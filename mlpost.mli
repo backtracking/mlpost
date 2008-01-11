@@ -1,4 +1,5 @@
-type point = float * float
+type num
+type point = num * num
 type path
 type command
 type figure = command list
@@ -6,7 +7,8 @@ type figure = command list
 val draw : path -> command
 val straight : point list -> path
 
-val cm : float -> float
-val mm : float -> float
-val pt : float -> float
-val inch : float -> float
+val bp : float -> num
+val pt : float -> num
+val cm : float -> num
+val mm : float -> num
+val inch : float -> num
