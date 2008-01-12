@@ -7,6 +7,14 @@ val cm : float -> num
 val mm : float -> num
 val inch : float -> num
 
+(* These functions create points of "unspecified" size, ie vectors
+   to use with Vec for instance *)
+val dir : float -> point
+val up : point
+val down : point
+val left : point
+val right : point
+
 (* these are the functions actually related to paths *)
 type style = Straight | Curved
 type t

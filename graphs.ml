@@ -46,6 +46,28 @@ let draw5 =
 	[z0] lcontrols (List.tl l1) in
       Convenience.draw ~style:Straight (List.rev hull)]
       
+let draw6 =
+  [ draw 
+      (List.fold_left (fun p knot -> concat p JCurve knot) 
+	 (start (NoDir,bpp z0,NoDir))
+	 [NoDir,bpp z1,Vec up;
+	  NoDir,bpp z2,Vec left;
+	  NoDir,bpp z3,NoDir;
+	  NoDir,bpp z4,NoDir])
+  ]
 
-  
 
+let lex = (NoDir,bpp (0.0,0.0),Vec(dir 45.))
+let rex a = (Vec(dir (10.*.a)), (cm 6., bp 0.), NoDir)
+let draw7 =
+  List.map
+    (fun a ->
+       draw (concat (start lex) JCurve 
+	       (rex (float_of_int (-a)))))
+    [0;1;2;3;4;5;6;7;8;9]
+let draw8 =
+  List.map
+    (fun a ->
+       draw (concat (start lex) JCurve 
+	       (rex (float_of_int a))))
+    [0;1;2;3;4;5;6;7;8;9]
