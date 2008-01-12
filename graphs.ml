@@ -1,7 +1,28 @@
 open Path
 
+(* generic functions that proved to be useful *)
+(* might move into the interface to obtain better metapost *)
 let bpp (a,b) = (bp a, bp b)
 let map_bp = List.map bpp
+
+(* construct the value f (f (... f(f acc st ) (st + 1) ...) (en -1)) en *)
+let rec fold_from_to f st en acc =
+  if st <= en then
+    fold_from_to f (st+1) en (f acc st)
+  else
+    acc
+
+(* map [st; ...; en] to [ f st; ...; f en] *)
+let map_from_to f st en =
+  fold_from_to (fun acc i -> (f i)::acc ) st en []
+
+let path_fold style l =
+  match l with
+    | [] -> failwith "empty path is not allowed"
+    | (x::xs) ->
+        List.fold_left (fun p knot -> concat p style knot) (start x) xs
+
+(* ==================== *)
 
 let draw1 = 
   [ draw (straight (map_bp [20.,20.; 0.,0.; 0.,30.; 30.,0.; 0.,0.]))]
@@ -48,9 +69,9 @@ let draw5 =
       
 let draw6 =
   [ draw 
-      (List.fold_left (fun p knot -> concat p JCurve knot) 
-	 (start (NoDir,bpp z0,NoDir))
-	 [NoDir,bpp z1,Vec up;
+      (path_fold JCurve
+	 [NoDir,bpp z0,NoDir;
+          NoDir,bpp z1,Vec up;
 	  NoDir,bpp z2,Vec left;
 	  NoDir,bpp z3,NoDir;
 	  NoDir,bpp z4,NoDir])
@@ -60,14 +81,55 @@ let draw6 =
 let lex = (NoDir,bpp (0.0,0.0),Vec(dir 45.))
 let rex a = (Vec(dir (10.*.a)), (cm 6., bp 0.), NoDir)
 let draw7 =
-  List.map
+  map_from_to 
     (fun a ->
        draw (concat (start lex) JCurve 
-	       (rex (float_of_int (-a)))))
-    [0;1;2;3;4;5;6;7;8;9]
+	       (rex (float_of_int (-a))))) 0 9
+
 let draw8 =
-  List.map
+  map_from_to
     (fun a ->
        draw (concat (start lex) JCurve 
-	       (rex (float_of_int a))))
-    [0;1;2;3;4;5;6;7;8;9]
+	       (rex (float_of_int a)))) 0 9
+
+let z0 = inch (-1.), bp 0.
+let z1 = bp 0., inch 2.
+let z2 = inch 1., bp 0.
+let draw9a =
+  [ draw (path_fold JCurve
+      [NoDir, z0, Vec down; NoDir, z1, Vec right;
+       NoDir, z2, Vec down] ) ]
+
+let draw9b =
+  [ draw (path_fold JCurveNoInflex
+      [NoDir, z0, Vec down; NoDir, z1, Vec right;
+       NoDir, z2, Vec down] ) ]
+
+let z0 = -5., 0.
+let z1 = -3., 2.
+let z2 = 3., 2.
+let z3 = 5., 0.
+let l1 = [z0;z1;z2;z3]
+
+let draw10a = [ Convenience.draw l1 ]
+let draw10b = 
+  [ draw 
+      (concat
+         (concat 
+            (concat (start (NoDir, bpp z0, NoDir)) JCurve (NoDir, bpp z1, NoDir)) 
+            (JTension(1.3,1.3)) (NoDir, bpp z2, NoDir))
+         JCurve (NoDir, bpp z3, NoDir)) ]
+
+let draw10b' =
+  let jl = [JCurve; JTension(1.3,1.3); JCurve] in
+    [ draw
+        (List.fold_left2
+           (fun acc s p -> concat acc s (NoDir,bpp p,NoDir)) 
+           (start (NoDir, bpp z0, NoDir)) jl [z1;z2;z3]) ]
+
+let draw10c =
+  let jl = [JCurve; JTension(1.5,1.0); JCurve] in
+    [ draw
+        (List.fold_left2
+           (fun acc s p -> concat acc s (NoDir,bpp p,NoDir)) 
+           (start (NoDir, bpp z0, NoDir)) jl [z1;z2;z3]) ]

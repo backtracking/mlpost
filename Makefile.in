@@ -35,8 +35,8 @@ OCAMLWIN32 = @OCAMLWIN32@
 EXE = @EXE@
 
 INCLUDES = 
-BFLAGS = -dtypes -g $(INCLUDES) @INCLUDEGTK2@  -I +threads 
-OFLAGS = -dtypes $(INCLUDES) @INCLUDEGTK2@ -I +threads 
+BFLAGS = -dtypes -g $(INCLUDES) #@INCLUDEGTK2@  -I +threads 
+OFLAGS = -dtypes $(INCLUDES) #@INCLUDEGTK2@ -I +threads 
 
 # main target
 #############
