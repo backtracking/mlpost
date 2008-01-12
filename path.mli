@@ -8,13 +8,36 @@ val mm : float -> num
 val inch : float -> num
 
 (* these are the functions actually related to paths *)
+type style = Straight | Curved
 type t
 
+(* low-level interface *)
+(* A path is a succession of knots bound by joints *)
+type direction = 
+  | Vec of point
+  | Curl of float
+  | NoDir 
+
+type joint = 
+    JLine
+  | JCurve
+  | JCurveNoInflex
+  | JTension of float * float
+  | JControls of point * point
+
+type knot = direction * point * direction
+
+val start : knot -> t
+val concat : t -> joint -> knot -> t
+
+val cycle : style -> t -> t
+val append : t -> t -> t
+
+(* helpers *)
+(** should be implemented in terms of the above functions *)
+(** perhaps even moved to Convenience *)
 val straight : point list -> t
 val curved : point list -> t
-
-val cycle : t -> t
-
 
 (* later in the mlpost module *)
 type command
