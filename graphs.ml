@@ -1,35 +1,5 @@
 open Path
-
-(* generic functions that proved to be useful *)
-(* might move into the interface to obtain better metapost *)
-let bpp (a,b) = (bp a, bp b)
-let map_bp = List.map bpp
-
-(* construct the value f (f (... f(f acc st ) (st + 1) ...) (en -1)) en *)
-let rec fold_from_to f st en acc =
-  if st <= en then
-    fold_from_to f (st+1) en (f acc st)
-  else
-    acc
-
-(* map [st; ...; en] to [ f st; ...; f en] *)
-let map_from_to f st en =
-  fold_from_to (fun acc i -> (f i)::acc ) st en []
-
-let path_fold style l =
-  match l with
-    | [] -> failwith "empty path is not allowed"
-    | (x::xs) ->
-        List.fold_left (fun p knot -> concat p style knot) (start x) xs
-
-let straight l =
-  path_fold JLine
-    (List.map (fun p -> (NoDir, p, NoDir)) l)
-
-let curved l =
-  path_fold JCurve
-    (List.map (fun p -> (NoDir, p, NoDir)) l)
-(* ==================== *)
+open Helpers
 
 let draw1 = 
   [ draw (straight (map_bp [20.,20.; 0.,0.; 0.,30.; 30.,0.; 0.,0.]))]
@@ -44,13 +14,14 @@ let z3 = 10.,70.
 let z4 = 40.,50.
 let l1 = z0::z1::z2::z3::z4::[]
 
-let draw4a = [ draw (cycle Curved (curved (map_bp l1)))]
+let draw4a = [ draw (cycle JCurve (curved (map_bp l1)))]
 let draw4a' = [ Convenience.draw ~cycle:true l1]
 
 let draw4b = [ draw 
 		 (append 
 		    (curved (map_bp [z0;z1;z2;z3]))
-		    (straight (map_bp [z3;z4;z0])))]
+                    JLine
+		    (straight (map_bp [z4;z0])))]
 (* no easy alternative way to draw this one, and that's fine *)
 let draw4b' = [ draw (curved (map_bp [z0;z1;z2;z3]));
 		draw (straight (map_bp [z3;z4;z0])) ]
@@ -72,7 +43,7 @@ let draw5 =
     let hull = 
       List.fold_left2 (fun acc (c1, c2) f -> f::c2::c1::acc) 
 	[z0] lcontrols (List.tl l1) in
-      Convenience.draw ~style:Straight (List.rev hull)]
+      Convenience.draw ~style:JLine (List.rev hull)]
       
 let draw6 =
   [ draw 
@@ -86,7 +57,7 @@ let draw6 =
 
 
 let lex = (NoDir,bpp (0.0,0.0),Vec(dir 45.))
-let rex a = (Vec(dir (10.*.a)), (cm 6., bp 0.), NoDir)
+let rex a = (Vec(dir (10.*.a)), p (cm 6., bp 0.), NoDir)
 let draw7 =
   map_from_to 
     (fun a ->
@@ -99,9 +70,9 @@ let draw8 =
        draw (concat (start lex) JCurve 
 	       (rex (float_of_int a)))) 0 9
 
-let z0 = inch (-1.), bp 0.
-let z1 = bp 0., inch 2.
-let z2 = inch 1., bp 0.
+let z0 = p( inch (-1.), bp 0.)
+let z1 = p( bp 0., inch 2.)
+let z2 = p(inch 1., bp 0.)
 let draw9a =
   [ draw (path_fold JCurve
       [NoDir, z0, Vec down; NoDir, z1, Vec right;

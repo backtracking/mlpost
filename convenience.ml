@@ -1,12 +1,12 @@
 module P = Path
+open Helpers
 
 type numtype = BP | PT | CM | MM | IN
 
-let num_lift f p = List.map (fun (a,b) ->  f a, f b) p
-
-let get_style = function
-  | P.Straight -> P.straight
-  | P.Curved -> P.curved
+let get_joint = function
+  | P.JLine -> straight
+  | P.JCurve -> curved
+  | _ -> assert false
 
 let get_unit = function
   | BP -> P.bp
@@ -15,7 +15,7 @@ let get_unit = function
   | CM -> P.cm
   | MM -> P.mm
 
-let draw ?(style=P.Curved) ?(cycle=false) ?(scale=BP) l =
-  let p = get_style style (num_lift (get_unit scale) l) in
+let draw ?(style=P.JCurve) ?(cycle=false) ?(scale=BP) l =
+  let p = get_joint style (num_lift (get_unit scale) l) in
   let p = if cycle then P.cycle style p else p in
     P.draw p

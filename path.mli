@@ -1,12 +1,13 @@
 (* there might be a Num module later *)
 type num
-type point = num * num
 val bp : float -> num
 val pt : float -> num
 val cm : float -> num
 val mm : float -> num
 val inch : float -> num
 
+type point
+val p : num * num -> point
 (* These functions create points of "unspecified" size, ie vectors
    to use with Vec for instance *)
 val dir : float -> point
@@ -16,7 +17,6 @@ val left : point
 val right : point
 
 (* these are the functions actually related to paths *)
-type style = Straight | Curved
 type t
 
 (* low-level interface *)
@@ -38,8 +38,8 @@ type knot = direction * point * direction
 val start : knot -> t
 val concat : t -> joint -> knot -> t
 
-val cycle : style -> t -> t
-val append : t -> t -> t
+val cycle : joint -> t -> t
+val append : t -> joint -> t -> t
 
 (* later in the mlpost module *)
 type command
