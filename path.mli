@@ -41,12 +41,6 @@ val concat : t -> joint -> knot -> t
 val cycle : style -> t -> t
 val append : t -> t -> t
 
-(* helpers *)
-(** should be implemented in terms of the above functions *)
-(** perhaps even moved to Convenience *)
-val straight : point list -> t
-val curved : point list -> t
-
 (* later in the mlpost module *)
 type command
 type figure = command list

@@ -22,6 +22,13 @@ let path_fold style l =
     | (x::xs) ->
         List.fold_left (fun p knot -> concat p style knot) (start x) xs
 
+let straight l =
+  path_fold JLine
+    (List.map (fun p -> (NoDir, p, NoDir)) l)
+
+let curved l =
+  path_fold JCurve
+    (List.map (fun p -> (NoDir, p, NoDir)) l)
 (* ==================== *)
 
 let draw1 = 
@@ -133,3 +140,18 @@ let draw10c =
         (List.fold_left2
            (fun acc s p -> concat acc s (NoDir,bpp p,NoDir)) 
            (start (NoDir, bpp z0, NoDir)) jl [z1;z2;z3]) ]
+
+let z0 = 2., -5.
+let z1 = 0., 0.
+let z2 = 2., 5.
+let cl = [0.; 1.; 2.; infinity]
+
+let draw11 =
+  List.map
+    (fun c ->
+       draw
+         (path_fold JCurve
+            [ (NoDir, bpp z0, Curl c);
+              (NoDir, bpp z1, NoDir);
+              (Curl c, bpp z1, NoDir) ]) )
+    cl
