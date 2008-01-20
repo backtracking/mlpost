@@ -6,6 +6,7 @@ let pair_apply f (a,b) = p (f a, f b)
 let num_lift f l = List.map (pair_apply f) l
 let bpp pair = pair_apply bp pair
 let map_bp = num_lift bp
+let inp pair = pair_apply inch pair
 
 (* construct the value f (f (... f(f acc st ) (st + 1) ...) (en -1)) en *)
 let rec fold_from_to f st en acc =
@@ -13,6 +14,9 @@ let rec fold_from_to f st en acc =
     fold_from_to f (st+1) en (f acc st)
   else
     acc
+
+let iter_from_to f st en =
+  fold_from_to (fun () i -> f i) st en ()
 
 (* map [st; ...; en] to [ f st; ...; f en] *)
 let map_from_to f st en =

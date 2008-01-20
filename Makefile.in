@@ -34,7 +34,6 @@ OCAMLWEB = @OCAMLWEB@
 OCAMLWIN32 = @OCAMLWIN32@
 EXE = @EXE@
 
-INCLUDES = 
 BFLAGS = -dtypes -g $(INCLUDES) #@INCLUDEGTK2@  -I +threads 
 OFLAGS = -dtypes $(INCLUDES) #@INCLUDEGTK2@ -I +threads 
 
@@ -48,13 +47,21 @@ all: $(OCAMLBEST)
 # bytecode and native-code compilation
 ######################################
 
-CMO = graphs.cmo
-CMX = $(CMO:.cmo=.cmx)
+CMO := path.cmo helpers.cmo convenience.cmo
+CMX := $(CMO:.cmo=.cmx)
+TESTCMO := graphs.cmo
+TESTCMX := $(TESTCMO:.cmo=.cmx)
 
 GENERATED = version.ml
 
 byte: $(NAME).cma
 opt: $(NAME).cmxa
+	
+test: 
+	make -C test test
+
+graphs.opt: $(CMX) $(TESTCMX)
+	$(OCAMLOPT) $(OFLAGS) -o $@ $^
 
 $(NAME).cma: $(CMO)
 	$(OCAMLC) -a $(BFLAGS) -o $@ $^
@@ -202,10 +209,12 @@ configure: configure.in
 #######
 
 clean::
-	rm -f *.cm[iox] *.o *~
+	rm -f *.cm[iox] *.o *~ *.annot
 	rm -f $(GENERATED) parser.output
 	rm -f $(NAME).cma $(NAME).cmxa $(NAME).a
 	rm -f *.aux *.log $(NAME).tex $(NAME).dvi $(NAME).ps
+	make -C test clean
+	rm -f graphs.opt
 
 dist-clean distclean:: clean
 	rm -f Makefile config.cache config.log config.status

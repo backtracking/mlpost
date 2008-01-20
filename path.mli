@@ -46,3 +46,4 @@ type command
 type figure = command list
 
 val draw : t -> command
+val print_fig : int -> Format.formatter -> figure -> unit
