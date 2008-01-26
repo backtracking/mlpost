@@ -165,14 +165,14 @@ let generate_tex tf tmpl1 tmpl2 l =
 let generate_mp fmt l =
   List.iter (fun (i,f) -> print_fig i fmt f) l
 
-let mpostfile = "test.mp"
-let texfile = "test.tex"
+let mpostfile = "test/test.mp"
+let texfile = "test/test.tex"
 
 let _ =
   let ch = open_out mpostfile in
   let fmt = F.formatter_of_out_channel ch in
     generate_mp fmt figs;
     close_out ch;
-    generate_tex texfile "manual/manual" "test" figs
+    generate_tex texfile "test/manual/manual" "test/test" figs
 
 

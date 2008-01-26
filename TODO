@@ -1,1 +1,6 @@
-Everything
+* mieux ranger le code (de fonctions auxiliaires et de "convenience")
+* mieux ranger le code (de test, génération de fichier .tex)
+* le Makefile marche maintenant ou pas ?
+* générer les figures pour convenience_graphs.ml
+* avoir un système de fonctions auxiliares plus clair; pour l'instant il y a
+  des fonctions qui font presque la même chose

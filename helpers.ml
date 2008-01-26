@@ -35,5 +35,7 @@ let straight l =
 let curved l =
   path_fold JCurve
     (List.map (fun p -> (NoDir, p, NoDir)) l)
-(* ==================== *)
 
+let jointpath lp lj =
+  List.fold_left2 concat (start (List.hd lp))
+    lj (List.tl lp)

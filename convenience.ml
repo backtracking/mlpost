@@ -15,7 +15,17 @@ let get_unit = function
   | CM -> P.cm
   | MM -> P.mm
 
-let draw ?(style=P.JCurve) ?(cycle=false) ?(scale=BP) l =
+let path ?(style=P.JCurve) ?(cycle=false) ?(scale=BP) l =
   let p = get_joint style (num_lift (get_unit scale) l) in
-  let p = if cycle then P.cycle style p else p in
-    P.draw p
+    if cycle then P.cycle style p else p 
+
+let draw ?(style=P.JCurve) ?(cycle=false) ?(scale=BP) l =
+  P.draw (path ~style:style ~cycle:cycle ~scale:scale l)
+
+let jointpath ?(scale=BP) lp lj =
+  let s = get_unit scale in
+    jointpath (List.map (fun (a,b) -> (P.NoDir, P.p (s a, s b), P.NoDir)) lp) lj
+
+let p ?(l=P.NoDir) ?(r=P.NoDir) ?(scale=BP) (a,b) =
+  let s = get_unit scale in
+    (l, P.p (s a, s b), r)
