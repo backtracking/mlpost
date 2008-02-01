@@ -5,4 +5,4 @@ mpost: test.mp
 clean: 
 	rm -f test\.[0-9]*
 	make -C manual clean
-	rm -f test.tex *.log
+	rm -f test.tex *.log test.mpx

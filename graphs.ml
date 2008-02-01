@@ -14,10 +14,17 @@ let z4 = 30.,50.
 let l1 = z0::z1::z2::z3::z4::[]
 
 let draw3 = 3,
-  [ draw (curved (map_bp l1))]
+  [ draw (curved (map_bp l1)) ] @
+    (dotlabels ~pos:PTop ["0";"2";"4"] (map_bp [z0;z2;z4])) @
+    [dotlabel ~pos:PLeft (tex "3") (bpp z3);
+    dotlabel ~pos:PRight (tex "1") (bpp z1)
+    ]
 
-let draw4a = 104, [ draw (cycle JCurve (curved (map_bp l1)))]
-let draw4a' = 104, [ Convenience.draw ~cycle:true l1]
+(* let draw4a = 104, [ draw (cycle JCurve (curved (map_bp l1)))] *)
+let draw4a' = 104, [ Convenience.draw ~cycle:true l1] @
+                     dotlabels ~pos:PTop ["2";"4"] (map_bp [z2;z4]) @
+                     dotlabels ~pos:PLeft ["0";"3"] (map_bp [z0;z3]) @
+                     [dotlabel ~pos:LowRight (tex "1") (bpp z1)]
 
 let draw4b = 204, [ draw 
 		 (append 
@@ -132,7 +139,7 @@ let draw11 =
                 (Curl c, inp z2, NoDir) ]) ] )
       cl labels
 
-let figs = [ draw1; draw3; draw4a; draw4a'; draw4b; draw4b'; 
+let figs = [ draw1; draw3; draw4a'; draw4b; draw4b'; 
              draw5; draw6; draw7; draw8; draw9a; draw9b;
              draw10a; draw10b; draw10b'; draw10c;] @ draw11
 
@@ -140,7 +147,9 @@ let generate_tex tf tmpl1 tmpl2 l =
   let minipage fmt i tmpl =
     F.fprintf fmt "@[<hov 2>\\begin{minipage}[tb]{0.5\\textwidth}@\n";
     F.fprintf fmt "@[<hov 2>\\begin{center}@\n";
-    F.fprintf fmt "\\includegraphics{%s.%i}" tmpl i;
+    F.fprintf fmt 
+      "\\includegraphics[width=\\textwidth,height=\\textwidth,keepaspectratio]{%s.%i}" 
+      tmpl i;
     F.fprintf fmt "@]@\n\\end{center}@\n";
     F.fprintf fmt "@]@\n\\end{minipage}@\n"
   in
@@ -151,13 +160,9 @@ let generate_tex tf tmpl1 tmpl2 l =
     F.fprintf fmt "@[<hov 2>\\begin{document}@.";
     List.iter
       (fun (i,_) ->
-        F.fprintf fmt "@\n@[<hov 2>\\begin{figure}[htpb]@\n";
-        F.fprintf fmt "\\caption{figure %d}@\n" i;
         minipage fmt i tmpl1;
         minipage fmt i tmpl2;
-        F.fprintf fmt "\\label{fig:%d}" i;
-        F.fprintf fmt "@]@\n\\end{figure}";
-        F.fprintf fmt "@\n \\clearpage@\n"
+        F.fprintf fmt "@\n \\vspace{3cm}@\n"
         ) l ;
     F.fprintf fmt "@]@\n\\end{document}@.";
     close_out chan

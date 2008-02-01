@@ -57,14 +57,33 @@ let cycle j p = {p with cycle = Some j}
 let append {path = (k1,l1); cycle = c1} j {path = (k2,l2);  cycle = _} =
   { path = (k2, l2@( (j,k1)::l1) ) ; cycle = c1}
 
+type position =
+  | Center
+  | PLeft
+  | PRight
+  | PTop
+  | PBot
+  | UpLeft
+  | UpRight
+  | LowLeft
+  | LowRight
 
+type picture = 
+  | Tex of string
 (* later in the mlpost module *)
 type command = 
   | Draw of t
+  | Label of picture * position * point
+  | DotLabel of picture * position * point
 
 type figure = command list
 
+let label ?(pos=Center) pic point = Label (pic,pos,point)
+(* replace later *)
+let dotlabel ?(pos=Center) pic point = DotLabel (pic,pos,point)
+
 let draw t = Draw t
+let tex s = Tex s
 
 let print_float fmt f =
   if f = infinity then F.fprintf fmt "infinity"
@@ -114,8 +133,28 @@ let print_path fmt {path = p; cycle = c } =
     | Some j -> 
         F.fprintf fmt "%a %a cycle" print_subpath p print_joint j
 
+let print_position fmt = function
+  | Center  -> F.fprintf fmt ""
+  | PLeft   -> F.fprintf fmt ".lft"
+  | PRight  -> F.fprintf fmt ".rt"
+  | PTop    -> F.fprintf fmt ".top"
+  | PBot    -> F.fprintf fmt ".bot"
+  | UpLeft  -> F.fprintf fmt ".ulft"
+  | UpRight -> F.fprintf fmt ".urt"
+  | LowLeft -> F.fprintf fmt ".llft"
+  | LowRight -> F.fprintf fmt ".lrt"
+
+let print_pic fmt = function
+  | Tex s -> F.fprintf fmt "btex %s etex" s
+
 let print_command fmt  = function
   | Draw p -> F.fprintf fmt "draw %a;@\n" print_path p
+  | Label (pic,pos,p) ->
+      F.fprintf fmt "label%a(%a,%a); @\n"
+        print_position pos print_pic pic print_point p
+  | DotLabel (pic,pos,p) ->
+      F.fprintf fmt "dotlabel%a(%a,%a); @\n"
+        print_position pos print_pic pic print_point p
 
 let print_fig i fmt l =
   F.fprintf fmt "beginfig(%d)@\n %a endfig;@." i 

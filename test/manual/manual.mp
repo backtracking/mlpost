@@ -7,9 +7,9 @@ z0 = (0,0);    z1 = (60,40);
 z2 = (40,90);  z3 = (10,70);
 z4 = (30,50);
 draw z0..z1..z2..z3..z4;
-%dotlabels.top(0,2,4);
-%dotlabels.lft(3);
-%dotlabels.lrt(1);
+dotlabels.top(0,2,4);
+dotlabels.lft(3);
+dotlabels.lrt(1);
 endfig;
 
 beginfig(104);
@@ -17,9 +17,9 @@ z0 = (0,0);    z1 = (60,40);
 z2 = (40,90);  z3 = (10,70);
 z4 = (30,50);
 draw z0..z1..z2..z3..z4..cycle;
-%dotlabels.top(2,4);
-%dotlabels.lft(0,3);
-%dotlabels.lrt(1);
+dotlabels.top(2,4);
+dotlabels.lft(0,3);
+dotlabels.lrt(1);
 endfig;
 
 beginfig(204);

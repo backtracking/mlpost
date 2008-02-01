@@ -58,7 +58,8 @@ byte: $(NAME).cma
 opt: $(NAME).cmxa
 	
 test: mpost test/test.dvi
-	xdvi test.dvi
+	dvips test.dvi
+	gv test.ps
 
 mpost: test/test.mp
 	make -C test mpost
@@ -223,7 +224,7 @@ clean::
 	rm -f $(NAME).cma $(NAME).cmxa $(NAME).a
 	rm -f *.aux *.log $(NAME).tex $(NAME).dvi $(NAME).ps
 	make -C test clean
-	rm -f graphs.opt convenience_graphs.opt test.dvi
+	rm -f graphs.opt convenience_graphs.opt test.dvi test.ps
 
 dist-clean distclean:: clean
 	rm -f Makefile config.cache config.log config.status

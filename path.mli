@@ -47,3 +47,20 @@ type figure = command list
 
 val draw : t -> command
 val print_fig : int -> Format.formatter -> figure -> unit
+
+type position =
+  | Center
+  | PLeft
+  | PRight
+  | PTop
+  | PBot
+  | UpLeft
+  | UpRight
+  | LowLeft
+  | LowRight
+
+type picture
+val tex : string -> picture
+
+val label : ?pos:position -> picture -> point -> command
+val dotlabel : ?pos:position -> picture -> point -> command

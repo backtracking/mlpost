@@ -39,3 +39,6 @@ let curved l =
 let jointpath lp lj =
   List.fold_left2 concat (start (List.hd lp))
     lj (List.tl lp)
+
+let dotlabels ?(pos=Center) ls lp =
+  List.map2 (fun s p -> dotlabel ~pos:pos (tex s) p) ls lp
