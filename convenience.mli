@@ -1,11 +1,11 @@
 type numtype = BP | PT | CM | MM | IN
 
 val draw : 
-    ?style:Path.joint -> ?cycle:bool -> ?scale:numtype -> 
+    ?style:Path.joint -> ?cycle:Path.joint -> ?scale:numtype -> 
       (float * float) list -> Path.command
 
 val path : 
-    ?style:Path.joint -> ?cycle:bool -> ?scale:numtype -> 
+    ?style:Path.joint -> ?cycle:Path.joint -> ?scale:numtype -> 
       (float * float) list -> Path.t
 
 val jointpath : 

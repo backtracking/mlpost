@@ -3,8 +3,7 @@ open Helpers
 module F = Format
 module C = Convenience
 
-let draw1 = 1, 
-  [ draw (straight (map_bp [20.,20.; 0.,0.; 0.,30.; 30.,0.; 0.,0.]))]
+let draw1 = 1, [ C.draw ~style:JLine [20.,20.; 0.,0.; 0.,30.; 30.,0.; 0.,0.] ]
 
 let z0 = 0.,0.
 let z1 = 60.,40.
@@ -13,60 +12,50 @@ let z3 = 10.,70.
 let z4 = 30.,50.
 let l1 = z0::z1::z2::z3::z4::[]
 
-let draw3 = 3,
-  [ draw (curved (map_bp l1)) ] @
-    (dotlabels ~pos:PTop ["0";"2";"4"] (map_bp [z0;z2;z4])) @
-    [dotlabel ~pos:PLeft (tex "3") (bpp z3);
-    dotlabel ~pos:PRight (tex "1") (bpp z1)
-    ]
+let labels1 =
+   (dotlabels ~pos:PTop ["0";"2";"4"] (map_bp [z0;z2;z4])) @
+   [dotlabel ~pos:PLeft (tex "3") (bpp z3);
+    dotlabel ~pos:PRight (tex "1") (bpp z1) ]
 
-(* let draw4a = 104, [ draw (cycle JCurve (curved (map_bp l1)))] *)
-let draw4a' = 104, [ Convenience.draw ~cycle:true l1] @
-                     dotlabels ~pos:PTop ["2";"4"] (map_bp [z2;z4]) @
-                     dotlabels ~pos:PLeft ["0";"3"] (map_bp [z0;z3]) @
-                     [dotlabel ~pos:LowRight (tex "1") (bpp z1)]
+let draw3 = 3, 
+  [ C.draw ~style:JCurve  l1 ] @ labels1
 
-let draw4b = 204, [ draw 
-		 (append 
-		    (curved (map_bp [z0;z1;z2;z3]))
-                    JLine
-		    (straight (map_bp [z4;z0])))]
+let draw4a, draw4b = 
+  let labels = dotlabels ~pos:PTop ["2";"4"] (map_bp [z2;z4]) @
+               dotlabels ~pos:PLeft ["0";"3"] (map_bp [z0;z3]) @
+               [dotlabel ~pos:LowRight (tex "1") (bpp z1)]
+  in
+    (104, [ C.draw ~cycle:JCurve l1] @ labels) ,
+    (204, 
+     [ draw 
+         (append (C.path [z0;z1;z2;z3]) JLine (C.path ~style:JLine [z4;z0]) )
+     ] @ labels)
+
 (* no easy alternative way to draw this one, and that's fine *)
-let draw4b' =204, [ draw (curved (map_bp [z0;z1;z2;z3]));
-		draw (straight (map_bp [z3;z4;z0])) ]
-
 let l1dirs = List.map (fun p -> NoDir,p,NoDir) (map_bp l1)
 let lcontrols =
   [(26.8, -1.8), (51.4,14.6);
    (67.1, 61.), (59.8,84.6);
    (25.4, 94.), (10.5,84.5);
    (9.6, 58.8), (18.8,49.6)]
+let lcontrolsbp = List.map (fun (a,b) -> JControls (bpp a, bpp b)) lcontrols
 
 let draw5 = 5,
-  [ draw 
-      (List.fold_left2 concat (start (List.hd l1dirs))
-	 (List.map (fun (p1,p2) -> JControls(bpp p1,bpp p2)) lcontrols)
-	 (List.tl l1dirs));
-    (** sur ce dessin, il y aussi le tracé "droit" qui suit les points
-	de controle, il faudra ajouter les pointillés pour ça. *)
+  [ draw (C.jointpath l1 lcontrolsbp) ;
     let hull = 
       List.fold_left2 (fun acc (c1, c2) f -> f::c2::c1::acc) 
-	[z0] lcontrols (List.tl l1) in
-      Convenience.draw ~style:JLine (List.rev hull)]
-      
-let draw6 = 6,
-  [ draw 
-      (path_fold JCurve
-	 [NoDir,bpp z0,NoDir;
-          NoDir,bpp z1,Vec up;
-	  NoDir,bpp z2,Vec left;
-	  NoDir,bpp z3,NoDir;
-	  NoDir,bpp z4,NoDir])
-  ]
+	[0.,0.] lcontrols (List.tl l1) 
+    in
+      C.draw ~style:JLine (List.rev hull) ] @ labels1
+
+let draw6 = 6, 
+  [ draw (path_fold JCurve 
+           [ C.p z0; C.p ~r:(Vec up) z1; 
+             C.p ~r:(Vec left) z2; C.p z3; C.p z4] ) ] @ labels1
 
 
-let lex = (NoDir,bpp (0.0,0.0),Vec(dir 45.))
-let rex a = (Vec(dir (10.*.a)), p (cm 6., bp 0.), NoDir)
+let lex = C.p ~r:(Vec(dir 45.)) (0.,0.)
+let rex a = C.p ~l:(Vec(dir (10.*.a))) ~scale:C.CM (6., 0.)
 let draw7 = 7,
   map_from_to 
     (fun a ->
@@ -79,18 +68,16 @@ let draw8 = 8,
        draw (concat (start lex) JCurve 
 	       (rex (float_of_int a)))) 0 7
 
-let z0 = p( inch (-1.), bp 0.)
-let z1 = p( bp 0., inch 0.2)
-let z2 = p(inch 1., bp 0.)
-let draw9a = 109,
-  [ draw (path_fold JCurve
-      [NoDir, z0, Vec up; NoDir, z1, Vec right;
-       NoDir, z2, Vec down] ) ]
+let z0 = (-1., 0.)
+let z1 = (0., 0.2)
+let z2 = ( 1., 0.)
+let labels9 = dotlabels ~pos:PBot ["0";"1";"2"] (map_in [z0;z1;z2])
+let z0 = C.p ~r:(Vec up) ~scale:C.IN z0
+let z1 = C.p ~r:(Vec right) ~scale:C.IN z1
+let z2 = C.p ~r:(Vec down) ~scale:C.IN z2
 
-let draw9b = 209,
-  [ draw (path_fold JCurveNoInflex
-      [NoDir, z0, Vec up; NoDir, z1, Vec right;
-       NoDir, z2, Vec down] ) ]
+let draw9a = 109, [draw (path_fold JCurve [z0;z1;z2])] @ labels9
+let draw9b = 209, [draw (path_fold JCurveNoInflex [z0;z1;z2])] @labels9
 
 let u l = 1.5 /. 10. *. l
 let z0 = (u (-5.)), 0.
@@ -98,29 +85,16 @@ let z1 = (u (-3.)),u 2.
 let z2 = (u 3.),u 2.
 let z3 = (u 5.),u 0.
 let l1 = [z0;z1;z2;z3]
+let labels10 = dotlabels ~pos:PBot ["0";"1";"2";"3"] (map_in l1)
 
-let draw10a = 110, [ C.draw ~scale:C.IN l1 ]
+let draw10a = 110, [C.draw ~scale:C.IN l1 ] @ labels10
+
 let draw10b = 210, 
-  [ draw 
-      (concat
-         (concat 
-            (concat (start (NoDir, inp z0, NoDir)) JCurve (NoDir, inp z1, NoDir)) 
-            (JTension(1.3,1.3)) (NoDir, inp z2, NoDir))
-         JCurve (NoDir, inp z3, NoDir)) ]
-
-let draw10b' = 210, 
-  let jl = [JCurve; JTension(1.3,1.3); JCurve] in
-    [ draw
-        (List.fold_left2
-           (fun acc s p -> concat acc s (NoDir,inp p,NoDir)) 
-           (start (NoDir, inp z0, NoDir)) jl [z1;z2;z3]) ]
-
-let draw10c = 310,
-  let jl = [JCurve; JTension(1.5,1.0); JCurve] in
-    [ draw
-        (List.fold_left2
-           (fun acc s p -> concat acc s (NoDir,inp p,NoDir)) 
-           (start (NoDir, inp z0, NoDir)) jl [z1;z2;z3]) ]
+  [ draw (C.jointpath ~scale:C.IN l1 [JCurve; JTension(1.3,1.3); JCurve] ) ] 
+  @ labels10
+let draw10c = 310, 
+  [ draw (C.jointpath ~scale:C.IN l1 [JCurve; JTension(1.5,1.0); JCurve] ) ]
+  @ labels10
 
 let u l = 1.4 /. 10. *. l
 let z0 = u (2.), u (-5.)
@@ -128,20 +102,27 @@ let z1 = 0., 0.
 let z2 = u 2., u 5.
 let cl = [0.; 1.; 2.; infinity]
 
-let draw11 =
-  let labels = [111; 211; 311; 411] in
-    List.map2
-      (fun c lab -> lab,
-         [draw
-           (path_fold JCurve
-              [ (NoDir, inp z0, Curl c);
-                (NoDir, inp z1, NoDir);
-                (Curl c, inp z2, NoDir) ]) ] )
-      cl labels
+let u l = 1.4 /. 10. *. l
+let z0 = u (2.), u (-5.)
+let z1 = 0., 0.
+let z2 = u 2., u 5.
+let cl = [0.; 1.; 2.; infinity]
+let pat c = [ C.p ~r:(Curl c) ~scale:C.IN z0 ; 
+              C.p ~scale:C.IN z1; 
+              C.p ~l:(Curl c) ~scale:C.IN z2 ]
 
-let figs = [ draw1; draw3; draw4a'; draw4b; draw4b'; 
-             draw5; draw6; draw7; draw8; draw9a; draw9b;
-             draw10a; draw10b; draw10b'; draw10c;] @ draw11
+let draw11 =
+  let numbers = [111; 211; 311; 411] in
+  let labels11 = dotlabels ~pos:PRight ["0";"1";"2"] (map_in [z0;z1;z2]) in
+    List.map2
+      (fun c n -> n,
+         [draw
+           (path_fold JCurve (pat c) ) ] @ labels11 )
+      cl numbers
+
+let figs = [ draw1; draw3; draw4a; draw4b;draw5; 
+             draw6; draw7; draw8; draw9a; draw9b;
+             draw10a; draw10b; draw10c;] @ draw11
 
 let generate_tex tf tmpl1 tmpl2 l =
   let minipage fmt i tmpl =
@@ -160,10 +141,11 @@ let generate_tex tf tmpl1 tmpl2 l =
     F.fprintf fmt "@[<hov 2>\\begin{document}@.";
     List.iter
       (fun (i,_) ->
-        minipage fmt i tmpl1;
-        minipage fmt i tmpl2;
-        F.fprintf fmt "@\n \\vspace{3cm}@\n"
-        ) l ;
+         F.fprintf fmt "@\n %i" i;
+         minipage fmt i tmpl1;
+         minipage fmt i tmpl2;
+         F.fprintf fmt "@\n \\vspace{3cm}@\n"
+      ) l ;
     F.fprintf fmt "@]@\n\\end{document}@.";
     close_out chan
 

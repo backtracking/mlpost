@@ -64,13 +64,10 @@ test: mpost test/test.dvi
 mpost: test/test.mp
 	make -C test mpost
 
-test/test.mp test/test.tex: graphs.opt convenience_graphs.opt
+test/test.mp test/test.tex: graphs.opt
 	./graphs.opt
 
 graphs.opt: $(CMX) $(TESTCMX)
-	$(OCAMLOPT) $(OFLAGS) -o $@ $^
-
-convenience_graphs.opt: $(CMX) convenience_graphs.cmx
 	$(OCAMLOPT) $(OFLAGS) -o $@ $^
 
 $(NAME).cma: $(CMO)

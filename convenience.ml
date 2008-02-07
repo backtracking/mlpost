@@ -9,23 +9,35 @@ let get_joint = function
   | _ -> assert false
 
 let get_unit = function
-  | BP -> P.bp
-  | PT -> P.pt
-  | IN -> P.inch
-  | CM -> P.cm
-  | MM -> P.mm
+  | BP -> bpp
+  | PT -> ptp
+  | IN -> inp
+  | CM -> cmp
+  | MM -> mmp
 
-let path ?(style=P.JCurve) ?(cycle=false) ?(scale=BP) l =
-  let p = get_joint style (num_lift (get_unit scale) l) in
-    if cycle then P.cycle style p else p 
+let get_lift = function
+  | BP -> map_bp
+  | PT -> map_pt
+  | IN -> map_in
+  | CM -> map_cm
+  | MM -> map_mm
 
-let draw ?(style=P.JCurve) ?(cycle=false) ?(scale=BP) l =
-  P.draw (path ~style:style ~cycle:cycle ~scale:scale l)
-
-let jointpath ?(scale=BP) lp lj =
-  let s = get_unit scale in
-    jointpath (List.map (fun (a,b) -> (P.NoDir, P.p (s a, s b), P.NoDir)) lp) lj
+let path ?(style=P.JCurve) ?(cycle) ?(scale=BP) l =
+  let p = get_joint style (get_lift scale l) in
+    match cycle with
+      | None -> p
+      | Some cst -> P.cycle cst p
 
 let p ?(l=P.NoDir) ?(r=P.NoDir) ?(scale=BP) (a,b) =
   let s = get_unit scale in
-    (l, P.p (s a, s b), r)
+    (l, s (a, b), r)
+
+let draw ?(style=P.JCurve) ?(cycle) ?(scale=BP) l =
+ match cycle with
+   | None -> P.draw (path ~style:style ~scale:scale l)
+   | Some s -> P.draw (path ~style:style ~cycle:s ~scale:scale l)
+
+let jointpath ?(scale=BP) lp lj =
+  let s = get_unit scale in
+    jointpath (List.map (fun (a,b) -> (P.NoDir, s (a, b), P.NoDir)) lp) lj
+
