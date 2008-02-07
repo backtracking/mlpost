@@ -42,7 +42,7 @@ OFLAGS = -dtypes $(INCLUDES) #@INCLUDEGTK2@ -I +threads
 
 NAME = mlpost
 
-all: graphs.opt convenience_graphs.opt
+all: graphs.opt
 
 # bytecode and native-code compilation
 ######################################
@@ -57,15 +57,19 @@ GENERATED = version.ml
 byte: $(NAME).cma
 opt: $(NAME).cmxa
 	
-test: mpost test/test.dvi
-	dvips test.dvi
-	gv test.ps
+test: mpost test/test.ps
+	gv test/test.ps
 
 mpost: test/test.mp
 	make -C test mpost
+	make -C test/manual mpost
 
 test/test.mp test/test.tex: graphs.opt
 	./graphs.opt
+
+test/test.ps: test/test.tex
+	make -C test latex
+
 
 graphs.opt: $(CMX) $(TESTCMX)
 	$(OCAMLOPT) $(OFLAGS) -o $@ $^
@@ -155,38 +159,7 @@ $(NAME).tex: $(SOURCES)
 # generic rules
 ###############
 
-.SUFFIXES: .mli .ml .cmi .cmo .cmx .mll .mly .tex .dvi .ps .html
-
-.mli.cmi:
-	$(OCAMLC) -c $(BFLAGS) $<
-
-.ml.cmo:
-	$(OCAMLC) -c $(BFLAGS) $<
-
-.ml.o:
-	$(OCAMLOPT) -c $(OFLAGS) $<
-
-.ml.cmx:
-	$(OCAMLOPT) -c $(OFLAGS) $<
-
-.mll.ml:
-	$(OCAMLLEX) $<
-
-.mly.ml:
-	$(OCAMLYACC) -v $<
-
-.mly.mli:
-	$(OCAMLYACC) -v $<
-
-.tex.dvi:
-	latex $< && latex $<
-
-.dvi.ps:
-	dvips $< -o $@ 
-
-.tex.html:
-	hevea $<
-
+include Makefile.rules
 # Emacs tags
 ############
 

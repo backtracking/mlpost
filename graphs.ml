@@ -160,6 +160,6 @@ let _ =
   let fmt = F.formatter_of_out_channel ch in
     generate_mp fmt figs;
     close_out ch;
-    generate_tex texfile "test/manual/manual" "test/test" figs
+    generate_tex texfile "manual/manual" "test" figs
 
 
