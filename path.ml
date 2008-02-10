@@ -96,7 +96,7 @@ let tex s = Tex s
 
 let print_float fmt f =
   if f = infinity then F.fprintf fmt "infinity"
-  else F.fprintf fmt "%g" f
+  else F.fprintf fmt "%.4f" f
 
 let print_num fmt = function
   | BP f -> F.fprintf fmt "%a" print_float f 

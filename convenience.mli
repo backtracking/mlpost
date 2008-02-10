@@ -2,7 +2,7 @@ open Style
 type numtype = BP | PT | CM | MM | IN
 
 val draw : 
-    ?style:Path.joint -> ?cycle:Path.joint -> ?scale:numtype -> 
+    ?style:Path.joint -> ?cycle:Path.joint -> ?scale:numtype ->
       ?color:Color.t -> (float * float) list -> Path.command
 
 val path : 
