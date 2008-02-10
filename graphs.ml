@@ -1,4 +1,5 @@
 open Path
+open Style
 open Helpers
 module F = Format
 module C = Convenience
@@ -44,9 +45,12 @@ let draw5 = 5,
   [ draw (C.jointpath l1 lcontrolsbp) ;
     let hull = 
       List.fold_left2 (fun acc (c1, c2) f -> f::c2::c1::acc) 
-	[0.,0.] lcontrols (List.tl l1) 
+	[0.,0.] lcontrols (List.tl l1)
     in
-      C.draw ~style:JLine (List.rev hull) ] @ labels1
+      (* As long as we dont have the dashed lines : gray *)
+    let gray = Color.make (Color.Gray 0.5)
+    in
+      C.draw ~color:gray ~style:JLine (List.rev hull) ] @ labels1
 
 let draw6 = 6, 
   [ draw (path_fold JCurve 

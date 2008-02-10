@@ -42,10 +42,12 @@ val cycle : joint -> t -> t
 val append : t -> joint -> t -> t
 
 (* later in the mlpost module *)
+open Style
+
 type command
 type figure = command list
 
-val draw : t -> command
+val draw : ?color:Color.t -> t -> command
 val print_fig : int -> Format.formatter -> figure -> unit
 
 type position =

@@ -71,8 +71,10 @@ type position =
 type picture = 
   | Tex of string
 (* later in the mlpost module *)
+open Style
+
 type command = 
-  | Draw of t
+  | Draw of t * style option
   | Label of picture * position * point
   | DotLabel of picture * position * point
 
@@ -82,7 +84,14 @@ let label ?(pos=Center) pic point = Label (pic,pos,point)
 (* replace later *)
 let dotlabel ?(pos=Center) pic point = DotLabel (pic,pos,point)
 
-let draw t = Draw t
+let draw ?color t = 
+  (* We don't use a default to avoid the output of 
+     ... withcolor (0.00red+0.00green+0.00blue) withpen .... 
+     for each command in the output file *)
+  match color with
+    | Some c -> Draw (t, Some (mk_style c))
+    | None -> Draw (t, None)
+
 let tex s = Tex s
 
 let print_float fmt f =
@@ -148,7 +157,11 @@ let print_pic fmt = function
   | Tex s -> F.fprintf fmt "btex %s etex" s
 
 let print_command fmt  = function
-  | Draw p -> F.fprintf fmt "draw %a;@\n" print_path p
+  | Draw (p, None) ->
+      F.fprintf fmt "draw %a;@\n" print_path p
+  | Draw (p, Some s) -> 
+      F.fprintf fmt "draw %a %a;@\n" 
+	print_path p print_style s
   | Label (pic,pos,p) ->
       F.fprintf fmt "label%a(%a,%a); @\n"
         print_position pos print_pic pic print_point p

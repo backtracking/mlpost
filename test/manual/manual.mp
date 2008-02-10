@@ -40,8 +40,9 @@ path p; p = z0..z1..z2..z3..z4;
 draw p;
 for t=0 upto 3:
   draw point t of p--postcontrol t of p
-    --precontrol t+1 of p--point t+1 of p
-    %dashed (evenly scaled .5)
+  --precontrol t+1 of p--point t+1 of p
+  withcolor 0.5white
+  %dashed (evenly scaled .5)
     ;
 endfor
 dotlabels.top(0,2,4);
@@ -134,3 +135,5 @@ z1=(0,0); (x0,-y0)=z2=(2u,5u);
 draw z0{curl c}..z1..{curl c}z2;
 dotlabels.rt(0,1,2);
 endfig;
+
+

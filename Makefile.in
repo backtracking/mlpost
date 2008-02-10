@@ -47,7 +47,7 @@ all: graphs.opt
 # bytecode and native-code compilation
 ######################################
 
-CMO := path.cmo helpers.cmo convenience.cmo
+CMO := style.cmo path.cmo helpers.cmo convenience.cmo
 CMX := $(CMO:.cmo=.cmx)
 TESTCMO := graphs.cmo
 TESTCMX := $(TESTCMO:.cmo=.cmx)
@@ -56,7 +56,7 @@ GENERATED = version.ml
 
 byte: $(NAME).cma
 opt: $(NAME).cmxa
-	
+
 test: mpost test/test.ps
 	gv test/test.ps
 
