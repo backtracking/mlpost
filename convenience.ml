@@ -32,10 +32,8 @@ let p ?(l=P.NoDir) ?(r=P.NoDir) ?(scale=BP) (a,b) =
   let s = get_unit scale in
     (l, s (a, b), r)
 
-let draw ?(style=P.JCurve) ?(cycle) ?(scale=BP) ?(color) l =
- match cycle with
-   | None -> P.draw ?color (path ~style:style ~scale:scale l)
-   | Some s -> P.draw ?color (path ~style:style ~cycle:s ~scale:scale l)
+let draw ?(style) ?(cycle) ?(scale) ?(color) l =
+   P.draw ?color (path ?style ?cycle ?scale l)
 
 let jointpath ?(scale=BP) lp lj =
   let s = get_unit scale in
