@@ -33,7 +33,7 @@ let p ?(l=P.NoDir) ?(r=P.NoDir) ?(scale=BP) (a,b) =
     (l, s (a, b), r)
 
 let draw ?(style) ?(cycle) ?(scale) ?(color) l =
-   P.draw ?color (path ?style ?cycle ?scale l)
+   Mlpost.draw ?color (path ?style ?cycle ?scale l)
 
 let jointpath ?(scale=BP) lp lj =
   let s = get_unit scale in

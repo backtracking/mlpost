@@ -1,4 +1,7 @@
 open Path
+open Point
+open Num
+open Mlpost
 
 (* generic functions that proved to be useful *)
 (* might move into the interface to obtain better metapost *)

@@ -1,6 +1,8 @@
 open Path
 open Style
+open Point
 open Helpers
+open Mlpost
 module F = Format
 module C = Convenience
 
@@ -173,7 +175,7 @@ let generate_tex tf tmpl1 tmpl2 l =
     close_out chan
 
 let generate_mp fmt l =
-  List.iter (fun (i,f) -> print_fig i fmt f) l
+  List.iter (fun (i,f) -> Mlpost.print i fmt f) l
 
 let mpostfile = "test/test.mp"
 let texfile = "test/test.tex"
