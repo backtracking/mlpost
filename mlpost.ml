@@ -20,6 +20,7 @@ type command =
   | Draw of Path.t * style option
   | Label of picture * position * Point.t
   | DotLabel of picture * position * Point.t
+  | Loop of int * int * (int -> command)
 
 type t = command list
 
@@ -34,6 +35,8 @@ let draw ?color t =
   match color with
     | Some c -> Draw (t, Some (mk_style c))
     | None -> Draw (t, None)
+
+let iter from until f = Loop (from, until, f)
 
 let tex s = Tex s
 
@@ -51,7 +54,7 @@ let print_position fmt = function
 let print_pic fmt = function
   | Tex s -> F.fprintf fmt "btex %s etex" s
 
-let print_command fmt  = function
+let rec print_command fmt  = function
   | Draw (p, None) ->
       F.fprintf fmt "draw %a;@\n" Path.print p
   | Draw (p, Some s) -> 
@@ -63,6 +66,10 @@ let print_command fmt  = function
   | DotLabel (pic,pos,p) ->
       F.fprintf fmt "dotlabel%a(%a,%a); @\n"
         print_position pos print_pic pic Point.print p
+  | Loop(from,until,cmd) ->
+      for i = from to until - 1 do
+	print_command fmt (cmd i);
+      done
 
 let print i fmt l =
   F.fprintf fmt "beginfig(%d)@\n %a endfig;@." i 

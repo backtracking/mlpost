@@ -3,6 +3,7 @@ type t = command list
 
 val draw : ?color:Style.Color.t -> Path.t -> command
 val print : int -> Format.formatter -> t -> unit
+val iter : int -> int -> (int -> command) -> command
 
 type position =
   | Center

@@ -135,13 +135,12 @@ let draw149 =
 	if x > 0.5 then Color.RGB (dblx-.1.,0.,2.-.dblx)
 	else Color.RGB (1.-.dblx,0.,dblx)) in
   let pt angle = (2.*.sin(2.*.angle), 2.*.cos(3.*.angle)) in
-  let rec build angle acc =
-    if angle > deuxpi then acc
-    else build (step+.angle)
-      ((C.draw ~scale:C.CM ~color:(couleur (angle /. deuxpi)) [pt angle])::acc)
-      (* 	withpen pencircle scaled 2bp *)
+  let cmd i =
+    let angle = step *. (float_of_int i) in
+      (C.draw ~scale:C.CM ~color:(couleur (angle /. deuxpi)) [pt angle])
+	(* 	withpen pencircle scaled 2bp *)
   in
-    (149,build 0. [])
+    (149,[Mlpost.iter 0 720 cmd])
 
 let figs = 
   [ draw1; draw3; draw4a; draw4b;draw5; 
