@@ -1,8 +1,7 @@
 type command
 type t = command list
 
-val draw : ?color:Color.t -> ?transform:Transform.t -> ?pen:Pen.t 
-               -> Path.t -> command
+val draw : ?color:Color.t -> ?pen:Pen.t -> Path.t -> command
 val print : int -> Format.formatter -> t -> unit
 val iter : int -> int -> (int -> command) -> command
 

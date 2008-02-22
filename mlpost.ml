@@ -28,12 +28,11 @@ let label ?(pos=Center) pic point = Label (pic,pos,point)
 (* replace later *)
 let dotlabel ?(pos=Center) pic point = DotLabel (pic,pos,point)
 
-let draw ?color ?(transform=T.id) ?pen t = 
+let draw ?color ?pen t = 
   (* We don't use a default to avoid the output of 
      ... withcolor (0.00red+0.00green+0.00blue) withpen .... 
      for each command in the output file *)
-  let newt = Path.transform transform t in
-    Draw (newt, color, pen)
+    Draw (t, color, pen)
 
 let iter from until f = Loop (from, until, f)
 
