@@ -124,29 +124,10 @@ let draw11 =
            (path_fold JCurve (pat c) ) ] @ labels11 )
       cl numbers
 
-let draw149 =
-  let deuxpi = 2.*.3.14159 in
-  let step = deuxpi /. 720. in
-  let couleur x =
-    Color.make (
-      let dblx = 2.*.x in
-	if x > 0.5 then Color.RGB (dblx-.1.,0.,2.-.dblx)
-	else Color.RGB (1.-.dblx,0.,dblx)) in
-  let pt angle = (2.*.sin(2.*.angle), 2.*.cos(3.*.angle)) in
-  let rec build angle acc =
-    if angle > deuxpi then acc
-    else build (step+.angle)
-      ((C.draw ~scale:C.CM ~color:(couleur (angle /. deuxpi)) [pt angle])::acc)
-      (* 	withpen pencircle scaled 2bp *)
-  in
-    (149,build 0. [])
-
 let figs = 
   [ draw1; draw3; draw4a; draw4b;draw5; 
     draw6; draw7; draw8; draw9a; draw9b;
-    draw10a; draw10b; draw10c] @ draw11 
-  @ [draw149]
-
+    draw10a; draw10b; draw10c] @ draw11
 
 let mpostfile = "test/testmanual.mp"
 let texfile = "test/testmanual.tex"

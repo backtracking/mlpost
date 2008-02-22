@@ -34,9 +34,26 @@ let d12 = 12,
                  C.draw ~style:JLine ~scale:C.CM ~pen:pen ~color:col [a;b])
               [a,b;b,c;c,a] cl
 
+let d149 =
+  let deuxpi = 2.*.3.14159 in
+  let step = deuxpi /. 720. in
+  let couleur x =
+    Color.make (
+      let dblx = 2.*.x in
+	if x > 0.5 then Color.RGB (dblx-.1.,0.,2.-.dblx)
+	else Color.RGB (1.-.dblx,0.,dblx)) in
+  let pt angle = (2.*.sin(2.*.angle), 2.*.cos(3.*.angle)) in
+  let pen = P.transform [T.scaled (Num.bp 2.)] Pen.circle in
+  let rec build angle acc =
+    if angle > deuxpi then acc
+    else build (step+.angle)
+      ((C.draw ~scale:C.CM ~color:(couleur (angle /. deuxpi)) ~pen [pt angle])::acc)
+  in
+    (149,build 0. [])
+
 
 let figs = 
-  [ d1; d2; d4; d5; d12]
+  [ d1; d2; d4; d5; d12; d149]
 
 let mpostfile = "test/othergraphs.mp"
 let texfile = "test/othergraphs.tex"

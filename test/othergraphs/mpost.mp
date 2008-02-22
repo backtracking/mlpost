@@ -33,3 +33,16 @@ beginfig(12)
     draw B--C withpen pencircle scaled 2bp withcolor .6white;
     draw C--A withpen pencircle scaled 2bp withcolor .4white;
 endfig;
+
+beginfig(149)
+  def couleur(expr x) =
+    if x>.5: (2*(1-x)) [red, blue];
+    else:    (1-2x) [blue, red]
+    fi
+  enddef;
+  for i=0 step .5 until 360:
+    draw 2cm* (sind(2*i), cosd(3*i))
+    withpen pencircle scaled 2bp
+    withcolor couleur(i/360);
+  endfor;
+endfig;

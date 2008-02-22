@@ -135,16 +135,3 @@ z1=(0,0); (x0,-y0)=z2=(2u,5u);
 draw z0{curl c}..z1..{curl c}z2;
 dotlabels.rt(0,1,2);
 endfig;
-
-beginfig(149)
-  def couleur(expr x) =
-    if x>.5: (2*(1-x)) [red, blue];
-    else:    (1-2x) [blue, red]
-    fi
-  enddef;
-  for i=0 step .5 until 360:
-    draw 2cm* (sind(2*i), cosd(3*i))
-    % withpen pencircle scaled 2bp
-    withcolor couleur(i/360);
-  endfor;
-endfig;
