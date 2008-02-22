@@ -1,4 +1,5 @@
 module F = Format
+module T = Transform
 
 type position =
   | Center
@@ -14,10 +15,9 @@ type position =
 type picture = 
   | Tex of string
 (* later in the mlpost module *)
-open Style
 
 type command = 
-  | Draw of Path.t * style option
+  | Draw of Path.t * Color.t option * Pen.t option
   | Label of picture * position * Point.t
   | DotLabel of picture * position * Point.t
   | Loop of int * int * (int -> command)
@@ -28,13 +28,12 @@ let label ?(pos=Center) pic point = Label (pic,pos,point)
 (* replace later *)
 let dotlabel ?(pos=Center) pic point = DotLabel (pic,pos,point)
 
-let draw ?color t = 
+let draw ?color ?(transform=T.id) ?pen t = 
   (* We don't use a default to avoid the output of 
      ... withcolor (0.00red+0.00green+0.00blue) withpen .... 
      for each command in the output file *)
-  match color with
-    | Some c -> Draw (t, Some (mk_style c))
-    | None -> Draw (t, None)
+  let newt = Path.transform transform t in
+    Draw (newt, color, pen)
 
 let iter from until f = Loop (from, until, f)
 
@@ -54,12 +53,15 @@ let print_position fmt = function
 let print_pic fmt = function
   | Tex s -> F.fprintf fmt "btex %s etex" s
 
+let print_option start printer fmt = function
+  | None -> ()
+  | Some o -> F.fprintf fmt "%s%a" start printer o
+
 let rec print_command fmt  = function
-  | Draw (p, None) ->
-      F.fprintf fmt "draw %a;@\n" Path.print p
-  | Draw (p, Some s) -> 
-      F.fprintf fmt "draw %a %a;@\n" 
-	Path.print p print_style s
+  | Draw (path, color, pen) ->
+      F.fprintf fmt "draw %a%a%a;@\n" Path.print path
+        (print_option " withcolor " Color.print) color
+        (print_option " withpen " Pen.print) pen
   | Label (pic,pos,p) ->
       F.fprintf fmt "label%a(%a,%a); @\n"
         print_position pos print_pic pic Point.print p

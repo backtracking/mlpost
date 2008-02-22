@@ -42,38 +42,57 @@ OFLAGS = -dtypes $(INCLUDES) #@INCLUDEGTK2@ -I +threads
 
 NAME = mlpost
 
-all: graphs.opt
+all: handbookgraphs.opt
 
 # bytecode and native-code compilation
 ######################################
 
-CMO := style.cmo point.cmo path.cmo mlpost.cmo helpers.cmo convenience.cmo
+CMO := num.cmo point.cmo transform.cmo color.cmo path.cmo pen.cmo\
+        mlpost.cmo helpers.cmo convenience.cmo generate.cmo
 CMX := $(CMO:.cmo=.cmx)
-TESTCMO := graphs.cmo
-TESTCMX := $(TESTCMO:.cmo=.cmx)
+HANDBOOKCMO := handbookgraphs.cmo
+OTHERCMO := othergraphs.cmo
+HANDBOOKCMX := $(HANDBOOKCMO:.cmo=.cmx)
+OTHERCMX := $(OTHERCMO:.cmo=.cmx)
 
 GENERATED = version.ml
 
 byte: $(NAME).cma
 opt: $(NAME).cmxa
 
-test: mpost test/test.ps
-	gv test/test.ps
+test: mpost test/testmanual.ps
+	gv test/testmanual.ps
 
-mpost: test/test.mp
+othergraphs: othermpost test/othergraphs.ps
+	gv test/othergraphs.ps
+
+othermpost: test/othergraphs.mp
+	make -C test other
+	make -C test/othergraphs mpost
+
+mpost: test/testmanual.mp
 	make -C test mpost
 	make -C test/manual mpost
 
-test/test.mp test/test.tex: graphs.opt
-	./graphs.opt
+test/testmanual.mp test/testmanual.tex: handbookgraphs.opt
+	./handbookgraphs.opt
 
-test/test.ps: test/test.tex
-	make -C test latex
+test/testmanual.ps: test/testmanual.tex
+	make -C test manual
 
 
-graphs.opt: $(CMX) $(TESTCMX)
+handbookgraphs.opt: $(CMX) $(HANDBOOKCMX)
 	$(OCAMLOPT) $(OFLAGS) -o $@ $^
 
+test/othergraphs.mp test/othergraphs.tex: othergraphs.opt
+	./othergraphs.opt
+
+test/othergraphs.ps: test/othergraphs.tex
+	make -C test othertex
+
+
+othergraphs.opt: $(CMX) $(OTHERCMX)
+	$(OCAMLOPT) $(OFLAGS) -o $@ $^
 $(NAME).cma: $(CMO)
 	$(OCAMLC) -a $(BFLAGS) -o $@ $^
 
@@ -194,7 +213,7 @@ clean::
 	rm -f $(NAME).cma $(NAME).cmxa $(NAME).a
 	rm -f *.aux *.log $(NAME).tex $(NAME).dvi $(NAME).ps
 	make -C test clean
-	rm -f graphs.opt convenience_graphs.opt test.dvi test.ps
+	rm -f *.opt test.dvi test.ps
 
 dist-clean distclean:: clean
 	rm -f Makefile config.cache config.log config.status

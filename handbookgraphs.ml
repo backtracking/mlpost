@@ -1,9 +1,7 @@
 open Path
-open Style
 open Point
 open Helpers
 open Mlpost
-module F = Format
 module C = Convenience
 
 let draw1 = 1, [ C.draw ~style:JLine [20.,20.; 0.,0.; 0.,30.; 30.,0.; 0.,0.] ]
@@ -135,12 +133,13 @@ let draw149 =
 	if x > 0.5 then Color.RGB (dblx-.1.,0.,2.-.dblx)
 	else Color.RGB (1.-.dblx,0.,dblx)) in
   let pt angle = (2.*.sin(2.*.angle), 2.*.cos(3.*.angle)) in
-  let cmd i =
-    let angle = step *. (float_of_int i) in
-      (C.draw ~scale:C.CM ~color:(couleur (angle /. deuxpi)) [pt angle])
-	(* 	withpen pencircle scaled 2bp *)
+  let rec build angle acc =
+    if angle > deuxpi then acc
+    else build (step+.angle)
+      ((C.draw ~scale:C.CM ~color:(couleur (angle /. deuxpi)) [pt angle])::acc)
+      (* 	withpen pencircle scaled 2bp *)
   in
-    (149,[Mlpost.iter 0 720 cmd])
+    (149,build 0. [])
 
 let figs = 
   [ draw1; draw3; draw4a; draw4b;draw5; 
@@ -148,42 +147,12 @@ let figs =
     draw10a; draw10b; draw10c] @ draw11 
   @ [draw149]
 
-let generate_tex tf tmpl1 tmpl2 l =
-  let minipage fmt i tmpl =
-    F.fprintf fmt "@[<hov 2>\\begin{minipage}[tb]{0.5\\textwidth}@\n";
-    F.fprintf fmt "@[<hov 2>\\begin{center}@\n";
-    F.fprintf fmt 
-      "\\includegraphics[width=\\textwidth,height=\\textwidth,keepaspectratio]{%s.%i}" 
-      tmpl i;
-    F.fprintf fmt "@]@\n\\end{center}@\n";
-    F.fprintf fmt "@]@\n\\end{minipage}@\n"
-  in
-  let chan = open_out tf in
-  let fmt = F.formatter_of_out_channel chan in
-    F.fprintf fmt "\\documentclass[a4paper]{article}@.";
-    F.fprintf fmt "\\usepackage[]{graphicx}@.";
-    F.fprintf fmt "@[<hov 2>\\begin{document}@.";
-    List.iter
-      (fun (i,_) ->
-         F.fprintf fmt "@\n %i" i;
-         minipage fmt i tmpl1;
-         minipage fmt i tmpl2;
-         F.fprintf fmt "@\n \\vspace{3cm}@\n"
-      ) l ;
-    F.fprintf fmt "@]@\n\\end{document}@.";
-    close_out chan
 
-let generate_mp fmt l =
-  List.iter (fun (i,f) -> Mlpost.print i fmt f) l
-
-let mpostfile = "test/test.mp"
-let texfile = "test/test.tex"
+let mpostfile = "test/testmanual.mp"
+let texfile = "test/testmanual.tex"
 
 let _ =
-  let ch = open_out mpostfile in
-  let fmt = F.formatter_of_out_channel ch in
-    generate_mp fmt figs;
-    close_out ch;
-    generate_tex texfile "manual/manual" "test" figs
+    Generate.generate_mp mpostfile figs;
+    Generate.generate_tex texfile "manual/manual" "testmanual" figs
 
 

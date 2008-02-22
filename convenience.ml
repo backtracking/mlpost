@@ -22,7 +22,7 @@ let get_lift = function
   | CM -> map_cm
   | MM -> map_mm
 
-let path ?(style=P.JCurve) ?(cycle) ?(scale=BP) l =
+let path ?(style=P.JCurve) ?(cycle) ?(scale=BP) l  =
   let p = get_joint style (get_lift scale l) in
     match cycle with
       | None -> p
@@ -32,10 +32,10 @@ let p ?(l=P.NoDir) ?(r=P.NoDir) ?(scale=BP) (a,b) =
   let s = get_unit scale in
     (l, s (a, b), r)
 
-let draw ?(style) ?(cycle) ?(scale) ?(color) l =
-   Mlpost.draw ?color (path ?style ?cycle ?scale l)
+let draw ?(style) ?(cycle) ?(scale) ?(color) ?(pen) l =
+   Mlpost.draw ?color ?pen (path ?style ?cycle ?scale l)
 
-let jointpath ?(scale=BP) lp lj =
+let jointpath ?(scale=BP) lp lj  =
   let s = get_unit scale in
     jointpath (List.map (fun (a,b) -> (P.NoDir, s (a, b), P.NoDir)) lp) lj
 

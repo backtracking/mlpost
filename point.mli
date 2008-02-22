@@ -1,14 +1,3 @@
-module Num : sig
-  type t
-  val bp : float -> t
-  val pt : float -> t
-  val cm : float -> t
-  val mm : float -> t
-  val inch : float -> t
-  val print : Format.formatter -> t -> unit
-  val print_float : Format.formatter -> float -> unit
-end
-
 type t
 val p : Num.t * Num.t -> t
 (* These functions create points of "unspecified" size, ie vectors

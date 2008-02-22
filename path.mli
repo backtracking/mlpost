@@ -15,7 +15,6 @@ type joint =
 type knot = direction * Point.t * direction
 
 type t
-
 val start : knot -> t
 val concat : t -> joint -> knot -> t
 
@@ -24,3 +23,10 @@ val append : t -> joint -> t -> t
 
 (* later in the mlpost module *)
 val print : Format.formatter -> t -> unit
+
+val fullcircle : t
+val halfcircle : t
+val quartercircle: t
+val unitsquare: t
+
+val transform : Transform.t -> t -> t

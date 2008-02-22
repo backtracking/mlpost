@@ -49,7 +49,7 @@ let path_fold style l =
         List.fold_left (fun p knot -> concat p style knot) (start x) xs
 
 (* construct a straight path from a point list *)
-let straight l =
+let straight l   =
   path_fold JLine
     (List.map (fun p -> (NoDir, p, NoDir)) l)
 
