@@ -5,23 +5,24 @@ open Mlpost
 module C = Convenience
 module P = Pen
 module T = Transform
+module N = Num
 
 let a = 0., 0.
 let b = 1., 0.
 let c = 0., 1.
 let l = [a ; b ; c]
-let d1 = 1, [C.draw ~style:JLine ~scale:C.CM l]
-let d2 = 2, [C.draw ~style:JLine ~scale:C.CM ~cycle:JLine 
+let d1 = 1, [C.draw ~style:JLine ~scale:N.cm l]
+let d2 = 2, [C.draw ~style:JLine ~scale:N.cm ~cycle:JLine 
                 l]
 
 let d4 = 4, 
          let pen = P.transform [T.scaled (Num.bp 4.)] Pen.circle in
-           [C.draw ~pen:pen ~scale:C.CM [a] ]
+           [C.draw ~pen ~scale:N.cm [a] ]
 
 let d5 = 5,
          let pen = P.transform [T.scaled (Num.bp 4.)] Pen.circle in
-           [C.draw ~style:JLine ~scale:C.CM ~cycle:JLine l] @
-           (List.map  (fun point -> C.draw ~pen:pen ~scale:C.CM [point]) l)
+           [C.draw ~style:JLine ~scale:N.cm ~cycle:JLine l] @
+           (List.map  (fun point -> C.draw ~pen ~scale:N.cm [point]) l)
 
 let d12 = 12,
           let pen = P.transform [T.scaled (Num.bp 2.)] Pen.circle in
@@ -30,12 +31,12 @@ let d12 = 12,
               [0.8;0.6;0.4] 
           in
             List.map2
-              (fun (a,b) col ->
-                 C.draw ~style:JLine ~scale:C.CM ~pen:pen ~color:col [a;b])
+              (fun (a,b) color ->
+                 C.draw ~style:JLine ~scale:N.cm ~pen ~color [a;b])
               [a,b;b,c;c,a] cl
 
 let triangle = 
-  C.path ~scale:C.CM ~style:JLine ~cycle:JLine [(0.,0.);(1.,0.);(0.,1.)]
+  C.path ~scale:N.cm ~style:JLine ~cycle:JLine [(0.,0.);(1.,0.);(0.,1.)]
 
 let d20 =
   20, [fill ~color:(Color.make (Color.Gray 0.8)) triangle]
@@ -56,7 +57,7 @@ let d23 =
 let deuxpi = 2.*.3.14159
 
 let d130 =
-  let sq = C.path ~style:JLine ~scale:C.CM ~cycle:JLine 
+  let sq = C.path ~style:JLine ~scale:N.cm ~cycle:JLine 
     [(0.,0.);(2.,0.);(2.,2.);(0.,2.)] in
     (** on peut pas utiliser la resolution de MetaPost donc on
 	construit la transform à la main.. :-/ *)
@@ -93,7 +94,7 @@ let d149 =
   let pen = P.transform [T.scaled (Num.bp 2.)] Pen.circle in
   let cmd i =
     let angle = step *. (float_of_int i) in
-      [C.draw ~scale:C.CM ~color:(couleur (angle /. deuxpi)) ~pen [pt angle]]
+      [C.draw ~scale:N.cm ~color:(couleur (angle /. deuxpi)) ~pen [pt angle]]
   in
     (149,[Mlpost.iter 0 720 cmd])
 
@@ -112,7 +113,7 @@ let d195 =
 	    if k mod 2 = 1 then [(kf,0.); (u1,umk); (u1,udm); (udp,0.)]
 	    else [(0.,kf); (umk,u1); (udm,u1); (0.,udp)]
 	  in [fill ~color (transform [t i j]
-			     (C.path ~style:JLine ~scale:C.MM ~cycle:JLine l))]
+			     (C.path ~style:JLine ~scale:N.mm ~cycle:JLine l))]
 	in
 	  [Mlpost.iter 0 5 strip]
       else [] 
@@ -121,8 +122,8 @@ let d195 =
   in
   let grid i =
     let ui = u i in
-      [C.draw ~style:JLine ~scale:C.MM [(0.,ui); (un, ui)];
-       C.draw ~style:JLine ~scale:C.MM [(ui,0.); (ui, un)]]
+      [C.draw ~style:JLine ~scale:N.mm [(0.,ui); (un, ui)];
+       C.draw ~style:JLine ~scale:N.mm [(ui,0.); (ui, un)]]
   in
     (195, [Mlpost.iter 0 n row; Mlpost.iter 0 (n+1) grid])
 

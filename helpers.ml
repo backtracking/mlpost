@@ -10,13 +10,10 @@ let ($$) f x = f x
 (* map over pairs *)
 let pmap f (a,b) = (f a, f b)
 
+let point scale fpair = p (pmap scale fpair)
+
 (* construct a point with the right measure *)
-let bpp, inp, cmp, mmp, ptp =
-  (fun pr -> p (pmap bp pr)) ,
-  (fun pr -> p (pmap inch pr)) ,
-  (fun pr -> p (pmap cm pr)) ,
-  (fun pr -> p (pmap mm pr)) ,
-  (fun pr -> p (pmap pt pr))
+let bpp, inp, cmp, mmp, ptp = point bp, point inch, point cm, point mm, point pt
 
 (* construct a list of points with the right measure *)
 let map_bp, map_in, map_cm, map_mm, map_pt =
@@ -48,15 +45,14 @@ let path_fold style l =
     | (x::xs) ->
         List.fold_left (fun p knot -> concat p style knot) (start x) xs
 
-(* construct a straight path from a point list *)
-let straight l   =
-  path_fold JLine
+let point_fold style l =
+  path_fold style
     (List.map (fun p -> (NoDir, p, NoDir)) l)
 
+(* construct a straight path from a point list *)
+let straight l = point_fold JLine
 (* construct a curved path from a point list *)
-let curved l =
-  path_fold JCurve
-    (List.map (fun p -> (NoDir, p, NoDir)) l)
+let curved l = point_fold JCurve
 
 (* construct a path with knot list and joint list *)
 let jointpath lp lj =

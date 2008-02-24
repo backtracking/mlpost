@@ -2,6 +2,7 @@ open Path
 open Point
 open Helpers
 open Mlpost
+module N = Num
 module C = Convenience
 
 let draw1 = 1, [ C.draw ~style:JLine [20.,20.; 0.,0.; 0.,30.; 30.,0.; 0.,0.] ]
@@ -59,7 +60,7 @@ let draw6 = 6,
 
 
 let lex = C.p ~r:(Vec(dir 45.)) (0.,0.)
-let rex a = C.p ~l:(Vec(dir (10.*.a))) ~scale:C.CM (6., 0.)
+let rex a = C.p ~l:(Vec(dir (10.*.a))) ~scale:N.cm (6., 0.)
 let draw7 = 7,
   map_from_to 
     (fun a ->
@@ -76,9 +77,9 @@ let z0 = (-1., 0.)
 let z1 = (0., 0.2)
 let z2 = ( 1., 0.)
 let labels9 = dotlabels ~pos:PBot ["0";"1";"2"] (map_in [z0;z1;z2])
-let z0 = C.p ~r:(Vec up) ~scale:C.IN z0
-let z1 = C.p ~r:(Vec right) ~scale:C.IN z1
-let z2 = C.p ~r:(Vec down) ~scale:C.IN z2
+let z0 = C.p ~r:(Vec up) ~scale:N.inch z0
+let z1 = C.p ~r:(Vec right) ~scale:N.inch z1
+let z2 = C.p ~r:(Vec down) ~scale:N.inch z2
 
 let draw9a = 109, [draw (path_fold JCurve [z0;z1;z2])] @ labels9
 let draw9b = 209, [draw (path_fold JCurveNoInflex [z0;z1;z2])] @labels9
@@ -91,13 +92,13 @@ let z3 = (u 5.),u 0.
 let l1 = [z0;z1;z2;z3]
 let labels10 = dotlabels ~pos:PBot ["0";"1";"2";"3"] (map_in l1)
 
-let draw10a = 110, [C.draw ~scale:C.IN l1 ] @ labels10
+let draw10a = 110, [C.draw ~scale:N.inch l1 ] @ labels10
 
 let draw10b = 210, 
-  [ draw (C.jointpath ~scale:C.IN l1 [JCurve; JTension(1.3,1.3); JCurve] ) ] 
+  [ draw (C.jointpath ~scale:N.inch l1 [JCurve; JTension(1.3,1.3); JCurve] ) ] 
   @ labels10
 let draw10c = 310, 
-  [ draw (C.jointpath ~scale:C.IN l1 [JCurve; JTension(1.5,1.0); JCurve] ) ]
+  [ draw (C.jointpath ~scale:N.inch l1 [JCurve; JTension(1.5,1.0); JCurve] ) ]
   @ labels10
 
 let u l = 1.4 /. 10. *. l
@@ -111,9 +112,9 @@ let z0 = u (2.), u (-5.)
 let z1 = 0., 0.
 let z2 = u 2., u 5.
 let cl = [0.; 1.; 2.; infinity]
-let pat c = [ C.p ~r:(Curl c) ~scale:C.IN z0 ; 
-              C.p ~scale:C.IN z1; 
-              C.p ~l:(Curl c) ~scale:C.IN z2 ]
+let pat c = [ C.p ~r:(Curl c) ~scale:N.inch z0 ; 
+              C.p ~scale:N.inch z1; 
+              C.p ~l:(Curl c) ~scale:N.inch z2 ]
 
 let draw11 =
   let numbers = [111; 211; 311; 411] in
@@ -133,13 +134,13 @@ let draw11 =
 (*     cycle (Vec up) JCurve (concat path JCurve (C.p ~r ~scale:C.CM (0.,0.))) in *)
 (*     21, [fill fillp; draw (transform t fullcircle)] *)
 let draw21 = 
-  let mp d pt = C.p ~r:(Vec d) ~scale:C.CM pt in
+  let mp d pt = C.p ~r:(Vec d) ~scale:N.cm pt in
   let kl = [mp down (-1.,0.); mp right (0.,-1.); mp up (1.,0.)] in
   let path = path_fold JCurve kl in
   let r = Vec (p (Num.bp (-.1.), Num.bp (-.2.))) in
   let fillp =
     cycle (Vec up) JCurve 
-      (concat path JCurve (C.p ~r ~scale:C.CM (0.,0.))) in
+      (concat path JCurve (C.p ~r ~scale:N.cm (0.,0.))) in
   let fullp = 
     cycle NoDir JCurve (concat path JCurve (mp left (0.,1.))) in
     21, [fill fillp; draw fullp]
