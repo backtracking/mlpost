@@ -16,16 +16,16 @@ let d2 = 2, [C.draw ~style:JLine ~scale:N.cm ~cycle:JLine
                 l]
 
 let d4 = 4, 
-         let pen = P.transform [T.scaled (Num.bp 4.)] Pen.circle in
+         let pen = P.transform [T.scaled 4.] Pen.circle in
            [C.draw ~pen ~scale:N.cm [a] ]
 
 let d5 = 5,
-         let pen = P.transform [T.scaled (Num.bp 4.)] Pen.circle in
+         let pen = P.transform [T.scaled 4.] Pen.circle in
            [C.draw ~style:JLine ~scale:N.cm ~cycle:JLine l] @
            (List.map  (fun point -> C.draw ~pen ~scale:N.cm [point]) l)
 
 let d12 = 12,
-          let pen = P.transform [T.scaled (Num.bp 2.)] Pen.circle in
+          let pen = P.transform [T.scaled 2.] Pen.circle in
           let cl = 
             List.map (fun f -> Color.make (Color.RGB (f,f,f) ) ) 
               [0.8;0.6;0.4] 
@@ -45,12 +45,12 @@ let d21 =
   21, [fill ~color:(Color.make (Color.Gray 0.8)) triangle; draw triangle]
 
 let d22 =
-  let pen = Pen.transform [T.scaled (Num.bp 2.)] Pen.circle in
+  let pen = Pen.transform [T.scaled 2.] Pen.circle in
   22, [fill ~color:(Color.make (Color.Gray 0.8)) triangle; 
        draw ~pen triangle]
 
 let d23 =
-  let pen = Pen.transform [T.scaled (Num.bp 2.)] Pen.circle in
+  let pen = Pen.transform [T.scaled 2.] Pen.circle in
   23, [draw ~pen triangle;
        fill ~color:(Color.make (Color.Gray 0.8)) triangle]
 
@@ -64,7 +64,7 @@ let d130 =
   let ratio = sqrt (3.28 /. 4.) in
   let angle = atan (0.2 /. 1.8) *. 360. /. deuxpi in
   let v = p (Num.cm 0.2, Num.cm 0.) in
-  let t = [T. rotated angle; T.scaled (Num.bp ratio); T.shifted v] in
+  let t = [T. rotated angle; T.scaled ratio; T.shifted v] in
   let rec apply acc = function 0 -> acc | n -> apply (transform t acc) (n-1) in
   let cmd i = 
     let p = apply sq (2*i) in
@@ -77,11 +77,11 @@ let d140 =
   let cmd i =
     let s = 1. -. ((float_of_int i) *. 0.01) in
     let color = Color.make (Color.Gray s) in
-      [fill ~color (transform [T.scaled (Num.cm (2.*.s))] fullcircle)]
+      [fill ~color (transform [T.scaled ~scale:Num.cm (2.*.s)] fullcircle)]
   in
   140, [iter 0 100 cmd; 
-	draw ~pen:(P.transform [T.scaled (Num.bp 2.)] P.circle)
-	  (transform [T.scaled (Num.cm 2.)] fullcircle)]
+	draw ~pen:(P.transform [T.scaled 2.] P.circle)
+	  (transform [T.scaled ~scale:Num.cm 2.] fullcircle)]
 
 let d149 =
   let step = deuxpi /. 720. in
@@ -91,7 +91,7 @@ let d149 =
 	if x > 0.5 then Color.RGB (dblx-.1.,0.,2.-.dblx)
 	else Color.RGB (1.-.dblx,0.,dblx)) in
   let pt angle = (2.*.sin(2.*.angle), 2.*.cos(3.*.angle)) in
-  let pen = P.transform [T.scaled (Num.bp 2.)] Pen.circle in
+  let pen = P.transform [T.scaled 2.] Pen.circle in
   let cmd i =
     let angle = step *. (float_of_int i) in
       [C.draw ~scale:N.cm ~color:(couleur (angle /. deuxpi)) ~pen [pt angle]]

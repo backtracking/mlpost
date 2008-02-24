@@ -13,7 +13,7 @@ type t' =
 
 type t = t' list
 
-let scaled  a = Scaled a
+let scaled ?(scale=Num.bp) a = Scaled (scale a)
 let rotated a = Rotated a
 let shifted a = Shifted a
 let slanted a = Slanted a
