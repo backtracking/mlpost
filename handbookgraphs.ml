@@ -124,10 +124,31 @@ let draw11 =
            (path_fold JCurve (pat c) ) ] @ labels11 )
       cl numbers
 
+(** Cette version de draw21 est assez cool mais ne marche pas car la largeur du trait
+    est scalée avec la figure... *)
+(* let draw21 = *)
+(*   let path = transform t halfcircle in *)
+(*   let r = Vec (p (Num.bp (-.1.), Num.bp (-.2.))) in *)
+(*   let fillp =  *)
+(*     cycle (Vec up) JCurve (concat path JCurve (C.p ~r ~scale:C.CM (0.,0.))) in *)
+(*     21, [fill fillp; draw (transform t fullcircle)] *)
+let draw21 = 
+  let mp d pt = C.p ~r:(Vec d) ~scale:C.CM pt in
+  let kl = [mp down (-1.,0.); mp right (0.,-1.); mp up (1.,0.)] in
+  let path = path_fold JCurve kl in
+  let r = Vec (p (Num.bp (-.1.), Num.bp (-.2.))) in
+  let fillp =
+    cycle (Vec up) JCurve 
+      (concat path JCurve (C.p ~r ~scale:C.CM (0.,0.))) in
+  let fullp = 
+    cycle NoDir JCurve (concat path JCurve (mp left (0.,1.))) in
+    21, [fill fillp; draw fullp]
+
 let figs = 
   [ draw1; draw3; draw4a; draw4b;draw5; 
     draw6; draw7; draw8; draw9a; draw9b;
-    draw10a; draw10b; draw10c] @ draw11
+    draw10a; draw10b; draw10c] @ draw11 
+  @ [draw21]
 
 let mpostfile = "test/testmanual.mp"
 let texfile = "test/testmanual.tex"

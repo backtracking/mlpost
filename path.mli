@@ -18,7 +18,7 @@ type t
 val start : knot -> t
 val concat : t -> joint -> knot -> t
 
-val cycle : joint -> t -> t
+val cycle : direction -> joint -> t -> t
 val append : t -> joint -> t -> t
 
 (* later in the mlpost module *)

@@ -1,7 +1,7 @@
 type t'
 
 val scaled : Num.t -> t'
-val rotated : Num.t -> t'
+val rotated : float -> t'
 val shifted : Point.t -> t'
 val slanted : Num.t -> t'
 val xscaled : Num.t -> t'

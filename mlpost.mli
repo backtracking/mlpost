@@ -2,8 +2,10 @@ type command
 type t = command list
 
 val draw : ?color:Color.t -> ?pen:Pen.t -> Path.t -> command
+val fill : ?color:Color.t -> Path.t -> command
+val iter : int -> int -> (int -> command list) -> command
+
 val print : int -> Format.formatter -> t -> unit
-val iter : int -> int -> (int -> command) -> command
 
 type position =
   | Center

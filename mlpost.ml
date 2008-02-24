@@ -18,9 +18,10 @@ type picture =
 
 type command = 
   | Draw of Path.t * Color.t option * Pen.t option
+  | Fill of Path.t * Color.t option
   | Label of picture * position * Point.t
   | DotLabel of picture * position * Point.t
-  | Loop of int * int * (int -> command)
+  | Loop of int * int * (int -> command list)
 
 type t = command list
 
@@ -33,6 +34,8 @@ let draw ?color ?pen t =
      ... withcolor (0.00red+0.00green+0.00blue) withpen .... 
      for each command in the output file *)
     Draw (t, color, pen)
+
+let fill ?color t = Fill (t, color)
 
 let iter from until f = Loop (from, until, f)
 
@@ -61,6 +64,9 @@ let rec print_command fmt  = function
       F.fprintf fmt "draw %a%a%a;@\n" Path.print path
         (print_option " withcolor " Color.print) color
         (print_option " withpen " Pen.print) pen
+  | Fill (path, color) ->
+      F.fprintf fmt "fill %a%a;@\n" Path.print path
+        (print_option " withcolor " Color.print) color
   | Label (pic,pos,p) ->
       F.fprintf fmt "label%a(%a,%a); @\n"
         print_position pos print_pic pic Point.print p
@@ -69,7 +75,7 @@ let rec print_command fmt  = function
         print_position pos print_pic pic Point.print p
   | Loop(from,until,cmd) ->
       for i = from to until - 1 do
-	print_command fmt (cmd i);
+	List.iter (print_command fmt) (cmd i);
       done
 
 let print i fmt l =

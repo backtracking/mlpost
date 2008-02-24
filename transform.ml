@@ -1,5 +1,5 @@
 type t' = 
-    Rotated of Num.t
+    Rotated of float
   | Scaled of Num.t
   | Shifted of Point.t
   | Slanted of Num.t
@@ -24,7 +24,7 @@ let rotate_around p f = RotateAround (p,f)
 let print_item fmt = function
   | Scaled a -> Format.fprintf fmt "scaled %a" Num.print a
   | Shifted a -> Format.fprintf fmt "shifted %a" Point.print a
-  | Rotated a -> Format.fprintf fmt "rotated %a" Num.print a
+  | Rotated a -> Format.fprintf fmt "rotated %a" Num.print_float a
   | Slanted a -> Format.fprintf fmt "slanted %a" Num.print a
   | Xscaled a -> Format.fprintf fmt "xscaled %a" Num.print a
   | Yscaled a -> Format.fprintf fmt "yscaled %a" Num.print a

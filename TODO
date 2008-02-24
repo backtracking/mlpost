@@ -1,3 +1,5 @@
 * mieux ranger le code de test, génération de fichier .tex
-* la commande fill pour pouvoir s'amuser avec les couleurs
 * plus d'exemples
+* Pouvoir faire la commande bbox sur des pictures. Ca demande
+  d'être capable de générer des définitions locales dans MetaPost
+  pour les pictures.

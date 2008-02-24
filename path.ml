@@ -18,7 +18,7 @@ type knot = direction * Point.t * direction
  * i. e. the list has to be reversed for printing *)
 type t =
   | Concat of knot * joint * t
-  | Cycle of joint * t
+  | Cycle of direction * joint * t
   | FullCircle
   | HalfCircle
   | QuarterCircle
@@ -29,7 +29,7 @@ type t =
 
 let start k = Knot k
 let concat p j k = Concat (k,j,p)
-let cycle j p = Cycle (j,p)
+let cycle d j p = Cycle (d,j,p)
 let append p1 j p2 = Append (p1,j,p2)
 let fullcircle = FullCircle
 let halfcircle = HalfCircle
@@ -61,11 +61,12 @@ let rec print fmt = function
   | HalfCircle -> F.fprintf fmt "halfcircle"
   | QuarterCircle -> F.fprintf fmt "quartercircle"
   | UnitSquare -> F.fprintf fmt "unitsquare"
-  | Transformed (p,tr) -> F.fprintf fmt "(%a %a)" print p Transform.print tr
+  | Transformed (p,tr) -> F.fprintf fmt "((%a) %a)"
+      print p Transform.print tr
   | Append (p1,j,p2) -> 
       F.fprintf fmt "%a %a %a" print p1 print_joint j print p2
-  | Cycle (j,p) ->
-      F.fprintf fmt "%a %a cycle" print p print_joint j
+  | Cycle (d,j,p) ->
+      F.fprintf fmt "%a %a %acycle" print p print_joint j print_dir d
   | Concat (k,j,p) ->
       F.fprintf fmt "%a %a %a" print p print_joint j print_knot k
   | Knot k -> print_knot fmt k

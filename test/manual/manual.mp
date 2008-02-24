@@ -135,3 +135,11 @@ z1=(0,0); (x0,-y0)=z2=(2u,5u);
 draw z0{curl c}..z1..{curl c}z2;
 dotlabels.rt(0,1,2);
 endfig;
+
+beginfig(21) ;
+path p ;
+p = (-1cm,0)..(0,-1cm)..(1cm,0) ;
+fill p{up} .. (0,0){-1,-2} ..
+{up}cycle ;
+draw p .. (0,1cm) .. cycle ;
+endfig ;

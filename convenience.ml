@@ -26,7 +26,7 @@ let path ?(style=P.JCurve) ?(cycle) ?(scale=BP) l  =
   let p = get_joint style (get_lift scale l) in
     match cycle with
       | None -> p
-      | Some cst -> P.cycle cst p
+      | Some cst -> P.cycle P.NoDir cst p
 
 let p ?(l=P.NoDir) ?(r=P.NoDir) ?(scale=BP) (a,b) =
   let s = get_unit scale in
