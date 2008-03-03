@@ -13,7 +13,7 @@ let p ?(l=P.NoDir) ?(r=P.NoDir) ?(scale=Num.bp) (a,b) =
     (l, s (a, b), r)
 
 let draw ?(style) ?(cycle) ?(scale) ?(color) ?(pen) l =
-   Mlpost.draw ?color ?pen (path ?style ?cycle ?scale l)
+   Command.draw ?color ?pen (path ?style ?cycle ?scale l)
 
 let jointpath ?(scale=Num.bp) lp lj  =
   let s pair =  Point.p (pmap scale pair) in

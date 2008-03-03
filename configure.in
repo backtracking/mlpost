@@ -32,7 +32,7 @@
 
 # check for one particular file of the sources 
 # ADAPT THE FOLLOWING LINE TO YOUR SOURCES!
-AC_INIT(graphs.ml)
+AC_INIT(command.mli)
 
 # Check for Ocaml compilers
 
@@ -47,6 +47,15 @@ OCAMLVERSION=`$OCAMLC -v | sed -n -e 's|.*version *\(.*\)$|\1|p' `
 echo "ocaml version is $OCAMLVERSION"
 OCAMLLIB=`$OCAMLC -v | tail -1 | cut -f 4 -d " "`
 echo "ocaml library path is $OCAMLLIB"
+
+case $OCAMLVERSION in
+  0.*|1.*|2.*|3.00*|3.01*|3.02*|3.03*|3.04*|3.05*|3.06*|3.07*)
+        AC_MSG_ERROR(mlpost needs ocaml version 3.08.0 or higher);;
+  3.08*)
+	FORPACK="";;
+  *)
+	FORPACK="-for-pack Mlpost";;
+esac
 
 # then we look for ocamlopt; if not present, we issue a warning
 # if the version is not the same, we also discard it
@@ -124,19 +133,13 @@ if echo "let _ = Sys.os_type" | ocaml | grep -q Win32; then
     AC_MSG_RESULT(Win32)
     OCAMLWIN32=yes
     EXE=.exe
+    LIBEXT=.lib
+    OBJEXT=.obj
 else
     OCAMLWIN32=no
     EXE=
-fi
-
-# checking for lablgtk2
-AC_CHECK_PROG(LABLGTK2,lablgtk2,yes,no)
-if test "$LABLGTK2" = yes ; then
-   if test -d "$OCAMLLIB/lablgtk2" ; then
-      INCLUDEGTK2="-I +lablgtk2"
-   else
-      LABLGTK2=no
-   fi      
+    LIBEXT=.a
+    OBJEXT=.o
 fi
 
 # substitutions to perform
@@ -147,12 +150,14 @@ AC_SUBST(OCAMLLEX)
 AC_SUBST(OCAMLYACC)
 AC_SUBST(OCAMLBEST)
 AC_SUBST(OCAMLVERSION)
+AC_SUBST(FORPACK)
 AC_SUBST(OCAMLLIB)
 AC_SUBST(OCAMLWEB)
 AC_SUBST(LABLGTK2)
-AC_SUBST(INCLUDEGTK2)
 AC_SUBST(OCAMLWIN32)
 AC_SUBST(EXE)
+AC_SUBST(LIBEXT)
+AC_SUBST(OBJEXT)
 
 # Finally create the Makefile from Makefile.in
 AC_OUTPUT(Makefile)

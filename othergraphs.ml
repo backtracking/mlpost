@@ -1,7 +1,8 @@
+open Mlpost
 open Path
 open Point
 open Helpers
-open Mlpost
+open Command
 module C = Convenience
 module P = Pen
 module T = Transform
@@ -96,7 +97,7 @@ let d149 =
     let angle = step *. (float_of_int i) in
       [C.draw ~scale:N.cm ~color:(couleur (angle /. deuxpi)) ~pen [pt angle]]
   in
-    (149,[Mlpost.iter 0 720 cmd])
+    (149,[Command.iter 0 720 cmd])
 
 let d195 = 
   let n = 8 and u x = 5.*. (float_of_int x) in
@@ -115,17 +116,17 @@ let d195 =
 	  in [fill ~color (transform [t i j]
 			     (C.path ~style:JLine ~scale:N.mm ~cycle:JLine l))]
 	in
-	  [Mlpost.iter 0 5 strip]
+	  [Command.iter 0 5 strip]
       else [] 
     in 
-      [Mlpost.iter 0 n col]
+      [Command.iter 0 n col]
   in
   let grid i =
     let ui = u i in
       [C.draw ~style:JLine ~scale:N.mm [(0.,ui); (un, ui)];
        C.draw ~style:JLine ~scale:N.mm [(ui,0.); (ui, un)]]
   in
-    (195, [Mlpost.iter 0 n row; Mlpost.iter 0 (n+1) grid])
+    (195, [Command.iter 0 n row; Command.iter 0 (n+1) grid])
 
 
 let figs = 

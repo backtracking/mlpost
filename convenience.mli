@@ -1,6 +1,6 @@
 val draw : 
     ?style:Path.joint -> ?cycle:Path.joint -> ?scale:(float -> Num.t) ->
-      ?color:Color.t -> ?pen:Pen.t -> (float * float) list -> Mlpost.command
+      ?color:Color.t -> ?pen:Pen.t -> (float * float) list -> Command.t
 
 val path : 
     ?style:Path.joint -> ?cycle:Path.joint -> ?scale:(float -> Num.t) -> 

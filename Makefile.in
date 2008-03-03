@@ -33,23 +33,29 @@ OCAMLVERSION = @OCAMLVERSION@
 OCAMLWEB = @OCAMLWEB@
 OCAMLWIN32 = @OCAMLWIN32@
 EXE = @EXE@
+LIBEXT = @LIBEXT@
+OBJEXT = @OBJEXT@
 
-BFLAGS = -dtypes -g $(INCLUDES) #@INCLUDEGTK2@  -I +threads 
-OFLAGS = -dtypes $(INCLUDES) #@INCLUDEGTK2@ -I +threads 
+BFLAGS = -dtypes -g $(INCLUDES) 
+OFLAGS = -dtypes $(INCLUDES) @FORPACK@
 
 # main target
 #############
 
 NAME = mlpost
 
-all: handbookgraphs.opt
+all: byte $(OCAMLBEST) handbookgraphs.opt
 
 # bytecode and native-code compilation
 ######################################
 
 CMO := num.cmo point.cmo transform.cmo color.cmo path.cmo pen.cmo\
-        mlpost.cmo helpers.cmo convenience.cmo generate.cmo
+        command.cmo helpers.cmo convenience.cmo generate.cmo
 CMX := $(CMO:.cmo=.cmx)
+
+CMA := mlpost.cma
+CMXA := mlpost.cmxa
+
 HANDBOOKCMO := handbookgraphs.cmo
 OTHERCMO := othergraphs.cmo
 HANDBOOKCMX := $(HANDBOOKCMO:.cmo=.cmx)
@@ -57,8 +63,20 @@ OTHERCMX := $(OTHERCMO:.cmo=.cmx)
 
 GENERATED = version.ml
 
-byte: $(NAME).cma
-opt: $(NAME).cmxa
+byte: $(CMA)
+opt: $(CMXA)
+
+$(CMA): mlpost.cmo
+	$(OCAMLC) -a $(BFLAGS) -o $@ $^
+
+$(CMXA): mlpost.cmx
+	$(OCAMLOPT) -a $(OFLAGS) -o $@ $^
+
+mlpost.cmo: $(CMO)
+	$(OCAMLC) $(INCLUDES) -pack -o $@ $^
+
+mlpost.cmx: $(CMX)
+	$(OCAMLOPT) $(INCLUDES) -pack -o $@ $^
 
 test: mpost test/testmanual.ps
 	gv test/testmanual.ps
@@ -90,14 +108,8 @@ test/othergraphs.mp test/othergraphs.tex: othergraphs.opt
 test/othergraphs.ps: test/othergraphs.tex
 	make -C test othertex
 
-
-othergraphs.opt: $(CMX) $(OTHERCMX)
+othergraphs.opt: $(CMXA) $(OTHERCMX)
 	$(OCAMLOPT) $(OFLAGS) -o $@ $^
-$(NAME).cma: $(CMO)
-	$(OCAMLC) -a $(BFLAGS) -o $@ $^
-
-$(NAME).cmxa: $(CMX)
-	$(OCAMLOPT) -a $(OFLAGS) -o $@ $^
 
 VERSION=0.1
 
@@ -113,14 +125,13 @@ install-indep:
 	mkdir -p $(MANDIR)/man1
 	cp -f $(NAME).1 $(MANDIR)/man1
 
-install: install-indep
-	cp -f $(NAME).$(OCAMLBEST) $(BINDIR)/$(NAME)$(EXE)
+install: install-$(OCAMLBEST) install-byte
 
-install-byte: install-indep
-	cp -f $(NAME).byte $(BINDIR)/$(NAME)$(EXE)
+install-byte: 
+	cp -f mlpost.cmo mlpost.cmi $(CMA) "$(OCAMLLIB)"
 
-install-opt: install-indep
-	cp -f $(NAME).opt $(BINDIR)/$(NAME)$(EXE)
+install-opt: 
+	cp -f mlpost$(LIBEXT) mlpost.cmx $(CMXA) "$(OCAMLLIB)"
 
 # documentation
 ###############

@@ -16,14 +16,14 @@ type picture =
   | Tex of string
 (* later in the mlpost module *)
 
-type command = 
+type t = 
   | Draw of Path.t * Color.t option * Pen.t option
   | Fill of Path.t * Color.t option
   | Label of picture * position * Point.t
   | DotLabel of picture * position * Point.t
-  | Loop of int * int * (int -> command list)
+  | Loop of int * int * (int -> t list)
 
-type t = command list
+type figure = t list
 
 let label ?(pos=Center) pic point = Label (pic,pos,point)
 (* replace later *)
