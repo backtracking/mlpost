@@ -8,6 +8,11 @@ other: othergraphs.mp
 	mpost othergraphs.mp end
 	make -C othergraphs
 
+tests: tests.mp
+	mpost tests.mp end
+	latex tests
+	dvips tests.dvi -o tests.ps
+
 othertex: othergraphs.ps
 
 clean: 

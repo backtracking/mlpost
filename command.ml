@@ -12,16 +12,13 @@ type position =
   | LowLeft
   | LowRight
 
-type picture = 
-  | Tex of string
-(* later in the mlpost module *)
-
 type t = 
   | Draw of Path.t * Color.t option * Pen.t option
   | Fill of Path.t * Color.t option
-  | Label of picture * position * Point.t
-  | DotLabel of picture * position * Point.t
+  | Label of Picture.t * position * Point.t
+  | DotLabel of Picture.t * position * Point.t
   | Loop of int * int * (int -> t list)
+  | DrawBox of Box.t
 
 type figure = t list
 
@@ -39,7 +36,7 @@ let fill ?color t = Fill (t, color)
 
 let iter from until f = Loop (from, until, f)
 
-let tex s = Tex s
+let draw_box b = DrawBox b
 
 let print_position fmt = function
   | Center  -> F.fprintf fmt ""
@@ -51,9 +48,6 @@ let print_position fmt = function
   | UpRight -> F.fprintf fmt ".urt"
   | LowLeft -> F.fprintf fmt ".llft"
   | LowRight -> F.fprintf fmt ".lrt"
-
-let print_pic fmt = function
-  | Tex s -> F.fprintf fmt "btex %s etex" s
 
 let print_option start printer fmt = function
   | None -> ()
@@ -69,14 +63,16 @@ let rec print_command fmt  = function
         (print_option " withcolor " Color.print) color
   | Label (pic,pos,p) ->
       F.fprintf fmt "label%a(%a,%a); @\n"
-        print_position pos print_pic pic Point.print p
+        print_position pos Picture.print pic Point.print p
   | DotLabel (pic,pos,p) ->
       F.fprintf fmt "dotlabel%a(%a,%a); @\n"
-        print_position pos print_pic pic Point.print p
+        print_position pos Picture.print pic Point.print p
   | Loop(from,until,cmd) ->
       for i = from to until - 1 do
 	List.iter (print_command fmt) (cmd i);
       done
+  | DrawBox b ->
+      F.fprintf fmt "%adrawboxed(%s);@\n" Box.declare b (Box.name b)
 
 let print i fmt l =
   F.fprintf fmt "beginfig(%d)@\n %a endfig;@." i 

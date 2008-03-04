@@ -30,3 +30,5 @@ val quartercircle: t
 val unitsquare: t
 
 val transform : Transform.t -> t -> t
+
+val bpath : Box.t -> t

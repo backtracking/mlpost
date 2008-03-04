@@ -26,6 +26,7 @@ type t =
   | Transformed of t * Transform.t
   | Knot of knot
   | Append of t * joint * t
+  | BoxBPath of Box.t
 
 let start k = Knot k
 let concat p j k = Concat (k,j,p)
@@ -38,6 +39,7 @@ let unitsquare = UnitSquare
 let transform tr = function
   | Transformed (p,tr') -> Transformed (p,tr'@tr)
   | _ as x -> Transformed (x,tr)
+let bpath b = BoxBPath b
 
 let print_joint fmt = function
   | JLine -> F.fprintf fmt "--"
@@ -70,4 +72,7 @@ let rec print fmt = function
   | Concat (k,j,p) ->
       F.fprintf fmt "%a %a %a" print p print_joint j print_knot k
   | Knot k -> print_knot fmt k
+  | BoxBPath b ->
+      F.fprintf fmt "bpath.%s" (Box.name b)
+
 

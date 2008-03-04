@@ -1,4 +1,5 @@
 open Mlpost
+open Num
 open Path
 open Point
 open Helpers
@@ -128,9 +129,8 @@ let d195 =
   in
     (195, [Command.iter 0 n row; Command.iter 0 (n+1) grid])
 
-
 let figs = 
-  [ d1; d2; d4; d5; d12; d20; d21; d22; d23; d130; d140; d149; d195]
+  [ d1; d2; d4; d5; d12; d20; d21; d22; d23; d130; d140; d149; d195 ]
 
 let mpostfile = "test/othergraphs.mp"
 let texfile = "test/othergraphs.tex"

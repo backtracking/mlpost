@@ -44,13 +44,13 @@ OFLAGS = -dtypes $(INCLUDES) @FORPACK@
 
 NAME = mlpost
 
-all: byte $(OCAMLBEST) handbookgraphs.opt
+all: byte $(OCAMLBEST) handbookgraphs.opt othergraphs.opt
 
 # bytecode and native-code compilation
 ######################################
 
-CMO := num.cmo point.cmo transform.cmo color.cmo path.cmo pen.cmo\
-        command.cmo helpers.cmo convenience.cmo generate.cmo
+CMO := num.cmo point.cmo transform.cmo color.cmo picture.cmo box.cmo \
+       path.cmo pen.cmo command.cmo helpers.cmo convenience.cmo generate.cmo
 CMX := $(CMO:.cmo=.cmx)
 
 CMA := mlpost.cma
@@ -80,6 +80,11 @@ mlpost.cmx: $(CMX)
 
 test: mpost test/testmanual.ps
 	gv test/testmanual.ps
+
+tests: $(CMA)
+	ocaml $(CMA) tests.ml
+	make -C test tests
+	gv test/tests.ps
 
 othergraphs: othermpost test/othergraphs.ps
 	gv test/othergraphs.ps

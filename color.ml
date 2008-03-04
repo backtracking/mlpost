@@ -36,6 +36,7 @@ let make = function
   | Orange -> 1.0,0.4,0.0
   | Purple -> 0.6,0.0,0.6
 
+let red = make Red
 
 let print fmt (r,g,b) =
   F.fprintf fmt "(%.3f red + %.3f green + %.3f blue)" r g b

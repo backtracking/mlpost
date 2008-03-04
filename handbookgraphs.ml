@@ -2,6 +2,7 @@ open Path
 open Point
 open Helpers
 open Command
+open Picture
 module N = Num
 module C = Convenience
 

@@ -1,5 +1,9 @@
-* mieux ranger le code de test, gÃ©nÃ©ration de fichier .tex
+* opérations sur Num.t : add, sub, ...
+* opérations sur Point.t : add, shift, rotate, ...
+  (on ne peut pas utiliser Transform.t car dépendance circulaire)
+* plus de labels dans Path, Point, etc.
+* mieux ranger le code de test, génération de fichier .tex
 * plus d'exemples
 * Pouvoir faire la commande bbox sur des pictures. Ca demande
-  d'Ãªtre capable de gÃ©nÃ©rer des dÃ©finitions locales dans MetaPost
+  d'être capable de générer des définitions locales dans MetaPost
   pour les pictures.

@@ -20,4 +20,7 @@ type spec =
 
 val default : t
 val make : spec -> t
+
+val red : t
+
 val print : Format.formatter -> t -> unit

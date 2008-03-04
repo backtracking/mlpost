@@ -37,5 +37,7 @@ let generate_tex tf tmpl1 tmpl2 l =
 
 let generate_mp fn l =
   write_to_formatted_file fn
-    (fun fmt -> List.iter (fun (i,f) -> Command.print i fmt f) l)
+    (fun fmt -> 
+      Format.fprintf fmt "input boxes;@\n";
+      List.iter (fun (i,f) -> Command.print i fmt f) l)
 
