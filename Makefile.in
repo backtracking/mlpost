@@ -50,7 +50,7 @@ all: byte $(OCAMLBEST) handbookgraphs.opt othergraphs.opt
 # bytecode and native-code compilation
 ######################################
 
-CMO := num.cmo point.cmo transform.cmo color.cmo picture.cmo box.cmo \
+CMO := num.cmo name.cmo point.cmo transform.cmo color.cmo picture.cmo box.cmo \
        path.cmo pen.cmo command.cmo helpers.cmo convenience.cmo generate.cmo
 CMX := $(CMO:.cmo=.cmx)
 
@@ -124,6 +124,9 @@ VERSION=0.1
 version.ml: Makefile
 	echo "let version = \""$(VERSION)"\"" > version.ml
 	echo "let date = \""`date`"\"" >> version.ml
+
+dep:
+	$(OCAMLDEP) *.mli *.ml | ocamldot | dot -Tps | gv -
 
 # headers
 #########

@@ -23,4 +23,14 @@ val up : t
 val down : t
 val left : t
 val right : t
+
+val north : Name.t -> t
+val south : Name.t -> t
+val west  : Name.t -> t
+val east  : Name.t -> t
+val north_west : Name.t -> t
+val south_west : Name.t -> t
+val north_east : Name.t -> t
+val south_east : Name.t -> t
+
 val print : Format.formatter -> t -> unit

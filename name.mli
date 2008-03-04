@@ -16,20 +16,6 @@
 
 type t
 
-val circle : Point.t -> Picture.t -> t
-val rect : Point.t -> Picture.t -> t
+val create : unit -> t
 
-val center : t -> Point.t
-val north : t -> Point.t
-val south : t -> Point.t
-val west  : t -> Point.t
-val east  : t -> Point.t 
-val north_west : t -> Point.t
-val south_west : t -> Point.t
-val north_east : t -> Point.t
-val south_east : t -> Point.t
-
-val declare : Format.formatter -> t -> unit
-
-val name : t -> Name.t
-
+val print : Format.formatter -> t -> unit

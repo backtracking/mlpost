@@ -93,7 +93,7 @@ let rec print fmt = function
       F.fprintf fmt "%a %a %a" print p print_joint j print_knot k
   | Knot k -> print_knot fmt k
   | BoxBPath b ->
-      F.fprintf fmt "bpath.%s" (Box.name b)
+      F.fprintf fmt "bpath.%a" Name.print (Box.name b)
   | CutAfter (p1, p2) -> F.fprintf fmt "%a cutafter %a" print p2 print p1
   | CutBefore (p1, p2) -> F.fprintf fmt "%a cutbefore %a" print p2 print p1
 

@@ -16,6 +16,8 @@
 
 module F = Format
 
+type corner = N | S | W | E | NE | NW | SW | SE
+
 type t = 
   | Ppair of Num.t * Num.t
   | Dir of float
@@ -23,6 +25,7 @@ type t =
   | Down
   | Left
   | Right
+  | BoxCorner of Name.t * corner
 
 let p (a,b) = Ppair (a,b)
 let dir f = Dir f
@@ -30,6 +33,24 @@ let up = Up
 let down = Down
 let left = Left
 let right = Right
+let north n = BoxCorner (n, N)
+let south n = BoxCorner (n, S)
+let west n = BoxCorner (n, W)
+let east n = BoxCorner (n, E)
+let north_west n = BoxCorner (n, NW)
+let north_east n = BoxCorner (n, NE)
+let south_west n = BoxCorner (n, SW)
+let south_east n = BoxCorner (n, SE)
+
+let print_corner fmt = function
+  | N -> F.fprintf fmt "n"
+  | S -> F.fprintf fmt "s"
+  | W -> F.fprintf fmt "w"
+  | E -> F.fprintf fmt "e"
+  | NW -> F.fprintf fmt "nw"
+  | NE -> F.fprintf fmt "ne"
+  | SW -> F.fprintf fmt "sw"
+  | SE -> F.fprintf fmt "se"
 
 let print fmt = function
   | Up -> F.fprintf fmt "up"
@@ -38,4 +59,5 @@ let print fmt = function
   | Right -> F.fprintf fmt "right"
   | Dir d -> F.fprintf fmt "dir %a" Num.print_float d
   | Ppair (m,n) -> F.fprintf fmt "(%a,%a)" Num.print m Num.print n
+  | BoxCorner (n, d) -> F.fprintf fmt "%a.%a" Name.print n print_corner d
 

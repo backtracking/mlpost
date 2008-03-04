@@ -34,7 +34,7 @@ let d1 =
     draw
       ~color:Color.red
       (Path.transform [Transform.shifted (1. ++ 1.)] (Path.bpath a));
-    draw_simple_arrow ~color:Color.orange ~pen (Box.center a) (Box.center b);
+    draw_simple_arrow ~color:Color.orange ~pen (Box.west a) (Box.south_east b);
     box_simple_arrow ~color:Color.blue a b;
   ]
 

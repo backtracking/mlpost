@@ -16,18 +16,12 @@
 
 open Format
 
-type name = string
-
-let new_name =
-  let r = ref 0 in
-  fun () -> incr r; "node" ^ string_of_int !r
-
 type t = 
-  | Circle of name * Point.t * Picture.t
-  | Rect of name * Point.t * Picture.t
+  | Circle of Name.t * Point.t * Picture.t
+  | Rect of Name.t * Point.t * Picture.t
 
-let circle c p = Circle (new_name (), c, p)
-let rect c p = Rect (new_name (), c, p)
+let circle c p = Circle (Name.create (), c, p)
+let rect c p = Rect (Name.create (), c, p)
 
 let center = function
   | Circle (_, c, _) 
@@ -35,12 +29,30 @@ let center = function
 
 let declare fmt = function
   | Circle (n, c, p) -> 
-      fprintf fmt "circleit.%s(%a);" n Picture.print p;
-      fprintf fmt "%s.c = %a;@\n" n Point.print c
+      fprintf fmt "circleit.%a(%a);" Name.print n Picture.print p;
+      fprintf fmt "%a.c = %a;@\n" Name.print n Point.print c
   | Rect (n, c, p) -> 
-      fprintf fmt "boxit.%s(%a);" n Picture.print p;
-      fprintf fmt "%s.c = %a;@\n" n Point.print c
+      fprintf fmt "boxit.%a(%a);" Name.print n Picture.print p;
+      fprintf fmt "%a.c = %a;@\n" Name.print n Point.print c
 
 let name = function
   | Circle (n, _, _) | Rect (n, _, _) -> n
+
+let north b = Point.north (name b)
+let south b = Point.south (name b)
+let west b = Point.west (name b)
+let east b = Point.east (name b)
+let north_west = function
+  | Rect (n, _, _) -> Point.north_west n
+  | Circle _ -> invalid_arg "north_west: circle"
+let north_east = function 
+  | Rect (n, _, _) -> Point.north_east n
+  | Circle _ as c -> invalid_arg "north_east: circle"
+let south_west = function 
+  | Rect (n, _, _) -> Point.south_west n
+  | Circle _ as c -> invalid_arg "south_west: circle"
+let south_east = function 
+  | Rect (n, _, _) -> Point.south_east n
+  | Circle _ as c -> invalid_arg "south_east: circle"
+
 

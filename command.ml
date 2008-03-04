@@ -95,11 +95,11 @@ let rec print_command fmt  = function
 	List.iter (print_command fmt) (cmd i);
       done
   | DrawBox (None, b) ->
-      F.fprintf fmt "%adrawboxed(%s);@\n" Box.declare b (Box.name b)
+      F.fprintf fmt "%adrawboxed(%a);@\n" Box.declare b Name.print (Box.name b)
   | DrawBox (Some _ as c, b) ->
       let fill = Fill (Path.bpath b, c) in
-      F.fprintf fmt "%a%adrawboxed(%s);@\n" 
-	Box.declare b print_command fill (Box.name b)
+      F.fprintf fmt "%a%adrawboxed(%a);@\n" 
+	Box.declare b print_command fill Name.print (Box.name b)
 
 let print i fmt l =
   F.fprintf fmt "beginfig(%d)@\n %a endfig;@." i 

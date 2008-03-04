@@ -1,3 +1,4 @@
+* Box : north_west etc. sur un circle (faire un calcul)
 * couleur d'une boîte
 * Box : dissocier déclaration et dessin (pour l'instant, draw_box fait les
   deux d'un coup)
