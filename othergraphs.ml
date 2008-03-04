@@ -147,7 +147,7 @@ let d195 =
     (195, [Command.iter 0 n row; Command.iter 0 (n+1) grid])
 
 let d267 = 
-  let a = Box.circle ~style:(Ratio 1.) (cmp (0., 0.)) (Picture.tex "Debut") in
+  let a = Box.circle ~style:(Ratio 1.) (cmp (0., 0.)) (Picture.tex "D\\'ebut") in
   let b = Box.circle ~style:(Ratio 1.) (cmp (2., 0.)) (Picture.tex "Fin") in
   let rose = Color.make (Color.RGB (1., 0.5, 0.5)) in
   let path angle a b =
@@ -157,10 +157,8 @@ let d267 =
 	      [NoDir, Box.center a, Vec (dir angle); 
 	       NoDir, Box.center b, Vec (dir (-. angle))] [JCurve])) 
   in
-  [draw_box ~fill:rose a;
-   draw_box ~fill:rose b;
-   draw_arrow (path 45. a b); 
-   draw_arrow (path (-135.) b a)]
+  [draw_box ~fill:rose a; draw_box ~fill:rose b;
+   draw_arrow (path 45. a b); draw_arrow (path (-135.) b a)]
 
 let figs = 
   [ d1; d2; d4; d5; d12; d20; d21; d22; d23; d130; d140; d149; d195;

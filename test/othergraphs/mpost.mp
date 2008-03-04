@@ -145,7 +145,7 @@ beginfig(267)
     drawboxed(t);
   enddef;
 
-  circleit.a(btex Debut etex);
+  circleit.a(btex D\'ebut etex);
   a.c = (0,0);
   a.dx = a.dy;
   circleit.b(btex Fin etex);
