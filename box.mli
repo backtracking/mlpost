@@ -16,7 +16,11 @@
 
 type t
 
-val circle : Point.t -> Picture.t -> t
+type circle_style =
+  | Padding of Num.t * Num.t (* dx , dy *)
+  | Ratio of float (* dx / dy *)
+
+val circle : ?style:circle_style -> Point.t -> Picture.t -> t
 val rect : Point.t -> Picture.t -> t
 
 val center : t -> Point.t
