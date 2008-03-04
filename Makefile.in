@@ -61,6 +61,8 @@ OTHERCMO := othergraphs.cmo
 HANDBOOKCMX := $(HANDBOOKCMO:.cmo=.cmx)
 OTHERCMX := $(OTHERCMO:.cmo=.cmx)
 
+$(HANDBOOKCMX) $(OTHERCMX): $(CMXA)
+
 GENERATED = version.ml
 
 byte: $(CMA)
@@ -104,7 +106,7 @@ test/testmanual.ps: test/testmanual.tex
 	make -C test manual
 
 
-handbookgraphs.opt: $(CMX) $(HANDBOOKCMX)
+handbookgraphs.opt: $(CMXA) $(HANDBOOKCMX)
 	$(OCAMLOPT) $(OFLAGS) -o $@ $^
 
 test/othergraphs.mp test/othergraphs.tex: othergraphs.opt
