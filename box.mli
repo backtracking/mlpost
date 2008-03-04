@@ -2,6 +2,7 @@
 type t
 
 val circle : Point.t -> Picture.t -> t
+val rect : Point.t -> Picture.t -> t
 
 val center : t -> Point.t
 

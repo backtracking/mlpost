@@ -32,3 +32,6 @@ val unitsquare: t
 val transform : Transform.t -> t -> t
 
 val bpath : Box.t -> t
+
+val cut_after : t -> t -> t
+val cut_before: t -> t -> t

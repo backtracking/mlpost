@@ -62,3 +62,14 @@ let jointpath lp lj =
 (*  puts labels at given points with given text *)
 let dotlabels ?(pos=Center) ls lp =
   List.map2 (fun s p -> dotlabel ~pos:pos (Picture.tex s) p) ls lp
+
+let draw_simple_arrow ?color ?pen ?(style=JLine) a b =
+  Command.draw_arrow ?color ?pen
+    (jointpath [NoDir,a,NoDir; NoDir,b,NoDir] [style])
+
+let box_simple_arrow ?color ?pen ?(style=JLine) a b =
+  Command.draw_arrow ?color ?pen
+    (let p = 
+      jointpath [NoDir,Box.center a,NoDir; NoDir,Box.center b,NoDir] [style]
+      in
+     cut_after (bpath b) (cut_before (bpath a) p))

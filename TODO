@@ -1,3 +1,6 @@
+* couleur d'une boîte
+* Box : dissocier déclaration et dessin (pour l'instant, draw_box fait les
+  deux d'un coup)
 * opérations sur Num.t : add, sub, ...
 * opérations sur Point.t : add, shift, rotate, ...
   (on ne peut pas utiliser Transform.t car dépendance circulaire)
@@ -7,3 +10,4 @@
 * Pouvoir faire la commande bbox sur des pictures. Ca demande
   d'être capable de générer des définitions locales dans MetaPost
   pour les pictures.
+

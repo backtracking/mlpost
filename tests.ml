@@ -3,18 +3,23 @@ open Num
 open Command
 open Point
 open Format
+open Path
+open Helpers
 
 let (++) x y = Point.p (cm x, cm y)
 let shift x y = Path.transform [Transform.shifted (x ++ y)]
 
 let d1 = 
-  let a = Box.circle up (Picture.tex "A") in
-  let b = Box.circle right (Picture.tex "B") in
+  let a = Box.circle (0. ++ 0.) (Picture.tex "A") in
+  let b = Box.rect (2. ++ 0.) (Picture.tex "B") in
+  let pen = Pen.transform [Transform.scaled 3.] Pen.default in
   [ draw_box a;
-    draw_box b;
-    draw 
+    draw_box ~fill:Color.purple b;
+    draw
       ~color:Color.red
       (Path.transform [Transform.shifted (1. ++ 1.)] (Path.bpath a));
+    draw_simple_arrow ~color:Color.orange ~pen (Box.center a) (Box.center b);
+    box_simple_arrow ~color:Color.blue a b;
   ]
 
 let figs = [d1]

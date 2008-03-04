@@ -22,5 +22,8 @@ val default : t
 val make : spec -> t
 
 val red : t
+val orange : t
+val blue : t
+val purple : t
 
 val print : Format.formatter -> t -> unit

@@ -1,9 +1,10 @@
 type t
 
 val draw : ?color:Color.t -> ?pen:Pen.t -> Path.t -> t
+val draw_arrow : ?color:Color.t -> ?pen:Pen.t -> Path.t -> t
 val fill : ?color:Color.t -> Path.t -> t
 val iter : int -> int -> (int -> t list) -> t
-val draw_box : Box.t -> t
+val draw_box : ?fill:Color.t -> Box.t -> t
 
 type position =
   | Center

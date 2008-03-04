@@ -10,6 +10,7 @@ let transform tr = function
   | Transformed (t,tr') -> Transformed (t,tr'@tr)
   | _ as x -> Transformed (x,tr)
 
+let default = Transformed (PenCircle, [Transform.scaled 0.5])
 let circle = PenCircle
 let square = PenSquare
 let from_path p = FromPath p

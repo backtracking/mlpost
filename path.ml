@@ -27,6 +27,8 @@ type t =
   | Knot of knot
   | Append of t * joint * t
   | BoxBPath of Box.t
+  | CutAfter of t * t
+  | CutBefore of t * t
 
 let start k = Knot k
 let concat p j k = Concat (k,j,p)
@@ -40,6 +42,8 @@ let transform tr = function
   | Transformed (p,tr') -> Transformed (p,tr'@tr)
   | _ as x -> Transformed (x,tr)
 let bpath b = BoxBPath b
+let cut_after p1 p2 = CutAfter (p1, p2)
+let cut_before p1 p2 = CutBefore (p1, p2)
 
 let print_joint fmt = function
   | JLine -> F.fprintf fmt "--"
@@ -74,5 +78,7 @@ let rec print fmt = function
   | Knot k -> print_knot fmt k
   | BoxBPath b ->
       F.fprintf fmt "bpath.%s" (Box.name b)
+  | CutAfter (p1, p2) -> F.fprintf fmt "%a cutafter %a" print p2 print p1
+  | CutBefore (p1, p2) -> F.fprintf fmt "%a cutbefore %a" print p2 print p1
 
 

@@ -14,11 +14,12 @@ type position =
 
 type t = 
   | Draw of Path.t * Color.t option * Pen.t option
+  | DrawArrow of Path.t * Color.t option * Pen.t option
   | Fill of Path.t * Color.t option
   | Label of Picture.t * position * Point.t
   | DotLabel of Picture.t * position * Point.t
   | Loop of int * int * (int -> t list)
-  | DrawBox of Box.t
+  | DrawBox of Color.t option * Box.t
 
 type figure = t list
 
@@ -32,11 +33,13 @@ let draw ?color ?pen t =
      for each command in the output file *)
     Draw (t, color, pen)
 
+let draw_arrow ?color ?pen t = DrawArrow (t, color, pen)
+
 let fill ?color t = Fill (t, color)
 
 let iter from until f = Loop (from, until, f)
 
-let draw_box b = DrawBox b
+let draw_box ?fill b = DrawBox (fill, b)
 
 let print_position fmt = function
   | Center  -> F.fprintf fmt ""
@@ -58,6 +61,10 @@ let rec print_command fmt  = function
       F.fprintf fmt "draw %a%a%a;@\n" Path.print path
         (print_option " withcolor " Color.print) color
         (print_option " withpen " Pen.print) pen
+  | DrawArrow (path, color, pen) ->
+      F.fprintf fmt "drawarrow %a%a%a;@\n" Path.print path
+        (print_option " withcolor " Color.print) color
+        (print_option " withpen " Pen.print) pen
   | Fill (path, color) ->
       F.fprintf fmt "fill %a%a;@\n" Path.print path
         (print_option " withcolor " Color.print) color
@@ -71,8 +78,12 @@ let rec print_command fmt  = function
       for i = from to until - 1 do
 	List.iter (print_command fmt) (cmd i);
       done
-  | DrawBox b ->
+  | DrawBox (None, b) ->
       F.fprintf fmt "%adrawboxed(%s);@\n" Box.declare b (Box.name b)
+  | DrawBox (Some _ as c, b) ->
+      let fill = Fill (Path.bpath b, c) in
+      F.fprintf fmt "%a%adrawboxed(%s);@\n" 
+	Box.declare b print_command fill (Box.name b)
 
 let print i fmt l =
   F.fprintf fmt "beginfig(%d)@\n %a endfig;@." i 
