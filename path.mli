@@ -51,3 +51,4 @@ val bpath : Box.t -> t
 
 val cut_after : t -> t -> t
 val cut_before: t -> t -> t
+val build_cycle : t list -> t

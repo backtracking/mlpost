@@ -33,5 +33,5 @@ let default = black
 let rgb r g b = (r,g,b)
 
 let print fmt (r,g,b) =
-  F.fprintf fmt "(%.3f red + %.3f green + %.3f blue)" r g b
+  F.fprintf fmt "(%.3f, %.3f , %.3f )" r g b
     

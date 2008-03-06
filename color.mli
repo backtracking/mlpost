@@ -28,7 +28,7 @@ val white : t
 val green : t
 val cyan : t
 val blue : t
-val cyan : t
+val yellow : t
 val magenta : t
 val orange : t
 val purple : t

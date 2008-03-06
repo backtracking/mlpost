@@ -23,6 +23,7 @@ open Command
 open SimplePoint
 module SP = SimplePath
 module C = Convenience
+module Co = Color
 module P = Pen
 module T = Transform
 module N = Num
@@ -69,6 +70,20 @@ let d23 =
   let pen = Pen.transform [T.scaled 2.] Pen.circle in
   23, [draw ~pen triangle;
        fill ~color:(Color.gray 0.8) triangle]
+
+let d111 =
+  let a = transform 
+            [T.scaled ~scale:N.cm 2. ; 
+             T.shifted (point ~scale:N.cm (0.5,0.))] fullcircle 
+  in
+  let t = [T.rotated 120.] in
+  let b = transform t a in
+  let c = transform t b in
+    List.map (fun (color, p) -> fill ~color p)
+      [ Co.red, a ; Co.green, b; Co.blue, c; Co.yellow, build_cycle [a;b]; 
+        Co.cyan, build_cycle [b;c]; Co.magenta, build_cycle [c;a]; 
+        Co.white, build_cycle [a;b;c] ] @ List.map draw [a;b;c]
+
 
 let deuxpi = 2.*.3.14159
 
@@ -157,8 +172,8 @@ let d267 =
    draw_arrow (path 45. a b); draw_arrow (path (-135.) b a)]
 
 let figs = 
-  [ d1; d2; d4; d5; d12; d20; d21; d22; d23; d130; d140; d149; d195;
-    267,d267 ]
+  [ d1; d2; d4; d5; d12; d20; d21; d22; d23; 111, d111; 
+    d130; d140; d149; d195; 267,d267 ]
 
 let mpostfile = "test/othergraphs.mp"
 let texfile = "test/othergraphs.tex"

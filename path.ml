@@ -45,6 +45,7 @@ type t =
   | BoxBPath of Box.t
   | CutAfter of t * t
   | CutBefore of t * t
+  | BuildCycle of t list
 
 let start k = Knot k
 let concat p j k = Concat (k,j,p)
@@ -60,6 +61,7 @@ let transform tr = function
 let bpath b = BoxBPath b
 let cut_after p1 p2 = CutAfter (p1, p2)
 let cut_before p1 p2 = CutBefore (p1, p2)
+let build_cycle l = BuildCycle l
 
 let print_joint fmt = function
   | JLine -> F.fprintf fmt "--"
@@ -77,6 +79,11 @@ let print_dir fmt = function
 
 let print_knot fmt (d1,p,d2) = 
   F.fprintf fmt "%a%a%a" print_dir d1 Point.print p print_dir d2
+
+let rec print_list sep prf fmt = function
+  | [] -> ()
+  | [x] -> prf fmt x
+  | (x::xs) -> prf fmt x; sep fmt (); print_list sep prf fmt xs
 
 let rec print fmt = function
   | FullCircle -> F.fprintf fmt "fullcircle"
@@ -96,5 +103,8 @@ let rec print fmt = function
       F.fprintf fmt "bpath.%a" Name.print (Box.name b)
   | CutAfter (p1, p2) -> F.fprintf fmt "%a cutafter %a@ " print p2 print p1
   | CutBefore (p1, p2) -> F.fprintf fmt "%a cutbefore %a@ " print p2 print p1
+  | BuildCycle l ->
+      F.fprintf fmt "buildcycle(%a)" 
+        (print_list (fun fmt () -> F.fprintf fmt ",") print) l
 
 
