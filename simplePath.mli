@@ -15,6 +15,10 @@ val path :
 val pathk :
     ?style:Path.joint -> ?cycle:Path.joint -> Path.knot list -> Path.t
 
+(** build a path from a point list *)
+val pathp :
+    ?style:Path.joint -> ?cycle:Path.joint -> Point.t list -> Path.t
+
 (** build a path from [n] knots and [n-1] joints *)
 val jointpathk : Path.knot list -> Path.joint list -> Path.t
 (** build a path from [n] points and [n-1] joints, with default directions *)

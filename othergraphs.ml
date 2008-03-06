@@ -27,6 +27,7 @@ module Co = Color
 module P = Pen
 module T = Transform
 module N = Num
+module H = Helpers
 
 let a = 0., 0.
 let b = 1., 0.
@@ -70,6 +71,17 @@ let d23 =
   let pen = Pen.transform [T.scaled 2.] Pen.circle in
   23, [draw ~pen triangle;
        fill ~color:(Color.gray 0.8) triangle]
+
+let d60 =
+  let a = point ~scale:N.cm (0.,0.) in
+  let b = point ~scale:N.cm ((-0.5), 1.) in
+  let c = point ~scale:N.cm (2., 1.5) in
+  let d = point ~scale:N.cm (1.5, 0.) in
+  let pen = Pen.transform [T.scaled 2.] Pen.circle in
+    [ draw ~pen (SP.jointpathp [a;d] [JControls (b,c)]);
+      draw ~color:(Co.gray 0.8) (SP.pathp ~style:JLine [b;c]);
+      H.draw_simple_arrow a b; H.draw_simple_arrow d c; ]
+
 
 let d111 =
   let a = transform 
@@ -172,7 +184,7 @@ let d267 =
    draw_arrow (path 45. a b); draw_arrow (path (-135.) b a)]
 
 let figs = 
-  [ d1; d2; d4; d5; d12; d20; d21; d22; d23; 111, d111; 
+  [ d1; d2; d4; d5; d12; d20; d21; d22; d23; 60, d60; 111, d111; 
     d130; d140; d149; d195; 267,d267 ]
 
 let mpostfile = "test/othergraphs.mp"

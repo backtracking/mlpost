@@ -20,13 +20,13 @@ let pathk ?(style) ?(cycle) = function
           | None -> p
           | Some style -> cycle_tmp ~style p
 
-let point_fold ?(scale) ?(style) ?(cycle) l =
+let pathp ?(style) ?(cycle) l =
   pathk ?style ?cycle
     (List.map (knotp) l)
 
 let path ?(style) ?(cycle) ?(scale) l =
   let sc = S.ptlist ?scale in
-    point_fold ?style ?cycle (sc l)
+    pathp ?style ?cycle (sc l)
 
 (* construct a path with knot list and joint list *)
 let jointpathk lp lj =
