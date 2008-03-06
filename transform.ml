@@ -40,18 +40,18 @@ let reflect p1 p2 = Reflect (p1,p2)
 let rotate_around p f = RotateAround (p,f)
 
 let print_item fmt = function
-  | Scaled a -> F.fprintf fmt "scaled %a" Num.print a
-  | Shifted a -> F.fprintf fmt "shifted %a" Point.print a
-  | Rotated a -> F.fprintf fmt "rotated %a" Num.print_float a
-  | Slanted a -> F.fprintf fmt "slanted %a" Num.print a
-  | Xscaled a -> F.fprintf fmt "xscaled %a" Num.print a
-  | Yscaled a -> F.fprintf fmt "yscaled %a" Num.print a
-  | Zscaled a -> F.fprintf fmt "zscaled %a" Point.print a
+  | Scaled a -> F.fprintf fmt "scaled %a@ " Num.print a
+  | Shifted a -> F.fprintf fmt "shifted %a@ " Point.print a
+  | Rotated a -> F.fprintf fmt "rotated %a@ " Num.print_float a
+  | Slanted a -> F.fprintf fmt "slanted %a@ " Num.print a
+  | Xscaled a -> F.fprintf fmt "xscaled %a@ " Num.print a
+  | Yscaled a -> F.fprintf fmt "yscaled %a@ " Num.print a
+  | Zscaled a -> F.fprintf fmt "zscaled %a@ " Point.print a
   | Reflect (p1,p2) -> 
-      F.fprintf fmt "reflectedabout (%a,%a)" 
+      F.fprintf fmt "reflectedabout (%a,%a)@ " 
         Point.print p1 Point.print p2
   | RotateAround (p,f) ->
-      F.fprintf fmt "rotatedaround(%a,%a)"
+      F.fprintf fmt "rotatedaround(%a,%a)@ "
         Point.print p Num.print_float f
 
 let rec print_list sep prf fmt = function

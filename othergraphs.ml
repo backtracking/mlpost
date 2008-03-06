@@ -19,8 +19,9 @@ open Num
 open Path
 open Point
 open Box
-open Helpers
 open Command
+open SimplePoint
+module SP = SimplePath
 module C = Convenience
 module P = Pen
 module T = Transform
@@ -31,12 +32,11 @@ let b = 1., 0.
 let c = 0., 1.
 let l = [a ; b ; c]
 let d1 = 1, [C.draw ~style:JLine ~scale:N.cm l]
-let d2 = 2, [C.draw ~style:JLine ~scale:N.cm ~cycle:JLine 
-                l]
+let d2 = 2, [C.draw ~style:JLine ~scale:N.cm ~cycle:JLine l]
 
-let d4 = 4, 
-         let pen = P.transform [T.scaled 4.] Pen.circle in
-           [C.draw ~pen ~scale:N.cm [a] ]
+let d4 =  
+  let pen = P.transform [T.scaled 4.] Pen.circle in
+    4, [C.draw ~pen ~scale:N.cm [a] ]
 
 let d5 = 5,
          let pen = P.transform [T.scaled 4.] Pen.circle in
@@ -45,38 +45,35 @@ let d5 = 5,
 
 let d12 = 12,
           let pen = P.transform [T.scaled 2.] Pen.circle in
-          let cl = 
-            List.map (fun f -> Color.make (Color.RGB (f,f,f) ) ) 
-              [0.8;0.6;0.4] 
-          in
+          let cl = List.map Color.gray [0.8;0.6;0.4] in
             List.map2
               (fun (a,b) color ->
                  C.draw ~style:JLine ~scale:N.cm ~pen ~color [a;b])
               [a,b;b,c;c,a] cl
 
 let triangle = 
-  C.path ~scale:N.cm ~style:JLine ~cycle:JLine [(0.,0.);(1.,0.);(0.,1.)]
+  SP.path ~scale:N.cm ~style:JLine ~cycle:JLine [(0.,0.);(1.,0.);(0.,1.)]
 
 let d20 =
-  20, [fill ~color:(Color.make (Color.Gray 0.8)) triangle]
+  20, [fill ~color:(Color.gray 0.8) triangle]
 
 let d21 =
-  21, [fill ~color:(Color.make (Color.Gray 0.8)) triangle; draw triangle]
+  21, [fill ~color:(Color.gray 0.8) triangle; draw triangle]
 
 let d22 =
   let pen = Pen.transform [T.scaled 2.] Pen.circle in
-  22, [fill ~color:(Color.make (Color.Gray 0.8)) triangle; 
+  22, [fill ~color:(Color.gray 0.8) triangle; 
        draw ~pen triangle]
 
 let d23 =
   let pen = Pen.transform [T.scaled 2.] Pen.circle in
   23, [draw ~pen triangle;
-       fill ~color:(Color.make (Color.Gray 0.8)) triangle]
+       fill ~color:(Color.gray 0.8) triangle]
 
 let deuxpi = 2.*.3.14159
 
 let d130 =
-  let sq = C.path ~style:JLine ~scale:N.cm ~cycle:JLine 
+  let sq = SP.path ~style:JLine ~scale:N.cm ~cycle:JLine 
     [(0.,0.);(2.,0.);(2.,2.);(0.,2.)] in
     (** on peut pas utiliser la resolution de MetaPost donc on
 	construit la transform à la main.. :-/ *)
@@ -87,16 +84,16 @@ let d130 =
   let rec apply acc = function 0 -> acc | n -> apply (transform t acc) (n-1) in
   let cmd i = 
     let p = apply sq (2*i) in
-      [fill ~color:(Color.make (Color.Gray 0.8)) p;
-       fill ~color:(Color.make Color.White) (transform t p)]
+      [fill ~color:(Color.gray 0.8) p;
+       fill ~color:Color.white (transform t p)]
   in
     130, [iter 0 50 cmd]
 
 let d140 =
   let cmd i =
     let s = 1. -. ((float_of_int i) *. 0.01) in
-    let color = Color.make (Color.Gray s) in
-      [fill ~color (transform [T.scaled ~scale:Num.cm (2.*.s)] fullcircle)]
+      [fill ~color:(Color.gray s) 
+         (transform [T.scaled ~scale:Num.cm (2.*.s)] fullcircle)]
   in
   140, [iter 0 100 cmd; 
 	draw ~pen:(P.transform [T.scaled 2.] P.circle)
@@ -105,10 +102,9 @@ let d140 =
 let d149 =
   let step = deuxpi /. 720. in
   let couleur x =
-    Color.make (
-      let dblx = 2.*.x in
-	if x > 0.5 then Color.RGB (dblx-.1.,0.,2.-.dblx)
-	else Color.RGB (1.-.dblx,0.,dblx)) in
+    let dblx = 2.*.x in
+      if x > 0.5 then Color.rgb (dblx-.1.) 0. (2.-.dblx)
+      else Color.rgb (1.-.dblx) 0. dblx in
   let pt angle = (2.*.sin(2.*.angle), 2.*.cos(3.*.angle)) in
   let pen = P.transform [T.scaled 2.] Pen.circle in
   let cmd i =
@@ -120,7 +116,7 @@ let d149 =
 let d195 = 
   let n = 8 and u x = 5.*. (float_of_int x) in
   let un = u n and u1 = u 1 and udemi = (u 1) /. 5. in
-  let color = Color.make (Color.Gray 0.8) in
+  let color = Color.gray 0.8 in
   let t i j = T.shifted (p (Num.mm (u i), Num.mm (u j))) in
   let row i =
     let col j =
@@ -132,7 +128,7 @@ let d195 =
 	    if k mod 2 = 1 then [(kf,0.); (u1,umk); (u1,udm); (udp,0.)]
 	    else [(0.,kf); (umk,u1); (udm,u1); (0.,udp)]
 	  in [fill ~color (transform [t i j]
-			     (C.path ~style:JLine ~scale:N.mm ~cycle:JLine l))]
+			     (SP.path ~style:JLine ~scale:N.mm ~cycle:JLine l))]
 	in
 	  [Command.iter 0 5 strip]
       else [] 
@@ -149,13 +145,13 @@ let d195 =
 let d267 = 
   let a = Box.circle ~style:(Ratio 1.) (cmp (0., 0.)) (Picture.tex "D\\'ebut") in
   let b = Box.circle ~style:(Ratio 1.) (cmp (2., 0.)) (Picture.tex "Fin") in
-  let rose = Color.make (Color.RGB (1., 0.5, 0.5)) in
+  let rose = Color.rgb 1. 0.5 0.5 in
   let path angle a b =
     cut_after (bpath b) 
       (cut_before (bpath a) 
-	  (jointpath 
-	      [NoDir, Box.center a, Vec (dir angle); 
-	       NoDir, Box.center b, Vec (dir (-. angle))] [JCurve])) 
+	  (SP.jointpathk
+	      [SP.knotp ~r:(Vec (dir angle)) (Box.center a); 
+	       SP.knotp ~r:(Vec (dir (-. angle))) (Box.center b)] [JCurve])) 
   in
   [draw_box ~fill:rose a; draw_box ~fill:rose b;
    draw_arrow (path 45. a b); draw_arrow (path (-135.) b a)]

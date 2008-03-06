@@ -70,7 +70,7 @@ let print_position fmt = function
 
 let print_option start printer fmt = function
   | None -> ()
-  | Some o -> F.fprintf fmt "%s%a" start printer o
+  | Some o -> F.fprintf fmt "%s%a@ " start printer o
 
 let rec print_command fmt  = function
   | Draw (path, color, pen) ->

@@ -45,13 +45,13 @@ OFLAGS = -dtypes $(INCLUDES) @FORPACK@
 
 NAME = mlpost
 
-all: byte $(OCAMLBEST) handbookgraphs.opt othergraphs.opt
+all: byte $(OCAMLBEST) handbookgraphs.cmx othergraphs.cmx tests.cmx
 
 # bytecode and native-code compilation
 ######################################
 
 CMO := num.cmo name.cmo point.cmo transform.cmo color.cmo picture.cmo box.cmo \
-       path.cmo pen.cmo command.cmo helpers.cmo convenience.cmo generate.cmo
+       path.cmo simplePoint.cmo simplePath.cmo pen.cmo command.cmo helpers.cmo convenience.cmo generate.cmo
 CMX := $(CMO:.cmo=.cmx)
 
 CMA := mlpost.cma
@@ -59,6 +59,7 @@ CMXA := mlpost.cmxa
 
 HANDBOOKCMO := handbookgraphs.cmo
 OTHERCMO := othergraphs.cmo
+TESTSCMO := tests.cmo
 HANDBOOKCMX := $(HANDBOOKCMO:.cmo=.cmx)
 OTHERCMX := $(OTHERCMO:.cmo=.cmx)
 
@@ -81,43 +82,21 @@ mlpost.cmo: $(CMO)
 mlpost.cmx: $(CMX)
 	$(OCAMLOPT) $(INCLUDES) -pack -o $@ $^
 
-test: mpost test/testmanual.ps
-	gv test/testmanual.ps
-
-tests: $(CMA)
+tests: $(CMA) tests.ml
 	ocaml $(CMA) tests.ml
 	make -C test tests
 	gv test/tests.ps
+handbook: $(CMA) handbookgraphs.ml
+	ocaml $(CMA) handbookgraphs.ml
+	make -C test manual
+	make -C test/manual mpost
+	gv test/testmanual.ps
 
-othergraphs: othermpost test/othergraphs.ps
-	gv test/othergraphs.ps
-
-othermpost: test/othergraphs.mp
+other: $(CMA) othergraphs.ml
+	ocaml $(CMA) othergraphs.ml
 	make -C test other
 	make -C test/othergraphs mpost
-
-mpost: test/testmanual.mp
-	make -C test mpost
-	make -C test/manual mpost
-
-test/testmanual.mp test/testmanual.tex: handbookgraphs.opt
-	./handbookgraphs.opt
-
-test/testmanual.ps: test/testmanual.tex
-	make -C test manual
-
-
-handbookgraphs.opt: $(CMXA) $(HANDBOOKCMX)
-	$(OCAMLOPT) $(OFLAGS) -o $@ $^
-
-test/othergraphs.mp test/othergraphs.tex: othergraphs.opt
-	./othergraphs.opt
-
-test/othergraphs.ps: test/othergraphs.tex
-	make -C test othertex
-
-othergraphs.opt: $(CMXA) $(OTHERCMX)
-	$(OCAMLOPT) $(OFLAGS) -o $@ $^
+	gv test/othergraphs.ps
 
 VERSION=0.1
 

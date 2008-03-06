@@ -86,7 +86,7 @@ let rec print fmt = function
   | Transformed (p,tr) -> F.fprintf fmt "((%a) %a)"
       print p Transform.print tr
   | Append (p1,j,p2) -> 
-      F.fprintf fmt "%a %a %a" print p1 print_joint j print p2
+      F.fprintf fmt "%a %a@ %a" print p1 print_joint j print p2
   | Cycle (d,j,p) ->
       F.fprintf fmt "%a %a %acycle" print p print_joint j print_dir d
   | Concat (k,j,p) ->
@@ -94,7 +94,7 @@ let rec print fmt = function
   | Knot k -> print_knot fmt k
   | BoxBPath b ->
       F.fprintf fmt "bpath.%a" Name.print (Box.name b)
-  | CutAfter (p1, p2) -> F.fprintf fmt "%a cutafter %a" print p2 print p1
-  | CutBefore (p1, p2) -> F.fprintf fmt "%a cutbefore %a" print p2 print p1
+  | CutAfter (p1, p2) -> F.fprintf fmt "%a cutafter %a@ " print p2 print p1
+  | CutBefore (p1, p2) -> F.fprintf fmt "%a cutbefore %a@ " print p2 print p1
 
 
