@@ -24,6 +24,8 @@ val down : t
 val left : t
 val right : t
 
+val unsafe : (Format.formatter -> unit) -> t
+
 val north : Name.t -> t
 val south : Name.t -> t
 val west  : Name.t -> t

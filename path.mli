@@ -49,6 +49,8 @@ val transform : Transform.t -> t -> t
 
 val bpath : Box.t -> t
 
+val point : float -> t -> Point.t
+
 val cut_after : t -> t -> t
 val cut_before: t -> t -> t
 val build_cycle : t list -> t

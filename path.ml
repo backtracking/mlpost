@@ -107,4 +107,5 @@ let rec print fmt = function
       F.fprintf fmt "buildcycle(%a)" 
         (print_list (fun fmt () -> F.fprintf fmt ",") print) l
 
-
+let point f p =
+  Point.unsafe (fun fmt -> F.fprintf fmt "(point %.4f of (%a))" f print p)

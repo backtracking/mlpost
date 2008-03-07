@@ -26,6 +26,7 @@ type t =
   | Left
   | Right
   | BoxCorner of Name.t * corner
+  | Unsafe of (Format.formatter -> unit)
 
 let p (a,b) = Ppair (a,b)
 let dir f = Dir f
@@ -41,6 +42,7 @@ let north_west n = BoxCorner (n, NW)
 let north_east n = BoxCorner (n, NE)
 let south_west n = BoxCorner (n, SW)
 let south_east n = BoxCorner (n, SE)
+let unsafe f = Unsafe f
 
 let print_corner fmt = function
   | N -> F.fprintf fmt "n"
@@ -60,4 +62,5 @@ let print fmt = function
   | Dir d -> F.fprintf fmt "dir %a" Num.print_float d
   | Ppair (m,n) -> F.fprintf fmt "(%a,%a)" Num.print m Num.print n
   | BoxCorner (n, d) -> F.fprintf fmt "%a.%a" Name.print n print_corner d
+  | Unsafe f -> f fmt
 

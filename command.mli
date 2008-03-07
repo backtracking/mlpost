@@ -22,16 +22,19 @@ val fill : ?color:Color.t -> Path.t -> t
 val iter : int -> int -> (int -> t list) -> t
 val draw_box : ?fill:Color.t -> Box.t -> t
 
+val append : t -> t -> t
+val (++) : t -> t -> t
+
 type position =
-  | Center
-  | PLeft
-  | PRight
-  | PTop
-  | PBot
-  | UpLeft
-  | UpRight
-  | LowLeft
-  | LowRight
+  | Pcenter
+  | Pleft
+  | Pright
+  | Ptop
+  | Pbot
+  | Pupleft
+  | Pupright
+  | Plowleft
+  | Plowright
 
 val label : ?pos:position -> Picture.t -> Point.t -> t
 val dotlabel : ?pos:position -> Picture.t -> Point.t -> t

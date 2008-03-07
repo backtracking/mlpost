@@ -18,15 +18,15 @@ module F = Format
 module T = Transform
 
 type position =
-  | Center
-  | PLeft
-  | PRight
-  | PTop
-  | PBot
-  | UpLeft
-  | UpRight
-  | LowLeft
-  | LowRight
+  | Pcenter
+  | Pleft
+  | Pright
+  | Ptop
+  | Pbot
+  | Pupleft
+  | Pupright
+  | Plowleft
+  | Plowright
 
 type t = 
   | Draw of Path.t * Color.t option * Pen.t option
@@ -36,12 +36,13 @@ type t =
   | DotLabel of Picture.t * position * Point.t
   | Loop of int * int * (int -> t list)
   | DrawBox of Color.t option * Box.t
+  | Seq of t * t
 
 type figure = t list
 
-let label ?(pos=Center) pic point = Label (pic,pos,point)
+let label ?(pos=Pcenter) pic point = Label (pic,pos,point)
 (* replace later *)
-let dotlabel ?(pos=Center) pic point = DotLabel (pic,pos,point)
+let dotlabel ?(pos=Pcenter) pic point = DotLabel (pic,pos,point)
 
 let draw ?color ?pen t = 
   (* We don't use a default to avoid the output of 
@@ -57,16 +58,19 @@ let iter from until f = Loop (from, until, f)
 
 let draw_box ?fill b = DrawBox (fill, b)
 
+let append c1 c2 = Seq (c1, c2)
+let (++) = append
+
 let print_position fmt = function
-  | Center  -> F.fprintf fmt ""
-  | PLeft   -> F.fprintf fmt ".lft"
-  | PRight  -> F.fprintf fmt ".rt"
-  | PTop    -> F.fprintf fmt ".top"
-  | PBot    -> F.fprintf fmt ".bot"
-  | UpLeft  -> F.fprintf fmt ".ulft"
-  | UpRight -> F.fprintf fmt ".urt"
-  | LowLeft -> F.fprintf fmt ".llft"
-  | LowRight -> F.fprintf fmt ".lrt"
+  | Pcenter  -> F.fprintf fmt ""
+  | Pleft   -> F.fprintf fmt ".lft"
+  | Pright  -> F.fprintf fmt ".rt"
+  | Ptop    -> F.fprintf fmt ".top"
+  | Pbot    -> F.fprintf fmt ".bot"
+  | Pupleft  -> F.fprintf fmt ".ulft"
+  | Pupright -> F.fprintf fmt ".urt"
+  | Plowleft -> F.fprintf fmt ".llft"
+  | Plowright -> F.fprintf fmt ".lrt"
 
 let print_option start printer fmt = function
   | None -> ()
@@ -100,6 +104,8 @@ let rec print_command fmt  = function
       let fill = Fill (Path.bpath b, c) in
       F.fprintf fmt "%a%adrawboxed(%a);@\n" 
 	Box.declare b print_command fill Name.print (Box.name b)
+  | Seq (c1, c2) ->
+      F.fprintf fmt "%a%a" print_command c1 print_command c2
 
 let print i fmt l =
   F.fprintf fmt "beginfig(%d)@\n %a endfig;@." i 
