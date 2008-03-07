@@ -4,11 +4,11 @@ open Diag
 
 let fig =
   let pen = Pen.circle in
-  let a = node 0. 4. "\\phantom{A}" in
-  let b = node 0. 3. "" in
+  let a = node 0. 4. "~~~" in
+  let b = node 0. 3. "~~~" in
   let inv = node 0. 2. "inv" in
-  let c = node 0. 1. "" in
-  let d = node 0. 0. "" in
+  let c = node 0. 1. "~~~" in
+  let d = node 0. 0. "~~~" in
   let do_ = node (-2.) 2. "do" in
   let diag = create [a;b;c;d;inv;do_] in
   let arrow = arrow diag in
