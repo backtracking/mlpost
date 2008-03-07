@@ -42,3 +42,4 @@ val dotlabel : ?pos:position -> Picture.t -> Point.t -> t
 type figure = t list
 val print : int -> Format.formatter -> figure -> unit
 
+val generate_mp : string -> (int * figure) list -> unit

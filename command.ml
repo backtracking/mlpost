@@ -111,3 +111,10 @@ let print i fmt l =
   F.fprintf fmt "beginfig(%d)@\n %a endfig;@." i 
     (fun fmt l -> List.iter (print_command fmt) l)
     l
+
+let generate_mp fn l =
+  Misc.write_to_formatted_file fn
+    (fun fmt -> 
+      Format.fprintf fmt "input boxes;@\n";
+      List.iter (fun (i,f) -> print i fmt f) l)
+

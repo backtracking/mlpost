@@ -35,21 +35,21 @@ let z4 = 30.,50.
 let l1 = z0::z1::z2::z3::z4::[]
 
 let labels1 =
-   (H.dotlabels ~pos:PTop ["0";"2";"4"] (map_bp [z0;z2;z4])) @
-   [dotlabel ~pos:PLeft (tex "3") (bpp z3);
-    dotlabel ~pos:PRight (tex "1") (bpp z1) ]
+   (H.dotlabels ~pos:Ptop ["0";"2";"4"] (map_bp [z0;z2;z4])) @
+   [dotlabel ~pos:Pleft (tex "3") (bpp z3);
+    dotlabel ~pos:Pright (tex "1") (bpp z1) ]
 
 let draw3 = 3, [ C.draw ~style:JCurve  l1 ] @ labels1
 
 let draw4a, draw4b = 
-  let labels = H.dotlabels ~pos:PTop ["2";"4"] (map_bp [z2;z4]) @
-               H.dotlabels ~pos:PLeft ["0";"3"] (map_bp [z0;z3]) @
-               [dotlabel ~pos:LowRight (tex "1") (bpp z1)]
+  let labels = H.dotlabels ~pos:Ptop ["2";"4"] (map_bp [z2;z4]) @
+               H.dotlabels ~pos:Pleft ["0";"3"] (map_bp [z0;z3]) @
+               [dotlabel ~pos:Plowright (tex "1") (bpp z1)]
   in
     (104, [ C.draw ~cycle:JCurve l1] @ labels) ,
     (204, 
      [ draw 
-         (append (SP.path [z0;z1;z2;z3]) JLine (SP.path ~style:JLine [z4;z0]) )
+         (Path.append (SP.path [z0;z1;z2;z3]) JLine (SP.path ~style:JLine [z4;z0]) )
      ] @ labels)
 
 (* no easy alternative way to draw this one, and that's fine *)
@@ -93,7 +93,7 @@ let draw8 = 8,
 let z0 = (-1., 0.)
 let z1 = (0., 0.2)
 let z2 = ( 1., 0.)
-let labels9 = H.dotlabels ~pos:PBot ["0";"1";"2"] (map_in [z0;z1;z2])
+let labels9 = H.dotlabels ~pos:Pbot ["0";"1";"2"] (map_in [z0;z1;z2])
 let z0 = SP.knot ~r:(Vec up) ~scale:N.inch z0
 let z1 = SP.knot ~r:(Vec right) ~scale:N.inch z1
 let z2 = SP.knot ~r:(Vec down) ~scale:N.inch z2
@@ -107,7 +107,7 @@ let z1 = (u (-3.)),u 2.
 let z2 = (u 3.),u 2.
 let z3 = (u 5.),u 0.
 let l1 = [z0;z1;z2;z3]
-let labels10 = H.dotlabels ~pos:PBot ["0";"1";"2";"3"] (map_in l1)
+let labels10 = H.dotlabels ~pos:Pbot ["0";"1";"2";"3"] (map_in l1)
 
 let draw10a = 110, [C.draw ~scale:N.inch l1 ] @ labels10
 
@@ -135,7 +135,7 @@ let pat c = [ SP.knot ~r:(Curl c) ~scale:N.inch z0 ;
 
 let draw11 =
   let numbers = [111; 211; 311; 411] in
-  let labels11 = H.dotlabels ~pos:PRight ["0";"1";"2"] (map_in [z0;z1;z2]) in
+  let labels11 = H.dotlabels ~pos:Pright ["0";"1";"2"] (map_in [z0;z1;z2]) in
     List.map2
       (fun c n -> n,
          [draw
@@ -170,7 +170,7 @@ let mpostfile = "test/testmanual.mp"
 let texfile = "test/testmanual.tex"
 
 let _ =
-    Generate.generate_mp mpostfile figs;
+    Command.generate_mp mpostfile figs;
     Generate.generate_tex texfile "manual/manual" "testmanual" figs
 
 

@@ -53,7 +53,7 @@ let d2 =
   let arrow = arrow diag in
   arrow a b ~lab:"$i\\leftarrow0$" ~pos:Pright;
   arrow b inv ~lab:"$m\\leftarrow t[i]$" ~pos:Pright;
-  arrow c d ~lab:"$i\ge n$" ~pos:Pright;
+  arrow c d ~lab:"$i\\ge n$" ~pos:Pright;
   arrow c do_ ~outd:Left ~ind:Down ~lab:"$i<n$" ~pos:Plowleft;
   arrow inv c ~lab:"$i\\leftarrow i+1$" ~pos:Pright;
   arrow do_ inv ~lab:"$m\\ge t[i]$" ~pos:Ptop;
@@ -67,8 +67,8 @@ let figs =
   List.map (fun f -> incr r; !r, f) figs
 
 let () =
-  Generate.generate_mp "test/tests.mp" figs;
-  Generate.write_to_formatted_file "test/tests.tex"
+  Command.generate_mp "test/tests.mp" figs;
+  Misc.write_to_formatted_file "test/tests.tex"
     (fun fmt ->
       fprintf fmt "\\documentclass[a4paper]{article}@.";
       fprintf fmt "\\usepackage[]{graphicx}@.";
