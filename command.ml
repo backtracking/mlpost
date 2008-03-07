@@ -36,7 +36,7 @@ type t =
   | DotLabel of Picture.t * position * Point.t
   | Loop of int * int * (int -> t list)
   | DrawBox of Color.t option * Box.t
-  | Seq of t * t
+  | Seq of t list
 
 type figure = t list
 
@@ -58,8 +58,9 @@ let iter from until f = Loop (from, until, f)
 
 let draw_box ?fill b = DrawBox (fill, b)
 
-let append c1 c2 = Seq (c1, c2)
+let append c1 c2 = Seq [c1; c2]
 let (++) = append
+let seq l = Seq l
 
 let print_position fmt = function
   | Pcenter  -> F.fprintf fmt ""
@@ -104,8 +105,8 @@ let rec print_command fmt  = function
       let fill = Fill (Path.bpath b, c) in
       F.fprintf fmt "%a%adrawboxed(%a);@\n" 
 	Box.declare b print_command fill Name.print (Box.name b)
-  | Seq (c1, c2) ->
-      F.fprintf fmt "%a%a" print_command c1 print_command c2
+  | Seq l ->
+      List.iter (fun c -> print_command fmt c) l
 
 let print i fmt l =
   F.fprintf fmt "beginfig(%d)@\n %a endfig;@." i 

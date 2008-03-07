@@ -24,6 +24,7 @@ val draw_box : ?fill:Color.t -> Box.t -> t
 
 val append : t -> t -> t
 val (++) : t -> t -> t
+val seq : t list -> t
 
 type position =
   | Pcenter
