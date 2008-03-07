@@ -18,15 +18,19 @@ all:
 	echo "let () = Command.generate_mp mpfile [1,fig]" >> $@
 
 %.mp: %_footer.ml
+	ocamlc -I .. -c $*.ml
 	ocaml -I .. ../mlpost.cma $^
 
 %.1: %.mp
 	mpost $^ end
 
-%.png: %.1
+%.png: %.ps
+	convert $*.ps $@
+
+%.ps: %.1
 	sed -e 's/all/$*/' all.tex > $*.tex
 	latex $*
 	dvips -E $*.dvi
-	convert $*.ps $@
-	rm -f $*.tex $*.dvi $*.ps
 
+%: %.ps
+	gv $^
