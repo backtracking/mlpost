@@ -45,6 +45,13 @@ let d5 = 5,
            [C.draw ~style:JLine ~scale:N.cm ~cycle:JLine l] @
            (List.map  (fun point -> C.draw ~pen ~scale:N.cm [point]) l)
 
+let d7 = 7,
+         let a , b, c = cmp a, cmp b, cmp c in
+           [C.draw ~style:JLine ~scale:N.cm ~cycle:JLine l ;
+            draw (SP.pathp [ segment 0.5 a b ; c]) ;
+            draw (SP.pathp [ segment 0.5 b c ; a]) ;
+            draw (SP.pathp [ segment 0.5 c a ; b]) ; ]
+
 let d12 = 12,
           let pen = P.transform [T.scaled 2.] Pen.circle in
           let cl = List.map Color.gray [0.8;0.6;0.4] in
@@ -184,7 +191,7 @@ let d267 =
    draw_arrow (path 45. a b); draw_arrow (path (-135.) b a)]
 
 let figs = 
-  [ d1; d2; d4; d5; d12; d20; d21; d22; d23; 60, d60; 111, d111; 
+  [ d1; d2; d4; d5; d7; d12; d20; d21; d22; d23; 60, d60; 111, d111; 
     d130; d140; d149; d195; 267,d267 ]
 
 let mpostfile = "test/othergraphs.mp"

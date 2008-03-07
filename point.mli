@@ -35,4 +35,6 @@ val south_west : Name.t -> t
 val north_east : Name.t -> t
 val south_east : Name.t -> t
 
+val segment : float -> t -> t -> t
+
 val print : Format.formatter -> t -> unit

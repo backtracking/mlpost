@@ -27,6 +27,7 @@ type t =
   | Right
   | BoxCorner of Name.t * corner
   | Unsafe of (Format.formatter -> unit)
+  | Segment of float * t * t
 
 let p (a,b) = Ppair (a,b)
 let dir f = Dir f
@@ -43,6 +44,7 @@ let north_east n = BoxCorner (n, NE)
 let south_west n = BoxCorner (n, SW)
 let south_east n = BoxCorner (n, SE)
 let unsafe f = Unsafe f
+let segment f p1 p2 = Segment (f,p1,p2)
 
 let print_corner fmt = function
   | N -> F.fprintf fmt "n"
@@ -54,7 +56,7 @@ let print_corner fmt = function
   | SW -> F.fprintf fmt "sw"
   | SE -> F.fprintf fmt "se"
 
-let print fmt = function
+let rec print fmt = function
   | Up -> F.fprintf fmt "up"
   | Down -> F.fprintf fmt "down"
   | Left -> F.fprintf fmt "left"
@@ -63,4 +65,5 @@ let print fmt = function
   | Ppair (m,n) -> F.fprintf fmt "(%a,%a)" Num.print m Num.print n
   | BoxCorner (n, d) -> F.fprintf fmt "%a.%a" Name.print n print_corner d
   | Unsafe f -> f fmt
+  | Segment (f,p1,p2) -> F.fprintf fmt "%f[%a,%a]" f print p1 print p2
 
