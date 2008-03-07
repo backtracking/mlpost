@@ -1,14 +1,16 @@
+MLFILES := $(shell echo *.ml)
+PNGFILES := $(MLFILES:.ml=.png)
 
-all:
+all: $(PNGFILES)
 	rm -f *.1 *.mp *_footer.ml
 	echo > index.html
 	for f in *.ml; do \
 	  b=`basename $$f .ml`; \
-	  make $$b.png; \
 	  echo '<img src="'$$b.png'">' >> index.html; \
 	  caml2html $$f -o $$f.html; \
-	  echo '<a href="'$$f.html'">source</a>' >> index.html; \
+	  echo '<a href="'$$f.html'">' >> index.html; \
 	  wc -l $$f  >> index.html; \
+	  echo '</a>' >> index.html; \
 	  echo "<hr>" >> index.html; \
 	done
 
@@ -28,9 +30,12 @@ all:
 	convert $*.ps $@
 
 %.ps: %.1
-	sed -e 's/all/$*/' all.tex > $*.tex
+	sed -e 's/all/$*/' all.template > $*.tex
 	latex $*
 	dvips -E $*.dvi
 
 %: %.ps
 	gv $^
+
+clean:
+	rm -f *.log *.aux *.mpx *.mp *.dvi *.png *.cmi *.cmo *.html

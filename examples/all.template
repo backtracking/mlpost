@@ -2,7 +2,7 @@
 \usepackage{graphicx}
 \pagestyle{empty}
 \begin{document}
-\includegraphics[width=\textwidth]{all.1}
+\includegraphics[scale=2]{all.1}
 \end{document}
 
 %%% Local Variables: 
