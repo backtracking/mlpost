@@ -16,16 +16,29 @@
 
 open Helpers
 
-type node = Box.t
+module Node = struct
 
-type node_style = Circle | Rect
+  type t = { id : int; x : float; y : float; s : string; }
 
-let fortybp x = Num.bp (40. *. x)
+  let create = 
+    let c = ref min_int in 
+    fun x y s -> incr c; { id = !c; x = x; y = y; s = s; }
 
-let node ?(style=Circle) ?(scale=fortybp) x y s = 
-  let p = Point.p (scale x, scale y) in
-  let pic = Picture.tex s in
-  match style with Circle -> Box.circle p pic | Rect -> Box.rect p pic
+  let hash n = 
+    n.id
+
+  let equal n1 n2 =
+    n1.id == n2.id
+
+end
+
+module Hnode = Hashtbl.Make(Node)
+
+open Node
+
+type node = Node.t
+
+let node = Node.create
 
 type dir = Up | Down | Left | Right | Angle of float
 
@@ -40,11 +53,12 @@ type arrow = {
 
 type t = {
   nodes : node list;
+  boxes : Box.t Hnode.t;
   mutable arrows: arrow list;
 }
 
 let create l = 
-  { nodes = l; arrows = [] }
+  { nodes = l; boxes = Hnode.create 17; arrows = [] }
 
 let arrow d ?(lab="") ?pos ?outd ?ind n1 n2 =
   d.arrows <- 
@@ -68,16 +82,37 @@ let indir = function
 let outdir = function None -> None | Some x -> Some (outdir x)
 let indir = function None -> None | Some x -> Some (indir x)
 
-let draw_arrow ?stroke ?pen a =
+type node_style = Circle | Rect
+
+let make_box ~style ~scale d n = 
+  let p = Point.p (scale n.x, scale n.y) in
+  let pic = Picture.tex n.s in
+  let b = match style with 
+    | Circle -> Box.circle p pic 
+    | Rect -> Box.rect p pic 
+  in
+  Hnode.add d.boxes n b;
+  b
+
+let box_of d = Hnode.find d.boxes
+
+let draw_arrow ?stroke ?pen d a =
+  let src = box_of d a.src in
+  let dst = box_of d a.dst in
   if a.lab = "" then 
     box_arrow 
-      ?color:stroke ?pen ?outd:(outdir a.outd) ?ind:(indir a.ind) a.src a.dst
+      ?color:stroke ?pen ?outd:(outdir a.outd) ?ind:(indir a.ind) src dst
   else
     box_label_arrow 
       ?color:stroke ?pen ?outd:(outdir a.outd) ?ind:(indir a.ind) 
-      ?pos:a.pos (Picture.tex a.lab) a.src a.dst
+      ?pos:a.pos (Picture.tex a.lab) src dst
 
-let draw ?fill ?stroke ?pen d =
-  List.map (Command.draw_box ?fill) d.nodes @
-  List.map (draw_arrow ?stroke ?pen) d.arrows
+let fortybp x = Num.bp (40. *. x)
+
+let draw ?(style=Circle) ?(scale=fortybp) ?fill ?stroke ?pen d =
+  let l = 
+    List.map 
+      (fun n -> Command.draw_box ?fill (make_box ~style ~scale d n)) d.nodes
+  in
+  l @ List.map (draw_arrow ?stroke ?pen d) d.arrows
 
