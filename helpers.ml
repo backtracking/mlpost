@@ -32,13 +32,18 @@ let draw_label_arrow ?color ?pen ?(style=JLine) ?pos lab a b =
   draw_arrow ?color ?pen p ++
   label ?pos lab (Path.point 0.5 p)
 
-let box_arrow ?color ?pen ?(style=JCurve) ?(outd=NoDir) ?(ind=NoDir) a b =
-  draw_arrow ?color ?pen
-    (let p = 
-      SP.jointpathk 
-	[NoDir, Box.center a, outd; ind, Box.center b, NoDir] [style]
-      in
-     cut_after (bpath b) (cut_before (bpath a) p))
+let box_path ~style ~outd ~ind a b =
+  let p = 
+    SP.jointpathk 
+      [NoDir, Box.center a, outd; ind, Box.center b, NoDir] [style]
+  in
+  cut_after (bpath b) (cut_before (bpath a) p)
+
+let box_arrow ?color ?pen ?(style=JCurve) ?(outd=NoDir) ?(ind=NoDir) a b =   
+  draw_arrow ?color ?pen (box_path ?style ?outd ?ind a b)
+
+let box_line ?color ?pen ?(style=JCurve) ?(outd=NoDir) ?(ind=NoDir) a b =   
+  draw ?color ?pen (box_path ?style ?outd ?ind a b)
 
 let box_simple_arrow ?color ?pen a b =
   box_arrow ?color ?pen ~style:JLine a b

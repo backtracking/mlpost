@@ -55,30 +55,10 @@ let rec random_tree = function
       node (string_of_int n) [random_tree k; random_tree (n - 1 - k)]
 
 let d2 = 
-  draw (random_tree 17)
+  draw ~node_style:Circle ~arrow_style:Undirected (random_tree 17)
 
-open Diag
-
-let d3 =
-  let pen = Pen.circle in
-  let a = node 0. 4. "~~~" in
-  let b = node 0. 3. "~~~" in
-  let inv = node 0. 2. "inv" in
-  let c = node 0. 1. "~~~" in
-  let d = node 0. 0. "~~~" in
-  let do_ = node (-2.) 2. "do" in
-  let diag = create [a;b;c;d;inv;do_] in
-  let arrow = arrow diag in
-  arrow a b ~lab:"$i\\leftarrow0$" ~pos:Pright;
-  arrow b inv ~lab:"$m\\leftarrow t[i]$" ~pos:Pright;
-  arrow c d ~lab:"$i\\ge n$" ~pos:Pright;
-  arrow c do_ ~outd:Left ~ind:Down ~lab:"$i<n$" ~pos:Plowleft;
-  arrow inv c ~lab:"$i\\leftarrow i+1$" ~pos:Pright;
-  arrow do_ inv ~lab:"$m\\ge t[i]$" ~pos:Ptop;
-  arrow do_ b ~outd:Up ~ind:Left ~lab:"$m<t[i]$" ~pos:Pupleft;
-  draw ~fill:Color.yellow ~stroke:Color.blue ~pen diag
-   
-let figs = [d3; d2; d1]
+ 
+let figs = [d2; d1]
 
 let figs =
   let r = ref 0 in

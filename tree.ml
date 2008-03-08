@@ -28,7 +28,20 @@ let rec width cs = function
   | [w, _] -> w
   | (w, _) :: l -> w +. cs +. width cs l
 
-let draw ?(scale=Num.cm) ?(ls=1.0) ?(nw=0.5) ?(cs=0.2) t =
+type node_style = Circle | Rect
+
+let box style p pic = match style with
+  | Circle -> Box.circle p pic
+  | Rect -> Box.rect p pic
+
+type arrow_style = Directed | Undirected
+
+let arc style b1 b2 = match style with
+  | Directed -> box_arrow b1 b2
+  | Undirected -> box_line b1 b2
+
+let draw ?(scale=Num.cm) ?(node_style=Circle) ?(arrow_style=Directed)
+  ?(ls=1.0) ?(nw=0.5) ?(cs=0.2) t =
   let point x y = Point.p (scale x, scale y) in
   (* tree -> float * (float -> float -> box * figure) *)
   let rec draw (N (s, l)) =
@@ -36,7 +49,7 @@ let draw ?(scale=Num.cm) ?(ls=1.0) ?(nw=0.5) ?(cs=0.2) t =
     let w = max nw (width cs l) in
     w,
     fun x y -> 
-      let b = Box.circle (point x y) (Picture.tex s) in
+      let b = box node_style (point x y) (Picture.tex s) in
       let x = ref (x -. w /. 2.) in
       b, 
       draw_box b :: 
@@ -44,7 +57,7 @@ let draw ?(scale=Num.cm) ?(ls=1.0) ?(nw=0.5) ?(cs=0.2) t =
 	(fun (wc,fc) -> 
 	   let b',fig = fc (!x +. wc /. 2.) (y -. ls) in
 	   x := !x +. wc +. cs;
-	   append (seq fig) (box_arrow b b')
+	   append (seq fig) (arc arrow_style b b')
 	) l
   in
   let _,f = draw t in

@@ -16,6 +16,8 @@
 
 (* trees *)
 
+(** 1. Creation *)
+
 type t = N of string * t list
 
 (* smart constructors *)
@@ -24,9 +26,22 @@ val leaf : string -> t
 val node : string -> t list -> t
 val bin : string -> t -> t -> t
 
-(* drawing *)
+(** 2. Drawing *)
+
+type node_style = Circle | Rect
+
+type arrow_style = Directed | Undirected
 
 val draw : 
-  ?scale:(float -> Num.t) -> ?ls:float -> ?nw:float -> ?cs:float -> 
+  ?scale:(float -> Num.t) -> 
+  ?node_style:node_style -> ?arrow_style:arrow_style -> 
+  ?ls:float -> ?nw:float -> ?cs:float -> 
   t -> Command.figure
+  (** Default scale is [Num.cm]. Drawing parameters are:
+      - [ls] (level sep): vertical distance between levels; 
+        default value is 1.0.
+      - [nw] (node width): width of one node; default value is 0.5
+      - [cs] (children sep): horizontal distance between siblings; 
+        default value is 0.2
+  *)
 
