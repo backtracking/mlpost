@@ -8,6 +8,7 @@ all: $(PNGFILES)
 	  b=`basename $$f .ml`; \
 	  echo '<img src="'$$b.png'">' >> index.html; \
 	  caml2html $$f -o $$f.html; \
+	  echo "<br>" >> index.html; \
 	  echo '<a href="'$$f.html'">' >> index.html; \
 	  wc -l $$f  >> index.html; \
 	  echo '</a>' >> index.html; \
