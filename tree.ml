@@ -36,11 +36,12 @@ let box style p pic = match style with
 
 type arrow_style = Directed | Undirected
 
-let arc style b1 b2 = match style with
-  | Directed -> box_arrow b1 b2
-  | Undirected -> box_line b1 b2
+let arc style ?stroke ?pen b1 b2 = match style with
+  | Directed -> box_arrow ?color:stroke ?pen b1 b2
+  | Undirected -> box_line ?color:stroke ?pen b1 b2
 
 let draw ?(scale=Num.cm) ?(node_style=Circle) ?(arrow_style=Directed)
+  ?fill ?stroke ?pen
   ?(ls=1.0) ?(nw=0.5) ?(cs=0.2) t =
   let point x y = Point.p (scale x, scale y) in
   (* tree -> float * (float -> float -> box * figure) *)
@@ -52,12 +53,12 @@ let draw ?(scale=Num.cm) ?(node_style=Circle) ?(arrow_style=Directed)
       let b = box node_style (point x y) (Picture.tex s) in
       let x = ref (x -. w /. 2.) in
       b, 
-      draw_box b :: 
+      draw_box ?fill b :: 
 	List.map 
 	(fun (wc,fc) -> 
 	   let b',fig = fc (!x +. wc /. 2.) (y -. ls) in
 	   x := !x +. wc +. cs;
-	   append (seq fig) (arc arrow_style b b')
+	   append (seq fig) (arc ?stroke ?pen arrow_style b b')
 	) l
   in
   let _,f = draw t in

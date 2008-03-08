@@ -55,7 +55,8 @@ let rec random_tree = function
       node (string_of_int n) [random_tree k; random_tree (n - 1 - k)]
 
 let d2 = 
-  draw ~node_style:Circle ~arrow_style:Undirected (random_tree 17)
+  draw ~node_style:Circle ~arrow_style:Undirected
+    ~fill:Color.yellow ~stroke:Color.blue ~pen:Pen.circle (random_tree 17)
 
  
 let figs = [d2; d1]

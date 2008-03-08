@@ -109,7 +109,7 @@ let draw_arrow ?stroke ?pen d a =
 
 let fortybp x = Num.bp (40. *. x)
 
-let draw ?(style=Circle) ?(scale=fortybp) ?fill ?stroke ?pen d =
+let draw ?(scale=fortybp) ?(style=Circle) ?fill ?stroke ?pen d =
   let l = 
     List.map 
       (fun n -> Command.draw_box ?fill (make_box ~style ~scale d n)) d.nodes

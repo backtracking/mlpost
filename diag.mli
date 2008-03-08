@@ -37,7 +37,7 @@ val arrow :
 type node_style = Circle | Rect
 
 val draw : 
-  ?style:node_style -> ?scale:(float -> Num.t) -> 
+  ?scale:(float -> Num.t) -> ?style:node_style -> 
   ?fill:Color.t -> ?stroke:Color.t -> ?pen:Pen.t ->
   t -> Command.figure
   (** default scale is 40bp *)
