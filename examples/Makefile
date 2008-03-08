@@ -15,6 +15,8 @@ all: $(PNGFILES)
 	  echo "<hr>" >> index.html; \
 	done
 
+$(PNGFILES): ../mlpost.cma
+
 %_footer.ml: %.ml
 	cp -f $^ $@
 	echo 'let mpfile = "'$*'.mp"' >> $@
