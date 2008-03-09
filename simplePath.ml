@@ -40,6 +40,10 @@ let pathp ?(style) ?(cycle) l =
   pathk ?style ?cycle
     (List.map (knotp) l)
 
+let pathn ?(style) ?(cycle) l =
+  pathp ?style ?cycle
+    (List.map (Point.p) l)
+
 let path ?(style) ?(cycle) ?(scale) l =
   let sc = S.ptlist ?scale in
     pathp ?style ?cycle (sc l)

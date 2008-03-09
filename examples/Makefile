@@ -41,4 +41,4 @@ $(PNGFILES): ../mlpost.cma
 	gv $^
 
 clean:
-	rm -f *.log *.aux *.mpx *.mp *.dvi *.png *.cmi *.cmo *.html *.tex
+	rm -f *.log *.aux *.mpx *.mp *.dvi *.png *.cmi *.cmo *.html *.tex *.ps

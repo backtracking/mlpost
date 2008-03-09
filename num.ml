@@ -31,7 +31,9 @@ let inch f = IN f
 
 let print_float fmt f =
   if f = infinity then F.fprintf fmt "infinity"
-  else F.fprintf fmt "%.4f" f
+  else
+    if f > 4095. then F.fprintf fmt "%4f" 4095.
+    else F.fprintf fmt "%.4f" f
 
 let print fmt = function
   | BP f -> F.fprintf fmt "%a" print_float f 

@@ -27,6 +27,10 @@ val path :
     ?style:Path.joint -> ?cycle:Path.joint -> ?scale:(float -> Num.t) -> 
       (float * float) list -> Path.t
 
+(** build a path from a list of num pairs *)
+val pathn : 
+    ?style:Path.joint -> ?cycle:Path.joint -> (Num.t * Num.t) list -> Path.t
+
 (** build a path from a knot list *)
 val pathk :
     ?style:Path.joint -> ?cycle:Path.joint -> Path.knot list -> Path.t
