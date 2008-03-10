@@ -44,3 +44,9 @@ type figure = t list
 val print : int -> Format.formatter -> figure -> unit
 
 val generate_mp : string -> (int * figure) list -> unit
+
+
+(* batch processing; used by the mlpost tool (see tool.mll) *)
+
+val emit : int -> figure -> unit
+val dump : string -> unit

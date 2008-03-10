@@ -13,8 +13,18 @@
 * les pointillés
 * clipping
 
+* prélude pour LaTeX, tel que 
 
+verbatimtex
+%&latex
+\documentclass{article}
+\usepackage[T1]{fontenc}
+\begin{document}
+etex
+
+-------------------------------------------------------------------------------
 des liens avec des exemples :
 
 http://tex.loria.fr/prod-graph/zoonekynd/metapost/metapost.html
 http://melusine.eu.org/syracuse/metapost/cheno/illustrations/illustrations.html
+

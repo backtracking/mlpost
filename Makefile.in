@@ -44,8 +44,10 @@ OFLAGS = -dtypes $(INCLUDES) @FORPACK@
 #############
 
 NAME = mlpost
+TESTS = handbookgraphs.cmx othergraphs.cmx tests.cmx
+TOOL = tool.$(OCAMLBEST)
 
-all: byte $(OCAMLBEST) handbookgraphs.cmx othergraphs.cmx tests.cmx
+all: byte $(OCAMLBEST) $(TOOL) $(TESTS)
 
 # bytecode and native-code compilation
 ######################################
@@ -67,7 +69,7 @@ OTHERCMX := $(OTHERCMO:.cmo=.cmx)
 
 $(HANDBOOKCMX) $(OTHERCMX): $(CMXA)
 
-GENERATED = version.ml
+GENERATED = version.ml tool.ml
 
 byte: $(CMA)
 opt: $(CMXA)
@@ -83,6 +85,15 @@ mlpost.cmo: $(CMO)
 
 mlpost.cmx: $(CMX)
 	$(OCAMLOPT) $(INCLUDES) -pack -o $@ $^
+
+TOOLCMO=tool.cmo
+TOOLCMX := $(TOOLCMO:.cmo=.cmx)
+
+tool.byte: $(TOOLCMO)
+	$(OCAMLC) -o $@ unix.cma $^
+
+tool.opt: $(TOOLCMX)
+	$(OCAMLOPT) -o $@ unix.cmxa $^
 
 tests: $(CMA) tests.ml
 	ocaml $(CMA) tests.ml

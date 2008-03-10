@@ -118,3 +118,11 @@ let generate_mp fn l =
       Format.fprintf fmt "input boxes;@\n";
       List.iter (fun (i,f) -> print i fmt f) l)
 
+(* batch processing *)
+
+let figures = ref []
+
+let emit i f = figures := (i, f) :: !figures
+
+let dump f = generate_mp f (List.rev !figures)
+
