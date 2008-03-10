@@ -58,8 +58,34 @@ let d2 =
   draw ~ls:(-1.0) ~node_style:Circle ~arrow_style:Directed
     ~fill:Color.yellow ~stroke:Color.blue ~pen:Pen.circle (random_tree 17)
 
- 
-let figs = [d2; d1]
+open SimplePoint
+open SimplePath
+open Transform
+open Dash
+
+let cheno014 = 
+  let z0 = cmp (0., 0.) in
+  let z1 = cmp (4., 1.) in
+  let cercle = transform [scaled ~scale:Num.cm 1.; shifted z0] fullcircle in
+  let rectangle = transform [shifted z1] 
+    (pathp ~style:JLine ~cycle:JLine 
+	[mmp (-5., -5.); mmp (5., -5.); mmp (5., 5.); mmp (-5., 5.)])
+  in
+  let p = pathk [NoDir, z0, Vec (dir 150.); NoDir, z1, Vec (dir (-30.))] in
+  [Command.draw cercle;
+   Command.draw rectangle ~dashed:evenly;
+   Command.draw p ~dashed:(withdots_scaled 0.3);
+   Command.draw_arrow (cut_before cercle (cut_after rectangle p));
+  ]
+(**
+    draw cercle ; draw rectangle dashed evenly ;
+    p = z0{dir150}..z1{dir-30} ;
+    draw p dashed withdots scaled 0.3 ;
+    drawarrow (p cutbefore cercle cutafter rectangle) ;
+endfig ;
+**)
+
+let figs = [cheno014; d2; d1]
 
 let figs =
   let r = ref 0 in

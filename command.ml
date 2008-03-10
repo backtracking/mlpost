@@ -14,6 +14,7 @@
 (*                                                                        *)
 (**************************************************************************)
 
+open Misc
 module F = Format
 module T = Transform
 
@@ -29,8 +30,8 @@ type position =
   | Plowright
 
 type t = 
-  | Draw of Path.t * Color.t option * Pen.t option
-  | DrawArrow of Path.t * Color.t option * Pen.t option
+  | Draw of Path.t * Color.t option * Pen.t option * Dash.t option
+  | DrawArrow of Path.t * Color.t option * Pen.t option * Dash.t option
   | Fill of Path.t * Color.t option
   | Label of Picture.t * position * Point.t
   | DotLabel of Picture.t * position * Point.t
@@ -44,13 +45,13 @@ let label ?(pos=Pcenter) pic point = Label (pic,pos,point)
 (* replace later *)
 let dotlabel ?(pos=Pcenter) pic point = DotLabel (pic,pos,point)
 
-let draw ?color ?pen t = 
+let draw ?color ?pen ?dashed t = 
   (* We don't use a default to avoid the output of 
      ... withcolor (0.00red+0.00green+0.00blue) withpen .... 
      for each command in the output file *)
-    Draw (t, color, pen)
+    Draw (t, color, pen, dashed)
 
-let draw_arrow ?color ?pen t = DrawArrow (t, color, pen)
+let draw_arrow ?color ?pen ?dashed t = DrawArrow (t, color, pen, dashed)
 
 let fill ?color t = Fill (t, color)
 
@@ -73,19 +74,17 @@ let print_position fmt = function
   | Plowleft -> F.fprintf fmt ".llft"
   | Plowright -> F.fprintf fmt ".lrt"
 
-let print_option start printer fmt = function
-  | None -> ()
-  | Some o -> F.fprintf fmt "%s%a@ " start printer o
-
 let rec print_command fmt  = function
-  | Draw (path, color, pen) ->
-      F.fprintf fmt "draw %a%a%a;@\n" Path.print path
+  | Draw (path, color, pen, dashed) ->
+      F.fprintf fmt "draw %a%a%a%a;@\n" Path.print path
         (print_option " withcolor " Color.print) color
         (print_option " withpen " Pen.print) pen
-  | DrawArrow (path, color, pen) ->
-      F.fprintf fmt "drawarrow %a%a%a;@\n" Path.print path
+        (print_option " dashed " Dash.print) dashed
+  | DrawArrow (path, color, pen, dashed) ->
+      F.fprintf fmt "drawarrow %a%a%a%a;@\n" Path.print path
         (print_option " withcolor " Color.print) color
         (print_option " withpen " Pen.print) pen
+        (print_option " dashed " Dash.print) dashed
   | Fill (path, color) ->
       F.fprintf fmt "fill %a%a;@\n" Path.print path
         (print_option " withcolor " Color.print) color
