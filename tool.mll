@@ -45,8 +45,7 @@ rule scan = parse
 
   let compile f =
     let bn = Filename.chop_extension f in
-    let mlf = bn ^ "_mlpost.ml" in
-    let cout = open_out mlf in
+    let mlf, cout = Filename.open_temp_file "mlpost" ".ml" in
     Printf.fprintf cout "open Mlpost\n";
     Printf.fprintf cout "# 1 \"%s\"\n" f;
     begin 

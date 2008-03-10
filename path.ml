@@ -46,6 +46,7 @@ type t =
   | CutAfter of t * t
   | CutBefore of t * t
   | BuildCycle of t list
+  | Sub of float * float * t (* ne fonctionne pas ! *)
 
 let start k = Knot k
 let concat p j k = Concat (k,j,p)
@@ -62,6 +63,7 @@ let bpath b = BoxBPath b
 let cut_after p1 p2 = CutAfter (p1, p2)
 let cut_before p1 p2 = CutBefore (p1, p2)
 let build_cycle l = BuildCycle l
+let sub f1 f2 p = Sub (f1, f2, p)
 
 let print_joint fmt = function
   | JLine -> F.fprintf fmt "--"
@@ -106,6 +108,9 @@ let rec print fmt = function
   | BuildCycle l ->
       F.fprintf fmt "buildcycle(%a)" 
         (print_list (fun fmt () -> F.fprintf fmt ",") print) l
+  | Sub (f1, f2, p) ->
+      F.fprintf fmt "subpath(%a,%a) of %a" 
+	Num.print_float f1 Num.print_float f2 print p
 
 let point f p =
   Point.unsafe (fun fmt -> F.fprintf fmt "(point %.4f of (%a))" f print p)

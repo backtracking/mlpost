@@ -37,6 +37,8 @@ val concat : t -> joint -> knot -> t
 val cycle : direction -> joint -> t -> t
 val append : t -> joint -> t -> t
 
+(* val sub : float -> float -> t -> t *)
+
 (* later in the mlpost module *)
 val print : Format.formatter -> t -> unit
 
