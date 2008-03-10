@@ -129,7 +129,7 @@ let d140 =
       [fill ~color:(Color.gray s) 
          (transform [T.scaled ~scale:Num.cm (2.*.s)] fullcircle)]
   in
-  140, [iter 0 100 cmd; 
+  140, [iter 0 100 cmd;
 	draw ~pen:(P.transform [T.scaled 2.] P.circle)
 	  (transform [T.scaled ~scale:Num.cm 2.] fullcircle)]
 

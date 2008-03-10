@@ -28,6 +28,9 @@ type t =
   | BoxCorner of Name.t * corner
   | Unsafe of (Format.formatter -> unit)
   | Segment of float * t * t
+  | Add of t * t
+  | Sub of t * t
+  | Rotated of float * t
 
 let p (a,b) = Ppair (a,b)
 let dir f = Dir f
@@ -45,6 +48,9 @@ let south_west n = BoxCorner (n, SW)
 let south_east n = BoxCorner (n, SE)
 let unsafe f = Unsafe f
 let segment f p1 p2 = Segment (f,p1,p2)
+let add p1 p2 = Add (p1, p2)
+let sub p1 p2 = Sub (p1, p2)
+let rotated f p = Rotated (f, p)
 
 let print_corner fmt = function
   | N -> F.fprintf fmt "n"
@@ -65,5 +71,9 @@ let rec print fmt = function
   | Ppair (m,n) -> F.fprintf fmt "(%a,%a)" Num.print m Num.print n
   | BoxCorner (n, d) -> F.fprintf fmt "%a.%a" Name.print n print_corner d
   | Unsafe f -> f fmt
-  | Segment (f,p1,p2) -> F.fprintf fmt "%f[%a,%a]" f print p1 print p2
-
+  | Segment (f,p1,p2) -> 
+      F.fprintf fmt "%a[%a,%a]" Num.print_float f print p1 print p2
+  | Add (p1, p2) -> F.fprintf fmt "(%a + %a)" print p1 print p2
+  | Sub (p1, p2) -> F.fprintf fmt "(%a - %a)" print p1 print p2
+  | Rotated (f, p) ->  
+      F.fprintf fmt "(%a rotated %a)" print p Num.print_float f

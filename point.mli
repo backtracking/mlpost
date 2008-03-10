@@ -37,4 +37,9 @@ val south_east : Name.t -> t
 
 val segment : float -> t -> t -> t
 
+(* operations on points *)
+val add : t -> t -> t
+val sub : t -> t -> t
+val rotated : float -> t -> t
+
 val print : Format.formatter -> t -> unit
