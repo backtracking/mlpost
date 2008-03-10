@@ -47,7 +47,7 @@ let rec random_tree = function
   | 1 -> 
       leaf "1"
   | 2 -> 
-      node "2" [leaf "1"]
+      node ~style:Rect ~fill:Color.red "2" [leaf "1"]
   | n when Random.bool () -> 
       node (string_of_int n) [random_tree (n-1)]
   | n -> 
@@ -55,7 +55,7 @@ let rec random_tree = function
       node (string_of_int n) [random_tree k; random_tree (n - 1 - k)]
 
 let d2 = 
-  draw ~node_style:Circle ~arrow_style:Undirected
+  draw ~ls:(-1.0) ~node_style:Circle ~arrow_style:Directed
     ~fill:Color.yellow ~stroke:Color.blue ~pen:Pen.circle (random_tree 17)
 
  

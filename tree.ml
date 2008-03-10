@@ -17,18 +17,18 @@
 open Command
 open Helpers
 
-type t = N of string * t list
+type node_style = Circle | Rect
 
-let leaf s = N (s, [])
-let node s l = N (s, l)
-let bin s x y = N (s, [x; y])
+type t = N of node_style option * Color.t option * string * t list
+
+let leaf ?style ?fill s = N (style, fill, s, [])
+let node ?style ?fill s l = N (style, fill, s, l)
+let bin  ?style ?fill s x y = N (style, fill, s, [x; y])
 
 let rec width cs = function
   | [] -> 0.
   | [w, _] -> w
   | (w, _) :: l -> w +. cs +. width cs l
-
-type node_style = Circle | Rect
 
 let box style p pic = match style with
   | Circle -> Box.circle p pic
@@ -45,11 +45,13 @@ let draw ?(scale=Num.cm) ?(node_style=Circle) ?(arrow_style=Directed)
   ?(ls=1.0) ?(nw=0.5) ?(cs=0.2) t =
   let point x y = Point.p (scale x, scale y) in
   (* tree -> float * (float -> float -> box * figure) *)
-  let rec draw (N (s, l)) =
+  let rec draw (N (nstyle, nfill, s, l)) =
     let l = List.map draw l in
     let w = max nw (width cs l) in
     w,
     fun x y -> 
+      let node_style = match nstyle with None -> node_style | Some s -> s in
+      let fill = match nfill with None -> fill | Some _ -> nfill in
       let b = box node_style (point x y) (Picture.tex s) in
       let x = ref (x -. w /. 2.) in
       b, 

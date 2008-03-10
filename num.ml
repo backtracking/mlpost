@@ -41,3 +41,13 @@ let print fmt = function
   | CM f -> F.fprintf fmt "%acm" print_float f 
   | MM f -> F.fprintf fmt "%amm" print_float f 
   | IN f -> F.fprintf fmt "%ain" print_float f 
+
+type scale = float -> t
+
+module Scale = struct
+  let bp x y = BP (x *. y)
+  let pt x y = PT (x *. y)
+  let cm x y = CM (x *. y)
+  let mm x y = MM (x *. y)
+  let inch x y = IN (x *. y)
+end

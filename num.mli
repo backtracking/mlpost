@@ -22,3 +22,13 @@ val mm : float -> t
 val inch : float -> t
 val print : Format.formatter -> t -> unit
 val print_float : Format.formatter -> float -> unit
+
+type scale = float -> t
+
+module Scale : sig
+  val bp : float -> scale
+  val pt : float -> scale
+  val cm : float -> scale
+  val mm : float -> scale
+  val inch : float -> scale
+end

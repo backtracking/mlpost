@@ -18,17 +18,16 @@
 
 (** 1. Creation *)
 
-type t = N of string * t list
-
-(* smart constructors *)
-
-val leaf : string -> t
-val node : string -> t list -> t
-val bin : string -> t -> t -> t
-
-(** 2. Drawing *)
+type t
+    (** the abstract type of trees *)
 
 type node_style = Circle | Rect
+
+val leaf : ?style:node_style -> ?fill:Color.t -> string -> t
+val node : ?style:node_style -> ?fill:Color.t -> string -> t list -> t
+val bin  : ?style:node_style -> ?fill:Color.t -> string -> t -> t -> t
+
+(** 2. Drawing *)
 
 type arrow_style = Directed | Undirected
 
@@ -38,11 +37,12 @@ val draw :
   ?fill:Color.t -> ?stroke:Color.t -> ?pen:Pen.t ->
   ?ls:float -> ?nw:float -> ?cs:float -> 
   t -> Command.figure
-  (** Default scale is [Num.cm]. Drawing parameters are:
-      - [ls] (level sep): vertical distance between levels; 
-        default value is 1.0.
-      - [nw] (node width): width of one node; default value is 0.5
-      - [cs] (children sep): horizontal distance between siblings; 
-        default value is 0.2
+  (** Default scale is [Num.cm]. 
+      Drawing parameters are:
+      - [ls] (level sep): vertical distance between levels.
+        The default value is 1.0. A negative value draws the tree upward.
+      - [nw] (node width): width of one node. The default value is 0.5.
+      - [cs] (children sep): horizontal distance between siblings.
+        The default value is 0.2.
   *)
 
