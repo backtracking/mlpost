@@ -20,24 +20,24 @@ type corner = N | S | W | E | NE | NW | SW | SE
 
 type t = 
   | Ppair of Num.t * Num.t
-  | Dir of float
-  | Up
-  | Down
-  | Left
-  | Right
   | BoxCorner of Name.t * corner
   | Unsafe of (Format.formatter -> unit)
-  | Segment of float * t * t
   | Add of t * t
   | Sub of t * t
+  | Mult of float * t
   | Rotated of float * t
 
 let p (a,b) = Ppair (a,b)
-let dir f = Dir f
-let up = Up
-let down = Down
-let left = Left
-let right = Right
+
+(* angle in degrees *)
+let dir f =  
+  let angle = Misc.deg2rad f in
+    Ppair (cos angle, sin angle)
+
+let up = Ppair (0.,1.)
+let down = Ppair (0.,-1.)
+let left = Ppair (-1.,0.)
+let right = Ppair (1.,0.)
 let north n = BoxCorner (n, N)
 let south n = BoxCorner (n, S)
 let west n = BoxCorner (n, W)
@@ -47,10 +47,37 @@ let north_east n = BoxCorner (n, NE)
 let south_west n = BoxCorner (n, SW)
 let south_east n = BoxCorner (n, SE)
 let unsafe f = Unsafe f
-let segment f p1 p2 = Segment (f,p1,p2)
-let add p1 p2 = Add (p1, p2)
-let sub p1 p2 = Sub (p1, p2)
-let rotated f p = Rotated (f, p)
+
+
+(* insert more sophisticated simplifications *)
+let rec add p1 p2 = 
+  match p1,p2 with
+    | Ppair (a1,b1), Ppair (a2,b2) -> Ppair (a1 +. a2, b1 +. b2)
+    | Add (p1',p2'), _ -> add p1' (add p2' p2)
+    | Sub (p1',p2'), _ -> add p2 (sub p1' p2')
+    | _, _ -> Add (p1,p2)
+
+and mult f = function
+  | Ppair (a,b) -> Ppair (f *. a, f *. b)
+  | Mult (f', p) -> mult (f *. f') p
+  | Add (p1,p2) -> add (mult f p1) (mult f p2)
+  | Sub (p1,p2) -> sub (mult f p1) (mult f p2)
+  | _ as p -> Mult (f,p)
+
+and sub p1 p2 = 
+  match p1,p2 with
+    | Ppair (a1,b1), Ppair (a2,b2) -> Ppair (a1 -. a2, b1 -. b2)
+    | Add (p1',p2'), _ -> add p1' (sub p2' p2)
+    | Sub (p1',p2'), _ -> sub p1' (add p2' p2)
+    | _, _ -> Sub (p1,p2)
+
+let segment f p1 p2 = add p1 (mult f (sub p2 p1))
+let rotated f = function
+  | Ppair (a,b) -> 
+      let angle = Misc.deg2rad f in
+        Ppair (cos(angle) *. a -. sin(angle) *. b,
+               sin(angle) *. a -. cos(angle) *. b)
+  | _ as p -> Rotated (f, p)
 
 let print_corner fmt = function
   | N -> F.fprintf fmt "n"
@@ -63,17 +90,11 @@ let print_corner fmt = function
   | SE -> F.fprintf fmt "se"
 
 let rec print fmt = function
-  | Up -> F.fprintf fmt "up"
-  | Down -> F.fprintf fmt "down"
-  | Left -> F.fprintf fmt "left"
-  | Right -> F.fprintf fmt "right"
-  | Dir d -> F.fprintf fmt "dir %a" Num.print_float d
   | Ppair (m,n) -> F.fprintf fmt "(%a,%a)" Num.print m Num.print n
   | BoxCorner (n, d) -> F.fprintf fmt "%a.%a" Name.print n print_corner d
   | Unsafe f -> f fmt
-  | Segment (f,p1,p2) -> 
-      F.fprintf fmt "%a[%a,%a]" Num.print_float f print p1 print p2
   | Add (p1, p2) -> F.fprintf fmt "(%a + %a)" print p1 print p2
   | Sub (p1, p2) -> F.fprintf fmt "(%a - %a)" print p1 print p2
+  | Mult (f, p) -> F.fprintf fmt "(%a * %a)" Num.print_float f print p
   | Rotated (f, p) ->  
       F.fprintf fmt "(%a rotated %a)" print p Num.print_float f

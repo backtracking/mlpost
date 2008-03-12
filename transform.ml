@@ -54,12 +54,7 @@ let print_item fmt = function
       F.fprintf fmt "rotatedaround(%a,%a)@ "
         Point.print p Num.print_float f
 
-let rec print_list sep prf fmt = function
-  | [] -> ()
-  | [x] -> prf fmt x
-  | (x::xs) -> prf fmt x; sep fmt (); print_list sep prf fmt xs
-
 let print fmt l =
-  print_list (fun fmt () -> F.fprintf fmt " ") print_item fmt l
+  Misc.print_list (fun fmt () -> F.fprintf fmt " ") print_item fmt l
 
 let id = []
