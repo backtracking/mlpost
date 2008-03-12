@@ -54,7 +54,9 @@ let rec add p1 p2 =
   match p1,p2 with
     | Ppair (a1,b1), Ppair (a2,b2) -> Ppair (a1 +. a2, b1 +. b2)
     | Add (p1',p2'), _ -> add p1' (add p2' p2)
-    | Sub (p1',p2'), _ -> add p2 (sub p1' p2')
+    | Sub (p1',p2'), _ -> add p1' (sub p2 p2')
+    | _, Add (p1',p2') -> add p1' (add p1 p2')
+    | _, Sub (p1',p2') -> add p1' (sub p1 p2')
     | _, _ -> Add (p1,p2)
 
 and mult f = function
@@ -62,6 +64,7 @@ and mult f = function
   | Mult (f', p) -> mult (f *. f') p
   | Add (p1,p2) -> add (mult f p1) (mult f p2)
   | Sub (p1,p2) -> sub (mult f p1) (mult f p2)
+  | Rotated (f', p) -> Rotated (f', mult f p)
   | _ as p -> Mult (f,p)
 
 and sub p1 p2 = 
@@ -69,14 +72,20 @@ and sub p1 p2 =
     | Ppair (a1,b1), Ppair (a2,b2) -> Ppair (a1 -. a2, b1 -. b2)
     | Add (p1',p2'), _ -> add p1' (sub p2' p2)
     | Sub (p1',p2'), _ -> sub p1' (add p2' p2)
+    | _, Add (p1',p2') -> sub (sub p1 p1') p2'
+    | _, Sub (p1',p2') -> add (sub p1 p1') p2'
     | _, _ -> Sub (p1,p2)
 
-let segment f p1 p2 = add p1 (mult f (sub p2 p1))
-let rotated f = function
+let segment f p1 p2 = add (mult (1.-.f) p1) (mult f p2)
+let rec rotated f = function
   | Ppair (a,b) -> 
       let angle = Misc.deg2rad f in
         Ppair (cos(angle) *. a -. sin(angle) *. b,
                sin(angle) *. a -. cos(angle) *. b)
+  | Add (p1, p2) -> add (rotated f p1) (rotated f p2)
+  | Sub (p1, p2) -> sub (rotated f p1) (rotated f p2)
+  | Rotated (f', p) -> Rotated (f+.f', p)
+  | Mult (f', p) -> Mult(f', rotated f p)
   | _ as p -> Rotated (f, p)
 
 let print_corner fmt = function
