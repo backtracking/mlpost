@@ -16,38 +16,28 @@
 
 module F = Format
 
-type t = 
-  | BP of float
-  | PT of float
-  | CM of float
-  | MM of float
-  | IN of float
+type t = float
 
-let bp f = BP f
-let pt f = PT f
-let cm f = CM f
-let mm f = MM f
-let inch f = IN f
+let bp f = f
+let pt f = 0.99626 *. f
+let cm f = 28.34645 *. f
+let mm f = 2.83464 *. f
+let inch f = 72. *. f
 
-let print_float fmt f =
+let print fmt f =
   if f = infinity then F.fprintf fmt "infinity"
   else
     if f > 4095. then F.fprintf fmt "%4f" 4095.
     else F.fprintf fmt "%.4f" f
 
-let print fmt = function
-  | BP f -> F.fprintf fmt "%a" print_float f 
-  | PT f -> F.fprintf fmt "%apt" print_float f 
-  | CM f -> F.fprintf fmt "%acm" print_float f 
-  | MM f -> F.fprintf fmt "%amm" print_float f 
-  | IN f -> F.fprintf fmt "%ain" print_float f 
+let print_float = print 
 
 type scale = float -> t
 
 module Scale = struct
-  let bp x y = BP (x *. y)
-  let pt x y = PT (x *. y)
-  let cm x y = CM (x *. y)
-  let mm x y = MM (x *. y)
-  let inch x y = IN (x *. y)
+  let bp x y = bp (x *. y)
+  let pt x y = pt (x *. y)
+  let cm x y = cm (x *. y)
+  let mm x y = mm (x *. y)
+  let inch x y = inch (x *. y)
 end

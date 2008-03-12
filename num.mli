@@ -14,7 +14,7 @@
 (*                                                                        *)
 (**************************************************************************)
 
-type t
+type t = float
 val bp : float -> t
 val pt : float -> t
 val cm : float -> t
