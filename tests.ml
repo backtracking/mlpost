@@ -56,9 +56,20 @@ let rec random_tree = function
       let k = 1 + Random.int (n - 2) in
       node (string_of_int n) [random_tree k; random_tree (n - 1 - k)]
 
-let d2 = 
-  draw ~ls:(-1.0) ~node_style:Circle ~arrow_style:Directed
-    ~fill:Color.yellow ~stroke:Color.blue ~pen:Pen.circle (random_tree 17)
+let d2c, d2s, d2sq, d2hsq = 
+  let tree = random_tree 17 in
+    (draw ~ls:(-1.0) 
+       ~node_style:Circle ~arrow_style:Directed ~edge_style:Curve
+       ~fill:Color.yellow ~stroke:Color.blue ~pen:Pen.circle tree,
+     draw ~ls:(-1.0) 
+       ~node_style:Circle ~arrow_style:Directed ~edge_style:Straight
+       ~fill:Color.yellow ~stroke:Color.blue ~pen:Pen.circle tree,
+     draw ~ls:(-1.0)
+       ~node_style:Circle ~arrow_style:Directed ~edge_style:Square
+       ~fill:Color.yellow ~stroke:Color.blue ~pen:Pen.circle tree,
+     draw ~ls:(-1.0)
+       ~node_style:Circle ~arrow_style:Directed ~edge_style:HalfSquare
+       ~fill:Color.yellow ~stroke:Color.blue ~pen:Pen.circle tree)
 
 let proval =
   let f = 7. in
@@ -81,7 +92,7 @@ let d3 =
   let pat = pattern [On (bp 6.); Off (bp 12.); On (bp 6.)] in
   [Command.draw p ~dashed:pat]
 
-let figs = [proval; d3; d2; d1]
+let figs = [proval; d3; d2sq; d2hsq; d2s; d2c; d1]
 
 let figs =
   let r = ref 0 in
