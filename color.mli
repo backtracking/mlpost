@@ -25,6 +25,7 @@ val blue : t
 val purple : t
 val gray : float -> t
 val white : t
+val black : t
 val green : t
 val cyan : t
 val blue : t

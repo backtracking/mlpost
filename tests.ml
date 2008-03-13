@@ -21,6 +21,8 @@ open Point
 open Format
 open Path
 open Helpers
+module SP = SimplePath
+module T = Transform
 
 let (++) x y = Point.p (cm x, cm y)
 let shift x y = Path.transform [Transform.shifted (x ++ y)]
@@ -58,6 +60,17 @@ let d2 =
   draw ~ls:(-1.0) ~node_style:Circle ~arrow_style:Directed
     ~fill:Color.yellow ~stroke:Color.blue ~pen:Pen.circle (random_tree 17)
 
+let proval =
+  let f = 7. in
+  let pen = Pen.transform [T.yscaled 0.5; T.rotated 40.] Pen.square in
+  let check = SP.jointpath [-1.2,1.2; 0., -2. ; 2., 2. ; 5., 5.] [JLine ; JCurve; JCurve] in
+    [ fill ~color:Color.black 
+        (Path.transform [Transform.scaled f] Path.fullcircle) ;
+      Command.label ~pos:Pleft (Picture.tex "Pr") (Point.p (f /. (-4.),0.)) ;
+      Command.label ~pos:Pright (Picture.tex "al") (Point.p (f /. 4.,0.)) ;
+      Command.draw ~color:Color.green ~pen check;]
+      
+
 open SimplePoint
 open SimplePath
 open Dash
@@ -68,7 +81,7 @@ let d3 =
   let pat = pattern [On (bp 6.); Off (bp 12.); On (bp 6.)] in
   [Command.draw p ~dashed:pat]
 
-let figs = [d3; d2; d1]
+let figs = [proval; d3; d2; d1]
 
 let figs =
   let r = ref 0 in

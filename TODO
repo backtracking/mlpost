@@ -4,8 +4,6 @@
   deux d'un coup)
 * un moyen pour joindre des boîtes à la boxjoin
 * opérations sur Num.t : add, sub, ...
-* opérations sur Point.t : add, shift, rotate, ...
-  (on ne peut pas utiliser Transform.t car dépendance circulaire)
 * Pouvoir faire la commande bbox sur des pictures. Ca demande
   d'être capable de générer des définitions locales dans MetaPost
   pour les pictures.
@@ -21,6 +19,9 @@ verbatimtex
 \usepackage[T1]{fontenc}
 \begin{document}
 etex
+
+* possibilite de donner un prélude comme ci-dessus
+* le petit outil pour inclure du mlpost en latex
 
 -------------------------------------------------------------------------------
 des liens avec des exemples :
