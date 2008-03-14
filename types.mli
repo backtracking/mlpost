@@ -5,6 +5,12 @@ type name = string
 
 type corner = N | S | W | E | NE | NW | SW | SE
 
+type on_off = On of num | Off of num
+
+type box_circle_style =
+  | Padding of num * num (* dx , dy *)
+  | Ratio of float (* dx / dy *)
+
 type point = 
   | PTPair of num * num
   | PTBoxCorner of name * corner
@@ -14,8 +20,35 @@ type point =
   | PTMult of float * point
   | PTRotated of float * point
 
+and direction = 
+  | Vec of point
+  | Curl of float
+  | NoDir 
+
+and joint = 
+  | JLine
+  | JCurve
+  | JCurveNoInflex
+  | JTension of float * float
+  | JControls of point * point
+
+and knot = direction * point * direction
+
 and path =
-  unit
+  | PAConcat of knot * joint * path
+  | PACycle of direction * joint * path
+  | PAFullCircle
+  | PAHalfCircle
+  | PAQuarterCircle
+  | PAUnitSquare
+  | PATransformed of path * transform list
+  | PAKnot of knot
+  | PAAppend of path * joint * path
+  | PABoxBPath of box
+  | PACutAfter of path * path
+  | PACutBefore of path * path
+  | PABuildCycle of path list
+  | PASub of float * float * path
 
 and transform =
   | TRRotated of float
@@ -30,3 +63,20 @@ and transform =
 
 and picture = 
   | PITex of string
+
+and box =
+  | BCircle of name * point * picture * box_circle_style option
+  | BRect of name * point * picture
+
+and dash =
+  | DEvenly
+  | DWithdots
+  | DScaled of float * dash
+  | DShifted of point * dash
+  | DPattern of on_off list
+
+and pen = 
+  | PenCircle
+  | PenSquare
+  | PenFromPath of path
+  | PenTransformed of pen * transform list

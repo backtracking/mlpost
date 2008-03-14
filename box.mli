@@ -14,9 +14,9 @@
 (*                                                                        *)
 (**************************************************************************)
 
-type t
+type t = Types.box
 
-type circle_style =
+type circle_style = Types.box_circle_style =
   | Padding of Num.t * Num.t (* dx , dy *)
   | Ratio of float (* dx / dy *)
 
@@ -33,7 +33,4 @@ val south_west : t -> Point.t
 val north_east : t -> Point.t
 val south_east : t -> Point.t
 
-val declare : Format.formatter -> t -> unit
-
-val name : t -> Name.t
 

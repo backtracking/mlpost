@@ -16,13 +16,13 @@
 
 (* low-level interface *)
 (* A path is a succession of knots bound by joints *)
-type direction = 
+type direction = Types.direction =
   | Vec of Point.t
   | Curl of float
   | NoDir 
 
-type joint = 
-    JLine
+type joint = Types.joint =
+  | JLine
   | JCurve
   | JCurveNoInflex
   | JTension of float * float
@@ -30,7 +30,8 @@ type joint =
 
 type knot = direction * Point.t * direction
 
-type t
+type t = Types.path
+
 val start : knot -> t
 val concat : t -> joint -> knot -> t
 
@@ -38,9 +39,6 @@ val cycle : direction -> joint -> t -> t
 val append : t -> joint -> t -> t
 
 (* val sub : float -> float -> t -> t *)
-
-(* later in the mlpost module *)
-val print : Format.formatter -> t -> unit
 
 val fullcircle : t
 val halfcircle : t
