@@ -18,7 +18,7 @@ open Helpers
 
 module Node = struct
 
-  type t = { id : int; x : float; y : float; s : string; }
+  type t = { id : int; x : float; y : float; s : Picture.t; }
 
   let create = 
     let c = ref min_int in 
@@ -38,7 +38,8 @@ open Node
 
 type node = Node.t
 
-let node = Node.create
+let node x y s = Node.create x y (Picture.tex s)
+let pic_node = Node.create
 
 type dir = Up | Down | Left | Right | Angle of float
 
@@ -86,7 +87,7 @@ type node_style = Circle | Rect
 
 let make_box ~style ~scale d n = 
   let p = Point.p (scale n.x, scale n.y) in
-  let pic = Picture.tex n.s in
+  let pic = n.s in
   let b = match style with 
     | Circle -> Box.circle p pic 
     | Rect -> Box.rect p pic 

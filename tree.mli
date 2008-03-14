@@ -27,6 +27,12 @@ val leaf : ?style:node_style -> ?fill:Color.t -> string -> t
 val node : ?style:node_style -> ?fill:Color.t -> string -> t list -> t
 val bin  : ?style:node_style -> ?fill:Color.t -> string -> t -> t -> t
 
+module Pic : sig
+  val leaf : ?style:node_style -> ?fill:Color.t -> Picture.t -> t
+  val node : ?style:node_style -> ?fill:Color.t -> Picture.t -> t list -> t
+  val bin  : ?style:node_style -> ?fill:Color.t -> Picture.t -> t -> t -> t
+end
+
 (** 2. Drawing *)
 
 type arrow_style = Directed | Undirected

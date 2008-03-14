@@ -21,6 +21,7 @@
 type node
 
 val node : float -> float -> string -> node
+val pic_node : float -> float -> Picture.t -> node
 
 type t
 

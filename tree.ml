@@ -19,11 +19,17 @@ open Helpers
 
 type node_style = Circle | Rect
 
-type t = N of node_style option * Color.t option * string * t list
+type t = N of node_style option * Color.t option * Picture.t * t list
 
-let leaf ?style ?fill s = N (style, fill, s, [])
-let node ?style ?fill s l = N (style, fill, s, l)
-let bin  ?style ?fill s x y = N (style, fill, s, [x; y])
+let leaf ?style ?fill s = N (style, fill, Picture.tex s, [])
+let node ?style ?fill s l = N (style, fill, Picture.tex s, l)
+let bin  ?style ?fill s x y = N (style, fill, Picture.tex s, [x; y])
+
+module Pic = struct
+  let leaf ?style ?fill s = N (style, fill, s, [])
+  let node ?style ?fill s l = N (style, fill, s, l)
+  let bin  ?style ?fill s x y = N (style, fill, s, [x; y])
+end
 
 let rec width cs = function
   | [] -> 0.
@@ -90,7 +96,7 @@ let draw ?(scale=Num.cm)
       let node_style = match nstyle with None -> node_style | Some s -> s in
       let fill = match nfill with None -> fill | Some _ -> nfill in
       let (b,_) as bx = 
-	box node_style (point x y) (Picture.tex s), (scale x, scale y) in
+	box node_style (point x y) s, (scale x, scale y) in
       let x = ref (x -. w /. 2.) in
       b, 
       draw_box ?fill b :: 

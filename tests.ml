@@ -50,8 +50,10 @@ let rec random_tree = function
       leaf "1"
   | 2 -> 
       node ~style:Rect ~fill:Color.red "2" [leaf "1"]
+(*
   | n when Random.bool () -> 
       node (string_of_int n) [random_tree (n-1)]
+*)
   | n -> 
       let k = 1 + Random.int (n - 2) in
       node (string_of_int n) [random_tree k; random_tree (n - 1 - k)]
@@ -113,13 +115,33 @@ let d4 =
   ]
 
 let d5 = 
-  let b1 = Box.circle (cmp (0.,0.)) pic in
-  let b2 = Box.rect (cmp (10.,0.)) (Picture.transform [T.rotated 40.] pic) in
+  let t1 = random_tree 5 in
+  let pic1 = Picture.make (Tree.draw t1) in
+  let b1 = Box.rect (cmp (0.,0.)) pic1 in
+  let t2 = random_tree 6 in
+  let pic2 = Picture.make (Tree.draw t2) in
+  let b2 = Box.rect (cmp (4.,0.)) pic2 in
   [ draw_box b1;
     draw_box b2;
     box_arrow b1 b2 ]
 
-let figs = [d5; d4; cheno011; proval; d3; d2sq; d2hsq; d2s; d2c; d1]
+open Tree.Pic
+
+let tree1 () = Picture.make (Tree.draw (random_tree (1 + Random.int 5)))
+
+let rec random_tree2 = function
+  | 1 -> 
+      leaf (tree1 ())
+  | 2 -> 
+      node (tree1 ()) [leaf (tree1 ())]
+  | n -> 
+      let k = 1 + Random.int (n - 2) in
+      node (tree1 ()) [random_tree2 k; random_tree2 (n - 1 - k)]
+
+let d6 =
+  Tree.draw ~scale:(Scale.cm 3.) ~cs:(mm 0.2) (random_tree2 10)
+
+let figs = [d6; d5; d4; cheno011; proval; d3; d2sq; d2hsq; d2s; d2c; d1]
 
 let figs =
   let r = ref 0 in
