@@ -49,25 +49,31 @@ let rec print_point fmt = function
       fprintf fmt "(point %a of (%a))" print_float f print_path p
 
 and print_transform fmt = function
-  | TRScaled a -> fprintf fmt "scaled %a@ " print_num a
-  | TRShifted a -> fprintf fmt "shifted %a@ " print_point a
-  | TRRotated a -> fprintf fmt "rotated %a@ " print_float a
-  | TRSlanted a -> fprintf fmt "slanted %a@ " print_num a
-  | TRXscaled a -> fprintf fmt "xscaled %a@ " print_num a
-  | TRYscaled a -> fprintf fmt "yscaled %a@ " print_num a
-  | TRZscaled a -> fprintf fmt "zscaled %a@ " print_point a
+  | TRScaled a -> fprintf fmt "scaled %a" print_num a
+  | TRShifted a -> fprintf fmt "shifted %a" print_point a
+  | TRRotated a -> fprintf fmt "rotated %a" print_float a
+  | TRSlanted a -> fprintf fmt "slanted %a" print_num a
+  | TRXscaled a -> fprintf fmt "xscaled %a" print_num a
+  | TRYscaled a -> fprintf fmt "yscaled %a" print_num a
+  | TRZscaled a -> fprintf fmt "zscaled %a" print_point a
   | TRReflect (p1,p2) -> 
-      fprintf fmt "reflectedabout (%a,%a)@ " 
+      fprintf fmt "reflectedabout (%a,%a)" 
         print_point p1 print_point p2
   | TRRotateAround (p,f) ->
-      fprintf fmt "rotatedaround(%a,%a)@ "
+      fprintf fmt "rotatedaround(%a,%a)"
         print_point p print_float f
 
 and print_transform_list fmt l =
-  Misc.print_list (fun fmt () -> fprintf fmt " ") print_transform fmt l
+  Misc.print_list space print_transform fmt l
 
 and print_picture fmt = function
   | PITex s -> fprintf fmt "btex %s etex" s
+  | PIMake _ -> assert false
+  | PITransform (tr, p) -> 
+      fprintf fmt "(%a transformed (identity %a))" 
+	print_picture p print_transform_list tr
+  | PIName n ->
+      pp_print_string fmt n
 
 and declare_box fmt = function
   | BCircle (n, c, p, s) -> 
@@ -97,7 +103,7 @@ and print_path fmt = function
   | PACycle (d,j,p) ->
       fprintf fmt "%a %a %acycle" print_path p print_joint j print_dir d
   | PAConcat (k,j,p) ->
-      fprintf fmt "%a %a %a" print_path p print_joint j print_knot k
+      fprintf fmt "%a %a@ %a" print_path p print_joint j print_knot k
   | PAKnot k -> print_knot fmt k
   | PABoxBPath (BCircle (n, _, _, _) | BRect (n, _, _)) ->
       fprintf fmt "bpath.%a" print_name n
@@ -107,7 +113,7 @@ and print_path fmt = function
       fprintf fmt "%a cutbefore %a@ " print_path p2 print_path p1
   | PABuildCycle l ->
       fprintf fmt "buildcycle(%a)" 
-        (Misc.print_list (fun fmt () -> fprintf fmt ",") print_path) l
+        (Misc.print_list comma print_path) l
   | PASub (f1, f2, p) ->
       fprintf fmt "subpath(%a,%a) of %a" 
 	print_float f1 print_float f2 print_path p
@@ -154,7 +160,7 @@ and print_pen fmt = function
 
 and print_command fmt  = function
   | CDraw (path, color, pen, dashed) ->
-      fprintf fmt "draw %a%a%a%a;@\n" print_path path
+      fprintf fmt "@[<hov 2>draw@ %a@,%a@,%a@,%a;@]@\n" print_path path
         (print_option " withcolor " print_color) color
         (print_option " withpen " print_pen) pen
         (print_option " dashed " print_dash) dashed
@@ -167,10 +173,10 @@ and print_command fmt  = function
       fprintf fmt "fill %a%a;@\n" print_path path
         (print_option " withcolor " print_color) color
   | CLabel (pic,pos,p) ->
-      fprintf fmt "label%a(%a,%a); @\n"
+      fprintf fmt "label%a(%a,@ %a); @\n"
         print_position pos print_picture pic print_point p
   | CDotLabel (pic,pos,p) ->
-      fprintf fmt "dotlabel%a(%a,%a); @\n"
+      fprintf fmt "@[<hov 2>dotlabel%a(%a,@ %a);@]@\n"
         print_position pos print_picture pic print_point p
   | CLoop(from,until,cmd) ->
       for i = from to until - 1 do
@@ -178,6 +184,8 @@ and print_command fmt  = function
       done
   | CDrawBox (None, (BCircle (n, _, _, _) | BRect (n, _, _) as b)) ->
       fprintf fmt "%adrawboxed(%a);@\n" declare_box b print_name n
+  | CDrawPic p ->
+      fprintf fmt "draw %a;@\n" print_picture p
   | CDrawBox (Some _ as c, (BCircle (n, _, _, _) | BRect (n, _, _) as b)) ->
       let fill = CFill (PABoxBPath b, c) in
       fprintf fmt "%a%adrawboxed(%a);@\n" 
@@ -186,10 +194,19 @@ and print_command fmt  = function
       List.iter (fun c -> print_command fmt c) l
   | CDeclPath (n, p) ->
       fprintf fmt "path %s ;@\n%s = %a;@\n" n n print_path p
+  | CDefPic (pic, cmd) ->
+      let savepic = Name.picture () in
+      fprintf fmt "picture %s, %s ;@\n" savepic pic;
+      fprintf fmt "%s = currentpicture;@\n" savepic;
+      fprintf fmt "currentpicture := nullpicture;@\n";
+      print_command fmt cmd;
+      fprintf fmt "%s = currentpicture;@\n" pic;
+      fprintf fmt "currentpicture := %s;@\n" savepic
 
 let print i fmt l =
+  Compile.reset ();
   let l = List.map Compile.command l in
-  fprintf fmt "beginfig(%d)@\n %a endfig;@." i 
+  fprintf fmt "@[beginfig(%d)@\n  @[%a@] endfig;@]@." i 
     (fun fmt l -> List.iter (print_command fmt) l)
     l
 

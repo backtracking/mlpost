@@ -29,3 +29,8 @@ let rec alpha i =
 let path =
   let r = ref 0 in
   fun () -> incr r; "path" ^ alpha !r
+
+let picture = 
+  let r = ref 0 in
+  fun () -> incr r; "pic" ^ alpha !r
+

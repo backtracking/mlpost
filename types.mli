@@ -77,6 +77,9 @@ and transform =
 
 and picture = 
   | PITex of string
+  | PIMake of command
+  | PITransform of transform list * picture
+  | PIName of name
 
 and box =
   | BCircle of name * point * picture * box_circle_style option
@@ -98,6 +101,7 @@ and pen =
 and command =
   | CDraw of path * color option * pen option * dash option
   | CDrawArrow of path * color option * pen option * dash option
+  | CDrawPic of picture
   | CFill of path * color option
   | CLabel of picture * position * point
   | CDotLabel of picture * position * point
@@ -105,3 +109,5 @@ and command =
   | CDrawBox of color option * box
   | CSeq of command list
   | CDeclPath of name * path
+  | CDefPic of name * command
+

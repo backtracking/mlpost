@@ -21,6 +21,7 @@ val draw_arrow : ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> Path.t -> t
 val fill : ?color:Color.t -> Path.t -> t
 val iter : int -> int -> (int -> t list) -> t
 val draw_box : ?fill:Color.t -> Box.t -> t
+val draw_pic : Picture.t -> t
 
 val append : t -> t -> t
 val (++) : t -> t -> t
@@ -41,3 +42,4 @@ val label : ?pos:position -> Picture.t -> Point.t -> t
 val dotlabel : ?pos:position -> Picture.t -> Point.t -> t
 
 type figure = t list
+

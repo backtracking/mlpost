@@ -102,7 +102,18 @@ let d3 =
   let pat = pattern [On (bp 6.); Off (bp 12.); On (bp 6.)] in
   [Command.draw p ~dashed:pat]
 
-let figs = [cheno011; proval; d3; d2sq; d2hsq; d2s; d2c; d1]
+
+let pic = Picture.make cheno011
+
+let d4 = 
+  [Command.draw_pic pic;
+   Command.iter 1 6 
+     (fun i -> 
+       [Command.draw_pic (Picture.transform [T.rotated (10. *. float i)] pic)])
+  ]
+
+
+let figs = [d4; cheno011; proval; d3; d2sq; d2hsq; d2s; d2c; d1]
 
 let figs =
   let r = ref 0 in

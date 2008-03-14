@@ -16,7 +16,12 @@
 
 open Types
 
-type t = Types.picture
+type t = picture
 
 let tex s = PITex s
 
+let make l = PIMake (CSeq l)
+
+let transform tr = function
+  | PITransform (tr', p) -> PITransform (tr'@tr, p)
+  | _ as x -> PITransform (tr, x)

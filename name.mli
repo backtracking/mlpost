@@ -18,4 +18,5 @@ type t = Types.name
 
 val path : unit -> t
 val node : unit -> t
+val picture : unit -> t
 

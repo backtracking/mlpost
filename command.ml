@@ -51,6 +51,8 @@ let iter from until f = CLoop (from, until, f)
 
 let draw_box ?fill b = CDrawBox (fill, b)
 
+let draw_pic p = CDrawPic p
+
 let append c1 c2 = CSeq [c1; c2]
 let (++) = append
 let seq l = CSeq l

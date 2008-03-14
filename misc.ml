@@ -30,10 +30,12 @@ let deg2rad f = pi *. f /. 180.
 
 let print_option start printer fmt = function
   | None -> ()
-  | Some o -> Format.fprintf fmt "%s%a@ " start printer o
+  | Some o -> Format.fprintf fmt "%s%a " start printer o
 
 let rec print_list sep prf fmt = function
   | [] -> ()
   | [x] -> prf fmt x
   | (x::xs) -> prf fmt x; sep fmt (); print_list sep prf fmt xs
 
+let space fmt () = Format.fprintf fmt "@ "
+let comma fmt () = Format.fprintf fmt ",@ "

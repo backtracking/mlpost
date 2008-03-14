@@ -18,5 +18,8 @@ type t = Types.picture
 
 val tex : string -> t
 
+val make : Types.command list -> t
+
+val transform : Transform.t -> t -> t
 
 
