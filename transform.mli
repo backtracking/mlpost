@@ -14,7 +14,7 @@
 (*                                                                        *)
 (**************************************************************************)
 
-type t'
+type t' = Types.transform
 
 val scaled : ?scale:(float -> Num.t) -> float -> t'
 val rotated : float -> t'
@@ -29,4 +29,3 @@ val rotate_around : Point.t -> float -> t'
 type t = t' list
 val id : t
 
-val print : Format.formatter -> t -> unit

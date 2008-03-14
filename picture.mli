@@ -14,10 +14,9 @@
 (*                                                                        *)
 (**************************************************************************)
 
-type t
+type t = Types.picture
 
 val tex : string -> t
 
-val print : Format.formatter -> t -> unit
 
 

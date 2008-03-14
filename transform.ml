@@ -14,47 +14,21 @@
 (*                                                                        *)
 (**************************************************************************)
 
-module F = Format
+open Types
 
-type t' = 
-    Rotated of float
-  | Scaled of Num.t
-  | Shifted of Point.t
-  | Slanted of Num.t
-  | Xscaled of Num.t
-  | Yscaled of Num.t
-  | Zscaled of Point.t
-  | Reflect of Point.t * Point.t
-  | RotateAround of Point.t * float
+type t' = transform
 
 type t = t' list
 
-let scaled ?(scale=Num.bp) a = Scaled (scale a)
-let rotated a = Rotated a
-let shifted a = Shifted a
-let slanted a = Slanted a
-let xscaled a = Xscaled a
-let yscaled a = Yscaled a
-let zscaled a = Zscaled a
-let reflect p1 p2 = Reflect (p1,p2)
-let rotate_around p f = RotateAround (p,f)
+let scaled ?(scale=Num.bp) a = TRScaled (scale a)
+let rotated a = TRRotated a
+let shifted a = TRShifted a
+let slanted a = TRSlanted a
+let xscaled a = TRXscaled a
+let yscaled a = TRYscaled a
+let zscaled a = TRZscaled a
+let reflect p1 p2 = TRReflect (p1,p2)
+let rotate_around p f = TRRotateAround (p,f)
 
-let print_item fmt = function
-  | Scaled a -> F.fprintf fmt "scaled %a@ " Num.print a
-  | Shifted a -> F.fprintf fmt "shifted %a@ " Point.print a
-  | Rotated a -> F.fprintf fmt "rotated %a@ " Num.print_float a
-  | Slanted a -> F.fprintf fmt "slanted %a@ " Num.print a
-  | Xscaled a -> F.fprintf fmt "xscaled %a@ " Num.print a
-  | Yscaled a -> F.fprintf fmt "yscaled %a@ " Num.print a
-  | Zscaled a -> F.fprintf fmt "zscaled %a@ " Point.print a
-  | Reflect (p1,p2) -> 
-      F.fprintf fmt "reflectedabout (%a,%a)@ " 
-        Point.print p1 Point.print p2
-  | RotateAround (p,f) ->
-      F.fprintf fmt "rotatedaround(%a,%a)@ "
-        Point.print p Num.print_float f
-
-let print fmt l =
-  Misc.print_list (fun fmt () -> F.fprintf fmt " ") print_item fmt l
 
 let id = []

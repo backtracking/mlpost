@@ -24,14 +24,6 @@ let cm f = 28.34645 *. f
 let mm f = 2.83464 *. f
 let inch f = 72. *. f
 
-let print fmt f =
-  if f = infinity then F.fprintf fmt "infinity"
-  else
-    if f > 4095. then F.fprintf fmt "%4f" 4095.
-    else F.fprintf fmt "%.4f" f
-
-let print_float = print 
-
 type scale = float -> t
 
 module Scale = struct

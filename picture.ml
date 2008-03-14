@@ -14,13 +14,9 @@
 (*                                                                        *)
 (**************************************************************************)
 
-open Format
+open Types
 
-type t = 
-  | Tex of string
-(* later in the mlpost module *)
+type t = Types.picture
 
-let tex s = Tex s
+let tex s = PITex s
 
-let print fmt = function
-  | Tex s -> fprintf fmt "btex %s etex" s
