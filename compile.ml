@@ -94,19 +94,24 @@ and command = function
   | CDraw (p, color, pen, dash) ->
       let p, code = path p in
       CSeq [code; CDraw (p, color, pen, dash)]
+  | CDrawArrow (p, color, pen, dash) ->
+      let p, code = path p in
+      CSeq [code; CDrawArrow (p, color, pen, dash)]
   | CDrawPic p ->
       let p, code = picture p in
       CSeq [code; CDrawPic p]
   | CDrawBox (c, b) ->
       let b, code = box b in
       CSeq [code; CDrawBox (c, b)]
+  | CFill (p, c) ->
+      let p, code = path p in
+      CSeq [code; CFill (p, c)]
   | CSeq l ->
       CSeq (List.map command l)
   | CLoop (i, j, f) ->
       CLoop (i, j, fun k -> List.map command (f k))
-  | c -> 
+  | CDefPic _ | CDeclPath _ | CDotLabel _ | CLabel _ as c ->
       c
-
 
 let reset () = 
   Hashtbl.clear known_pictures
