@@ -30,7 +30,7 @@ let shift x y = Path.transform [Transform.shifted (x ++ y)]
 let d1 = 
   let a = Box.circle (0. ++ 0.) (Picture.tex "$\\sqrt2$") in
   let b = Box.rect (2. ++ 0.) (Picture.tex "$\\pi$") in
-  let pen = Pen.transform [Transform.scaled 3.] Pen.default in
+  let pen = Pen.default ~tr:[Transform.scaled 3.] () in
   [ draw_box a;
     draw_box ~fill:Color.purple b;
     draw
@@ -62,20 +62,20 @@ let d2c, d2s, d2sq, d2hsq =
   let tree = random_tree 17 in
     (draw ~ls:(-1.0) 
        ~node_style:Circle ~arrow_style:Directed ~edge_style:Curve
-       ~fill:Color.yellow ~stroke:Color.blue ~pen:Pen.circle tree,
+       ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree,
      draw ~ls:(-1.0) 
        ~node_style:Circle ~arrow_style:Directed ~edge_style:Straight
-       ~fill:Color.yellow ~stroke:Color.blue ~pen:Pen.circle tree,
+       ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree,
      draw ~ls:(-1.0)
        ~node_style:Circle ~arrow_style:Directed ~edge_style:Square
-       ~fill:Color.yellow ~stroke:Color.blue ~pen:Pen.circle tree,
+       ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree,
      draw ~ls:(-1.0)
        ~node_style:Circle ~arrow_style:Directed ~edge_style:HalfSquare
-       ~fill:Color.yellow ~stroke:Color.blue ~pen:Pen.circle tree)
+       ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree)
 
 let proval =
   let f = 7. in
-  let pen = Pen.transform [T.yscaled 0.5; T.rotated 40.] Pen.square in
+  let pen = Pen.square ~tr:[T.yscaled 0.5; T.rotated 40.] () in
   let check = SP.jointpath [-1.2,1.2; 0., -2. ; 2., 2. ; 5., 5.] [JLine ; JCurve; JCurve] in
     [ fill ~color:Color.black 
         (Path.transform [Transform.scaled f] Path.fullcircle) ;
@@ -85,7 +85,7 @@ let proval =
 
 let cheno011 =
   let p = SP.path ~cycle:JCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)] in
-  let pen = Pen.transform [T.scaled 1.5] Pen.circle in
+  let pen = Pen.circle ~tr:[T.scaled 1.5] () in
   [Command.draw p;
    seq (List.map
 	   (fun (pos, l, i) -> 

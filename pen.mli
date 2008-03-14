@@ -17,7 +17,7 @@
 type t = Types.pen
 
 val transform : Transform.t -> t -> t
-val default : t
-val circle : t
-val square : t
+val default : ?tr:Transform.t -> unit -> t
+val circle : ?tr:Transform.t -> unit -> t
+val square : ?tr:Transform.t -> unit -> t
 val from_path : Path.t -> t

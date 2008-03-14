@@ -15,16 +15,19 @@
 (**************************************************************************)
 
 open Types
+open Transform
 
 type t = Types.pen
 
-let transform tr = function
-  | PenTransformed (t,tr') -> PenTransformed (t,tr'@tr)
-  | _ as x -> PenTransformed (x,tr)
+let transform tr p = 
+  match tr, p with
+    | [], _ -> p
+    | _, PenTransformed (t,tr') -> PenTransformed (t,tr'@tr)
+    | _, _ -> PenTransformed (p,tr)
 
-let default = PenTransformed (PenCircle, [Transform.scaled 0.5])
-let circle = PenCircle
-let square = PenSquare
+let default ?(tr=id) () = PenTransformed (PenCircle, (scaled 0.5)::tr)
+let circle ?(tr=id) () = transform tr PenCircle
+let square ?(tr=id) () = transform tr PenSquare
 let from_path p = PenFromPath p
 
 

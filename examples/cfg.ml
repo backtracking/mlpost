@@ -3,7 +3,7 @@ open Command
 open Diag
 
 let fig =
-  let pen = Pen.circle in
+  let pen = Pen.circle () in
   let a = node 0. 4. "~~~" in
   let b = node 0. 3. "~~~" in
   let inv = node 0. 2. "inv" in

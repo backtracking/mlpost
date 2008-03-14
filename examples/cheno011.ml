@@ -6,7 +6,7 @@ module T = Transform
 
 let fig =
   let p = SP.path ~cycle:JCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)] in
-  let pen = Pen.transform [T.scaled 1.5] Pen.circle in
+  let pen = Pen.circle ~tr:[T.scaled 1.5] () in
   [Command.draw p;
    Command.seq 
      (List.map

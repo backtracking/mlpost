@@ -2,7 +2,7 @@ open Mlpost
 open Command
 
 let a = Point.p (Num.bp 0., Num.bp 0.)
-let pen = Pen.transform [Transform.scaled ~scale:Num.bp 4.] Pen.circle
+let pen = Pen.circle ~tr:[Transform.scaled 4.] () 
 let fig = [
   draw (SimplePath.pathp [a]) ~pen;
   label ~pos:Ptop (Picture.tex "Au dessus") a;

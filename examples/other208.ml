@@ -34,7 +34,7 @@ let rec pave t a b c n =
 	    (pave Two d e b (n-1))@
 	      (pave Three d a e (n-1))@pave Four c d b (n-1)
   else  
-    let pen = Pen.transform [Transform.scaled 1.] Pen.circle in
+    let pen = Pen.circle () in
     let gb = Color.rgb 0. 1. 1. in
     let gr = Color.rgb 1. 1. 0. in
     let path = SP.pathp ~style:JLine ~cycle:JLine [a;b;c] in

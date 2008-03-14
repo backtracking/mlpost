@@ -6,7 +6,7 @@ module T = Transform
 
 let fig =
   let f = 7. in
-  let pen = Pen.transform [T.yscaled 0.5; T.rotated 40.] Pen.square in
+  let pen = Pen.square ~tr:[T.yscaled 0.5; T.rotated 40.] () in
   let check = 
     SP.jointpath [-1.2,1.2; 0., -2. ; 2., 2. ; 5., 5.] [JLine ; JCurve; JCurve]
   in

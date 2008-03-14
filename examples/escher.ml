@@ -23,7 +23,7 @@ let mult f (a1,a2) = (f *. a1, f *. a2)
 let myscale = List.map (mult s)
 
 let fig =
-  let pen1 = Pen.circle in
+  let pen1 = Pen.circle () in
   let mygreen = Color.rgb 0.8 0.9 0.8 in
   let p1  = ( 750.,8000. -. 4950. ) in
   let p2  = (1050.,8000. -. 4950. ) in
