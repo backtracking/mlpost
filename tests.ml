@@ -112,8 +112,14 @@ let d4 =
        [Command.draw_pic (Picture.transform [T.rotated (10. *. float i)] pic)])
   ]
 
+let d5 = 
+  let b1 = Box.circle (cmp (0.,0.)) pic in
+  let b2 = Box.rect (cmp (10.,0.)) (Picture.transform [T.rotated 40.] pic) in
+  [ draw_box b1;
+    draw_box b2;
+    box_arrow b1 b2 ]
 
-let figs = [d4; cheno011; proval; d3; d2sq; d2hsq; d2s; d2c; d1]
+let figs = [d5; d4; cheno011; proval; d3; d2sq; d2hsq; d2s; d2c; d1]
 
 let figs =
   let r = ref 0 in
