@@ -198,7 +198,7 @@ let mpostfile = "test/othergraphs.mp"
 let texfile = "test/othergraphs.tex"
 
 let _ =
-    Command.generate_mp mpostfile figs;
+    Metapost.generate_mp mpostfile figs;
     Generate.generate_tex texfile "othergraphs/mpost" "othergraphs" figs
 
 

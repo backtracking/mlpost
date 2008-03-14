@@ -15,10 +15,10 @@
 (**************************************************************************)
 
 open Misc
-module F = Format
+open Types
 module T = Transform
 
-type position =
+type position = Types.position =
   | Pcenter
   | Pleft
   | Pright
@@ -29,100 +29,30 @@ type position =
   | Plowleft
   | Plowright
 
-type t = 
-  | Draw of Path.t * Color.t option * Pen.t option * Dash.t option
-  | DrawArrow of Path.t * Color.t option * Pen.t option * Dash.t option
-  | Fill of Path.t * Color.t option
-  | Label of Picture.t * position * Point.t
-  | DotLabel of Picture.t * position * Point.t
-  | Loop of int * int * (int -> t list)
-  | DrawBox of Color.t option * Box.t
-  | Seq of t list
+type t = command
 
 type figure = t list
 
-let label ?(pos=Pcenter) pic point = Label (pic,pos,point)
+let label ?(pos=Pcenter) pic point = CLabel (pic,pos,point)
 (* replace later *)
-let dotlabel ?(pos=Pcenter) pic point = DotLabel (pic,pos,point)
+let dotlabel ?(pos=Pcenter) pic point = CDotLabel (pic,pos,point)
 
 let draw ?color ?pen ?dashed t = 
   (* We don't use a default to avoid the output of 
      ... withcolor (0.00red+0.00green+0.00blue) withpen .... 
      for each command in the output file *)
-    Draw (t, color, pen, dashed)
+    CDraw (t, color, pen, dashed)
 
-let draw_arrow ?color ?pen ?dashed t = DrawArrow (t, color, pen, dashed)
+let draw_arrow ?color ?pen ?dashed t = CDrawArrow (t, color, pen, dashed)
 
-let fill ?color t = Fill (t, color)
+let fill ?color t = CFill (t, color)
 
-let iter from until f = Loop (from, until, f)
+let iter from until f = CLoop (from, until, f)
 
-let draw_box ?fill b = DrawBox (fill, b)
+let draw_box ?fill b = CDrawBox (fill, b)
 
-let append c1 c2 = Seq [c1; c2]
+let append c1 c2 = CSeq [c1; c2]
 let (++) = append
-let seq l = Seq l
+let seq l = CSeq l
 
-let print_position fmt = function
-  | Pcenter  -> F.fprintf fmt ""
-  | Pleft   -> F.fprintf fmt ".lft"
-  | Pright  -> F.fprintf fmt ".rt"
-  | Ptop    -> F.fprintf fmt ".top"
-  | Pbot    -> F.fprintf fmt ".bot"
-  | Pupleft  -> F.fprintf fmt ".ulft"
-  | Pupright -> F.fprintf fmt ".urt"
-  | Plowleft -> F.fprintf fmt ".llft"
-  | Plowright -> F.fprintf fmt ".lrt"
-
-let rec print_command fmt  = function
-  | Draw (path, color, pen, dashed) ->
-      F.fprintf fmt "draw %a%a%a%a;@\n" Path.print path
-        (print_option " withcolor " Color.print) color
-        (print_option " withpen " Pen.print) pen
-        (print_option " dashed " Dash.print) dashed
-  | DrawArrow (path, color, pen, dashed) ->
-      F.fprintf fmt "drawarrow %a%a%a%a;@\n" Path.print path
-        (print_option " withcolor " Color.print) color
-        (print_option " withpen " Pen.print) pen
-        (print_option " dashed " Dash.print) dashed
-  | Fill (path, color) ->
-      F.fprintf fmt "fill %a%a;@\n" Path.print path
-        (print_option " withcolor " Color.print) color
-  | Label (pic,pos,p) ->
-      F.fprintf fmt "label%a(%a,%a); @\n"
-        print_position pos Picture.print pic Point.print p
-  | DotLabel (pic,pos,p) ->
-      F.fprintf fmt "dotlabel%a(%a,%a); @\n"
-        print_position pos Picture.print pic Point.print p
-  | Loop(from,until,cmd) ->
-      for i = from to until - 1 do
-	List.iter (print_command fmt) (cmd i);
-      done
-  | DrawBox (None, b) ->
-      F.fprintf fmt "%adrawboxed(%a);@\n" Box.declare b Name.print (Box.name b)
-  | DrawBox (Some _ as c, b) ->
-      let fill = Fill (Path.bpath b, c) in
-      F.fprintf fmt "%a%adrawboxed(%a);@\n" 
-	Box.declare b print_command fill Name.print (Box.name b)
-  | Seq l ->
-      List.iter (fun c -> print_command fmt c) l
-
-let print i fmt l =
-  F.fprintf fmt "beginfig(%d)@\n %a endfig;@." i 
-    (fun fmt l -> List.iter (print_command fmt) l)
-    l
-
-let generate_mp fn l =
-  Misc.write_to_formatted_file fn
-    (fun fmt -> 
-      Format.fprintf fmt "input boxes;@\n";
-      List.iter (fun (i,f) -> print i fmt f) l)
-
-(* batch processing *)
-
-let figures = ref []
-
-let emit i f = figures := (i, f) :: !figures
-
-let dump f = generate_mp f (List.rev !figures)
 

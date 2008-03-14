@@ -52,7 +52,7 @@ all: byte $(OCAMLBEST) $(TOOL) $(TESTS)
 # bytecode and native-code compilation
 ######################################
 
-CMO := misc.cmo num.cmo name.cmo point.cmo transform.cmo \
+CMO := misc.cmo metapost.cmo num.cmo name.cmo point.cmo transform.cmo \
        color.cmo picture.cmo box.cmo dash.cmo \
        path.cmo simplePoint.cmo simplePath.cmo pen.cmo command.cmo \
        helpers.cmo diag.cmo tree.cmo convenience.cmo generate.cmo

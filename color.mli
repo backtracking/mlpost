@@ -14,7 +14,7 @@
 (*                                                                        *)
 (**************************************************************************)
 
-type t
+type t = Types.color
 
 val default : t
 
@@ -33,5 +33,3 @@ val yellow : t
 val magenta : t
 val orange : t
 val purple : t
-
-val print : Format.formatter -> t -> unit

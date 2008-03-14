@@ -29,6 +29,9 @@ let center = function
   | BCircle (_, c, _, _) 
   | BRect (_, c, _) -> c
 
+let name = function
+  | BCircle (n, _, _, _) | BRect (n, _, _) -> n
+
 let north b = Point.north (name b)
 let south b = Point.south (name b)
 let west b = Point.west (name b)

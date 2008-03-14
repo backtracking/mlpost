@@ -1,5 +1,6 @@
 
 open Format
+open Misc
 open Types
 
 let print_name = pp_print_string
@@ -20,9 +21,23 @@ let rec print_num fmt f =
     if f > 4095. then fprintf fmt "%4f" 4095.
     else fprintf fmt "%.4f" f
 
-and print_float fmt f = print_num fmt f
+let print_float fmt f = print_num fmt f
 
-and print_point fmt = function
+let print_color fmt (r,g,b) =
+  fprintf fmt "(%a, %a , %a)" print_float r print_float g print_float b
+
+let print_position fmt = function
+  | Pcenter  -> fprintf fmt ""
+  | Pleft   -> fprintf fmt ".lft"
+  | Pright  -> fprintf fmt ".rt"
+  | Ptop    -> fprintf fmt ".top"
+  | Pbot    -> fprintf fmt ".bot"
+  | Pupleft  -> fprintf fmt ".ulft"
+  | Pupright -> fprintf fmt ".urt"
+  | Plowleft -> fprintf fmt ".llft"
+  | Plowright -> fprintf fmt ".lrt"
+
+let rec print_point fmt = function
   | PTPair (m,n) -> fprintf fmt "(%a,%a)" print_num m print_num n
   | PTBoxCorner (n, d) -> fprintf fmt "%a.%a" print_name n print_corner d
   | PTAdd (p1, p2) -> fprintf fmt "(%a + %a)" print_point p1 print_point p2
@@ -31,7 +46,7 @@ and print_point fmt = function
   | PTRotated (f, p) ->  
       fprintf fmt "(%a rotated %a)" print_point p print_float f
   | PTPointOf (f, p) ->
-      fprintf fmt "(point %a of %a)" print_float f print_path p
+      fprintf fmt "(point %a of (%a))" print_float f print_path p
 
 and print_transform fmt = function
   | TRScaled a -> fprintf fmt "scaled %a@ " print_num a
@@ -134,3 +149,57 @@ and print_pen fmt = function
   | PenFromPath p -> fprintf fmt "makepen (%a)" print_path p
   | PenTransformed (p,tr) -> 
       fprintf fmt "%a %a" print_pen p print_transform_list tr
+
+and print_command fmt  = function
+  | CDraw (path, color, pen, dashed) ->
+      fprintf fmt "draw %a%a%a%a;@\n" print_path path
+        (print_option " withcolor " print_color) color
+        (print_option " withpen " print_pen) pen
+        (print_option " dashed " print_dash) dashed
+  | CDrawArrow (path, color, pen, dashed) ->
+      fprintf fmt "drawarrow %a%a%a%a;@\n" print_path path
+        (print_option " withcolor " print_color) color
+        (print_option " withpen " print_pen) pen
+        (print_option " dashed " print_dash) dashed
+  | CFill (path, color) ->
+      fprintf fmt "fill %a%a;@\n" print_path path
+        (print_option " withcolor " print_color) color
+  | CLabel (pic,pos,p) ->
+      fprintf fmt "label%a(%a,%a); @\n"
+        print_position pos print_picture pic print_point p
+  | CDotLabel (pic,pos,p) ->
+      fprintf fmt "dotlabel%a(%a,%a); @\n"
+        print_position pos print_picture pic print_point p
+  | CLoop(from,until,cmd) ->
+      for i = from to until - 1 do
+	List.iter (print_command fmt) (cmd i);
+      done
+  | CDrawBox (None, (BCircle (n, _, _, _) | BRect (n, _, _) as b)) ->
+      fprintf fmt "%adrawboxed(%a);@\n" declare_box b print_name n
+  | CDrawBox (Some _ as c, (BCircle (n, _, _, _) | BRect (n, _, _) as b)) ->
+      let fill = CFill (PABoxBPath b, c) in
+      fprintf fmt "%a%adrawboxed(%a);@\n" 
+	declare_box b print_command fill print_name n
+  | CSeq l ->
+      List.iter (fun c -> print_command fmt c) l
+
+
+let print i fmt l =
+  fprintf fmt "beginfig(%d)@\n %a endfig;@." i 
+    (fun fmt l -> List.iter (print_command fmt) l)
+    l
+
+let generate_mp fn l =
+  Misc.write_to_formatted_file fn
+    (fun fmt -> 
+      Format.fprintf fmt "input boxes;@\n";
+      List.iter (fun (i,f) -> print i fmt f) l)
+
+(* batch processing *)
+
+let figures = ref []
+
+let emit i f = figures := (i, f) :: !figures
+
+let dump f = generate_mp f (List.rev !figures)
+

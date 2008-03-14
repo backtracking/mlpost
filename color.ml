@@ -14,7 +14,7 @@
 (*                                                                        *)
 (**************************************************************************)
 
-module F = Format
+open Types
 
 type t = float * float * float
          
@@ -32,6 +32,3 @@ let black = gray 0.0
 let default = black
 let rgb r g b = (r,g,b)
 
-let print fmt (r,g,b) =
-  F.fprintf fmt "(%.3f, %.3f , %.3f )" r g b
-    

@@ -170,7 +170,7 @@ let mpostfile = "test/testmanual.mp"
 let texfile = "test/testmanual.tex"
 
 let _ =
-    Command.generate_mp mpostfile figs;
+    Metapost.generate_mp mpostfile figs;
     Generate.generate_tex texfile "manual/manual" "testmanual" figs
 
 

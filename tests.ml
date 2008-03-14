@@ -99,7 +99,7 @@ let figs =
   List.map (fun f -> incr r; !r, f) figs
 
 let () =
-  Command.generate_mp "test/tests.mp" figs;
+  Metapost.generate_mp "test/tests.mp" figs;
   Misc.write_to_formatted_file "test/tests.tex"
     (fun fmt ->
       fprintf fmt "\\documentclass[a4paper]{article}@.";

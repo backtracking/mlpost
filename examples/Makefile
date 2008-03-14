@@ -20,7 +20,7 @@ $(PNGFILES): ../mlpost.cma
 %_footer.ml: %.ml
 	cp -f $^ $@
 	echo 'let mpfile = "'$*'.mp"' >> $@
-	echo "let () = Command.generate_mp mpfile [1,fig]" >> $@
+	echo "let () = Metapost.generate_mp mpfile [1,fig]" >> $@
 
 %.mp: %_footer.ml
 	ocamlc -I .. -c $*.ml

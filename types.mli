@@ -1,9 +1,22 @@
 
 type num = float
 
+type color = float * float * float
+
 type name = string
 
 type corner = N | S | W | E | NE | NW | SW | SE
+
+type position =
+  | Pcenter
+  | Pleft
+  | Pright
+  | Ptop
+  | Pbot
+  | Pupleft
+  | Pupright
+  | Plowleft
+  | Plowright
 
 type on_off = On of num | Off of num
 
@@ -80,3 +93,13 @@ and pen =
   | PenSquare
   | PenFromPath of path
   | PenTransformed of pen * transform list
+
+and command =
+  | CDraw of path * color option * pen option * dash option
+  | CDrawArrow of path * color option * pen option * dash option
+  | CFill of path * color option
+  | CLabel of picture * position * point
+  | CDotLabel of picture * position * point
+  | CLoop of int * int * (int -> command list)
+  | CDrawBox of color option * box
+  | CSeq of command list
