@@ -80,7 +80,17 @@ let proval =
       Command.label ~pos:Pleft (Picture.tex "Pr") (Point.p (f /. (-4.),0.)) ;
       Command.label ~pos:Pright (Picture.tex "al") (Point.p (f /. 4.,0.)) ;
       Command.draw ~color:Color.green ~pen check;]
-      
+
+let cheno011 =
+  let p = SP.path ~cycle:JCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)] in
+  let pen = Pen.transform [T.scaled 1.5] Pen.circle in
+  [Command.draw p;
+   seq (List.map
+	   (fun (pos, l, i) -> 
+	     Command.dotlabel ~pos (Picture.tex l) (Path.point i p))
+	   [Pbot, "0", 0.;  Pupleft, "1", 1. ;
+	    Plowleft, "2", 2. ;  Ptop, "3", 3. ; Pleft, "4", 4. ]);
+   Command.draw ~pen (Path.sub 1.3 3.2 p)]
 
 open SimplePoint
 open SimplePath
@@ -92,7 +102,7 @@ let d3 =
   let pat = pattern [On (bp 6.); Off (bp 12.); On (bp 6.)] in
   [Command.draw p ~dashed:pat]
 
-let figs = [proval; d3; d2sq; d2hsq; d2s; d2c; d1]
+let figs = [cheno011; proval; d3; d2sq; d2hsq; d2s; d2c; d1]
 
 let figs =
   let r = ref 0 in

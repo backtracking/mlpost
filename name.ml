@@ -16,8 +16,16 @@
 
 type t = string
 
-let create =
+let create prefix =
   let r = ref 0 in
-  fun () -> incr r; "node" ^ string_of_int !r
+  fun () -> incr r; prefix ^ string_of_int !r
 
-let print = Format.pp_print_string
+let node = create "node"
+
+let rec alpha i =
+  if 0 <= i && i <= 22 then String.make 1 (Char.chr (Char.code 'a' + i))
+  else alpha (i / 22) ^ alpha (i mod 22)
+
+let path =
+  let r = ref 0 in
+  fun () -> incr r; "path" ^ alpha !r

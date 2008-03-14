@@ -22,8 +22,8 @@ type circle_style = box_circle_style =
 
 type t = box
 
-let circle ?style c p = BCircle (Name.create (), c, p, style)
-let rect c p = BRect (Name.create (), c, p)
+let circle ?style c p = BCircle (Name.node (), c, p, style)
+let rect c p = BRect (Name.node (), c, p)
 
 let center = function
   | BCircle (_, c, _, _) 

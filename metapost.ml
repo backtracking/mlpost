@@ -111,6 +111,8 @@ and print_path fmt = function
   | PASub (f1, f2, p) ->
       fprintf fmt "subpath(%a,%a) of %a" 
 	print_float f1 print_float f2 print_path p
+  | PAName n ->
+      pp_print_string fmt n
 
 and print_joint fmt = function
   | JLine -> fprintf fmt "--"
@@ -182,9 +184,11 @@ and print_command fmt  = function
 	declare_box b print_command fill print_name n
   | CSeq l ->
       List.iter (fun c -> print_command fmt c) l
-
+  | CDeclPath (n, p) ->
+      fprintf fmt "path %s ;@\n%s = %a;@\n" n n print_path p
 
 let print i fmt l =
+  let l = List.map Compile.command l in
   fprintf fmt "beginfig(%d)@\n %a endfig;@." i 
     (fun fmt l -> List.iter (print_command fmt) l)
     l

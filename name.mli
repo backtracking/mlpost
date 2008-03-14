@@ -16,6 +16,6 @@
 
 type t = Types.name
 
-val create : unit -> t
+val path : unit -> t
+val node : unit -> t
 
-val print : Format.formatter -> t -> unit

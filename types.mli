@@ -62,6 +62,7 @@ and path =
   | PACutBefore of path * path
   | PABuildCycle of path list
   | PASub of float * float * path
+  | PAName of name
 
 and transform =
   | TRRotated of float
@@ -103,3 +104,4 @@ and command =
   | CLoop of int * int * (int -> command list)
   | CDrawBox of color option * box
   | CSeq of command list
+  | CDeclPath of name * path
