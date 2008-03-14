@@ -30,6 +30,7 @@ val bin  : ?style:node_style -> ?fill:Color.t -> string -> t -> t -> t
 (** 2. Drawing *)
 
 type arrow_style = Directed | Undirected
+
 type edge_style = Straight | Curve | Square | HalfSquare
 
 val draw : 

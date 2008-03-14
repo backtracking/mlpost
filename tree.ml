@@ -35,6 +35,7 @@ let box style p pic = match style with
   | Rect -> Box.rect p pic
 
 type arrow_style = Directed | Undirected
+
 type edge_style = Straight | Curve | Square | HalfSquare
 
 let arc astyle estyle ?stroke ?pen (b1,(x1,y1)) (b2,(x2,y2)) =
@@ -95,9 +96,9 @@ let draw ?(scale=Num.cm)
       draw_box ?fill b :: 
 	List.map 
 	(fun (wc,fc) -> 
-	   let x',y' = (!x+.wc /.2.), (y -. ls) in
+	   let x',y' = (!x +. wc /. 2.), (y -. ls) in
 	   let b',fig = fc x' y' in
-	   let bx' = b',(scale x', scale y') in
+	   let bx' = b', (scale x', scale y') in
 	   x := !x +. wc +. cs;
 	   append (seq fig) (arc ?stroke ?pen arrow_style edge_style bx bx')
 	) l
