@@ -109,7 +109,7 @@ let pic = Picture.make cheno011
 
 let d4 = 
   [Command.draw_pic pic;
-   Command.iter 1 6 
+   Command.iter 1 5 
      (fun i -> 
        [Command.draw_pic (Picture.transform [T.rotated (10. *. float i)] pic)])
   ]

@@ -133,9 +133,9 @@ let fig =
                (fold_append ~style:JLine 
                   [line1 ; line6; line2; line8; line4; line7])
   in
-    [ Command.iter (-1) 2
+    [ Command.iter (-1) 1
         (fun x ->
-           [Command.iter (-1) 2
+           [Command.iter (-1) 1
              (fun y ->
                 let xf, yf = float_of_int x, float_of_int y in
                 let offset = (xf *. xs1 +. yf *. xs2, yf *. ys) in

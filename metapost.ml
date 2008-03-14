@@ -194,7 +194,7 @@ and print_command fmt  = function
       fprintf fmt "@[<hov 2>dotlabel%a(%a,@ %a);@]@\n"
         print_position pos print_picture pic print_point p
   | CLoop(from,until,cmd) ->
-      for i = from to until - 1 do
+      for i = from to until do
 	List.iter (print_command fmt) (cmd i);
       done
   | CDrawBox (None, (BCircle (n, _, _, _) | BRect (n, _, _) as b)) ->

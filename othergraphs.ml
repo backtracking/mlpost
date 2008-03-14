@@ -121,7 +121,7 @@ let d130 =
       [fill ~color:(Color.gray 0.8) p;
        fill ~color:Color.white (transform t p)]
   in
-    130, [iter 0 50 cmd]
+    130, [iter 0 49 cmd]
 
 let d140 =
   let cmd i =
@@ -129,7 +129,7 @@ let d140 =
       [fill ~color:(Color.gray s) 
          (transform [T.scaled ~scale:Num.cm (2.*.s)] fullcircle)]
   in
-  140, [iter 0 100 cmd;
+  140, [iter 0 99 cmd;
 	draw ~pen:(P.transform [T.scaled 2.] P.circle)
 	  (transform [T.scaled ~scale:Num.cm 2.] fullcircle)]
 
@@ -145,7 +145,7 @@ let d149 =
     let angle = step *. (float_of_int i) in
       [C.draw ~scale:N.cm ~color:(couleur (angle /. deuxpi)) ~pen [pt angle]]
   in
-    (149,[Command.iter 0 720 cmd])
+    (149,[Command.iter 0 719 cmd])
 
 let d195 = 
   let n = 8 and u x = 5.*. (float_of_int x) in
@@ -164,17 +164,17 @@ let d195 =
 	  in [fill ~color (transform [t i j]
 			     (SP.path ~style:JLine ~scale:N.mm ~cycle:JLine l))]
 	in
-	  [Command.iter 0 5 strip]
+	  [Command.iter 0 4 strip]
       else [] 
     in 
-      [Command.iter 0 n col]
+      [Command.iter 0 (n-1) col]
   in
   let grid i =
     let ui = u i in
       [C.draw ~style:JLine ~scale:N.mm [(0.,ui); (un, ui)];
        C.draw ~style:JLine ~scale:N.mm [(ui,0.); (ui, un)]]
   in
-    (195, [Command.iter 0 n row; Command.iter 0 (n+1) grid])
+    (195, [Command.iter 0 (n-1) row; Command.iter 0 (n) grid])
 
 let d267 = 
   let a = Box.circle ~style:(Ratio 1.) (cmp (0., 0.)) (Picture.tex "D\\'ebut") in

@@ -79,13 +79,13 @@ let draw6 = 6,
 let lex = SP.knot ~r:(Vec(dir 45.)) (0.,0.)
 let rex a = SP.knot ~l:(Vec(dir (10.*.a))) ~scale:N.cm (6., 0.)
 let draw7 = 7, 
-            [Command.iter 0 10
+            [Command.iter 0 9
                (fun a ->
                   [draw (concat (start lex) JCurve 
                           (rex (float_of_int (-a))))]) ]
 
 let draw8 = 8,
-            [Command.iter 0 8
+            [Command.iter 0 7
                (fun a ->
                   [draw (concat (start lex) JCurve 
                           (rex (float_of_int a)))]) ]
