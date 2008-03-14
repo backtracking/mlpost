@@ -18,21 +18,56 @@ open Types
 
 let nop = CSeq []
 
+let known_pictures = Hashtbl.create 17
+let known_paths = Hashtbl.create 17
+
 let rec path = function
   | PASub (f1, f2, p) ->
+      begin 
+	try 
+	  let p = Hashtbl.find known_paths p in
+	  PASub (f1,f2, PAName p), nop
+	with Not_found ->
+          let n = Name.path () in
+          let () = Hashtbl.add known_paths p n in
+          let p, code = path p in
+            PASub (f1, f2, PAName n), CSeq [code; CDeclPath (n, p)]
+      end
+  | PAConcat (k,j,p) ->
       let p, code = path p in
-      let n = Name.path () in
-      PASub (f1, f2, PAName n), CSeq [code; CDeclPath (n, p)]
-  | p -> 
-      p, nop
+        PAConcat (k,j,p), code
+  | PACycle (d,j,p) ->
+      let p, code = path p in
+        PACycle (d,j,p), code
+  | PATransformed (p,tr) ->
+      let p, code = path p in
+        PATransformed (p,tr), code
+  | PAAppend (p1,j,p2) ->
+      let p1, c1 = path p1 in
+      let p2, c2 = path p2 in
+        PAAppend (p1,j,p2), CSeq [c1; c2]
+  | PACutAfter (p1,p2) ->
+      let p1, c1 = path p1 in
+      let p2, c2 = path p2 in
+        PACutAfter (p1,p2), CSeq [c1; c2]
+  | PACutBefore (p1,p2) ->
+      let p1, c1 = path p1 in
+      let p2, c2 = path p2 in
+        PACutBefore (p1,p2), CSeq [c1; c2]
+  | PABuildCycle pl ->
+      let npl = List.map path pl in
+        PABuildCycle (List.map fst npl), CSeq (List.map snd npl)
+  | PABoxBPath b ->
+      let b, code = box b in
+        PABoxBPath b, code
+  | (PAUnitSquare | PAQuarterCircle | PAHalfCircle | 
+     PAFullCircle | PAName _ | PAKnot _) as p -> p, nop
 
-let known_pictures = Hashtbl.create 17
-
-let rec picture = function
+and picture = function
   | PIMake c as p ->
       begin 
 	try 
-	  let pic = Hashtbl.find known_pictures p in
+          let pic = Hashtbl.find known_pictures p in
 	  PIName pic, nop
 	with Not_found ->
 	  let pic = Name.picture () in
@@ -42,8 +77,7 @@ let rec picture = function
   | PITransform (tr, p) ->
       let p, code = picture p in
       PITransform (tr, p), code
-  | p ->
-      p, nop
+  | (PIName _ | PITex _)  as p -> p, nop
 
 and box = function
   | BCircle (n, p, pic, s) ->

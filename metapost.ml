@@ -92,7 +92,7 @@ and print_picture fmt = function
 
 and declare_box fmt = function
   | BCircle (n, c, p, s) -> 
-      fprintf fmt "circleit.%a(%a);" print_name n print_picture p;
+      fprintf fmt "circleit.%a(%a);@," print_name n print_picture p;
       fprintf fmt "%a.c = %a;@\n" print_name n print_point c;
       begin match s with
 	| None -> ()
