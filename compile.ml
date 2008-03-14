@@ -33,6 +33,9 @@ let rec path = function
           let p, code = path p in
             PASub (f1, f2, PAName n), CSeq [code; CDeclPath (n, p)]
       end
+  | PABBox p ->
+      let p, code = picture p in
+        PABBox p, code
   | PAConcat (k,j,p) ->
       let p, code = path p in
         PAConcat (k,j,p), code

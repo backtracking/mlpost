@@ -19,8 +19,8 @@ open Types
 type t = picture
 
 let tex s = PITex s
-
 let make l = PIMake (CSeq l)
+let bbox pic = PABBox pic
 
 let transform tr = function
   | PITransform (tr', p) -> PITransform (tr'@tr, p)

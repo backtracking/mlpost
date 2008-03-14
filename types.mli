@@ -77,6 +77,7 @@ and path =
   | PACutBefore of path * path
   | PABuildCycle of path list
   | PASub of float * float * path
+  | PABBox of picture
   | PAName of name
 
 and transform =

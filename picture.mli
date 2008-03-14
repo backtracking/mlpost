@@ -22,4 +22,4 @@ val make : Types.command list -> t
 
 val transform : Transform.t -> t -> t
 
-
+val bbox : t -> Types.path

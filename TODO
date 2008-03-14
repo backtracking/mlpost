@@ -3,10 +3,6 @@
 * Box : dissocier déclaration et dessin (pour l'instant, draw_box fait les
   deux d'un coup)
 * un moyen pour joindre des boîtes à la boxjoin
-* opérations sur Num.t : add, sub, ...
-* Pouvoir faire la commande bbox sur des pictures. Ca demande
-  d'être capable de générer des définitions locales dans MetaPost
-  pour les pictures.
 * la syntaxe des transformations est encore un peu lourde ...
 * les pointillés
 * clipping
@@ -21,7 +17,6 @@ verbatimtex
 etex
 
 * possibilite de donner un prélude comme ci-dessus
-* le petit outil pour inclure du mlpost en latex
 
 -------------------------------------------------------------------------------
 des liens avec des exemples :

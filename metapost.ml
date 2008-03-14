@@ -132,6 +132,8 @@ and print_path fmt = function
   | PASub (f1, f2, p) ->
       fprintf fmt "subpath(%a,%a) of %a" 
 	print_float f1 print_float f2 print_path p
+  | PABBox p ->
+      fprintf fmt "bbox %a" print_picture p
   | PAName n ->
       pp_print_string fmt n
 

@@ -125,6 +125,11 @@ let d5 =
     draw_box b2;
     box_arrow b1 b2 ]
 
+let d7 =
+  let pic = Picture.tex "bound this!" in
+    [Command.draw_pic pic;
+     Command.draw (Picture.bbox pic)]
+    
 open Tree.Pic
 
 let tree1 () = Picture.make (Tree.draw (random_tree (1 + Random.int 5)))
@@ -141,7 +146,7 @@ let rec random_tree2 = function
 let d6 =
   Tree.draw ~scale:(Scale.cm 3.) ~cs:(mm 0.2) (random_tree2 10)
 
-let figs = [d6; d5; d4; cheno011; proval; d3; d2sq; d2hsq; d2s; d2c; d1]
+let figs = [d7; d6; d5; d4; cheno011; proval; d3; d2sq; d2hsq; d2s; d2c; d1]
 
 let figs =
   let r = ref 0 in
