@@ -14,8 +14,7 @@
 (*                                                                        *)
 (**************************************************************************)
 
-open Point
-type t = Point.t
+include Point
 let pmap f (a,b) = (f a, f b)
 
 let p ?(scale=Num.bp) pr =
@@ -38,20 +37,3 @@ let map_bp, map_in, map_cm, map_mm, map_pt =
   ptlist ~scale:Num.cm, 
   ptlist ~scale:Num.mm, 
   ptlist ~scale:Num.pt
-
-let dir = Point.dir
-let up, down, left, right = up, down, left, right
-
-let north = north 
-let south = south 
-let west  = west  
-let east  = east  
-let north_west = north_west 
-let south_west = south_west 
-let north_east = north_east 
-let south_east = south_east 
-
-let rotated = rotated
-let sub = sub
-let add = add
-let segment = segment

@@ -15,38 +15,22 @@
 (**************************************************************************)
 
 module S = SimplePoint
-module P = Path
+include Path
 
-type direction = Path.direction =
-  | Vec of Point.t
-  | Curl of float
-  | NoDir 
-
-type joint = Path.joint =
-  | JLine
-  | JCurve
-  | JCurveNoInflex
-  | JTension of float * float
-  | JControls of Point.t * Point.t
-
-type knot = Path.knot
-
-type t = Path.t
-
-let knotp ?(l=P.NoDir) ?(r=P.NoDir) p = (l, p, r)
+let knotp ?(l=NoDir) ?(r=NoDir) p = (l, p, r)
 
 let knot ?(l) ?(r) ?(scale) p = knotp ?l (S.p ?scale p) ?r
 
-let cycle_tmp ?(dir=P.NoDir) ?(style=P.JCurve) p = Path.cycle dir style p
+let cycle_tmp ?(dir=NoDir) ?(style=JCurve) p = Path.cycle dir style p
 let cycle = cycle_tmp
-let concat ?(style=P.JCurve) p k = P.concat p style k
+let concat ?(style=JCurve) p k = concat p style k
 
 (* construct a path with a given style from a knot list *)
 let pathk ?(style) ?(cycle) = function
   | [] -> failwith "empty path is not allowed"
   | (x::xs) ->
       let p = List.fold_left 
-                 (fun p knot -> concat ?style p knot) (P.start x) xs
+                 (fun p knot -> concat ?style p knot) (start x) xs
       in
         match cycle with
           | None -> p
@@ -66,21 +50,9 @@ let path ?(style) ?(cycle) ?(scale) l =
 
 (* construct a path with knot list and joint list *)
 let jointpathk lp lj =
-  List.fold_left2 P.concat (P.start (List.hd lp)) lj (List.tl lp)
+  List.fold_left2 Path.concat (start (List.hd lp)) lj (List.tl lp)
 
 let jointpathp lp lj  = jointpathk (List.map (knotp) lp) lj
 let jointpath ?(scale) lp lj  = jointpathk (List.map (knot ?scale) lp) lj
 
-let start = P.start
-let append ?(style=JCurve) p1 p2 = P.append p1 style p2
-let subpath = P.subpath
-let fullcircle = P.fullcircle
-let halfcircle = P.halfcircle
-let quartercircle = P.quartercircle
-let unitsquare = P.unitsquare
-let transform = P.transform
-let bpath = P.bpath
-let point = P.point
-let cut_before = P.cut_before
-let cut_after = P.cut_after
-let build_cycle = P.build_cycle
+let append ?(style=JCurve) p1 p2 = append p1 style p2
