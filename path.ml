@@ -21,7 +21,7 @@ let knotp ?(l=NoDir) ?(r=NoDir) p = (l, p, r)
 
 let knot ?(l) ?(r) ?(scale) p = knotp ?l (S.p ?scale p) ?r
 
-let cycle_tmp ?(dir=NoDir) ?(style=JCurve) p = PrimPath.cycle dir style p
+let cycle_tmp ?(dir=NoDir) ?(style=defaultjoint) p = PrimPath.cycle dir style p
 let cycle = cycle_tmp
 let concat ?(style=JCurve) p k = concat p style k
 

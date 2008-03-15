@@ -227,11 +227,19 @@ let print i fmt l =
     (fun fmt l -> List.iter (print_command fmt) l)
     l
 
-let generate_mp fn l =
+let defaultprelude fmt () =
+  fprintf fmt "verbatimtex@\n";
+  fprintf fmt "%%&latex@\n";
+  fprintf fmt "\\documentclass{article}@\n";
+  fprintf fmt "\\begin{document}@\n";
+  fprintf fmt "etex@\n";
+  fprintf fmt "input boxes;@\n"
+
+let generate_mp fn ?(prelude=defaultprelude) l =
   Misc.write_to_formatted_file fn
     (fun fmt -> 
-      Format.fprintf fmt "input boxes;@\n";
-      List.iter (fun (i,f) -> print i fmt f) l)
+       defaultprelude fmt ();
+       List.iter (fun (i,f) -> print i fmt f) l)
 
 (* batch processing *)
 

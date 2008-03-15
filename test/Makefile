@@ -21,5 +21,3 @@ clean:
 	rm -f testmanual.*
 	rm -f tests.*
 	rm -f othergraphs.*
-
-include ../Makefile.rules

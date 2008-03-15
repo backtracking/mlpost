@@ -71,6 +71,7 @@ val fullcircle : t
 val halfcircle : t
 val quartercircle: t
 val unitsquare: t
+val defaultjoint : joint
 
 val transform : Transform.t -> t -> t
 

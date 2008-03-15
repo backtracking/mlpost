@@ -54,3 +54,5 @@ val point : float -> t -> Point.t
 val cut_after : t -> t -> t
 val cut_before: t -> t -> t
 val build_cycle : t list -> t
+
+val defaultjoint : joint
