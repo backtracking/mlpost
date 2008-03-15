@@ -49,6 +49,6 @@ let bpath b = PABoxBPath b
 let cut_after p1 p2 = PACutAfter (p1, p2)
 let cut_before p1 p2 = PACutBefore (p1, p2)
 let build_cycle l = PABuildCycle l
-let sub f1 f2 p = PASub (f1, f2, p)
+let subpath f1 f2 p = PASub (f1, f2, p)
 
 let point f p = PTPointOf (f, p)

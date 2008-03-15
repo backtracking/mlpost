@@ -17,15 +17,14 @@
 open Mlpost
 open Num
 open Command
-open Point
 open Format
-open Path
 open Helpers
-module SP = SimplePath
+open SimplePath
+open SimplePoint
 module T = Transform
 
-let (++) x y = Point.p (cm x, cm y)
-let shift x y = Path.transform [Transform.shifted (x ++ y)]
+let (++) x y = p (cm x, cm y)
+let shift x y = transform [Transform.shifted (x ++ y)]
 
 let d1 = 
   let a = Box.circle (0. ++ 0.) (Picture.tex "$\\sqrt2$") in
@@ -35,7 +34,7 @@ let d1 =
     draw_box ~fill:Color.purple b;
     draw
       ~color:Color.red
-      (Path.transform [Transform.shifted (1. ++ 1.)] (Path.bpath a));
+      (transform [Transform.shifted (1. ++ 1.)] (bpath a));
     draw_label_arrow ~color:Color.orange ~pen 
       ~pos:Pupright (Picture.tex "foo") (Box.west a) (Box.south_east b);
     box_simple_arrow ~color:Color.blue a b;
@@ -78,9 +77,9 @@ let proval =
   let pen = Pen.square ~tr:[T.yscaled 0.5; T.rotated 40.] () in
   let check = SP.jointpath [-1.2,1.2; 0., -2. ; 2., 2. ; 5., 5.] [JLine ; JCurve; JCurve] in
     [ fill ~color:Color.black 
-        (Path.transform [Transform.scaled f] Path.fullcircle) ;
-      Command.label ~pos:Pleft (Picture.tex "Pr") (Point.p (f /. (-4.),0.)) ;
-      Command.label ~pos:Pright (Picture.tex "al") (Point.p (f /. 4.,0.)) ;
+        (transform [Transform.scaled f] fullcircle) ;
+      label ~pos:Pleft (Picture.tex "Pr") (Point.p (f /. (-4.),0.)) ;
+      label ~pos:Pright (Picture.tex "al") (Point.p (f /. 4.,0.)) ;
       Command.draw ~color:Color.green ~pen check;]
 
 let cheno011 =
@@ -89,15 +88,13 @@ let cheno011 =
   [Command.draw p;
    seq (List.map
 	   (fun (pos, l, i) -> 
-	     Command.dotlabel ~pos (Picture.tex l) (Path.point i p))
+	     Command.dotlabel ~pos (Picture.tex l) (point i p))
 	   [Pbot, "0", 0.;  Pupleft, "1", 1. ;
 	    Plowleft, "2", 2. ;  Ptop, "3", 3. ; Pleft, "4", 4. ]);
-   Command.draw ~pen (Path.sub 1.3 3.2 p)]
+   Command.draw ~pen (subpath 1.3 3.2 p)]
 
 open SimplePoint
-open SimplePath
 open Dash
-open Transform
 
 let d3 =
   let p = pathp [cmp (0., 0.); cmp (5., 0.)] in
@@ -108,10 +105,10 @@ let d3 =
 let pic = Picture.make cheno011
 
 let d4 = 
-  [Command.draw_pic pic;
-   Command.iter 1 5 
+  [draw_pic pic;
+   iter 1 5 
      (fun i -> 
-       [Command.draw_pic (Picture.transform [T.rotated (10. *. float i)] pic)])
+       [draw_pic (Picture.transform [T.rotated (10. *. float i)] pic)])
   ]
 
 let d5 = 

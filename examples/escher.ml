@@ -4,14 +4,13 @@
 *)
 open Mlpost
 open Command
-open Path
+open SimplePath
 open SimplePoint
-module SP = SimplePath
 
 let rec fold_append ?(style=JCurve) = function
   | [] -> failwith "No empty list allowed"
   | [x] -> x
-  | (x::xs) -> append x style (fold_append xs)
+  | (x::xs) -> append ~style x (fold_append xs)
 
 let s = 0.004 
 let xs1 = 48.
@@ -105,10 +104,10 @@ let fig =
   let p79 = ( 525.,8000. -. 4875. ) in
   let p80 = (1840.,8000. -. 4600. ) in
   let p81 = (2375.,8000. -. 4550. ) in
-  let line1 = SP.path (myscale [p79;p1;p2;p3;p4;p5]) in
+  let line1 = path (myscale [p79;p1;p2;p3;p4;p5]) in
   let line2 = 
     fold_append ~style:JLine 
-      (List.map (fun l -> SP.path (myscale l) )
+      (List.map (fun l -> path (myscale l) )
       [  [p9;p10;p11;p12] ; [p12; p13; p14] ;
          [p14; p15; p16] ; [p16; p17; p18] ;
          [p18; p19; p20] ; [p20; p21; p22] ;
@@ -123,13 +122,13 @@ let fig =
          [p54; p55; p56] ; [p56; p57; p58] ;
          [p58; p59; p60] ; [p60; p61; p62] ;
          [p62; p66; p67; p68 ] ]) in
-  let line3 = SP.path (myscale  [p62; p63; p64 ]) in
-  let line4 = SP.path (myscale [p72; p73; p74 ]) in
-  let line5  = SP.path (myscale [p79; p80; p81]) in
-  let line6  = SP.path (myscale [p6; p6; p7; p8; p9 ]) in
-  let line7  = SP.path (myscale [p74; p75; p76; p77; p78; p78; p79]) in
-  let line8  = SP.path (myscale [p68; p69; p70; p71; p72]) in
-  let bird = SP.cycle ~style:JLine 
+  let line3 = path (myscale  [p62; p63; p64 ]) in
+  let line4 = path (myscale [p72; p73; p74 ]) in
+  let line5  = path (myscale [p79; p80; p81]) in
+  let line6  = path (myscale [p6; p6; p7; p8; p9 ]) in
+  let line7  = path (myscale [p74; p75; p76; p77; p78; p78; p79]) in
+  let line8  = path (myscale [p68; p69; p70; p71; p72]) in
+  let bird = cycle ~style:JLine 
                (fold_append ~style:JLine 
                   [line1 ; line6; line2; line8; line4; line7])
   in

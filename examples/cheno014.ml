@@ -1,6 +1,4 @@
 open Mlpost
-open Path
-open Point
 open SimplePoint
 open SimplePath
 open Dash

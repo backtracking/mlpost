@@ -16,12 +16,10 @@
 
 open Mlpost
 open Num
-open Path
-open Point
 open Box
 open Command
 open SimplePoint
-module SP = SimplePath
+open SimplePath
 module C = Convenience
 module Co = Color
 module P = Pen
@@ -48,9 +46,9 @@ let d5 = 5,
 let d7 = 7,
          let a , b, c = cmp a, cmp b, cmp c in
            [C.draw ~style:JLine ~scale:N.cm ~cycle:JLine l ;
-            draw (SP.pathp [ segment 0.5 a b ; c]) ;
-            draw (SP.pathp [ segment 0.5 b c ; a]) ;
-            draw (SP.pathp [ segment 0.5 c a ; b]) ; ]
+            draw (pathp [ segment 0.5 a b ; c]) ;
+            draw (pathp [ segment 0.5 b c ; a]) ;
+            draw (pathp [ segment 0.5 c a ; b]) ; ]
 
 let d12 = 12,
           let pen = P.circle ~tr:[T.scaled 2.] () in
@@ -61,7 +59,7 @@ let d12 = 12,
               [a,b;b,c;c,a] cl
 
 let triangle = 
-  SP.path ~scale:N.cm ~style:JLine ~cycle:JLine [(0.,0.);(1.,0.);(0.,1.)]
+  path ~scale:N.cm ~style:JLine ~cycle:JLine [(0.,0.);(1.,0.);(0.,1.)]
 
 let d20 =
   20, [fill ~color:(Color.gray 0.8) triangle]
@@ -80,20 +78,20 @@ let d23 =
        fill ~color:(Color.gray 0.8) triangle]
 
 let d60 =
-  let a = point ~scale:N.cm (0.,0.) in
-  let b = point ~scale:N.cm ((-0.5), 1.) in
-  let c = point ~scale:N.cm (2., 1.5) in
-  let d = point ~scale:N.cm (1.5, 0.) in
+  let a = p ~scale:N.cm (0.,0.) in
+  let b = p ~scale:N.cm ((-0.5), 1.) in
+  let c = p ~scale:N.cm (2., 1.5) in
+  let d = p ~scale:N.cm (1.5, 0.) in
   let pen = Pen.circle ~tr:[T.scaled 2.] () in
-    [ draw ~pen (SP.jointpathp [a;d] [JControls (b,c)]);
-      draw ~color:(Co.gray 0.8) (SP.pathp ~style:JLine [b;c]);
+    [ draw ~pen (jointpathp [a;d] [JControls (b,c)]);
+      draw ~color:(Co.gray 0.8) (pathp ~style:JLine [b;c]);
       H.draw_simple_arrow a b; H.draw_simple_arrow d c; ]
 
 
 let d111 =
   let a = transform 
             [T.scaled ~scale:N.cm 2. ; 
-             T.shifted (point ~scale:N.cm (0.5,0.))] fullcircle 
+             T.shifted (p ~scale:N.cm (0.5,0.))] fullcircle 
   in
   let t = [T.rotated 120.] in
   let b = transform t a in
@@ -107,7 +105,7 @@ let d111 =
 let deuxpi = 2.*.3.14159
 
 let d130 =
-  let sq = SP.path ~style:JLine ~scale:N.cm ~cycle:JLine 
+  let sq = path ~style:JLine ~scale:N.cm ~cycle:JLine 
     [(0.,0.);(2.,0.);(2.,2.);(0.,2.)] in
     (** on peut pas utiliser la resolution de MetaPost donc on
 	construit la transform à la main.. :-/ *)
@@ -162,7 +160,7 @@ let d195 =
 	    if k mod 2 = 1 then [(kf,0.); (u1,umk); (u1,udm); (udp,0.)]
 	    else [(0.,kf); (umk,u1); (udm,u1); (0.,udp)]
 	  in [fill ~color (transform [t i j]
-			     (SP.path ~style:JLine ~scale:N.mm ~cycle:JLine l))]
+			     (path ~style:JLine ~scale:N.mm ~cycle:JLine l))]
 	in
 	  [Command.iter 0 4 strip]
       else [] 
@@ -183,9 +181,9 @@ let d267 =
   let path angle a b =
     cut_after (bpath b) 
       (cut_before (bpath a) 
-	  (SP.jointpathk
-	      [SP.knotp ~r:(Vec (dir angle)) (Box.center a); 
-	       SP.knotp ~r:(Vec (dir (-. angle))) (Box.center b)] [JCurve])) 
+	  (jointpathk
+	      [knotp ~r:(Vec (dir angle)) (Box.center a); 
+	       knotp ~r:(Vec (dir (-. angle))) (Box.center b)] [JCurve])) 
   in
   [draw_box ~fill:rose a; draw_box ~fill:rose b;
    draw_arrow (path 45. a b); draw_arrow (path (-135.) b a)]

@@ -38,7 +38,7 @@ val concat : t -> joint -> knot -> t
 val cycle : direction -> joint -> t -> t
 val append : t -> joint -> t -> t
 
-val sub : float -> float -> t -> t
+val subpath : float -> float -> t -> t
 
 val fullcircle : t
 val halfcircle : t

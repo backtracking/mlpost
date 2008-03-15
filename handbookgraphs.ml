@@ -15,13 +15,11 @@
 (**************************************************************************)
 
 open Mlpost
-open Path
-open Point
 open Command
 open Picture
 open SimplePoint
+open SimplePath
 module H = Helpers
-module SP = SimplePath
 module N = Num
 module C = Convenience
 
@@ -49,11 +47,11 @@ let draw4a, draw4b =
     (104, [ C.draw ~cycle:JCurve l1] @ labels) ,
     (204, 
      [ draw 
-         (Path.append (SP.path [z0;z1;z2;z3]) JLine (SP.path ~style:JLine [z4;z0]) )
+         (Path.append (path [z0;z1;z2;z3]) JLine (path ~style:JLine [z4;z0]) )
      ] @ labels)
 
 (* no easy alternative way to draw this one, and that's fine *)
-let l1dirs = List.map (SP.knot ~scale:N.bp) l1
+let l1dirs = List.map (knot) l1
 let lcontrols =
   [(26.8, -1.8), (51.4,14.6);
    (67.1, 61.), (59.8,84.6);
@@ -62,7 +60,7 @@ let lcontrols =
 let lcontrolsbp = List.map (fun (a,b) -> JControls (bpp a, bpp b)) lcontrols
 
 let draw5 = 5,
-  [ draw (SP.jointpath l1 lcontrolsbp) ;
+  [ draw (jointpath l1 lcontrolsbp) ;
     let hull = 
       List.fold_left2 (fun acc (c1, c2) f -> f::c2::c1::acc) 
 	[0.,0.] lcontrols (List.tl l1)
@@ -71,35 +69,35 @@ let draw5 = 5,
       C.draw ~color:(Color.gray 0.5) ~style:JLine (List.rev hull) ] @ labels1
 
 let draw6 = 6, 
-  [ draw (SP.pathk
-           [ SP.knot z0; SP.knot ~r:(Vec up) z1; 
-             SP.knot ~r:(Vec left) z2; SP.knot z3; SP.knot z4] ) ] @ labels1
+  [ draw (pathk
+           [ knot z0; knot ~r:(Vec up) z1; 
+             knot ~r:(Vec left) z2; knot z3; knot z4] ) ] @ labels1
 
 
-let lex = SP.knot ~r:(Vec(dir 45.)) (0.,0.)
-let rex a = SP.knot ~l:(Vec(dir (10.*.a))) ~scale:N.cm (6., 0.)
+let lex = knot ~r:(Vec(dir 45.)) (0.,0.)
+let rex a = knot ~l:(Vec(dir (10.*.a))) ~scale:N.cm (6., 0.)
 let draw7 = 7, 
             [Command.iter 0 9
                (fun a ->
-                  [draw (concat (start lex) JCurve 
+                  [draw (concat (start lex) ~style:JCurve 
                           (rex (float_of_int (-a))))]) ]
 
 let draw8 = 8,
             [Command.iter 0 7
                (fun a ->
-                  [draw (concat (start lex) JCurve 
+                  [draw (concat (start lex) ~style:JCurve 
                           (rex (float_of_int a)))]) ]
 
 let z0 = (-1., 0.)
 let z1 = (0., 0.2)
 let z2 = ( 1., 0.)
 let labels9 = H.dotlabels ~pos:Pbot ["0";"1";"2"] (map_in [z0;z1;z2])
-let z0 = SP.knot ~r:(Vec up) ~scale:N.inch z0
-let z1 = SP.knot ~r:(Vec right) ~scale:N.inch z1
-let z2 = SP.knot ~r:(Vec down) ~scale:N.inch z2
+let z0 = knot ~r:(Vec up) ~scale:N.inch z0
+let z1 = knot ~r:(Vec right) ~scale:N.inch z1
+let z2 = knot ~r:(Vec down) ~scale:N.inch z2
 
-let draw9a = 109, [draw (SP.pathk [z0;z1;z2])] @ labels9
-let draw9b = 209, [draw (SP.pathk ~style:JCurveNoInflex [z0;z1;z2])] @labels9
+let draw9a = 109, [draw (pathk [z0;z1;z2])] @ labels9
+let draw9b = 209, [draw (pathk ~style:JCurveNoInflex [z0;z1;z2])] @labels9
 
 let u l = 1.5 /. 10. *. l
 let z0 = (u (-5.)), 0.
@@ -112,10 +110,10 @@ let labels10 = H.dotlabels ~pos:Pbot ["0";"1";"2";"3"] (map_in l1)
 let draw10a = 110, [C.draw ~scale:N.inch l1 ] @ labels10
 
 let draw10b = 210, 
-  [ draw (SP.jointpath ~scale:N.inch l1 [JCurve; JTension(1.3,1.3); JCurve] ) ] 
+  [ draw (jointpath ~scale:N.inch l1 [JCurve; JTension(1.3,1.3); JCurve] ) ] 
   @ labels10
 let draw10c = 310, 
-  [ draw (SP.jointpath ~scale:N.inch l1 [JCurve; JTension(1.5,1.0); JCurve] ) ]
+  [ draw (jointpath ~scale:N.inch l1 [JCurve; JTension(1.5,1.0); JCurve] ) ]
   @ labels10
 
 let u l = 1.4 /. 10. *. l
@@ -129,9 +127,9 @@ let z0 = u (2.), u (-5.)
 let z1 = 0., 0.
 let z2 = u 2., u 5.
 let cl = [0.; 1.; 2.; infinity]
-let pat c = [ SP.knot ~r:(Curl c) ~scale:N.inch z0 ; 
-              SP.knot ~scale:N.inch z1; 
-              SP.knot ~l:(Curl c) ~scale:N.inch z2 ]
+let pat c = [ knot ~r:(Curl c) ~scale:N.inch z0 ; 
+              knot ~scale:N.inch z1; 
+              knot ~l:(Curl c) ~scale:N.inch z2 ]
 
 let draw11 =
   let numbers = [111; 211; 311; 411] in
@@ -139,7 +137,7 @@ let draw11 =
     List.map2
       (fun c n -> n,
          [draw
-           (SP.pathk (pat c) ) ] @ labels11 )
+           (pathk (pat c) ) ] @ labels11 )
       cl numbers
 
 (** Cette version de draw21 est assez cool mais ne marche pas car la largeur du trait
@@ -151,13 +149,13 @@ let draw11 =
 (*     cycle (Vec up) JCurve (concat path JCurve (C.p ~r ~scale:C.CM (0.,0.))) in *)
 (*     21, [fill fillp; draw (transform t fullcircle)] *)
 let draw21 = 
-  let mp d pt = SP.knot ~r:(Vec d) ~scale:N.cm pt in
+  let mp d pt = knot ~r:(Vec d) ~scale:N.cm pt in
   let kl = [mp down (-1.,0.); mp right (0.,-1.); mp up (1.,0.)] in
-  let path = SP.pathk kl in
-  let r = Vec (point (-.1., -.2.)) in
-  let fillp = SP.cycle ~dir:(Vec up)
-      (SP.concat path (SP.knot ~r ~scale:N.cm (0.,0.))) in
-  let fullp = SP.cycle (SP.concat path (mp left (0.,1.))) in
+  let path = pathk kl in
+  let r = Vec (p (-.1., -.2.)) in
+  let fillp = cycle ~dir:(Vec up)
+      (concat path (knot ~r ~scale:N.cm (0.,0.))) in
+  let fullp = cycle (concat path (mp left (0.,1.))) in
     21, [fill fillp; draw fullp]
 
 let figs = 

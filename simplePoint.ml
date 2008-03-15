@@ -14,20 +14,22 @@
 (*                                                                        *)
 (**************************************************************************)
 
+open Point
+type t = Point.t
 let pmap f (a,b) = (f a, f b)
 
-let point ?(scale=Num.bp) pr =
+let p ?(scale=Num.bp) pr =
   Point.p (pmap scale pr)
 
-let ptlist ?scale l = List.map (point ?scale) l
+let ptlist ?scale l = List.map (p ?scale) l
 
 (* construct a point with the right measure *)
 let bpp, inp, cmp, mmp, ptp = 
-    point ~scale:Num.bp, 
-    point ~scale:Num.inch, 
-    point ~scale:Num.cm, 
-    point ~scale:Num.mm, 
-    point ~scale:Num.pt
+    p ~scale:Num.bp, 
+    p ~scale:Num.inch, 
+    p ~scale:Num.cm, 
+    p ~scale:Num.mm, 
+    p ~scale:Num.pt
 
 (* construct a list of points with the right measure *)
 let map_bp, map_in, map_cm, map_mm, map_pt =
@@ -36,3 +38,20 @@ let map_bp, map_in, map_cm, map_mm, map_pt =
   ptlist ~scale:Num.cm, 
   ptlist ~scale:Num.mm, 
   ptlist ~scale:Num.pt
+
+let dir = Point.dir
+let up, down, left, right = up, down, left, right
+
+let north = north 
+let south = south 
+let west  = west  
+let east  = east  
+let north_west = north_west 
+let south_west = south_west 
+let north_east = north_east 
+let south_east = south_east 
+
+let rotated = rotated
+let sub = sub
+let add = add
+let segment = segment

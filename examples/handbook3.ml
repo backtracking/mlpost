@@ -1,9 +1,8 @@
 open Mlpost
-open Path
-open Point
 open Command
 open Picture
 open SimplePoint
+open SimplePath
 module H = Helpers
 module C = Convenience
 

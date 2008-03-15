@@ -17,9 +17,25 @@
 module S = SimplePoint
 module P = Path
 
+type direction = Path.direction =
+  | Vec of Point.t
+  | Curl of float
+  | NoDir 
+
+type joint = Path.joint =
+  | JLine
+  | JCurve
+  | JCurveNoInflex
+  | JTension of float * float
+  | JControls of Point.t * Point.t
+
+type knot = Path.knot
+
+type t = Path.t
+
 let knotp ?(l=P.NoDir) ?(r=P.NoDir) p = (l, p, r)
 
-let knot ?(l) ?(r) ?(scale) p = knotp ?l (S.point ?scale p) ?r
+let knot ?(l) ?(r) ?(scale) p = knotp ?l (S.p ?scale p) ?r
 
 let cycle_tmp ?(dir=P.NoDir) ?(style=P.JCurve) p = Path.cycle dir style p
 let cycle = cycle_tmp
@@ -55,3 +71,16 @@ let jointpathk lp lj =
 let jointpathp lp lj  = jointpathk (List.map (knotp) lp) lj
 let jointpath ?(scale) lp lj  = jointpathk (List.map (knot ?scale) lp) lj
 
+let start = P.start
+let append ?(style=JCurve) p1 p2 = P.append p1 style p2
+let subpath = P.subpath
+let fullcircle = P.fullcircle
+let halfcircle = P.halfcircle
+let quartercircle = P.quartercircle
+let unitsquare = P.unitsquare
+let transform = P.transform
+let bpath = P.bpath
+let point = P.point
+let cut_before = P.cut_before
+let cut_after = P.cut_after
+let build_cycle = P.build_cycle
