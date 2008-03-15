@@ -1,6 +1,6 @@
 open Mlpost
 open SimplePoint
-open SimplePath
+open Path
 open Dash
 open Transform
 

@@ -1,7 +1,7 @@
 open Mlpost
 open SimplePoint
 open Command
-open SimplePath
+open Path
 
 type t = One | Two | Three | Four
 

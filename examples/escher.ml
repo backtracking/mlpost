@@ -4,7 +4,7 @@
 *)
 open Mlpost
 open Command
-open SimplePath
+open Path
 open SimplePoint
 
 let rec fold_append ?(style=JCurve) = function

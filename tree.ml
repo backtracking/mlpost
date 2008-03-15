@@ -16,6 +16,7 @@
 
 open Command
 open Helpers
+open Path
 
 type node_style = Circle | Rect
 
@@ -52,33 +53,33 @@ let arc astyle estyle ?stroke ?pen (b1,(x1,y1)) (b2,(x2,y2)) =
 	box_line ?color:stroke ?pen, draw ?color:stroke ?pen 
   in
     match estyle with
-      | Straight -> boxdraw ~style:Path.JLine b1 b2
+      | Straight -> boxdraw ~style:JLine b1 b2
       | Curve -> 
 	  let p1, p2 = Box.center b1, Box.center b2 in
 	  let corner = Point.p (x2-.(x2-.x1)/.4.,(y1+.y2)/.2.) in
-	  let p = SimplePath.pathk ~style:Path.JCurve
-	    [Path.NoDir, p1, Path.Vec (Point.sub corner p1); 
-	     Path.NoDir, corner, Path.NoDir; 
-	     Path.Vec (Point.sub p2 corner), p2, Path.NoDir] in
+	  let p = pathk ~style:JCurve
+	    [NoDir, p1, Vec (Point.sub corner p1); 
+	     NoDir, corner, NoDir; 
+	     Vec (Point.sub p2 corner), p2, NoDir] in
 	  let parrow = 
-	    Path.cut_after (Path.bpath b2) (Path.cut_before (Path.bpath b1) p)
+	    cut_after (bpath b2) (cut_before (bpath b1) p)
 	  in
 	    linedraw parrow
       | Square -> 
 	  let corner = Point.p (x2,y1) in
-	  let p = SimplePath.pathp ~style:Path.JLine 
+	  let p = pathp ~style:JLine 
 	    [Box.center b1; corner; Box.center b2] in
 	  let parrow = 
-	    Path.cut_after (Path.bpath b2) (Path.cut_before (Path.bpath b1) p) 
+	    cut_after (bpath b2) (cut_before (bpath b1) p) 
 	  in
 	    linedraw parrow
       | HalfSquare -> 
 	  let m = (y1+.y2)/.2. in
 	  let corner1, corner2 = Point.p (x1,m), Point.p (x2,m) in
-	  let p = SimplePath.pathp ~style:Path.JLine 
+	  let p = pathp ~style:JLine 
 	    [Box.center b1; corner1; corner2; Box.center b2] in
 	  let parrow = 
-	    Path.cut_after (Path.bpath b2) (Path.cut_before (Path.bpath b1) p) 
+	    cut_after (bpath b2) (cut_before (bpath b1) p) 
 	  in
 	    linedraw parrow
 
@@ -106,7 +107,7 @@ let draw ?(scale=Num.cm)
 	   let b',fig = fc x' y' in
 	   let bx' = b', (scale x', scale y') in
 	   x := !x +. wc +. cs;
-	   append (seq fig) (arc ?stroke ?pen arrow_style edge_style bx bx')
+	   Command.append (seq fig) (arc ?stroke ?pen arrow_style edge_style bx bx')
 	) l
   in
   let _,f = draw t in

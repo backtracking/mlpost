@@ -1,6 +1,6 @@
 open Mlpost
 open Command
-open SimplePath
+open Path
 module T = Transform
 
 let fig =

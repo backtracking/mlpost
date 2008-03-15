@@ -1,10 +1,7 @@
 * Box : north_west etc. sur un circle (faire un calcul)
 * couleur d'une boîte
-* Box : dissocier déclaration et dessin (pour l'instant, draw_box fait les
-  deux d'un coup)
 * un moyen pour joindre des boîtes à la boxjoin
 * la syntaxe des transformations est encore un peu lourde ...
-* les pointillés
 * clipping
 
 * prélude pour LaTeX, tel que 
@@ -16,11 +13,20 @@ verbatimtex
 \begin{document}
 etex
 
-* possibilite de donner un prélude comme ci-dessus
+* rendre mlpost "latex-ready":
+  * inclure du mlpost dans un fichier latex
+  * prendre en compte le prelude du fichier latex
+  * possibilite de donner un autre prélude
+  * et si on veut partager des definitions parmi plusieurs figures du meme
+    fichier latex ?
+  * peut-etre aussi un mode "metapost", qui crée des fichiers figure.i, qu'il
+    faut inclure à la main dans son document
+
 
 -------------------------------------------------------------------------------
 des liens avec des exemples :
 
 http://tex.loria.fr/prod-graph/zoonekynd/metapost/metapost.html
 http://melusine.eu.org/syracuse/metapost/cheno/illustrations/illustrations.html
-
+http://melusine.eu.org/syracuse/metapost/mpman/
+http://www.cs.ucc.ie/~dongen/mpost/mpost.html

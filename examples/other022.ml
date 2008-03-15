@@ -1,5 +1,5 @@
 open Mlpost
-open SimplePath
+open Path
 
 let fig =
   let pen = Pen.circle ~tr:[Transform.scaled 2.] () in

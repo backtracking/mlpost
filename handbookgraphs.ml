@@ -18,7 +18,7 @@ open Mlpost
 open Command
 open Picture
 open SimplePoint
-open SimplePath
+open Path
 module H = Helpers
 module N = Num
 module C = Convenience
@@ -47,7 +47,8 @@ let draw4a, draw4b =
     (104, [ C.draw ~cycle:JCurve l1] @ labels) ,
     (204, 
      [ draw 
-         (Path.append (path [z0;z1;z2;z3]) JLine (path ~style:JLine [z4;z0]) )
+         (Path.append ~style:JLine (path [z0;z1;z2;z3]) 
+            (path ~style:JLine [z4;z0]) )
      ] @ labels)
 
 (* no easy alternative way to draw this one, and that's fine *)

@@ -14,32 +14,59 @@
 (*                                                                        *)
 (**************************************************************************)
 
-(* low-level interface *)
-(* A path is a succession of knots bound by joints *)
-type direction = Types.direction =
+type direction = PrimPath.direction =
   | Vec of Point.t
   | Curl of float
   | NoDir 
 
-type joint = Types.joint =
+type joint = PrimPath.joint =
   | JLine
   | JCurve
   | JCurveNoInflex
   | JTension of float * float
   | JControls of Point.t * Point.t
 
-type knot = direction * Point.t * direction
+type knot = PrimPath.knot
 
-type t = Types.path
+type t = PrimPath.t
+(** build a knot from a pair of floats *)
+val knot :
+    ?l:PrimPath.direction -> ?r:PrimPath.direction -> 
+      ?scale:(float -> Num.t) -> float * float -> PrimPath.knot
+(** build a knot from a point *)
+val knotp :
+    ?l:PrimPath.direction -> ?r:PrimPath.direction -> Point.t -> PrimPath.knot
 
+(** build a path from a list of floatpairs *)
+val path : 
+    ?style:PrimPath.joint -> ?cycle:PrimPath.joint -> ?scale:(float -> Num.t) -> 
+      (float * float) list -> PrimPath.t
+
+(** build a path from a knot list *)
+val pathk :
+    ?style:PrimPath.joint -> ?cycle:PrimPath.joint -> PrimPath.knot list -> PrimPath.t
+
+(** build a path from a point list *)
+val pathp :
+    ?style:PrimPath.joint -> ?cycle:PrimPath.joint -> Point.t list -> PrimPath.t
+
+(** build a path from [n] knots and [n-1] joints *)
+val jointpathk : PrimPath.knot list -> PrimPath.joint list -> PrimPath.t
+(** build a path from [n] points and [n-1] joints, with default directions *)
+val jointpathp : Point.t list -> PrimPath.joint list -> PrimPath.t
+
+(** build a path from [n] float_pairs and [n-1] joints, with default 
+* directions *)
+val jointpath : 
+    ?scale:(float -> Num.t) -> (float * float) list -> 
+      PrimPath.joint list -> PrimPath.t
+
+(** the same functions as in [PrimPath] but with labels *)
+val cycle : ?dir:PrimPath.direction -> ?style:PrimPath.joint -> PrimPath.t -> PrimPath.t
+val concat : ?style:PrimPath.joint -> PrimPath.t -> PrimPath.knot -> PrimPath.t
 val start : knot -> t
-val concat : t -> joint -> knot -> t
-
-val cycle : direction -> joint -> t -> t
-val append : t -> joint -> t -> t
-
+val append : ?style:PrimPath.joint -> t -> t -> t
 val subpath : float -> float -> t -> t
-
 val fullcircle : t
 val halfcircle : t
 val quartercircle: t
@@ -54,3 +81,4 @@ val point : float -> t -> Point.t
 val cut_after : t -> t -> t
 val cut_before: t -> t -> t
 val build_cycle : t list -> t
+

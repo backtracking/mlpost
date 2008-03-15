@@ -2,7 +2,7 @@ open Mlpost
 open SimplePoint
 open Command
 open Dash
-module SP = SimplePath
+module SP = Path
 
 let fig = 
   let a = cmp (0., 0.) in

@@ -19,7 +19,7 @@ open Num
 open Command
 open Format
 open Helpers
-open SimplePath
+open Path
 open SimplePoint
 module T = Transform
 
@@ -75,7 +75,7 @@ let d2c, d2s, d2sq, d2hsq =
 let proval =
   let f = 7. in
   let pen = Pen.square ~tr:[T.yscaled 0.5; T.rotated 40.] () in
-  let check = SP.jointpath [-1.2,1.2; 0., -2. ; 2., 2. ; 5., 5.] [JLine ; JCurve; JCurve] in
+  let check = jointpath [-1.2,1.2; 0., -2. ; 2., 2. ; 5., 5.] [JLine ; JCurve; JCurve] in
     [ fill ~color:Color.black 
         (transform [Transform.scaled f] fullcircle) ;
       label ~pos:Pleft (Picture.tex "Pr") (Point.p (f /. (-4.),0.)) ;
@@ -83,7 +83,7 @@ let proval =
       Command.draw ~color:Color.green ~pen check;]
 
 let cheno011 =
-  let p = SP.path ~cycle:JCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)] in
+  let p = path ~cycle:JCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)] in
   let pen = Pen.circle ~tr:[T.scaled 1.5] () in
   [Command.draw p;
    seq (List.map

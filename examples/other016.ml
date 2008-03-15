@@ -3,7 +3,7 @@ open SimplePoint
 open Command
 open Dash
 open Num
-module SP = SimplePath
+module SP = Path
 
 let fig = 
   [draw ~dashed:(pattern [On (bp 1.) ; Off (bp 2.); On (bp 10.); Off (bp 2.)]) 

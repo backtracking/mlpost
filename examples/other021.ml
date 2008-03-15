@@ -1,5 +1,5 @@
 open Mlpost
-open SimplePath
+open Path
 
 let fig =
   let triangle = 

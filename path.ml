@@ -14,41 +14,45 @@
 (*                                                                        *)
 (**************************************************************************)
 
-open Types
+module S = SimplePoint
+include PrimPath
 
-type direction = Types.direction =
-  | Vec of Point.t
-  | Curl of float
-  | NoDir 
+let knotp ?(l=NoDir) ?(r=NoDir) p = (l, p, r)
 
-type joint = Types.joint =
-    JLine
-  | JCurve
-  | JCurveNoInflex
-  | JTension of float * float
-  | JControls of Point.t * Point.t
+let knot ?(l) ?(r) ?(scale) p = knotp ?l (S.p ?scale p) ?r
 
-type knot = direction * Point.t * direction
+let cycle_tmp ?(dir=NoDir) ?(style=JCurve) p = PrimPath.cycle dir style p
+let cycle = cycle_tmp
+let concat ?(style=JCurve) p k = concat p style k
 
-(* the intention is to add new knots in front,
- * i. e. the list has to be reversed for printing *)
-type t = path
+(* construct a path with a given style from a knot list *)
+let pathk ?(style) ?(cycle) = function
+  | [] -> failwith "empty path is not allowed"
+  | (x::xs) ->
+      let p = List.fold_left 
+                 (fun p knot -> concat ?style p knot) (start x) xs
+      in
+        match cycle with
+          | None -> p
+          | Some style -> cycle_tmp ~style p
 
-let start k = PAKnot k
-let concat p j k = PAConcat (k,j,p)
-let cycle d j p = PACycle (d,j,p)
-let append p1 j p2 = PAAppend (p1,j,p2)
-let fullcircle = PAFullCircle
-let halfcircle = PAHalfCircle
-let quartercircle = PAQuarterCircle
-let unitsquare = PAUnitSquare
-let transform tr = function
-  | PATransformed (p,tr') -> PATransformed (p,tr'@tr)
-  | _ as x -> PATransformed (x,tr)
-let bpath b = PABoxBPath b
-let cut_after p1 p2 = PACutAfter (p1, p2)
-let cut_before p1 p2 = PACutBefore (p1, p2)
-let build_cycle l = PABuildCycle l
-let subpath f1 f2 p = PASub (f1, f2, p)
+let pathp ?(style) ?(cycle) l =
+  pathk ?style ?cycle
+    (List.map (knotp) l)
 
-let point f p = PTPointOf (f, p)
+let pathn ?(style) ?(cycle) l =
+  pathp ?style ?cycle
+    (List.map (Point.p) l)
+
+let path ?(style) ?(cycle) ?(scale) l =
+  let sc = S.ptlist ?scale in
+    pathp ?style ?cycle (sc l)
+
+(* construct a path with knot list and joint list *)
+let jointpathk lp lj =
+  List.fold_left2 PrimPath.concat (start (List.hd lp)) lj (List.tl lp)
+
+let jointpathp lp lj  = jointpathk (List.map (knotp) lp) lj
+let jointpath ?(scale) lp lj  = jointpathk (List.map (knot ?scale) lp) lj
+
+let append ?(style=JCurve) p1 p2 = append p1 style p2

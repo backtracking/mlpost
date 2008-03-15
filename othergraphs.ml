@@ -19,7 +19,7 @@ open Num
 open Box
 open Command
 open SimplePoint
-open SimplePath
+open Path
 module C = Convenience
 module Co = Color
 module P = Pen

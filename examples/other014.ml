@@ -2,7 +2,7 @@ open Mlpost
 open SimplePoint
 open Command
 open Dash
-module SP = SimplePath
+module SP = Path
 
 let fig = 
   [draw ~dashed:(scaled 2. evenly) (SP.path ~scale:Num.cm [0.,0.; 3.,0.]) ;
