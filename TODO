@@ -4,15 +4,6 @@
 * la syntaxe des transformations est encore un peu lourde ...
 * clipping
 
-* prélude pour LaTeX, tel que 
-
-verbatimtex
-%&latex
-\documentclass{article}
-\usepackage[T1]{fontenc}
-\begin{document}
-etex
-
 * rendre mlpost "latex-ready":
   * inclure du mlpost dans un fichier latex
   * prendre en compte le prelude du fichier latex
@@ -22,6 +13,10 @@ etex
   * peut-etre aussi un mode "metapost", qui crée des fichiers figure.i, qu'il
     faut inclure à la main dans son document
 
+* pour l'instant on ne peut pas se servir des éléments créés avec Diag ou Tree,
+  pour faire d'autres parties du dessin (flèche d'une boîte du diagram vers un
+  autre objet du dessin, ...)
+
 
 -------------------------------------------------------------------------------
 des liens avec des exemples :
@@ -30,3 +25,5 @@ http://tex.loria.fr/prod-graph/zoonekynd/metapost/metapost.html
 http://melusine.eu.org/syracuse/metapost/cheno/illustrations/illustrations.html
 http://melusine.eu.org/syracuse/metapost/mpman/
 http://www.cs.ucc.ie/~dongen/mpost/mpost.html
+http://www.ursoswald.ch/metapost/tutorial.pdf
+http://remote.science.uva.nl/~heck/Courses/mptut.pdf

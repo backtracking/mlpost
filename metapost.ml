@@ -239,6 +239,7 @@ let defaultprelude fmt () =
   fprintf fmt "verbatimtex@\n";
   fprintf fmt "%%&latex@\n";
   fprintf fmt "\\documentclass{article}@\n";
+  fprintf fmt "\\usepackage[T1]{fontenc}@\n";
   fprintf fmt "\\begin{document}@\n";
   fprintf fmt "etex@\n";
   fprintf fmt "input boxes;@\n"
