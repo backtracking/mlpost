@@ -30,6 +30,12 @@ let print_corner fmt = function
   | SW -> fprintf fmt "sw"
   | SE -> fprintf fmt "se"
 
+let print_piccorner fmt = function
+  | UL -> fprintf fmt "ulcorner"
+  | LL -> fprintf fmt "llcorner"
+  | UR -> fprintf fmt "urcorner"
+  | LR -> fprintf fmt "lrcorner"
+
 let rec print_num fmt f =
   if f = infinity then fprintf fmt "infinity"
   else
@@ -55,6 +61,8 @@ let print_position fmt = function
 let rec print_point fmt = function
   | PTPair (m,n) -> fprintf fmt "(%a,%a)" print_num m print_num n
   | PTBoxCorner (n, d) -> fprintf fmt "%a.%a" print_name n print_corner d
+  | PTPicCorner (pic, d) -> 
+      fprintf fmt "(%a %a)" print_piccorner d print_picture pic
   | PTAdd (p1, p2) -> fprintf fmt "(%a + %a)" print_point p1 print_point p2
   | PTSub (p1, p2) -> fprintf fmt "(%a - %a)" print_point p1 print_point p2
   | PTMult (f, p) -> fprintf fmt "(%a * %a)" print_float f print_point p

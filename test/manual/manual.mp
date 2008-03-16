@@ -136,10 +136,76 @@ draw z0{curl c}..z1..{curl c}z2;
 dotlabels.rt(0,1,2);
 endfig;
 
+beginfig(17) ;
+a=.7in ; b=.5in ;
+z0=(0,0) ;
+z1=-z3=(a,0) ;
+z2=-z4=(0,b) ;
+draw z1..z2..z3..z4..cycle ;
+draw z1 -- z0 -- z2 ;
+label.top("a",.5[z0,z1]) ;
+label.lft("b",.5[z0,z2]) ;
+dotlabel.bot("(0,0)",z0) ;
+endfig ;
+
+beginfig(18) ;
+  numeric u;
+  u = 1cm;
+  draw (0,2u) -- (0,0) -- (4u,0) ;
+  pickup pencircle scaled 1pt ;
+  draw (0,0){up}
+  for i=1 upto 8 :
+    ..(i/2,sqrt(i/2))*u endfor ;
+  label.lrt(btex $ \sqrt x$ etex,
+    (3,sqrt 3)*u) ;
+  label.bot(btex $x$ etex, (2u,0)) ;
+  label.lft(btex $y$ etex, (0,u)) ;
+endfig ;
+
+beginfig(19) ;
+  numeric ux, uy ;
+  120ux=1.2in; 4uy=2.4in ;
+  draw (0,4uy) -- (0,0) -- (120ux,0) ;
+  pickup pencircle scaled 1pt ;
+  draw (0,uy){right}
+  for ix=1 upto 8 :
+    ..(15ix*ux, uy*2/(1+cosd 15ix))
+  endfor ;
+  label.bot (btex axe $x$ etex, (60ux,0)) ;
+  label.lft (btex axe $y$ etex
+    rotated 90, (0,2uy)) ;
+  label.lft (btex
+    $\displaystyle y={2\over1+\cos x}$ etex,
+    (120ux, 4uy)) ;
+endfig ;
+
 beginfig(21) ;
 path p ;
 p = (-1cm,0)..(0,-1cm)..(1cm,0) ;
 fill p{up} .. (0,0){-1,-2} ..
 {up}cycle ;
 draw p .. (0,1cm) .. cycle ;
+endfig ;
+
+beginfig(22) ;
+path a, b, aa, ab ;
+a = fullcircle scaled 2cm ;
+b = a shifted (0,1cm) ;
+aa = halfcircle scaled 2cm ;
+ab = buildcycle(aa, b) ;
+picture pa, pb ;
+pa = thelabel(btex $A$ etex, (0,-
+.5cm)) ;
+pb = thelabel(btex $B$ etex,
+(0,1.5cm)) ;
+fill a withcolor .7white ;
+fill b withcolor .7white ;
+fill ab withcolor .4white ;
+unfill bbox pa ;
+draw pa ;
+unfill bbox pb ;
+draw pb ;
+label.lft(btex $U$ etex, (-
+1cm,.5cm)) ;
+draw bbox currentpicture ;
 endfig ;

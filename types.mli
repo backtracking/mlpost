@@ -21,6 +21,7 @@ type color = float * float * float
 type name = string
 
 type corner = N | S | W | E | NE | NW | SW | SE
+type piccorner = UL | UR | LL | LR
 
 type position =
   | Pcenter
@@ -42,6 +43,7 @@ type box_circle_style =
 type point = 
   | PTPair of num * num
   | PTBoxCorner of name * corner
+  | PTPicCorner of picture * piccorner
   | PTPointOf of float * path
   | PTAdd of point * point
   | PTSub of point * point

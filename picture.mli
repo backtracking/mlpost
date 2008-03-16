@@ -19,7 +19,12 @@ type t = Types.picture
 val tex : string -> t
 
 val make : Types.command list -> t
+val currentpicture : t
 
 val transform : Transform.t -> t -> t
 
 val bbox : t -> Types.path
+val ulcorner : t -> Types.point
+val llcorner : t -> Types.point
+val urcorner : t -> Types.point
+val lrcorner : t -> Types.point

@@ -123,9 +123,19 @@ let d5 =
     box_arrow b1 b2 ]
 
 let d7 =
-  let pic = Picture.tex "bound this!" in
+  let pic = 
+    Picture.transform [T.scaled 4.] (Picture.tex "bound this!") in
+  let pbox = pathp ~style:JLine ~cycle:JLine
+    [Picture.ulcorner pic; Picture.urcorner pic; 
+     Picture.lrcorner pic; Picture.llcorner pic] in
     [Command.draw_pic pic;
-     Command.draw (Picture.bbox pic)]
+     Command.draw (Picture.bbox pic);
+     Command.draw pbox;
+     Command.dotlabel ~pos:Pleft (Picture.tex "ulcorner") (Picture.ulcorner pic);
+     Command.dotlabel ~pos:Pleft (Picture.tex "llcorner") (Picture.llcorner pic);
+     Command.dotlabel ~pos:Pright (Picture.tex "urcorner") (Picture.urcorner pic);
+     Command.dotlabel ~pos:Pright (Picture.tex "lrcorner") (Picture.lrcorner pic);
+    ]
     
 open Tree.Pic
 
