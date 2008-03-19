@@ -14,11 +14,20 @@
 (*                                                                        *)
 (**************************************************************************)
 
-type t = Types.color
+(** Colors *)
+
+type t = Types.color 
+  (** the abstract type of Colors *)
 
 val default : t
+  (** the default Color is black *)
 
 val rgb : float -> float -> float -> t
+  (** [rgb r g b] constructs the color that corresponds to the color code 
+      RGB(r,g,b)  *)
+
+(** {2 Predefined Colors} *)
+
 val red : t
 val orange : t
 val blue : t
