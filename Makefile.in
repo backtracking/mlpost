@@ -44,6 +44,8 @@ OFLAGS = -dtypes $(INCLUDES) @FORPACK@
 #############
 
 NAME = mlpost
+VERSION=0.1
+
 TESTS = handbookgraphs.cmx othergraphs.cmx tests.cmx
 TOOL = tool.$(OCAMLBEST)
 
@@ -131,25 +133,18 @@ headers:
 # installation
 ##############
 
-install-indep: 
-	mkdir -p $(BINDIR)
-	mkdir -p $(MANDIR)/man1
-	cp -f $(NAME).1 $(MANDIR)/man1
+install: install-$(OCAMLBEST) 
 
-install: install-$(OCAMLBEST) install-byte
-
-install-byte: 
+install-byte: $(CMA) tool.byte
 	cp -f mlpost.cmo mlpost.cmi $(CMA) "$(OCAMLLIB)"
+	mkdir -p $(BINDIR)
+	cp -f tool.byte $(BINDIR)/mlpost
 
-install-opt: 
+install-opt: $(CMXA) tool.opt
+	cp -f mlpost.cmo mlpost.cmi $(CMA) "$(OCAMLLIB)"
 	cp -f mlpost$(LIBEXT) mlpost.cmx $(CMXA) "$(OCAMLLIB)"
-
-# documentation
-###############
-
-DOCFILES=manual.ps manual.html
-
-doc: $(DOCFILES)
+	mkdir -p $(BINDIR)
+	cp -f tool.opt $(BINDIR)/mlpost
 
 # export
 ########
@@ -157,15 +152,15 @@ doc: $(DOCFILES)
 EXPORTDIR=$(NAME)-$(VERSION)
 TAR=$(EXPORTDIR).tar
 
-FTP = $$HOME/ftp/$(NAME)
-WWW = $$HOME/WWW/$(NAME)
+WWW = /users/www-perso/projets/mlpost
+FTP = $(WWW)/download
 
-FILES = *.ml *.mli \
-	Makefile.in configure configure.in   \
-	.depend README INSTALL COPYING GPL CHANGES
+FILES = *.ml *.mli *.mll \
+	Makefile.in configure configure.in .depend \
+	.depend README.txt INSTALL LICENSE CHANGES
 
-export: source binary export-doc
-	cp README COPYING GPL CHANGES $(FTP)
+export: source export-www export-examples
+	cp README.txt INSTALL LICENSE CHANGES $(FTP)
 
 source: 
 	mkdir -p export/$(EXPORTDIR)
@@ -173,21 +168,15 @@ source:
 	cd export ; tar cf $(TAR) $(EXPORTDIR) ; gzip -f --best $(TAR)
 	cp export/$(TAR).gz $(FTP)
 
-export-doc: $(DOCFILES)
-	gzip -c manual.ps > $(FTP)/manual.ps.gz
-	cp manual.html $(WWW)
+export-www: www/version.prehtml
+	make -C www
 
-BINARY = $(EXPORTDIR)-$(OSTYPE)
-BINARYTAR=$(BINARY).tar
+www/version.prehtml:
+	echo "<#def version>$(VERSION)</#def>" > www/version.prehtml
 
-BINARYFILES = README INSTALL COPYING GPL $(NAME).1
-
-binary: $(NAME).$(OCAMLBEST) $(DOCFILES)
-	mkdir -p export/$(BINARY)
-	cp $(BINARYFILES) $(DOCFILES) export/$(BINARY)
-	cp $(NAME).$(OCAMLBEST) export/$(BINARY)/$(NAME)
-	(cd export; tar czf $(BINARY).tar.gz $(BINARY))
-	cp export/$(BINARY).tar.gz $(FTP)
+export-examples: 
+	make -C examples
+	cp -f --parents examples/*.png examples/*.html $(WWW)
 
 # literate programming
 ######################

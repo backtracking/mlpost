@@ -1,0 +1,53 @@
+<html>
+
+<head>
+<#iso>
+<title>
+Mlpost</title>
+<meta name="Keywords" content="metapost ocaml">
+</head>
+
+<body>
+
+<h1>Mlpost</h1>
+
+<#fr>
+Mlpost est une interface <#ocaml> pour <#metapost>.
+</#fr>
+<#en>
+Mlpost is an <#ocaml> interface to <#metapost>.
+</#en>
+
+<h3><#fr>Exemples</#fr><#en>Examples</#en></h3>
+
+<#fr>Ne manquez pas notre <a href="examples/">galerie d'exemples</a>.</#fr>
+<#en>Have a look at our <a href="examples/">examples</a>.</#en>
+
+<h3>Download</h3>
+
+<#fr>
+La version courante est <#version> et peut être téléchargée
+<a href="download/">ici</a>.
+</#fr>
+<#en>
+Current version is <#version> and can be downloaded from <a
+href="download/">here</a>.
+Here are the <a href="download/CHANGES">CHANGES</a>.
+</#en> 
+
+<h3><#fr>Auteurs</#fr><#en>Authors</#en></h3>
+
+<#fr>Mlpost est développé par</#fr>
+<#en>Mlpost is developed by</#en>
+<ul>
+<li><a href="http://www.lri.fr/~kanig/">Johannes Kanig</a>
+<li><a href="http://www.lri.fr/~lescuyer/">Stéphane Lescuyer</a>
+<li><a href="http://www.lri.fr/~filliatr/">Jean-Christophe Filliâtre</a>
+</ul>
+
+<hr>
+<#fr><a href="index.en.html">english</a></#fr>
+<#en><a href="index.fr.html">français</a></#en>
+
+</body>
+</html>
