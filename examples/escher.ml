@@ -1,6 +1,5 @@
-(* shamelessly stolen from
+(* taken from
  * http://www.cs.ucc.ie/~dongen/mpost/mp/Escher87.mp
- * we should ask that guy before publishing this example
 *)
 open Mlpost
 open Command
