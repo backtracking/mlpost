@@ -39,5 +39,6 @@ val segment : float -> t -> t -> t
 (* operations on points *)
 val add : t -> t -> t
 val sub : t -> t -> t
+val mult : float -> t -> t
 val rotated : float -> t -> t
 
