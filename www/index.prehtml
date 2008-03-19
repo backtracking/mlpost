@@ -18,10 +18,24 @@ Mlpost est une interface <#ocaml> pour <#metapost>.
 Mlpost is an <#ocaml> interface to <#metapost>.
 </#en>
 
+<p>
+
+<center>
+<a href="examples/tree1.ml.html"><img src="examples/tree1.png" alt="no image"></a>
+</center>
+
+
 <h3><#fr>Exemples</#fr><#en>Examples</#en></h3>
 
 <#fr>Ne manquez pas notre <a href="examples/">galerie d'exemples</a>.</#fr>
 <#en>Have a look at our <a href="examples/">examples</a>.</#en>
+
+<h3>API</h3>
+
+<#fr>Parcourir l'<a href="doc/">API</a>.Note : Tous les modules sont
+regroupés à l'intérieur d'un unique module Mlpost.</#fr>
+<#en>Browse the <a href="doc/">API</a>. Note that all modules are
+packaged into a single module Mlpost.</#en>
 
 <h3>Download</h3>
 

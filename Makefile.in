@@ -159,7 +159,7 @@ FILES = *.ml *.mli *.mll \
 	Makefile.in configure configure.in .depend \
 	.depend README.txt INSTALL LICENSE CHANGES
 
-export: source export-www export-examples
+export: source export-www export-examples export-doc
 	cp README.txt INSTALL LICENSE CHANGES $(FTP)
 
 source: 
@@ -167,6 +167,12 @@ source:
 	cp $(FILES) export/$(EXPORTDIR)
 	cd export ; tar cf $(TAR) $(EXPORTDIR) ; gzip -f --best $(TAR)
 	cp export/$(TAR).gz $(FTP)
+
+DOCFILES:=$(shell echo *.mli)
+DOCFILES:=$(filter-out types.mli, $(DOCFILES))
+
+export-doc:
+	ocamldoc -html -d $(WWW)/doc $(DOCFILES)
 
 export-www: www/version.prehtml
 	make -C www

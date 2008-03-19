@@ -14,14 +14,26 @@
 (*                                                                        *)
 (**************************************************************************)
 
+(** Boxes *)
+
 type t = Types.box
+  (** the abstract type of boxes *)
+
+(** {2 Creating boxes} *)
 
 type circle_style = Types.box_circle_style =
-  | Padding of Num.t * Num.t (* dx , dy *)
-  | Ratio of float (* dx / dy *)
+  | Padding of Num.t * Num.t (** dx , dy *)
+  | Ratio of float           (** dx / dy *)
 
 val circle : ?style:circle_style -> Point.t -> Picture.t -> t
+  (** [circle p pic] creates a circle box of center [p] and of contents
+      [pic] *)
+
 val rect : Point.t -> Picture.t -> t
+  (** [rect p pic] creates a rectangular box of center [p] and of contents
+      [pic] *)
+
+(** {2 Special points of a box} *)
 
 val center : t -> Point.t
 val north : t -> Point.t

@@ -14,12 +14,12 @@
 (*                                                                        *)
 (**************************************************************************)
 
-(* trees *)
-
-(** 1. Creation *)
+(** Trees *)
 
 type t
     (** the abstract type of trees *)
+
+(** {2 Creation} *)
 
 type node_style = Circle | Rect
 
@@ -27,13 +27,14 @@ val leaf : ?style:node_style -> ?fill:Color.t -> string -> t
 val node : ?style:node_style -> ?fill:Color.t -> string -> t list -> t
 val bin  : ?style:node_style -> ?fill:Color.t -> string -> t -> t -> t
 
+(** variants to create trees with pictures at nodes *)
 module Pic : sig
   val leaf : ?style:node_style -> ?fill:Color.t -> Picture.t -> t
   val node : ?style:node_style -> ?fill:Color.t -> Picture.t -> t list -> t
   val bin  : ?style:node_style -> ?fill:Color.t -> Picture.t -> t -> t -> t
 end
 
-(** 2. Drawing *)
+(** {2 Drawing} *)
 
 type arrow_style = Directed | Undirected
 
