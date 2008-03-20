@@ -133,6 +133,7 @@ val build_cycle : t list -> t
 
 
 (** {2 Predefined values} *)
+
 val defaultjoint : joint
 val fullcircle : t
 val halfcircle : t
