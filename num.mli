@@ -14,7 +14,15 @@
 (*                                                                        *)
 (**************************************************************************)
 
+(** The Mlpost Num module *)
+
 type t = float
+(** The Mlpost numeric type is just a float *)
+
+(** {2 Conversion functions} *)
+(** The base unit in Mlpost are bp. The following functions permit to specify
+    values in other common units *)
+
 val bp : float -> t
 val pt : float -> t
 val cm : float -> t
