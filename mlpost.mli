@@ -16,30 +16,34 @@
 
 (** This is Mlpost *)
 
+(** {2 Interfaces to basic Metapost datatypes} *)
+
 module rec Path : sig
 
-  (** Paths *)
+  (** Paths are the objects used to describe lines, curves, and 
+      more generally almost everything that is drawn with Mlpost *) 
 
-  (** A direction, which is useful to put constraints on paths on points
+  (** A [direction] is used to put constraints on paths:
       {ul {- [Vec p] defines a direction by a point (interpreted as a vector)}
-      {- [Curl f] Change the curling factor of the extremity of a path}
+      {- [Curl f] changes the curling factor of the extremity of a path; 
+      higher curling factor means flatter curves}
       {- [NoDir] means no particular direction} } *)
   type direction =
       | Vec of Point.t
       | Curl of float
       | NoDir 
 
-  (** A [knot] is simply a point with an incoming and outgoing
-      direction constraint *)
+  (** A [knot] is the basic element of a path, and is simply a point 
+      with an incoming and outgoing direction constraint *)
   type knot = direction * Point.t * direction
 
   (** A joint is the connection between two knots in a path. It is either
-      {ul {- [JLine] is a straight line}
-      {- [JCurve] is a spline curve}
-      {- [JCurveNoInflex] avoids inflection}
-      {- [JTension] permits "tension" on the joint; [JCurve] uses a default
+      {ul {- [JLine] for a straight line}
+      {- [JCurve] for a spline curve}
+      {- [JCurveNoInflex] to avoid inflexion points}
+      {- [JTension] to specify "tension" on the joint; [JCurve] uses a default
       tension of 1. Higher tension means less "wild" curves}
-      {- [JControls] permits to give control points by hand}} *)
+      {- [JControls] to explicitely specify control points}} *)
   type joint =
       | JLine
       | JCurve
@@ -47,61 +51,63 @@ module rec Path : sig
       | JTension of float * float
       | JControls of Point.t * Point.t
 
-  (** the abstract type of paths *)
+  (** The abstract type of paths *)
   type t
 
-  (** {2 labelled path constructors} *)
-  (** build a knot from a pair of floats 
+  (** {2 Labelled path constructors} *)
+  (** Build a knot from a pair of floats
       @param l an incoming direction
-      @param r an outgoing direction *)
+      @param r an outgoing direction 
+      @param scale a scaling factor applied to the floats *)
   val knot :
     ?l:direction -> ?r:direction -> 
     ?scale:(float -> Num.t) -> float * float -> knot
 
-  (** build a knot from a point; the optional arguments are as in {!knot} *)
+  (** Build a knot from a point; the optional arguments are as in {!knot} *)
   val knotp :
     ?l:direction -> ?r:direction -> Point.t -> knot
 
-  (** build a path from a list of floatpairs
-      @param style the joint style used for all joints of the path
+  (** Build a path from a list of pairs of floats
+      @param style the joint style used for all joints in the path
       @param cycle if given, the path is closed using the given style
       @param scale permits to scale the whole path *)
   val path : 
     ?style:joint -> ?cycle:joint -> ?scale:(float -> Num.t) -> 
     (float * float) list -> t
 
-  (** same as [path], but uses a knot list *)
+  (** Same as [path], but uses a knot list *)
   val pathk :
     ?style:joint -> ?cycle:joint -> knot list -> t
 
-  (** same as [path] but uses a point list *)
+  (** Same as [path] but uses a point list *)
   val pathp :
     ?style:joint -> ?cycle:joint -> Point.t list -> t
 
-  (** build a path from [n] knots and [n-1] joints *)
+  (** Build a path from [n] knots and [n-1] joints *)
   val jointpathk : knot list -> joint list -> t
 
-  (** build a path from [n] points and [n-1] joints, with default directions *)
+  (** Build a path from [n] points and [n-1] joints, 
+      with default directions *)
   val jointpathp : Point.t list -> joint list -> t
 
-  (** build a path from [n] float_pairs and [n-1] joints, with default 
-      * directions *)
+  (** Build a path from [n] float_pairs and [n-1] joints, 
+      with default directions *)
   val jointpath : 
     ?scale:(float -> Num.t) -> (float * float) list -> 
     joint list -> t
 
-  (** close a path using direction [dir] and style [style] *)
+  (** Close a path using direction [dir] and style [style] *)
   val cycle : ?dir:direction -> ?style:joint -> t -> t
 
 
   (** {2 Primitive path constructors} *)
-  (** add a knot at the end of a path  *)
+  (** Add a knot at the end of a path  *)
   val concat : ?style:joint -> t -> knot -> t
 
-  (** lift a knot to a path *)
+  (** Create a simple path with one knot *)
   val start : knot -> t
 
-  (** append a path to another using joint [style] *)
+  (** Append a path to another using joint [style] *)
   val append : ?style:joint -> t -> t -> t
 
 
@@ -110,38 +116,45 @@ module rec Path : sig
   (** [point f p] returns a certain point on the path [p]; [f] is
       given "in control points": [1.] means the first control point,
       [2.] the second and so on; intermediate values are accepted. *)
-
   val point : float -> t -> Point.t
 
   (** [subpath start end path] selects the subpath of [path] that lies
       between [start] and [end]. [start] and [end] are given in
       control points, as in {!point}. *)
-    
   val subpath : float -> float -> t -> t
 
-  (** apply a transformation to a path *)
+  (** Apply a transformation to a path *)
   val transform : Transform.t -> t -> t
 
-  (** get the bounding path of a box *)
+  (** Get the bounding path of a box *)
   val bpath : Box.t -> t
 
-  (** [cut_after p1 p2] cuts [p2] after the intersection with [p1]. To memorize
-      the order of the arguments, you can read: "cut after [p1]" *)
+  (** [cut_after p1 p2] cuts [p2] after the intersection with [p1]. 
+      To memorize the order of the arguments, 
+      you can read: "cut after [p1]" *)
   val cut_after : t -> t -> t
 
-  (** same as {!cut_after}, but cuts before *)
+  (** Same as {!cut_after}, but cuts before *)
   val cut_before: t -> t -> t
 
-  (** builds a cycle from a set of intersecting paths *)
+  (** Build a cycle from a set of intersecting paths *)
   val build_cycle : t list -> t
-
 
   (** {2 Predefined values} *)
 
+  (** The default joint style ([JLine]) *)
   val defaultjoint : joint
+
+  (** A full circle of radius 1 and centered on the origin *)
   val fullcircle : t
+
+  (** The upper half of {!fullcircle} *)
   val halfcircle : t
+
+  (** The right half of {!halfcircle} *)
   val quartercircle: t
+
+  (** A full square of size 1 and centered on the origin *)
   val unitsquare: t
 
 end

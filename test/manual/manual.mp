@@ -209,3 +209,25 @@ label.lft(btex $U$ etex, (-
 1cm,.5cm)) ;
 draw bbox currentpicture ;
 endfig ;
+
+
+beginfig(24) ;
+h=2in ; w=2.7in ;
+path p[], q[], pp ;
+for i=2 upto 4 : ii :=i**2 ;
+p[i] = (w/ii,h){1,-ii}...(w/i,h/i)...(w,h/ii){ii,-1} ;
+endfor
+q0.5 = (0,0) -- (w,0.5h) ;
+q1.5 = (0,0) -- (w/1.5,h) ;
+pp = buildcycle(q0.5, p2, q1.5, p4) ;
+fill pp withcolor .7white ;
+z0=center pp ;
+picture lab ;
+lab=thelabel(btex $f>0$ etex, z0) ;
+unfill bbox lab ; draw lab ; draw q0.5 ; draw p2 ; draw q1.5 ; draw
+p4 ;
+dotlabel.top(btex $P$ etex, p2 intersectionpoint q0.5) ;
+dotlabel.rt(btex $Q$ etex, p2 intersectionpoint q1.5) ;
+dotlabel.lft(btex $R$ etex, p4 intersectionpoint q1.5) ;
+dotlabel.bot(btex $S$ etex, p4 intersectionpoint q0.5) ;
+endfig ;
