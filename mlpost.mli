@@ -148,10 +148,10 @@ module rec Path : sig
   (** A full circle of radius 1 and centered on the origin *)
   val fullcircle : t
 
-  (** The upper half of {!fullcircle} *)
+  (** The upper half of [fullcircle] *)
   val halfcircle : t
 
-  (** The right half of {!halfcircle} *)
+  (** The right half of [halfcircle] *)
   val quartercircle: t
 
   (** A full square of size 1 and centered on the origin *)
@@ -161,41 +161,66 @@ end
 
 and Point : sig
 
+  (** The abstract type for points *)
   type t
 
+  (**  Construct a point from two numeric values *)
   val pt : Num.t * Num.t -> t
-    (* These functions create points of "unspecified" size, ie vectors
-       to use with Vec for instance *)
+
+  (** The following functions create points of length 1. 
+      They are especially useful to specify directions with [Path.Vec] *)
+
+  (** [dir f] is the point at angle [f] on the unit circle. 
+      [f] shall be given in degrees *)
   val dir : float -> t
+    
+  (** The unitary vectors pointing up, down, left and right *)
+
   val up : t
   val down : t
   val left : t
   val right : t
 
+  (** {2 Operations on points} *)
+    
+  (** [segment f p1 p2] is the point [(1-f)p1 + fp2] *)
   val segment : float -> t -> t -> t
 
-  (* operations on points *)
+  (** Sum two points *)
   val add : t -> t -> t
+  
+  (** Substract two points *)
   val sub : t -> t -> t
+  
+  (** Multiply a point by a scalar *)
   val mult : float -> t -> t
+  
+  (** Rotate a point by an angle in degrees *)
   val rotated : float -> t -> t
 
-  (* construct a point with the right measure *)
+  (** {2 Convenient constructors} *)
+
+  (** The following functions build a point at a 
+      given scale (see {!Num.t} for scales) *)
   val bpp : float * float -> t
   val inp : float * float -> t
   val cmp : float * float -> t
   val mmp : float * float -> t
   val ptp : float * float -> t
 
-  (* construct a list of points with the right measure *)
+  (** Same as the previous functions but build list of points *)
   val map_bp : (float * float) list -> t list
   val map_in: (float * float) list -> t list
   val map_cm: (float * float) list -> t list
   val map_mm: (float * float) list -> t list
   val map_pt: (float * float) list -> t list
 
-  (* might be useful to give another measure *)
+  (** Builds a point from a pair of floats
+      @param scale a scaling function to be applied to each float;
+      see {!Num.t} for scaling functions for usual units *)
   val p : ?scale:(float -> Num.t) -> float * float -> t
+
+  (** Same as [p], but builds a list of points *)
   val ptlist : ?scale:(float -> Num.t) -> (float * float) list -> t list
 
 end
@@ -204,14 +229,19 @@ and Box : sig
 
   (** Boxes *)
 
+  (** The abstract type of boxes *)
   type t
-      (** the abstract type of boxes *)
 
   (** {2 Creating boxes} *)
 
+  (** Circle boxes can be customized in two different ways:
+      {ul {- [Padding dx dy] specifies the padding that shall 
+      be added between the contents of the box and its borders}
+      {-  [Ratio f] specifies the ratio of the box's width and its height }
+      } *)
   type circle_style =
       | Padding of Num.t * Num.t (** dx , dy *)
-      | Ratio of float           (** dx / dy *)
+      | Ratio of float           (** x / y *)
 
   val circle : ?style:circle_style -> Point.t -> Picture.t -> t
     (** [circle p pic] creates a circle box of center [p] and of contents
@@ -221,7 +251,7 @@ and Box : sig
     (** [rect p pic] creates a rectangular box of center [p] and of contents
 	[pic] *)
 
-  (** {2 Special points of a box} *)
+  (** {2 Special points on a box} *)
 
   val center : t -> Point.t
   val north : t -> Point.t
