@@ -91,7 +91,7 @@ rule scan = parse
       try while true do output_char cout (input_char cin) done
       with End_of_file -> ()
     end;
-    let pdf = if !pdf then "" else "~pdf:true" in
+    let pdf = if !pdf then "~pdf:true" else "" in
     let prelude = match !latex_file with
       | None -> ""
       | Some f -> 
