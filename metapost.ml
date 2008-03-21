@@ -235,26 +235,43 @@ let print i fmt l =
     (fun fmt l -> List.iter (print_command fmt) l)
     l
 
-let defaultprelude fmt () =
+let print_prelude s fmt () =
   fprintf fmt "verbatimtex@\n";
   fprintf fmt "%%&latex@\n";
-  fprintf fmt "\\documentclass{article}@\n";
-  fprintf fmt "\\usepackage[T1]{fontenc}@\n";
+  fprintf fmt "%s" s;
   fprintf fmt "\\begin{document}@\n";
   fprintf fmt "etex@\n";
   fprintf fmt "input boxes;@\n"
 
+let defaultprelude =
+  print_prelude "\\documentclass{article}\n\\usepackage[T1]{fontenc}\n" 
+
 let generate_mp fn ?(prelude=defaultprelude) l =
   Misc.write_to_formatted_file fn
     (fun fmt -> 
-       defaultprelude fmt ();
+       prelude fmt ();
        List.iter (fun (i,f) -> print i fmt f) l)
 
 (* batch processing *)
 
+let figuren = ref 0
 let figures = ref []
 
-let emit i f = figures := (i, f) :: !figures
+let emit s f = 
+  incr figuren;
+  figures := (!figuren, s, f) :: !figures
 
-let dump f = generate_mp f (List.rev !figures)
-
+let dump ?prelude ?(pdf=false) bn = 
+  let f = bn ^ ".mp" in
+  let prelude = match prelude with
+    | None -> defaultprelude
+    | Some s -> print_prelude s
+  in
+  generate_mp f ~prelude (List.rev_map (fun (i,_,f) -> i,f) !figures);
+  let out = Sys.command (sprintf "mpost %s end" f) in
+  if out <> 0 then exit 1;
+  let suf = if pdf then ".mps" else ".1" in
+  List.iter 
+    (fun (i,s,_) -> 
+      Sys.rename (bn ^ "." ^ string_of_int i) (s ^ suf))
+    !figures

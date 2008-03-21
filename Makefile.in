@@ -130,7 +130,7 @@ dep:
 
 headers:
 	headache -c headache_config.txt -h header.txt \
-		Makefile.in configure.in README.txt *.mli *.ml
+		Makefile.in configure.in README.txt *.mli *.ml *.mll
 
 # installation
 ##############
