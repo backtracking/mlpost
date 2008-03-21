@@ -30,7 +30,7 @@ Mlpost is an <#ocaml> interface to <#metapost>.
 <#fr>Ne manquez pas notre <a href="examples/">galerie d'exemples</a>.</#fr>
 <#en>Have a look at our <a href="examples/">examples</a>.</#en>
 
-<h3>API</h3>
+<h3>Documentation</h3>
 
 <#fr>Parcourir l'<a href="doc/">API</a>.Note : Tous les modules sont
 regroupés à l'intérieur d'un unique module Mlpost.</#fr>

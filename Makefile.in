@@ -83,11 +83,13 @@ $(CMA): mlpost.cmo
 $(CMXA): mlpost.cmx
 	$(OCAMLOPT) -a $(OFLAGS) -o $@ $^
 
+mlpost.cmo: mlpost.cmi
 mlpost.cmo: $(CMO)
-	$(OCAMLC) $(INCLUDES) -pack -o $@ $^
+	$(OCAMLC) $(INCLUDES) -pack -o $@ $(CMO)
 
+mlpost.cmx: mlpost.cmi
 mlpost.cmx: $(CMX)
-	$(OCAMLOPT) $(INCLUDES) -pack -o $@ $^
+	$(OCAMLOPT) $(INCLUDES) -pack -o $@ $(CMX)
 
 TOOLCMO=tool.cmo
 TOOLCMX := $(TOOLCMO:.cmo=.cmx)
@@ -171,8 +173,12 @@ source:
 DOCFILES:=$(shell echo *.mli)
 DOCFILES:=$(filter-out types.mli, $(DOCFILES))
 
+doc:
+	mkdir -p doc
+	ocamldoc -html -hide Mlpost -d doc mlpost.mli
+
 export-doc:
-	ocamldoc -html -d $(WWW)/doc $(DOCFILES)
+	ocamldoc -html -hide Mlpost -d $(WWW)/doc mlpost.mli
 
 export-www: www/version.prehtml
 	make -C www
