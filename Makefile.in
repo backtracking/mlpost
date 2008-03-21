@@ -57,7 +57,7 @@ all: byte $(OCAMLBEST) $(TOOL) $(TESTS)
 CMO := misc.cmo name.cmo compile.cmo metapost.cmo num.cmo point.cmo \
        transform.cmo \
        color.cmo picture.cmo box.cmo dash.cmo \
-       primPath.cmo simplePoint.cmo path.cmo pen.cmo command.cmo \
+       primPath.cmo path.cmo pen.cmo command.cmo \
        helpers.cmo diag.cmo tree.cmo convenience.cmo generate.cmo
 CMX := $(CMO:.cmo=.cmx)
 

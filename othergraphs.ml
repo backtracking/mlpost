@@ -18,7 +18,7 @@ open Mlpost
 open Num
 open Box
 open Command
-open SimplePoint
+open Point
 open Path
 module C = Convenience
 module Co = Color

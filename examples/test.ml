@@ -5,7 +5,7 @@ open Point
 open Path
 open Helpers
 
-let cmp x y = SimplePoint.cmp (x, y)
+let cmp x y = Point.cmp (x, y)
 
 let fig = 
   let a = Box.circle (cmp 0. 0.) (Picture.tex "$\\sqrt2$") in

@@ -22,7 +22,7 @@ type corner = Types.corner
 
 type t = Types.point
 
-let p (a,b) = PTPair (a,b)
+let pt (a,b) = PTPair (a,b)
 
 (* angle in degrees *)
 let dir f =  
@@ -82,3 +82,26 @@ let rec rotated f = function
   | PTMult (f', p) -> PTMult(f', rotated f p)
   | _ as p -> PTRotated (f, p)
 
+(* From simplePoint *)
+let pmap f (a,b) = (f a, f b)
+
+let p ?(scale=Num.bp) pr =
+  pt (pmap scale pr)
+
+let ptlist ?scale l = List.map (p ?scale) l
+
+(* construct a point with the right measure *)
+let bpp, inp, cmp, mmp, ptp = 
+    p ~scale:Num.bp, 
+    p ~scale:Num.inch, 
+    p ~scale:Num.cm, 
+    p ~scale:Num.mm, 
+    p ~scale:Num.pt
+
+(* construct a list of points with the right measure *)
+let map_bp, map_in, map_cm, map_mm, map_pt =
+  ptlist ~scale:Num.bp, 
+  ptlist ~scale:Num.inch, 
+  ptlist ~scale:Num.cm, 
+  ptlist ~scale:Num.mm, 
+  ptlist ~scale:Num.pt

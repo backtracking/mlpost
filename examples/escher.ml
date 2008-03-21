@@ -4,7 +4,7 @@
 open Mlpost
 open Command
 open Path
-open SimplePoint
+open Point
 
 let rec fold_append ?(style=JCurve) = function
   | [] -> failwith "No empty list allowed"

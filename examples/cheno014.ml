@@ -1,5 +1,5 @@
 open Mlpost
-open SimplePoint
+open Point
 open Path
 open Dash
 open Transform

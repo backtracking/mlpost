@@ -17,7 +17,7 @@
 open Mlpost
 open Command
 open Picture
-open SimplePoint
+open Point
 open Path
 module H = Helpers
 module N = Num

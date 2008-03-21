@@ -20,7 +20,7 @@ open Command
 open Format
 open Helpers
 open Path
-open SimplePoint
+open Point
 module T = Transform
 
 let (++) x y = p (cm x, cm y)
@@ -93,7 +93,6 @@ let cheno011 =
 	    Plowleft, "2", 2. ;  Ptop, "3", 3. ; Pleft, "4", 4. ]);
    Command.draw ~pen (subpath 1.3 3.2 p)]
 
-open SimplePoint
 open Dash
 
 let d3 =
