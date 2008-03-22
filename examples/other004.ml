@@ -1,5 +1,7 @@
 open Mlpost
+open Path
+open Command
 
 let fig =
-  [ Convenience.draw ~pen:(Pen.circle ~tr:[Transform.scaled 4.] ()) 
-      [(0.,0.)] ]
+  [ draw ~pen:(Pen.circle ~tr:[Transform.scaled 4.] ()) 
+      (path [(0.,0.)])]

@@ -21,9 +21,9 @@ open Point
 open Path
 module H = Helpers
 module N = Num
-module C = Convenience
 
-let draw1 = 1, [ C.draw ~style:JLine [20.,20.; 0.,0.; 0.,30.; 30.,0.; 0.,0.] ]
+let draw1 = 1, [ draw 
+                   (path ~style:JLine [20.,20.; 0.,0.; 0.,30.; 30.,0.; 0.,0.])]
 
 let z0 = 0.,0.
 let z1 = 60.,40.
@@ -37,14 +37,14 @@ let labels1 =
    [dotlabel ~pos:Pleft (tex "3") (bpp z3);
     dotlabel ~pos:Pright (tex "1") (bpp z1) ]
 
-let draw3 = 3, [ C.draw ~style:JCurve  l1 ] @ labels1
+let draw3 = 3, [ draw (path ~style:JCurve  l1) ] @ labels1
 
 let draw4a, draw4b = 
   let labels = H.dotlabels ~pos:Ptop ["2";"4"] (map_bp [z2;z4]) @
                H.dotlabels ~pos:Pleft ["0";"3"] (map_bp [z0;z3]) @
                [dotlabel ~pos:Plowright (tex "1") (bpp z1)]
   in
-    (104, [ C.draw ~cycle:JCurve l1] @ labels) ,
+    (104, [ draw (path ~cycle:JCurve l1)] @ labels) ,
     (204, 
      [ draw 
          (Path.append ~style:JLine (path [z0;z1;z2;z3]) 
@@ -67,7 +67,7 @@ let draw5 = 5,
 	[0.,0.] lcontrols (List.tl l1)
     in
       (* As long as we dont have the dashed lines : gray *)
-      C.draw ~color:(Color.gray 0.5) ~style:JLine (List.rev hull) ] @ labels1
+      draw ~color:(Color.gray 0.5) (path ~style:JLine (List.rev hull)) ] @ labels1
 
 let draw6 = 6, 
   [ draw (pathk
@@ -108,7 +108,7 @@ let z3 = (u 5.),u 0.
 let l1 = [z0;z1;z2;z3]
 let labels10 = H.dotlabels ~pos:Pbot ["0";"1";"2";"3"] (map_in l1)
 
-let draw10a = 110, [C.draw ~scale:N.inch l1 ] @ labels10
+let draw10a = 110, [draw (path ~scale:N.inch l1) ] @ labels10
 
 let draw10b = 210, 
   [ draw (jointpath ~scale:N.inch l1 [JCurve; JTension(1.3,1.3); JCurve] ) ] 

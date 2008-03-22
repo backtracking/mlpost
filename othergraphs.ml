@@ -20,7 +20,6 @@ open Box
 open Command
 open Point
 open Path
-module C = Convenience
 module Co = Color
 module P = Pen
 module T = Transform
@@ -31,21 +30,21 @@ let a = 0., 0.
 let b = 1., 0.
 let c = 0., 1.
 let l = [a ; b ; c]
-let d1 = 1, [C.draw ~style:JLine ~scale:N.cm l]
-let d2 = 2, [C.draw ~style:JLine ~scale:N.cm ~cycle:JLine l]
+let d1 = 1, [draw (path ~style:JLine ~scale:N.cm l)]
+let d2 = 2, [draw (path ~style:JLine ~scale:N.cm ~cycle:JLine l)]
 
 let d4 =  
   let pen = Pen.circle ~tr:[T.scaled 4.] () in
-    4, [C.draw ~pen ~scale:N.cm [a] ]
+    4, [draw ~pen (path ~scale:N.cm [a]) ]
 
 let d5 = 5,
          let pen = P.circle ~tr:[T.scaled 4.] () in
-           [C.draw ~style:JLine ~scale:N.cm ~cycle:JLine l] @
-           (List.map  (fun point -> C.draw ~pen ~scale:N.cm [point]) l)
+           [draw (path ~style:JLine ~scale:N.cm ~cycle:JLine l)] @
+           (List.map  (fun point -> draw ~pen (path ~scale:N.cm [point])) l)
 
 let d7 = 7,
          let a , b, c = cmp a, cmp b, cmp c in
-           [C.draw ~style:JLine ~scale:N.cm ~cycle:JLine l ;
+           [draw (path ~style:JLine ~scale:N.cm ~cycle:JLine l) ;
             draw (pathp [ segment 0.5 a b ; c]) ;
             draw (pathp [ segment 0.5 b c ; a]) ;
             draw (pathp [ segment 0.5 c a ; b]) ; ]
@@ -55,7 +54,7 @@ let d12 = 12,
           let cl = List.map Color.gray [0.8;0.6;0.4] in
             List.map2
               (fun (a,b) color ->
-                 C.draw ~style:JLine ~scale:N.cm ~pen ~color [a;b])
+                 draw ~pen ~color (path ~style:JLine ~scale:N.cm [a;b]))
               [a,b;b,c;c,a] cl
 
 let triangle = 
@@ -141,7 +140,8 @@ let d149 =
   let pen = P.circle ~tr:[T.scaled 2.] () in
   let cmd i =
     let angle = step *. (float_of_int i) in
-      [C.draw ~scale:N.cm ~color:(couleur (angle /. deuxpi)) ~pen [pt angle]]
+      [draw  ~color:(couleur (angle /. deuxpi)) ~pen 
+        (path ~scale:N.cm [pt angle])]
   in
     (149,[Command.iter 0 719 cmd])
 
@@ -169,8 +169,8 @@ let d195 =
   in
   let grid i =
     let ui = u i in
-      [C.draw ~style:JLine ~scale:N.mm [(0.,ui); (un, ui)];
-       C.draw ~style:JLine ~scale:N.mm [(ui,0.); (ui, un)]]
+      [draw (path ~style:JLine ~scale:N.mm [(0.,ui); (un, ui)]);
+       draw (path ~style:JLine ~scale:N.mm [(ui,0.); (ui, un)])]
   in
     (195, [Command.iter 0 (n-1) row; Command.iter 0 (n) grid])
 

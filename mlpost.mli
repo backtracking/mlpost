@@ -372,22 +372,6 @@ and Picture : sig
 
 end
 
-and Convenience : sig
-
-  (** the Convenience Module *)
-
-  val draw : 
-    ?style:Path.joint -> ?cycle:Path.joint -> ?scale:(float -> Num.t) ->
-    ?color:Color.t -> ?pen:Pen.t -> (float * float) list -> Command.t
-    (** a convenient method to draw a simple path
-	@param style the joint style used for all joints of the path
-	@param cycle if given, the path is closed using the given style
-	@param scale permits to scale the whole path
-	@param color permits to give a color to draw the path; default is black
-	@param pen the pen to draw the path *)
-
-end
-
 and Command : sig
 
   (** General Commands to build figures *)

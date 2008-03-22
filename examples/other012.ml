@@ -1,6 +1,6 @@
 open Mlpost
 open Path
-module C = Convenience
+open Command
 
 let fig = 
   let a = (0., 0.) in
@@ -10,5 +10,5 @@ let fig =
   let cl = List.map Color.gray [0.8;0.6;0.4] in
     List.map2
       (fun (a,b) color ->
-         C.draw ~style:JLine ~scale:Num.cm ~pen ~color [a;b])
+         draw ~pen ~color (path ~style:JLine ~scale:Num.cm [a;b]))
       [a,b;b,c;c,a] cl
