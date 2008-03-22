@@ -347,7 +347,7 @@ and Picture : sig
     (** Group a list of commands into a picture *)
 
   val tex : string -> t
-   (** Take a string in {% \LaTeX %} format and transform it into a picture
+   (** Take a string in Latex format and transform it into a picture
     *)
 
 (*
@@ -496,30 +496,49 @@ and Helpers : sig
 end
 
 and Pen : sig
+  (** Pens are used to change the the way lines are drawn in Mlpost *)
 
   type t
+    (** The abstract type of pens *)
 
   val transform : Transform.t -> t -> t
+    (** Apply a transformation to pens *)
   val default : ?tr:Transform.t -> unit -> t
+    (** The default pen; it corresponds to [transform [Transform.scaled 0.5]
+   circle] *)
   val circle : ?tr:Transform.t -> unit -> t
+    (** A circular pen of diameter 1 bp *)
   val square : ?tr:Transform.t -> unit -> t
+    (** A pen in form of a square, of length 1 bp *)
   val from_path : Path.t -> t
+    (** Construct a pen from a closed path *)
 
 end
 
 and Dash : sig
+  (** This module permits to define dash patterns, that are used to draw lines
+   in different styles *)
 
   type t
+    (** The abstract type of dash patterns *)
 
   val evenly : t
+    (** The pattern composed of evenly spaced dashes *)
   val withdots : t
+    (** The pattern composed of evenly spaced dots *)
 
   val scaled : float -> t -> t
+    (** Scale a dash pattern *)
   val shifted : Point.t -> t -> t
+    (** Shift a dash pattern *)
 
   type on_off = On of Num.t | Off of Num.t
 
+
   val pattern : on_off list -> t
+    (** This function, together with the type [on_off]  permit to construct
+     custom dash patterns, by giving a list of [On] / [Off] constructors, with 
+      corresponding lengths *)
 
 
 end
@@ -607,24 +626,41 @@ module Diag : sig
 
   (** Diagrams. *)
 
-  (** 1. Creation *)
+  (** This module permits to create diagrams in a very simple and yet quite
+   flexible fashion. It permits to specify content, form and color of nodes as
+   well as color, form and labels of arrows between nodes. Nodes have to be 
+   placed by hand, though *)
+
+  (** {1 Creation} *)
 
   type node
+    (** The abstract type of nodes *)
 
   val node : float -> float -> string -> node
+    (** Construct a node at a given position with a given content in Latex
+        format *)
   val pic_node : float -> float -> Picture.t -> node
+    (** Construct a node at a given position with a given picture in it *)
 
   type t
+    (** The abstract type of diagrams *)
 
   val create : node list -> t
+    (** Create a diagram that consists of the given nodes *)
 
   type dir = Up | Down | Left | Right | Angle of float
 
   val arrow : 
     t -> ?lab:string -> ?pos:Command.position -> 
     ?outd:dir -> ?ind:dir -> node -> node -> unit
+    (** [arrow d n1 n2] adds an arrow between n1 and n2 in the diagram d, by
+        side effect.
+	@param lab The label of the arrow, in Latex format
+	@param pos The position of the label, relative to the arrow
+	@param outd The outgoing direction of the arrow
+	@param ind The ingoing direction of the arrow *)
 
-  (** 2. Drawing *)
+  (** {2 Drawing} *)
 
   type node_style = Circle | Rect
 
@@ -632,8 +668,12 @@ module Diag : sig
     ?scale:(float -> Num.t) -> ?style:node_style -> 
     ?fill:Color.t -> ?stroke:Color.t -> ?pen:Pen.t ->
     t -> Command.figure
-    (** default scale is 40bp *)
-
+    (** Draws the diagram.
+	@param scale The default distance between nodes
+	@param style The style of nodes: circular or rectangular
+	@param fill The color to fill nodes
+	@param stroke The color to draw arrows
+	@param pen The pen used for arrows *)
 end
 
 (** {2 Metapost generation} *)
