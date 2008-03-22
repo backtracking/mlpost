@@ -284,6 +284,12 @@ and Num : sig
   val mm : float -> t
   val inch : float -> t
 
+  (** {2 Useful constants and functions} *)
+
+  val pi : float
+  val deg2rad : float -> float
+  (** Converts angles in degree into angles in rad *)
+
   type scale = float -> t
 
   module Scale : sig
@@ -678,16 +684,3 @@ module Generate : sig
   val generate_tex : string -> string -> string -> (int * 'a) list -> unit
 end
 
-module Misc : sig
-  val write_to_file : string -> (out_channel -> 'a) -> unit
-  val write_to_formatted_file : string -> (Format.formatter -> 'a) -> unit
-  val pi : float
-  val deg2rad : float -> float
-  val print_option :
-    string ->
-    (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a option -> unit
-  val print_list :
-    ('a -> unit -> 'b) -> ('a -> 'c -> unit) -> 'a -> 'c list -> unit
-  val space : Format.formatter -> unit -> unit
-  val comma : Format.formatter -> unit -> unit
-end

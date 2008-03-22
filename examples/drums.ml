@@ -33,10 +33,10 @@ let hihat b =
   in
     seq [d steel stem; d steel stemjoint;
 	 d steel (foot 0.5 3.5 0. (0.,-9.0));
-	 d steel (foot 0.5 7.5 (Misc.deg2rad 35.) (-0.3,-9.0));
-	 d steel (foot 0.5 7.5 (Misc.deg2rad (-35.)) (0.3,-9.0));
-	 d steel (foot 0.3 2.1 (Misc.deg2rad 110.) (0.0,-12.));
-	 d steel (foot 0.3 2. (Misc.deg2rad 250.) (0.0,-12.));
+	 d steel (foot 0.5 7.5 (Num.deg2rad 35.) (-0.3,-9.0));
+	 d steel (foot 0.5 7.5 (Num.deg2rad (-35.)) (0.3,-9.0));
+	 d steel (foot 0.3 2.1 (Num.deg2rad 110.) (0.0,-12.));
+	 d steel (foot 0.3 2. (Num.deg2rad 250.) (0.0,-12.));
 	 d steel (foot 0.3 5. 0. (0.,-9.0));
 	 d steel head; d copper cymb] 
 

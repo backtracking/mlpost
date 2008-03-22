@@ -26,7 +26,7 @@ let pt (a,b) = PTPair (a,b)
 
 (* angle in degrees *)
 let dir f =  
-  let angle = Misc.deg2rad f in
+  let angle = Num.deg2rad f in
     PTPair (cos angle, sin angle)
 
 let up = PTPair (0.,1.)
@@ -73,7 +73,7 @@ and sub p1 p2 =
 let segment f p1 p2 = add (mult (1.-.f) p1) (mult f p2)
 let rec rotated f = function
   | PTPair (a,b) -> 
-      let angle = Misc.deg2rad f in
+      let angle = Num.deg2rad f in
         PTPair (cos(angle) *. a -. sin(angle) *. b,
                sin(angle) *. a -. cos(angle) *. b)
   | PTAdd (p1, p2) -> add (rotated f p1) (rotated f p2)

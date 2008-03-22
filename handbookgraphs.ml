@@ -175,7 +175,7 @@ let draw19 =
     | 0 -> start (knot ~r:(Vec right) (0.,uy))
     | n -> let f = (float_of_int n)*.15. in 
 	concat ~style:JCurve (pg (n-1)) 
-	  (knot (f*.ux, 2./.(1.+.(cos (Misc.deg2rad f)))*.uy)) in
+	  (knot (f*.ux, 2./.(1.+.(cos (Num.deg2rad f)))*.uy)) in
     19, [draw (path ~style:JLine [(0.,duy); (0.,0.); (dux,0.)]);
 	 draw ~pen (pg 8);
 	 label ~pos:Pbot (tex "axe $x$") (p (60.*.ux, 0.));
