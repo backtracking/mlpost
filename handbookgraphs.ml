@@ -208,14 +208,15 @@ let draw22 =
   let pa = make [label (tex "$A$") (p (0., Num.cm (-0.5)))] in
   let pb= make [label (tex "$B$") (p (0., Num.cm 1.5))] in  
   let ab = build_cycle [aa; b] in
-    22, [fill ~color:(Color.gray 0.7) a;
-	 fill ~color:(Color.gray 0.7) b;
-	 fill ~color:(Color.gray 0.4) ab;
-	 fill ~color:Color.white (bbox pa); draw_pic pa;
-	 fill ~color:Color.white (bbox pb); draw_pic pb;
-	 label ~pos:Pleft (tex "$U$") (p ~scale:Num.cm (-1.,0.5));
-	 draw (bbox currentpicture)
-	]
+  let pic = make
+      [fill ~color:(Color.gray 0.7) a;
+           fill ~color:(Color.gray 0.7) b;
+           fill ~color:(Color.gray 0.4) ab;
+           fill ~color:Color.white (bbox pa); draw_pic pa;
+           fill ~color:Color.white (bbox pb); draw_pic pb;
+           label ~pos:Pleft (tex "$U$") (p ~scale:Num.cm (-1.,0.5)); ] 
+  in
+    22, [draw_pic pic; draw (bbox pic)]
 
 let figs = 
   [ draw1; draw3; draw4a; draw4b;draw5; 

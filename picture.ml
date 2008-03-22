@@ -25,7 +25,7 @@ let ulcorner pic = PTPicCorner (pic, UL)
 let llcorner pic = PTPicCorner (pic, LL)
 let urcorner pic = PTPicCorner (pic, UR)
 let lrcorner pic = PTPicCorner (pic, LR)
-let currentpicture = PIName "currentpicture"
+(* let currentpicture = PIName "currentpicture" *)
 
 let transform tr = function
   | PITransform (tr', p) -> PITransform (tr'@tr, p)

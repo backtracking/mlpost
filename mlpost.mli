@@ -202,6 +202,7 @@ and Point : sig
 
   (** The following functions build a point at a 
       given scale (see {!Num.t} for scales) *)
+
   val bpp : float * float -> t
   val inp : float * float -> t
   val cmp : float * float -> t
@@ -209,6 +210,7 @@ and Point : sig
   val ptp : float * float -> t
 
   (** Same as the previous functions but build list of points *)
+
   val map_bp : (float * float) list -> t list
   val map_in: (float * float) list -> t list
   val map_cm: (float * float) list -> t list
@@ -296,36 +298,73 @@ end
 
 and Transform : sig
 
+  (** Transformations are an important way to modify objects in Mlpost.
+      Objects can be scaled, shifted, rotated, etc, and any combination of
+      these transformations is possible. Currently, transformations can be
+      applied to Pictures, Pens and Paths. *)                                                      
+
   type t'
+    (** The abstract type of a single transformation *)
 
   val scaled : ?scale:(float -> Num.t) -> float -> t'
+    (** Scale an object by a constant factor *)
   val rotated : float -> t'
+    (** Rotate an object by an angle given in degrees *)
   val shifted : Point.t -> t'
+    (** Shift an object with respect to a point *)
   val slanted : Num.t -> t'
+    (** Slant an object: the point [(x,y)] becomes [(x+ay,y)], with slanting
+        factor [a] *)
   val xscaled : Num.t -> t'
+    (** Scale an object by a constant factor, but only in the [x] direction *)
   val yscaled : Num.t -> t'
+    (** Scale an object by a constant factor, but only in the [y] direction *)
   val zscaled : Point.t -> t'
+    (** Zscaled multiplies points of the object by the given point, using
+        "complex" multiplication: [(x,y) * (a,b) = (ax - by, bx + ay)];
+        its effect is to rotate and scale so as to map [(1,0)] into [(a,b)] *)
   val reflect : Point.t -> Point.t -> t'
+    (** Reflect an object with respect to the line that goes through the two
+        given points *)
   val rotate_around : Point.t -> float -> t'
+    (** Rotate an object by an angle given in degrees, around a given point *)
 
   type t = t' list
+    (** A transformation is a list of single transformations *)
+
   val id : t
-
-
+    (** The identity transformation  *)
 end
 
 and Picture : sig
 
-  type t
+  (** Pictures are a powerful way to reuse and modify parts of a figure *)
 
-  val tex : string -> t
+  type t
+    (** The abstract type of pictures *)
 
   val make : Command.t list -> t
+    (** Group a list of commands into a picture *)
+
+  val tex : string -> t
+   (** Take a string in {% \LaTeX %} format and transform it into a picture
+    *)
+
+(*
   val currentpicture : t
+    (* Corresponds to the picture that has been drawn so far and can be used in
+     * commands to manipulate it *)
+
+*)
 
   val transform : Transform.t -> t -> t
+    (** Apply a transformation to a picture *)
 
   val bbox : t -> Path.t
+    (** Get the bounding box of a picture *)
+
+  (** {2 Special points of the bounding box of a picture} *)
+
   val ulcorner : t -> Point.t
   val llcorner : t -> Point.t
   val urcorner : t -> Point.t
@@ -354,30 +393,30 @@ and Command : sig
   (** General Commands to build figures *)
 
   type t
-      (** the abstract commands type *)
+      (** The abstract commands type *)
 
   type figure = t list
-      (** a figure is a list of commands *)
+      (** A figure is a list of commands *)
 
 
   (** {2 Drawing Commands} *)
 
   val draw : ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> Path.t -> t
-    (** draw a path 
+    (** Draw a path 
 	@param color the color of the path; default is black
 	@param pen the pen used to draw the path; default is {!Pen.default}
 	@param dashed if given, the path is drawn using that dash_style. *)
 
   val draw_arrow : ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> Path.t -> t
-    (** draw a path with an arrow head; the optional arguments are the same as for
+    (** Draw a path with an arrow head; the optional arguments are the same as for
 	{!draw} *)
 
   val fill : ?color:Color.t -> Path.t -> t
-    (** fill a contour given by a closed path 
+    (** Fill a contour given by a closed path 
 	@param color the color used to fill the area; default is black *)
 
   val draw_box : ?fill:Color.t -> Box.t -> t
-    (** draw a box 
+    (** Draw a box 
 	@param fill the color used to fill the box *)
 
   val draw_pic : Picture.t -> t
@@ -390,12 +429,12 @@ and Command : sig
 	f m; f (m+1); ... ; f(n) of commands *)
 
   val append : t -> t -> t
-    (** append two commands to form a compound command *)
+    (** Append two commands to form a compound command *)
 
   val (++) : t -> t -> t
-    (** abbreviation for [append] *)
+    (** Abbreviation for [append] *)
   val seq : t list -> t
-    (** group a list of commands to a single command *)
+    (** Group a list of commands to a single command *)
 
   (** {2 Labels} *)
 
@@ -414,7 +453,7 @@ and Command : sig
   (** [label ~pos:Pleft pic p] puts picture [pic] at the left of point [p] *)
   val label : ?pos:position -> Picture.t -> Point.t -> t
 
-  (** works like [label], but puts a dot at point [p] as well *)
+  (** Works like [label], but puts a dot at point [p] as well *)
   val dotlabel : ?pos:position -> Picture.t -> Point.t -> t
 
 end
