@@ -18,7 +18,109 @@
 
 (** {2 Interfaces to basic Metapost datatypes} *)
 
-module rec Path : sig
+module rec Num : sig
+
+  (** The Mlpost Num module *)
+
+  type t = float
+      (** The Mlpost numeric type is just a float *)
+      
+  (** {2 Conversion functions} *)
+  (** The base unit in Mlpost are bp. The following functions 
+      permit to specify values in other common units *)
+
+  val bp : float -> t
+  val pt : float -> t
+  val cm : float -> t
+  val mm : float -> t
+  val inch : float -> t
+
+  (** {2 Useful constants and functions} *)
+
+  val pi : float
+  val deg2rad : float -> float
+  (** Converts angles in degree into angles in rad *)
+
+  type scale = float -> t
+
+  module Scale : sig
+    val bp : float -> scale
+    val pt : float -> scale
+    val cm : float -> scale
+    val mm : float -> scale
+    val inch : float -> scale
+  end
+end
+
+and Point : sig
+
+  (** The abstract type for points *)
+  type t
+
+  (**  Construct a point from two numeric values *)
+  val pt : Num.t * Num.t -> t
+
+  (** The following functions create points of length 1. 
+      They are especially useful to specify directions with [Path.Vec] *)
+
+  (** [dir f] is the point at angle [f] on the unit circle. 
+      [f] shall be given in degrees *)
+  val dir : float -> t
+    
+  (** The unitary vectors pointing up, down, left and right *)
+
+  val up : t
+  val down : t
+  val left : t
+  val right : t
+
+  (** {2 Operations on points} *)
+    
+  (** [segment f p1 p2] is the point [(1-f)p1 + fp2] *)
+  val segment : float -> t -> t -> t
+
+  (** Sum two points *)
+  val add : t -> t -> t
+  
+  (** Substract two points *)
+  val sub : t -> t -> t
+  
+  (** Multiply a point by a scalar *)
+  val mult : float -> t -> t
+  
+  (** Rotate a point by an angle in degrees *)
+  val rotated : float -> t -> t
+
+  (** {2 Convenient constructors} *)
+
+  (** The following functions build a point at a 
+      given scale (see {!Num.t} for scales) *)
+
+  val bpp : float * float -> t
+  val inp : float * float -> t
+  val cmp : float * float -> t
+  val mmp : float * float -> t
+  val ptp : float * float -> t
+
+  (** Same as the previous functions but build list of points *)
+
+  val map_bp : (float * float) list -> t list
+  val map_in: (float * float) list -> t list
+  val map_cm: (float * float) list -> t list
+  val map_mm: (float * float) list -> t list
+  val map_pt: (float * float) list -> t list
+
+  (** Builds a point from a pair of floats
+      @param scale a scaling function to be applied to each float;
+      see {!Num.t} for scaling functions for usual units *)
+  val p : ?scale:(float -> Num.t) -> float * float -> t
+
+  (** Same as [p], but builds a list of points *)
+  val ptlist : ?scale:(float -> Num.t) -> (float * float) list -> t list
+
+end
+
+and Path : sig
 
   (** Paths are the objects used to describe lines, curves, and 
       more generally almost everything that is drawn with Mlpost *) 
@@ -159,71 +261,83 @@ module rec Path : sig
 
 end
 
-and Point : sig
+and Pen : sig
+  (** Pens are used to change the the way lines are drawn in Mlpost *)
 
-  (** The abstract type for points *)
   type t
+    (** The abstract type of pens *)
 
-  (**  Construct a point from two numeric values *)
-  val pt : Num.t * Num.t -> t
+  val transform : Transform.t -> t -> t
+    (** Apply a transformation to pens *)
+  val default : ?tr:Transform.t -> unit -> t
+    (** The default pen; it corresponds to [transform [Transform.scaled 0.5]
+   circle] *)
+  val circle : ?tr:Transform.t -> unit -> t
+    (** A circular pen of diameter 1 bp *)
+  val square : ?tr:Transform.t -> unit -> t
+    (** A pen in form of a square, of length 1 bp *)
+  val from_path : Path.t -> t
+    (** Construct a pen from a closed path *)
 
-  (** The following functions create points of length 1. 
-      They are especially useful to specify directions with [Path.Vec] *)
+end
 
-  (** [dir f] is the point at angle [f] on the unit circle. 
-      [f] shall be given in degrees *)
-  val dir : float -> t
-    
-  (** The unitary vectors pointing up, down, left and right *)
+and Dash : sig
+  (** This module permits to define dash patterns, that are used to draw lines
+   in different styles *)
 
-  val up : t
-  val down : t
-  val left : t
-  val right : t
+  type t
+    (** The abstract type of dash patterns *)
 
-  (** {2 Operations on points} *)
-    
-  (** [segment f p1 p2] is the point [(1-f)p1 + fp2] *)
-  val segment : float -> t -> t -> t
+  val evenly : t
+    (** The pattern composed of evenly spaced dashes *)
+  val withdots : t
+    (** The pattern composed of evenly spaced dots *)
 
-  (** Sum two points *)
-  val add : t -> t -> t
-  
-  (** Substract two points *)
-  val sub : t -> t -> t
-  
-  (** Multiply a point by a scalar *)
-  val mult : float -> t -> t
-  
-  (** Rotate a point by an angle in degrees *)
-  val rotated : float -> t -> t
+  val scaled : float -> t -> t
+    (** Scale a dash pattern *)
+  val shifted : Point.t -> t -> t
+    (** Shift a dash pattern *)
 
-  (** {2 Convenient constructors} *)
+  type on_off = On of Num.t | Off of Num.t
 
-  (** The following functions build a point at a 
-      given scale (see {!Num.t} for scales) *)
 
-  val bpp : float * float -> t
-  val inp : float * float -> t
-  val cmp : float * float -> t
-  val mmp : float * float -> t
-  val ptp : float * float -> t
+  val pattern : on_off list -> t
+    (** This function, together with the type [on_off]  permits to construct
+     custom dash patterns, by giving a list of [On] / [Off] constructors, with 
+      corresponding lengths *)
 
-  (** Same as the previous functions but build list of points *)
+end
 
-  val map_bp : (float * float) list -> t list
-  val map_in: (float * float) list -> t list
-  val map_cm: (float * float) list -> t list
-  val map_mm: (float * float) list -> t list
-  val map_pt: (float * float) list -> t list
+and Color : sig
 
-  (** Builds a point from a pair of floats
-      @param scale a scaling function to be applied to each float;
-      see {!Num.t} for scaling functions for usual units *)
-  val p : ?scale:(float -> Num.t) -> float * float -> t
+  (** Colors *)
 
-  (** Same as [p], but builds a list of points *)
-  val ptlist : ?scale:(float -> Num.t) -> (float * float) list -> t list
+  type t
+      (** the abstract type of Colors *)
+
+  val default : t
+    (** the default Color is black *)
+
+  val rgb : float -> float -> float -> t
+    (** [rgb r g b] constructs the color that corresponds to the color code 
+	RGB(r,g,b)  *)
+
+  (** {2 Predefined Colors} *)
+
+  val red : t
+  val orange : t
+  val blue : t
+  val purple : t
+  val gray : float -> t
+  val white : t
+  val black : t
+  val green : t
+  val cyan : t
+  val blue : t
+  val yellow : t
+  val magenta : t
+  val orange : t
+  val purple : t
 
 end
 
@@ -267,47 +381,12 @@ and Box : sig
 
 end
 
-and Num : sig
-
-  (** The Mlpost Num module *)
-
-  type t = float
-      (** The Mlpost numeric type is just a float *)
-
-  (** {2 Conversion functions} *)
-  (** The base unit in Mlpost are bp. The following functions permit to specify
-      values in other common units *)
-
-  val bp : float -> t
-  val pt : float -> t
-  val cm : float -> t
-  val mm : float -> t
-  val inch : float -> t
-
-  (** {2 Useful constants and functions} *)
-
-  val pi : float
-  val deg2rad : float -> float
-  (** Converts angles in degree into angles in rad *)
-
-  type scale = float -> t
-
-  module Scale : sig
-    val bp : float -> scale
-    val pt : float -> scale
-    val cm : float -> scale
-    val mm : float -> scale
-    val inch : float -> scale
-  end
-
-end
-
 and Transform : sig
 
   (** Transformations are an important way to modify objects in Mlpost.
       Objects can be scaled, shifted, rotated, etc, and any combination of
       these transformations is possible. Currently, transformations can be
-      applied to Pictures, Pens and Paths. *)                                                      
+      applied to Pictures, Pens and Paths. *)  
 
   type t'
     (** The abstract type of a single transformation *)
@@ -398,8 +477,8 @@ and Command : sig
 	@param dashed if given, the path is drawn using that dash_style. *)
 
   val draw_arrow : ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> Path.t -> t
-    (** Draw a path with an arrow head; the optional arguments are the same as for
-	{!draw} *)
+    (** Draw a path with an arrow head; the optional arguments 
+	are the same as for {!draw} *)
 
   val fill : ?color:Color.t -> Path.t -> t
     (** Fill a contour given by a closed path 
@@ -448,7 +527,9 @@ and Command : sig
 
 end
 
-and Helpers : sig
+(** {2 Helpers and high-level drawing commands} *)
+
+module Helpers : sig
   val dotlabels :
     ?pos:Command.position -> string list -> Point.t list -> Command.t list
   val draw_simple_arrow :
@@ -482,87 +563,6 @@ and Helpers : sig
     ?outd:Path.direction ->
     ?ind:Path.direction ->
     ?pos:Command.position -> Picture.t -> Box.t -> Box.t -> Command.t
-
-end
-
-and Pen : sig
-  (** Pens are used to change the the way lines are drawn in Mlpost *)
-
-  type t
-    (** The abstract type of pens *)
-
-  val transform : Transform.t -> t -> t
-    (** Apply a transformation to pens *)
-  val default : ?tr:Transform.t -> unit -> t
-    (** The default pen; it corresponds to [transform [Transform.scaled 0.5]
-   circle] *)
-  val circle : ?tr:Transform.t -> unit -> t
-    (** A circular pen of diameter 1 bp *)
-  val square : ?tr:Transform.t -> unit -> t
-    (** A pen in form of a square, of length 1 bp *)
-  val from_path : Path.t -> t
-    (** Construct a pen from a closed path *)
-
-end
-
-and Dash : sig
-  (** This module permits to define dash patterns, that are used to draw lines
-   in different styles *)
-
-  type t
-    (** The abstract type of dash patterns *)
-
-  val evenly : t
-    (** The pattern composed of evenly spaced dashes *)
-  val withdots : t
-    (** The pattern composed of evenly spaced dots *)
-
-  val scaled : float -> t -> t
-    (** Scale a dash pattern *)
-  val shifted : Point.t -> t -> t
-    (** Shift a dash pattern *)
-
-  type on_off = On of Num.t | Off of Num.t
-
-
-  val pattern : on_off list -> t
-    (** This function, together with the type [on_off]  permit to construct
-     custom dash patterns, by giving a list of [On] / [Off] constructors, with 
-      corresponding lengths *)
-
-
-end
-
-and Color : sig
-
-  (** Colors *)
-
-  type t
-      (** the abstract type of Colors *)
-
-  val default : t
-    (** the default Color is black *)
-
-  val rgb : float -> float -> float -> t
-    (** [rgb r g b] constructs the color that corresponds to the color code 
-	RGB(r,g,b)  *)
-
-  (** {2 Predefined Colors} *)
-
-  val red : t
-  val orange : t
-  val blue : t
-  val purple : t
-  val gray : float -> t
-  val white : t
-  val black : t
-  val green : t
-  val cyan : t
-  val blue : t
-  val yellow : t
-  val magenta : t
-  val orange : t
-  val purple : t
 
 end
 
@@ -667,6 +667,21 @@ module Diag : sig
 end
 
 (** {2 Metapost generation} *)
+
+(* Misc does not appear in the documentation *)
+(**/**)
+module Misc : sig
+  val write_to_file : string -> (out_channel -> 'a) -> unit
+  val write_to_formatted_file : string -> (Format.formatter -> 'a) -> unit
+  val print_option :
+    string ->
+    (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a option -> unit
+  val print_list :
+    ('a -> unit -> 'b) -> ('a -> 'c -> unit) -> 'a -> 'c list -> unit
+  val space : Format.formatter -> unit -> unit
+  val comma : Format.formatter -> unit -> unit
+end
+(**/**)
 
 module Metapost : sig
 
