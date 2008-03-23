@@ -720,6 +720,14 @@ module Metapost : sig
 
   val emit : string -> Command.t list -> unit
   val dump : ?prelude:string -> ?pdf:bool -> string -> unit
+    (** [dump ?prelude ?pdf f] builds a Metapost file [f.mp] for all figures,
+	then runs Metapost on it, and renames figure files according to the
+	names specified to [emit]. The file suffix is [.mps] if [pdf] is
+	set, and [.1] otherwise. *)
+
+  val dump_tex : ?prelude:string -> string -> unit
+    (** [dump_tex ?prelude f] builds a LaTeX file [f.tex] for all the figures,
+	using LaTeX prelude [prelude] if given. *)
 
 end
 

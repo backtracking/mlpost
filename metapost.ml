@@ -261,6 +261,24 @@ let emit s f =
   incr figuren;
   figures := (!figuren, s, f) :: !figures
 
+let dump_tex ?prelude f =
+  let c = open_out (f ^ ".tex") in
+  let fmt = formatter_of_out_channel c in
+  begin match prelude with
+    | None -> 
+	fprintf fmt "\\documentclass[a4paper]{article}";
+	fprintf fmt "\\usepackage{graphicx}"
+    | Some s ->
+	fprintf fmt "%s@\n" s
+  end;
+  fprintf fmt "\\begin{document}@\n";
+  List.iter
+    (fun (_,s,_) ->
+       fprintf fmt "\\includegraphics{%s.mps}@\n@\n" s)
+    !figures;
+  fprintf fmt "\\end{document}@.";
+  close_out c
+
 let dump ?prelude ?(pdf=false) bn = 
   let f = bn ^ ".mp" in
   let prelude = match prelude with
@@ -275,3 +293,4 @@ let dump ?prelude ?(pdf=false) bn =
     (fun (i,s,_) -> 
       Sys.rename (bn ^ "." ^ string_of_int i) (s ^ suf))
     !figures
+

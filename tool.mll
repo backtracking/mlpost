@@ -41,11 +41,13 @@
       exit 1
     end;
     latex_file := Some f
+  let xpdf = ref false
 
   let spec =
     [ "-pdf", Set pdf, "generates .mps files";
       "-latex", String set_latex_file, 
       "<main.tex>  scans the LaTeX prelude";
+      "-xpdf", Set xpdf, "wysiwyg mode using xpdf";
     ]
 
   let () = 
@@ -91,7 +93,7 @@ rule scan = parse
       try while true do output_char cout (input_char cin) done
       with End_of_file -> ()
     end;
-    let pdf = if !pdf then "~pdf:true" else "" in
+    let pdf = if !pdf || !xpdf then "~pdf:true" else "" in
     let prelude = match !latex_file with
       | None -> ""
       | Some f -> 
@@ -102,9 +104,23 @@ rule scan = parse
     in
     Printf.fprintf cout 
       "let () = Mlpost.Metapost.dump %s %s \"%s\"\n" prelude pdf bn;
+    if !xpdf then 
+      Printf.fprintf cout 
+	"let () = Mlpost.Metapost.dump_tex %s \"_mlpost\"\n" prelude;
     close_out cout;
     ocaml [|"mlpost.cma"; mlf|];
-    Sys.remove mlf
+    Sys.remove mlf;
+    if !xpdf then begin
+      ignore (Sys.command "pdflatex _mlpost.tex");
+      match Unix.fork () with
+	| 0 -> 
+	    begin match Unix.fork () with
+	      | 0 -> eprintf "ICI@."; Unix.execvp "xpdf" [|"xpdf";"-remote"; "mlpost"; "_mlpost.pdf"|]
+	      | _ -> exit 0
+	    end
+	| id -> 
+	    ignore (Unix.waitpid [] id); exit 0
+    end
 
   let () = Queue.iter compile files
 }

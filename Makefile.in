@@ -173,6 +173,7 @@ source:
 DOCFILES:=$(shell echo *.mli)
 DOCFILES:=$(filter-out types.mli, $(DOCFILES))
 
+.PHONY: doc
 doc: mlpost.mli
 	mkdir -p doc
 	ocamldoc -html -hide Mlpost -d doc mlpost.mli
