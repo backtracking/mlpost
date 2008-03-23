@@ -502,6 +502,7 @@ and Command : sig
 
   val (++) : t -> t -> t
     (** Abbreviation for [append] *)
+
   val seq : t list -> t
     (** Group a list of commands to a single command *)
 
@@ -568,20 +569,32 @@ end
 
 module Tree : sig
 
-  (** Trees *)
+  (** This module provides high-level means for creating and drawing Trees *)
 
   type t
-      (** the abstract type of trees *)
+    (** The abstract type of trees *)
 
   (** {2 Creation} *)
-
+    
+  (** The style for tree nodes *) 
   type node_style = Circle | Rect
 
   val leaf : ?style:node_style -> ?fill:Color.t -> string -> t
-  val node : ?style:node_style -> ?fill:Color.t -> string -> t list -> t
-  val bin  : ?style:node_style -> ?fill:Color.t -> string -> t -> t -> t
+    (** [leaf label] creates a leaf with label [label]. 
+	@param style a [node_style] describing how the leaf should be drawn
+	@param fill if present, this color is used to fill the leaf *)
 
-  (** variants to create trees with pictures at nodes *)
+  val node : ?style:node_style -> ?fill:Color.t -> string -> t list -> t
+    (** [node label children] creates a node with label [label] and a list
+	of children [children]. 
+	Optional arguments are the same as in [leaf]. *)
+
+  val bin  : ?style:node_style -> ?fill:Color.t -> string -> t -> t -> t
+    (** [bin label l r] creates a binary node with label [label] and 
+	children [l] and [r].
+	Optional arguments are the same as in [leaf]. *)
+
+  (** Variants to create trees with pictures at nodes *)
   module Pic : sig
     val leaf : ?style:node_style -> ?fill:Color.t -> Picture.t -> t
     val node : ?style:node_style -> ?fill:Color.t -> Picture.t -> t list -> t
@@ -590,9 +603,20 @@ module Tree : sig
 
   (** {2 Drawing} *)
 
-  type arrow_style = Directed | Undirected
+  (** The style of arrows between nodes *)
+  type arrow_style = 
+      Directed     (** edges are directed and an 
+		       arrow is drawn at the end of an edge *)
+    | Undirected   (** edges are undirected and no arrow is drawn *)
 
-  type edge_style = Straight | Curve | Square | HalfSquare
+  (** There are several styles available for edges *)
+  type edge_style = 
+      Straight 	  (** edges are straight lines between nodes *)
+    | Curve 	  (** edges are curved lines between nodes *)
+    | Square 	  (** edges are straight lines and 
+		      branch out from the sides of nodes *)
+    | HalfSquare  (** edges are straight lines and 
+		      branch out from below nodes *)
 
   val draw : 
     ?scale:(float -> Num.t) -> 
@@ -601,7 +625,11 @@ module Tree : sig
     ?fill:Color.t -> ?stroke:Color.t -> ?pen:Pen.t ->
     ?ls:float -> ?nw:float -> ?cs:float -> 
     t -> Command.figure
-    (** Default scale is [Num.cm]. 
+    (** Default scale is [Num.cm].
+	Default node_style is [Circle].
+	Default arrow_style is [Directed].
+	Default edge_style is [Straight].
+
 	Drawing parameters are:
 	- [ls] (level sep): vertical distance between levels.
         The default value is 1.0. A negative value draws the tree upward.
@@ -621,7 +649,7 @@ module Diag : sig
    well as color, form and labels of arrows between nodes. Nodes have to be 
    placed by hand, though *)
 
-  (** {1 Creation} *)
+  (** {2 Creation} *)
 
   type node
     (** The abstract type of nodes *)
