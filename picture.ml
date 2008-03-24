@@ -19,7 +19,7 @@ open Types
 type t = picture
 
 let tex s = PITex s
-let make l = PIMake (CSeq l)
+let make l = PIMake l
 let bbox pic = PABBox pic
 let ulcorner pic = PTPicCorner (pic, UL)
 let llcorner pic = PTPicCorner (pic, LL)

@@ -50,7 +50,7 @@ let snare b =
     seq [d steel drumout; d Color.red drumin]
     
 let snarepic b pos =
-  let pic = Picture.make [snare b] in
+  let pic = Picture.make (snare b) in
   let tpic = Picture.transform [Transform.shifted (p ~scale pos)] pic in
     draw_pic tpic
 

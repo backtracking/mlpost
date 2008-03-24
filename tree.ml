@@ -111,7 +111,7 @@ let draw ?(scale=Num.cm)
 	) l
   in
   let _,f = draw t in
-  snd (f 0. 0.)
+  Command.seq (snd (f 0. 0.))
 
 
   

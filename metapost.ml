@@ -205,7 +205,7 @@ and print_command fmt  = function
         print_position pos print_picture pic print_point p
   | CLoop(from,until,cmd) ->
       for i = from to until do
-	List.iter (print_command fmt) (cmd i);
+	print_command fmt (cmd i);
       done
   | CDrawBox (None, (BCircle (n, _, _, _) | BRect (n, _, _) as b)) ->
       fprintf fmt "%adrawboxed(%a);@\n" declare_box b print_name n

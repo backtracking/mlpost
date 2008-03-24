@@ -123,7 +123,7 @@ and command =
   | CFill of path * color option
   | CLabel of picture * position * point
   | CDotLabel of picture * position * point
-  | CLoop of int * int * (int -> command list)
+  | CLoop of int * int * (int -> command)
   | CDrawBox of color option * box
   | CSeq of command list
   | CDeclPath of name * path

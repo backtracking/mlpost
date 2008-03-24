@@ -80,14 +80,14 @@ let rex a = knot ~l:(Vec(dir (10.*.a))) ~scale:N.cm (6., 0.)
 let draw7 = 7, 
             [Command.iter 0 9
                (fun a ->
-                  [draw (concat (start lex) ~style:JCurve 
-                          (rex (float_of_int (-a))))]) ]
+                  draw (concat (start lex) ~style:JCurve 
+                          (rex (float_of_int (-a))))) ]
 
 let draw8 = 8,
             [Command.iter 0 7
                (fun a ->
-                  [draw (concat (start lex) ~style:JCurve 
-                          (rex (float_of_int a)))]) ]
+                  draw (concat (start lex) ~style:JCurve 
+                          (rex (float_of_int a)))) ]
 
 let z0 = (-1., 0.)
 let z1 = (0., 0.2)
@@ -205,16 +205,16 @@ let draw22 =
   let a = transform [Transform.scaled (Num.cm 2.)] fullcircle in
   let aa = transform [Transform.scaled (Num.cm 2.)] halfcircle in
   let b = transform [Transform.shifted (p (0., Num.cm 1.))] a in
-  let pa = make [label (tex "$A$") (p (0., Num.cm (-0.5)))] in
-  let pb= make [label (tex "$B$") (p (0., Num.cm 1.5))] in  
+  let pa = make (label (tex "$A$") (p (0., Num.cm (-0.5)))) in
+  let pb= make (label (tex "$B$") (p (0., Num.cm 1.5))) in  
   let ab = build_cycle [aa; b] in
   let pic = make
-      [fill ~color:(Color.gray 0.7) a;
-           fill ~color:(Color.gray 0.7) b;
-           fill ~color:(Color.gray 0.4) ab;
-           fill ~color:Color.white (bbox pa); draw_pic pa;
-           fill ~color:Color.white (bbox pb); draw_pic pb;
-           label ~pos:Pleft (tex "$U$") (p ~scale:Num.cm (-1.,0.5)); ] 
+    (seq [fill ~color:(Color.gray 0.7) a;
+	  fill ~color:(Color.gray 0.7) b;
+          fill ~color:(Color.gray 0.4) ab;
+          fill ~color:Color.white (bbox pa); draw_pic pa;
+          fill ~color:Color.white (bbox pb); draw_pic pb;
+          label ~pos:Pleft (tex "$U$") (p ~scale:Num.cm (-1.,0.5)); ])
   in
     22, [draw_pic pic; draw (bbox pic)]
 

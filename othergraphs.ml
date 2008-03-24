@@ -115,16 +115,16 @@ let d130 =
   let rec apply acc = function 0 -> acc | n -> apply (transform t acc) (n-1) in
   let cmd i = 
     let p = apply sq (2*i) in
-      [fill ~color:(Color.gray 0.8) p;
-       fill ~color:Color.white (transform t p)]
+    seq [fill ~color:(Color.gray 0.8) p;
+	 fill ~color:Color.white (transform t p)]
   in
     130, [iter 0 49 cmd]
 
 let d140 =
   let cmd i =
     let s = 1. -. ((float_of_int i) *. 0.01) in
-      [fill ~color:(Color.gray s) 
-         (transform [T.scaled ~scale:Num.cm (2.*.s)] fullcircle)]
+      fill ~color:(Color.gray s) 
+        (transform [T.scaled ~scale:Num.cm (2.*.s)] fullcircle)
   in
   140, [iter 0 99 cmd;
 	draw ~pen:(P.circle ~tr:[T.scaled 2.] ())
@@ -140,8 +140,8 @@ let d149 =
   let pen = P.circle ~tr:[T.scaled 2.] () in
   let cmd i =
     let angle = step *. (float_of_int i) in
-      [draw  ~color:(couleur (angle /. deuxpi)) ~pen 
-        (path ~scale:N.cm [pt angle])]
+    draw  ~color:(couleur (angle /. deuxpi)) ~pen 
+      (path ~scale:N.cm [pt angle])
   in
     (149,[Command.iter 0 719 cmd])
 
@@ -159,18 +159,18 @@ let d195 =
 	  let l = 
 	    if k mod 2 = 1 then [(kf,0.); (u1,umk); (u1,udm); (udp,0.)]
 	    else [(0.,kf); (umk,u1); (udm,u1); (0.,udp)]
-	  in [fill ~color (transform [t i j]
-			     (path ~style:JLine ~scale:N.mm ~cycle:JLine l))]
+	  in fill ~color (transform [t i j]
+			    (path ~style:JLine ~scale:N.mm ~cycle:JLine l))
 	in
-	  [Command.iter 0 4 strip]
-      else [] 
+	Command.iter 0 4 strip
+      else Command.nop
     in 
-      [Command.iter 0 (n-1) col]
+    Command.iter 0 (n-1) col
   in
   let grid i =
     let ui = u i in
-      [draw (path ~style:JLine ~scale:N.mm [(0.,ui); (un, ui)]);
-       draw (path ~style:JLine ~scale:N.mm [(ui,0.); (ui, un)])]
+    seq [draw (path ~style:JLine ~scale:N.mm [(0.,ui); (un, ui)]);
+	 draw (path ~style:JLine ~scale:N.mm [(ui,0.); (ui, un)])]
   in
     (195, [Command.iter 0 (n-1) row; Command.iter 0 (n) grid])
 

@@ -57,4 +57,9 @@ let append c1 c2 = CSeq [c1; c2]
 let (++) = append
 let seq l = CSeq l
 
+(* syntactic sugar *)
+
+let iterl f l = seq (List.map f l)
+
+let nop = CSeq []
 

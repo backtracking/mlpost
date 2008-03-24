@@ -115,5 +115,6 @@ let draw ?(scale=fortybp) ?(style=Circle) ?fill ?stroke ?pen d =
     List.map 
       (fun n -> Command.draw_box ?fill (make_box ~style ~scale d n)) d.nodes
   in
-  l @ List.map (draw_arrow ?stroke ?pen d) d.arrows
+  Command.seq (l @ List.map (draw_arrow ?stroke ?pen d) d.arrows)
+
 

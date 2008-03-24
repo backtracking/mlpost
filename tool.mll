@@ -112,6 +112,8 @@ rule scan = parse
     Sys.remove mlf;
     if !xpdf then begin
       ignore (Sys.command "pdflatex _mlpost.tex");
+      ignore (Sys.command "xpdf -remote mlpost -reload")
+(***	
       match Unix.fork () with
 	| 0 -> 
 	    begin match Unix.fork () with
@@ -120,6 +122,7 @@ rule scan = parse
 	    end
 	| id -> 
 	    ignore (Unix.waitpid [] id); exit 0
+***)
     end
 
   let () = Queue.iter compile files

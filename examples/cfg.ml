@@ -19,4 +19,4 @@ let fig =
   arrow inv c ~lab:"$i\\leftarrow i+1$" ~pos:Pright;
   arrow do_ inv ~lab:"$m\\ge t[i]$" ~pos:Ptop;
   arrow do_ b ~outd:Up ~ind:Left ~lab:"$m<t[i]$" ~pos:Pupleft;
-  draw ~fill:Color.yellow ~stroke:Color.blue ~pen diag
+  [draw ~fill:Color.yellow ~stroke:Color.blue ~pen diag]

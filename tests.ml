@@ -59,18 +59,18 @@ let rec random_tree = function
 
 let d2c, d2s, d2sq, d2hsq = 
   let tree = random_tree 17 in
-    (draw ~ls:(-1.0) 
+  [draw ~ls:(-1.0) 
        ~node_style:Circle ~arrow_style:Directed ~edge_style:Curve
-       ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree,
-     draw ~ls:(-1.0) 
+       ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree],
+  [draw ~ls:(-1.0) 
        ~node_style:Circle ~arrow_style:Directed ~edge_style:Straight
-       ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree,
-     draw ~ls:(-1.0)
+       ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree],
+  [draw ~ls:(-1.0)
        ~node_style:Circle ~arrow_style:Directed ~edge_style:Square
-       ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree,
-     draw ~ls:(-1.0)
+       ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree],
+  [draw ~ls:(-1.0)
        ~node_style:Circle ~arrow_style:Directed ~edge_style:HalfSquare
-       ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree)
+       ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree]
 
 let proval =
   let f = 7. in
@@ -101,13 +101,13 @@ let d3 =
   [Command.draw p ~dashed:pat]
 
 
-let pic = Picture.make cheno011
+let pic = Picture.make (seq cheno011)
 
 let d4 = 
   [draw_pic pic;
    iter 1 5 
      (fun i -> 
-       [draw_pic (Picture.transform [T.rotated (10. *. float i)] pic)])
+	draw_pic (Picture.transform [T.rotated (10. *. float i)] pic))
   ]
 
 let d5 = 
@@ -150,7 +150,7 @@ let rec random_tree2 = function
       node (tree1 ()) [random_tree2 k; random_tree2 (n - 1 - k)]
 
 let d6 =
-  Tree.draw ~scale:(Scale.cm 3.) ~cs:(mm 0.2) (random_tree2 10)
+  [Tree.draw ~scale:(Scale.cm 3.) ~cs:(mm 0.2) (random_tree2 10)]
 
 let figs = [d7; d6; d5; d4; cheno011; proval; d3; d2sq; d2hsq; d2s; d2c; d1]
 

@@ -109,7 +109,7 @@ and command = function
   | CSeq l ->
       CSeq (List.map command l)
   | CLoop (i, j, f) ->
-      CLoop (i, j, fun k -> List.map command (f k))
+      CLoop (i, j, fun k -> command (f k))
   | CDefPic _ | CDeclPath _ | CDotLabel _ | CLabel _ as c ->
       c
 

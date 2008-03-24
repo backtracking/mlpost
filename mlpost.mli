@@ -428,8 +428,8 @@ and Picture : sig
   type t
     (** The abstract type of pictures *)
 
-  val make : Command.t list -> t
-    (** Group a list of commands into a picture *)
+  val make : Command.t -> t
+    (** Make a picture from a drawing command *)
 
   val tex : string -> t
    (** Take a string in Latex format and transform it into a picture
@@ -493,9 +493,8 @@ and Command : sig
 
   (** {2 Manipulating Commands} *)
 
-  val iter : int -> int -> (int -> t list) -> t
-    (** [iter m n f] builds a command that corresponds to the sequence
-	f m; f (m+1); ... ; f(n) of commands *)
+  val nop : t
+    (** A command that has no effect *)
 
   val append : t -> t -> t
     (** Append two commands to form a compound command *)
@@ -505,6 +504,14 @@ and Command : sig
 
   val seq : t list -> t
     (** Group a list of commands to a single command *)
+
+  val iter : int -> int -> (int -> t) -> t
+    (** [iter m n f] builds a command that corresponds to the sequence
+	of commands [f m; f (m+1); ... ; f(n)] *)
+
+  val iterl : ('a -> t) -> 'a list -> t
+    (** [iterl f l] builds a command that corresponds to the sequence
+	of commands [f x1; f x2; ... ; f xn] for [l = [x1;x2;...;xn]] *)
 
   (** {2 Labels} *)
 
@@ -624,7 +631,7 @@ module Tree : sig
     ?edge_style:edge_style ->
     ?fill:Color.t -> ?stroke:Color.t -> ?pen:Pen.t ->
     ?ls:float -> ?nw:float -> ?cs:float -> 
-    t -> Command.figure
+    t -> Command.t
     (** Default scale is [Num.cm].
 	Default node_style is [Circle].
 	Default arrow_style is [Directed].
@@ -685,7 +692,7 @@ module Diag : sig
   val draw : 
     ?scale:(float -> Num.t) -> ?style:node_style -> 
     ?fill:Color.t -> ?stroke:Color.t -> ?pen:Pen.t ->
-    t -> Command.figure
+    t -> Command.t
     (** Draws the diagram.
 	@param scale The default distance between nodes
 	@param style The style of nodes: circular or rectangular
