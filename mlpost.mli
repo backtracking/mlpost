@@ -541,36 +541,33 @@ module Helpers : sig
   val dotlabels :
     ?pos:Command.position -> string list -> Point.t list -> Command.t list
   val draw_simple_arrow :
-    ?color:Color.t ->
-    ?pen:Pen.t -> ?style:Path.joint -> Point.t -> Point.t -> Command.t
+    ?color:Color.t -> ?pen:Pen.t -> 
+    ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
+    Point.t -> Point.t -> Command.t
   val draw_label_arrow :
-    ?color:Color.t ->
-    ?pen:Pen.t ->
-    ?style:Path.joint ->
-    ?pos:Command.position -> Picture.t -> Point.t -> Point.t -> Command.t
+    ?color:Color.t -> ?pen:Pen.t ->
+    ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
+    ?pos:Command.position -> Picture.t -> 
+    Point.t -> Point.t -> Command.t
   val box_path :
     style:PrimPath.joint ->
     outd:PrimPath.direction ->
     ind:PrimPath.direction -> Box.t -> Box.t -> Path.t
   val box_arrow :
-    ?color:Color.t ->
-    ?pen:Pen.t ->
-    ?style:Path.joint ->
-    ?outd:Path.direction -> ?ind:Path.direction -> Box.t -> Box.t -> Command.t
+    ?color:Color.t -> ?pen:Pen.t ->
+    ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction -> 
+    Box.t -> Box.t -> Command.t
   val box_line :
     ?color:Color.t ->
     ?pen:Pen.t ->
-    ?style:Path.joint ->
-    ?outd:Path.direction -> ?ind:Path.direction -> Box.t -> Box.t -> Command.t
-  val box_simple_arrow :
-    ?color:Color.t -> ?pen:Pen.t -> Box.t -> Box.t -> Command.t
+    ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction -> 
+    Box.t -> Box.t -> Command.t
   val box_label_arrow :
     ?color:Color.t ->
     ?pen:Pen.t ->
-    ?style:Path.joint ->
-    ?outd:Path.direction ->
-    ?ind:Path.direction ->
-    ?pos:Command.position -> Picture.t -> Box.t -> Box.t -> Command.t
+    ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
+    ?pos:Command.position -> Picture.t -> 
+    Box.t -> Box.t -> Command.t
 
 end
 

@@ -23,11 +23,12 @@ open Command
 let dotlabels ?(pos=Pcenter) ls lp =
   List.map2 (fun s p -> dotlabel ~pos:pos (Picture.tex s) p) ls lp
 
-let draw_simple_arrow ?color ?pen ?(style=defaultjoint) a b =
-  draw_arrow ?color ?pen (jointpathp [a;b] [style])
+let draw_simple_arrow ?color ?pen ?(style=defaultjoint) ?(outd=NoDir) ?(ind=NoDir) a b =
+  let p = jointpathk [NoDir, a, outd; ind, b, NoDir] [style] in
+  draw_arrow ?color ?pen p
 
-let draw_label_arrow ?color ?pen ?(style=defaultjoint) ?pos lab a b =
-  let p = jointpathp [a;b] [style] in
+let draw_label_arrow ?color ?pen ?(style=defaultjoint) ?(outd=NoDir) ?(ind=NoDir) ?pos lab a b =
+  let p = jointpathk [NoDir, a, outd; ind, b, NoDir] [style] in
   draw_arrow ?color ?pen p ++
   label ?pos lab (Path.point 0.5 p)
 
@@ -43,9 +44,6 @@ let box_arrow ?color ?pen ?(style=defaultjoint) ?(outd=NoDir) ?(ind=NoDir) a b =
 
 let box_line ?color ?pen ?(style=defaultjoint) ?(outd=NoDir) ?(ind=NoDir) a b =   
   draw ?color ?pen (box_path ?style ?outd ?ind a b)
-
-let box_simple_arrow ?color ?pen a b =
-  box_arrow ?color ?pen ~style:JLine a b
 
 let box_label_arrow 
     ?color ?pen ?(style=defaultjoint) ?(outd=NoDir) ?(ind=NoDir) ?pos lab a b =

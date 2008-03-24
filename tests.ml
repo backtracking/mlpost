@@ -37,7 +37,7 @@ let d1 =
       (transform [Transform.shifted (1. ++ 1.)] (bpath a));
     draw_label_arrow ~color:Color.orange ~pen 
       ~pos:Pupright (Picture.tex "foo") (Box.west a) (Box.south_east b);
-    box_simple_arrow ~color:Color.blue a b;
+    box_arrow ~color:Color.blue a b;
   ]
 
 open Tree
