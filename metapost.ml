@@ -255,11 +255,11 @@ let generate_mp fn ?(prelude=defaultprelude) l =
 (* batch processing *)
 
 let figuren = ref 0
-let figures = ref []
+let figures = Queue.create ()
 
 let emit s f = 
   incr figuren;
-  figures := (!figuren, s, f) :: !figures
+  Queue.add (!figuren, s, f) figures
 
 let dump_tex ?prelude f =
   let c = open_out (f ^ ".tex") in
@@ -272,10 +272,15 @@ let dump_tex ?prelude f =
 	fprintf fmt "%s@\n" s
   end;
   fprintf fmt "\\begin{document}@\n";
-  List.iter
+  fprintf fmt "\\begin{center}@\n";
+  Queue.iter
     (fun (_,s,_) ->
-       fprintf fmt "\\includegraphics{%s.mps}@\n@\n" s)
-    !figures;
+       fprintf fmt "\\hrulefill\\verb!%s!\\hrulefill\\\\[1em]@\n" s;
+       fprintf fmt "\\framebox{\\includegraphics[width=\\textwidth]{%s.mps}}\\\\[1em]@\n" s;
+       fprintf fmt "\\framebox{\\includegraphics{%s.mps}}\\\\@\n" s;
+       fprintf fmt "\\hrulefill\\\\@\n@\n\\medskip@\n";)
+    figures;
+  fprintf fmt "\\end{center}@\n";
   fprintf fmt "\\end{document}@.";
   close_out c
 
@@ -285,12 +290,13 @@ let dump ?prelude ?(pdf=false) bn =
     | None -> defaultprelude
     | Some s -> print_prelude s
   in
-  generate_mp f ~prelude (List.rev_map (fun (i,_,f) -> i,f) !figures);
+  let figl = Queue.fold (fun l (i,_,f) -> (i,f) :: l) [] figures in
+  generate_mp f ~prelude figl;
   let out = Sys.command (sprintf "mpost %s end" f) in
   if out <> 0 then exit 1;
   let suf = if pdf then ".mps" else ".1" in
-  List.iter 
+  Queue.iter 
     (fun (i,s,_) -> 
       Sys.rename (bn ^ "." ^ string_of_int i) (s ^ suf))
-    !figures
+    figures
 
