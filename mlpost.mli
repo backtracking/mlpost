@@ -555,23 +555,20 @@ module Helpers : sig
     outd:PrimPath.direction ->
     ind:PrimPath.direction -> Box.t -> Box.t -> Path.t
   val box_arrow :
-    ?color:Color.t -> ?pen:Pen.t ->
+    ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction -> 
     Box.t -> Box.t -> Command.t
   val box_line :
-    ?color:Color.t ->
-    ?pen:Pen.t ->
+    ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction -> 
     Box.t -> Box.t -> Command.t
   val box_label_arrow :
-    ?color:Color.t ->
-    ?pen:Pen.t ->
+    ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
     ?pos:Command.position -> Picture.t -> 
     Box.t -> Box.t -> Command.t
   val box_label_line :
-    ?color:Color.t ->
-    ?pen:Pen.t ->
+    ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
     ?pos:Command.position -> Picture.t -> 
     Box.t -> Box.t -> Command.t
@@ -665,10 +662,10 @@ module Diag : sig
   type node
     (** The abstract type of nodes *)
 
-  val node : float -> float -> string -> node
+  val node : ?fill:Color.t -> float -> float -> string -> node
     (** Construct a node at a given position with a given content in Latex
         format *)
-  val pic_node : float -> float -> Picture.t -> node
+  val pic_node : ?fill:Color.t -> float -> float -> Picture.t -> node
     (** Construct a node at a given position with a given picture in it *)
 
   type t
@@ -681,7 +678,7 @@ module Diag : sig
 
   val arrow : 
     t -> ?lab:string -> ?pos:Command.position -> 
-    ?head:bool -> ?outd:dir -> ?ind:dir -> 
+    ?head:bool -> ?dashed:Dash.t -> ?outd:dir -> ?ind:dir -> 
     node -> node -> unit
     (** [arrow d n1 n2] adds an arrow between n1 and n2 in the diagram d, by
         side effect.
@@ -701,7 +698,8 @@ module Diag : sig
     t -> Command.t
     (** Draws the diagram.
 	@param scale The default distance between nodes
-	@param style The style of nodes: circular or rectangular
+	@param style The style of nodes: circular or rectangular 
+	(default is circular)
 	@param boxed The border is drawn if set (default is true)
 	@param fill The color to fill nodes
 	@param stroke The color to draw arrows
