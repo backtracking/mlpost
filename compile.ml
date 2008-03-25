@@ -100,9 +100,9 @@ and command = function
   | CDrawPic p ->
       let p, code = picture p in
       CSeq [code; CDrawPic p]
-  | CDrawBox (c, b) ->
+  | CDrawBox (c, bx, b) ->
       let b, code = box b in
-      CSeq [code; CDrawBox (c, b)]
+      CSeq [code; CDrawBox (c, bx, b)]
   | CFill (p, c) ->
       let p, code = path p in
       CSeq [code; CFill (p, c)]

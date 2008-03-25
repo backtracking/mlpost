@@ -47,6 +47,10 @@ let print_float fmt f = print_num fmt f
 let print_color fmt (r,g,b) =
   fprintf fmt "(%a, %a , %a)" print_float r print_float g print_float b
 
+let print_boxed fmt = function
+  | Boxed -> pp_print_string fmt "drawboxed"
+  | Unboxed -> pp_print_string fmt "drawunboxed"
+
 let print_position fmt = function
   | Pcenter  -> fprintf fmt ""
   | Pleft   -> fprintf fmt ".lft"
@@ -207,14 +211,14 @@ and print_command fmt  = function
       for i = from to until do
 	print_command fmt (cmd i);
       done
-  | CDrawBox (None, (BCircle (n, _, _, _) | BRect (n, _, _) as b)) ->
-      fprintf fmt "%adrawboxed(%a);@\n" declare_box b print_name n
+  | CDrawBox (None, bx, (BCircle (n, _, _, _) | BRect (n, _, _) as b)) ->
+      fprintf fmt "%a%a(%a);@\n" declare_box b print_boxed bx print_name n
   | CDrawPic p ->
       fprintf fmt "draw %a;@\n" print_picture p
-  | CDrawBox (Some _ as c, (BCircle (n, _, _, _) | BRect (n, _, _) as b)) ->
+  | CDrawBox (Some _ as c, bx, (BCircle (n, _, _, _) | BRect (n, _, _) as b)) ->
       let fill = CFill (PABoxBPath b, c) in
-      fprintf fmt "%a%adrawboxed(%a);@\n" 
-	declare_box b print_command fill print_name n
+      fprintf fmt "%a%a%a(%a);@\n" 
+	declare_box b print_command fill print_boxed bx print_name n
   | CSeq l ->
       List.iter (fun c -> print_command fmt c) l
   | CDeclPath (n, p) ->

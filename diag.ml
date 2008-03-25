@@ -62,7 +62,7 @@ type t = {
 let create l = 
   { nodes = l; boxes = Hnode.create 17; arrows = [] }
 
-let arrow d ?(lab="") ?(head=true) ?pos ?outd ?ind n1 n2 =
+let arrow d ?(lab="") ?pos ?(head=true) ?outd ?ind n1 n2 =
   d.arrows <- 
     { src = n1; dst = n2; lab = lab; head = head; 
       pos = pos; outd = outd; ind = ind } 
@@ -114,10 +114,12 @@ let draw_arrow ?stroke ?pen d a =
 
 let fortybp x = Num.bp (40. *. x)
 
-let draw ?(scale=fortybp) ?(style=Circle (Box.Ratio 1.)) ?fill ?stroke ?pen d =
+let draw ?(scale=fortybp) ?(style=Circle (Box.Ratio 1.)) 
+    ?boxed ?fill ?stroke ?pen d =
   let l = 
     List.map 
-      (fun n -> Command.draw_box ?fill (make_box ~style ~scale d n)) d.nodes
+      (fun n -> 
+	Command.draw_box ?fill ?boxed (make_box ~style ~scale d n)) d.nodes
   in
   Command.seq (l @ List.map (draw_arrow ?stroke ?pen d) d.arrows)
 

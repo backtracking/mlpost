@@ -484,9 +484,10 @@ and Command : sig
     (** Fill a contour given by a closed path 
 	@param color the color used to fill the area; default is black *)
 
-  val draw_box : ?fill:Color.t -> Box.t -> t
+  val draw_box : ?fill:Color.t -> ?boxed:bool -> Box.t -> t
     (** Draw a box 
-	@param fill the color used to fill the box *)
+	@param fill the color used to fill the box 
+	@param boxed if set, the box border is drawn (default is [true]) *)
 
   val draw_pic : Picture.t -> t
     (** draws a picture *) 
@@ -679,13 +680,14 @@ module Diag : sig
   type dir = Up | Down | Left | Right | Angle of float
 
   val arrow : 
-    t -> ?lab:string -> ?head:bool -> ?pos:Command.position -> 
-    ?outd:dir -> ?ind:dir -> node -> node -> unit
+    t -> ?lab:string -> ?pos:Command.position -> 
+    ?head:bool -> ?outd:dir -> ?ind:dir -> 
+    node -> node -> unit
     (** [arrow d n1 n2] adds an arrow between n1 and n2 in the diagram d, by
         side effect.
 	@param lab The label of the arrow, in Latex format
-	@param head If true, the arrow has a head. Otherwise, it's just a line.
 	@param pos The position of the label, relative to the arrow
+	@param head If true, the arrow has a head. Otherwise, it's just a line.
 	@param outd The outgoing direction of the arrow
 	@param ind The ingoing direction of the arrow *)
 
@@ -695,11 +697,12 @@ module Diag : sig
 
   val draw : 
     ?scale:(float -> Num.t) -> ?style:node_style -> 
-    ?fill:Color.t -> ?stroke:Color.t -> ?pen:Pen.t ->
+    ?boxed:bool -> ?fill:Color.t -> ?stroke:Color.t -> ?pen:Pen.t ->
     t -> Command.t
     (** Draws the diagram.
 	@param scale The default distance between nodes
 	@param style The style of nodes: circular or rectangular
+	@param boxed The border is drawn if set (default is true)
 	@param fill The color to fill nodes
 	@param stroke The color to draw arrows
 	@param pen The pen used for arrows *)

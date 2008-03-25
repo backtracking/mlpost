@@ -23,6 +23,8 @@ type name = string
 type corner = N | S | W | E | NE | NW | SW | SE
 type piccorner = UL | UR | LL | LR
 
+type boxed = Boxed | Unboxed
+
 type position =
   | Pcenter
   | Pleft
@@ -124,7 +126,7 @@ and command =
   | CLabel of picture * position * point
   | CDotLabel of picture * position * point
   | CLoop of int * int * (int -> command)
-  | CDrawBox of color option * box
+  | CDrawBox of color option * boxed * box
   | CSeq of command list
   | CDeclPath of name * path
   | CDefPic of name * command
