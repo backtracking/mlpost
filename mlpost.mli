@@ -568,6 +568,12 @@ module Helpers : sig
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
     ?pos:Command.position -> Picture.t -> 
     Box.t -> Box.t -> Command.t
+  val box_label_line :
+    ?color:Color.t ->
+    ?pen:Pen.t ->
+    ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
+    ?pos:Command.position -> Picture.t -> 
+    Box.t -> Box.t -> Command.t
 
 end
 
@@ -673,18 +679,19 @@ module Diag : sig
   type dir = Up | Down | Left | Right | Angle of float
 
   val arrow : 
-    t -> ?lab:string -> ?pos:Command.position -> 
+    t -> ?lab:string -> ?head:bool -> ?pos:Command.position -> 
     ?outd:dir -> ?ind:dir -> node -> node -> unit
     (** [arrow d n1 n2] adds an arrow between n1 and n2 in the diagram d, by
         side effect.
 	@param lab The label of the arrow, in Latex format
+	@param head If true, the arrow has a head. Otherwise, it's just a line.
 	@param pos The position of the label, relative to the arrow
 	@param outd The outgoing direction of the arrow
 	@param ind The ingoing direction of the arrow *)
 
   (** {2 Drawing} *)
 
-  type node_style = Circle | Rect
+  type node_style = Circle of Box.circle_style | Rect
 
   val draw : 
     ?scale:(float -> Num.t) -> ?style:node_style -> 
