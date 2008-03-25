@@ -630,7 +630,7 @@ module Tree : sig
     ?scale:(float -> Num.t) -> 
     ?node_style:node_style -> ?arrow_style:arrow_style -> 
     ?edge_style:edge_style ->
-    ?fill:Color.t -> ?stroke:Color.t -> ?pen:Pen.t ->
+    ?boxed:bool -> ?fill:Color.t -> ?stroke:Color.t -> ?pen:Pen.t ->
     ?ls:float -> ?nw:float -> ?cs:float -> 
     t -> Command.t
     (** Default scale is [Num.cm].

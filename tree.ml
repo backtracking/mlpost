@@ -85,7 +85,7 @@ let arc astyle estyle ?stroke ?pen (b1,(x1,y1)) (b2,(x2,y2)) =
 
 let draw ?(scale=Num.cm) 
     ?(node_style=Circle) ?(arrow_style=Directed) ?(edge_style=Straight)
-    ?fill ?stroke ?pen
+    ?(boxed=true) ?fill ?stroke ?pen
     ?(ls=1.0) ?(nw=0.5) ?(cs=0.2) t =
   let point x y = Point.p (scale x, scale y) in
   (* tree -> float * (float -> float -> box * figure) *)
@@ -100,7 +100,7 @@ let draw ?(scale=Num.cm)
 	box node_style (point x y) s, (scale x, scale y) in
       let x = ref (x -. w /. 2.) in
       b, 
-      draw_box ?fill b :: 
+      draw_box ?fill ~boxed b :: 
 	List.map 
 	(fun (wc,fc) -> 
 	   let x',y' = (!x +. wc /. 2.), (y -. ls) in

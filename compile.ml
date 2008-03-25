@@ -18,18 +18,25 @@ open Types
 
 let nop = CSeq []
 
-let known_pictures = Hashtbl.create 17
-let known_paths = Hashtbl.create 17
+module HPic = Hashtbl.Make(struct 
+  type t = picture let equal = (==) let hash = Hashtbl.hash 
+end)
+let known_pictures = HPic.create 17
+
+module HPath = Hashtbl.Make(struct 
+  type t = path let equal = (==) let hash = Hashtbl.hash 
+end)
+let known_paths = HPath.create 17
 
 let rec path = function
   | PASub (f1, f2, p) ->
       begin 
 	try 
-	  let p = Hashtbl.find known_paths p in
+	  let p = HPath.find known_paths p in
 	  PASub (f1,f2, PAName p), nop
 	with Not_found ->
           let n = Name.path () in
-          let () = Hashtbl.add known_paths p n in
+          let () = HPath.add known_paths p n in
           let p, code = path p in
             PASub (f1, f2, PAName n), CSeq [code; CDeclPath (n, p)]
       end
@@ -70,11 +77,11 @@ and picture = function
   | PIMake c as p ->
       begin 
 	try 
-          let pic = Hashtbl.find known_pictures p in
+          let pic = HPic.find known_pictures p in
 	  PIName pic, nop
 	with Not_found ->
 	  let pic = Name.picture () in
-	  Hashtbl.add known_pictures p pic;
+	  HPic.add known_pictures p pic;
 	  PIName pic, CDefPic (pic, command c)
       end
   | PITransform (tr, p) ->
@@ -114,4 +121,5 @@ and command = function
       c
 
 let reset () = 
-  Hashtbl.clear known_pictures
+  HPath.clear known_paths;
+  HPic.clear known_pictures
