@@ -42,6 +42,10 @@ let north_east n = PTBoxCorner (n, NE)
 let south_west n = PTBoxCorner (n, SW)
 let south_east n = PTBoxCorner (n, SE)
 
+let simple_transform str = function
+  | PTTransformed (p,tr) -> PTTransformed (p,str::tr)
+  | _ as p -> PTTransformed (p,[str])
+
 (* insert more sophisticated simplifications *)
 let rec add p1 p2 = 
   match p1,p2 with
@@ -52,13 +56,15 @@ let rec add p1 p2 =
     | _, PTSub (p1',p2') -> add p1' (sub p1 p2')
     | _, _ -> PTAdd (p1,p2)
 
-and mult f = function
-  | PTPair (a,b) -> PTPair (f *. a, f *. b)
-  | PTMult (f', p) -> mult (f *. f') p
-  | PTAdd (p1,p2) -> add (mult f p1) (mult f p2)
-  | PTSub (p1,p2) -> sub (mult f p1) (mult f p2)
-  | PTRotated (f', p) -> PTRotated (f', mult f p)
-  | _ as p -> PTMult (f,p)
+and mult f p =
+    if Num.is_zero f then PTPair (0.,0.) else
+      match p with
+        | PTPair (a,b) -> PTPair (f *. a, f *. b)
+        | PTMult (f', p) -> mult (f *. f') p
+        | PTAdd (p1,p2) -> add (mult f p1) (mult f p2)
+        | PTSub (p1,p2) -> sub (mult f p1) (mult f p2)
+        | PTRotated (f', p) -> PTRotated (f', mult f p)
+        | _ as p -> PTMult (f,p)
 
 and sub p1 p2 = 
   match p1,p2 with
@@ -68,6 +74,7 @@ and sub p1 p2 =
     | _, PTAdd (p1',p2') -> sub (sub p1 p1') p2'
     | _, PTSub (p1',p2') -> add (sub p1 p1') p2'
     | _, _ -> PTSub (p1,p2)
+
 
 let segment f p1 p2 = add (mult (1.-.f) p1) (mult f p2)
 let rec rotated f = function
@@ -81,16 +88,22 @@ let rec rotated f = function
   | PTMult (f', p) -> PTMult(f', rotated f p)
   | _ as p -> PTRotated (f, p)
 
+let xscaled f = function
+  | PTPair (a,b) -> PTPair (f *. a, b)
+  | _ as p -> simple_transform (TRXscaled f) p
+
+let yscaled f = function
+  | PTPair (a,b) -> PTPair (a, f *. b)
+  | _ as p -> simple_transform (TRYscaled f) p
+
 let transform tr p =
   List.fold_left 
     (fun acc -> function
        | TRScaled f -> mult f acc
        | TRShifted p -> add acc p
        | TRRotated f -> rotated f acc
-       | _ as str -> 
-           match acc with
-             | PTTransformed (p,tr) -> PTTransformed (p,str::tr)
-             | _ -> PTTransformed (p,[str])
+       | TRXscaled f -> rotated f acc
+       | _ as str -> simple_transform str acc
     ) p tr
     
 (* From simplePoint *)

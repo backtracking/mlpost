@@ -27,6 +27,8 @@ let inch f = 72. *. f
 let pi = 3.14159
 let deg2rad f = pi *. f /. 180.
 
+let is_zero f = abs_float f < 0.00001
+
 type scale = float -> t
 
 module Scale = struct
