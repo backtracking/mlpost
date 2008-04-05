@@ -74,6 +74,8 @@ let rec print_point fmt = function
       fprintf fmt "(%a rotated %a)" print_point p print_float f
   | PTPointOf (f, p) ->
       fprintf fmt "(point %a of (%a))" print_float f print_path p
+  | PTTransformed (p,tr) -> fprintf fmt "((%a) %a)"
+      print_point p print_transform_list (List.rev tr)
 
 and print_transform fmt = function
   | TRScaled a -> fprintf fmt "scaled %a" print_num a

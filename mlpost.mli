@@ -76,6 +76,9 @@ and Point : sig
 
   (** {2 Operations on points} *)
     
+  (** Apply a transformation to a point *)
+  val transform : Transform.t -> t -> t
+
   (** [segment f p1 p2] is the point [(1-f)p1 + fp2] *)
   val segment : float -> t -> t -> t
 

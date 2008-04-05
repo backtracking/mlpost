@@ -51,6 +51,7 @@ type point =
   | PTSub of point * point
   | PTMult of float * point
   | PTRotated of float * point
+  | PTTransformed of point * transform list
 
 and direction = 
   | Vec of point

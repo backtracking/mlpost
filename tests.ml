@@ -19,8 +19,8 @@ open Num
 open Command
 open Format
 open Helpers
-open Path
 open Point
+open Path
 module T = Transform
 
 let (++) x y = p (cm x, cm y)
@@ -152,7 +152,15 @@ let rec random_tree2 = function
 let d6 =
   [Tree.draw ~scale:(Scale.cm 3.) ~cs:(mm 0.2) (random_tree2 10)]
 
-let figs = [d7; d6; d5; d4; cheno011; proval; d3; d2sq; d2hsq; d2s; d2c; d1]
+let d8 = 
+  let p = Path.transform [T.scaled 50.] fullcircle in
+  let pt = point 1.5 p in
+  let pt2 = Point.mult 1.2 (Point.rotated 180. pt) in
+    [ Command.draw p; dotlabel (Picture.tex "1") pt; 
+      dotlabel (Picture.tex "2") pt2]
+
+let figs = [d8; d7; d6; d5; d4; cheno011; proval; d3; 
+            d2sq; d2hsq; d2s; d2c; d1]
 
 let figs =
   let r = ref 0 in

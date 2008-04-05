@@ -42,7 +42,6 @@ let north_east n = PTBoxCorner (n, NE)
 let south_west n = PTBoxCorner (n, SW)
 let south_east n = PTBoxCorner (n, SE)
 
-
 (* insert more sophisticated simplifications *)
 let rec add p1 p2 = 
   match p1,p2 with
@@ -82,6 +81,18 @@ let rec rotated f = function
   | PTMult (f', p) -> PTMult(f', rotated f p)
   | _ as p -> PTRotated (f, p)
 
+let transform tr p =
+  List.fold_left 
+    (fun acc -> function
+       | TRScaled f -> mult f acc
+       | TRShifted p -> add acc p
+       | TRRotated f -> rotated f acc
+       | _ as str -> 
+           match acc with
+             | PTTransformed (p,tr) -> PTTransformed (p,str::tr)
+             | _ -> PTTransformed (p,[str])
+    ) p tr
+    
 (* From simplePoint *)
 let pmap f (a,b) = (f a, f b)
 
