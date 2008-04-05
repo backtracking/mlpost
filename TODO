@@ -13,17 +13,15 @@
   et rien ne passe, metapost considere tjs que leur largeur est nulle.
 
 * rendre mlpost "latex-ready":
-  * inclure du mlpost dans un fichier latex
-  * prendre en compte le prelude du fichier latex
-  * possibilite de donner un autre prélude
   * et si on veut partager des definitions parmi plusieurs figures du meme
     fichier latex ?
-  * peut-etre aussi un mode "metapost", qui crée des fichiers figure.i, qu'il
-    faut inclure à la main dans son document
 
 * pour l'instant on ne peut pas se servir des éléments créés avec Diag ou Tree,
   pour faire d'autres parties du dessin (flèche d'une boîte du diagram vers un
   autre objet du dessin, ...)
+
+* Avec un AST indépendant pour la compilation, est-ce qu'on peut rendre celui
+  plus proche de Metapost, et rendre l'AST Mlpost plus commode pour nous ?
 
 
 -------------------------------------------------------------------------------
