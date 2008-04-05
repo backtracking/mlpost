@@ -54,7 +54,7 @@ all: byte $(OCAMLBEST) $(TOOL) $(TESTS) check-examples
 # bytecode and native-code compilation
 ######################################
 
-CMO := misc.cmo name.cmo compile.cmo metapost.cmo num.cmo point.cmo \
+CMO := misc.cmo name.cmo compiled_types.cmo compile.cmo metapost.cmo num.cmo point.cmo \
        transform.cmo \
        color.cmo picture.cmo box.cmo dash.cmo \
        primPath.cmo path.cmo pen.cmo command.cmo \

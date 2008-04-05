@@ -129,6 +129,8 @@ and command =
   | CLoop of int * int * (int -> command)
   | CDrawBox of color option * boxed * box
   | CSeq of command list
+(*
+  These have moved into the compiled AST
   | CDeclPath of name * path
   | CDefPic of name * command
-
+    *)

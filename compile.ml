@@ -15,8 +15,9 @@
 (**************************************************************************)
 
 open Types
+open Compiled_types
 
-let nop = CSeq []
+let nop = C.CSeq []
 
 module HPic = Hashtbl.Make(struct 
   type t = picture let equal = (==) let hash = Hashtbl.hash 
@@ -28,97 +29,231 @@ module HPath = Hashtbl.Make(struct
 end)
 let known_paths = HPath.create 17
 
-let rec path = function
+let option_compile f = function
+  | None -> None, nop
+  | Some obj -> 
+      let obj, c = f obj in
+        Some obj, c
+
+let rec point = function
+  | PTPair (f1,f2) -> C.PTPair (f1,f2), nop
+  | PTPointOf (f,p) -> 
+      let p, code = path p in
+        C.PTPointOf (f,p) , code
+  | PTAdd (p1,p2) -> 
+      let p1,c1 = point p1 in
+      let p2,c2 = point p2 in
+        C.PTAdd (p1,p2), C.CSeq [c1;c2]
+  | PTSub (p1,p2) ->
+      let p1,c1 = point p1 in
+      let p2,c2 = point p2 in
+        C.PTSub (p1,p2), C.CSeq [c1;c2]
+  | PTMult (f,p) ->
+      let p1,c1 = point p in
+        C.PTMult (f,p1), c1
+  | PTRotated (f,p) ->
+      let p1,c1 = point p in
+        C.PTRotated (f,p1), c1
+  | PTPicCorner (pic, corner) ->
+      let pic, code = picture pic in
+        C.PTPicCorner (pic, corner) , code
+  | PTBoxCorner (n, corner) ->
+      C.PTBoxCorner (n, corner), nop
+  | PTTransformed (p,tr) ->
+      let p, c1 = point p in
+      let tr, c2 = transform_list tr in
+        C.PTTransformed (p,tr), C.CSeq [c1;c2]
+
+and path = function
   | PASub (f1, f2, p) ->
       begin 
 	try 
 	  let p = HPath.find known_paths p in
-	  PASub (f1,f2, PAName p), nop
+	  C.PASub (f1,f2, p), nop
 	with Not_found ->
           let n = Name.path () in
           let () = HPath.add known_paths p n in
           let p, code = path p in
-            PASub (f1, f2, PAName n), CSeq [code; CDeclPath (n, p)]
+            C.PASub (f1, f2, n), C.CSeq [code; C.CDeclPath (n, p)]
       end
   | PABBox p ->
       let p, code = picture p in
-        PABBox p, code
+        C.PABBox p, code
   | PAConcat (k,j,p) ->
-      let p, code = path p in
-        PAConcat (k,j,p), code
+      let p, c1 = path p in
+      let k, c2 = knot k in
+      let j, c3 = joint j in
+        C.PAConcat (k,j,p), C.CSeq [c1; c2; c3]
   | PACycle (d,j,p) ->
-      let p, code = path p in
-        PACycle (d,j,p), code
+      let d, c1 = direction d in
+      let j, c2 = joint j in
+      let p, c3 = path p in
+        C.PACycle (d,j,p), C.CSeq [c1; c2; c3]
   | PATransformed (p,tr) ->
-      let p, code = path p in
-        PATransformed (p,tr), code
+      let p, c1 = path p in
+      let tr, c2 = transform_list tr in
+        C.PATransformed (p,tr), C.CSeq [c1;c2]
   | PAAppend (p1,j,p2) ->
       let p1, c1 = path p1 in
-      let p2, c2 = path p2 in
-        PAAppend (p1,j,p2), CSeq [c1; c2]
+      let j, c2 = joint j in
+      let p2, c3 = path p2 in
+        C.PAAppend (p1,j,p2), C.CSeq [c1; c2; c3]
   | PACutAfter (p1,p2) ->
       let p1, c1 = path p1 in
       let p2, c2 = path p2 in
-        PACutAfter (p1,p2), CSeq [c1; c2]
+        C.PACutAfter (p1,p2), C.CSeq [c1; c2]
   | PACutBefore (p1,p2) ->
       let p1, c1 = path p1 in
       let p2, c2 = path p2 in
-        PACutBefore (p1,p2), CSeq [c1; c2]
+        C.PACutBefore (p1,p2), C.CSeq [c1; c2]
   | PABuildCycle pl ->
       let npl = List.map path pl in
-        PABuildCycle (List.map fst npl), CSeq (List.map snd npl)
+        C.PABuildCycle (List.map fst npl), C.CSeq (List.map snd npl)
   | PABoxBPath b ->
       let b, code = box b in
-        PABoxBPath b, code
-  | (PAUnitSquare | PAQuarterCircle | PAHalfCircle | 
-     PAFullCircle | PAName _ | PAKnot _) as p -> p, nop
+        C.PABoxBPath b, code
+  | PAUnitSquare -> C.PAUnitSquare, nop
+  | PAQuarterCircle -> C.PAQuarterCircle, nop
+  | PAHalfCircle -> C.PAHalfCircle, nop
+  | PAFullCircle -> C.PAFullCircle, nop
+  | PAName n -> C.PAName n, nop
+  | PAKnot k ->
+      let k, code = knot k in
+        C.PAKnot k, code
+
+and knot (d1,p,d2) =
+  let d1, c1 = direction d1 in
+  let p, c2 = point p in
+  let d2, c3 = direction d2 in
+    (d1,p,d2), C.CSeq [c1;c2;c3]
+
+and joint = function
+  | JLine -> C.JLine, nop
+  | JCurve -> C.JCurve, nop
+  | JCurveNoInflex -> C.JCurveNoInflex, nop
+  | JTension (a,b) -> C.JTension (a,b), nop
+  | JControls (p1,p2) ->
+      let p1,c1 = point p1 in
+      let p2,c2 = point p2 in
+        C.JControls (p1,p2), C.CSeq [c1;c2]
+
+and direction = function
+  | Vec p -> 
+      let p, code = point p in
+        C.Vec p, code
+  | Curl f -> C.Curl f, nop
+  | NoDir  -> C.NoDir, nop
+
+and transform = function
+  | TRRotated f -> C.TRRotated f, nop
+  | TRScaled f -> C.TRScaled f, nop
+  | TRSlanted f -> C.TRSlanted f, nop
+  | TRXscaled f -> C.TRXscaled f, nop
+  | TRYscaled f -> C.TRYscaled f, nop
+  | TRShifted p -> 
+      let p, code = point p in
+        C.TRShifted p, code
+  | TRZscaled p -> 
+      let p, code = point p in
+        C.TRZscaled p, code
+  | TRReflect (p1,p2) ->
+      let p1, c1 = point p1 in
+      let p2, c2 = point p2 in
+        C.TRReflect (p1,p2), C.CSeq [c1; c2]
+  | TRRotateAround (p,f) ->
+      let p, code = point p in
+        C.TRRotateAround (p,f), code
+and transform_list l =
+  let l1,l2 = List.fold_right
+                (fun tr (trl, cl) -> 
+                   let tr,c =  transform tr in
+                     tr::trl, c::cl ) l ([],[]) in
+    l1, C.CSeq l2
 
 and picture = function
   | PIMake c as p ->
       begin 
 	try 
           let pic = HPic.find known_pictures p in
-	  PIName pic, nop
+	  C.PIName pic, nop
 	with Not_found ->
 	  let pic = Name.picture () in
 	  HPic.add known_pictures p pic;
-	  PIName pic, CDefPic (pic, command c)
+	  C.PIName pic, C.CDefPic (pic, command c)
       end
   | PITransform (tr, p) ->
-      let p, code = picture p in
-      PITransform (tr, p), code
-  | (PIName _ | PITex _)  as p -> p, nop
+      let tr, c1 = transform_list tr in
+      let p, c2 = picture p in
+      C.PITransform (tr, p), C.CSeq [c1;c2]
+  | PIName n -> C.PIName n, nop 
+  | PITex s -> C.PITex s, nop 
 
 and box = function
   | BCircle (n, p, pic, s) ->
-      let pic, code = picture pic in
-      BCircle (n, p, pic, s), code
+      let p, c1 = point p in
+      let pic, c2 = picture pic in
+      C.BCircle (n, p, pic, s), C.CSeq [c1 ; c2]
   | BRect (n, p, pic) ->
-      let pic, code = picture pic in
-      BRect (n, p, pic), code
+      let p, c1 = point p in
+      let pic, c2 = picture pic in
+      C.BRect (n, p, pic), C.CSeq [c1 ; c2]
+
+and pen = function
+  | PenCircle -> C.PenCircle, nop
+  | PenSquare -> C.PenCircle, nop
+  | PenFromPath p -> 
+      let p, code = path p in
+        C.PenFromPath p, code
+  | PenTransformed (p, tr) ->
+      let p, c1 = pen p in
+      let tr, c2 = transform_list tr in
+        C.PenTransformed (p,tr), C.CSeq [c1 ; c2] 
+
+
+and dash = function
+  | DEvenly -> C.DEvenly, nop
+  | DWithdots -> C.DWithdots, nop
+  | DScaled (f, d) -> 
+      let d,c = dash d in
+        C.DScaled (f,d) , c
+  | DShifted (p,d) ->
+      let p, c1 = point p in
+      let d, c2 = dash d in
+        C.DShifted (p,d), C.CSeq [ c1 ; c2]
+  | DPattern l -> C.DPattern l, nop
 
 and command = function
-  | CDraw (p, color, pen, dash) ->
-      let p, code = path p in
-      CSeq [code; CDraw (p, color, pen, dash)]
-  | CDrawArrow (p, color, pen, dash) ->
-      let p, code = path p in
-      CSeq [code; CDrawArrow (p, color, pen, dash)]
+  | CDraw (p, color, pe, dsh) ->
+      let p, c1 = path p in
+      let pe, c2 = (option_compile pen) pe in
+      let dsh, c3 = (option_compile dash) dsh in
+      C.CSeq [c1; c2; c3; C.CDraw (p, color, pe, dsh)]
+  | CDrawArrow (p, color, pe, dsh) ->
+      let p, c1 = path p in
+      let pe, c2 = (option_compile pen) pe in
+      let dsh, c3 = (option_compile dash) dsh in
+      C.CSeq [c1; c2; c3; C.CDrawArrow (p, color, pe, dsh)]
   | CDrawPic p ->
       let p, code = picture p in
-      CSeq [code; CDrawPic p]
+      C.CSeq [code; C.CDrawPic p]
   | CDrawBox (c, bx, b) ->
       let b, code = box b in
-      CSeq [code; CDrawBox (c, bx, b)]
+      C.CSeq [code; C.CDrawBox (c, bx, b)]
   | CFill (p, c) ->
       let p, code = path p in
-      CSeq [code; CFill (p, c)]
+      C.CSeq [code; C.CFill (p, c)]
   | CSeq l ->
-      CSeq (List.map command l)
+      C.CSeq (List.map command l)
   | CLoop (i, j, f) ->
-      CLoop (i, j, fun k -> command (f k))
-  | CDefPic _ | CDeclPath _ | CDotLabel _ | CLabel _ as c ->
-      c
+      C.CLoop (i, j, fun k -> command (f k))
+  | CDotLabel (pic, pos, pt) -> 
+      let pic, c1 = picture pic in
+      let pt, c2 = point pt in
+      C.CSeq [c1 ; c2 ; C.CDotLabel (pic,pos,pt) ]
+  | CLabel (pic, pos ,pt) -> 
+      let pic, c1 = picture pic in
+      let pt, c2 = point pt in
+      C.CSeq [c1 ; c2 ; C.CLabel (pic,pos,pt) ]
 
 let reset () = 
   HPath.clear known_paths;

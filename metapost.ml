@@ -17,6 +17,7 @@
 open Format
 open Misc
 open Types
+open Compiled_types
 
 let print_name = pp_print_string
 
@@ -63,32 +64,32 @@ let print_position fmt = function
   | Plowright -> fprintf fmt ".lrt"
 
 let rec print_point fmt = function
-  | PTPair (m,n) -> fprintf fmt "(%a,%a)" print_num m print_num n
-  | PTBoxCorner (n, d) -> fprintf fmt "%a.%a" print_name n print_corner d
-  | PTPicCorner (pic, d) -> 
+  | C.PTPair (m,n) -> fprintf fmt "(%a,%a)" print_num m print_num n
+  | C.PTBoxCorner (n, d) -> fprintf fmt "%a.%a" print_name n print_corner d
+  | C.PTPicCorner (pic, d) -> 
       fprintf fmt "(%a %a)" print_piccorner d print_picture pic
-  | PTAdd (p1, p2) -> fprintf fmt "(%a + %a)" print_point p1 print_point p2
-  | PTSub (p1, p2) -> fprintf fmt "(%a - %a)" print_point p1 print_point p2
-  | PTMult (f, p) -> fprintf fmt "(%a * %a)" print_float f print_point p
-  | PTRotated (f, p) ->  
+  | C.PTAdd (p1, p2) -> fprintf fmt "(%a + %a)" print_point p1 print_point p2
+  | C.PTSub (p1, p2) -> fprintf fmt "(%a - %a)" print_point p1 print_point p2
+  | C.PTMult (f, p) -> fprintf fmt "(%a * %a)" print_float f print_point p
+  | C.PTRotated (f, p) ->  
       fprintf fmt "(%a rotated %a)" print_point p print_float f
-  | PTPointOf (f, p) ->
+  | C.PTPointOf (f, p) ->
       fprintf fmt "(point %a of (%a))" print_float f print_path p
-  | PTTransformed (p,tr) -> fprintf fmt "((%a) %a)"
+  | C.PTTransformed (p,tr) -> fprintf fmt "((%a) %a)"
       print_point p print_transform_list (List.rev tr)
 
 and print_transform fmt = function
-  | TRScaled a -> fprintf fmt "scaled %a" print_num a
-  | TRShifted a -> fprintf fmt "shifted %a" print_point a
-  | TRRotated a -> fprintf fmt "rotated %a" print_float a
-  | TRSlanted a -> fprintf fmt "slanted %a" print_num a
-  | TRXscaled a -> fprintf fmt "xscaled %a" print_num a
-  | TRYscaled a -> fprintf fmt "yscaled %a" print_num a
-  | TRZscaled a -> fprintf fmt "zscaled %a" print_point a
-  | TRReflect (p1,p2) -> 
+  | C.TRScaled a -> fprintf fmt "scaled %a" print_num a
+  | C.TRShifted a -> fprintf fmt "shifted %a" print_point a
+  | C.TRRotated a -> fprintf fmt "rotated %a" print_float a
+  | C.TRSlanted a -> fprintf fmt "slanted %a" print_num a
+  | C.TRXscaled a -> fprintf fmt "xscaled %a" print_num a
+  | C.TRYscaled a -> fprintf fmt "yscaled %a" print_num a
+  | C.TRZscaled a -> fprintf fmt "zscaled %a" print_point a
+  | C.TRReflect (p1,p2) -> 
       fprintf fmt "reflectedabout (%a,%a)" 
         print_point p1 print_point p2
-  | TRRotateAround (p,f) ->
+  | C.TRRotateAround (p,f) ->
       fprintf fmt "rotatedaround(%a,%a)"
         print_point p print_float f
 
@@ -96,16 +97,15 @@ and print_transform_list fmt l =
   Misc.print_list space print_transform fmt l
 
 and print_picture fmt = function
-  | PITex s -> fprintf fmt "btex %s etex" s
-  | PIMake _ -> assert false
-  | PITransform (tr, p) -> 
+  | C.PITex s -> fprintf fmt "btex %s etex" s
+  | C.PITransform (tr, p) -> 
       fprintf fmt "(%a transformed (identity %a))" 
 	print_picture p print_transform_list tr
-  | PIName n ->
+  | C.PIName n ->
       pp_print_string fmt n
 
 and declare_box fmt = function
-  | BCircle (n, c, p, s) -> 
+  | C.BCircle (n, c, p, s) -> 
       fprintf fmt "circleit.%a(%a);@," print_name n print_picture p;
       fprintf fmt "%a.c = %a;@\n" print_name n print_point c;
       begin match s with
@@ -116,64 +116,64 @@ and declare_box fmt = function
 	| Some (Ratio r) ->
 	    fprintf fmt "%a.dx = %f * %a.dy;@\n" print_name n r print_name n
       end
-  | BRect (n, c, p) -> 
+  | C.BRect (n, c, p) -> 
       fprintf fmt "boxit.%a(%a);" print_name n print_picture p;
       fprintf fmt "%a.c = %a;@\n" print_name n print_point c
 
 and print_path fmt = function
-  | PAFullCircle -> fprintf fmt "fullcircle"
-  | PAHalfCircle -> fprintf fmt "halfcircle"
-  | PAQuarterCircle -> fprintf fmt "quartercircle"
-  | PAUnitSquare -> fprintf fmt "unitsquare"
-  | PATransformed (p,tr) -> fprintf fmt "((%a) %a)"
+  | C.PAFullCircle -> fprintf fmt "fullcircle"
+  | C.PAHalfCircle -> fprintf fmt "halfcircle"
+  | C.PAQuarterCircle -> fprintf fmt "quartercircle"
+  | C.PAUnitSquare -> fprintf fmt "unitsquare"
+  | C.PATransformed (p,tr) -> fprintf fmt "((%a) %a)"
       print_path p print_transform_list tr
-  | PAAppend (p1,j,p2) -> 
+  | C.PAAppend (p1,j,p2) -> 
       fprintf fmt "%a %a@ %a" print_path p1 print_joint j print_path p2
-  | PACycle (d,j,p) ->
+  | C.PACycle (d,j,p) ->
       fprintf fmt "%a %a %acycle" print_path p print_joint j print_dir d
-  | PAConcat (k,j,p) ->
+  | C.PAConcat (k,j,p) ->
       fprintf fmt "%a %a@ %a" print_path p print_joint j print_knot k
-  | PAKnot k -> print_knot fmt k
-  | PABoxBPath (BCircle (n, _, _, _) | BRect (n, _, _)) ->
+  | C.PAKnot k -> print_knot fmt k
+  | C.PABoxBPath (C.BCircle (n, _, _, _) | C.BRect (n, _, _)) ->
       fprintf fmt "bpath.%a" print_name n
-  | PACutAfter (p1, p2) -> 
+  | C.PACutAfter (p1, p2) -> 
       fprintf fmt "%a cutafter %a@ " print_path p2 print_path p1
-  | PACutBefore (p1, p2) -> 
+  | C.PACutBefore (p1, p2) -> 
       fprintf fmt "%a cutbefore %a@ " print_path p2 print_path p1
-  | PABuildCycle l ->
+  | C.PABuildCycle l ->
       fprintf fmt "buildcycle(%a)" 
         (Misc.print_list comma print_path) l
-  | PASub (f1, f2, p) ->
+  | C.PASub (f1, f2, p) ->
       fprintf fmt "subpath(%a,%a) of %a" 
-	print_float f1 print_float f2 print_path p
-  | PABBox p ->
+	print_float f1 print_float f2 print_name p
+  | C.PABBox p ->
       fprintf fmt "bbox %a" print_picture p
-  | PAName n ->
+  | C.PAName n ->
       pp_print_string fmt n
 
 and print_joint fmt = function
-  | JLine -> fprintf fmt "--"
-  | JCurve -> fprintf fmt ".."
-  | JCurveNoInflex -> fprintf fmt "..."
-  | JTension (a,b) -> 
+  | C.JLine -> fprintf fmt "--"
+  | C.JCurve -> fprintf fmt ".."
+  | C.JCurveNoInflex -> fprintf fmt "..."
+  | C.JTension (a,b) -> 
       fprintf fmt "..tension %a and %a .." print_float a print_float b
-  | JControls (a,b) -> 
+  | C.JControls (a,b) -> 
       fprintf fmt "..controls %a and %a .." print_point a print_point b
 
 and print_dir fmt = function
-  | NoDir -> ()
-  | Vec p -> fprintf fmt "{%a}" print_point p
-  | Curl f -> fprintf fmt "{curl %a}" print_float f
+  | C.NoDir -> ()
+  | C.Vec p -> fprintf fmt "{%a}" print_point p
+  | C.Curl f -> fprintf fmt "{curl %a}" print_float f
 
 and print_knot fmt (d1,p,d2) = 
   fprintf fmt "%a%a%a" print_dir d1 print_point p print_dir d2
 
 and print_dash fmt = function
-  | DEvenly -> fprintf fmt "evenly"
-  | DWithdots -> fprintf fmt "withdots"
-  | DScaled (s, d) -> fprintf fmt "%a scaled %a" print_dash d print_float s
-  | DShifted (p, d) -> fprintf fmt "%a shifted %a" print_dash d print_point p
-  | DPattern l -> 
+  | C.DEvenly -> fprintf fmt "evenly"
+  | C.DWithdots -> fprintf fmt "withdots"
+  | C.DScaled (s, d) -> fprintf fmt "%a scaled %a" print_dash d print_float s
+  | C.DShifted (p, d) -> fprintf fmt "%a shifted %a" print_dash d print_point p
+  | C.DPattern l -> 
       fprintf fmt "dashpattern(";
       List.iter 
 	(fun p -> 
@@ -183,49 +183,50 @@ and print_dash fmt = function
       fprintf fmt ")" 
 
 and print_pen fmt = function
-  | PenCircle -> fprintf fmt "pencircle"
-  | PenSquare -> fprintf fmt "pensquare"
-  | PenFromPath p -> fprintf fmt "makepen (%a)" print_path p
-  | PenTransformed (p,tr) -> 
+  | C.PenCircle -> fprintf fmt "pencircle"
+  | C.PenSquare -> fprintf fmt "pensquare"
+  | C.PenFromPath p -> fprintf fmt "makepen (%a)" print_path p
+  | C.PenTransformed (p,tr) -> 
       fprintf fmt "%a %a" print_pen p print_transform_list tr
 
 and print_command fmt  = function
-  | CDraw (path, color, pen, dashed) ->
+  | C.CDraw (path, color, pen, dashed) ->
       fprintf fmt "@[<hov 2>draw@ %a@,%a@,%a@,%a;@]@\n" print_path path
         (print_option " withcolor " print_color) color
         (print_option " withpen " print_pen) pen
         (print_option " dashed " print_dash) dashed
-  | CDrawArrow (path, color, pen, dashed) ->
+  | C.CDrawArrow (path, color, pen, dashed) ->
       fprintf fmt "drawarrow %a%a%a%a;@\n" print_path path
         (print_option " withcolor " print_color) color
         (print_option " withpen " print_pen) pen
         (print_option " dashed " print_dash) dashed
-  | CFill (path, color) ->
+  | C.CFill (path, color) ->
       fprintf fmt "fill %a%a;@\n" print_path path
         (print_option " withcolor " print_color) color
-  | CLabel (pic,pos,p) ->
+  | C.CLabel (pic,pos,p) ->
       fprintf fmt "label%a(%a,@ %a); @\n"
         print_position pos print_picture pic print_point p
-  | CDotLabel (pic,pos,p) ->
+  | C.CDotLabel (pic,pos,p) ->
       fprintf fmt "@[<hov 2>dotlabel%a(%a,@ %a);@]@\n"
         print_position pos print_picture pic print_point p
-  | CLoop(from,until,cmd) ->
+  | C.CLoop(from,until,cmd) ->
       for i = from to until do
 	print_command fmt (cmd i);
       done
-  | CDrawBox (None, bx, (BCircle (n, _, _, _) | BRect (n, _, _) as b)) ->
+  | C.CDrawBox (None, bx, (C.BCircle (n, _, _, _) | C.BRect (n, _, _) as b)) ->
       fprintf fmt "%a%a(%a);@\n" declare_box b print_boxed bx print_name n
-  | CDrawPic p ->
+  | C.CDrawPic p ->
       fprintf fmt "draw %a;@\n" print_picture p
-  | CDrawBox (Some _ as c, bx, (BCircle (n, _, _, _) | BRect (n, _, _) as b)) ->
-      let fill = CFill (PABoxBPath b, c) in
+  | C.CDrawBox 
+      (Some _ as c, bx, (C.BCircle (n, _, _, _) | C.BRect (n, _, _) as b)) ->
+      let fill = C.CFill (C.PABoxBPath b, c) in
       fprintf fmt "%a%a%a(%a);@\n" 
 	declare_box b print_command fill print_boxed bx print_name n
-  | CSeq l ->
+  | C.CSeq l ->
       List.iter (fun c -> print_command fmt c) l
-  | CDeclPath (n, p) ->
+  | C.CDeclPath (n, p) ->
       fprintf fmt "path %s ;@\n%s = %a;@\n" n n print_path p
-  | CDefPic (pic, cmd) ->
+  | C.CDefPic (pic, cmd) ->
       let savepic = Name.picture () in
       fprintf fmt "picture %s, %s ;@\n" savepic pic;
       fprintf fmt "%s = currentpicture;@\n" savepic;
