@@ -20,8 +20,12 @@
   pour faire d'autres parties du dessin (flèche d'une boîte du diagram vers un
   autre objet du dessin, ...)
 
+* intersection entre deux segments, chemins, ...
 * Avec un AST indépendant pour la compilation, est-ce qu'on peut rendre celui
   plus proche de Metapost, et rendre l'AST Mlpost plus commode pour nous ?
+
+* accelerer la compilation des images dans examples/
+* se décider où on met nos exemples
 
 
 -------------------------------------------------------------------------------

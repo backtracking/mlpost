@@ -152,14 +152,20 @@ let rec random_tree2 = function
 let d6 =
   [Tree.draw ~scale:(Scale.cm 3.) ~cs:(mm 0.2) (random_tree2 10)]
 
-let d8 = 
-  let p = Path.transform [T.scaled 50.] fullcircle in
-  let pt = point 1.5 p in
-  let pt2 = Point.mult 1.2 (Point.rotated 180. pt) in
-    [ Command.draw p; dotlabel (Picture.tex "1") pt; 
-      dotlabel (Picture.tex "2") pt2]
+let half pic = Picture.transform [Transform.scaled 0.5] pic
 
-let figs = [d8; d7; d6; d5; d4; cheno011; proval; d3; 
+let rec right_split n pic = 
+  if n <= 0 then pic
+  else
+    let smaller = right_split (n-1) (half pic) in
+      Picture.beside pic (Picture.below smaller smaller)
+
+let d11 =
+  let p1 = Picture.transform [Transform.rotated 90.] (Picture.tex "recursion") in
+    [Command.draw_pic (right_split 5 p1)]
+
+  
+let figs = [d11; d7; d6; d5; d4; cheno011; proval; d3; 
             d2sq; d2hsq; d2s; d2c; d1]
 
 let figs =

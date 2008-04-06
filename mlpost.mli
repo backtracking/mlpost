@@ -451,6 +451,11 @@ and Picture : sig
   val bbox : t -> Path.t
     (** Get the bounding box of a picture *)
 
+  val center : t -> Point.t -> t
+  val place_up_left : t -> Point.t -> t
+  val beside : t -> t -> t
+  val below : t -> t -> t
+
   (** {2 Special points of the bounding box of a picture} *)
 
   val ulcorner : t -> Point.t
