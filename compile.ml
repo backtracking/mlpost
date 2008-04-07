@@ -35,6 +35,11 @@ module HPath = Hashtbl.Make(struct
 end)
 let known_paths = HPath.create 17
 
+module HBox = Hashtbl.Make(struct
+  type t = box let equal = (==) let hash = Hashtbl.hash
+end)
+let known_boxes = HBox.create 17
+
 let option_compile f = function
   | None -> None, nop
   | Some obj -> 
@@ -63,8 +68,9 @@ let rec point = function
   | PTPicCorner (pic, corner) ->
       let pic, code = picture pic in
         C.PTPicCorner (pic, corner) , code
-  | PTBoxCorner (n, corner) ->
-      C.PTBoxCorner (n, corner), nop
+  | PTBoxCorner (b, corner) ->
+      let b, code = box b in
+      C.PTBoxCorner (b, corner), code
   | PTTransformed (p,tr) ->
       let p, c1 = point p in
       let tr, c2 = transform_list tr in
@@ -194,15 +200,26 @@ and picture = function
   | PIName n -> C.PIName n, nop 
   | PITex s -> C.PITex s, nop 
 
-and box = function
-  | BCircle (n, p, pic, s) ->
-      let p, c1 = point p in
-      let pic, c2 = picture pic in
-      C.BCircle (n, p, pic, s), c1 ++ c2
-  | BRect (n, p, pic) ->
-      let p, c1 = point p in
-      let pic, c2 = picture pic in
-      C.BRect (n, p, pic), c1 ++ c2
+and box b = 
+  try
+    let b = HBox.find known_boxes b in
+      C.BName b, nop
+   with Not_found ->
+     let n = Name.node () in
+       HBox.add known_boxes b n;
+       let bn = C.BName n in
+       let code = 
+         match b with
+           | BCircle (p, pic, s) ->
+               let p, c1 = point p in
+               let pic, c2 = picture pic in
+                 c1 ++ c2 ++ C.CDeclBox (C.BCircle (n, p, pic, s))
+           | BRect (p,pic) ->
+               let p, c1 = point p in
+               let pic, c2 = picture pic in
+                 c1 ++ c2 ++ C.CDeclBox (C.BRect (n, p, pic))
+       in
+         bn, code
 
 and pen = function
   | PenCircle -> C.PenCircle, nop

@@ -1,6 +1,6 @@
   type point =
     | PTPair of num * num
-    | PTBoxCorner of name * corner
+    | PTBoxCorner of box * corner
     | PTPicCorner of picture * piccorner
     | PTPointOf of float * path
     | PTAdd of point * point
@@ -60,6 +60,8 @@
     | PIName of name
 
   and box =
+    | BName of name
+  and declbox =
     | BCircle of name * point * picture * box_circle_style option
     | BRect of name * point * picture
 
@@ -88,6 +90,7 @@
     | CSeq of command list
     | CDeclPath of name * path
     | CDefPic of name * command
+    | CDeclBox of declbox
 
 
   and color = Types.color

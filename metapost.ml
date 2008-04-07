@@ -65,7 +65,7 @@ let print_position fmt = function
 
 let rec print_point fmt = function
   | C.PTPair (m,n) -> fprintf fmt "(%a,%a)" print_num m print_num n
-  | C.PTBoxCorner (n, d) -> fprintf fmt "%a.%a" print_name n print_corner d
+  | C.PTBoxCorner (b, d) -> fprintf fmt "%a.%a" print_box b print_corner d
   | C.PTPicCorner (pic, d) -> 
       fprintf fmt "(%a %a)" print_piccorner d print_picture pic
   | C.PTAdd (p1, p2) -> fprintf fmt "(%a + %a)" print_point p1 print_point p2
@@ -93,16 +93,16 @@ and print_transform fmt = function
       fprintf fmt "rotatedaround(%a,%a)"
         print_point p print_float f
 
-and print_transform_list fmt l =
-  Misc.print_list space print_transform fmt l
+and print_transform_list fmt l = Misc.print_list space print_transform fmt l
 
 and print_picture fmt = function
   | C.PITex s -> fprintf fmt "btex %s etex" s
   | C.PITransform (tr, p) -> 
       fprintf fmt "(%a transformed (identity %a))" 
 	print_picture p print_transform_list tr
-  | C.PIName n ->
-      pp_print_string fmt n
+  | C.PIName n -> pp_print_string fmt n
+
+and print_box fmt (C.BName n) = pp_print_string fmt n
 
 and declare_box fmt = function
   | C.BCircle (n, c, p, s) -> 
@@ -134,8 +134,7 @@ and print_path fmt = function
   | C.PAConcat (k,j,p) ->
       fprintf fmt "%a %a@ %a" print_path p print_joint j print_knot k
   | C.PAKnot k -> print_knot fmt k
-  | C.PABoxBPath (C.BCircle (n, _, _, _) | C.BRect (n, _, _)) ->
-      fprintf fmt "bpath.%a" print_name n
+  | C.PABoxBPath (C.BName n) -> fprintf fmt "bpath.%a" print_name n
   | C.PACutAfter (p1, p2) -> 
       fprintf fmt "%a cutafter %a@ " print_path p2 print_path p1
   | C.PACutBefore (p1, p2) -> 
@@ -146,10 +145,8 @@ and print_path fmt = function
   | C.PASub (f1, f2, p) ->
       fprintf fmt "subpath(%a,%a) of %a" 
 	print_float f1 print_float f2 print_name p
-  | C.PABBox p ->
-      fprintf fmt "bbox %a" print_picture p
-  | C.PAName n ->
-      pp_print_string fmt n
+  | C.PABBox p -> fprintf fmt "bbox %a" print_picture p
+  | C.PAName n -> pp_print_string fmt n
 
 and print_joint fmt = function
   | C.JLine -> fprintf fmt "--"
@@ -213,19 +210,18 @@ and print_command fmt  = function
       for i = from to until do
 	print_command fmt (cmd i);
       done
-  | C.CDrawBox (None, bx, (C.BCircle (n, _, _, _) | C.BRect (n, _, _) as b)) ->
-      fprintf fmt "%a%a(%a);@\n" declare_box b print_boxed bx print_name n
+  | C.CDrawBox (None, bx, (C.BName n)) ->
+      fprintf fmt "%a(%a);@\n" print_boxed bx print_name n
   | C.CDrawPic p ->
       fprintf fmt "draw %a;@\n" print_picture p
   | C.CDrawBox 
-      (Some _ as c, bx, (C.BCircle (n, _, _, _) | C.BRect (n, _, _) as b)) ->
+      (Some _ as c, bx, ((C.BName n) as b)) ->
       let fill = C.CFill (C.PABoxBPath b, c) in
-      fprintf fmt "%a%a%a(%a);@\n" 
-	declare_box b print_command fill print_boxed bx print_name n
-  | C.CSeq l ->
-      List.iter (fun c -> print_command fmt c) l
+      fprintf fmt "%a%a(%a);@\n" print_command fill print_boxed bx print_name n
+  | C.CSeq l -> List.iter (fun c -> print_command fmt c) l
   | C.CDeclPath (n, p) ->
       fprintf fmt "path %s ;@\n%s = %a;@\n" n n print_path p
+  | C.CDeclBox declbox -> declare_box fmt declbox
   | C.CDefPic (pic, cmd) ->
       let savepic = Name.picture () in
       fprintf fmt "picture %s, %s ;@\n" savepic pic;

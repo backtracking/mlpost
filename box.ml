@@ -22,31 +22,26 @@ type circle_style = box_circle_style =
 
 type t = box
 
-let circle ?style c p = BCircle (Name.node (), c, p, style)
-let rect c p = BRect (Name.node (), c, p)
+let circle ?style c p = BCircle (c, p, style)
+let rect c p = BRect (c, p)
 
 let center = function
-  | BCircle (_, c, _, _) 
-  | BRect (_, c, _) -> c
+  | BCircle (c, _, _) 
+  | BRect (c, _) -> c
 
-let name = function
-  | BCircle (n, _, _, _) | BRect (n, _, _) -> n
-
-let north b = Point.north (name b)
-let south b = Point.south (name b)
-let west b = Point.west (name b)
-let east b = Point.east (name b)
+let north b = PTBoxCorner (b,N)
+let south b = PTBoxCorner (b,S)
+let west b = PTBoxCorner (b,W)
+let east b = PTBoxCorner (b,E)
 let north_west = function
-  | BRect (n, _, _) -> Point.north_west n
+  | BRect _ as b -> PTBoxCorner (b,NW)
   | BCircle _ -> invalid_arg "north_west: circle"
 let north_east = function 
-  | BRect (n, _, _) -> Point.north_east n
+  | BRect _ as b -> PTBoxCorner (b,NE)
   | BCircle _ -> invalid_arg "north_east: circle"
 let south_west = function 
-  | BRect (n, _, _) -> Point.south_west n
+  | BRect _ as b -> PTBoxCorner (b,SW)
   | BCircle _ -> invalid_arg "south_west: circle"
 let south_east = function 
-  | BRect (n, _, _) -> Point.south_east n
+  | BRect _ as b -> PTBoxCorner (b,SE)
   | BCircle _ -> invalid_arg "south_east: circle"
-
-

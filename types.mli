@@ -44,7 +44,7 @@ type box_circle_style =
 
 type point = 
   | PTPair of num * num
-  | PTBoxCorner of name * corner
+  | PTBoxCorner of box * corner
   | PTPicCorner of picture * piccorner
   | PTPointOf of float * path
   | PTAdd of point * point
@@ -103,8 +103,8 @@ and picture =
   | PIName of name
 
 and box =
-  | BCircle of name * point * picture * box_circle_style option
-  | BRect of name * point * picture
+  | BCircle of point * picture * box_circle_style option
+  | BRect of point * picture
 
 and dash =
   | DEvenly
