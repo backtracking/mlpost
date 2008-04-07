@@ -1,4 +1,3 @@
-module C = struct
   type point =
     | PTPair of num * num
     | PTBoxCorner of name * corner
@@ -100,4 +99,3 @@ module C = struct
   and boxed = Types.boxed
   and box_circle_style  =Types.box_circle_style
   and on_off  =Types.on_off
-end
