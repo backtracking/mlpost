@@ -17,7 +17,7 @@
 open Format
 open Misc
 open Types
-open Compiled_types
+module C = Compiled_types
 
 let print_name = pp_print_string
 

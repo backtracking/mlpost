@@ -15,7 +15,7 @@
 (**************************************************************************)
 
 open Types
-open Compiled_types
+module C = Compiled_types
 
 let nop = C.CSeq []
 let (++) c1 c2 =
