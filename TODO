@@ -16,9 +16,15 @@
   * et si on veut partager des definitions parmi plusieurs figures du meme
     fichier latex ?
 
-* pour l'instant on ne peut pas se servir des éléments créés avec Diag ou Tree,
-  pour faire d'autres parties du dessin (flèche d'une boîte du diagram vers un
-  autre objet du dessin, ...)
+* des boîtes sans placement explicite
+* Tree pourrait s'en servir pour pour construire des boîtes avant de les
+  placer explicitement
+* On pourrait donc avoir une fonction get_picture : node -> picture
+  qui rend la picture du node (avec ou sans la boîte autour ?)
+* ce qui permettrait de résoudre le problème suivant :
+  * pour l'instant on ne peut pas se servir des éléments créés avec Diag ou
+    Tree, pour faire d'autres parties du dessin (flèche d'une boîte du diagram
+    vers un autre objet du dessin, ...)
 
 * intersection entre deux segments, chemins, ...
 * Avec un AST indépendant pour la compilation, est-ce qu'on peut rendre celui
