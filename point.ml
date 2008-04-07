@@ -101,7 +101,8 @@ let transform tr p =
        | TRScaled f -> mult f acc
        | TRShifted p -> add acc p
        | TRRotated f -> rotated f acc
-       | TRXscaled f -> rotated f acc
+       | TRXscaled f -> xscaled f acc
+       | TRYscaled f -> yscaled f acc
        | TRRotateAround (p,f) -> rotate_around p f acc
        | _ as str -> simple_transform str acc
     ) p tr

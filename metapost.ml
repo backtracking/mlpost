@@ -98,8 +98,7 @@ and print_transform_list fmt l = Misc.print_list space print_transform fmt l
 and print_picture fmt = function
   | C.PITex s -> fprintf fmt "btex %s etex" s
   | C.PITransform (tr, p) -> 
-      fprintf fmt "((%a) %a)" 
-	print_picture p print_transform_list tr
+      fprintf fmt "((%a) %a)" print_picture p print_transform_list tr
   | C.PIName n -> pp_print_string fmt n
 
 and print_box fmt (C.BName n) = pp_print_string fmt n

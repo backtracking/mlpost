@@ -94,6 +94,16 @@ and Point : sig
   (** Rotate a point by an angle in degrees *)
   val rotated : float -> t -> t
 
+  (** [rotate_around p1 f p2] rotates [p2] around [p1] by an angle [f] 
+      in degrees *)
+  val rotate_around : t -> float -> t -> t
+
+  (** Scales the X coordinate of a point by a scalar *)
+  val xscaled : float -> t -> t
+
+  (** Scales the Y coordinate of a point by a scalar *)
+  val yscaled : float -> t -> t
+
   (** {2 Convenient constructors} *)
 
   (** The following functions build a point at a 
@@ -452,9 +462,16 @@ and Picture : sig
     (** Get the bounding box of a picture *)
 
   val center : t -> Point.t -> t
+    (** Place a picture centered at some point *)
+
   val place_up_left : t -> Point.t -> t
+    (** Place a picture with its upper left corner at some point *)
+
   val beside : t -> t -> t
+    (** [beside p1 p2] returns a picture in which [p2] is placed right to [p1] *)
+
   val below : t -> t -> t
+    (** [below p1 p2] returns a picture in which [p2] is placed below [p1] *)
 
   (** {2 Special points of the bounding box of a picture} *)
 
