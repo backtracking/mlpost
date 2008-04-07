@@ -35,13 +35,14 @@ let west b = PTBoxCorner (b,W)
 let east b = PTBoxCorner (b,E)
 let north_west = function
   | BRect _ as b -> PTBoxCorner (b,NW)
-  | BCircle _ -> invalid_arg "north_west: circle"
+  | BCircle (c,_,_) as b -> Point.rotate_around c 45. (PTBoxCorner (b,N))
 let north_east = function 
   | BRect _ as b -> PTBoxCorner (b,NE)
-  | BCircle _ -> invalid_arg "north_east: circle"
+  | BCircle (c,_,_) as b -> Point.rotate_around c 45. (PTBoxCorner (b,E))
 let south_west = function 
   | BRect _ as b -> PTBoxCorner (b,SW)
-  | BCircle _ -> invalid_arg "south_west: circle"
+  | BCircle (c,_,_) as b -> Point.rotate_around c 45.(PTBoxCorner (b,W))
 let south_east = function 
   | BRect _ as b -> PTBoxCorner (b,SE)
-  | BCircle _ -> invalid_arg "south_east: circle"
+  | BCircle (c,_,_) as b -> Point.rotate_around c 45.(PTBoxCorner (b,S))
+
