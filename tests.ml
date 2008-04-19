@@ -164,8 +164,18 @@ let d11 =
   let p1 = Picture.transform [Transform.rotated 90.] (Picture.tex "recursion") in
     [Command.draw_pic (right_split 5 p1)]
 
-  
-let figs = [d11; d7; d6; d5; d4; cheno011; proval; d3; 
+let rec sierpinski p n =
+  if n = 0 then p else
+    let sp = sierpinski p (n-1) in
+    let p = half sp in
+    let p1 = Picture.beside p p in
+      Picture.below p p1
+
+let d12 = 
+  let p1 = Picture.tex "A" in
+    [Command.draw_pic (sierpinski p1 8)]
+
+let figs = [d12; d11; d7; d6; d5; d4; cheno011; proval; d3; 
             d2sq; d2hsq; d2s; d2c; d1]
 
 let figs =
