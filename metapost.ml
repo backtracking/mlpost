@@ -302,3 +302,16 @@ let dump ?prelude ?(pdf=false) bn =
       Sys.rename (bn ^ "." ^ string_of_int i) (s ^ suf))
     figures
 
+let slideshow l k = 
+  let l = List.map (fun f -> Picture.make (Command.seq f)) l in
+  let l' = Command.seq (List.map 
+                  (fun p -> Command.draw 
+                              ~color:Color.white 
+                              (Picture.bbox p)) l)
+  in
+  let x = ref (k-1) in
+    List.map (fun p -> 
+                  incr x;
+                  !x, [Command.append l' (Command.draw_pic p)]) l
+
+

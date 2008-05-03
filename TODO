@@ -29,6 +29,12 @@
 * Avec un AST indépendant pour la compilation, est-ce qu'on peut rendre celui
   plus proche de Metapost, et rendre l'AST Mlpost plus commode pour nous ?
 
+* compilation
+  - optimisation des inefficacités les plus évidentes 
+      (draw_pic (make_pic cmd)) -> cmd ...
+  - utiliser des pictures globales en dehors de toute figure pour le partage
+    entre figures
+
 * accelerer la compilation des images dans examples/
 * se décider où on met nos exemples
 

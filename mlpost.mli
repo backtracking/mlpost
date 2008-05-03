@@ -766,6 +766,13 @@ module Metapost : sig
     (** [dump_tex ?prelude f] builds a LaTeX file [f.tex] for all the figures,
 	using LaTeX prelude [prelude] if given. *)
 
+  val slideshow : Command.figure list -> int -> (int * Command.figure) list
+    (** takes a list of figures and returns a list of figures of exactly the
+        same size (the size of the biggest figure). Shared objects are 
+        hopefully placed at the same absolute location across figures. The 
+        resulting figures are numbered with consecutive increasing integers, 
+        starting with the given value. *)
+
 end
 
 module Generate : sig
