@@ -231,7 +231,9 @@ and print_command fmt  = function
       fprintf fmt "currentpicture := %s;@\n" savepic
 
 let print i fmt l =
-  Compile.reset ();
+  (* resetting is actually not needed; variables other than 
+     x,y are not local to figures *)
+(*   Compile.reset (); *)
   let l = List.map Compile.command l in
   fprintf fmt "@[beginfig(%d)@\n  @[%a@] endfig;@]@." i 
     (fun fmt l -> List.iter (print_command fmt) l)

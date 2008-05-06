@@ -280,4 +280,5 @@ and command = function
 
 let reset () = 
   HPath.clear known_paths;
-  HPic.clear known_pictures
+  HPic.clear known_pictures;
+  HBox.clear known_boxes
