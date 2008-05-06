@@ -45,8 +45,13 @@ let rec print_num fmt f =
 
 let print_float fmt f = print_num fmt f
 
-let print_color fmt (r,g,b) =
-  fprintf fmt "(%a, %a , %a)" print_float r print_float g print_float b
+let print_color fmt = function
+  | RGB (r,g,b) -> 
+      fprintf fmt "(%a, %a , %a)" print_float r print_float g print_float b
+  | CMYK (c,m,y,k) ->
+      fprintf fmt "(%a, %a, %a, %a)" print_float c print_float m 
+        print_float y print_float k
+  | Gray f -> fprintf fmt "%a" print_float f
 
 let print_boxed fmt = function
   | Boxed -> pp_print_string fmt "drawboxed"

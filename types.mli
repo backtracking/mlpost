@@ -16,7 +16,10 @@
 
 type num = float
 
-type color = float * float * float
+type color = 
+  | RGB of float * float * float
+  | CMYK of float * float * float * float
+  | Gray of float
 
 type name = string
 

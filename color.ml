@@ -16,19 +16,22 @@
 
 open Types
 
-type t = float * float * float
+type t = Types.color = 
+  | RGB of float * float * float
+  | CMYK of float * float * float * float
+  | Gray of float
          
-let red = 1.0,0.0,0.0
-let blue = 0.0,0.0,1.0
-let green = 0.0,1.0,0.0
-let orange = 1.0,0.4,0.0
-let purple = 0.6,0.0,0.6
-let magenta = 1.0,0.0,1.0
-let cyan =  0.0,1.0,1.0
-let yellow = 1.0,1.0,0.0
-let gray f = f,f,f
+let red = RGB (1.0,0.0,0.0)
+let blue = RGB (0.0,0.0,1.0)
+let green = RGB (0.0,1.0,0.0)
+let orange = RGB (1.0,0.4,0.0)
+let purple = RGB (0.6,0.0,0.6)
+let magenta = RGB (1.0,0.0,1.0)
+let cyan =  RGB (0.0,1.0,1.0)
+let yellow = RGB (1.0,1.0,0.0)
+let gray f = Gray f
 let white = gray 1.0
 let black = gray 0.0
 let default = black
-let rgb r g b = (r,g,b)
-
+let rgb r g b = RGB (r,g,b)
+let cmyk c m y k = CMYK (c,m,y,k)

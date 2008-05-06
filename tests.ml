@@ -48,7 +48,7 @@ let rec random_tree = function
   | 1 -> 
       leaf "1"
   | 2 -> 
-      node ~style:Rect ~fill:Color.red "2" [leaf "1"]
+      node ~style:Rect ~fill:(Color.cmyk 1. 0.5 0.3 0.2) "2" [leaf "1"]
 (*
   | n when Random.bool () -> 
       node (string_of_int n) [random_tree (n-1)]
@@ -76,7 +76,7 @@ let proval =
   let f = 7. in
   let pen = Pen.square ~tr:[T.yscaled 0.5; T.rotated 40.] () in
   let check = jointpath [-1.2,1.2; 0., -2. ; 2., 2. ; 5., 5.] [JLine ; JCurve; JCurve] in
-    [ fill ~color:Color.black 
+    [ fill ~color:(Color.gray 0.2)
         (transform [Transform.scaled f] fullcircle) ;
       label ~pos:Pleft (Picture.tex "Pr") (Point.p (f /. (-4.),0.)) ;
       label ~pos:Pright (Picture.tex "al") (Point.p (f /. 4.,0.)) ;

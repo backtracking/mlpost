@@ -335,6 +335,9 @@ and Color : sig
     (** [rgb r g b] constructs the color that corresponds to the color code 
 	RGB(r,g,b)  *)
 
+  val cmyk : float -> float -> float -> float -> t
+    (** [cmyk c m y k] constructs the color that corresponds to the color code 
+	CMYK(c,m,y,k)  *)
   (** {2 Predefined Colors} *)
 
   val red : t
