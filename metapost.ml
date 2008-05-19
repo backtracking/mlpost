@@ -51,7 +51,7 @@ let print_color fmt = function
   | CMYK (c,m,y,k) ->
       fprintf fmt "(%a, %a, %a, %a)" print_float c print_float m 
         print_float y print_float k
-  | Gray f -> fprintf fmt "%a" print_float f
+  | Gray f -> fprintf fmt "%a * white" print_float f
 
 let print_boxed fmt = function
   | Boxed -> pp_print_string fmt "drawboxed"
