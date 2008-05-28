@@ -175,7 +175,49 @@ let d12 =
   let p1 = Picture.tex "A" in
     [Command.draw_pic (sierpinski p1 8)]
 
-let figs = [d12; d11; d7; d6; d5; d4; cheno011; proval; d3; 
+let rec fold_from_to f acc a b =
+  if a <= b then fold_from_to f (f acc a) (a+1) b else acc
+
+let grid x y =
+  let fx,fy = float_of_int x, float_of_int y in
+  let step = 20. in
+  let maxl, maxr = 0., step *. fx in
+  let maxu, maxd = step *. fy, 0. in
+  let ul, ur = (0., maxu), (maxr, maxu)  in
+  let ll, lr = (0., 0.), (maxr, 0.)  in
+  let box = path ~style:JLine ~cycle:JLine [ll; lr; ur; ul] in
+  let stp i = (float_of_int i) *. step in
+  let pattern = Dash.scaled 0.5 Dash.withdots in
+  let horizontal i = 
+    [Command.draw ~dashed:pattern (path [maxl, stp i; maxr, stp i]);
+     Command.draw (path [maxl, stp i; maxl +. step /. 3., stp i]);
+     Command.draw (path [maxr, stp i; maxr -. step /. 3., stp i]);
+     label ~pos:Pleft (Picture.tex (string_of_int i)) (p (maxl, stp i));
+    ]
+  in
+  let vertical i = 
+    [Command.draw ~dashed:pattern (path [stp i, maxd; stp i, maxu]);
+     Command.draw (path [stp i, maxl; stp i, maxd +. step /. 3.]);
+     Command.draw (path [stp i, maxu; stp i, maxu -. step /. 3.]);
+     label ~pos:Pbot (Picture.tex (string_of_int i)) (p (stp i, maxd));
+    ]
+  in
+  let c =
+    fold_from_to
+      (fun acc i -> (seq (horizontal i)) :: acc)
+      (fold_from_to
+        (fun acc i -> (seq (vertical i)) :: acc) 
+        [Command.draw box] 1 x) 
+      1 y
+  in
+    Picture.make (seq c)
+
+let d13 =
+  let p = grid 20 14 in
+    [draw_pic p]
+
+
+let figs = [d13; d12; d11; d7; d6; d5; d4; cheno011; proval; d3; 
             d2sq; d2hsq; d2s; d2c; d1]
 
 let figs =
