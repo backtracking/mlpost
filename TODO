@@ -43,11 +43,7 @@ Module des Plots
 ==================
 
 * paramètres :
-  * axes / grid / closed
   * toutes les dimensions : debut + fin pour les axes, step, scale
-  * dashpattern / horiz / vert
-  * labels + placement + fct qui donne un label
-  * tiks
   * labels des axes + orientation
   * plotter des fonctions:
       stepwise

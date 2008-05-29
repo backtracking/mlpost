@@ -734,6 +734,42 @@ module Diag : sig
 	@param pen The pen used for arrows *)
 end
 
+
+module Plot : sig
+
+  (** Plots. *)
+
+  (** This module helps drawing grids and plotting functions. *)
+
+  type grid
+    (** The abstract type of grids *)
+
+  val mk_grid : int -> int -> Num.t -> Num.t -> grid
+    (** [mk_grid w h dx dy] builds a grid of width [w] and height [h],
+	each cell being [dx] units wide and [dy] units high. *)
+
+  type orientation = 
+    | Horizontal | Vertical | Both
+	  
+  type labels = 
+    | NoLabels
+    | Label of (int -> Picture.t) * Command.position
+	
+  type ticks =
+    | NoTicks
+    | Ticks of Num.t * Pen.t
+	
+  type grid_option =
+    | Pattern of orientation * (int -> Dash.t)
+    | Style of orientation * (int -> Pen.t)
+    | Axis of int * orientation * Pen.t * ticks * labels
+    | Box of Pen.t
+	
+  val draw_grid : ?options:grid_option list -> grid -> Command.t
+    (** [draw_grid opts g] draws the grid [g] with options [opts]. *)
+
+end
+
 (** {2 Metapost generation} *)
 
 (* Misc does not appear in the documentation *)

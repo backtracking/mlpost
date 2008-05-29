@@ -176,50 +176,48 @@ let d12 =
   let p1 = Picture.tex "A" in
     [Command.draw_pic (sierpinski p1 8)]
 
-let rec fold_from_to f acc a b =
-  if a <= b then fold_from_to f (f acc a) (a+1) b else acc
-
-let grid x y =
-  let fx,fy = float_of_int x, float_of_int y in
-  let step = 20. in
-  let maxl, maxr = 0., step *. fx in
-  let maxu, maxd = step *. fy, 0. in
-  let ul, ur = (0., maxu), (maxr, maxu)  in
-  let ll, lr = (0., 0.), (maxr, 0.)  in
-  let box = path ~style:JLine ~cycle:JLine [ll; lr; ur; ul] in
-  let stp i = (float_of_int i) *. step in
-  let pattern = Dash.scaled 0.5 Dash.withdots in
-  let horizontal i = 
-    [Command.draw ~dashed:pattern (path [maxl, stp i; maxr, stp i]);
-     Command.draw (path [maxl, stp i; maxl +. step /. 3., stp i]);
-     Command.draw (path [maxr, stp i; maxr -. step /. 3., stp i]);
-     label ~pos:Pleft (Picture.tex (string_of_int i)) (p (maxl, stp i));
-    ]
-  in
-  let vertical i = 
-    [Command.draw ~dashed:pattern (path [stp i, maxd; stp i, maxu]);
-     Command.draw (path [stp i, maxl; stp i, maxd +. step /. 3.]);
-     Command.draw (path [stp i, maxu; stp i, maxu -. step /. 3.]);
-     label ~pos:Pbot (Picture.tex (string_of_int i)) (p (stp i, maxd));
-    ]
-  in
-  let c =
-    fold_from_to
-      (fun acc i -> (seq (horizontal i)) :: acc)
-      (fold_from_to
-        (fun acc i -> (seq (vertical i)) :: acc) 
-        [Command.draw box] 1 x) 
-      1 y
-  in
-    Picture.make (seq c)
+(** pltots *)
+open Plot
+let grid = mk_grid 20 14 (Num.bp 20.) (Num.bp 20.)
 
 let d13 =
-  let p = grid 20 14 in
-    [draw_pic p]
+  [draw_pic (Picture.make (draw_grid grid))]
+
+let d14 =
+  let tr = [Transform.scaled 5.] in
+  let hpattern _ = Dash.scaled 0.5 Dash.withdots in
+  let vpattern _ = Dash.scaled 2. Dash.evenly in
+  let style i = 
+    if i mod 5 = 0 then 
+      Pen.default ~tr:([Transform.scaled 2.5]) ()
+    else Pen.default () in
+  let options = [Box (Pen.default ~tr ());
+		 Pattern (Horizontal, hpattern);
+		 Pattern (Vertical, vpattern);
+		 Style (Both, style)
+		] in
+    [draw_pic (Picture.make (draw_grid ~options grid))]
+
+let florence =
+  let grid = mk_grid 20 14 (Num.bp 14.) (Num.bp 20.) in
+  let pattern = Pattern (Both, fun _ -> (Dash.scaled 0.5 Dash.withdots)) in
+  let label p = Label ((fun i -> (Picture.tex (string_of_int i))), p) in
+  let ticks s = Ticks (s, Pen.default ()) in
+  let yaxis = 
+    Axis(0, Vertical, Pen.default (), ticks (14./.3.), label Pleft) in
+  let xaxis = 
+    Axis(0, Horizontal, Pen.default (), ticks (20./.3.), label Pbot) in
+  let topaxis = 
+    Axis(20, Vertical, Pen.default (), ticks (-.14./.3.), NoLabels) in
+  let rightaxis = 
+    Axis(14, Horizontal, Pen.default (), ticks (-.20./.3.), NoLabels) in
+  let options = [pattern; yaxis; xaxis; topaxis; rightaxis] in
+    [draw_pic (Picture.make (draw_grid ~options grid))]
 
 
-let figs = [d13; d11; d7; d6; d5; d4; cheno011; proval; d3; 
-            d2sq; d2hsq; d2s; d2c; d1]
+let figs = [d13; d14; florence]
+(* ; d11; d7; d6; d5; d4; cheno011; proval; d3;  *)
+(*             d2sq; d2hsq; d2s; d2c; d1] *)
 
 let figs =
   let r = ref 0 in
