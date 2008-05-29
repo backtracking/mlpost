@@ -48,7 +48,8 @@ let rec random_tree = function
   | 1 -> 
       leaf "1"
   | 2 -> 
-      node ~style:Rect ~fill:(Color.cmyk 1. 0.5 0.3 0.2) "2" [leaf "1"]
+(*       node ~style:Rect ~fill:(Color.cmyk 1. 0.5 0.3 0.2) "2" [leaf "1"] *)
+      node ~style:Rect ~fill:(Color.rgb 0.5 0.3 0.2) "2" [leaf "1"]
 (*
   | n when Random.bool () -> 
       node (string_of_int n) [random_tree (n-1)]
@@ -217,7 +218,7 @@ let d13 =
     [draw_pic p]
 
 
-let figs = [d13; d12; d11; d7; d6; d5; d4; cheno011; proval; d3; 
+let figs = [d13; d11; d7; d6; d5; d4; cheno011; proval; d3; 
             d2sq; d2hsq; d2s; d2c; d1]
 
 let figs =
