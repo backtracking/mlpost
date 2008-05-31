@@ -218,11 +218,36 @@ let draw22 =
   in
     22, [draw_pic pic; draw (bbox pic)]
 
+let draw40 =
+  let k1 = knot ~r:(Curl 0.) ~scale:Num.pt (0.,0.) in
+  let k2 = knot ~scale:Num.pt (5., -3.) in
+  let k3 = knot ~scale:Num.pt ~l:(Curl 0.) (10.,0.) in
+  let p1 = pathk [k1;k2;k3] in
+  let p2 = append p1 
+            (Path.transform 
+              [Transform.yscaled (-1.); 
+               Transform.shifted (p ~scale:Num.pt (10.,0.))] p1) in
+  let p2 = 
+    Misc.fold_from_to
+      (fun acc i -> 
+        let tr = Transform.shifted (p ~scale:Num.pt (float_of_int i *. 20.,0.)) in
+        append acc (Path.transform [tr] p2)) p2 1 3 in
+  let cmd = 
+    Command.iter 0 8
+      (fun i ->
+        let tr = Transform.shifted (p ~scale:Num.pt (0., float_of_int i *. 10.)) in
+          Command.draw (Path.transform [tr] p2)) in
+  let pic = Picture.make cmd in
+  let pth = Path.transform [Transform.shifted (p (0.5, 0.5));
+                            Transform.scaled ~scale:Num.pt 72.] fullcircle in
+  let pic' = Picture.clip pic pth in
+    40, [ draw_pic pic'; draw pth]
+
 let figs = 
   [ draw1; draw3; draw4a; draw4b;draw5; 
     draw6; draw7; draw8; draw9a; draw9b;
     draw10a; draw10b; draw10c] @ draw11 
-  @ [draw17; draw18; draw19; draw21; draw22]
+  @ [draw17; draw18; draw19; draw21; draw22; draw40]
 
 let mpostfile = "test/testmanual.mp"
 let texfile = "test/testmanual.tex"

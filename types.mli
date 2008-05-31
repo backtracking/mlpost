@@ -104,6 +104,7 @@ and picture =
   | PIMake of command
   | PITransform of transform list * picture
   | PIName of name
+  | PIClip of picture * path
 
 and box =
   | BCircle of point * picture * box_circle_style option

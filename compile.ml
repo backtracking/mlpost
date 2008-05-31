@@ -199,6 +199,22 @@ and picture = function
       C.PITransform (tr, p), c1 ++ c2
   | PIName n -> C.PIName n, nop 
   | PITex s -> C.PITex s, nop 
+  | PIClip (pic,pth) as p ->
+      begin
+        try
+          let pic = HPic.find known_pictures p in
+            C.PIName pic, nop
+        with Not_found ->
+          let pn = Name.picture () in
+          let pic, c1 = picture pic in
+          let pth, c2 = path pth in
+          (* clip (pic,pth) is compiled to:
+             newpic := pic;
+             clip newpic to pth;
+             *)
+          C.PIName pn, c1 ++ c2 ++ C.CEqPic (pn,pic) ++ C.CClip (pn,pth)
+      end
+        
 
 and box b = 
   try

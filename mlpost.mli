@@ -483,6 +483,10 @@ and Picture : sig
   val urcorner : t -> Point.t
   val lrcorner : t -> Point.t
 
+  val clip : t -> Path.t -> t
+  (** [clip pic path] limits [pic] to the cyclic path [path]; all elements 
+   *   outside of [path] are cut off. *)
+
 end
 
 and Command : sig
@@ -784,6 +788,11 @@ module Misc : sig
     ('a -> unit -> 'b) -> ('a -> 'c -> unit) -> 'a -> 'c list -> unit
   val space : Format.formatter -> unit -> unit
   val comma : Format.formatter -> unit -> unit
+
+  val fold_from_to : ('a -> int -> 'a) -> 'a -> int -> int -> 'a
+  (** [fold_from_to f acc i j] is equivalent to 
+   *   [List.fold_left f acc [i; i +1; .. j] ],
+   *  where i <= j *)
 end
 (**/**)
 

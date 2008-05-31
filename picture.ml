@@ -43,3 +43,5 @@ let beside p1 p2 =
 
 let below p1 p2 =
   make (CSeq [CDrawPic p1; CDrawPic (place_up_left p2 (llcorner p1))])
+
+let clip pic pth = PIClip (pic,pth)

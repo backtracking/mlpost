@@ -106,6 +106,8 @@ and command =
   | CSeq of command list
   | CDeclPath of name * path
   | CDefPic of name * command
+  | CEqPic of name * picture
+  | CClip of name * path
   | CDeclBox of declbox
 
 

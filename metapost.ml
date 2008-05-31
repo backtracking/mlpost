@@ -226,6 +226,9 @@ and print_command fmt  = function
   | C.CDeclPath (n, p) ->
       fprintf fmt "path %s ;@\n%s = %a;@\n" n n print_path p
   | C.CDeclBox declbox -> declare_box fmt declbox
+  | C.CEqPic (pn1, pic) ->
+      fprintf fmt "picture %s;@\n" pn1;
+      fprintf fmt "%s = %a;@\n" pn1 print_picture pic;
   | C.CDefPic (pic, cmd) ->
       let savepic = Name.picture () in
       fprintf fmt "picture %s, %s ;@\n" savepic pic;
@@ -234,6 +237,8 @@ and print_command fmt  = function
       print_command fmt cmd;
       fprintf fmt "%s = currentpicture;@\n" pic;
       fprintf fmt "currentpicture := %s;@\n" savepic
+  | C.CClip (pic,pth) ->
+      fprintf fmt "clip %s to %a;@\n" pic print_path pth
 
 let print i fmt l =
   (* resetting is actually not needed; variables other than 
