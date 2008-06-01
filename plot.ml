@@ -18,7 +18,7 @@ open Command
 open Helpers
 open Path
 
-type grid = 
+type skeleton = 
     {
       width : int;
       height : int;
@@ -26,156 +26,115 @@ type grid =
       stepy : Num.t;
     }
 
-let mk_grid width height stepx stepy =
+let mk_skeleton width height stepx stepy =
   {width = width; height = height; stepx = stepx; stepy = stepy}
 
-type orientation = 
-  | Horizontal | Vertical | Both
+type labels = (int -> Picture.t) option
 
-type labels = 
-  | NoLabels
-  | Label of (int -> Picture.t) * position
+type ticks = (float * Pen.t) option
 
-type ticks =
-  | NoTicks
-  | Ticks of Num.t * Pen.t
+let get_style = function
+  | None -> fun i -> Dash.evenly, Pen.default ()
+  | Some f -> f
 
-type grid_option =
-  | Pattern of orientation * (int -> Dash.t)
-  | Style of orientation * (int -> Pen.t)
-  | Axis of int * orientation * Pen.t * ticks * labels
-  | Box of Pen.t
+let off_pattern = fun i -> Dash.pattern [Dash.On 5.]
+let defpen = fun i -> Pen.default ()
 
-type parsed_grid_options =
-    { hpattern : (int -> Dash.t) option;
-      vpattern : (int -> Dash.t) option;
-      hstyle : (int -> Pen.t) option;
-      vstyle : (int -> Pen.t) option;
-      axis : int -> orientation -> (Pen.t * ticks * labels) option;
-      box : Pen.t option;
-    }      
+let get_borders sx sy h w = 0., sx *. (float_of_int w), 
+                            sy *. (float_of_int h), 0.
 
-let parse_options =
-  let parse_opt acc = function
-    | Pattern (Both, dash) -> 
-	{acc with hpattern = Some dash; vpattern = Some dash}
-    | Pattern (Horizontal, dash) -> {acc with hpattern = Some dash}
-    | Pattern (Vertical, dash) -> {acc with vpattern = Some dash}
-    | Style (Both, pen) -> 
-	{acc with hstyle = Some pen; vstyle = Some pen}
-    | Style (Horizontal, pen) -> {acc with hstyle = Some pen}
-    | Style (Vertical, pen) -> {acc with vstyle = Some pen}
-    | Axis (pos, o, pen, ticks, labels) -> 
-	{acc with axis = fun pos' o' ->
-	   if pos = pos' && o = o' then Some (pen, ticks, labels)
-	   else acc.axis pos' o'
-	}
-    | Box pen -> {acc with box = Some pen}
-  in
-    List.fold_left parse_opt 
-      {
-	hpattern = None;
-	vpattern = None;
-	hstyle = None;
-	vstyle = None;
-	axis = (fun _ _ -> None);
-	box = None;
-      }
-
-let rec fold_from_to f acc a b =
-  if a <= b then fold_from_to f (f acc a) (a+1) b else acc
-
-let draw_grid ?(options=[]) {width=w; height=h; stepx=sx; stepy=sy} =
-  let fx,fy = float_of_int w, float_of_int h in
-  let maxl, maxr = 0., sx *. fx in
-  let maxu, maxd = sy *. fy, 0. in
-  let ul, ur = (0., maxu), (maxr, maxu)  in
-  let ll, lr = (0., 0.), (maxr, 0.)  in
-  let opt = parse_options options in
-    
-  let linei op os = match op, os with 
-    | None, None -> fun i p -> Command.draw p
-    | None, Some pen -> fun i p -> Command.draw ~pen:(pen i) p
-    | Some pat, None -> fun i p -> Command.draw ~dashed:(pat i) p
-    | Some pat, Some pen -> 
-	fun i p -> Command.draw ~pen:(pen i) ~dashed:(pat i) p
-  in
-  let axis i o line p labf tickf =
-    match opt.axis i o with
-      | Some(pen, ticks, labels) ->
-	  let label =
-	    match labels with 
-	      | NoLabels -> []
-	      | Label (pici, pos) ->
-		  labf (fun i pt -> label ~pos (pici i) pt) in
-	  let tick =
-	    match ticks with
-	      | NoTicks -> []
-	      | Ticks (size, pen) -> 
-		  tickf (fun pt -> Command.draw ~pen (pt size)) in
-	    (Command.draw ~pen p)::tick@label
-      | None -> [line i p]
-  in      
-  let horizontal i = 
+let draw_grid ?(hdash=off_pattern) ?(vdash=off_pattern) 
+              ?(hpen=defpen) ?(vpen=defpen) 
+              {width=w; height=h; stepx=sx; stepy=sy} =
+  let maxl, maxr, maxu, maxd = get_borders sx sy h w in
+  let drawline dashed pen p = Command.draw ~pen ~dashed p in
+  let horizontal i =
     let y = float_of_int i *. sy in
     let pi = path [maxl, y; maxr, y] in
-    let pt i y = Point.p (maxl +. (float_of_int i) *. sx, y) in
-    let label f =
-      fold_from_to (fun l i ->  (f i (pt i y))::l) [] 0 w in
-    let tick f =
-      let pth i size = pathp [pt i y; pt i (y +. size)] in
-	fold_from_to (fun l i -> (f (pth i))::l) [] 0 w in
-      axis i Horizontal (linei opt.hpattern opt.hstyle) pi label tick
+      drawline (hdash i) (hpen i) pi
   in
-  let vertical i = 
+  let vertical i =
     let x = float_of_int i *. sx in
     let pi = path [x, maxd; x, maxu] in
-    let pt i x = Point.p (x, maxd +. (float_of_int i) *. sy) in
-    let label f =
-      fold_from_to (fun l i ->  (f i (pt i x))::l) [] 0 h in
-    let tick f =
-      let pth i size = pathp [pt i x; pt i (x +. size)] in
-	fold_from_to (fun l i -> (f (pth i))::l) [] 0 h in
-      axis i Vertical (linei opt.vpattern opt.vstyle) pi label tick
+      drawline (vdash i) (vpen i) pi
   in
-  let box = match opt.box with 
-    | Some pen -> 
-	[Command.draw ~pen (path ~style:JLine ~cycle:JLine [ll; lr; ur; ul])]
-    | None -> []
+    seq (Misc.fold_from_to
+	   (fun acc i -> (horizontal i) :: acc)
+	   (Misc.fold_from_to
+              (fun acc i -> (vertical i) :: acc) 
+              [] 0 w) 0 h)
+
+let deflabel = Some (fun i -> Picture.tex (string_of_int i)) 
+let defticks = Some (0.25, Pen.default ())
+
+let get_corners maxu maxr = (0., maxu), (maxr, maxu), (0., 0.), (maxr, 0.)
+
+let draw_axes ?(hpen=Pen.default ()) ?(vpen=Pen.default ()) 
+         ?(hlabel= deflabel ) ?(vlabel=deflabel)
+         ?(ticks=defticks) ?(closed=false) 
+         {width=w; height=h; stepx=sx; stepy=sy} =
+  let maxl, maxr, maxu, maxd = get_borders sx sy h w in
+  let ul, ur, ll, lr = get_corners maxu maxr in
+  let labelcmd pos p i = function
+    | None -> Command.nop
+    | Some f -> Command.label ~pos (f i) p
   in
-    seq (fold_from_to
-	   (fun acc i -> (seq (horizontal i)) :: acc)
-	   (fold_from_to
-              (fun acc i -> (seq (vertical i)) :: acc) 
-	      box 0 w) 0 h)
+  let ticks_cmd pathf = 
+    match ticks with
+    | None -> Command.nop
+    | Some (f,pen) -> Command.draw ~pen (pathf f)
+  in
+  let horizontal i =
+    let x = float_of_int i *. sx in
+      seq [ labelcmd Pbot (Point.p (x,maxd)) i hlabel; 
+            ticks_cmd (fun f -> path [x,maxd; x, maxd +. sy *. f]);
+            if closed then
+              ticks_cmd (fun f -> path [x,maxu; x, maxu -. sy *.f])
+            else Command.nop ]
+  in
+  let vertical i =
+    let y = float_of_int i *. sy in
+      seq [labelcmd Pleft (Point.p (maxl, y)) i vlabel; 
+           ticks_cmd (fun f ->  path [maxl,y; maxl +. sx *. f,y]);
+            if closed then
+              ticks_cmd (fun f -> path [maxr,y; maxr -. sy *. f, y])
+            else Command.nop ]
+  in
+    seq 
+      [Command.draw ~pen:hpen (path [ll; lr]);
+       Command.draw ~pen:vpen (path [ll; ul]);
+       if closed then
+         seq [Command.draw ~pen:hpen (path [ul; ur]);
+              Command.draw ~pen:vpen (path [lr; ur])]
+       else Command.nop;
+       seq (Misc.fold_from_to
+              (fun acc i -> (horizontal i) :: acc)
+              (Misc.fold_from_to
+                 (fun acc i -> (vertical i) :: acc) 
+               [] 0 h) 0 w) ]
 
+type drawing = | Stepwise | Normal
 
-(* let draw_grid ?(options=[]) {width=w; height=h; stepx=sx; stepy=sy} = *)
-(*   let fx,fy = float_of_int w, float_of_int h in *)
-(*   let maxl, maxr = 0., sx *. fx in *)
-(*   let maxu, maxd = sy *. fy, 0. in *)
-(*   let ul, ur = (0., maxu), (maxr, maxu)  in *)
-(*   let ll, lr = (0., 0.), (maxr, 0.)  in *)
-(*   let box = path ~style:JLine ~cycle:JLine [ll; lr; ur; ul] in *)
-(*   let pattern = Dash.scaled 0.5 Dash.withdots in *)
-(*   let horizontal i =  *)
-(*     let y = float_of_int i *. sy in *)
-(*     [Command.draw ~dashed:pattern (path [maxl, y; maxr, y]); *)
-(*      Command.draw (path [maxl, y; maxl +. sx /. 3., y]); *)
-(*      Command.draw (path [maxr, y; maxr -. sx /. 3., y]); *)
-(*      label ~pos:Pleft (Picture.tex (string_of_int i)) (Point.p (maxl, y)); *)
-(*     ] *)
-(*   in *)
-(*   let vertical i =  *)
-(*     let x = float_of_int i *. sx in *)
-(*     [Command.draw ~dashed:pattern (path [x, maxd; x, maxu]); *)
-(*      Command.draw (path [x, maxl; x, maxd +. sy /. 3.]); *)
-(*      Command.draw (path [x, maxu; x, maxu -. sy /. 3.]); *)
-(*      label ~pos:Pbot (Picture.tex (string_of_int i)) (Point.p (x, maxd)); *)
-(*     ] *)
-(*   in *)
-(*     seq (fold_from_to *)
-(* 	   (fun acc i -> (seq (horizontal i)) :: acc) *)
-(* 	   (fold_from_to *)
-(*               (fun acc i -> (seq (vertical i)) :: acc)  *)
-(*               [Command.draw box] 0 w) 0 h) *)
+let draw_func ?(pen) ?(drawing=Normal) ?(style) f {width=w; height=h; stepx=sx; stepy=sy} =
+  let maxl, maxr, maxu, maxd = get_borders sx sy h w in
+  let ul, ur, ll, lr = get_corners maxu maxr in
+  let box = path ~style:JLine ~cycle:JLine [ul;ll;lr;ur] in
+  let normal acc i =
+    let x, y = (float_of_int i) *. sx, (f i) *. sy 
+    in 
+      (x,y)::acc
+  in
+  let stepwise (acc,x,y) i =
+    let nx, ny = (float_of_int i) *. sx, (f i) *. sy in
+      (nx,ny) :: (nx,y) :: acc, nx, ny
+  in
+  let graph = 
+    match drawing with
+    | Normal -> Misc.fold_from_to normal [] 0 w
+    | Stepwise -> 
+        let p, _,_ = Misc.fold_from_to stepwise ([],0.,0.) 0 w in
+          p
+  in
+    let pic = Picture.clip 
+               (Picture.make (Command.draw ?pen (path ?style graph))) box in 
+      draw_pic pic

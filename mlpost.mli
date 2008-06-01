@@ -745,33 +745,29 @@ module Plot : sig
 
   (** This module helps drawing grids and plotting functions. *)
 
-  type grid
-    (** The abstract type of grids *)
+  type skeleton
+    (** The abstract skeleton for grids, axes and functions *)
 
-  val mk_grid : int -> int -> Num.t -> Num.t -> grid
-    (** [mk_grid w h dx dy] builds a grid of width [w] and height [h],
+  val mk_skeleton : int -> int -> Num.t -> Num.t -> skeleton
+    (** [mk_skeleton w h dx dy] builds a skeleton of width [w] and height [h],
 	each cell being [dx] units wide and [dy] units high. *)
 
-  type orientation = 
-    | Horizontal | Vertical | Both
-	  
-  type labels = 
-    | NoLabels
-    | Label of (int -> Picture.t) * Command.position
+  type labels = (int -> Picture.t) option
+  type ticks =  (Num.t * Pen.t) option
 	
-  type ticks =
-    | NoTicks
-    | Ticks of Num.t * Pen.t
+  type drawing = Stepwise | Normal
 	
-  type grid_option =
-    | Pattern of orientation * (int -> Dash.t)
-    | Style of orientation * (int -> Pen.t)
-    | Axis of int * orientation * Pen.t * ticks * labels
-    | Box of Pen.t
-	
-  val draw_grid : ?options:grid_option list -> grid -> Command.t
-    (** [draw_grid opts g] draws the grid [g] with options [opts]. *)
+  val draw_grid : ?hdash:(int -> Dash.t) ->
+                  ?vdash:(int -> Dash.t) ->
+                  ?hpen:(int -> Pen.t) ->
+                  ?vpen:(int -> Pen.t) -> skeleton -> Command.t
 
+  val draw_axes : ?hpen:Pen.t -> ?vpen:Pen.t -> ?hlabel:labels -> 
+                  ?vlabel:labels -> ?ticks:ticks -> ?closed:bool -> 
+                    skeleton -> Command.t
+
+  val draw_func : ?pen:Pen.t -> ?drawing:drawing -> ?style:Path.joint -> 
+                  (int -> float) -> skeleton -> Command.t
 end
 
 (** {2 Metapost generation} *)

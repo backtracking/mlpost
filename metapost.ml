@@ -228,7 +228,7 @@ and print_command fmt  = function
   | C.CDeclBox declbox -> declare_box fmt declbox
   | C.CEqPic (pn1, pic) ->
       fprintf fmt "picture %s;@\n" pn1;
-      fprintf fmt "%s = %a;@\n" pn1 print_picture pic;
+      fprintf fmt "%s := %a;@\n" pn1 print_picture pic;
   | C.CDefPic (pic, cmd) ->
       let savepic = Name.picture () in
       fprintf fmt "picture %s, %s ;@\n" savepic pic;

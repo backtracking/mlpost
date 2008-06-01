@@ -176,46 +176,58 @@ let d12 =
   let p1 = Picture.tex "A" in
     [Command.draw_pic (sierpinski p1 8)]
 
-(** pltots *)
+(** plots *)
 open Plot
-let grid = mk_grid 20 14 (Num.bp 20.) (Num.bp 20.)
+let sk = mk_skeleton 20 14 (Num.bp 20.) (Num.bp 20.)
 
-let d13 =
-  [draw_pic (Picture.make (draw_grid grid))]
+let d13 =  [ (draw_grid sk)]
+
+let squaref x = x *. x
+let f2 i = sqrt (float_of_int i)
+let f3 i = squaref (float_of_int i)
 
 let d14 =
-  let tr = [Transform.scaled 5.] in
-  let hpattern _ = Dash.scaled 0.5 Dash.withdots in
-  let vpattern _ = Dash.scaled 2. Dash.evenly in
-  let style i = 
-    if i mod 5 = 0 then 
+  let hdash _ = Dash.scaled 0.5 Dash.withdots in
+  let vdash _ = Dash.scaled 2. Dash.evenly in
+  let hvpen i = 
+    if i mod 5 = 0 then
       Pen.default ~tr:([Transform.scaled 2.5]) ()
     else Pen.default () in
-  let options = [Box (Pen.default ~tr ());
-		 Pattern (Horizontal, hpattern);
-		 Pattern (Vertical, vpattern);
-		 Style (Both, style)
-		] in
-    [draw_pic (Picture.make (draw_grid ~options grid))]
+  let pen = Pen.default ~tr:[Transform.scaled 4.] () in
+     [draw_grid ~hdash ~vdash ~hpen:hvpen ~vpen:hvpen sk;
+       draw_func ~pen f2 sk;
+       draw_func ~pen f3 sk
+      ]
+
+let f1 i =
+  let aux = function
+  | 0 -> 1
+  | 1 | 2 -> 2
+  | 3 | 4 -> 3
+  | 5  -> 4
+  | 6 | 7 -> 5
+  | 8 |9 -> 6
+  | 10 -> 7
+  | 11 | 12 -> 8
+  | 13 | 14 -> 9
+  | 15 -> 10
+  | 16 | 17 -> 11
+  | 18 | 19 -> 12
+  | 20 -> 13
+  | _ -> 0
+  in
+    float_of_int (aux i)
 
 let florence =
-  let grid = mk_grid 20 14 (Num.bp 14.) (Num.bp 20.) in
-  let pattern = Pattern (Both, fun _ -> (Dash.scaled 0.5 Dash.withdots)) in
-  let label p = Label ((fun i -> (Picture.tex (string_of_int i))), p) in
-  let ticks s = Ticks (s, Pen.default ()) in
-  let yaxis = 
-    Axis(0, Vertical, Pen.default (), ticks (14./.3.), label Pleft) in
-  let xaxis = 
-    Axis(0, Horizontal, Pen.default (), ticks (20./.3.), label Pbot) in
-  let topaxis = 
-    Axis(20, Vertical, Pen.default (), ticks (-.14./.3.), NoLabels) in
-  let rightaxis = 
-    Axis(14, Horizontal, Pen.default (), ticks (-.20./.3.), NoLabels) in
-  let options = [pattern; yaxis; xaxis; topaxis; rightaxis] in
-    [draw_pic (Picture.make (draw_grid ~options grid))]
+  let sk = mk_skeleton 20 14 14. 20. in
+  let pen = Pen.default ~tr:[Transform.scaled 4.] () in
+  let dash _ = Dash.scaled 0.5 Dash.withdots in
+    [ draw_grid ~hdash:dash ~vdash:dash sk;
+     draw_axes ~closed:true sk;
+     draw_func ~pen ~drawing:Stepwise ~style:JLine f1 sk;
+      ]
 
-
-let figs = [d13; d14; florence]
+let figs = [florence; d14; d13; ]
 (* ; d11; d7; d6; d5; d4; cheno011; proval; d3;  *)
 (*             d2sq; d2hsq; d2s; d2c; d1] *)
 
