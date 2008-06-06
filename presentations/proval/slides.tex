@@ -10,6 +10,7 @@
 \usepackage{mathrsfs}
 \usepackage{pifont}
 \usepackage{shadow}   
+\usepackage{alltt}   
 \usepackage[dvips]{epsfig}
 
 \usetheme{Madrid}
@@ -58,7 +59,46 @@
       \item outils ``langages de programmation'': Metapost, Tikz
     \end{itemize}
   \end{block}
-  
 \end{frame}
+
+\begin{frame}\frametitle{Metapost}
+  \begin{minipage}{0.3\linewidth}
+  \includegraphics{mpex.mps}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.6\linewidth}
+    \small
+    \begin{alltt}
+beginfig(1);\\
+\hspace*{0pt}~ numeric u;\\
+\hspace*{0pt}~ u = 1cm;\\
+\hspace*{0pt}~ draw (0,2u)---(0,0)---(4u,0);\\
+\hspace*{0pt}~ pickup pencircle scaled 1pt;\\
+\hspace*{0pt}~ draw (0,0)\{up\}\\
+\hspace*{0pt}~ for i=1 upto 8: \\
+\hspace*{0pt}~~~  ..(i/2,sqrt(i/2))*u  \\
+\hspace*{0pt}~ endfor;\\
+\hspace*{0pt}~ label.lrt(btex $\sqrt x$ etex, 
+\hspace*{0pt}~ ~ ~ ~ ~ ~ (3,sqrt 3)*u);\\
+\hspace*{0pt}~ label.bot(btex $x$ etex, (2u,0));\\
+\hspace*{0pt}~ label.lft(btex $y$ etex, (0,u));\\
+endfig;\\
+    \end{alltt}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}\frametitle{MetaPost et Tikz}
+  \begin{block}{MetaPost}
+    \begin{itemize}
+      \item 
+    \end{itemize}
+  \end{block}
+  \begin{block}{Tikz}
+    \begin{itemize}
+      \item langage très complet, similaire dans l'esprit à MetaPost
+      \item  
+    \end{itemize}
+  \end{block}
+\end{frame}<++>
 
 \end{document}
