@@ -222,10 +222,10 @@ let florence =
   let sk = mk_skeleton 20 14 14. 20. in
   let pen = Pen.default ~tr:[Transform.scaled 4.] () in
   let dash _ = Dash.scaled 0.5 Dash.withdots in
-    [ draw_grid ~hdash:dash ~vdash:dash sk;
-     draw_axes ~closed:true sk;
-     draw_func ~pen ~drawing:Stepwise ~style:JLine f1 sk;
-      ]
+  [ draw_grid ~hdash:dash ~vdash:dash sk;
+    draw_axes ~closed:true sk;
+    draw_func ~pen ~drawing:Stepwise ~style:JLine f1 sk;
+  ]
 
 let figs = [florence; d14; d13 ]
 (* d11; d7; d6; d5; d4; cheno011; proval; d3;  
