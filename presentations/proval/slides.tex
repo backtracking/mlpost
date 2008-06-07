@@ -14,6 +14,7 @@
 \usepackage[dvips]{epsfig}
 
 \usetheme{Madrid}
+
 \beamertemplatenavigationsymbolsempty
 
 \definecolor{yel}{rgb}{.9,.8,.4}
@@ -38,7 +39,7 @@
     \hfill\includegraphics[height=5cm]{cfg.mps}
   \end{center}
   \hfill\includegraphics{proval.mps}
-%  \hfill\includegraphics[width=0.15\textwidth]{lrilogo.jpg}\rho
+%  \hfill\includegraphics[width=0.15\textwidth]{lrilogo.jpg}ρ
 \end{frame}
 
 \begin{frame}\frametitle{Motivation}
@@ -54,8 +55,8 @@
 
   \begin{block}{Solutions existantes}
     \begin{itemize}
-      \item outils graphiques style {\tt dia} : Pas de support Latex, pas
-        d'automatisation
+      \item outils graphiques gratuits style {\tt dia} : Pas de support Latex,
+        pas d'automatisation
       \item outils ``langages de programmation'': Metapost, Tikz
     \end{itemize}
   \end{block}
@@ -87,18 +88,137 @@ endfig;\\
   \end{minipage}
 \end{frame}
 
-\begin{frame}\frametitle{MetaPost et Tikz}
+\begin{frame}\frametitle{Tikz}
+%\begin{tikzpicture}[scale=2]
+%  \shade[top color=blue,bottom color=gray!50] 
+%      (0,0) parabola (1.5,2.25) |- (0,0);
+%  \draw (1.05cm,2pt) node[above] 
+%      {$\displaystyle\int_0^{3/2} \!\!x^2\mathrm{d}x$};
+%
+%  \draw[style=help lines] (0,0) grid (3.9,3.9)
+%       [step=0.25cm]      (1,2) grid +(1,1);
+%
+%  \draw[->] (-0.2,0) -- (4,0) node[right] {$x$};
+%  \draw[->] (0,-0.2) -- (0,4) node[above] {$f(x)$};
+%
+%  \foreach \x/\xtext in {1/1, 1.5/1\frac{1}{2}, 2/2, 3/3}
+%    \draw[shift={(\x,0)}] (0pt,2pt) -- (0pt,-2pt) node[below] {$\xtext$};
+%
+%  \foreach \y/\ytext in {1/1, 2/2, 2.25/2\frac{1}{4}, 3/3}
+%    \draw[shift={(0,\y)}] (2pt,0pt) -- (-2pt,0pt) node[left] {$\ytext$};
+%
+%  \draw (-.5,.25) parabola bend (0,0) (2,4) node[below right] {$x^2$};
+%\end{tikzpicture}
+\end{frame}
+
+\begin{frame}\frametitle{Pourquoi pas MetaPost ou Tikz ?}
   \begin{block}{MetaPost}
     \begin{itemize}
-      \item 
+      \item Pas de structures de données
+      \item Pas de fonctions (seulement macros textuelles) 
+      \item précédences des opérateurs très bizarres
     \end{itemize}
   \end{block}
   \begin{block}{Tikz}
     \begin{itemize}
       \item langage très complet, similaire dans l'esprit à MetaPost
-      \item  
+      \item les dessins se font directement en \LaTeX
+      \item compliqué à prendre en main 
     \end{itemize}
   \end{block}
-\end{frame}<++>
+
+  \medskip
+
+  les deux : Encore un langage à apprendre, messages d'erreur
+  incompréhensibles, \dots
+\end{frame}
+
+\begin{frame}\frametitle{MlPost}
+  \begin{block}{A commencé comme un ``pretty-printeur'' de Metapost}
+    \begin{itemize}
+      \item pour profiter des capacités de Metapost 
+      \item typage et expressivité de Caml
+      \item developpement facilité d'extensions
+    \end{itemize}
+  \end{block}
+
+  \begin{block}{Aujourd'hui : bibliothèque OCaml}
+    \begin{itemize}
+      \item un ``cross-compiler'' vers Metapost
+      \item interface fonctionnelle
+      \item memoization des différents motifs d'un dessin
+      \item utiliser le côté impératif de MetaPost pour du partage
+    \end{itemize}
+  \end{block}
+
+\end{frame}
+
+\begin{frame}\frametitle{Brique de base : les chemins}
+  \begin{block}{Les chemins}
+    \begin{itemize}
+      \item Une liste de points, connectés par des lignes droites, des courbes
+        de Bézier, \dots
+      \item on peut les fermer, les combiner, les intersecter, remplir la
+        surface délimitée, s'en servir pour faire du {\em clipping}, \dots
+    \end{itemize}
+  \end{block}
+  \begin{center}
+  \includegraphics{path.mps}
+  \end{center}
+\end{frame}
+
+\begin{frame}\frametitle{Types de base}
+
+  \begin{block}{Types différents}
+    \begin{itemize}
+      \item longueurs : {\tt Num}
+      \item points : {\tt Point}
+      \item chemins : {\tt Path}
+      \item transformations affines : {\tt Transform}
+      \item plumes : {\tt Pen}
+      \item couleurs : {\tt Color}
+    \end{itemize}
+  \end{block}
+
+  \begin{center}
+    \includegraphics[width=0.3\textheight]{colortriangle.mps}
+  \end{center}
+  
+\end{frame}
+
+\begin{frame}
+  boites, flêches, labels, latex \dots
+\end{frame}
+
+\begin{frame}\frametitle{Pictures}
+
+\end{frame}
+
+\begin{frame}
+  extensions: Diag, Tree, Plot
+\end{frame}
+
+\begin{frame}\frametitle{Conclusion}
+
+  \begin{block}{Points forts de MlPost}
+    \begin{itemize}
+      \item les mêmes que MetaPost ! 
+      \item Bibliothèque Caml - dans votre langage de programmation favori
+      \item The sky is the limit : on attend vos extensions
+      \item Supporté par JCF  :)
+    \end{itemize}
+  \end{block}
+  
+  \begin{block}{Inconvénients}
+    \begin{itemize}
+      \item Syntaxe un peu lourde (inévitable, sans réinventer un langage),
+        camlp4~?
+      \item Pas toutes les fonctionnalités de MetaPost, peu d'extensions
+        comparé à Tikz
+      \item Toutes les erreurs ne peuvent pas être détectées par typage
+      \item Pas encore prouvé en Coq :)
+    \end{itemize}
+  \end{block}
+\end{frame}
 
 \end{document}

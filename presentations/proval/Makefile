@@ -1,6 +1,7 @@
 pdf: slides.pdf
 
-slides.pdf: cfg.mps proval.mps mpex.mps slides.tex
+slides.pdf: cfg.mps proval.mps mpex.mps colortriangle.mps slides.tex
+	pdflatex slides.tex
 	pdflatex slides.tex
 
 %.mps: %.ml
