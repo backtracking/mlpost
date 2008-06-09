@@ -1,6 +1,12 @@
+MPSFILES := cfg proval mpex colortriangle path cheno pictures tree2 tree6
+MPSFILES := $(patsubst %,%.mps, $(MPSFILES))
+
+GENERATED := cfg proval colortriangle path cheno pictures tree2 tree6
+GENERATED := $(patsubst %,%.mp, $(GENERATED))
+
 pdf: slides.pdf
 
-slides.pdf: cfg.mps proval.mps mpex.mps colortriangle.mps slides.tex
+slides.pdf: $(MPSFILES) slides.tex
 	pdflatex slides.tex
 	pdflatex slides.tex
 
@@ -8,7 +14,8 @@ slides.pdf: cfg.mps proval.mps mpex.mps colortriangle.mps slides.tex
 	mlpost -pdf -latex slides.tex $^
 
 clean:
-	rm -f *.toc *.aux *.pdf cfg.mp proval.mp *.log *~ *.mp[sx] *.snm *.nav *.out
+	rm -f *.toc *.aux *.pdf *.log *~ *.mp[sx] *.snm *.nav *.out
+	rm -f $(GENERATED)
 
 %.mps: %.1
 	mv $^ $@
