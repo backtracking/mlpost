@@ -1,4 +1,5 @@
-MPSFILES := cfg proval mpex colortriangle path cheno pictures tree2 tree6
+MPSFILES := cfg proval mpex colortriangle path cheno pictures tree2 \
+		tree6 florence
 MPSFILES := $(patsubst %,%.mps, $(MPSFILES))
 
 GENERATED := cfg proval colortriangle path cheno pictures tree2 tree6
