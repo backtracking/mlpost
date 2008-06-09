@@ -70,11 +70,24 @@ let defticks = Some (0.25, Pen.default ())
 let get_corners maxu maxr = (0., maxu), (maxr, maxu), (0., 0.), (maxr, 0.)
 
 let draw_axes ?(hpen=Pen.default ()) ?(vpen=Pen.default ()) 
-         ?(hlabel= deflabel ) ?(vlabel=deflabel)
-         ?(ticks=defticks) ?(closed=false) 
+         ?(hlabel= deflabel) ?(vlabel=deflabel)
+         ?(ticks=defticks) ?(closed=false) ?hcaption ?vcaption
          {width=w; height=h; stepx=sx; stepy=sy} =
   let maxl, maxr, maxu, maxd = get_borders sx sy h w in
   let ul, ur, ll, lr = get_corners maxu maxr in
+  let hcaptcmd = match hcaption with 
+    | None -> Command.nop
+    | Some labl -> 
+	Command.label ~pos:Plowleft labl 
+	  (Point.pt (float_of_int w *. sx, -.sy))
+  in
+  let vcaptcmd = match vcaption with 
+    | None -> Command.nop
+    | Some labl -> 
+	Command.label ~pos:Plowleft 
+	  (Picture.transform [Transform.rotated 90.] labl)
+	  (Point.pt (-.sx, float_of_int h *. sy))
+  in
   let labelcmd pos p i = function
     | None -> Command.nop
     | Some f -> Command.label ~pos (f i) p
@@ -107,6 +120,7 @@ let draw_axes ?(hpen=Pen.default ()) ?(vpen=Pen.default ())
          seq [Command.draw ~pen:hpen (path [ul; ur]);
               Command.draw ~pen:vpen (path [lr; ur])]
        else Command.nop;
+       hcaptcmd; vcaptcmd;
        seq (Misc.fold_from_to
               (fun acc i -> (horizontal i) :: acc)
               (Misc.fold_from_to
@@ -115,7 +129,8 @@ let draw_axes ?(hpen=Pen.default ()) ?(vpen=Pen.default ())
 
 type drawing = | Stepwise | Normal
 
-let draw_func ?(pen) ?(drawing=Normal) ?(style) f {width=w; height=h; stepx=sx; stepy=sy} =
+let draw_func ?(pen) ?(drawing=Normal) ?(style) ?(dashed) ?(label)
+    f {width=w; height=h; stepx=sx; stepy=sy} =
   let maxl, maxr, maxu, maxd = get_borders sx sy h w in
   let ul, ur, ll, lr = get_corners maxu maxr in
   let box = path ~style:JLine ~cycle:JLine [ul;ll;lr;ur] in
@@ -132,9 +147,12 @@ let draw_func ?(pen) ?(drawing=Normal) ?(style) f {width=w; height=h; stepx=sx; 
     match drawing with
     | Normal -> Misc.fold_from_to normal [] 0 w
     | Stepwise -> 
-        let p, _,_ = Misc.fold_from_to stepwise ([],0.,0.) 0 w in
-          p
+        let p, _,_ = Misc.fold_from_to stepwise ([],0.,0.) 0 w in p
   in
-    let pic = Picture.clip 
-               (Picture.make (Command.draw ?pen (path ?style graph))) box in 
-      draw_pic pic
+  let pic = Picture.clip 
+    (Picture.make (Command.draw ?pen ?dashed (path ?style graph))) box in 
+    match label with 
+      | None -> draw_pic pic 
+      | Some (lab, pos, i) -> 
+	  let pt = Point.pt (float_of_int i *. sx, (f i) *. sy) in
+	    seq [Command.label ~pos lab pt; draw_pic pic]

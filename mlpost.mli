@@ -470,6 +470,15 @@ and Picture : sig
   val place_up_left : t -> Point.t -> t
     (** Place a picture with its upper left corner at some point *)
 
+  val place_up_right : t -> Point.t -> t
+    (** Place a picture with its upper right corner at some point *)
+
+  val place_bot_left : t -> Point.t -> t
+    (** Place a picture with its bottom left corner at some point *)
+
+  val place_bot_right : t -> Point.t -> t
+    (** Place a picture with its bottom right corner at some point *)
+
   val beside : t -> t -> t
     (** [beside p1 p2] returns a picture in which [p2] is placed right to [p1] *)
 
@@ -764,10 +773,13 @@ module Plot : sig
 
   val draw_axes : ?hpen:Pen.t -> ?vpen:Pen.t -> ?hlabel:labels -> 
                   ?vlabel:labels -> ?ticks:ticks -> ?closed:bool -> 
+                  ?hcaption:Picture.t -> ?vcaption:Picture.t ->
                     skeleton -> Command.t
 
-  val draw_func : ?pen:Pen.t -> ?drawing:drawing -> ?style:Path.joint -> 
-                  (int -> float) -> skeleton -> Command.t
+  val draw_func : ?pen:Pen.t -> ?drawing:drawing -> 
+                  ?style:Path.joint -> ?dashed:Dash.t ->
+                  ?label:(Picture.t * Command.position * int) ->
+                    (int -> float) -> skeleton -> Command.t
 end
 
 (** {2 Metapost generation} *)

@@ -38,6 +38,14 @@ let center pic p =
 let place_up_left pic p =
   transform [Transform.shifted (Point.sub p (ulcorner pic))] pic
 
+let place_up_right pic p =
+  transform [Transform.shifted (Point.sub p (urcorner pic))] pic
+
+let place_bot_left pic p =
+  transform [Transform.shifted (Point.sub p (llcorner pic))] pic
+
+let place_bot_right pic p =
+  transform [Transform.shifted (Point.sub p (lrcorner pic))] pic
 let beside p1 p2 = 
   make (CSeq [CDrawPic p1; CDrawPic (place_up_left p2 (urcorner p1))])
 
