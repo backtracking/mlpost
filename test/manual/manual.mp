@@ -41,8 +41,8 @@ draw p;
 for t=0 upto 3:
   draw point t of p--postcontrol t of p
   --precontrol t+1 of p--point t+1 of p
-  withcolor 0.5white
-  %dashed (evenly scaled .5)
+  %withcolor 0.5white
+  dashed (evenly scaled .5)
     ;
 endfor
 dotlabels.top(0,2,4);

@@ -67,7 +67,8 @@ let draw5 = 5,
 	[0.,0.] lcontrols (List.tl l1)
     in
       (* As long as we dont have the dashed lines : gray *)
-      draw ~color:(Color.gray 0.5) (path ~style:JLine (List.rev hull)) ] @ labels1
+      draw ~dashed:(Dash.scaled 0.5 Dash.evenly) 
+        (path ~style:JLine (List.rev hull)) ] @ labels1
 
 let draw6 = 6, 
   [ draw (pathk
