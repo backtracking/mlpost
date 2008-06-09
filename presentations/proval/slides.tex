@@ -11,6 +11,7 @@
 \usepackage{pifont}
 \usepackage{shadow}   
 \usepackage{alltt}   
+\usepackage{tikz}
 \usepackage[dvips]{epsfig}
 
 \usetheme{Madrid}
@@ -39,7 +40,7 @@
     \hfill\includegraphics[height=5cm]{cfg.mps}
   \end{center}
   \hfill\includegraphics{proval.mps}
-%  \hfill\includegraphics[width=0.15\textwidth]{lrilogo.jpg}\rho
+%  \hfill\includegraphics[width=0.15\textwidth]{lrilogo.jpg}ρ
 \end{frame}
 
 \begin{frame}\frametitle{Motivation}
@@ -88,29 +89,46 @@ endfig;\\
   \end{minipage}
 \end{frame}
 
-\begin{frame}\frametitle{Tikz}
-%\begin{tikzpicture}[scale=2]
-%  \shade[top color=blue,bottom color=gray!50] 
-%      (0,0) parabola (1.5,2.25) |- (0,0);
-%  \draw (1.05cm,2pt) node[above] 
-%      {$\displaystyle\int_0^{3/2} \!\!x^2\mathrm{d}x$};
-%
-%  \draw[style=help lines] (0,0) grid (3.9,3.9)
-%       [step=0.25cm]      (1,2) grid +(1,1);
-%
-%  \draw[->] (-0.2,0) -- (4,0) node[right] {$x$};
-%  \draw[->] (0,-0.2) -- (0,4) node[above] {$f(x)$};
-%
-%  \foreach \x/\xtext in {1/1, 1.5/1\frac{1}{2}, 2/2, 3/3}
-%    \draw[shift={(\x,0)}] (0pt,2pt) -- (0pt,-2pt) node[below] {$\xtext$};
-%
-%  \foreach \y/\ytext in {1/1, 2/2, 2.25/2\frac{1}{4}, 3/3}
-%    \draw[shift={(0,\y)}] (2pt,0pt) -- (-2pt,0pt) node[left] {$\ytext$};
-%
-%  \draw (-.5,.25) parabola bend (0,0) (2,4) node[below right] {$x^2$};
-%\end{tikzpicture}
+\begin{frame}[fragile]\frametitle{Tikz}
+  \begin{minipage}[]{0.45\textwidth}
+  \footnotesize
+  \begin{verbatim}
+  \shade[top color=blue,
+             bottom color=gray!50] 
+      (0,0) parabola 
+            (1.5,2.25) |- (0,0);
+  \draw[style=help lines] 
+         (0,0) grid (3.9,3.9)
+       [step=0.25cm]      
+         (1,2) grid +(1,1);
+
+  \draw[->] (-0.2,0) -- 
+      (4,0) node[right] {$x$};
+  \draw[->] (0,-0.2) -- 
+      (0,4) node[above] {$f(x)$};
+
+  \draw (-.5,.25) 
+        parabola bend (0,0) (2,4) 
+        node[below right] {$x^2$};
+  \end{verbatim}
+  \end{minipage}
+  \begin{minipage}[]{0.4\textwidth}
+    \begin{tikzpicture}[scale=1.4]
+    \shade[top color=blue,bottom color=gray!50] 
+        (0,0) parabola (1.5,2.25) |- (0,0);
+    \draw[style=help lines] (0,0) grid (3.9,3.9)
+         [step=0.25cm]      (1,2) grid +(1,1);
+
+    \draw[->] (-0.2,0) -- (4,0) node[right] {$x$};
+    \draw[->] (0,-0.2) -- (0,4) node[above] {$f(x)$};
+
+    \draw (-.5,.25) parabola bend (0,0) (2,4) node[below right] {$x^2$};
+  \end{tikzpicture}
+  \end{minipage}
 \end{frame}
 
+\begin{frame}[fragile]\frametitle{Tikz (2)}
+\end{frame}
 \begin{frame}\frametitle{Pourquoi pas MetaPost ou Tikz ?}
   \begin{block}{MetaPost}
     \begin{itemize}
@@ -268,7 +286,7 @@ endfig;\\
     \begin{itemize}
       \item Dessiner des axes
       \item Ajouter une grille
-      \item Plotter la fonction 
+      \item Plotter des fonctions
     \end{itemize}
   \end{block}
   \begin{center}
