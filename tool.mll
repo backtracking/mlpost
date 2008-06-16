@@ -42,16 +42,24 @@
     end;
     latex_file := Some f
   let xpdf = ref false
+  let use_ocamlbuild = ref false
+  let ccopt = ref ""
+  let execopt = ref ""
 
-  let spec =
-    [ "-pdf", Set pdf, "generates .mps files";
+  let spec = Arg.align
+    [ "-pdf", Set pdf, " Generate .mps files";
       "-latex", String set_latex_file, 
-      "<main.tex>  scans the LaTeX prelude";
-      "-xpdf", Set xpdf, "wysiwyg mode using xpdf";
+      "<main.tex> Scan the LaTeX prelude";
+      "-xpdf", Set xpdf, " wysiwyg mode using xpdf";
+      "-ocamlbuild", Set use_ocamlbuild, " Use ocamlbuild to compile";
+      "-ccopt", Set_string ccopt, "\"<options>\" Pass <options> to the compiler";
+      "-execopt", Set_string execopt,
+      "\"<options>\" Pass <options> to ocaml (same as -ccopt) or, \
+if using -ocamlbuild, to the compiled program";
     ]
 
   let () = 
-    Arg.parse spec add_file "usage: mlpost [options] files..."
+    Arg.parse spec add_file "Usage: mlpost [options] files..."
 
   let buffer = Buffer.create 1024
 }
@@ -83,6 +91,21 @@ rule scan = parse
     let out = Sys.command cmd in
     if out <> 0 then exit 1
 
+  let ocamlbuild args =
+    command ("ocamlbuild " ^ String.concat " " args)
+
+  (** Return an unused file name which in the same directory as the prefix. *)
+  let temp_file_name prefix suffix =
+    if not (Sys.file_exists (prefix ^ suffix)) then
+      prefix ^ suffix
+    else begin
+      let i = ref 0 in
+      while Sys.file_exists (prefix ^ string_of_int !i ^ suffix) do
+        incr i
+      done;
+      prefix ^ string_of_int !i ^ suffix
+    end
+
   let compile f =
     let bn = Filename.chop_extension f in
     let mlf, cout = Filename.open_temp_file "mlpost" ".ml" in
@@ -108,7 +131,18 @@ rule scan = parse
       Printf.fprintf cout 
 	"let () = Mlpost.Metapost.dump_tex %s \"_mlpost\"\n" prelude;
     close_out cout;
-    ocaml [|"mlpost.cma"; mlf|];
+
+    if !use_ocamlbuild then begin
+      (* Ocamlbuild cannot compile a file which is in /tmp *)
+      let mlf2 = temp_file_name bn ".ml" in
+      command ("cp " ^ mlf ^ " " ^ mlf2);
+      ocamlbuild
+        ["-lib mlpost"; Filename.chop_extension mlf2 ^ ".byte"; !ccopt; "--";
+         !execopt];
+      Sys.remove mlf2
+    end else
+      ocaml [|"mlpost.cma"; mlf; !ccopt; !execopt|];
+
     Sys.remove mlf;
     if !xpdf then begin
       ignore (Sys.command "pdflatex _mlpost.tex");
