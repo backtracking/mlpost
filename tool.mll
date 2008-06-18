@@ -46,14 +46,17 @@
   let ccopt = ref ""
   let execopt = ref ""
 
+  let add_ccopt x = ccopt := !ccopt ^ " " ^ x
+  let add_execopt x = execopt := !execopt ^ " " ^ x
+
   let spec = Arg.align
     [ "-pdf", Set pdf, " Generate .mps files";
       "-latex", String set_latex_file, 
       "<main.tex> Scan the LaTeX prelude";
       "-xpdf", Set xpdf, " wysiwyg mode using xpdf";
       "-ocamlbuild", Set use_ocamlbuild, " Use ocamlbuild to compile";
-      "-ccopt", Set_string ccopt, "\"<options>\" Pass <options> to the compiler";
-      "-execopt", Set_string execopt,
+      "-ccopt", String add_ccopt, "\"<options>\" Pass <options> to the compiler";
+      "-execopt", String add_execopt,
       "\"<options>\" Pass <options> to ocaml (same as -ccopt) or, \
 if using -ocamlbuild, to the compiled program";
     ]
