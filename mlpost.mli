@@ -408,7 +408,10 @@ and Transform : sig
     (** The abstract type of a single transformation *)
 
   val scaled : ?scale:(float -> Num.t) -> float -> t'
-    (** Scale an object by a constant factor *)
+    (** Scale an object by a constant factor.
+      @param scale a scaling function to be applied to each float;
+      see {!Num.t} for scaling functions for usual units. This makes only sense
+      when the object to be transformed is given in "bp" units *)
   val rotated : float -> t'
     (** Rotate an object by an angle given in degrees *)
   val shifted : Point.t -> t'
