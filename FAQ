@@ -1,0 +1,12 @@
+1) When I include an MlPost Figure using \includegraphics in a PDF document,
+   I get the following error: "File not found : supp-pdf.tex".
+
+Answer:
+
+This seems to be a bug in some old Ubuntu distributions. You need the package
+"context" that contains the file "supp-pdf.tex". So an
+
+apt-get install context
+
+should do.
+   

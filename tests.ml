@@ -280,7 +280,24 @@ let florence =
     instants
   ]
 
-let figs = [florence; d14; d13 ]
+let d15 =
+  let s = "010101011111" in
+  let cmd = ref [] in
+  let dist = 5. in
+  let () =
+    String.iter 
+      (fun c -> 
+        let p = Picture.tex (String.make 1 c) in
+          cmd := (p :: !cmd)) s in
+  let i = ref 0 in
+    List.map
+      (fun p -> 
+         incr i; Command.label ~pos:Pleft p 
+                  (Point.p (dist *. (float_of_int !i), 0.))) !cmd
+
+    
+
+let figs = [d15; florence; d14; d13 ]
 (* d11; d7; d6; d5; d4; cheno011; proval; d3;  
              d2sq; d2hsq; d2s; d2c; d1] *)
 
