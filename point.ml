@@ -113,6 +113,14 @@ let pmap f (a,b) = (f a, f b)
 let p ?(scale=Num.bp) pr =
   pt (pmap scale pr)
 
+let lengthpoint p = PTLength p
+
+let p ?(scale=Num.bp) pr =
+  pt (pmap scale pr)
+
+let origin = p (0.,0.)
+
+
 let ptlist ?scale l = List.map (p ?scale) l
 
 (* construct a point with the right measure *)

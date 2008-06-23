@@ -74,6 +74,11 @@ and Point : sig
   val left : t
   val right : t
 
+  val origin : t
+
+  val lengthpoint : t -> t
+  (** [lengthpoint p] is the point [(|p|,|p|)] *)
+
   (** {2 Operations on points} *)
     
   (** Apply a transformation to a point *)

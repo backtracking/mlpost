@@ -75,6 +75,10 @@ let rec point = function
       let p, c1 = point p in
       let tr, c2 = transform_list tr in
         C.PTTransformed (p,tr),  c1 ++ c2
+  | PTLength p ->
+      let p1,c1 = point p in
+        C.PTLength p1, c1
+
 
 and path = function
   | PASub (f1, f2, p) ->
