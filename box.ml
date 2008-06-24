@@ -46,3 +46,4 @@ let south_east = function
   | BRect _ as b -> PTBoxCorner (b,SE)
   | BCircle (c,_,_) as b -> Point.rotate_around c 45.(PTBoxCorner (b,S))
 
+let bpath b = PABoxBPath b

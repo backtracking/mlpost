@@ -45,7 +45,6 @@ let unitsquare = PAUnitSquare
 let transform tr = function
   | PATransformed (p,tr') -> PATransformed (p,tr'@tr)
   | _ as x -> PATransformed (x,tr)
-let bpath b = PABoxBPath b
 let cut_after p1 p2 = PACutAfter (p1, p2)
 let cut_before p1 p2 = PACutBefore (p1, p2)
 let build_cycle l = PABuildCycle l

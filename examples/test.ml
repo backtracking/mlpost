@@ -15,7 +15,7 @@ let fig =
     draw_box ~fill:Color.purple b;
     draw
       ~color:Color.red
-      (Path.transform [Transform.shifted (cmp 1. 1.)] (Path.bpath a));
+      (Path.transform [Transform.shifted (cmp 1. 1.)] (Box.bpath a));
     draw_label_arrow ~color:Color.orange ~pen 
       ~pos:Pupright (Picture.tex "foo") (Box.west a) (Box.south_east b);
     box_arrow ~color:Color.blue a b;

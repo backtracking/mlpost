@@ -34,7 +34,7 @@ let d1 =
     draw_box ~fill:Color.purple b;
     draw
       ~color:Color.red
-      (transform [Transform.shifted (1. ++ 1.)] (bpath a));
+      (transform [Transform.shifted (1. ++ 1.)] (Box.bpath a));
     draw_label_arrow ~color:Color.orange ~pen 
       ~pos:Pupright (Picture.tex "foo") (Box.west a) (Box.south_east b);
     box_arrow ~color:Color.blue a b;
@@ -303,7 +303,7 @@ let d16 =
 
     
 
-let figs = [d16; d15; florence; d14; d13 ]
+let figs = [d15; florence; d14; d13 ]
 (* d11; d7; d6; d5; d4; cheno011; proval; d3;  
              d2sq; d2hsq; d2s; d2c; d1] *)
 

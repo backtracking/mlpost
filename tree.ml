@@ -62,7 +62,7 @@ let arc astyle estyle ?stroke ?pen (b1,(x1,y1)) (b2,(x2,y2)) =
 	     NoDir, corner, NoDir; 
 	     Vec (Point.sub p2 corner), p2, NoDir] in
 	  let parrow = 
-	    cut_after (bpath b2) (cut_before (bpath b1) p)
+	    cut_after (Box.bpath b2) (cut_before (Box.bpath b1) p)
 	  in
 	    linedraw parrow
       | Square -> 
@@ -70,7 +70,7 @@ let arc astyle estyle ?stroke ?pen (b1,(x1,y1)) (b2,(x2,y2)) =
 	  let p = pathp ~style:JLine 
 	    [Box.center b1; corner; Box.center b2] in
 	  let parrow = 
-	    cut_after (bpath b2) (cut_before (bpath b1) p) 
+	    cut_after (Box.bpath b2) (cut_before (Box.bpath b1) p) 
 	  in
 	    linedraw parrow
       | HalfSquare -> 
@@ -79,7 +79,7 @@ let arc astyle estyle ?stroke ?pen (b1,(x1,y1)) (b2,(x2,y2)) =
 	  let p = pathp ~style:JLine 
 	    [Box.center b1; corner1; corner2; Box.center b2] in
 	  let parrow = 
-	    cut_after (bpath b2) (cut_before (bpath b1) p) 
+	    cut_after (Box.bpath b2) (cut_before (Box.bpath b1) p) 
 	  in
 	    linedraw parrow
 

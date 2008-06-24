@@ -246,9 +246,6 @@ and Path : sig
   (** Apply a transformation to a path *)
   val transform : Transform.t -> t -> t
 
-  (** Get the bounding path of a box *)
-  val bpath : Box.t -> t
-
   (** [cut_after p1 p2] cuts [p2] after the intersection with [p1]. 
       To memorize the order of the arguments, 
       you can read: "cut after [p1]" *)
@@ -387,6 +384,9 @@ and Box : sig
   val rect : Point.t -> Picture.t -> t
     (** [rect p pic] creates a rectangular box of center [p] and of contents
 	[pic] *)
+
+  (** Get the bounding path of a box *)
+  val bpath : t -> Path.t
 
   (** {2 Special points on a box} *)
 
