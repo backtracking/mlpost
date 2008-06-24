@@ -70,10 +70,12 @@ and transform =
   | TRReflect of point * point
   | TRRotateAround of point * float
 
-and picture = 
-  (* compiled pictures do not have PIMake *)
+and picture_expr =
   | PITex of string
   | PITransform of transform list * picture
+  | PSimPic of picture
+and picture =
+  (* compiled pictures are always names *)
   | PIName of name
 
 and box =
@@ -107,7 +109,7 @@ and command =
   | CSeq of command list
   | CDeclPath of name * path
   | CDefPic of name * command
-  | CEqPic of name * picture
+  | CSimplePic of name * picture_expr
   | CClip of name * path
   | CDeclBox of declbox
 

@@ -303,9 +303,9 @@ let d16 =
 
     
 
-let figs = [d15; florence; d14; d13 ]
-(* d11; d7; d6; d5; d4; cheno011; proval; d3;  
-             d2sq; d2hsq; d2s; d2c; d1] *)
+let figs = [d15; florence; d14; d13;
+ d11; d7; d6; d5; d4; cheno011; proval; d3;  
+             d2sq; d2hsq; d2s; d2c; d1] 
 
 let figs =
   let r = ref 0 in
