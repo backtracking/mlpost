@@ -402,6 +402,39 @@ and Box : sig
 
 end
 
+and Mlbox : sig
+
+  (** Boxes *)
+
+  (** The abstract type of boxes *)
+  type t
+
+  (** {2 Creating boxes} *)
+
+  val circle : Point.t -> Picture.t -> t
+    (** [circle p pic] creates a circle box of center [p] and of contents
+	[pic] *)
+
+  val rect : Point.t -> Picture.t -> t
+    (** [rect p pic] creates a rectangular box of center [p] and of contents
+	[pic] *)
+
+  (** Get the bounding path of a box *)
+  val bpath : t -> Path.t
+
+  (** {2 Special points on a box} *)
+
+  val center : t -> Point.t
+  val north : t -> Point.t
+  val south : t -> Point.t
+  val west  : t -> Point.t
+  val east  : t -> Point.t 
+  val north_west : t -> Point.t
+  val south_west : t -> Point.t
+  val north_east : t -> Point.t
+  val south_east : t -> Point.t
+
+end
 and Transform : sig
 
   (** Transformations are an important way to modify objects in Mlpost.
@@ -537,6 +570,8 @@ and Command : sig
     (** Draw a box 
 	@param fill the color used to fill the box 
 	@param boxed if set, the box border is drawn (default is [true]) *)
+
+  val draw_mlbox : ?fill:Color.t -> Mlbox.t -> t
 
   val draw_pic : Picture.t -> t
     (** draws a picture *) 

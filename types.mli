@@ -111,6 +111,9 @@ and box =
   | BCircle of point * picture * box_circle_style option
   | BRect of point * picture
 
+and mlbox = 
+  | MLBBox of point * path * picture
+
 and dash =
   | DEvenly
   | DWithdots
@@ -133,6 +136,7 @@ and command =
   | CDotLabel of picture * position * point
   | CLoop of int * int * (int -> command)
   | CDrawBox of color option * boxed * box
+  | CDrawMlBox of color option * mlbox
   | CSeq of command list
 (*
   These have moved into the compiled AST

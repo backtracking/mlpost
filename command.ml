@@ -52,6 +52,8 @@ let iter from until f = CLoop (from, until, f)
 let draw_box ?fill ?(boxed=true) b = 
   CDrawBox (fill, (if boxed then Boxed else Unboxed), b)
 
+let draw_mlbox ?fill b = CDrawMlBox (fill, b)
+
 let draw_pic p = CDrawPic p
 
 let append c1 c2 = CSeq [c1; c2]

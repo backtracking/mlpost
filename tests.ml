@@ -40,6 +40,21 @@ let d1 =
     box_arrow ~color:Color.blue a b;
   ]
 
+let d1' = 
+  let a = Mlbox.circle (0. ++ 0.) (Picture.tex "$\\sqrt2$") in
+  let b = Mlbox.rect (2. ++ 0.) (Picture.tex "$\\pi$") in
+(*   let pen = Pen.default ~tr:[Transform.scaled 3.] () in *)
+  [ draw_mlbox a;
+    draw_mlbox ~fill:Color.purple b;
+    draw
+      ~color:Color.red
+      (transform [Transform.shifted (1. ++ 1.)] (Mlbox.bpath a));
+(*
+    draw_label_arrow ~color:Color.orange ~pen 
+      ~pos:Pupright (Picture.tex "foo") (Mlbox.west a) (Mlbox.south_east b);
+    box_arrow ~color:Color.blue a b;
+*)
+  ]
 open Tree
 
 let () = Random.self_init ()
@@ -303,9 +318,9 @@ let d16 =
 
     
 
-let figs = [d15; florence; d14; d13;
+let figs = [d1'; d1; d15; florence; d14; d13;
  d11; d7; d6; d5; d4; cheno011; proval; d3;  
-             d2sq; d2hsq; d2s; d2c; d1] 
+             d2sq; d2hsq; d2s; d2c; ] 
 
 let figs =
   let r = ref 0 in

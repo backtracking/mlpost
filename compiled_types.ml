@@ -113,7 +113,6 @@ and command =
   | CClip of name * path
   | CDeclBox of declbox
 
-
 and color = Types.color
 and position = Types.position
 and num = Types.num
