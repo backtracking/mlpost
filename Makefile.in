@@ -49,7 +49,9 @@ VERSION=0.1
 TESTS = handbookgraphs.cmx othergraphs.cmx tests.cmx
 TOOL = tool.$(OCAMLBEST)
 
-all: byte $(OCAMLBEST) $(TOOL) $(TESTS) check-examples
+all: byte $(OCAMLBEST) $(TOOL)
+
+check: byte $(OCAMLBEST) $(TOOL) $(TESTS) check-examples
 
 # bytecode and native-code compilation
 ######################################
