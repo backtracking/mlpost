@@ -1,5 +1,5 @@
 open Mlpost
-open SimplePoint
+open Point
 open Command
 open Dash
 module SP = Path

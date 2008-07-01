@@ -32,7 +32,7 @@
 
 # check for one particular file of the sources 
 # ADAPT THE FOLLOWING LINE TO YOUR SOURCES!
-AC_INIT(command.mli)
+AC_INIT(mlpost.mli)
 
 # Check for Ocaml compilers
 

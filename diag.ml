@@ -18,11 +18,16 @@ open Helpers
 
 module Node = struct
 
-  type t = { id : int; x : float; y : float; s : Picture.t; }
+  type t = { 
+    id : int; 
+    fill : Color.t option;
+    x : float; 
+    y : float; 
+    s : Picture.t; }
 
   let create = 
     let c = ref min_int in 
-    fun x y s -> incr c; { id = !c; x = x; y = y; s = s; }
+    fun fill x y s -> incr c; { id = !c; fill = fill; x = x; y = y; s = s; }
 
   let hash n = 
     n.id
@@ -38,8 +43,8 @@ open Node
 
 type node = Node.t
 
-let node x y s = Node.create x y (Picture.tex s)
-let pic_node = Node.create
+let node ?fill x y s = Node.create fill x y (Picture.tex s)
+let pic_node ?fill = Node.create fill
 
 type dir = Up | Down | Left | Right | Angle of float
 
@@ -47,6 +52,8 @@ type arrow = {
   src : node; 
   dst : node; 
   lab : string; 
+  head : bool;
+  dashed : Types.dash option;
   pos : Command.position option;
   outd : dir option;
   ind : dir option;
@@ -61,10 +68,11 @@ type t = {
 let create l = 
   { nodes = l; boxes = Hnode.create 17; arrows = [] }
 
-let arrow d ?(lab="") ?pos ?outd ?ind n1 n2 =
+let arrow d ?(lab="") ?pos ?(head=true) ?dashed ?outd ?ind n1 n2 =
   d.arrows <- 
-    { src = n1; dst = n2; lab = lab; pos = pos; outd = outd; ind = ind } 
-    :: d.arrows
+    { src = n1; dst = n2; lab = lab; head = head;  dashed = dashed;
+      pos = pos; outd = outd; ind = ind } 
+  :: d.arrows
 
 let outdir = function
   | Up -> Path.Vec Point.up
@@ -83,13 +91,13 @@ let indir = function
 let outdir = function None -> None | Some x -> Some (outdir x)
 let indir = function None -> None | Some x -> Some (indir x)
 
-type node_style = Circle | Rect
+type node_style = Circle of Box.circle_style | Rect
 
 let make_box ~style ~scale d n = 
   let p = Point.p (scale n.x, scale n.y) in
   let pic = n.s in
   let b = match style with 
-    | Circle -> Box.circle p pic 
+    | Circle s -> Box.circle ~style:s p pic 
     | Rect -> Box.rect p pic 
   in
   Hnode.add d.boxes n b;
@@ -97,23 +105,31 @@ let make_box ~style ~scale d n =
 
 let box_of d = Hnode.find d.boxes
 
-let draw_arrow ?stroke ?pen d a =
+let draw_arrow ?stroke ?pen ?dashed d a =
   let src = box_of d a.src in
   let dst = box_of d a.dst in
+  let ba, bla = 
+    if a.head then box_arrow, box_label_arrow
+    else box_line, box_label_line in
   if a.lab = "" then 
-    box_arrow 
-      ?color:stroke ?pen ?outd:(outdir a.outd) ?ind:(indir a.ind) src dst
+    ba ?color:stroke ?pen ?dashed:a.dashed 
+      ?outd:(outdir a.outd) ?ind:(indir a.ind) src dst
   else
-    box_label_arrow 
-      ?color:stroke ?pen ?outd:(outdir a.outd) ?ind:(indir a.ind) 
+    bla 
+      ?color:stroke ?pen ?dashed:a.dashed 
+      ?outd:(outdir a.outd) ?ind:(indir a.ind) 
       ?pos:a.pos (Picture.tex a.lab) src dst
 
 let fortybp x = Num.bp (40. *. x)
 
-let draw ?(scale=fortybp) ?(style=Circle) ?fill ?stroke ?pen d =
+let draw ?(scale=fortybp) ?(style=Circle (Box.Ratio 1.)) 
+    ?boxed ?fill ?stroke ?pen d =
   let l = 
     List.map 
-      (fun n -> Command.draw_box ?fill (make_box ~style ~scale d n)) d.nodes
+      (fun n -> 
+	let fill = if n.fill <> None then n.fill else fill in
+	Command.draw_box ?fill ?boxed (make_box ~style ~scale d n)) d.nodes
   in
-  l @ List.map (draw_arrow ?stroke ?pen d) d.arrows
+  Command.seq (l @ List.map (draw_arrow ?stroke ?pen d) d.arrows)
+
 

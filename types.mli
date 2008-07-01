@@ -16,12 +16,17 @@
 
 type num = float
 
-type color = float * float * float
+type color = 
+  | RGB of float * float * float
+  | CMYK of float * float * float * float
+  | Gray of float
 
 type name = string
 
 type corner = N | S | W | E | NE | NW | SW | SE
 type piccorner = UL | UR | LL | LR
+
+type boxed = Boxed | Unboxed
 
 type position =
   | Pcenter
@@ -42,13 +47,15 @@ type box_circle_style =
 
 type point = 
   | PTPair of num * num
-  | PTBoxCorner of name * corner
+  | PTBoxCorner of box * corner
   | PTPicCorner of picture * piccorner
   | PTPointOf of float * path
   | PTAdd of point * point
   | PTSub of point * point
   | PTMult of float * point
   | PTRotated of float * point
+  | PTTransformed of point * transform list
+  | PTLength of point
 
 and direction = 
   | Vec of point
@@ -98,10 +105,14 @@ and picture =
   | PIMake of command
   | PITransform of transform list * picture
   | PIName of name
+  | PIClip of picture * path
 
 and box =
-  | BCircle of name * point * picture * box_circle_style option
-  | BRect of name * point * picture
+  | BCircle of point * picture * box_circle_style option
+  | BRect of point * picture
+
+and mlbox = 
+  | MLBBox of point * path * picture
 
 and dash =
   | DEvenly
@@ -123,9 +134,12 @@ and command =
   | CFill of path * color option
   | CLabel of picture * position * point
   | CDotLabel of picture * position * point
-  | CLoop of int * int * (int -> command list)
-  | CDrawBox of color option * box
+  | CLoop of int * int * (int -> command)
+  | CDrawBox of color option * boxed * box
+  | CDrawMlBox of color option * mlbox
   | CSeq of command list
+(*
+  These have moved into the compiled AST
   | CDeclPath of name * path
   | CDefPic of name * command
-
+    *)

@@ -6,4 +6,4 @@ let fig =
   let b = node 1. 0. "B" in
   let diag = create [a;b] in
   arrow diag a b;
-  draw diag
+  [draw diag]

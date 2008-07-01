@@ -23,11 +23,12 @@ open Command
 let dotlabels ?(pos=Pcenter) ls lp =
   List.map2 (fun s p -> dotlabel ~pos:pos (Picture.tex s) p) ls lp
 
-let draw_simple_arrow ?color ?pen ?(style=defaultjoint) a b =
-  draw_arrow ?color ?pen (jointpathp [a;b] [style])
+let draw_simple_arrow ?color ?pen ?(style=defaultjoint) ?(outd=NoDir) ?(ind=NoDir) a b =
+  let p = jointpathk [NoDir, a, outd; ind, b, NoDir] [style] in
+  draw_arrow ?color ?pen p
 
-let draw_label_arrow ?color ?pen ?(style=defaultjoint) ?pos lab a b =
-  let p = jointpathp [a;b] [style] in
+let draw_label_arrow ?color ?pen ?(style=defaultjoint) ?(outd=NoDir) ?(ind=NoDir) ?pos lab a b =
+  let p = jointpathk [NoDir, a, outd; ind, b, NoDir] [style] in
   draw_arrow ?color ?pen p ++
   label ?pos lab (Path.point 0.5 p)
 
@@ -36,21 +37,26 @@ let box_path ~style ~outd ~ind a b =
     jointpathk 
       [NoDir, Box.center a, outd; ind, Box.center b, NoDir] [style]
   in
-  cut_after (bpath b) (cut_before (bpath a) p)
+  cut_after (Box.bpath b) (cut_before (Box.bpath a) p)
 
-let box_arrow ?color ?pen ?(style=defaultjoint) ?(outd=NoDir) ?(ind=NoDir) a b =   
-  draw_arrow ?color ?pen (box_path ?style ?outd ?ind a b)
+let box_arrow ?color ?pen ?dashed ?(style=defaultjoint) ?(outd=NoDir) ?(ind=NoDir) a b =   
+  draw_arrow ?color ?pen ?dashed (box_path ?style ?outd ?ind a b)
 
-let box_line ?color ?pen ?(style=defaultjoint) ?(outd=NoDir) ?(ind=NoDir) a b =   
-  draw ?color ?pen (box_path ?style ?outd ?ind a b)
+let box_line ?color ?pen ?dashed ?(style=defaultjoint) ?(outd=NoDir) ?(ind=NoDir) a b =   
+  draw ?color ?pen ?dashed (box_path ?style ?outd ?ind a b)
 
-let box_simple_arrow ?color ?pen a b =
-  box_arrow ?color ?pen ~style:JLine a b
-
-let box_label_arrow 
-    ?color ?pen ?(style=defaultjoint) ?(outd=NoDir) ?(ind=NoDir) ?pos lab a b =
+let box_label_line
+    ?color ?pen ?dashed ?(style=defaultjoint) ?(outd=NoDir) ?(ind=NoDir) ?pos lab a b =
   let p = jointpathk 
 	[NoDir, Box.center a, outd; ind, Box.center b, NoDir] [style] in
-  let p = cut_after (bpath b) (cut_before (bpath a) p) in
-  draw_arrow ?color ?pen p ++
+  let p = cut_after (Box.bpath b) (cut_before (Box.bpath a) p) in
+  draw ?color ?pen ?dashed p ++
+  label ?pos lab (Path.point 0.5 p)
+
+let box_label_arrow 
+    ?color ?pen ?dashed ?(style=defaultjoint) ?(outd=NoDir) ?(ind=NoDir) ?pos lab a b =
+  let p = jointpathk 
+	[NoDir, Box.center a, outd; ind, Box.center b, NoDir] [style] in
+  let p = cut_after (Box.bpath b) (cut_before (Box.bpath a) p) in
+  draw_arrow ?color ?pen ?dashed p ++
   label ?pos lab (Path.point 0.5 p)

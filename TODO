@@ -1,22 +1,56 @@
-* Box : north_west etc. sur un circle (faire un calcul)
 * couleur d'une boîte
 * un moyen pour joindre des boîtes à la boxjoin
 * la syntaxe des transformations est encore un peu lourde ...
 * clipping
+* on ne peut pas spécifier des boites d'une taille "minimum" ce
+  qui pourrait être utile en particulier dans Diag. Si on utilise
+  le Padding pour ça, il s'ajoute aussi lorsque le noeud contient 
+  un long label et c'est pas satisfaisant.
+  Moyen alternatif : trouver le moyen de faire un label uniquement
+  composé de blancs latex, mais d'une certaine taille ; j'ai essayé
+  tout ce que je connais (les ~, les \ , les \makebox, les \hspace)
+  et rien ne passe, metapost considere tjs que leur largeur est nulle.
 
 * rendre mlpost "latex-ready":
-  * inclure du mlpost dans un fichier latex
-  * prendre en compte le prelude du fichier latex
-  * possibilite de donner un autre prélude
   * et si on veut partager des definitions parmi plusieurs figures du meme
     fichier latex ?
-  * peut-etre aussi un mode "metapost", qui crée des fichiers figure.i, qu'il
-    faut inclure à la main dans son document
 
-* pour l'instant on ne peut pas se servir des éléments créés avec Diag ou Tree,
-  pour faire d'autres parties du dessin (flèche d'une boîte du diagram vers un
-  autre objet du dessin, ...)
+* des boîtes sans placement explicite
+* Tree pourrait s'en servir pour pour construire des boîtes avant de les
+  placer explicitement
+* On pourrait donc avoir une fonction get_picture : node -> picture
+  qui rend la picture du node (avec ou sans la boîte autour ?)
+* ce qui permettrait de résoudre le problème suivant :
+  * pour l'instant on ne peut pas se servir des éléments créés avec Diag ou
+    Tree, pour faire d'autres parties du dessin (flèche d'une boîte du diagram
+    vers un autre objet du dessin, ...)
 
+* intersection entre deux segments, chemins, ...
+* Avec un AST indépendant pour la compilation, est-ce qu'on peut rendre celui
+  plus proche de Metapost, et rendre l'AST Mlpost plus commode pour nous ?
+
+* compilation
+  - optimisation des inefficacités les plus évidentes 
+      (draw_pic (make_pic cmd)) -> cmd ...
+  - utiliser des pictures globales en dehors de toute figure pour le partage
+    entre figures
+
+* accelerer la compilation des images dans examples/
+* se décider où on met nos exemples
+
+
+Module des Plots
+==================
+
+* paramètres :
+  * toutes les dimensions : debut + fin pour les axes, step, scale
+  * labels des axes + orientation
+  * plotter des fonctions:
+      stepwise
+      lineaires par morceaux
+      continues
+      debut / fin
+    
 
 -------------------------------------------------------------------------------
 des liens avec des exemples :
@@ -27,3 +61,5 @@ http://melusine.eu.org/syracuse/metapost/mpman/
 http://www.cs.ucc.ie/~dongen/mpost/mpost.html
 http://www.ursoswald.ch/metapost/tutorial.pdf
 http://remote.science.uva.nl/~heck/Courses/mptut.pdf
+(* ceci est metafun (metapost plus des macros) *)
+http://www.pragma-ade.com/general/manuals/metafun-p.pdf

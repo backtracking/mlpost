@@ -14,7 +14,7 @@
 (*                                                                        *)
 (**************************************************************************)
 
-module S = SimplePoint
+module S = Point
 include PrimPath
 
 let knotp ?(l=NoDir) ?(r=NoDir) p = (l, p, r)

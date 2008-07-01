@@ -41,8 +41,8 @@ draw p;
 for t=0 upto 3:
   draw point t of p--postcontrol t of p
   --precontrol t+1 of p--point t+1 of p
-  withcolor 0.5white
-  %dashed (evenly scaled .5)
+  %withcolor 0.5white
+  dashed (evenly scaled .5)
     ;
 endfor
 dotlabels.top(0,2,4);
@@ -209,3 +209,18 @@ label.lft(btex $U$ etex, (-
 1cm,.5cm)) ;
 draw bbox currentpicture ;
 endfig ;
+
+beginfig(40);
+path p[];
+p1 = (0,0){curl 0}..(5,-3)..{curl 0}(10,0);
+p2 = p1..(p1 yscaled-1 shifted(10,0));
+p0 = p2;
+for i=1 upto 3:  p0:=p0.. p2 shifted (i*20pt,0);
+  endfor
+for j=0 upto 8:  draw p0 shifted (0,j*10pt);
+  endfor
+p3 = fullcircle shifted (.5,.5) scaled 72pt;
+clip currentpicture to p3;
+draw p3;
+endfig;
+

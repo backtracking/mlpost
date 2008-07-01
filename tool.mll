@@ -1,3 +1,18 @@
+(**************************************************************************)
+(*                                                                        *)
+(*  Copyright (C) Johannes Kanig, Stephane Lescuyer                       *)
+(*  and Jean-Christophe Filliatre                                         *)
+(*                                                                        *)
+(*  This software is free software; you can redistribute it and/or        *)
+(*  modify it under the terms of the GNU Library General Public           *)
+(*  License version 2, with the special exception on linking              *)
+(*  described in file LICENSE.                                            *)
+(*                                                                        *)
+(*  This software is distributed in the hope that it will be useful,      *)
+(*  but WITHOUT ANY WARRANTY; without even the implied warranty of        *)
+(*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                  *)
+(*                                                                        *)
+(**************************************************************************)
 
 { 
   open Format
@@ -18,17 +33,53 @@
     end;
     Queue.add f files
 
-  let spec =
-    [ ]
+  let pdf = ref false
+  let latex_file = ref None
+  let set_latex_file f =
+    if not (Sys.file_exists f) then begin
+      eprintf "mlpost: %s: no such file@." f;
+      exit 1
+    end;
+    latex_file := Some f
+  let xpdf = ref false
+  let use_ocamlbuild = ref false
+  let ccopt = ref ""
+  let execopt = ref ""
+
+  let add_ccopt x = ccopt := !ccopt ^ " " ^ x
+  let add_execopt x = execopt := !execopt ^ " " ^ x
+
+  let spec = Arg.align
+    [ "-pdf", Set pdf, " Generate .mps files";
+      "-latex", String set_latex_file, 
+      "<main.tex> Scan the LaTeX prelude";
+      "-xpdf", Set xpdf, " wysiwyg mode using xpdf";
+      "-ocamlbuild", Set use_ocamlbuild, " Use ocamlbuild to compile";
+      "-ccopt", String add_ccopt, "\"<options>\" Pass <options> to the compiler";
+      "-execopt", String add_execopt,
+      "\"<options>\" Pass <options> to ocaml (same as -ccopt) or, \
+if using -ocamlbuild, to the compiled program";
+    ]
 
   let () = 
-    Arg.parse spec add_file "usage: mlpost [options] files..."
+    Arg.parse spec add_file "Usage: mlpost [options] files..."
+
+  let buffer = Buffer.create 1024
 }
 
 (* scan the main LaTeX file to extract its prelude *)
 
 rule scan = parse
-  | eof { () }
+  | "\\%" as s
+      { Buffer.add_string buffer s; scan lexbuf }
+  | "%" [^'\n']* '\n'
+      { Buffer.add_char buffer '\n'; scan lexbuf }
+  | _ as c
+      { Buffer.add_char buffer c; scan lexbuf }
+  | "\\begin{document}"
+      { Buffer.contents buffer }
+  | eof 
+      { Buffer.contents buffer }
 
 {
   let command s =
@@ -41,7 +92,22 @@ rule scan = parse
   let ocaml args =
     let cmd = "ocaml " ^ String.concat " " (Array.to_list args) in
     let out = Sys.command cmd in
-    if out <> 0 then Unix.execvp "ocaml" args
+    if out <> 0 then exit 1
+
+  let ocamlbuild args =
+    command ("ocamlbuild " ^ String.concat " " args)
+
+  (** Return an unused file name which in the same directory as the prefix. *)
+  let temp_file_name prefix suffix =
+    if not (Sys.file_exists (prefix ^ suffix)) then
+      prefix ^ suffix
+    else begin
+      let i = ref 0 in
+      while Sys.file_exists (prefix ^ string_of_int !i ^ suffix) do
+        incr i
+      done;
+      prefix ^ string_of_int !i ^ suffix
+    end
 
   let compile f =
     let bn = Filename.chop_extension f in
@@ -53,12 +119,48 @@ rule scan = parse
       try while true do output_char cout (input_char cin) done
       with End_of_file -> ()
     end;
-    let fmp = bn ^ ".mp" in
-    Printf.fprintf cout "let () = Command.dump \"%s\"\n" fmp;
+    let pdf = if !pdf || !xpdf then "~pdf:true" else "" in
+    let prelude = match !latex_file with
+      | None -> ""
+      | Some f -> 
+	  let c = open_in f in
+	  let s = scan (from_channel c) in
+	  close_in c;
+	  sprintf "~prelude:%S" s
+    in
+    Printf.fprintf cout 
+      "let () = Mlpost.Metapost.dump %s %s \"%s\"\n" prelude pdf bn;
+    if !xpdf then 
+      Printf.fprintf cout 
+	"let () = Mlpost.Metapost.dump_tex %s \"_mlpost\"\n" prelude;
     close_out cout;
-    ocaml [|"mlpost.cma"; mlf|];
-    command (sprintf "mpost %s end" fmp);
-    Sys.remove mlf
+
+    if !use_ocamlbuild then begin
+      (* Ocamlbuild cannot compile a file which is in /tmp *)
+      let mlf2 = temp_file_name bn ".ml" in
+      command ("cp " ^ mlf ^ " " ^ mlf2);
+      ocamlbuild
+        ["-lib mlpost"; Filename.chop_extension mlf2 ^ ".byte"; !ccopt; "--";
+         !execopt];
+      Sys.remove mlf2
+    end else
+      ocaml [|"mlpost.cma"; mlf; !ccopt; !execopt|];
+
+    Sys.remove mlf;
+    if !xpdf then begin
+      ignore (Sys.command "pdflatex _mlpost.tex");
+      ignore (Sys.command "xpdf -remote mlpost -reload")
+(***	
+      match Unix.fork () with
+	| 0 -> 
+	    begin match Unix.fork () with
+	      | 0 -> eprintf "ICI@."; Unix.execvp "xpdf" [|"xpdf";"-remote"; "mlpost"; "_mlpost.pdf"|]
+	      | _ -> exit 0
+	    end
+	| id -> 
+	    ignore (Unix.waitpid [] id); exit 0
+***)
+    end
 
   let () = Queue.iter compile files
 }
