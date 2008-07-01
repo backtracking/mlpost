@@ -17,13 +17,13 @@ Mlpost manual</title>
 <#en>To make PostScript figures with Mlpost, follow these steps:</#en>
 <#fr>Pour construire des figures PostScript avec Mlpost, il faut
 procéder ainsi :</#fr>
-<#de>Um Postcript Figuren zu zeichnen, folgen Sie diese Schritten:</#de>
+<#de>Um mit Mlpost Postcript-Abbildungen zu zeichnen, folgen Sie diese Schritten:</#de>
 
 <ol>
 <li>
 <#en>Define your figures in an Ocaml file <tt>fig.ml</tt></#en>
 <#fr>Définir ses figures dans un fichier Ocaml <tt>fig.ml</tt></#fr>
-<#de>Definieren Sie Ihre Figuren in einem Ocaml Programm <tt>fig.ml</tt></#de>
+<#de>Definieren Sie Ihre Zeichnungen in einem Ocaml Programm <tt>fig.ml</tt></#de>
 
 <pre>
 	 let fig_a = ...
@@ -32,13 +32,13 @@ procéder ainsi :</#fr>
 
 <#en>Each figure has type </#en>   
 <#fr>Chaque figure a le type</#fr>
-<#de>Jede Figur hat den Typ</de>
+<#de>Jede Abbildung hat den Typ</de>
 <a href="doc/Mlpost.Command.html#TYPEfigure"><tt>Command.figure</tt></a>.
 
 <li> 
 <#en>Add some code to emit Metapost code, as follows</#en>
 <#fr>Ajouter du code pour la production du Metapost</#fr>
-<#de>Fügen Sie Code hinzu, um das Metapost Programm herzustellen</#de>
+<#de>Fügen Sie den folgenden Code hinzu, der das Metapost Programm erzeugt</#de>
 <pre>  
 	let () = Metapost.emit "file_a" fig_a
 	let () = Metapost.emit "file_b" fig_b
@@ -47,7 +47,7 @@ procéder ainsi :</#fr>
 <li> 
 <#en>Then run the <tt>mlpost</tt> program on this file</#en>
 <#fr>Lancer le programme <tt>mlpost</tt> sur ce fichier</#fr>
-<#de>Führen Sie das <tt>mlpost</tt> Programm auf dieser Datei</#de>
+<#de>Führen Sie das <tt>mlpost</tt> Programm auf dieser Datei aus, mit dem Kommando </#de>
 
 <pre>
        mlpost fig.ml
@@ -56,7 +56,7 @@ procéder ainsi :</#fr>
 <#en>It will create PostScript figures in files file_a.1, file_b.1, etc.</#en>
 <#fr>Les figures PostScript sont alors créées dans les fichiers
 file_a.1, file_b.1, etc.</#fr>
-<#de>Das wird die PostScript Figuren in die Dateien file_a.1 file_b.1, ... schaffen.</#de>
+<#de>Die PostScript-Abbildungen werden in den Dateien file_a.1 file_b.1, usw abgespeichert.</#de>
 </ol>
 
 
@@ -76,8 +76,8 @@ file_a.1, file_b.1, etc.</#fr>
 	PostScript produced by Metapost)</#en>
 	<#fr>produit des fichiers .mps au lieu de .1, pour inclure
 	dans du LaTeX compilé avec <tt>pdflatex</tt></#fr>
-	<#de>produziert .mps Dateien anstatt .1, für Eingliederung in 
-	LaTeX Dateien, die mit pdflatex kompiliert wurden.</#de>
+	<#de>produziert .mps Dateien anstatt .1, zum Einfügen in 
+	LaTeX Dateien, die mit pdflatex kompiliert werden.</#de>
 
 <p>
 
@@ -91,10 +91,10 @@ file_a.1, file_b.1, etc.</#fr>
 	<#fr>spécifie le fichier LaTeX principal, dont le prélude est
 	extrait et passé à Metapost (on peut ainsi utiliser les
 	macros, polices et paquets du document LaTeX en question).</#fr>
-	<#de>spezifiziert die hauptsächliche Datei, deren Latex-Präambel 
-	gezogen wird und zu Metapost gegeben wird. In dieser Weise 
-	wird es möglich, Macros, Schriftbilder und Pakete Ihres Latex-Präambels
-	in Ihren Figuren zu benutzen.</#de>
+        <#de>spezifiziert die LaTeX-Hauptdatei, deren LaTeX-Präambel an Metapost
+        weitergegeben wird. Auf diese Weise können die gleichen Makros, Fonts
+        und LaTeX-Pakete wie im LaTeX-Dokument in den Abbildungen verwendet
+        werden.  </#de>
 </dl>
 
 <hr>
