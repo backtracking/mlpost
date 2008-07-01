@@ -129,10 +129,10 @@ rule scan = parse
 	  sprintf "~prelude:%S" s
     in
     Printf.fprintf cout 
-      "let () = Mlpost.Metapost.dump %s %s \"%s\"\n" prelude pdf bn;
+      "\nlet () = Mlpost.Metapost.dump %s %s \"%s\"\n" prelude pdf bn;
     if !xpdf then 
       Printf.fprintf cout 
-	"let () = Mlpost.Metapost.dump_tex %s \"_mlpost\"\n" prelude;
+	"\nlet () = Mlpost.Metapost.dump_tex %s \"_mlpost\"\n" prelude;
     close_out cout;
 
     if !use_ocamlbuild then begin

@@ -549,6 +549,8 @@ and Command : sig
   type figure = t list
       (** A figure is a list of commands *)
 
+  val logo : figure
+    (** The Mlpost logo. *)
 
   (** {2 Drawing Commands} *)
 

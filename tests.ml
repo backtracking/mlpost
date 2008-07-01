@@ -316,9 +316,11 @@ let d16 =
   let p3 = Point.p (50.,0.) in
     [ Command.draw (pathp ~style:JLine [p3;p2;p1])]
 
+let d17 = Command.logo
+
     
 
-let figs = [d1'; d1; d15; florence; d14; d13;
+let figs = [d17; d1'; d1; d15; florence; d14; d13;
  d11; d7; d6; d5; d4; cheno011; proval; d3;  
              d2sq; d2hsq; d2s; d2c; ] 
 

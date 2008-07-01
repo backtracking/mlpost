@@ -66,3 +66,6 @@ let iterl f l = seq (List.map f l)
 
 let nop = CSeq []
 
+let logo =
+  [ draw_box ~fill: Color.yellow
+      (Box.circle (PTPair (0., 0.)) (PITex "Mlpost")) ]
