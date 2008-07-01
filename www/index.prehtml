@@ -32,6 +32,11 @@ Mlpost is an <#ocaml> interface to <#metapost>.
 
 <h3>Documentation</h3>
 
+<#fr>Il existe un <a href="manual.fr.html">petit manuel</a>.</#fr>
+<#en>There is a <a href="manual.en.html">small manual</a>.</#en>
+
+<p>
+
 <#fr>Parcourir l'<a href="doc/">API</a>.Note : Tous les modules sont
 regroupés à l'intérieur d'un unique module Mlpost.</#fr>
 <#en>Browse the <a href="doc/">API</a>. Note that all modules are
@@ -60,8 +65,9 @@ Here are the <a href="download/CHANGES">CHANGES</a>.
 </ul>
 
 <hr>
-<#fr><a href="index.en.html">english</a></#fr>
-<#en><a href="index.fr.html">français</a></#en>
+<a href="index.fr.html">Français</a> /
+<a href="index.en.html">English</a> / 
+<a href="index.de.html">Deutsch</a>
 
 </body>
 </html>

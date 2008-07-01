@@ -1,0 +1,94 @@
+<html>
+
+<head>
+<#iso>
+<title>
+Mlpost manual</title>
+<meta name="Keywords" content="metapost ocaml">
+</head>
+
+<body>
+
+<h1>Mlpost manual</h1>
+
+
+<h2>Usage</h2>
+
+<#en>To make PostScript figures with Mlpost, follow these steps:</#en>
+<#fr>Pour construire des figures PostScript avec Mlpost, il faut
+procéder ainsi :</#fr>
+
+<ol>
+<li>
+<#en>Define your figures in an Ocaml file <tt>fig.ml</tt></#en>
+<#fr>Définir ses figures dans un fichier Ocaml <tt>fig.ml</tt></#fr>
+
+<pre>
+	 let fig_a = ...
+	 let fig_b = ...
+</pre>
+
+<#en>Each figure has type </#en>   
+<#fr>Chaque figure a le type</#fr>
+<a href="doc/Mlpost.Command.html#TYPEfigure"><tt>Command.figure</tt></a>.
+
+<li> 
+<#en>Add some code to emit Metapost code, as follows</#en>
+<#fr>Ajouter du code pour la production du Metapost</#fr>
+<pre>  
+	let () = Metapost.emit "file_a" fig_a
+	let () = Metapost.emit "file_b" fig_b
+</pre>
+
+<li> 
+<#en>Then run the <tt>mlpost</tt> program on this file</#en>
+<#fr>Lancer le programme <tt>mlpost</tt> sur ce fichier</#fr>
+
+<pre>
+       mlpost fig.ml
+</pre>
+
+<#en>It will create PostScript figures in files file_a.1, file_b.1, etc.</#en>
+<#fr>Les figures PostScript sont alors créées dans les fichiers
+file_a.1, file_b.1, etc.</#fr>
+</ol>
+
+
+<h2>Options</h2>
+
+<#en><tt>mlpost</tt> supports the following options:</#en>
+<#fr><tt>mlpost</tt> accepte les options suivantes :</#fr>
+<#de><tt>mlpost</tt> akzeptiert die folgenden Optionen:</#de>
+
+<dl>
+<dt>
+-pdf
+<dd>
+	<#en>creates .mps files instead of .1, for inclusion in LaTeX files 
+	compiled with pdflatex (the PostScript file is actually the
+	same, but the suffix is used by <tt>pdflatex</tt> to identify
+	PostScript produced by Metapost)</#en>
+	<#fr>produit des fichiers .mps au lieu de .1, pour inclure
+	dans du LaTeX compilé avec <tt>pdflatex</tt></#fr>
+
+<p>
+
+<dt>
+-latex main.tex     
+<dd>
+        <#en>indicates the main LaTeX file, from which the prelude is
+        extracted to be passed to Metapost (this way you can use
+        macros, fonts and packages from your LaTeX document in your
+        figures). </#en>
+	<#fr>spécifie le fichier LaTeX principal, dont le prélude est
+	extrait et passé à Metapost (on peut ainsi utiliser les
+	macros, polices et paquets du document LaTeX en question).</#fr>
+</dl>
+
+<hr>
+<a href="manual.fr.html">Français</a> /
+<a href="manual.en.html">English</a> / 
+<a href="manual.de.html">Deutsch</a>
+	
+</body>
+</html>

@@ -1,7 +1,8 @@
 
 WWW = /users/www-perso/projets/mlpost/
 
-ALL =  	index.fr.html  index.en.html 
+ALL =  	index.fr.html  index.en.html index.de.html \
+         manual.fr.html manual.en.html manual.de.html
 
 install: all
 	cp -f --parents $(ALL) $(WWW)
@@ -19,4 +20,7 @@ YAMLPP=yamlpp macros.prehtml version.prehtml
 
 %.en.html: %.prehtml
 	$(YAMLPP) -l en $< -o $@
+
+%.de.html: %.prehtml
+	$(YAMLPP) -l de $< -o $@
 
