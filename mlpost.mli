@@ -351,11 +351,8 @@ and Color : sig
   val black : t
   val green : t
   val cyan : t
-  val blue : t
   val yellow : t
   val magenta : t
-  val orange : t
-  val purple : t
 
 end
 
