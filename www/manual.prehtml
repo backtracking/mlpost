@@ -32,7 +32,7 @@ procéder ainsi :</#fr>
 
 <#en>Each figure has type </#en>   
 <#fr>Chaque figure a le type</#fr>
-<#de>Jede Abbildung hat den Typ</de>
+<#de>Jede Abbildung hat den Typ</#de>
 <a href="doc/Mlpost.Command.html#TYPEfigure"><tt>Command.figure</tt></a>.
 
 <li> 
