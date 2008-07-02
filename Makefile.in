@@ -277,6 +277,7 @@ clean::
 	rm -f $(NAME).cma $(NAME).cmxa $(NAME).a
 	rm -f *.aux *.log $(NAME).tex $(NAME).dvi $(NAME).ps
 	make -C test clean
+	make -C www clean
 	rm -f *.opt test.dvi test.ps
 
 dist-clean distclean:: clean

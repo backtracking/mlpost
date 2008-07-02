@@ -24,3 +24,5 @@ YAMLPP=yamlpp macros.prehtml version.prehtml
 %.de.html: %.prehtml
 	$(YAMLPP) -l de $< -o $@
 
+clean:
+	rm -f $(ALL)
