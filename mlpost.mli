@@ -783,7 +783,7 @@ module Diag : sig
     ?boxed:bool -> ?fill:Color.t -> ?stroke:Color.t -> ?pen:Pen.t ->
     t -> Command.t
     (** Draws the diagram.
-	@param scale The default distance between nodes
+        @param scale The distance between nodes; default is 40 bp
 	@param style The style of nodes: circular or rectangular 
 	(default is circular)
 	@param boxed The border is drawn if set (default is true)
