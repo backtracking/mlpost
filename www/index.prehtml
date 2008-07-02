@@ -17,6 +17,9 @@ Mlpost est une interface <#ocaml> pour <#metapost>.
 <#en>
 Mlpost is an <#ocaml> interface to <#metapost>.
 </#en>
+<#de>
+Mlpost ist ein <#ocaml> Interface für <#metapost>.
+</#de>
 
 <p>
 
@@ -25,15 +28,17 @@ Mlpost is an <#ocaml> interface to <#metapost>.
 </center>
 
 
-<h3><#fr>Exemples</#fr><#en>Examples</#en></h3>
+<h3><#fr>Exemples</#fr><#en>Examples</#en><#de>Beispiele</#de></h3>
 
 <#fr>Ne manquez pas notre <a href="examples/">galerie d'exemples</a>.</#fr>
 <#en>Have a look at our <a href="examples/">examples</a>.</#en>
+<#de><a href="examples/">Beispiele</a> von Mlpost-Programmen.</#de>
 
 <h3>Documentation</h3>
 
 <#fr>Il existe un <a href="manual.fr.html">petit manuel</a>.</#fr>
 <#en>There is a <a href="manual.en.html">small manual</a>.</#en>
+<#de>Es gibt ein <a href="manual.en.html">kleines Handbuch</a>.</#de>
 
 <p>
 
@@ -41,6 +46,8 @@ Mlpost is an <#ocaml> interface to <#metapost>.
 regroupés à l'intérieur d'un unique module Mlpost.</#fr>
 <#en>Browse the <a href="doc/">API</a>. Note that all modules are
 packaged into a single module Mlpost.</#en>
+<#de>Werfen Sie einen Blick auf die <a href="doc/">API</a>. Alle Module
+befinden sich in einem Hauptmodul Mlpost.  </#de>
 
 <h3>Download</h3>
 
@@ -53,11 +60,17 @@ Current version is <#version> and can be downloaded from <a
 href="download/">here</a>.
 Here are the <a href="download/CHANGES">CHANGES</a>.
 </#en> 
+<#de>
+Die aktuelle Version ist <#version> and kann im <a
+href="download/">Download-Bereich</a> heruntergeladen werden.
+Es gibt auch ein <a href="download/CHANGES">Changelog</a>.
+</#de> 
 
-<h3><#fr>Auteurs</#fr><#en>Authors</#en></h3>
+<h3><#fr>Auteurs</#fr><#en>Authors</#en><#de>Autoren</#de></h3>
 
 <#fr>Mlpost est développé par</#fr>
 <#en>Mlpost is developed by</#en>
+<#de>Mlpost wird entwickelt von</#de>
 <ul>
 <li><a href="http://www.lri.fr/~kanig/">Johannes Kanig</a>
 <li><a href="http://www.lri.fr/~lescuyer/">Stéphane Lescuyer</a>
