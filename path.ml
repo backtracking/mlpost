@@ -20,6 +20,7 @@ include PrimPath
 let knotp ?(l=NoDir) ?(r=NoDir) p = (l, p, r)
 
 let knot ?(l) ?(r) ?(scale) p = knotp ?l (S.p ?scale p) ?r
+let knotn ?(l) ?(r) p = knotp ?l (S.pt p) ?r
 
 let cycle_tmp ?(dir=NoDir) ?(style=defaultjoint) p = PrimPath.cycle dir style p
 let cycle = cycle_tmp
@@ -41,18 +42,17 @@ let pathp ?(style) ?(cycle) l =
     (List.map (knotp) l)
 
 let pathn ?(style) ?(cycle) l =
-  pathp ?style ?cycle
-    (List.map (Point.p) l)
+  pathp ?style ?cycle (List.map (Point.p) l)
 
 let path ?(style) ?(cycle) ?(scale) l =
-  let sc = S.ptlist ?scale in
-    pathp ?style ?cycle (sc l)
+  let sc = S.ptlist ?scale in pathp ?style ?cycle (sc l)
 
 (* construct a path with knot list and joint list *)
 let jointpathk lp lj =
   List.fold_left2 PrimPath.concat (start (List.hd lp)) lj (List.tl lp)
 
 let jointpathp lp lj  = jointpathk (List.map (knotp) lp) lj
+let jointpathn lp lj  = jointpathk (List.map knotn lp) lj
 let jointpath ?(scale) lp lj  = jointpathk (List.map (knot ?scale) lp) lj
 
 let append ?(style=JCurve) p1 p2 = append p1 style p2

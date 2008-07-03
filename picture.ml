@@ -32,7 +32,7 @@ let transform tr = function
   | _ as x -> PITransform (tr, x)
 
 let center pic p = 
-  let bp = Point.segment 0.5 (llcorner pic) (urcorner pic) in
+  let bp = Point.segment (F 0.5) (llcorner pic) (urcorner pic) in
     transform [Transform.shifted (Point.sub p bp)] pic
 
 let place_up_left pic p =

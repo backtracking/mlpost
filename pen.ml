@@ -25,7 +25,7 @@ let transform tr p =
     | _, PenTransformed (t,tr') -> PenTransformed (t,tr'@tr)
     | _, _ -> PenTransformed (p,tr)
 
-let default ?(tr=id) () = PenTransformed (PenCircle, (scaled 0.5)::tr)
+let default ?(tr=id) () = PenTransformed (PenCircle, (scaled (F 0.5))::tr)
 let circle ?(tr=id) () = transform tr PenCircle
 let square ?(tr=id) () = transform tr PenSquare
 let from_path p = PenFromPath p

@@ -183,6 +183,10 @@ and Path : sig
     ?l:direction -> ?r:direction -> 
     ?scale:(float -> Num.t) -> float * float -> knot
 
+  (** Build a knot from a Num.t pair; the optional arguments are as in {!knot} *)
+  val knotn :
+    ?l:direction -> ?r:direction -> -> Num.t * Num.t -> knot
+
   (** Build a knot from a point; the optional arguments are as in {!knot} *)
   val knotp :
     ?l:direction -> ?r:direction -> Point.t -> knot
@@ -195,13 +199,16 @@ and Path : sig
     ?style:joint -> ?cycle:joint -> ?scale:(float -> Num.t) -> 
     (float * float) list -> t
 
+  (** Same as [path], but uses a [Num.t] list *)
+  val pathn : 
+    ?style:joint -> ?cycle:joint -> ?scale:(float -> Num.t) -> 
+    (Num.t * Num.t) list -> t
   (** Same as [path], but uses a knot list *)
   val pathk :
     ?style:joint -> ?cycle:joint -> knot list -> t
 
   (** Same as [path] but uses a point list *)
-  val pathp :
-    ?style:joint -> ?cycle:joint -> Point.t list -> t
+  val pathp : ?style:joint -> ?cycle:joint -> Point.t list -> t
 
   (** Build a path from [n] knots and [n-1] joints *)
   val jointpathk : knot list -> joint list -> t
@@ -209,6 +216,7 @@ and Path : sig
   (** Build a path from [n] points and [n-1] joints, 
       with default directions *)
   val jointpathp : Point.t list -> joint list -> t
+  val jointpathn : (Num.t * Num.t) list -> joint list -> t
 
   (** Build a path from [n] float_pairs and [n-1] joints, 
       with default directions *)
