@@ -29,11 +29,19 @@ module rec Num : sig
   (** The base unit in Mlpost are bp. The following functions 
       permit to specify values in other common units *)
 
+  val f : float -> t
   val bp : float -> t
   val pt : float -> t
   val cm : float -> t
   val mm : float -> t
   val inch : float -> t
+
+  module Infix : sig
+    val (+/) : t -> t -> t
+    val (-/) : t -> t -> t
+    val ( */) : t -> t -> t
+    val (//) : t -> t -> t
+  end
 
   (** {2 Useful constants and functions} *)
 
