@@ -35,6 +35,26 @@ let is_zero f = abs_float f < 0.00001
 
 type scale = float -> t
 
+let addn x y = 
+  match x, y with
+  | F f1, F f2 -> F (f1 +. f2)
+  | _, _ -> NAdd (x,y)
+
+let subn x y = 
+  match x, y with
+  | F f1, F f2 -> F (f1 -. f2)
+  | _, _ -> NAdd (x,y)
+
+let multn x y = 
+  match x, y with
+  | F f1, F f2 -> F (f1 *. f2)
+  | _, _ -> NMult (x,y)
+  
+let divn x y = 
+  match x, y with
+  | F f1, F f2 -> F (f1 /. f2)
+  | _, _ -> NDiv (x,y)
+
 module Scale = struct
   let bp x y = bp (x *. y)
   let pt x y = pt (x *. y)
@@ -44,8 +64,8 @@ module Scale = struct
 end
 
 module Infix = struct
-  let (+/) x y = NAdd (x,y)
-  let (-/) x y = NMinus (x,y)
-  let ( */) x y = NMult (x,y)
-  let (//) x y = NDiv (x,y)
+  let (+/)  = addn
+  let (-/)  = subn
+  let ( */)  = multn
+  let (//)  = divn
 end

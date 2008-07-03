@@ -36,6 +36,14 @@ let simple_transform str = function
   | PTTransformed (p,tr) -> PTTransformed (p,str::tr)
   | _ as p -> PTTransformed (p,[str])
 
+let xpart = function
+  | PTPair (a,b) -> a
+  | _ as p -> NXPart p
+
+let ypart = function
+  | PTPair (a,b) -> b
+  | _ as p -> NYPart p
+
 (* insert more sophisticated simplifications *)
 let rec add p1 p2 = 
   match p1,p2 with

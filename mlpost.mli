@@ -95,6 +95,9 @@ and Point : sig
   (** [segment f p1 p2] is the point [(1-f)p1 + fp2] *)
   val segment : float -> t -> t -> t
 
+  val xpart : t -> Num.t
+  val ypart : t -> Num.t
+
   (** Sum two points *)
   val add : t -> t -> t
   
