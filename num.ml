@@ -38,3 +38,10 @@ module Scale = struct
   let mm x y = mm (x *. y)
   let inch x y = inch (x *. y)
 end
+
+module Infix = struct
+  let (+/) x y = NAdd (x,y)
+  let (-/) x y = NMinus (x,y)
+  let ( */) x y = NMult (x,y)
+  let (//) x y = NDiv (x,y)
+end
