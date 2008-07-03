@@ -131,7 +131,8 @@ and boxed = Types.boxed
 and box_circle_style =
   | Padding of num * num
   | Ratio of float
-and on_off  =Types.on_off
+and on_off =
+  | On of num | Off of num
 
 let pa_transformed p l =
   match p with

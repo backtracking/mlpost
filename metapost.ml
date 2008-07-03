@@ -191,8 +191,8 @@ and print_dash fmt = function
       fprintf fmt "dashpattern(";
       List.iter 
 	(fun p -> 
-	  let p,n = match p with On n -> "on", n | Off n -> "off", n in
-	  fprintf fmt "%s %a " p print_num n) 
+	  let p,n = match p with C.On n -> "on", n | C.Off n -> "off", n in
+	    fprintf fmt "%s %a " p print_num n) 
 	l;
       fprintf fmt ")" 
 

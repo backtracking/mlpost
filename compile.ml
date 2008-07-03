@@ -337,7 +337,18 @@ and dash = function
       let p, c1 = point p in
       let d, c2 = dash d in
         C.DShifted (p,d), c1 ++ c2
-  | DPattern l -> C.DPattern l, nop
+  | DPattern l -> 
+      let l1,l2 = List.fold_right
+        (fun pat (patl, cl) -> 
+           let pat,c =  dash_pattern pat in
+             pat::patl, c::cl ) l ([],[]) in
+	C.DPattern l1, C.CSeq l2
+
+and dash_pattern = function
+  | On f -> 
+      let f1, c1 = num f in C.On f1, c1
+  | Off f -> 
+      let f1, c1 = num f in C.Off f1, c1
 
 and command = function
   | CDraw (p, color, pe, dsh) ->
