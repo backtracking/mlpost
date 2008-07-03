@@ -49,16 +49,19 @@ VERSION=0.1
 TESTS = handbookgraphs.cmx othergraphs.cmx tests.cmx
 TOOL = tool.$(OCAMLBEST)
 
-all: byte $(OCAMLBEST) $(TOOL) $(TESTS)
+all: byte $(OCAMLBEST) $(TOOL)
+
+check: byte $(OCAMLBEST) $(TOOL) $(TESTS) check-examples
 
 # bytecode and native-code compilation
 ######################################
 
-CMO := misc.cmo name.cmo compile.cmo metapost.cmo num.cmo point.cmo \
+CMO := misc.cmo name.cmo compiled_types.cmo compile.cmo  \
+       num.cmo point.cmo \
        transform.cmo \
-       color.cmo picture.cmo box.cmo dash.cmo \
-       primPath.cmo simplePoint.cmo path.cmo pen.cmo command.cmo \
-       helpers.cmo diag.cmo tree.cmo convenience.cmo generate.cmo
+       color.cmo picture.cmo primPath.cmo path.cmo box.cmo mlbox.cmo  \
+       dash.cmo pen.cmo command.cmo metapost.cmo\
+       helpers.cmo diag.cmo tree.cmo plot.cmo generate.cmo
 CMX := $(CMO:.cmo=.cmx)
 
 CMA := mlpost.cma
@@ -83,11 +86,13 @@ $(CMA): mlpost.cmo
 $(CMXA): mlpost.cmx
 	$(OCAMLOPT) -a $(OFLAGS) -o $@ $^
 
+mlpost.cmo: mlpost.cmi
 mlpost.cmo: $(CMO)
-	$(OCAMLC) $(INCLUDES) -pack -o $@ $^
+	$(OCAMLC) $(INCLUDES) -pack -o $@ $(CMO)
 
+mlpost.cmx: mlpost.cmi
 mlpost.cmx: $(CMX)
-	$(OCAMLOPT) $(INCLUDES) -pack -o $@ $^
+	$(OCAMLOPT) $(INCLUDES) -pack -o $@ $(CMX)
 
 TOOLCMO=tool.cmo
 TOOLCMX := $(TOOLCMO:.cmo=.cmx)
@@ -102,6 +107,7 @@ tests: $(CMA) tests.ml
 	ocaml $(CMA) tests.ml
 	make -C test tests
 	gv test/tests.ps
+
 handbook: $(CMA) handbookgraphs.ml
 	ocaml $(CMA) handbookgraphs.ml
 	make -C test manual
@@ -113,6 +119,10 @@ other: $(CMA) othergraphs.ml
 	make -C test other
 	make -C test/othergraphs mpost
 	gv test/othergraphs.ps
+
+.PHONY: check-examples
+check-examples: mlpost.cma
+	for f in examples/*.ml; do ocamlc -c $$f; done
 
 VERSION=0.1
 
@@ -128,7 +138,7 @@ dep:
 
 headers:
 	headache -c headache_config.txt -h header.txt \
-		Makefile.in configure.in README.txt *.mli *.ml
+		Makefile.in configure.in README.txt *.mli *.ml *.mll
 
 # installation
 ##############
@@ -159,7 +169,7 @@ FILES = *.ml *.mli *.mll \
 	Makefile.in configure configure.in .depend \
 	.depend README.txt INSTALL LICENSE CHANGES
 
-export: source export-www export-examples
+export: source export-www export-examples export-doc
 	cp README.txt INSTALL LICENSE CHANGES $(FTP)
 
 source: 
@@ -167,6 +177,17 @@ source:
 	cp $(FILES) export/$(EXPORTDIR)
 	cd export ; tar cf $(TAR) $(EXPORTDIR) ; gzip -f --best $(TAR)
 	cp export/$(TAR).gz $(FTP)
+
+DOCFILES:=$(shell echo *.mli)
+DOCFILES:=$(filter-out types.mli, $(DOCFILES))
+
+.PHONY: doc
+doc: mlpost.mli
+	mkdir -p doc
+	ocamldoc -html -hide Mlpost -d doc mlpost.mli
+
+export-doc:
+	ocamldoc -html -hide Mlpost -d $(WWW)/doc mlpost.mli
 
 export-www: www/version.prehtml
 	make -C www
@@ -189,7 +210,39 @@ $(NAME).tex: $(SOURCES)
 # generic rules
 ###############
 
-include Makefile.rules
+.SUFFIXES: .mli .ml .cmi .cmo .cmx .mll .mly .tex .dvi .ps .html
+
+.mli.cmi:
+	$(OCAMLC) -c $(BFLAGS) $<
+
+.ml.cmo:
+	$(OCAMLC) -c $(BFLAGS) $<
+
+.ml.o:
+	$(OCAMLOPT) -c $(OFLAGS) $<
+
+.ml.cmx:
+	$(OCAMLOPT) -c $(OFLAGS) $<
+
+.mll.ml:
+	$(OCAMLLEX) $<
+
+.mly.ml:
+	$(OCAMLYACC) -v $<
+
+.mly.mli:
+	$(OCAMLYACC) -v $<
+
+.tex.dvi:
+	latex $< && latex $<
+
+.dvi.ps:
+	dvips $< -o $@ 
+
+.tex.html:
+	hevea $<
+
+
 # Emacs tags
 ############
 
@@ -224,6 +277,7 @@ clean::
 	rm -f $(NAME).cma $(NAME).cmxa $(NAME).a
 	rm -f *.aux *.log $(NAME).tex $(NAME).dvi $(NAME).ps
 	make -C test clean
+	make -C www clean
 	rm -f *.opt test.dvi test.ps
 
 dist-clean distclean:: clean

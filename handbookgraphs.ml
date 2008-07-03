@@ -17,13 +17,13 @@
 open Mlpost
 open Command
 open Picture
-open SimplePoint
+open Point
 open Path
 module H = Helpers
 module N = Num
-module C = Convenience
 
-let draw1 = 1, [ C.draw ~style:JLine [20.,20.; 0.,0.; 0.,30.; 30.,0.; 0.,0.] ]
+let draw1 = 1, [ draw 
+                   (path ~style:JLine [20.,20.; 0.,0.; 0.,30.; 30.,0.; 0.,0.])]
 
 let z0 = 0.,0.
 let z1 = 60.,40.
@@ -37,14 +37,14 @@ let labels1 =
    [dotlabel ~pos:Pleft (tex "3") (bpp z3);
     dotlabel ~pos:Pright (tex "1") (bpp z1) ]
 
-let draw3 = 3, [ C.draw ~style:JCurve  l1 ] @ labels1
+let draw3 = 3, [ draw (path ~style:JCurve  l1) ] @ labels1
 
 let draw4a, draw4b = 
   let labels = H.dotlabels ~pos:Ptop ["2";"4"] (map_bp [z2;z4]) @
                H.dotlabels ~pos:Pleft ["0";"3"] (map_bp [z0;z3]) @
                [dotlabel ~pos:Plowright (tex "1") (bpp z1)]
   in
-    (104, [ C.draw ~cycle:JCurve l1] @ labels) ,
+    (104, [ draw (path ~cycle:JCurve l1)] @ labels) ,
     (204, 
      [ draw 
          (Path.append ~style:JLine (path [z0;z1;z2;z3]) 
@@ -67,7 +67,8 @@ let draw5 = 5,
 	[0.,0.] lcontrols (List.tl l1)
     in
       (* As long as we dont have the dashed lines : gray *)
-      C.draw ~color:(Color.gray 0.5) ~style:JLine (List.rev hull) ] @ labels1
+      draw ~dashed:(Dash.scaled 0.5 Dash.evenly) 
+        (path ~style:JLine (List.rev hull)) ] @ labels1
 
 let draw6 = 6, 
   [ draw (pathk
@@ -80,14 +81,14 @@ let rex a = knot ~l:(Vec(dir (10.*.a))) ~scale:N.cm (6., 0.)
 let draw7 = 7, 
             [Command.iter 0 9
                (fun a ->
-                  [draw (concat (start lex) ~style:JCurve 
-                          (rex (float_of_int (-a))))]) ]
+                  draw (concat (start lex) ~style:JCurve 
+                          (rex (float_of_int (-a))))) ]
 
 let draw8 = 8,
             [Command.iter 0 7
                (fun a ->
-                  [draw (concat (start lex) ~style:JCurve 
-                          (rex (float_of_int a)))]) ]
+                  draw (concat (start lex) ~style:JCurve 
+                          (rex (float_of_int a)))) ]
 
 let z0 = (-1., 0.)
 let z1 = (0., 0.2)
@@ -108,7 +109,7 @@ let z3 = (u 5.),u 0.
 let l1 = [z0;z1;z2;z3]
 let labels10 = H.dotlabels ~pos:Pbot ["0";"1";"2";"3"] (map_in l1)
 
-let draw10a = 110, [C.draw ~scale:N.inch l1 ] @ labels10
+let draw10a = 110, [draw (path ~scale:N.inch l1) ] @ labels10
 
 let draw10b = 210, 
   [ draw (jointpath ~scale:N.inch l1 [JCurve; JTension(1.3,1.3); JCurve] ) ] 
@@ -175,7 +176,7 @@ let draw19 =
     | 0 -> start (knot ~r:(Vec right) (0.,uy))
     | n -> let f = (float_of_int n)*.15. in 
 	concat ~style:JCurve (pg (n-1)) 
-	  (knot (f*.ux, 2./.(1.+.(cos (Misc.deg2rad f)))*.uy)) in
+	  (knot (f*.ux, 2./.(1.+.(cos (Num.deg2rad f)))*.uy)) in
     19, [draw (path ~style:JLine [(0.,duy); (0.,0.); (dux,0.)]);
 	 draw ~pen (pg 8);
 	 label ~pos:Pbot (tex "axe $x$") (p (60.*.ux, 0.));
@@ -205,23 +206,49 @@ let draw22 =
   let a = transform [Transform.scaled (Num.cm 2.)] fullcircle in
   let aa = transform [Transform.scaled (Num.cm 2.)] halfcircle in
   let b = transform [Transform.shifted (p (0., Num.cm 1.))] a in
-  let pa = make [label (tex "$A$") (p (0., Num.cm (-0.5)))] in
-  let pb= make [label (tex "$B$") (p (0., Num.cm 1.5))] in  
+  let pa = make (label (tex "$A$") (p (0., Num.cm (-0.5)))) in
+  let pb= make (label (tex "$B$") (p (0., Num.cm 1.5))) in  
   let ab = build_cycle [aa; b] in
-    22, [fill ~color:(Color.gray 0.7) a;
-	 fill ~color:(Color.gray 0.7) b;
-	 fill ~color:(Color.gray 0.4) ab;
-	 fill ~color:Color.white (bbox pa); draw_pic pa;
-	 fill ~color:Color.white (bbox pb); draw_pic pb;
-	 label ~pos:Pleft (tex "$U$") (p ~scale:Num.cm (-1.,0.5));
-	 draw (bbox currentpicture)
-	]
+  let pic = make
+    (seq [fill ~color:(Color.gray 0.7) a;
+	  fill ~color:(Color.gray 0.7) b;
+          fill ~color:(Color.gray 0.4) ab;
+          fill ~color:Color.white (bbox pa); draw_pic pa;
+          fill ~color:Color.white (bbox pb); draw_pic pb;
+          label ~pos:Pleft (tex "$U$") (p ~scale:Num.cm (-1.,0.5)); ])
+  in
+    22, [draw_pic pic; draw (bbox pic)]
+
+let draw40 =
+  let k1 = knot ~r:(Curl 0.) ~scale:Num.pt (0.,0.) in
+  let k2 = knot ~scale:Num.pt (5., -3.) in
+  let k3 = knot ~scale:Num.pt ~l:(Curl 0.) (10.,0.) in
+  let p1 = pathk [k1;k2;k3] in
+  let p2 = append p1 
+            (Path.transform 
+              [Transform.yscaled (-1.); 
+               Transform.shifted (p ~scale:Num.pt (10.,0.))] p1) in
+  let p2 = 
+    Misc.fold_from_to
+      (fun acc i -> 
+        let tr = Transform.shifted (p ~scale:Num.pt (float_of_int i *. 20.,0.)) in
+        append acc (Path.transform [tr] p2)) p2 1 3 in
+  let cmd = 
+    Command.iter 0 8
+      (fun i ->
+        let tr = Transform.shifted (p ~scale:Num.pt (0., float_of_int i *. 10.)) in
+          Command.draw (Path.transform [tr] p2)) in
+  let pic = Picture.make cmd in
+  let pth = Path.transform [Transform.shifted (p (0.5, 0.5));
+                            Transform.scaled ~scale:Num.pt 72.] fullcircle in
+  let pic' = Picture.clip pic pth in
+    40, [ draw_pic pic'; draw pth]
 
 let figs = 
   [ draw1; draw3; draw4a; draw4b;draw5; 
     draw6; draw7; draw8; draw9a; draw9b;
     draw10a; draw10b; draw10c] @ draw11 
-  @ [draw17; draw18; draw19; draw21; draw22]
+  @ [draw17; draw18; draw19; draw21; draw22; draw40]
 
 let mpostfile = "test/testmanual.mp"
 let texfile = "test/testmanual.tex"

@@ -1,0 +1,22 @@
+1) When I include an MlPost Figure using \includegraphics in a PDF document,
+   I get the following error: "File not found : supp-pdf.tex".
+
+Answer:
+
+This seems to be a bug in some old Ubuntu distributions. You need the package
+"context" that contains the file "supp-pdf.tex". So an
+
+apt-get install context
+
+should do.
+   
+
+2) When I run the mlpost tool on my figure, I get the error "! Unable to make
+mpx file.".
+
+Answer:
+
+This is a cryptical error message from metapost saying that there is some
+error in the Latex code that is part of your figure. However, it often points
+to some random Latex code, so you will have to figure out by yourself, or by
+looking at the "mpxerr.tex" file that has been generated.

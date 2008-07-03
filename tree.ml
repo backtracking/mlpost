@@ -62,7 +62,7 @@ let arc astyle estyle ?stroke ?pen (b1,(x1,y1)) (b2,(x2,y2)) =
 	     NoDir, corner, NoDir; 
 	     Vec (Point.sub p2 corner), p2, NoDir] in
 	  let parrow = 
-	    cut_after (bpath b2) (cut_before (bpath b1) p)
+	    cut_after (Box.bpath b2) (cut_before (Box.bpath b1) p)
 	  in
 	    linedraw parrow
       | Square -> 
@@ -70,7 +70,7 @@ let arc astyle estyle ?stroke ?pen (b1,(x1,y1)) (b2,(x2,y2)) =
 	  let p = pathp ~style:JLine 
 	    [Box.center b1; corner; Box.center b2] in
 	  let parrow = 
-	    cut_after (bpath b2) (cut_before (bpath b1) p) 
+	    cut_after (Box.bpath b2) (cut_before (Box.bpath b1) p) 
 	  in
 	    linedraw parrow
       | HalfSquare -> 
@@ -79,13 +79,13 @@ let arc astyle estyle ?stroke ?pen (b1,(x1,y1)) (b2,(x2,y2)) =
 	  let p = pathp ~style:JLine 
 	    [Box.center b1; corner1; corner2; Box.center b2] in
 	  let parrow = 
-	    cut_after (bpath b2) (cut_before (bpath b1) p) 
+	    cut_after (Box.bpath b2) (cut_before (Box.bpath b1) p) 
 	  in
 	    linedraw parrow
 
 let draw ?(scale=Num.cm) 
     ?(node_style=Circle) ?(arrow_style=Directed) ?(edge_style=Straight)
-    ?fill ?stroke ?pen
+    ?(boxed=true) ?fill ?stroke ?pen
     ?(ls=1.0) ?(nw=0.5) ?(cs=0.2) t =
   let point x y = Point.p (scale x, scale y) in
   (* tree -> float * (float -> float -> box * figure) *)
@@ -100,7 +100,7 @@ let draw ?(scale=Num.cm)
 	box node_style (point x y) s, (scale x, scale y) in
       let x = ref (x -. w /. 2.) in
       b, 
-      draw_box ?fill b :: 
+      draw_box ?fill ~boxed b :: 
 	List.map 
 	(fun (wc,fc) -> 
 	   let x',y' = (!x +. wc /. 2.), (y -. ls) in
@@ -111,7 +111,7 @@ let draw ?(scale=Num.cm)
 	) l
   in
   let _,f = draw t in
-  snd (f 0. 0.)
+  Command.seq (snd (f 0. 0.))
 
 
   

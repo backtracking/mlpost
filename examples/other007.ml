@@ -1,6 +1,6 @@
 open Mlpost
 open Path
-open SimplePoint
+open Point
 open Command
 
 let fig = 

@@ -1,5 +1,5 @@
 open Mlpost
-module C = Convenience
+open Command
 open Path
 
 let fig =
@@ -7,5 +7,5 @@ let fig =
   let b = 1., 0. in
   let c = 0., 1. in
   let pen = (Pen.circle ~tr:[Transform.scaled 4.] ()) in
-  [ C.draw ~style:JLine ~scale:Num.cm ~cycle:JLine [a;b;c] ] @
-    List.map (fun a -> C.draw ~pen ~scale:Num.cm [a]) [a;b;c]
+  [ draw (path ~style:JLine ~scale:Num.cm ~cycle:JLine [a;b;c]) ] @
+    List.map (fun a -> draw ~pen (path ~scale:Num.cm [a])) [a;b;c]

@@ -19,14 +19,37 @@ open Types
 type t = picture
 
 let tex s = PITex s
-let make l = PIMake (CSeq l)
+let make l = PIMake l
 let bbox pic = PABBox pic
 let ulcorner pic = PTPicCorner (pic, UL)
 let llcorner pic = PTPicCorner (pic, LL)
 let urcorner pic = PTPicCorner (pic, UR)
 let lrcorner pic = PTPicCorner (pic, LR)
-let currentpicture = PIName "currentpicture"
+(* let currentpicture = PIName "currentpicture" *)
 
 let transform tr = function
   | PITransform (tr', p) -> PITransform (tr'@tr, p)
   | _ as x -> PITransform (tr, x)
+
+let center pic p = 
+  let bp = Point.segment 0.5 (llcorner pic) (urcorner pic) in
+    transform [Transform.shifted (Point.sub p bp)] pic
+
+let place_up_left pic p =
+  transform [Transform.shifted (Point.sub p (ulcorner pic))] pic
+
+let place_up_right pic p =
+  transform [Transform.shifted (Point.sub p (urcorner pic))] pic
+
+let place_bot_left pic p =
+  transform [Transform.shifted (Point.sub p (llcorner pic))] pic
+
+let place_bot_right pic p =
+  transform [Transform.shifted (Point.sub p (lrcorner pic))] pic
+let beside p1 p2 = 
+  make (CSeq [CDrawPic p1; CDrawPic (place_up_left p2 (urcorner p1))])
+
+let below p1 p2 =
+  make (CSeq [CDrawPic p1; CDrawPic (place_up_left p2 (llcorner p1))])
+
+let clip pic pth = PIClip (pic,pth)

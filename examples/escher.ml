@@ -1,11 +1,10 @@
-(* shamelessly stolen from
+(* taken from
  * http://www.cs.ucc.ie/~dongen/mpost/mp/Escher87.mp
- * we should ask that guy before publishing this example
 *)
 open Mlpost
 open Command
+open Point
 open Path
-open SimplePoint
 
 let rec fold_append ?(style=JCurve) = function
   | [] -> failwith "No empty list allowed"
@@ -134,7 +133,7 @@ let fig =
   in
     [ Command.iter (-1) 1
         (fun x ->
-           [Command.iter (-1) 1
+           Command.iter (-1) 1
              (fun y ->
                 let xf, yf = float_of_int x, float_of_int y in
                 let offset = (xf *. xs1 +. yf *. xs2, yf *. ys) in
@@ -145,10 +144,10 @@ let fig =
                   let offset = add offset2 po in
                     transform [Transform.shifted (bpp offset)] Path.fullcircle
                 in
-                  [ fill ~color:Color.red (mypath (-12.,27.));
-                    draw ~color:Color.blue (mypath (-12.,27.))] @
-                  [ fill ~color:mygreen (tr bird)] @
-                  List.map (fun p -> draw ~pen:pen1 (tr p)) 
-                    [line1;line2;line3;line4;line5] @
-                  List.map (fun p -> draw ~pen:pen1 (tr p)) 
-                    [line6; line7; line8] ) ] ) ]
+                  seq ([ fill ~color:Color.red (mypath (-12.,27.));
+			 draw ~color:Color.blue (mypath (-12.,27.))] @
+			 [ fill ~color:mygreen (tr bird)] @
+			 List.map (fun p -> draw ~pen:pen1 (tr p)) 
+			 [line1;line2;line3;line4;line5] @
+			 List.map (fun p -> draw ~pen:pen1 (tr p)) 
+			 [line6; line7; line8] ) ) ) ]

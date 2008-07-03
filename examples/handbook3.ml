@@ -1,10 +1,9 @@
 open Mlpost
 open Command
 open Picture
-open SimplePoint
+open Point
 open Path
 module H = Helpers
-module C = Convenience
 
 let z0 = 0.,0.
 let z1 = 60.,40.
@@ -18,5 +17,5 @@ let labels1 =
    [dotlabel ~pos:Pleft (tex "3") (bpp z3);
     dotlabel ~pos:Pright (tex "1") (bpp z1) ]
 
-let fig = [ C.draw ~style:JCurve  l1 ] @ labels1
+let fig = [ draw (path ~style:JCurve  l1) ] @ labels1
 
