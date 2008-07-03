@@ -15,6 +15,8 @@
 (**************************************************************************)
 
 open Types
+open Num
+open Infix
 
 type corner = Types.corner
 
@@ -47,7 +49,7 @@ let ypart = function
 (* insert more sophisticated simplifications *)
 let rec add p1 p2 = 
   match p1,p2 with
-    | PTPair (a1,b1), PTPair (a2,b2) -> PTPair (NAdd(a1,a2), NAdd(b1,b2))
+    | PTPair (a1,b1), PTPair (a2,b2) -> PTPair (addn a1 a2 , addn b1 b2)
     | PTAdd (p1',p2'), _ -> add p1' (add p2' p2)
     | PTSub (p1',p2'), _ -> add p1' (sub p2 p2')
     | _, _ -> PTAdd (p1,p2)
@@ -55,8 +57,8 @@ let rec add p1 p2 =
 and mult f p =
 (*     if Num.is_zero f then PTPair (F 0.,F 0.) else *)
   match p with
-    | PTPair (a,b) -> PTPair (NMult(f, a), NMult(f, b))
-    | PTMult (f', p) -> mult (NMult(f,f')) p
+    | PTPair (a,b) -> PTPair (multn f a , multn f b)
+    | PTMult (f', p) -> mult (multn f f') p
     | PTAdd (p1,p2) -> add (mult f p1) (mult f p2)
     | PTSub (p1,p2) -> sub (mult f p1) (mult f p2)
     | PTRotated (f', p) -> PTRotated (f', mult f p)
@@ -64,7 +66,7 @@ and mult f p =
 
 and sub p1 p2 = 
   match p1,p2 with
-    | PTPair (a1,b1), PTPair (a2,b2) -> PTPair (NMinus(a1, a2), NMinus(b1, b2))
+    | PTPair (a1,b1), PTPair (a2,b2) -> PTPair (subn a1 a2, subn b1 b2 )
     | PTAdd (p1',p2'), _ -> add p1' (sub p2' p2)
     | PTSub (p1',p2'), _ -> sub p1' (add p2' p2)
     | _, _ -> PTSub (p1,p2)
@@ -74,8 +76,8 @@ let segment f p1 p2 = add (mult (F (1.-.f)) p1) (mult (F f) p2)
 let rec rotated f = function
   | PTPair (a,b) -> 
       let angle = Num.deg2rad f in
-        PTPair (NMinus(NMult(F (cos(angle)), a), NMult(F (sin(angle)), b)),
-		NAdd(NMult(F (sin(angle)), a), NMult(F (cos(angle)), b)))
+        PTPair ( (F (cos angle) */ a) -/ (F (sin angle) */ b),
+                 (F (sin angle) */ a) +/ (F (cos angle) */ b))
   | PTAdd (p1, p2) -> add (rotated f p1) (rotated f p2)
   | PTSub (p1, p2) -> sub (rotated f p1) (rotated f p2)
   | PTRotated (f', p) -> PTRotated (f+.f', p)

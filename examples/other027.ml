@@ -1,7 +1,7 @@
 open Mlpost
 open Command
 
-let a = Point.p (Num.bp 0., Num.bp 0.)
+let a = Point.pt (Num.bp 0., Num.bp 0.)
 let pen = Pen.circle ~tr:[Transform.scaled 4.] () 
 let fig = [
   draw (Path.pathp [a]) ~pen;

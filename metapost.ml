@@ -56,12 +56,12 @@ let rec print_num fmt = function
   | C.F f ->
       if f = infinity then fprintf fmt "infinity"
       else
-	if f > 4095. then fprintf fmt "%4f" 4095.
-	else fprintf fmt "%.4f" f
+	if f > 4095. then fprintf fmt "% 4f" 4095.
+	else fprintf fmt "% .4f" f
   | C.NXPart p -> fprintf fmt "xpart %a" print_point p
   | C.NYPart p -> fprintf fmt "ypart %a" print_point p
   | C.NAdd (f1, f2) -> fprintf fmt "(%a+%a)" print_num f1 print_num f2
-  | C.NMinus (f1, f2) -> fprintf fmt "(%a-%a)" print_num f1 print_num f2
+  | C.NMinus (f1, f2) -> fprintf fmt "(%a - %a)" print_num f1 print_num f2
   | C.NMult (f1, f2) -> fprintf fmt "(%a*%a)" print_num f1 print_num f2
   | C.NDiv (f1, f2) -> fprintf fmt "(%a/%a)" print_num f1 print_num f2
 

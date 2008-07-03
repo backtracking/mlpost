@@ -1,5 +1,6 @@
 open Mlpost
 open Path
+open Num
 open Point
 
 let fig =
@@ -27,5 +28,5 @@ let fig =
       let acc = tree b c (n-1) newsize acc in
           tree b d (n-1) newsize acc
   in
-    tree (p (0.,0.)) (p (0., Num.cm 1.)) 10 (Num.mm 2.) []
+    tree (p (0.,0.)) (pt (f 0., Num.cm 1.)) 10  2. []
 
