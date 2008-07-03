@@ -14,15 +14,15 @@
 (*                                                                        *)
 (**************************************************************************)
 
-module F = Format
+open Types
 
-type t = float
+type t = num
 
-let bp f = f
-let pt f = 0.99626 *. f
-let cm f = 28.34645 *. f
-let mm f = 2.83464 *. f
-let inch f = 72. *. f
+let bp f = F f
+let pt f = F (0.99626 *. f)
+let cm f = F (28.34645 *. f)
+let mm f = F (2.83464 *. f)
+let inch f = F (72. *. f)
 
 let pi = 3.14159
 let deg2rad f = pi *. f /. 180.

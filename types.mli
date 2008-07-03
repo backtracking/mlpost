@@ -14,8 +14,6 @@
 (*                                                                        *)
 (**************************************************************************)
 
-type num = float
-
 type color = 
   | RGB of float * float * float
   | CMYK of float * float * float * float
@@ -39,13 +37,16 @@ type position =
   | Plowleft
   | Plowright
 
-type on_off = On of num | Off of num
+type num = 
+  | F of float
+  | NXPart of point
+  | NYPart of point
+  | NAdd of num * num
+  | NMinus of num * num
+  | NMult of num * num
+  | NDiv of num * num
 
-type box_circle_style =
-  | Padding of num * num (* dx , dy *)
-  | Ratio of float (* dx / dy *)
-
-type point = 
+and point = 
   | PTPair of num * num
   | PTBoxCorner of box * corner
   | PTPicCorner of picture * piccorner
@@ -56,6 +57,13 @@ type point =
   | PTRotated of float * point
   | PTTransformed of point * transform list
   | PTLength of point
+
+and on_off = On of num | Off of num
+
+and box_circle_style =
+  | Padding of num * num (* dx , dy *)
+  | Ratio of float (* dx / dy *)
+
 
 and direction = 
   | Vec of point
