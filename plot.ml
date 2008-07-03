@@ -33,7 +33,7 @@ let mk_skeleton width height stepx stepy =
 
 type labels = (int -> Picture.t) option
 
-type ticks = (float * Pen.t) option
+type ticks = (Num.t * Pen.t) option
 
 let get_style = function
   | None -> fun i -> Dash.evenly, Pen.default ()

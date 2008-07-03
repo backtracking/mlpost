@@ -22,7 +22,7 @@ module rec Num : sig
 
   (** The Mlpost Num module *)
 
-  type t = float
+  type t
       (** The Mlpost numeric type is just a float *)
       
   (** {2 Conversion functions} *)
@@ -94,7 +94,7 @@ and Point : sig
   val sub : t -> t -> t
   
   (** Multiply a point by a scalar *)
-  val mult : float -> t -> t
+  val mult : Num.t -> t -> t
   
   (** Rotate a point by an angle in degrees *)
   val rotated : float -> t -> t
@@ -104,10 +104,10 @@ and Point : sig
   val rotate_around : t -> float -> t -> t
 
   (** Scales the X coordinate of a point by a scalar *)
-  val xscaled : float -> t -> t
+  val xscaled : Num.t -> t -> t
 
   (** Scales the Y coordinate of a point by a scalar *)
-  val yscaled : float -> t -> t
+  val yscaled : Num.t -> t -> t
 
   (** {2 Convenient constructors} *)
 
@@ -838,7 +838,7 @@ module Shapes : sig
 (** Various Basic Geometric Shapes *)
 
   val rounded_rect : 
-    ?fill:Color.t -> ?stroke:Color.t -> ?thickness:Num.t ->
+    ?fill:Color.t -> ?stroke:Color.t -> ?thickness:float ->
     Num.t -> Num.t -> Num.t -> Num.t -> Picture.t
     (** [rounded_rect w h rx ry] draws a rectangle of width [w] and
 	height [h] with rounded corners. The rounded corners are arcs
@@ -853,7 +853,7 @@ module Shapes : sig
     *)
       
   val rectangle :
-    ?fill:Color.t -> ?stroke:Color.t -> ?thickness:Num.t ->
+    ?fill:Color.t -> ?stroke:Color.t -> ?thickness:float ->
     Num.t -> Num.t -> Picture.t
     (** [rectangle w h] draws a rectangle of width [w] and height [h].
 	@param fill the color with which to fill the rectangle ;
@@ -865,7 +865,7 @@ module Shapes : sig
     *)
 
   val ellipse :
-    ?fill:Color.t -> ?stroke:Color.t -> ?thickness:Num.t ->
+    ?fill:Color.t -> ?stroke:Color.t -> ?thickness:float ->
     Num.t -> Num.t -> Picture.t
     (** [ellipse rx ry] draws an ellipse of great axis [rx] and small axis [ry].
 	The ellipse is centered on the origin and aligned with the x axis.
@@ -878,7 +878,7 @@ module Shapes : sig
     *)
 
   val arc_ellipse :
-    ?fill:Color.t -> ?stroke:Color.t -> ?thickness:Num.t -> ?close:bool ->
+    ?fill:Color.t -> ?stroke:Color.t -> ?thickness:float -> ?close:bool ->
     Num.t -> Num.t -> float -> float -> Picture.t
     (** [arc_ellipse rx ry th1 th2] draws an arc of the ellipse 
 	of great axis [rx] and small axis [ry] starting at angle [th1] and
