@@ -298,13 +298,22 @@ and box b =
            | BCircle (p, pic, s) ->
                let p, c1 = point p in
                let pic, c2 = picture pic in
-                 c1 ++ c2 ++ C.CDeclBox (C.BCircle (n, p, pic, s))
+	       let s1, c3 = box_circle_style s in
+                 c1 ++ c2 ++ c3 ++ C.CDeclBox (C.BCircle (n, p, pic, s1))
            | BRect (p,pic) ->
                let p, c1 = point p in
                let pic, c2 = picture pic in
                  c1 ++ c2 ++ C.CDeclBox (C.BRect (n, p, pic))
        in
          bn, code
+
+and box_circle_style = function
+  | Some(Padding(f1, f2)) ->
+      let f1, c1 = num f1 in
+      let f2, c2 = num f2 in
+	Some (C.Padding(f1, f2)), c1 ++ c2
+  | Some(Ratio f) -> Some (C.Ratio f), nop
+  | None -> None, nop
 
 and pen = function
   | PenCircle -> C.PenCircle, nop

@@ -127,8 +127,8 @@ let draw ?(scale=fortybp) ?(style=Circle (Box.Ratio 1.))
   let l = 
     List.map 
       (fun n -> 
-	let fill = if n.fill <> None then n.fill else fill in
-	Command.draw_box ?fill ?boxed (make_box ~style ~scale d n)) d.nodes
+	 let fill = if n.fill <> None then n.fill else fill in
+	   Command.draw_box ?fill ?boxed (make_box ~style ~scale d n)) d.nodes
   in
   Command.seq (l @ List.map (draw_arrow ?stroke ?pen d) d.arrows)
 

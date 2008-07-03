@@ -37,22 +37,6 @@ let print_piccorner fmt = function
   | UR -> fprintf fmt "urcorner"
   | LR -> fprintf fmt "lrcorner"
 
-let rec print_num fmt f =
-  if f = infinity then fprintf fmt "infinity"
-  else
-    if f > 4095. then fprintf fmt "%4f" 4095.
-    else fprintf fmt "%.4f" f
-
-let print_float fmt f = print_num fmt f
-
-let print_color fmt = function
-  | RGB (r,g,b) -> 
-      fprintf fmt "(%a, %a , %a)" print_float r print_float g print_float b
-  | CMYK (c,m,y,k) ->
-      fprintf fmt "(%a, %a, %a, %a)" print_float c print_float m 
-        print_float y print_float k
-  | Gray f -> fprintf fmt "%a * white" print_float f
-
 let print_boxed fmt = function
   | Boxed -> pp_print_string fmt "drawboxed"
   | Unboxed -> pp_print_string fmt "drawunboxed"
@@ -68,14 +52,37 @@ let print_position fmt = function
   | Plowleft -> fprintf fmt ".llft"
   | Plowright -> fprintf fmt ".lrt"
 
-let rec print_point fmt = function
+let rec print_num fmt = function
+  | C.F f ->
+      if f = infinity then fprintf fmt "infinity"
+      else
+	if f > 4095. then fprintf fmt "%4f" 4095.
+	else fprintf fmt "%.4f" f
+  | C.NXPart p -> fprintf fmt "xpart %a" print_point p
+  | C.NYPart p -> fprintf fmt "ypart %a" print_point p
+  | C.NAdd (f1, f2) -> fprintf fmt "(%a+%a)" print_num f1 print_num f2
+  | C.NMinus (f1, f2) -> fprintf fmt "(%a-%a)" print_num f1 print_num f2
+  | C.NMult (f1, f2) -> fprintf fmt "(%a*%a)" print_num f1 print_num f2
+  | C.NDiv (f1, f2) -> fprintf fmt "(%a/%a)" print_num f1 print_num f2
+
+and print_float fmt f = print_num fmt (C.F f)
+
+and print_color fmt = function
+  | RGB (r,g,b) -> 
+      fprintf fmt "(%a, %a , %a)" print_float r print_float g print_float b
+  | CMYK (c,m,y,k) ->
+      fprintf fmt "(%a, %a, %a, %a)" print_float c print_float m 
+        print_float y print_float k
+  | Gray f -> fprintf fmt "%a * white" print_float f
+
+and print_point fmt = function
   | C.PTPair (m,n) -> fprintf fmt "(%a,%a)" print_num m print_num n
   | C.PTBoxCorner (b, d) -> fprintf fmt "%a.%a" print_box b print_corner d
   | C.PTPicCorner (pic, d) -> 
       fprintf fmt "(%a %a)" print_piccorner d print_picture pic
   | C.PTAdd (p1, p2) -> fprintf fmt "(%a + %a)" print_point p1 print_point p2
   | C.PTSub (p1, p2) -> fprintf fmt "(%a - %a)" print_point p1 print_point p2
-  | C.PTMult (f, p) -> fprintf fmt "(%a * %a)" print_float f print_point p
+  | C.PTMult (f, p) -> fprintf fmt "(%a * %a)" print_num f print_point p
   | C.PTRotated (f, p) ->  
       fprintf fmt "(%a rotated %a)" print_point p print_float f
   | C.PTPointOf (f, p) ->
@@ -120,10 +127,10 @@ and declare_box fmt = function
       fprintf fmt "%a.c = %a;@\n" print_name n print_point c;
       begin match s with
 	| None -> ()
-	| Some (Padding (dx, dy)) -> 
+	| Some (C.Padding (dx, dy)) -> 
 	    fprintf fmt "%a.dx = %a; %a.dy = %a;@\n" 
 	      print_name n print_num dx print_name n print_num dy
-	| Some (Ratio r) ->
+	| Some (C.Ratio r) ->
 	    fprintf fmt "%a.dx = %f * %a.dy;@\n" print_name n r print_name n
       end
   | C.BRect (n, c, p) -> 

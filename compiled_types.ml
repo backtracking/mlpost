@@ -128,7 +128,9 @@ and name = Types.name
 and corner = Types.corner
 and piccorner = Types.piccorner
 and boxed = Types.boxed
-and box_circle_style  =Types.box_circle_style
+and box_circle_style =
+  | Padding of num * num
+  | Ratio of float
 and on_off  =Types.on_off
 
 let pa_transformed p l =
