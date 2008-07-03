@@ -68,4 +68,4 @@ let nop = CSeq []
 
 let logo =
   [ draw_box ~fill: Color.yellow
-      (Box.circle (PTPair (0., 0.)) (PITex "Mlpost")) ]
+      (Box.circle (PTPair (F 0., F 0.)) (PITex "Mlpost")) ]

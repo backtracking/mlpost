@@ -16,8 +16,6 @@
 
 open Types
 
-module F = Format
-
 type corner = Types.corner
 
 type t = Types.point
@@ -27,12 +25,12 @@ let pt (a,b) = PTPair (a,b)
 (* angle in degrees *)
 let dir f =  
   let angle = Num.deg2rad f in
-    PTPair (cos angle, sin angle)
+    PTPair (F (cos angle), F (sin angle))
 
-let up = PTPair (0.,1.)
-let down = PTPair (0.,-1.)
-let left = PTPair (-1.,0.)
-let right = PTPair (1.,0.)
+let up = PTPair (F 0., F 1.)
+let down = PTPair (F 0., F (-1.))
+let left = PTPair (F (-1.), F 0.)
+let right = PTPair (F 1., F 0.)
 
 let simple_transform str = function
   | PTTransformed (p,tr) -> PTTransformed (p,str::tr)
@@ -41,43 +39,35 @@ let simple_transform str = function
 (* insert more sophisticated simplifications *)
 let rec add p1 p2 = 
   match p1,p2 with
-    | PTPair (a1,b1), PTPair (a2,b2) -> PTPair (a1 +. a2, b1 +. b2)
+    | PTPair (a1,b1), PTPair (a2,b2) -> PTPair (NAdd(a1,a2), NAdd(b1,b2))
     | PTAdd (p1',p2'), _ -> add p1' (add p2' p2)
     | PTSub (p1',p2'), _ -> add p1' (sub p2 p2')
-(*
-    | _, PTAdd (p1',p2') -> add p1' (add p1 p2')
-    | _, PTSub (p1',p2') -> add p1' (sub p1 p2')
-      *)
     | _, _ -> PTAdd (p1,p2)
 
 and mult f p =
-    if Num.is_zero f then PTPair (0.,0.) else
-      match p with
-        | PTPair (a,b) -> PTPair (f *. a, f *. b)
-        | PTMult (f', p) -> mult (f *. f') p
-        | PTAdd (p1,p2) -> add (mult f p1) (mult f p2)
-        | PTSub (p1,p2) -> sub (mult f p1) (mult f p2)
-        | PTRotated (f', p) -> PTRotated (f', mult f p)
-        | _ as p -> PTMult (f,p)
+(*     if Num.is_zero f then PTPair (F 0.,F 0.) else *)
+  match p with
+    | PTPair (a,b) -> PTPair (NMult(f, a), NMult(f, b))
+    | PTMult (f', p) -> mult (NMult(f,f')) p
+    | PTAdd (p1,p2) -> add (mult f p1) (mult f p2)
+    | PTSub (p1,p2) -> sub (mult f p1) (mult f p2)
+    | PTRotated (f', p) -> PTRotated (f', mult f p)
+    | _ as p -> PTMult (f,p)
 
 and sub p1 p2 = 
   match p1,p2 with
-    | PTPair (a1,b1), PTPair (a2,b2) -> PTPair (a1 -. a2, b1 -. b2)
+    | PTPair (a1,b1), PTPair (a2,b2) -> PTPair (NMinus(a1, a2), NMinus(b1, b2))
     | PTAdd (p1',p2'), _ -> add p1' (sub p2' p2)
     | PTSub (p1',p2'), _ -> sub p1' (add p2' p2)
-(*
-    | _, PTAdd (p1',p2') -> sub (sub p1 p1') p2'
-    | _, PTSub (p1',p2') -> add (sub p1 p1') p2'
-      *)
     | _, _ -> PTSub (p1,p2)
 
 
-let segment f p1 p2 = add (mult (1.-.f) p1) (mult f p2)
+let segment f p1 p2 = add (mult (F (1.-.f)) p1) (mult (F f) p2)
 let rec rotated f = function
   | PTPair (a,b) -> 
       let angle = Num.deg2rad f in
-        PTPair (cos(angle) *. a -. sin(angle) *. b,
-               sin(angle) *. a +. cos(angle) *. b)
+        PTPair (NMinus(NMult(F (cos(angle)), a), NMult(F (sin(angle)), b)),
+		NAdd(NMult(F (sin(angle)), a), NMult(F (cos(angle)), b)))
   | PTAdd (p1, p2) -> add (rotated f p1) (rotated f p2)
   | PTSub (p1, p2) -> sub (rotated f p1) (rotated f p2)
   | PTRotated (f', p) -> PTRotated (f+.f', p)
@@ -88,11 +78,11 @@ let rec rotated f = function
 let rotate_around p1 f p2 = add p1 (rotated f (sub p2 p1))
 
 let xscaled f = function
-  | PTPair (a,b) -> PTPair (f *. a, b)
+  | PTPair (a,b) -> PTPair (NMult(f,a), b)
   | _ as p -> simple_transform (TRXscaled f) p
 
 let yscaled f = function
-  | PTPair (a,b) -> PTPair (a, f *. b)
+  | PTPair (a,b) -> PTPair (a, NMult(f,b))
   | _ as p -> simple_transform (TRYscaled f) p
 
 let transform tr p =

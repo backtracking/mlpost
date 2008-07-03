@@ -53,7 +53,7 @@ and point =
   | PTPointOf of float * path
   | PTAdd of point * point
   | PTSub of point * point
-  | PTMult of float * point
+  | PTMult of num * point
   | PTRotated of float * point
   | PTTransformed of point * transform list
   | PTLength of point
