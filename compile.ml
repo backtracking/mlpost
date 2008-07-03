@@ -250,7 +250,7 @@ and box b =
 
 and pen = function
   | PenCircle -> C.PenCircle, nop
-  | PenSquare -> C.PenCircle, nop
+  | PenSquare -> C.PenSquare, nop
   | PenFromPath p -> 
       let p, code = path p in
         C.PenFromPath p, code

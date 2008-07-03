@@ -824,6 +824,71 @@ module Plot : sig
                     (int -> float) -> skeleton -> Command.t
 end
 
+
+module Shapes : sig
+
+(** Various Basic Geometric Shapes *)
+
+  val rounded_rect : 
+    ?fill:Color.t -> ?stroke:Color.t -> ?thickness:Num.t ->
+    Num.t -> Num.t -> Num.t -> Num.t -> Picture.t
+    (** [rounded_rect w h rx ry] draws a rectangle of width [w] and
+	height [h] with rounded corners. The rounded corners are arcs
+	of an ellipse of radii [rx] and [ry]. [rx] (resp. [ry]) should
+	be positive and smaller than [w/2] (resp. [h/2]).
+	@param fill the color with which to fill the rectangle ;
+	  if no color is provided, the rectangle is not filled.
+	@param stroke the color with which the rectangle's outline
+	  shall be drawn ; default is black.
+	@param thickness the thickness of the pen used to draw
+	  the outline ; 1. is default
+    *)
+      
+  val rectangle :
+    ?fill:Color.t -> ?stroke:Color.t -> ?thickness:Num.t ->
+    Num.t -> Num.t -> Picture.t
+    (** [rectangle w h] draws a rectangle of width [w] and height [h].
+	@param fill the color with which to fill the rectangle ;
+	  if no color is provided, the rectangle is not filled.
+	@param stroke the color with which the rectangle's outline
+	  shall be drawn ; default is black.
+	@param thickness the thickness of the pen used to draw
+	  the outline ; 1. is default
+    *)
+
+  val ellipse :
+    ?fill:Color.t -> ?stroke:Color.t -> ?thickness:Num.t ->
+    Num.t -> Num.t -> Picture.t
+    (** [ellipse rx ry] draws an ellipse of great axis [rx] and small axis [ry].
+	The ellipse is centered on the origin and aligned with the x axis.
+	@param fill the colod with which to fill the ellipse ; if no color
+	  is provided, it is not filled.
+	@param stroke the color with which the ellipse's outline shall be
+	  drawn ; default is black.
+	@param thickness the thickness of the pen used to draw
+	  the outline ; 1. is default
+    *)
+
+  val arc_ellipse :
+    ?fill:Color.t -> ?stroke:Color.t -> ?thickness:Num.t -> ?close:bool ->
+    Num.t -> Num.t -> float -> float -> Picture.t
+    (** [arc_ellipse rx ry th1 th2] draws an arc of the ellipse 
+	of great axis [rx] and small axis [ry] starting at angle [th1] and
+	ending at angle [th2] (in radians).
+	The ellipse is centered on the origin and aligned with the x axis.
+	@param fill the colod with which to fill the ellipse ; if no color
+	  is provided, it is not filled.
+	@param stroke the color with which the ellipse's outline shall be
+	  drawn ; default is black.
+	@param thickness the thickness of the pen used to draw
+	  the outline ; 1. is default
+	@param close if true, the extremities of the arc are joined to 
+	the origin by straight lines, thus closing path. If [fill] is provided,
+	then [close] will be true by default ; otherwise it is false.
+    *)
+
+end
+
 (** {2 Metapost generation} *)
 
 (* Misc does not appear in the documentation *)

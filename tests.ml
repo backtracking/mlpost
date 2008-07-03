@@ -318,11 +318,38 @@ let d16 =
 
 let d17 = Command.logo
 
-    
+let shapes1 =
+  List.fold_left Picture.below
+    (Picture.tex "Shapes 1 !")
+    [Shapes.rectangle 10. 20.;
+     Shapes.rectangle ~stroke:Color.purple ~thickness:4. 35. 15.;
+     Shapes.rectangle 
+       ~fill:Color.blue ~stroke:Color.orange ~thickness:4. 15. 35.;
+     Shapes.rounded_rect 55. 25. 10. 10.;
+     Shapes.rounded_rect ~stroke:Color.green 55. 25. 20. 5.;
+(*      Shapes.rounded_rect ~fill:Color.black ~stroke:Color.red  *)
+(*        ~thickness:2. 70. 25. 12.5 12.5; *)
+     Shapes.rounded_rect ~fill:Color.black ~stroke:Color.red 
+       ~thickness:2. 70. 25. 14. 14.;
+    ]
+  
+let shapes2 =
+  List.fold_left Picture.below
+    (Picture.tex "Shapes 2 !")
+    [
+      Shapes.arc_ellipse 10. 10. 0. 1.7;
+      Shapes.arc_ellipse ~stroke:Color.red 30. 10. 0. 1.7;
+      Shapes.arc_ellipse ~stroke:Color.red ~close:true 30. 10. 0. 1.7 ;
+      Shapes.arc_ellipse ~fill:Color.black ~stroke:Color.red 30. 10. 0. 1.7;
+      Shapes.ellipse 10. 10.;
+      Shapes.ellipse ~stroke:Color.red 30. 10.;
+      Shapes.ellipse ~fill:Color.black ~stroke:Color.red 30. 10.;
+    ]
 
-let figs = [d17; d1'; d1; d15; florence; d14; d13;
- d11; d7; d6; d5; d4; cheno011; proval; d3;  
-             d2sq; d2hsq; d2s; d2c; ] 
+let figs = [[Command.draw_pic shapes1]; [Command.draw_pic shapes2]]    
+  (* let figs = [d17; d1'; d1; d15; florence; d14; d13; *)
+  (*  d11; d7; d6; d5; d4; cheno011; proval; d3;   *)
+  (*              d2sq; d2hsq; d2s; d2c; ]  *)
 
 let figs =
   let r = ref 0 in
