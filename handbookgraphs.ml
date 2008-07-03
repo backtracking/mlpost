@@ -17,10 +17,11 @@
 open Mlpost
 open Command
 open Picture
-open Point
 open Path
 module H = Helpers
-module N = Num
+open Num
+open Num.Infix
+open Point
 
 let draw1 = 1, [ draw 
                    (path ~style:JLine [20.,20.; 0.,0.; 0.,30.; 30.,0.; 0.,0.])]
@@ -77,7 +78,7 @@ let draw6 = 6,
 
 
 let lex = knot ~r:(Vec(dir 45.)) (0.,0.)
-let rex a = knot ~l:(Vec(dir (10.*.a))) ~scale:N.cm (6., 0.)
+let rex a = knot ~l:(Vec(dir (10.*.a))) ~scale:cm (6., 0.)
 let draw7 = 7, 
             [Command.iter 0 9
                (fun a ->
@@ -94,9 +95,9 @@ let z0 = (-1., 0.)
 let z1 = (0., 0.2)
 let z2 = ( 1., 0.)
 let labels9 = H.dotlabels ~pos:Pbot ["0";"1";"2"] (map_in [z0;z1;z2])
-let z0 = knot ~r:(Vec up) ~scale:N.inch z0
-let z1 = knot ~r:(Vec right) ~scale:N.inch z1
-let z2 = knot ~r:(Vec down) ~scale:N.inch z2
+let z0 = knot ~r:(Vec up) ~scale:inch z0
+let z1 = knot ~r:(Vec right) ~scale:inch z1
+let z2 = knot ~r:(Vec down) ~scale:inch z2
 
 let draw9a = 109, [draw (pathk [z0;z1;z2])] @ labels9
 let draw9b = 209, [draw (pathk ~style:JCurveNoInflex [z0;z1;z2])] @labels9
@@ -109,13 +110,13 @@ let z3 = (u 5.),u 0.
 let l1 = [z0;z1;z2;z3]
 let labels10 = H.dotlabels ~pos:Pbot ["0";"1";"2";"3"] (map_in l1)
 
-let draw10a = 110, [draw (path ~scale:N.inch l1) ] @ labels10
+let draw10a = 110, [draw (path ~scale:inch l1) ] @ labels10
 
 let draw10b = 210, 
-  [ draw (jointpath ~scale:N.inch l1 [JCurve; JTension(1.3,1.3); JCurve] ) ] 
+  [ draw (jointpath ~scale:inch l1 [JCurve; JTension(1.3,1.3); JCurve] ) ] 
   @ labels10
 let draw10c = 310, 
-  [ draw (jointpath ~scale:N.inch l1 [JCurve; JTension(1.5,1.0); JCurve] ) ]
+  [ draw (jointpath ~scale:inch l1 [JCurve; JTension(1.5,1.0); JCurve] ) ]
   @ labels10
 
 let u l = 1.4 /. 10. *. l
@@ -129,9 +130,9 @@ let z0 = u (2.), u (-5.)
 let z1 = 0., 0.
 let z2 = u 2., u 5.
 let cl = [0.; 1.; 2.; infinity]
-let pat c = [ knot ~r:(Curl c) ~scale:N.inch z0 ; 
-              knot ~scale:N.inch z1; 
-              knot ~l:(Curl c) ~scale:N.inch z2 ]
+let pat c = [ knot ~r:(Curl c) ~scale:inch z0 ; 
+              knot ~scale:inch z1; 
+              knot ~l:(Curl c) ~scale:inch z2 ]
 
 let draw11 =
   let numbers = [111; 211; 311; 411] in
@@ -145,8 +146,8 @@ let draw11 =
 let draw17 =
   let a, b = Num.inch (0.7), Num.inch (0.5) in
   let z0 = p (0.,0.) in
-  let z1 = p (a, 0.) and z3 = p (-.a, 0.) in
-  let z2 = p (0., b) and z4 = p (0., -.b) in
+  let z1 = pt (a, f 0.) and z3 = pt (f 0. -/ a, f 0.) in
+  let z2 = pt (f 0., b) and z4 = pt (f 0., f 0. -/ b) in
     17, [draw (pathp ~cycle:JCurve [z1;z2;z3;z4]);
 	 draw (pathp ~style:JLine [z1; z0; z2]);
 	 label ~pos:Ptop (tex "a") (segment 0.5 z0 z1);
@@ -161,28 +162,30 @@ let draw18 =
     | 0 -> start (knot ~r:(Vec up) ~scale:u (0.,0.))
     | n -> let f = (float_of_int n /. 2.) in 
 	concat ~style:JCurve (pg (n-1)) (knot ~scale:u (f, sqrt f)) in
-    18, [draw (path ~style:JLine [(0.,u 2.); (0.,0.); (u 4.,0.)]);
+    18, [draw (pathn ~style:JLine [(f 0.,u 2.); (f 0.,f 0.); (u 4.,f 0.)]);
 	 draw ~pen (pg 8);
-	 label ~pos:Plowright (tex "$ \\sqrt x$") (p (u 3., u (sqrt 3.)));
-	 label ~pos:Pbot (tex "$x$") (p (u 2., 0.));
-	 label ~pos:Plowleft (tex "$y$") (p (0., u 1.))]
+	 label ~pos:Plowright (tex "$ \\sqrt x$") (pt (u 3., u (sqrt 3.)));
+	 label ~pos:Pbot (tex "$x$") (pt (u 2., f 0.));
+	 label ~pos:Plowleft (tex "$y$") (pt (f 0., u 1.))]
 	 
+(*
 let draw19 =
   let ux, uy = Num.inch 0.01, Num.inch 0.6 in
-  let dux, duy = 120.*.ux, 4.*.uy in
+  let dux, duy = f 120. */ ux, f 4. */ uy in
   let pen = Pen.circle ~tr:[Transform.scaled ~scale:Num.pt 1.] () in 
   let axey = Picture.transform [Transform.rotated 90.] (tex "axe $y$") in
   let rec pg = function
-    | 0 -> start (knot ~r:(Vec right) (0.,uy))
+    | 0 -> start (knotn ~r:(Vec right) (f 0.,uy))
     | n -> let f = (float_of_int n)*.15. in 
 	concat ~style:JCurve (pg (n-1)) 
-	  (knot (f*.ux, 2./.(1.+.(cos (Num.deg2rad f)))*.uy)) in
+	  (knotn (f*.ux, f 2. // (f 1.+/ (cos (Num.deg2rad f)))*.uy)) in
     19, [draw (path ~style:JLine [(0.,duy); (0.,0.); (dux,0.)]);
 	 draw ~pen (pg 8);
 	 label ~pos:Pbot (tex "axe $x$") (p (60.*.ux, 0.));
 	 label ~pos:Pleft axey (p (0., 2.*.uy));
 	 label ~pos:Pleft (tex "$\\displaystyle y={2\\over1+\\cos x}$")
 	   (p (dux, duy))]
+*)
 
 (** Cette version de draw21 est assez cool mais ne marche pas car la largeur du trait
     est scalée avec la figure... *)
@@ -193,21 +196,21 @@ let draw19 =
 (*     cycle (Vec up) JCurve (concat path JCurve (C.p ~r ~scale:C.CM (0.,0.))) in *)
 (*     21, [fill fillp; draw (transform t fullcircle)] *)
 let draw21 = 
-  let mp d pt = knot ~r:(Vec d) ~scale:N.cm pt in
+  let mp d pt = knot ~r:(Vec d) ~scale:cm pt in
   let kl = [mp down (-1.,0.); mp right (0.,-1.); mp up (1.,0.)] in
   let path = pathk kl in
   let r = Vec (p (-.1., -.2.)) in
   let fillp = cycle ~dir:(Vec up)
-      (concat path (knot ~r ~scale:N.cm (0.,0.))) in
+      (concat path (knot ~r ~scale:cm (0.,0.))) in
   let fullp = cycle (concat path (mp left (0.,1.))) in
     21, [fill fillp; draw fullp]
 
 let draw22 =
-  let a = transform [Transform.scaled (Num.cm 2.)] fullcircle in
-  let aa = transform [Transform.scaled (Num.cm 2.)] halfcircle in
-  let b = transform [Transform.shifted (p (0., Num.cm 1.))] a in
-  let pa = make (label (tex "$A$") (p (0., Num.cm (-0.5)))) in
-  let pb= make (label (tex "$B$") (p (0., Num.cm 1.5))) in  
+  let a = Path.transform [Transform.scaled ~scale:cm 2.] fullcircle in
+  let aa = Path.transform [Transform.scaled ~scale:cm 2.] halfcircle in
+  let b = Path.transform [Transform.shifted (pt (f 0., Num.cm 1.))] a in
+  let pa = make (label (tex "$A$") (pt (f 0., Num.cm (-0.5)))) in
+  let pb= make (label (tex "$B$") (pt (f 0., Num.cm 1.5))) in  
   let ab = build_cycle [aa; b] in
   let pic = make
     (seq [fill ~color:(Color.gray 0.7) a;
@@ -226,7 +229,7 @@ let draw40 =
   let p1 = pathk [k1;k2;k3] in
   let p2 = append p1 
             (Path.transform 
-              [Transform.yscaled (-1.); 
+              [Transform.yscaled (f (-1.)); 
                Transform.shifted (p ~scale:Num.pt (10.,0.))] p1) in
   let p2 = 
     Misc.fold_from_to
@@ -248,7 +251,7 @@ let figs =
   [ draw1; draw3; draw4a; draw4b;draw5; 
     draw6; draw7; draw8; draw9a; draw9b;
     draw10a; draw10b; draw10c] @ draw11 
-  @ [draw17; draw18; draw19; draw21; draw22; draw40]
+  @ [draw17; draw18; draw21; draw22; draw40]
 
 let mpostfile = "test/testmanual.mp"
 let texfile = "test/testmanual.tex"
