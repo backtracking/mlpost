@@ -46,8 +46,36 @@ let option_compile f = function
       let obj, c = f obj in
         Some obj, c
 
-let rec point = function
-  | PTPair (f1,f2) -> C.PTPair (f1,f2), nop
+let rec num = function
+  | F f -> C.F f, nop
+  | NXPart p -> 
+      let p,c = point p in
+      C.NXPart p, c
+  | NYPart p ->
+      let p,c = point p in
+      C.NYPart p, c
+  | NAdd (n1,n2) ->
+      let n1,c1 = num n1 in
+      let n2,c2 = num n2 in
+        C.NAdd (n1,n2), c1 ++ c2
+  | NMinus (n1,n2) ->
+      let n1,c1 = num n1 in
+      let n2,c2 = num n2 in
+        C.NMinus (n1,n2), c1 ++ c2
+  | NMult (n1,n2) ->
+      let n1,c1 = num n1 in
+      let n2,c2 = num n2 in
+        C.NMult (n1,n2), c1 ++ c2
+  | NDiv (n1,n2) ->
+      let n1,c1 = num n1 in
+      let n2,c2 = num n2 in
+        C.NDiv (n1,n2), c1 ++ c2
+
+and point = function
+  | PTPair (f1,f2) -> 
+      let f1, c1 = num f1 in
+      let f2,c2 = num f2 in 
+      C.PTPair (f1,f2), c1 ++ c2
   | PTPointOf (f,p) -> 
       let p, code = path p in
         C.PTPointOf (f,p) , code
@@ -60,8 +88,9 @@ let rec point = function
       let p2,c2 = point p2 in
         C.PTSub (p1,p2),  c1 ++ c2
   | PTMult (f,p) ->
-      let p1,c1 = point p in
-        C.PTMult (f,p1), c1
+      let f, c1 = num f in
+      let p1,c2 = point p in
+        C.PTMult (f,p1), c1 ++ c2
   | PTRotated (f,p) ->
       let p1,c1 = point p in
         C.PTRotated (f,p1), c1
@@ -192,10 +221,18 @@ and direction = function
 
 and transform = function
   | TRRotated f -> C.TRRotated f, nop
-  | TRScaled f -> C.TRScaled f, nop
-  | TRSlanted f -> C.TRSlanted f, nop
-  | TRXscaled f -> C.TRXscaled f, nop
-  | TRYscaled f -> C.TRYscaled f, nop
+  | TRScaled f -> 
+      let f,c = num f in
+      C.TRScaled f, c
+  | TRSlanted f -> 
+      let f,c = num f in
+      C.TRSlanted f, c
+  | TRXscaled f -> 
+      let f,c = num f in
+      C.TRXscaled f, c
+  | TRYscaled f -> 
+      let f,c = num f in
+      C.TRYscaled f, c
   | TRShifted p -> 
       let p, code = point p in
         C.TRShifted p, code

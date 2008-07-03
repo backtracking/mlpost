@@ -14,14 +14,23 @@
 (*                                                                        *)
 (**************************************************************************)
 
-type point =
+type num = 
+  | F of float
+  | NXPart of point
+  | NYPart of point
+  | NAdd of num * num
+  | NMinus of num * num
+  | NMult of num * num
+  | NDiv of num * num
+
+and point =
   | PTPair of num * num
   | PTBoxCorner of box * corner
   | PTPicCorner of picture * piccorner
   | PTPointOf of float * path
   | PTAdd of point * point
   | PTSub of point * point
-  | PTMult of float * point
+  | PTMult of num * point
   | PTRotated of float * point
   | PTTransformed of point * transform list
   | PTLength of point
@@ -115,7 +124,6 @@ and command =
 
 and color = Types.color
 and position = Types.position
-and num = Types.num
 and name = Types.name
 and corner = Types.corner
 and piccorner = Types.piccorner
