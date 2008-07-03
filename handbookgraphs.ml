@@ -168,7 +168,6 @@ let draw18 =
 	 label ~pos:Pbot (tex "$x$") (pt (u 2., f 0.));
 	 label ~pos:Plowleft (tex "$y$") (pt (f 0., u 1.))]
 	 
-(*
 let draw19 =
   let ux, uy = Num.inch 0.01, Num.inch 0.6 in
   let dux, duy = f 120. */ ux, f 4. */ uy in
@@ -176,16 +175,15 @@ let draw19 =
   let axey = Picture.transform [Transform.rotated 90.] (tex "axe $y$") in
   let rec pg = function
     | 0 -> start (knotn ~r:(Vec right) (f 0.,uy))
-    | n -> let f = (float_of_int n)*.15. in 
+    | n -> let k = (float_of_int n)*.15. in 
 	concat ~style:JCurve (pg (n-1)) 
-	  (knotn (f*.ux, f 2. // (f 1.+/ (cos (Num.deg2rad f)))*.uy)) in
-    19, [draw (path ~style:JLine [(0.,duy); (0.,0.); (dux,0.)]);
+	  (knotn (f k */ ux, f 2. // (f 1.+/ f (cos (Num.deg2rad k)))*/uy)) in
+    19, [draw (pathn ~style:JLine [(f 0.,duy); (f 0.,f 0.); (dux,f 0.)]);
 	 draw ~pen (pg 8);
-	 label ~pos:Pbot (tex "axe $x$") (p (60.*.ux, 0.));
-	 label ~pos:Pleft axey (p (0., 2.*.uy));
+	 label ~pos:Pbot (tex "axe $x$") (pt (f 60.*/ux, f 0.));
+	 label ~pos:Pleft axey (pt (f 0., f 2.*/uy));
 	 label ~pos:Pleft (tex "$\\displaystyle y={2\\over1+\\cos x}$")
-	   (p (dux, duy))]
-*)
+	   (pt (dux, duy))]
 
 (** Cette version de draw21 est assez cool mais ne marche pas car la largeur du trait
     est scalée avec la figure... *)
