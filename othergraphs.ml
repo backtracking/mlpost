@@ -110,7 +110,7 @@ let d130 =
 	construit la transform à la main.. :-/ *)
   let ratio = sqrt (3.28 /. 4.) in
   let angle = atan (0.2 /. 1.8) *. 360. /. deuxpi in
-  let v = p (Num.cm 0.2, Num.cm 0.) in
+  let v = pt (Num.cm 0.2, Num.cm 0.) in
   let t = [T.rotated angle; T.scaled ratio; T.shifted v] in
   let rec apply acc = function 0 -> acc | n -> apply (transform t acc) (n-1) in
   let cmd i = 
@@ -149,7 +149,7 @@ let d195 =
   let n = 8 and u x = 5.*. (float_of_int x) in
   let un = u n and u1 = u 1 and udemi = (u 1) /. 5. in
   let color = Color.gray 0.8 in
-  let t i j = T.shifted (p (Num.mm (u i), Num.mm (u j))) in
+  let t i j = T.shifted (pt (Num.mm (u i), Num.mm (u j))) in
   let row i =
     let col j =
       if (i+j) mod 2 = 1 then
