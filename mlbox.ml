@@ -32,7 +32,7 @@ let margin = p (2., 2.)
 
 (* the same behaviour as METAPOST *)
 let get_margins ur ll =
-  let diag = mult 0.5 (sub ur ll) in
+  let diag = mult (F 0.5) (sub ur ll) in
   let l = add (lengthpoint diag) margin in
     sub l diag
 
