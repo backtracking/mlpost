@@ -81,7 +81,32 @@ let rec point = function
 
 
 and path p =
-  let rec compile_path = function
+  let find_name_with_cont k p =
+    (* find the name of path [p] if it exists,
+     * otherwise go on with continuation [k] *)
+    match p with
+      | PAName n -> C.PAName n, nop
+      | _ -> try
+              let n = HPath.find known_paths p in
+                C.PAName n, nop
+             with Not_found -> k p
+  in
+  let rec new_name old =
+    (* give a new name to the path [old] *)
+    let p, code = compile_path' old in
+    let n = Name.path () in
+    let () = HPath.add known_paths old n in
+      C.PAName n, code ++ C.CDeclPath (n,p)
+
+      (* compile [p], if it hasn't a name yet *)
+  and compile_path p = find_name_with_cont compile_path' p
+
+      (* compile [p] and give it a name, if it hasn't a name yet *)
+  and comp_save_path p = find_name_with_cont new_name p
+  and compile_path' = function
+    (* compile the argument path ; 
+     * use [compile_path] for path components to be able to use
+     * path components that already have a name *)
     | PACycle (d,j,p) ->
         let d, c1 = direction d in
         let j, c2 = joint j in
@@ -95,7 +120,10 @@ and path p =
     | PATransformed (p,tr) ->
         let p, c1 = compile_path p in
         let tr, c2 = transform_list tr in
-        C.PATransformed (p,tr), c1 ++ c2
+        (* group transformations, for slightly smaller metapost code *)
+        (* this only happens in the Metapost AST, to be able to use
+         * path components that already have a name *)
+        C.pa_transformed p tr, c1 ++ c2
     | PACutAfter (p1,p2) ->
         let p1, c1 = compile_path p1 in
         let p2, c2 = compile_path p2 in
@@ -112,39 +140,32 @@ and path p =
     | PABuildCycle pl ->
         let npl = List.map compile_path pl in
         C.PABuildCycle (List.map fst npl), C.CSeq (List.map snd npl)
+    | PASub (f1, f2, p) ->
+        (* the Metapost subpath command needs a path name as argument
+         * we use comp_save_path here to assure that *)
+        let p, code = comp_save_path p in
+        begin
+          match p with
+            | C.PAName n -> C.PASub (f1,f2,n), code
+            | _ -> assert false
+        end
+        (* simple paths are not compiled nor given names *)
     | PABBox p ->
         let p, code = picture p in
         C.PABBox p, code
     | PABoxBPath b ->
         let b, code = box b in
         C.PABoxBPath b, code
+    | PAKnot k ->
+        let k, code = knot k in
+        C.PAKnot k, code
+    | PAName n -> C.PAName n, nop
     | PAUnitSquare -> C.PAUnitSquare, nop
     | PAQuarterCircle -> C.PAQuarterCircle, nop
     | PAHalfCircle -> C.PAHalfCircle, nop
     | PAFullCircle -> C.PAFullCircle, nop
-    | PAKnot k ->
-        let k, code = knot k in
-        C.PAKnot k, code
-    | PASub (f1, f2, p) ->
-        let p, code = path p in
-        begin
-          match p with
-            | C.PAName n -> C.PASub (f1,f2,n), code
-            | _ -> assert false
-        end
-    | PAName _ -> assert false
   in
-    match p with
-      | PAName n -> C.PAName n, nop
-      | _ ->
-          try
-            let n = HPath.find known_paths p in
-            C.PAName n, nop
-          with Not_found ->
-            let n = Name.path () in
-            let () = HPath.add known_paths p n in
-            let p, code = compile_path p in
-              C.PAName n, code ++ C.CDeclPath (n,p)
+    comp_save_path p
 
 and knot (d1,p,d2) =
   let d1, c1 = direction d1 in

@@ -346,10 +346,10 @@ let shapes2 =
       Shapes.ellipse ~fill:Color.black ~stroke:Color.red 30. 10.;
     ]
 
-let figs = [[Command.draw_pic shapes1]; [Command.draw_pic shapes2]]    
-  (* let figs = [d17; d1'; d1; d15; florence; d14; d13; *)
-  (*  d11; d7; d6; d5; d4; cheno011; proval; d3;   *)
-  (*              d2sq; d2hsq; d2s; d2c; ]  *)
+let figs = [[Command.draw_pic shapes1]; [Command.draw_pic shapes2];
+            d17; d1'; d1; d15; florence; d14; d13; 
+ d11; d7; d6; d5; d4; cheno011; proval; d3;  
+              d2sq; d2hsq; d2s; d2c; ] 
 
 let figs =
   let r = ref 0 in

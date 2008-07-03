@@ -122,3 +122,9 @@ and piccorner = Types.piccorner
 and boxed = Types.boxed
 and box_circle_style  =Types.box_circle_style
 and on_off  =Types.on_off
+
+let pa_transformed p l =
+  match p with
+    | PATransformed (p',l') ->
+        PATransformed (p', l' @ l)
+    | _ -> PATransformed (p,l)
