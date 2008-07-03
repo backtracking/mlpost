@@ -18,6 +18,10 @@ open Types
 
 type t = num
 
+let f x = F x
+
+let num_of_int i = F (float_of_int i)
+
 let bp f = F f
 let pt f = F (0.99626 *. f)
 let cm f = F (28.34645 *. f)

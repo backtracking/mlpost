@@ -17,6 +17,8 @@
 open Command
 open Helpers
 open Path
+open Num
+open Num.Infix
 
 type node_style = Circle | Rect
 
@@ -56,7 +58,7 @@ let arc astyle estyle ?stroke ?pen (b1,(x1,y1)) (b2,(x2,y2)) =
       | Straight -> boxdraw ~style:JLine b1 b2
       | Curve -> 
 	  let p1, p2 = Box.center b1, Box.center b2 in
-	  let corner = Point.p (x2-.(x2-.x1)/.4.,(y1+.y2)/.2.) in
+	  let corner = Point.pt (x2-/(x2-/x1)//(f 4.),(y1+/y2)//(f 2.)) in
 	  let p = pathk ~style:JCurve
 	    [NoDir, p1, Vec (Point.sub corner p1); 
 	     NoDir, corner, NoDir; 
@@ -66,7 +68,7 @@ let arc astyle estyle ?stroke ?pen (b1,(x1,y1)) (b2,(x2,y2)) =
 	  in
 	    linedraw parrow
       | Square -> 
-	  let corner = Point.p (x2,y1) in
+	  let corner = Point.pt (x2,y1) in
 	  let p = pathp ~style:JLine 
 	    [Box.center b1; corner; Box.center b2] in
 	  let parrow = 
@@ -74,8 +76,8 @@ let arc astyle estyle ?stroke ?pen (b1,(x1,y1)) (b2,(x2,y2)) =
 	  in
 	    linedraw parrow
       | HalfSquare -> 
-	  let m = (y1+.y2)/.2. in
-	  let corner1, corner2 = Point.p (x1,m), Point.p (x2,m) in
+	  let m = (y1+/y2)//(f 2.) in
+	  let corner1, corner2 = Point.pt (x1,m), Point.pt (x2,m) in
 	  let p = pathp ~style:JLine 
 	    [Box.center b1; corner1; corner2; Box.center b2] in
 	  let parrow = 
@@ -87,7 +89,7 @@ let draw ?(scale=Num.cm)
     ?(node_style=Circle) ?(arrow_style=Directed) ?(edge_style=Straight)
     ?(boxed=true) ?fill ?stroke ?pen
     ?(ls=1.0) ?(nw=0.5) ?(cs=0.2) t =
-  let point x y = Point.p (scale x, scale y) in
+  let point x y = Point.pt (scale x, scale y) in
   (* tree -> float * (float -> float -> box * figure) *)
   let rec draw (N (nstyle, nfill, s, l)) =
     let l = List.map draw l in

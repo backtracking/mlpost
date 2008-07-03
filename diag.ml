@@ -94,7 +94,7 @@ let indir = function None -> None | Some x -> Some (indir x)
 type node_style = Circle of Box.circle_style | Rect
 
 let make_box ~style ~scale d n = 
-  let p = Point.p (scale n.x, scale n.y) in
+  let p = Point.pt (scale n.x, scale n.y) in
   let pic = n.s in
   let b = match style with 
     | Circle s -> Box.circle ~style:s p pic 
