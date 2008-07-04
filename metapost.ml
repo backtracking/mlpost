@@ -64,6 +64,8 @@ let rec print_num fmt = function
   | C.NMinus (f1, f2) -> fprintf fmt "(%a - %a)" print_num f1 print_num f2
   | C.NMult (f1, f2) -> fprintf fmt "(%a*%a)" print_num f1 print_num f2
   | C.NDiv (f1, f2) -> fprintf fmt "(%a/%a)" print_num f1 print_num f2
+  | C.NMax (f1, f2) -> fprintf fmt "(max %a %a)" print_num f1 print_num f2
+  | C.NMin (f1, f2) -> fprintf fmt "(min %a %a)" print_num f1 print_num f2
 
 and print_float fmt f = print_num fmt (C.F f)
 

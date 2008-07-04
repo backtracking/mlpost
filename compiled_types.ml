@@ -22,6 +22,8 @@ type num =
   | NMinus of num * num
   | NMult of num * num
   | NDiv of num * num
+  | NMax of num * num
+  | NMin of num * num
 
 and point =
   | PTPair of num * num

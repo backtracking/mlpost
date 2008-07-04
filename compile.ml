@@ -70,6 +70,14 @@ let rec num = function
       let n1,c1 = num n1 in
       let n2,c2 = num n2 in
         C.NDiv (n1,n2), c1 ++ c2
+  | NMax (n1,n2) ->
+      let n1,c1 = num n1 in
+      let n2,c2 = num n2 in
+	C.NMax (n1,n2), c1 ++ c2
+  | NMin (n1,n2) ->
+      let n1,c1 = num n1 in
+      let n2,c2 = num n2 in
+	C.NMin (n1,n2), c1 ++ c2
 
 and point = function
   | PTPair (f1,f2) -> 
