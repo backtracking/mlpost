@@ -733,7 +733,7 @@ module Tree : sig
     ?node_style:node_style -> ?arrow_style:arrow_style -> 
     ?edge_style:edge_style ->
     ?boxed:bool -> ?fill:Color.t -> ?stroke:Color.t -> ?pen:Pen.t ->
-    ?ls:float -> ?nw:float -> ?cs:float -> 
+    ?ls:Num.t -> ?nw:Num.t -> ?cs:Num.t -> 
     t -> Command.t
     (** Default scale is [Num.cm].
 	Default node_style is [Circle].

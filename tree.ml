@@ -35,9 +35,9 @@ module Pic = struct
 end
 
 let rec width cs = function
-  | [] -> 0.
+  | [] -> f 0.
   | [w, _] -> w
-  | (w, _) :: l -> w +. cs +. width cs l
+  | (w, _) :: l -> w +/ cs +/ width cs l
 
 let box style p pic = match style with
   | Circle -> Box.circle p pic
@@ -85,35 +85,36 @@ let arc astyle estyle ?stroke ?pen (b1,(x1,y1)) (b2,(x2,y2)) =
 	  in
 	    linedraw parrow
 
-let draw ?(scale=Num.cm) 
+let draw ?(scale=Num.cm)
     ?(node_style=Circle) ?(arrow_style=Directed) ?(edge_style=Straight)
     ?(boxed=true) ?fill ?stroke ?pen
-    ?(ls=1.0) ?(nw=0.5) ?(cs=0.2) t =
-  let point x y = Point.pt (scale x, scale y) in
+    ?(ls=f 1.0) ?(nw=f 0.5) ?(cs=f 0.2) t =
+  let point x y = Point.pt (scale 1. */ x, scale 1. */ y) in
   (* tree -> float * (float -> float -> box * figure) *)
   let rec draw (N (nstyle, nfill, s, l)) =
     let l = List.map draw l in
+      (** XXX *)
     let w = max nw (width cs l) in
     w,
     fun x y -> 
       let node_style = match nstyle with None -> node_style | Some s -> s in
       let fill = match nfill with None -> fill | Some _ -> nfill in
       let (b,_) as bx = 
-	box node_style (point x y) s, (scale x, scale y) in
-      let x = ref (x -. w /. 2.) in
+	box node_style (point x y) s, (x */ scale 1., y */ scale 1.) in
+      let x = ref (x -/ (w // (f 2.))) in
       b, 
       draw_box ?fill ~boxed b :: 
 	List.map 
 	(fun (wc,fc) -> 
-	   let x',y' = (!x +. wc /. 2.), (y -. ls) in
+	   let x',y' = (!x +/ (wc // f 2.)), (y -/ ls) in
 	   let b',fig = fc x' y' in
-	   let bx' = b', (scale x', scale y') in
-	   x := !x +. wc +. cs;
+	   let bx' = b', (scale 1. */ x', scale 1. */ y') in
+	   x := !x +/ wc +/ cs;
 	   Command.append (seq fig) (arc ?stroke ?pen arrow_style edge_style bx bx')
 	) l
   in
   let _,f = draw t in
-  Command.seq (snd (f 0. 0.))
+  Command.seq (snd (f (bp 0.) (bp 0.)))
 
 
   

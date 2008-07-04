@@ -23,7 +23,7 @@ open Point
 open Path
 module T = Transform
 
-let (++) x y = p (cm x, cm y)
+let (++) x y = pt (cm x, cm y)
 let shift x y = transform [Transform.shifted (x ++ y)]
 
 let d1 = 
@@ -74,23 +74,20 @@ let rec random_tree = function
       node (string_of_int n) [random_tree k; random_tree (n - 1 - k)]
 
 let d2c, d2s, d2sq, d2hsq = 
+  let ls = bp (-1.0) in
   let tree = random_tree 17 in
-  [draw ~ls:(-1.0) 
-       ~node_style:Circle ~arrow_style:Directed ~edge_style:Curve
+  [draw ~ls ~node_style:Circle ~arrow_style:Directed ~edge_style:Curve
        ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree],
-  [draw ~ls:(-1.0) 
-       ~node_style:Circle ~arrow_style:Directed ~edge_style:Straight
+  [draw ~ls ~node_style:Circle ~arrow_style:Directed ~edge_style:Straight
        ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree],
-  [draw ~ls:(-1.0)
-       ~node_style:Circle ~arrow_style:Directed ~edge_style:Square
+  [draw ~ls ~node_style:Circle ~arrow_style:Directed ~edge_style:Square
        ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree],
-  [draw ~ls:(-1.0)
-       ~node_style:Circle ~arrow_style:Directed ~edge_style:HalfSquare
+  [draw ~ls ~node_style:Circle ~arrow_style:Directed ~edge_style:HalfSquare
        ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree]
 
 let proval =
   let f = 7. in
-  let pen = Pen.square ~tr:[T.yscaled 0.5; T.rotated 40.] () in
+  let pen = Pen.square ~tr:[T.yscaled (bp 0.5); T.rotated 40.] () in
   let check = jointpath [-1.2,1.2; 0., -2. ; 2., 2. ; 5., 5.] [JLine ; JCurve; JCurve] in
     [ fill ~color:(Color.gray 0.2)
         (transform [Transform.scaled f] fullcircle) ;
@@ -273,10 +270,10 @@ let instants =
     Command.seq 
       [base; Command.iter 0 20 tick; 
        Command.label (Picture.transform [Transform.scaled 2.]
-			(Picture.tex "$\\omega_1$")) (pt (-20.,-55.))]
+			(Picture.tex "$\\omega_1$")) (pt (f (-20.), f (-55.)))]
 
 let florence =
-  let sk = mk_skeleton 20 14 14. 20. in
+  let sk = mk_skeleton 20 14 (f 14.) (f 20.) in
   let pen = Pen.default ~tr:[Transform.scaled 4.] () in
   let pen2 = Pen.default ~tr:[Transform.scaled 3.] () in
   let dash _ = Dash.scaled 0.5 Dash.withdots in
@@ -321,29 +318,30 @@ let d17 = Command.logo
 let shapes1 =
   List.fold_left Picture.below
     (Picture.tex "Shapes 1 !")
-    [Shapes.rectangle 10. 20.;
-     Shapes.rectangle ~stroke:Color.purple ~thickness:4. 35. 15.;
+    [Shapes.rectangle (f 10.) (f 20.);
+     Shapes.rectangle ~stroke:Color.purple ~thickness:4. (f 35.) (f 15.);
      Shapes.rectangle 
-       ~fill:Color.blue ~stroke:Color.orange ~thickness:4. 15. 35.;
-     Shapes.rounded_rect 55. 25. 10. 10.;
-     Shapes.rounded_rect ~stroke:Color.green 55. 25. 20. 5.;
+       ~fill:Color.blue ~stroke:Color.orange ~thickness:4. (f 15.) (f 35.);
+     Shapes.rounded_rect (f 55.) (f 25.) (f 10.) (f 10.);
+     Shapes.rounded_rect ~stroke:Color.green (f 55.) (f 25.) (f 20.) (f 5.);
 (*      Shapes.rounded_rect ~fill:Color.black ~stroke:Color.red  *)
 (*        ~thickness:2. 70. 25. 12.5 12.5; *)
      Shapes.rounded_rect ~fill:Color.black ~stroke:Color.red 
-       ~thickness:2. 70. 25. 14. 14.;
+       ~thickness:2. (f 70.) (f 25.) (f 14.) (f 14.);
     ]
   
 let shapes2 =
   List.fold_left Picture.below
     (Picture.tex "Shapes 2 !")
     [
-      Shapes.arc_ellipse 10. 10. 0. 1.7;
-      Shapes.arc_ellipse ~stroke:Color.red 30. 10. 0. 1.7;
-      Shapes.arc_ellipse ~stroke:Color.red ~close:true 30. 10. 0. 1.7 ;
-      Shapes.arc_ellipse ~fill:Color.black ~stroke:Color.red 30. 10. 0. 1.7;
-      Shapes.ellipse 10. 10.;
-      Shapes.ellipse ~stroke:Color.red 30. 10.;
-      Shapes.ellipse ~fill:Color.black ~stroke:Color.red 30. 10.;
+      Shapes.arc_ellipse (f 10.) (f 10.) 0. 1.7;
+      Shapes.arc_ellipse ~stroke:Color.red (f 30.) (f 10.) 0. 1.7;
+      Shapes.arc_ellipse ~stroke:Color.red ~close:true (f 30.) (f 10.) 0. 1.7;
+      Shapes.arc_ellipse 
+	~fill:Color.black ~stroke:Color.red (f 30.) (f 10.) 0. 1.7;
+      Shapes.ellipse (f 10.) (f 10.);
+      Shapes.ellipse ~stroke:Color.red (f 30.) (f 10.);
+      Shapes.ellipse ~fill:Color.black ~stroke:Color.red (f 30.) (f 10.);
     ]
 
 let figs = [[Command.draw_pic shapes1]; [Command.draw_pic shapes2];
