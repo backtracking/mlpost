@@ -204,9 +204,9 @@ let draw21 =
     21, [fill fillp; draw fullp]
 
 let draw22 =
-  let a = Path.transform [Transform.scaled ~scale:cm 2.] fullcircle in
-  let aa = Path.transform [Transform.scaled ~scale:cm 2.] halfcircle in
-  let b = Path.transform [Transform.shifted (pt (f 0., Num.cm 1.))] a in
+  let a = Path.scale ~scale:cm 2. fullcircle in
+  let aa = Path.scale ~scale:cm 2. halfcircle in
+  let b = Path.shift (pt (f 0., Num.cm 1.)) a in
   let pa = make (label (tex "$A$") (pt (f 0., Num.cm (-0.5)))) in
   let pb= make (label (tex "$B$") (pt (f 0., Num.cm 1.5))) in  
   let ab = build_cycle [aa; b] in
@@ -225,23 +225,21 @@ let draw40 =
   let k2 = knot ~scale:Num.pt (5., -3.) in
   let k3 = knot ~scale:Num.pt ~l:(Curl 0.) (10.,0.) in
   let p1 = pathk [k1;k2;k3] in
-  let p2 = append p1 
-            (Path.transform 
-              [Transform.yscaled (f (-1.)); 
-               Transform.shifted (p ~scale:Num.pt (10.,0.))] p1) in
+  let p2 = append p1 (Path.shift (p ~scale:Num.pt (10.,0.)) 
+                       (Path.yscale (f (-1.)) p1)) in
   let p2 = 
     Misc.fold_from_to
       (fun acc i -> 
-        let tr = Transform.shifted (p ~scale:Num.pt (float_of_int i *. 20.,0.)) in
-        append acc (Path.transform [tr] p2)) p2 1 3 in
+        append acc (Path.shift (p ~scale:Num.pt (float_of_int i *. 20.,0.)) p2))
+      p2 1 3 in
   let cmd = 
     Command.iter 0 8
       (fun i ->
-        let tr = Transform.shifted (p ~scale:Num.pt (0., float_of_int i *. 10.)) in
-          Command.draw (Path.transform [tr] p2)) in
+        draw (Path.shift (p ~scale:Num.pt (0., float_of_int i *. 10.)) p2))
+  in
   let pic = Picture.make cmd in
-  let pth = Path.transform [Transform.shifted (p (0.5, 0.5));
-                            Transform.scaled ~scale:Num.pt 72.] fullcircle in
+  let pth = 
+    Path.scale ~scale:Num.pt 72. (Path.shift (p (0.5, 0.5)) fullcircle) in
   let pic' = Picture.clip pic pth in
     40, [ draw_pic pic'; draw pth]
 

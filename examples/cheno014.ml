@@ -6,8 +6,9 @@ open Transform
 
 let z0 = cmp (0., 0.)
 let z1 = cmp (4., 1.)
-let cercle = transform [scaled ~scale:Num.cm 1.; shifted z0] fullcircle
-let rectangle = transform [shifted z1] 
+
+let cercle = Path.shift z0 (Path.scale ~scale:Num.cm 1. fullcircle)
+let rectangle = Path.shift z1
   (path ~style:JLine ~cycle:JLine ~scale:Num.mm
       [-5., -5.; 5., -5.; 5., 5.; -5., 5.])
 let p = pathk [NoDir, z0, Vec (dir 150.); NoDir, z1, Vec (dir (-30.))]

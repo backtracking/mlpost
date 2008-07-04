@@ -265,6 +265,12 @@ and Path : sig
   (** Apply a transformation to a path *)
   val transform : Transform.t -> t -> t
 
+  val scale : ?scale:(float -> Num.t) -> float -> t -> t
+  val rotate : float -> t -> t
+  val shift : Point.t -> t -> t
+  val yscale : Num.t -> t -> t
+  val xscale : Num.t -> t -> t
+
   (** [cut_after p1 p2] cuts [p2] after the intersection with [p1]. 
       To memorize the order of the arguments, 
       you can read: "cut after [p1]" *)

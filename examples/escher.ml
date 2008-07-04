@@ -139,10 +139,10 @@ let fig =
                 let offset = (xf *. xs1 +. yf *. xs2, yf *. ys) in
                 let offset2 = ( (xf +. 1.) *. xs1 +. (yf -. 1.) *. xs2, 
                                 (yf -. 1.) *. ys  ) in
-                let tr p = transform [Transform.shifted (bpp offset)] p in
+                let tr p = Path.shift (bpp offset) p in
                 let mypath po = 
                   let offset = add offset2 po in
-                    transform [Transform.shifted (bpp offset)] Path.fullcircle
+                    Path.shift (bpp offset) Path.fullcircle
                 in
                   seq ([ fill ~color:Color.red (mypath (-12.,27.));
 			 draw ~color:Color.blue (mypath (-12.,27.))] @

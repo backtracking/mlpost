@@ -88,10 +88,8 @@ let d60 =
 
 
 let d111 =
-  let a = transform 
-            [T.scaled ~scale:N.cm 2. ; 
-             T.shifted (p ~scale:N.cm (0.5,0.))] fullcircle 
-  in
+  let a = Path.shift (p ~scale:N.cm (0.5, 0.))
+                    (Path.scale ~scale:N.cm 2. fullcircle) in
   let t = [T.rotated 120.] in
   let b = transform t a in
   let c = transform t b in
@@ -124,11 +122,11 @@ let d140 =
   let cmd i =
     let s = 1. -. ((float_of_int i) *. 0.01) in
       fill ~color:(Color.gray s) 
-        (transform [T.scaled ~scale:Num.cm (2.*.s)] fullcircle)
+        (Path.scale ~scale:Num.cm (2.*.s) fullcircle)
   in
   140, [iter 0 99 cmd;
 	draw ~pen:(P.circle ~tr:[T.scaled 2.] ())
-	  (transform [T.scaled ~scale:Num.cm 2.] fullcircle)]
+          (Path.scale ~scale:Num.cm 2. fullcircle)]
 
 let d149 =
   let step = deuxpi /. 720. in

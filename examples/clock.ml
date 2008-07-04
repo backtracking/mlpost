@@ -5,7 +5,7 @@ open Point
 
 let fig =
   let pen = Pen.default ~tr:([Transform.scaled 10.0]) () in
-  let circle = Path.transform [Transform.scaled ~scale:Num.cm 9.] Path.fullcircle in
+  let circle = Path.scale ~scale:Num.cm 9. Path.fullcircle in
   let color = Color.blue in
   let time hr mn = 
     let m = (float_of_int (mn mod 60)) in

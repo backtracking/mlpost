@@ -34,7 +34,7 @@ let d1 =
     draw_box ~fill:Color.purple b;
     draw
       ~color:Color.red
-      (transform [Transform.shifted (1. ++ 1.)] (Box.bpath a));
+      (Path.shift (1. ++ 1.) (Box.bpath a));
     draw_label_arrow ~color:Color.orange ~pen 
       ~pos:Pupright (Picture.tex "foo") (Box.west a) (Box.south_east b);
     box_arrow ~color:Color.blue a b;
@@ -48,7 +48,7 @@ let d1' =
     draw_mlbox ~fill:Color.purple b;
     draw
       ~color:Color.red
-      (transform [Transform.shifted (1. ++ 1.)] (Mlbox.bpath a));
+      (Path.shift (1. ++ 1.) (Mlbox.bpath a));
 (*
     draw_label_arrow ~color:Color.orange ~pen 
       ~pos:Pupright (Picture.tex "foo") (Mlbox.west a) (Mlbox.south_east b);
@@ -89,8 +89,7 @@ let proval =
   let f = 7. in
   let pen = Pen.square ~tr:[T.yscaled (bp 0.5); T.rotated 40.] () in
   let check = jointpath [-1.2,1.2; 0., -2. ; 2., 2. ; 5., 5.] [JLine ; JCurve; JCurve] in
-    [ fill ~color:(Color.gray 0.2)
-        (transform [Transform.scaled f] fullcircle) ;
+    [ fill ~color:(Color.gray 0.2) (Path.scale f fullcircle) ;
       label ~pos:Pleft (Picture.tex "Pr") (Point.p (f /. (-4.),0.)) ;
       label ~pos:Pright (Picture.tex "al") (Point.p (f /. 4.,0.)) ;
       Command.draw ~color:Color.green ~pen check;]

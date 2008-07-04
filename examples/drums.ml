@@ -19,8 +19,7 @@ let steel = Color.gray 0.85
 (** The (closed) hihat ! true : color, false : b&w *)
 let hihat b =
   let d = mydraw b in
-  let cymb = transform [Transform.xscaled (scale 7.);
-			Transform.yscaled (scale 1.2)] fullcircle in
+  let cymb = Path.yscale (f 1.2) (Path.xscale (f 7.) fullcircle) in
   let head =
     polyg [(-0.5,0.); (-0.3,0.); (-0.15,1.65); (0.15,1.65);
 	   (0.3,0.); (0.5,0.); (0.33,-1.2); (-0.33,-1.2)] in
@@ -31,7 +30,7 @@ let hihat b =
   let foot b l alpha c =
     let hb = b /. 2. and ls = l*.(sin alpha) and lc = -.l*.(cos alpha) in
     let f = polyg [(hb,0.); (hb-.ls,lc); (-.hb-.ls,lc); (-.hb,0.)] in
-      transform [Transform.shifted (p ~scale c)] f
+      Path.shift (p ~scale c) f
   in
     seq [d steel stem; d steel stemjoint;
 	 d steel (foot 0.5 3.5 0. (0.,-9.0));
