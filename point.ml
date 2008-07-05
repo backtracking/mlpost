@@ -113,7 +113,7 @@ let pmap f (a,b) = (f a, f b)
 let p ?(scale=Num.bp) pr =
   pt (pmap scale pr)
 
-let lengthpoint p = PTLength p
+let length p = gmean (xpart p) (ypart p)
 
 let p ?(scale=Num.bp) pr =
   pt (pmap scale pr)

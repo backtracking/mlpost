@@ -24,6 +24,7 @@ type num =
   | NDiv of num * num
   | NMax of num * num
   | NMin of num * num
+  | NGMean of num * num
 
 and point =
   | PTPair of num * num
@@ -35,7 +36,6 @@ and point =
   | PTMult of num * point
   | PTRotated of float * point
   | PTTransformed of point * transform list
-  | PTLength of point
 
 and direction = 
   | Vec of point

@@ -55,6 +55,11 @@ let divn x y =
   | F f1, F f2 -> F (f1 /. f2)
   | _, _ -> NDiv (x,y)
 
+let gmean x y = 
+  match x, y with
+  | F f1, F f2 -> F ( sqrt (f1 *. f1 +. f2 *. f2 ))
+  | _, _ -> NGMean (x,y)
+
 module Scale = struct
   let bp x y = bp (x *. y)
   let pt x y = pt (x *. y)

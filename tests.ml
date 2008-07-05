@@ -308,7 +308,8 @@ let d15 =
 
 let d16 = 
   let p1 = Point.p (0.,50.) in
-  let p2 = Point.lengthpoint p1 in
+  let l = Point.length p1 in
+  let p2 = Point.pt (l,l) in
   let p3 = Point.p (50.,0.) in
     [ Command.draw (pathp ~style:JLine [p3;p2;p1])]
 
@@ -344,7 +345,7 @@ let shapes2 =
     ]
 
 let figs = [[Command.draw_pic shapes1]; [Command.draw_pic shapes2];
-            d17; d1'; d1; d15; florence; d14; d13; 
+d17; d16; d1'; d1; d15; florence; d14; d13; 
  d11; d7; d6; d5; d4; cheno011; proval; d3;  
               d2sq; d2hsq; d2s; d2c; ] 
 

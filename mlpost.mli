@@ -36,6 +36,8 @@ module rec Num : sig
   val mm : float -> t
   val inch : float -> t
 
+  val gmean : t -> t -> t
+
   module Infix : sig
     val (+/) : t -> t -> t
     val (-/) : t -> t -> t
@@ -84,8 +86,8 @@ and Point : sig
 
   val origin : t
 
-  val lengthpoint : t -> t
-  (** [lengthpoint p] is the point [(|p|,|p|)] *)
+  val length : t -> Num.t
+  (** [length p] is the length of vector from the origin to [p] *)
 
   (** {2 Operations on points} *)
     

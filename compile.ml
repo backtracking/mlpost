@@ -78,6 +78,10 @@ let rec num = function
       let n1,c1 = num n1 in
       let n2,c2 = num n2 in
 	C.NMin (n1,n2), c1 ++ c2
+  | NGMean (n1,n2) ->
+      let n1,c1 = num n1 in
+      let n2,c2 = num n2 in
+	C.NGMean (n1,n2), c1 ++ c2
 
 and point = function
   | PTPair (f1,f2) -> 
@@ -112,10 +116,6 @@ and point = function
       let p, c1 = point p in
       let tr, c2 = transform_list tr in
         C.PTTransformed (p,tr),  c1 ++ c2
-  | PTLength p ->
-      let p1,c1 = point p in
-        C.PTLength p1, c1
-
 
 and path p =
   let find_name_with_cont k p =
