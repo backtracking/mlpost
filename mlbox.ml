@@ -19,50 +19,37 @@ open Types
 open Picture
 open Point
 
+open Num.Infix
+
 type t = mlbox
 
 let rect c p = 
   let pic = center p c in
     let p = bbox pic in
-      MLBBox (c, p, pic)
+    { c = c; bpath = p ; pic = pic }
 
-let middle p1 p2 = segment 0.5 p1 p2
+let margin = Num.bp 2.
 
-let margin = p (2., 2.)
-
-(* the same behaviour as METAPOST *)
-let get_margins ur ll =
-  let diag = mult (F 0.5) (sub ur ll) in
-  let le = length diag in
-  let l = add (pt (le,le)) margin in
-    sub l diag
-
-let circle c pic = 
+let circle ?(dr=F 0.) c pic =
   let pic = center pic c in
-  let ul = ulcorner pic in
-  let lr = lrcorner pic in
-  let ll = llcorner pic in
-  let ur = urcorner pic in
-  let marginpoint = get_margins ur ll in
-  let dxp = yscaled (F 0.) marginpoint in
-  let dyp = xscaled (F 0.) marginpoint in
-  let halfxdiff = add (mult (F 0.5) (sub lr ll)) dxp in
-  let halfydiff = add (mult (F 0.5) (sub ul ll)) dyp in
-  let e = add c halfxdiff in
-  let w = sub c halfxdiff in
-  let s = sub c halfydiff in
-  let n = add c halfydiff in
-  let path = Path.pathk ~cycle:Path.JCurveNoInflex ~style:Path.JCurveNoInflex
-              (List.map2 (fun p d -> (NoDir,p,Vec d)) 
-              [e; n; w; s;] [up; left; down; right; ])  in
-    MLBBox (c, path, pic)
+  let r = length (sub (urcorner pic) (llcorner pic)) in
+  let r = r +/ margin +/ dr in
+  { c = c; pic = pic ; bpath = Path.shift c (Path.scale r Path.fullcircle)}
 
-let center (MLBBox (c,_,_)) = c
+let ellipse ?(dx=F 0.) ?(dy=F 0.) c pic =
+  let pic = center pic c in 
+  let rx = length (sub (ulcorner pic) (llcorner pic)) in
+  let ry = length (sub (urcorner pic) (ulcorner pic)) in
+  let rx = rx +/ margin +/ dx in
+  let ry = ry +/ margin +/ dy in
+    { c = c; pic = pic; bpath = Path.shift c (Shapes.full_ellipse_path rx ry) }
 
-let north_west (MLBBox (_,_,pic)) = ulcorner pic
-let north_east  (MLBBox (_,_,pic)) = urcorner pic
-let south_west (MLBBox (_,_,pic)) = llcorner pic
-let south_east  (MLBBox (_,_,pic)) = lrcorner pic
+let center {c = c} = c
+
+let north_west {pic = pic} = ulcorner pic
+let north_east {pic = pic} = urcorner pic
+let south_west {pic = pic} = llcorner pic
+let south_east {pic = pic} = lrcorner pic
 
 let north b = segment 0.5 (north_west b) (north_east b)
   
@@ -70,4 +57,4 @@ let south b = segment 0.5 (south_west b) (south_east b)
 let west  b = segment 0.5 (north_west b) (north_west b) 
 let east  b = segment 0.5 (south_east b) (north_east b) 
 
-let bpath (MLBBox (_,p,_)) = p
+let bpath {bpath = p} = p

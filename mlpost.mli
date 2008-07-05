@@ -445,7 +445,7 @@ and Mlbox : sig
 
   (** {2 Creating boxes} *)
 
-  val circle : Point.t -> Picture.t -> t
+  val circle : ?dr:Num.t -> Point.t -> Picture.t -> t
     (** [circle p pic] creates a circle box of center [p] and of contents
 	[pic] *)
 

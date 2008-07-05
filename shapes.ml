@@ -15,7 +15,6 @@
 (**************************************************************************)
 
 open Command
-open Helpers
 open Point
 open Path
 open Num.Infix

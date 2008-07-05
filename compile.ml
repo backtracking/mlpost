@@ -390,7 +390,7 @@ and command = function
       let pic, c1 = picture pic in
       let pt, c2 = point pt in
       c1 ++ c2 ++ C.CLabel (pic,pos,pt)
-  | CDrawMlBox (c,(MLBBox (_,pa,pi))) ->
+  | CDrawMlBox (c,{bpath = pa; pic = pi}) ->
       let pa, c1 = path pa in
       let pi, c2 = picture pi in
       let box_cmd =

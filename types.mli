@@ -121,7 +121,7 @@ and box =
   | BRect of point * picture
 
 and mlbox = 
-  | MLBBox of point * path * picture
+  { c : point ; bpath : path; pic : picture }
 
 and dash =
   | DEvenly

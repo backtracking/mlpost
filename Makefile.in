@@ -59,9 +59,9 @@ check: byte $(OCAMLBEST) $(TOOL) $(TESTS) check-examples
 CMO := misc.cmo name.cmo compiled_types.cmo compile.cmo  \
        num.cmo point.cmo \
        transform.cmo \
-       color.cmo picture.cmo primPath.cmo path.cmo box.cmo mlbox.cmo  \
-       dash.cmo pen.cmo command.cmo metapost.cmo\
-       helpers.cmo diag.cmo tree.cmo plot.cmo shapes.cmo \
+       color.cmo picture.cmo primPath.cmo path.cmo box.cmo   \
+       dash.cmo pen.cmo command.cmo shapes.cmo mlbox.cmo metapost.cmo\
+       helpers.cmo diag.cmo tree.cmo plot.cmo  \
 	generate.cmo
 CMX := $(CMO:.cmo=.cmx)
 
