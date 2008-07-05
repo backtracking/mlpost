@@ -43,7 +43,7 @@ let addn x y =
 let subn x y = 
   match x, y with
   | F f1, F f2 -> F (f1 -. f2)
-  | _, _ -> NAdd (x,y)
+  | _, _ -> NMinus (x,y)
 
 let multn x y = 
   match x, y with
