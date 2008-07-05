@@ -11,7 +11,7 @@ let fig =
     jointpath [-1.2,1.2; 0., -2. ; 2., 2. ; 5., 5.] [JLine ; JCurve; JCurve]
   in
   [fill ~color:Color.black 
-      (Path.scale k Path.fullcircle) ;
+      (Path.scale (f k) Path.fullcircle) ;
    label ~pos:Pleft (Picture.tex "Pr") (Point.p (k /. (-4.),0.)) ;
    label ~pos:Pright (Picture.tex "al") (Point.p (k /. 4.,0.)) ;
    draw ~color:Color.green ~pen check;]

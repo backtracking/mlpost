@@ -4,8 +4,8 @@ open Num
 open Point
 
 let fig =
-  let pen = Pen.default ~tr:([Transform.scaled 10.0]) () in
-  let circle = Path.scale ~scale:Num.cm 9. Path.fullcircle in
+  let pen = Pen.default ~tr:([Transform.scaled (f 10.0)]) () in
+  let circle = Path.scale (Num.cm 9.) Path.fullcircle in
   let color = Color.blue in
   let time hr mn = 
     let m = (float_of_int (mn mod 60)) in
@@ -18,7 +18,7 @@ let fig =
   let num i = 
     let tr = [Transform.rotated (float_of_int (-30*i))] in
       Picture.transform tr 
-	(Picture.center (Picture.transform [Transform.scaled 2.0]
+	(Picture.center (Picture.transform [Transform.scaled (f 2.0)]
 			   (Picture.tex (string_of_int i)))
 	   (Point.pt (Num.cm 0., Num.cm 3.9))) in
   let pic = Picture.make (seq
@@ -27,7 +27,7 @@ let fig =
      time 15 37;
      label (Picture.tex "sur une id\\'ee de Claude") (p (0.,0.));
     ]) in
-    [draw_pic (Picture.transform [Transform.scaled 0.3] pic)]
+    [draw_pic (Picture.transform [Transform.scaled (f 0.3)] pic)]
 		 
 
 (* let _ = Metapost.emit "clock" [fig] *)

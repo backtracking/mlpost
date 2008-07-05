@@ -20,7 +20,7 @@ type t' = transform
 
 type t = t' list
 
-let scaled ?(scale=Num.bp) a = TRScaled (scale a)
+let scaled a = TRScaled a
 let rotated a = TRRotated a
 let shifted a = TRShifted a
 let slanted a = TRSlanted a

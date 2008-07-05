@@ -36,6 +36,16 @@ module rec Num : sig
   val mm : float -> t
   val inch : float -> t
 
+  val bpn : t -> t
+  val ptn : t -> t
+  val cmn : t -> t
+  val mmn : t -> t
+  val inchn : t -> t
+
+  val addn : t -> t -> t
+  val subn : t -> t -> t
+  val multn : t -> t -> t
+  val divn : t -> t -> t
   val gmean : t -> t -> t
 
   module Infix : sig
@@ -267,7 +277,7 @@ and Path : sig
   (** Apply a transformation to a path *)
   val transform : Transform.t -> t -> t
 
-  val scale : ?scale:(float -> Num.t) -> float -> t -> t
+  val scale : Num.t -> t -> t
   val rotate : float -> t -> t
   val shift : Point.t -> t -> t
   val yscale : Num.t -> t -> t
@@ -469,7 +479,7 @@ and Transform : sig
   type t'
     (** The abstract type of a single transformation *)
 
-  val scaled : ?scale:(float -> Num.t) -> float -> t'
+  val scaled : Num.t -> t'
     (** Scale an object by a constant factor.
       @param scale a scaling function to be applied to each float;
       see {!Num.t} for scaling functions for usual units. This makes only sense

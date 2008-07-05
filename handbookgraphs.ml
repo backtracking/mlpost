@@ -157,7 +157,7 @@ let draw17 =
 
 let draw18 =
   let u = Num.cm in
-  let pen = Pen.circle ~tr:[Transform.scaled ~scale:Num.pt 1.] () in 
+  let pen = Pen.circle ~tr:[Transform.scaled (f 1.)] () in 
   let rec pg = function
     | 0 -> start (knot ~r:(Vec up) ~scale:u (0.,0.))
     | n -> let f = (float_of_int n /. 2.) in 
@@ -171,7 +171,7 @@ let draw18 =
 let draw19 =
   let ux, uy = Num.inch 0.01, Num.inch 0.6 in
   let dux, duy = f 120. */ ux, f 4. */ uy in
-  let pen = Pen.circle ~tr:[Transform.scaled ~scale:Num.pt 1.] () in 
+  let pen = Pen.circle ~tr:[Transform.scaled (f 1.)] () in 
   let axey = Picture.transform [Transform.rotated 90.] (tex "axe $y$") in
   let rec pg = function
     | 0 -> start (knotn ~r:(Vec right) (f 0.,uy))
@@ -204,8 +204,8 @@ let draw21 =
     21, [fill fillp; draw fullp]
 
 let draw22 =
-  let a = Path.scale ~scale:cm 2. fullcircle in
-  let aa = Path.scale ~scale:cm 2. halfcircle in
+  let a = Path.scale (cm 2.) fullcircle in
+  let aa = Path.scale (cm 2.) halfcircle in
   let b = Path.shift (pt (f 0., Num.cm 1.)) a in
   let pa = make (label (tex "$A$") (pt (f 0., Num.cm (-0.5)))) in
   let pb= make (label (tex "$B$") (pt (f 0., Num.cm 1.5))) in  
@@ -239,7 +239,7 @@ let draw40 =
   in
   let pic = Picture.make cmd in
   let pth = 
-    Path.scale ~scale:Num.pt 72. (Path.shift (p (0.5, 0.5)) fullcircle) in
+    Path.scale (Num.pt 72.) (Path.shift (p (0.5, 0.5)) fullcircle) in
   let pic' = Picture.clip pic pth in
     40, [ draw_pic pic'; draw pth]
 

@@ -56,7 +56,7 @@ let jointpath ?(scale) lp lj  = jointpathk (List.map (knot ?scale) lp) lj
 
 let append ?(style=JCurve) p1 p2 = append p1 style p2
 
-let scale ?(scale=Num.bp) f p = transform [Transform.scaled ~scale f] p
+let scale f p = transform [Transform.scaled f] p
 let rotate f p = transform [Transform.rotated f] p
 let shift pt path = transform [Transform.shifted pt] path
 let yscale n p = transform [Transform.yscaled n] p

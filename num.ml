@@ -60,6 +60,12 @@ let gmean x y =
   | F f1, F f2 -> F ( sqrt (f1 *. f1 +. f2 *. f2 ))
   | _, _ -> NGMean (x,y)
 
+let bpn n = n
+let ptn n = multn (F 0.99626) n
+let cmn n = multn (F 28.34645) n
+let mmn n = multn (F 2.83464) n
+let inchn n = multn (F 72.) n
+
 module Scale = struct
   let bp x y = bp (x *. y)
   let pt x y = pt (x *. y)

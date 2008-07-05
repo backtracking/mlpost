@@ -29,7 +29,7 @@ let shift x y = transform [Transform.shifted (x ++ y)]
 let d1 = 
   let a = Box.circle (0. ++ 0.) (Picture.tex "$\\sqrt2$") in
   let b = Box.rect (2. ++ 0.) (Picture.tex "$\\pi$") in
-  let pen = Pen.default ~tr:[Transform.scaled 3.] () in
+  let pen = Pen.default ~tr:[Transform.scaled (f 3.)] () in
   [ draw_box a;
     draw_box ~fill:Color.purple b;
     draw
@@ -89,14 +89,14 @@ let proval =
   let f = 7. in
   let pen = Pen.square ~tr:[T.yscaled (bp 0.5); T.rotated 40.] () in
   let check = jointpath [-1.2,1.2; 0., -2. ; 2., 2. ; 5., 5.] [JLine ; JCurve; JCurve] in
-    [ fill ~color:(Color.gray 0.2) (Path.scale f fullcircle) ;
+    [ fill ~color:(Color.gray 0.2) (Path.scale (Num.bp f) fullcircle) ;
       label ~pos:Pleft (Picture.tex "Pr") (Point.p (f /. (-4.),0.)) ;
       label ~pos:Pright (Picture.tex "al") (Point.p (f /. 4.,0.)) ;
       Command.draw ~color:Color.green ~pen check;]
 
 let cheno011 =
   let p = path ~cycle:JCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)] in
-  let pen = Pen.circle ~tr:[T.scaled 1.5] () in
+  let pen = Pen.circle ~tr:[T.scaled (f 1.5)] () in
   [Command.draw p;
    seq (List.map
 	   (fun (pos, l, i) -> 
@@ -135,7 +135,7 @@ let d5 =
 
 let d7 =
   let pic = 
-    Picture.transform [T.scaled 4.] (Picture.tex "bound this!") in
+    Picture.transform [T.scaled (f 4.)] (Picture.tex "bound this!") in
   let pbox = pathp ~style:JLine ~cycle:JLine
     [Picture.ulcorner pic; Picture.urcorner pic; 
      Picture.lrcorner pic; Picture.llcorner pic] in
@@ -164,7 +164,7 @@ let rec random_tree2 = function
 let d6 =
   [Tree.draw ~scale:(Scale.cm 3.) ~cs:(mm 0.2) (random_tree2 10)]
 
-let half pic = Picture.transform [Transform.scaled 0.5] pic
+let half pic = Picture.transform [Transform.scaled (f 0.5)] pic
 
 let rec right_split n pic = 
   if n <= 0 then pic
@@ -202,9 +202,9 @@ let d14 =
   let vdash _ = Dash.scaled 2. Dash.evenly in
   let hvpen i = 
     if i mod 5 = 0 then
-      Pen.default ~tr:([Transform.scaled 2.5]) ()
+      Pen.default ~tr:([Transform.scaled (f 2.5)]) ()
     else Pen.default () in
-  let pen = Pen.default ~tr:[Transform.scaled 4.] () in
+  let pen = Pen.default ~tr:[Transform.scaled (f 4.)] () in
      [draw_grid ~hdash ~vdash ~hpen:hvpen ~vpen:hvpen sk;
        draw_func ~pen f2 sk;
        draw_func ~pen f3 sk
@@ -252,12 +252,12 @@ let f3 i =
   float_of_int ((i+3)/5)
 
 let flab i = (Picture.transform
-		[Transform.scaled 1.7]
+		[Transform.scaled (f 1.7)]
 		(Picture.tex (Printf.sprintf "$f_{\\omega_%d}$" i)),
 	      Command.Ptop, 19)
 	
 let instants = 
-  let pen = Pen.default ~tr:[Transform.scaled 2.5] () in
+  let pen = Pen.default ~tr:[Transform.scaled (f 2.5)] () in
   let base = 
     Command.draw ~pen (Path.path ~style:JLine [(0.,-65.); (280.,-65.)]) in
   let tick i = 
@@ -268,18 +268,18 @@ let instants =
   in
     Command.seq 
       [base; Command.iter 0 20 tick; 
-       Command.label (Picture.transform [Transform.scaled 2.]
+       Command.label (Picture.transform [Transform.scaled (f 2.)]
 			(Picture.tex "$\\omega_1$")) (pt (f (-20.), f (-55.)))]
 
 let florence =
   let sk = mk_skeleton 20 14 (f 14.) (f 20.) in
-  let pen = Pen.default ~tr:[Transform.scaled 4.] () in
-  let pen2 = Pen.default ~tr:[Transform.scaled 3.] () in
+  let pen = Pen.default ~tr:[Transform.scaled (f 4.)] () in
+  let pen2 = Pen.default ~tr:[Transform.scaled (f 3.)] () in
   let dash _ = Dash.scaled 0.5 Dash.withdots in
   let dash2 = Dash.scaled 0.66 Dash.withdots in
   let dash3 = Dash.scaled 0.9 Dash.evenly in
   let vcaption, hcaption = 
-    let tr = [Transform.scaled 1.5] in
+    let tr = [Transform.scaled (f 1.5)] in
       Picture.transform tr (Picture.tex "\\textsf{Number of ones}"),
     Picture.transform tr (Picture.tex "\\textsf{Instants}") in
   let plot = draw_func ~drawing:Stepwise ~style:JLine in

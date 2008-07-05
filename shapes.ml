@@ -66,7 +66,7 @@ let rounded_rect ?fill ?(stroke=Color.black) ?(thickness=0.5)
     match fill with
       | None -> Command.nop
       | Some color -> Command.fill ~color path in
-  let pen = Pen.square ~tr:([Transform.scaled thickness]) () in
+  let pen = Pen.square ~tr:([Transform.scaled (F thickness)]) () in
   let strokecmd = Command.draw ~color:stroke ~pen path in
     Picture.make (Command.seq [fillcmd; strokecmd])
 
@@ -106,7 +106,7 @@ let arc_ellipse ?fill ?(stroke=Color.black) ?(thickness=0.5) ?(close=false)
     match fill with
       | None -> Command.nop
       | Some color -> Command.fill ~color path in
-  let pen = Pen.square ~tr:([Transform.scaled thickness]) () in
+  let pen = Pen.square ~tr:([Transform.scaled (F thickness)]) () in
   let strokecmd = Command.draw ~color:stroke ~pen path in
     Picture.make (Command.seq [fillcmd; strokecmd])
 
@@ -116,7 +116,7 @@ let ellipse ?fill ?(stroke=Color.black) ?(thickness=0.5) rx ry =
     match fill with
       | None -> Command.nop
       | Some color -> Command.fill ~color path in
-  let pen = Pen.square ~tr:([Transform.scaled thickness]) () in
+  let pen = Pen.square ~tr:([Transform.scaled (F thickness)]) () in
   let strokecmd = Command.draw ~color:stroke ~pen path in
     Picture.make (Command.seq [fillcmd; strokecmd])
 

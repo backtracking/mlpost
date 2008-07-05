@@ -10,7 +10,7 @@ let fig =
   let thinning =  0.7 in
   let shortening = 0.8 in
   let drawit a b thickness =
-    let pen = Pen.circle ~tr:[Transform.scaled thickness] () in
+    let pen = Pen.circle ~tr:[Transform.scaled (f thickness)] () in
     Command.draw ~pen (pathp [a ; b])
   in
   let randrotate a b neg =
