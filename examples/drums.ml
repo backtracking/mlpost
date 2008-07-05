@@ -19,7 +19,7 @@ let steel = Color.gray 0.85
 (** The (closed) hihat ! true : color, false : b&w *)
 let hihat b =
   let d = mydraw b in
-  let cymb = Path.yscale (f 1.2) (Path.xscale (f 7.) fullcircle) in
+  let cymb = Path.yscale (scale 1.2) (Path.xscale (scale 7.) fullcircle) in
   let head =
     polyg [(-0.5,0.); (-0.3,0.); (-0.15,1.65); (0.15,1.65);
 	   (0.3,0.); (0.5,0.); (0.33,-1.2); (-0.33,-1.2)] in
