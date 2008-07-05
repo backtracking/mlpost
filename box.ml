@@ -1,3 +1,4 @@
+
 (**************************************************************************)
 (*                                                                        *)
 (*  Copyright (C) Johannes Kanig, Stephane Lescuyer                       *)
@@ -15,35 +16,45 @@
 (**************************************************************************)
 
 open Types
+open Picture
+open Point
 
-type circle_style = box_circle_style =
-  | Padding of Num.t * Num.t (* dx , dy *)
-  | Ratio of float (* dx / dy *)
+open Num.Infix
 
 type t = box
 
-let circle ?style c p = BCircle (c, p, style)
-let rect c p = BRect (c, p)
+let rect c p = 
+  let pic = center p c in
+    let p = bbox pic in
+    { c = c; bpath = p ; pic = pic }
 
-let center = function
-  | BCircle (c, _, _) 
-  | BRect (c, _) -> c
+let margin = Num.bp 2.
 
-let north b = PTBoxCorner (b,N)
-let south b = PTBoxCorner (b,S)
-let west b = PTBoxCorner (b,W)
-let east b = PTBoxCorner (b,E)
-let north_west = function
-  | BRect _ as b -> PTBoxCorner (b,NW)
-  | BCircle (c,_,_) as b -> Point.rotate_around c 45. (PTBoxCorner (b,N))
-let north_east = function 
-  | BRect _ as b -> PTBoxCorner (b,NE)
-  | BCircle (c,_,_) as b -> Point.rotate_around c 45. (PTBoxCorner (b,E))
-let south_west = function 
-  | BRect _ as b -> PTBoxCorner (b,SW)
-  | BCircle (c,_,_) as b -> Point.rotate_around c 45.(PTBoxCorner (b,W))
-let south_east = function 
-  | BRect _ as b -> PTBoxCorner (b,SE)
-  | BCircle (c,_,_) as b -> Point.rotate_around c 45.(PTBoxCorner (b,S))
+let circle ?(dr=F 0.) c pic =
+  let pic = center pic c in
+  let r = length (sub (urcorner pic) (llcorner pic)) in
+  let r = r +/ margin +/ dr in
+  { c = c; pic = pic ; bpath = Path.shift c (Path.scale r Path.fullcircle)}
 
-let bpath b = PABoxBPath b
+let ellipse ?(dx=F 0.) ?(dy=F 0.) c pic =
+  let pic = center pic c in 
+  let rx = length (sub (urcorner pic) (ulcorner pic)) in
+  let ry = length (sub (urcorner pic) (lrcorner pic)) in
+  let rx = rx +/ dx in
+  let ry = ry +/ dy in
+    { c = c; pic = pic; bpath = Path.shift c (Shapes.full_ellipse_path rx ry) }
+
+let center {c = c} = c
+
+let north_west {pic = pic} = ulcorner pic
+let north_east {pic = pic} = urcorner pic
+let south_west {pic = pic} = llcorner pic
+let south_east {pic = pic} = lrcorner pic
+
+let north b = segment 0.5 (north_west b) (north_east b)
+  
+let south b = segment 0.5 (south_west b) (south_east b) 
+let west  b = segment 0.5 (north_west b) (north_west b) 
+let east  b = segment 0.5 (south_east b) (north_east b) 
+
+let bpath {bpath = p} = p

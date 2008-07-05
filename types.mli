@@ -51,7 +51,6 @@ type num =
 
 and point = 
   | PTPair of num * num
-  | PTBoxCorner of box * corner
   | PTPicCorner of picture * piccorner
   | PTPointOf of float * path
   | PTAdd of point * point
@@ -61,10 +60,6 @@ and point =
   | PTTransformed of point * transform list
 
 and on_off = On of num | Off of num
-
-and box_circle_style =
-  | Padding of num * num (* dx , dy *)
-  | Ratio of float (* dx / dy *)
 
 and direction = 
   | Vec of point
@@ -90,7 +85,6 @@ and path =
   | PATransformed of path * transform list
   | PAKnot of knot
   | PAAppend of path * joint * path
-  | PABoxBPath of box
   | PACutAfter of path * path
   | PACutBefore of path * path
   | PABuildCycle of path list
@@ -116,11 +110,7 @@ and picture =
   | PIName of name
   | PIClip of picture * path
 
-and box =
-  | BCircle of point * picture * box_circle_style option
-  | BRect of point * picture
-
-and mlbox = 
+and box = 
   { c : point ; bpath : path; pic : picture }
 
 and dash =
@@ -145,7 +135,6 @@ and command =
   | CDotLabel of picture * position * point
   | CLoop of int * int * (int -> command)
   | CDrawBox of color option * boxed * box
-  | CDrawMlBox of color option * mlbox
   | CSeq of command list
 (*
   These have moved into the compiled AST

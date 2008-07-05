@@ -402,53 +402,14 @@ and Box : sig
 
   (** {2 Creating boxes} *)
 
-  (** Circle boxes can be customized in two different ways:
-      {ul {- [Padding dx dy] specifies the padding that shall 
-      be added between the contents of the box and its borders}
-      {-  [Ratio f] specifies the ratio of the box's width and its height }
-      } *)
-  type circle_style =
-      | Padding of Num.t * Num.t (** dx , dy *)
-      | Ratio of float           (** x / y *)
-
-  val circle : ?style:circle_style -> Point.t -> Picture.t -> t
-    (** [circle p pic] creates a circle box of center [p] and of contents
-	[pic] *)
-
-  val rect : Point.t -> Picture.t -> t
-    (** [rect p pic] creates a rectangular box of center [p] and of contents
-	[pic] *)
-
-  (** Get the bounding path of a box *)
-  val bpath : t -> Path.t
-
-  (** {2 Special points on a box} *)
-
-  val center : t -> Point.t
-  val north : t -> Point.t
-  val south : t -> Point.t
-  val west  : t -> Point.t
-  val east  : t -> Point.t 
-  val north_west : t -> Point.t
-  val south_west : t -> Point.t
-  val north_east : t -> Point.t
-  val south_east : t -> Point.t
-
-end
-
-and Mlbox : sig
-
-  (** Boxes *)
-
-  (** The abstract type of boxes *)
-  type t
-
-  (** {2 Creating boxes} *)
-
   val circle : ?dr:Num.t -> Point.t -> Picture.t -> t
     (** [circle p pic] creates a circle box of center [p] and of contents
 	[pic] *)
 
+  val ellipse : ?dx:Num.t -> ?dy:Num.t -> Point.t -> Picture.t -> t
+    (** [ellipse p pic] creates a elliptic box of center [p] and of contents
+	[pic] *)
+
   val rect : Point.t -> Picture.t -> t
     (** [rect p pic] creates a rectangular box of center [p] and of contents
 	[pic] *)
@@ -469,6 +430,7 @@ and Mlbox : sig
   val south_east : t -> Point.t
 
 end
+
 and Transform : sig
 
   (** Transformations are an important way to modify objects in Mlpost.
@@ -583,9 +545,11 @@ and Command : sig
   type figure = t list
       (** A figure is a list of commands *)
 
+(*
   val logo : figure
     (** The Mlpost logo. *)
 
+*)
   (** {2 Drawing Commands} *)
 
   val draw : ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> Path.t -> t
@@ -606,8 +570,6 @@ and Command : sig
     (** Draw a box 
 	@param fill the color used to fill the box 
 	@param boxed if set, the box border is drawn (default is [true]) *)
-
-  val draw_mlbox : ?fill:Color.t -> Mlbox.t -> t
 
   val draw_pic : Picture.t -> t
     (** draws a picture *) 
@@ -810,7 +772,7 @@ module Diag : sig
 
   (** {2 Drawing} *)
 
-  type node_style = Circle of Box.circle_style | Rect
+  type node_style = Circle of Num.t | Rect
 
   val draw : 
     ?scale:(float -> Num.t) -> ?style:node_style -> 

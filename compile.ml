@@ -35,11 +35,6 @@ module HPath = Hashtbl.Make(struct
 end)
 let known_paths = HPath.create 17
 
-module HBox = Hashtbl.Make(struct
-  type t = box let equal = (==) let hash = Hashtbl.hash
-end)
-let known_boxes = HBox.create 17
-
 let option_compile f = function
   | None -> None, nop
   | Some obj -> 
@@ -109,9 +104,6 @@ and point = function
   | PTPicCorner (pic, corner) ->
       let pic, code = picture pic in
         C.PTPicCorner (pic, corner) , code
-  | PTBoxCorner (b, corner) ->
-      let b, code = box b in
-      C.PTBoxCorner (b, corner), code
   | PTTransformed (p,tr) ->
       let p, c1 = point p in
       let tr, c2 = transform_list tr in
@@ -190,9 +182,6 @@ and path p =
     | PABBox p ->
         let p, code = picture p in
         C.PABBox p, code
-    | PABoxBPath b ->
-        let b, code = box b in
-        C.PABoxBPath b, code
     | PAKnot k ->
         let k, code = knot k in
         C.PAKnot k, code
@@ -293,36 +282,6 @@ and picture =
              C.PIName pn, cmd
        end
 
-and box b = 
-  try
-    let b = HBox.find known_boxes b in
-      C.BName b, nop
-   with Not_found ->
-     let n = Name.node () in
-       HBox.add known_boxes b n;
-       let bn = C.BName n in
-       let code = 
-         match b with
-           | BCircle (p, pic, s) ->
-               let p, c1 = point p in
-               let pic, c2 = picture pic in
-	       let s1, c3 = box_circle_style s in
-                 c1 ++ c2 ++ c3 ++ C.CDeclBox (C.BCircle (n, p, pic, s1))
-           | BRect (p,pic) ->
-               let p, c1 = point p in
-               let pic, c2 = picture pic in
-                 c1 ++ c2 ++ C.CDeclBox (C.BRect (n, p, pic))
-       in
-         bn, code
-
-and box_circle_style = function
-  | Some(Padding(f1, f2)) ->
-      let f1, c1 = num f1 in
-      let f2, c2 = num f2 in
-	Some (C.Padding(f1, f2)), c1 ++ c2
-  | Some(Ratio f) -> Some (C.Ratio f), nop
-  | None -> None, nop
-
 and pen = function
   | PenCircle -> C.PenCircle, nop
   | PenSquare -> C.PenSquare, nop
@@ -372,9 +331,6 @@ and command = function
   | CDrawPic p ->
       let p, code = picture p in
       C.CSeq [code; C.CDrawPic p]
-  | CDrawBox (c, bx, b) ->
-      let b, code = box b in
-      C.CSeq [code; C.CDrawBox (c, bx, b)]
   | CFill (p, c) ->
       let p, code = path p in
       C.CSeq [code; C.CFill (p, c)]
@@ -390,18 +346,22 @@ and command = function
       let pic, c1 = picture pic in
       let pt, c2 = point pt in
       c1 ++ c2 ++ C.CLabel (pic,pos,pt)
-  | CDrawMlBox (c,{bpath = pa; pic = pi}) ->
+  | CDrawBox (c, b, {bpath = pa; pic = pi}) ->
       let pa, c1 = path pa in
       let pi, c2 = picture pi in
+      let path_cmd =
+        match b with
+        | Boxed -> C.CDraw (pa, None, None, None)
+        | Unboxed -> nop
+      in
       let box_cmd =
         match c with
-          | None -> C.CSeq [C.CDraw (pa, None, None, None); C.CDrawPic pi]
-          | Some c -> C.CSeq [C.CDraw (pa, None, None, None);
-                              C.CFill (pa, Some c); C.CDrawPic pi]
+          | None -> C.CDrawPic pi
+          | Some c -> C.CFill (pa, Some c) ++ C.CDrawPic pi
       in
-        C.CSeq [c1;c2; box_cmd]
+        C.CSeq [c1;c2; path_cmd ++ box_cmd]
+
 
 let reset () = 
   HPath.clear known_paths;
   HPic.clear known_pictures;
-  HBox.clear known_boxes

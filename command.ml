@@ -52,8 +52,6 @@ let iter from until f = CLoop (from, until, f)
 let draw_box ?fill ?(boxed=true) b = 
   CDrawBox (fill, (if boxed then Boxed else Unboxed), b)
 
-let draw_mlbox ?fill b = CDrawMlBox (fill, b)
-
 let draw_pic p = CDrawPic p
 
 let append c1 c2 = CSeq [c1; c2]
@@ -66,6 +64,8 @@ let iterl f l = seq (List.map f l)
 
 let nop = CSeq []
 
+(*
 let logo =
   [ draw_box ~fill: Color.yellow
       (Box.circle (PTPair (F 0., F 0.)) (PITex "Mlpost")) ]
+*)

@@ -28,7 +28,6 @@ type num =
 
 and point =
   | PTPair of num * num
-  | PTBoxCorner of box * corner
   | PTPicCorner of picture * piccorner
   | PTPointOf of float * path
   | PTAdd of point * point
@@ -61,7 +60,6 @@ and path =
   | PATransformed of path * transform list
   | PAKnot of knot
   | PAAppend of path * joint * path
-  | PABoxBPath of box
   | PACutAfter of path * path
   | PACutBefore of path * path
   | PABuildCycle of path list
@@ -89,12 +87,6 @@ and picture =
   (* compiled pictures are always names *)
   | PIName of name
 
-and box =
-  | BName of name
-and declbox =
-  | BCircle of name * point * picture * box_circle_style option
-  | BRect of name * point * picture
-
 and dash =
   | DEvenly
   | DWithdots
@@ -116,23 +108,17 @@ and command =
   | CLabel of picture * position * point
   | CDotLabel of picture * position * point
   | CLoop of int * int * (int -> command)
-  | CDrawBox of color option * boxed * box
   | CSeq of command list
   | CDeclPath of name * path
   | CDefPic of name * command
   | CSimplePic of name * picture_expr
   | CClip of name * path
-  | CDeclBox of declbox
 
 and color = Types.color
 and position = Types.position
 and name = Types.name
 and corner = Types.corner
 and piccorner = Types.piccorner
-and boxed = Types.boxed
-and box_circle_style =
-  | Padding of num * num
-  | Ratio of float
 and on_off =
   | On of num | Off of num
 

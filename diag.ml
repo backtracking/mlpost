@@ -91,13 +91,13 @@ let indir = function
 let outdir = function None -> None | Some x -> Some (outdir x)
 let indir = function None -> None | Some x -> Some (indir x)
 
-type node_style = Circle of Box.circle_style | Rect
+type node_style = Circle of Num.t | Rect
 
 let make_box ~style ~scale d n = 
   let p = Point.pt (scale n.x, scale n.y) in
   let pic = n.s in
   let b = match style with 
-    | Circle s -> Box.circle ~style:s p pic 
+    | Circle dr -> Box.circle ~dr p pic 
     | Rect -> Box.rect p pic 
   in
   Hnode.add d.boxes n b;
@@ -122,7 +122,7 @@ let draw_arrow ?stroke ?pen ?dashed d a =
 
 let fortybp x = Num.bp (40. *. x)
 
-let draw ?(scale=fortybp) ?(style=Circle (Box.Ratio 1.)) 
+let draw ?(scale=fortybp) ?(style=Circle (Num.bp 0.)) 
     ?boxed ?fill ?stroke ?pen d =
   let l = 
     List.map 

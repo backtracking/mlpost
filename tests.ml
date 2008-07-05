@@ -40,6 +40,7 @@ let d1 =
     box_arrow ~color:Color.blue a b;
   ]
 
+(*
 let d1' = 
   let a = Mlbox.circle (0. ++ 0.) (Picture.tex "$\\sqrt2$") in
   let b = Mlbox.rect (2. ++ 0.) (Picture.tex "$\\pi$") in
@@ -55,6 +56,7 @@ let d1' =
     box_arrow ~color:Color.blue a b;
 *)
   ]
+*)
 open Tree
 
 let () = Random.self_init ()
@@ -313,7 +315,7 @@ let d16 =
   let p3 = Point.p (50.,0.) in
     [ Command.draw (pathp ~style:JLine [p3;p2;p1])]
 
-let d17 = Command.logo
+(* let d17 = Command.logo *)
 
 let shapes1 =
   List.fold_left Picture.below
@@ -345,7 +347,7 @@ let shapes2 =
     ]
 
 let figs = [[Command.draw_pic shapes1]; [Command.draw_pic shapes2];
-d17; d16; d1'; d1; d15; florence; d14; d13; 
+d16; d1; d15; florence; d14; d13; 
  d11; d7; d6; d5; d4; cheno011; proval; d3;  
               d2sq; d2hsq; d2s; d2c; ] 
 
