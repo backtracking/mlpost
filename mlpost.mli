@@ -46,6 +46,8 @@ module rec Num : sig
   val subn : t -> t -> t
   val multn : t -> t -> t
   val divn : t -> t -> t
+  val maxn : t -> t -> t
+  val minn : t -> t -> t
   val gmean : t -> t -> t
 
   module Infix : sig

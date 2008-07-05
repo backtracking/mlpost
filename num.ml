@@ -55,6 +55,16 @@ let divn x y =
   | F f1, F f2 -> F (f1 /. f2)
   | _, _ -> NDiv (x,y)
 
+let maxn x y =
+  match x, y with
+    | F f1, F f2 -> F (max f1 f2)
+    | _, _ -> NMax (x,y)
+
+let minn x y =
+  match x, y with
+    | F f1, F f2 -> F (min f1 f2)
+    | _, _ -> NMin (x,y)
+
 let gmean x y = 
   match x, y with
   | F f1, F f2 -> F ( sqrt (f1 *. f1 +. f2 *. f2 ))

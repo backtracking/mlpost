@@ -32,12 +32,11 @@ let rounded_rect ?fill ?(stroke=Color.black) ?(thickness=0.5)
     width height rx ry =
   let path = 
     let hw,hh = width//(F 2.),height//(F 2.) in
-      (** A REMETTRE APRES COMPILATINO DES CONDITIONS *)
-(*     let rx = max 0. (if rx > hw then hw else rx) in *)
-(*     let ry = max 0. (if ry > hh then hh else ry) in *)
-(*     let ul, ur, br, bl =  *)
-(*       pt (-.hw, hh), pt (hw, hh),  *)
-(*       pt (hw, -.hh), pt (-.hw, -.hh) in *)
+    let rx = Num.maxn (F 0.) (Num.minn rx hw) in
+    let ry = Num.maxn (F 0.) (Num.minn ry hh) in
+      (*     let ul, ur, br, bl =  *)
+      (*       pt (-.hw, hh), pt (hw, hh),  *)
+      (*       pt (hw, -.hh), pt (-.hw, -.hh) in *)
     let ul1, ul2 = 
       pt (neg hw, hh-/(mkappa*/ry)), pt (mkappa*/rx-/hw, hh) in
     let ur1, ur2 = 

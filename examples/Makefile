@@ -35,7 +35,7 @@ $(PNGFILES): ../mlpost.cma
 %.ps: %.1
 	sed -e 's/all/$*/' all.template > $*.tex
 	latex $*
-	dvips -E $*.dvi
+	dvips -E $*.dvi -o
 
 %: %.ps
 	gv $^
