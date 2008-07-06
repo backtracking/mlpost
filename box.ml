@@ -25,8 +25,7 @@ type t = box
 
 let rect c p = 
   let pic = center p c in
-    let p = bbox pic in
-    { c = c; bpath = p ; pic = pic }
+    { c = c; bpath = bbox pic ; pic = pic }
 
 let margin = Num.bp 2.
 
@@ -43,6 +42,19 @@ let ellipse ?(dx=F 0.) ?(dy=F 0.) c pic =
   let rx = rx +/ dx in
   let ry = ry +/ dy in
     { c = c; pic = pic; bpath = Path.shift c (Shapes.full_ellipse_path rx ry) }
+
+let round_rect c p =
+  let pic = center p c in
+  let dx = length (sub (urcorner pic) (ulcorner pic)) in
+  let dy = length (sub (urcorner pic) (lrcorner pic)) in
+  let dx = dx +/ margin in
+  let dy = dy +/ margin in
+  let rx = min (dx // (F 10.)) (dy // (F 10.)) in
+  { c = c; 
+    bpath = Path.shift c (Shapes.rounded_rect_path dx dy rx rx); 
+    pic = pic }
+            
+
 
 let center {c = c} = c
 

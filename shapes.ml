@@ -28,9 +28,7 @@ let neg f = (F 0.) -/ f
 
 (** Rectangles *)
 
-let rounded_rect ?fill ?(stroke=Color.black) ?(thickness=0.5) 
-    width height rx ry =
-  let path = 
+let rounded_rect_path width height rx ry =
     let hw,hh = width//(F 2.),height//(F 2.) in
     let rx = Num.maxn (F 0.) (Num.minn rx hw) in
     let ry = Num.maxn (F 0.) (Num.minn ry hh) in
@@ -59,7 +57,11 @@ let rounded_rect ?fill ?(stroke=Color.black) ?(thickness=0.5)
        JLine; JControls(br1,br2); 
        JLine; JControls(bl1,bl2); JLine] in
       cycle ~dir:(Vec right) ~style:(JControls(ul1,ul2))
-	(jointpathk knots joints) in
+	(jointpathk knots joints)
+
+let rounded_rect ?fill ?(stroke=Color.black) ?(thickness=0.5) 
+    width height rx ry =
+  let path = rounded_rect_path width height rx ry in
   let fillcmd =
     match fill with
       | None -> Command.nop

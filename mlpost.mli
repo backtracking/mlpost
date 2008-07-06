@@ -416,6 +416,8 @@ and Box : sig
     (** [rect p pic] creates a rectangular box of center [p] and of contents
 	[pic] *)
 
+  val round_rect : Point.t -> Picture.t -> t
+
   (** Get the bounding path of a box *)
   val bpath : t -> Path.t
 
@@ -829,6 +831,8 @@ end
 module Shapes : sig
 
 (** Various Basic Geometric Shapes *)
+
+  val rounded_rect_path : Num.t -> Num.t -> Num.t -> Num.t -> Path.t
 
   val rounded_rect : 
     ?fill:Color.t -> ?stroke:Color.t -> ?thickness:float ->

@@ -173,8 +173,8 @@ let d195 =
     (195, [Command.iter 0 (n-1) row; Command.iter 0 (n) grid])
 
 let d267 = 
-  let a = Box.ellipse (cmp (0., 0.)) (Picture.tex "D\\'ebut") in
-  let b = Box.ellipse (cmp (2., 0.)) (Picture.tex "Fin") in
+  let a = Box.round_rect (cmp (0., 0.)) (Picture.tex "D\\'ebut") in
+  let b = Box.round_rect (cmp (2., 0.)) (Picture.tex "Fin") in
   let rose = Color.rgb 1. 0.5 0.5 in
   let path angle a b =
     cut_after (bpath b) 
