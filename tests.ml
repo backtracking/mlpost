@@ -373,8 +373,10 @@ let stack =
        Picture.tex "topo"; 
        Picture.tex "{\\Large I}"] 
   in
-  let cbl = List.map 
-    (fun b -> fill ~color:Color.cyan (Picture.corner_bbox (Box.picture b))) bl 
+  let cbl = List.map2 
+    (fun b n -> fill ~color:(Color.color n) (Picture.corner_bbox (Box.picture b))) 
+    bl 
+    ["BlanchedAlmond"; "DarkSlateGray"; "medium violet red"]
   in
   seq cbl :: List.map Command.draw_box bl
 

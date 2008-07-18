@@ -401,6 +401,11 @@ and Color : sig
   val yellow : t
   val magenta : t
 
+  (** {3 X11-named Colors} *)
+  val color : string -> t
+    (** [color n] returns the RGB color associated to name [n]
+	(as defined in /etc/X11/rgb.txt). Raises Not_found if [n] does not
+	correspond to a colour *)
 end
 
 and Box : sig
