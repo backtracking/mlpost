@@ -29,6 +29,7 @@ module rec Num : sig
   (** The base unit in Mlpost are bp. The following functions 
       permit to specify values in other common units *)
 
+  (** The following constants are shortcuts for (bp 0.) (bp 1.) (bp 2.) *)
   val zero : t
   val one : t
   val two : t
@@ -105,6 +106,12 @@ and Point : sig
   val length : t -> Num.t
   (** [length p] is the length of vector from the origin to [p] *)
 
+  (** [xpart p] is the x coordinate of point [p] *)
+  val xpart : t -> Num.t
+
+  (** [ypart p] is the y coordinate of point [p] *)
+  val ypart : t -> Num.t
+
   (** {2 Operations on points} *)
     
   (** Apply a transformation to a point *)
@@ -112,9 +119,6 @@ and Point : sig
 
   (** [segment f p1 p2] is the point [(1-f)p1 + fp2] *)
   val segment : float -> t -> t -> t
-
-  val xpart : t -> Num.t
-  val ypart : t -> Num.t
 
   (** Sum two points *)
   val add : t -> t -> t
@@ -410,17 +414,21 @@ and Box : sig
 
   val circle : ?dr:Num.t -> Point.t -> Picture.t -> t
     (** [circle p pic] creates a circle box of center [p] and of contents
-	[pic] *)
+	[pic]. Optional padding is given by arguments [dr]. *)
 
   val ellipse : ?dx:Num.t -> ?dy:Num.t -> Point.t -> Picture.t -> t
     (** [ellipse p pic] creates a elliptic box of center [p] and of contents
-	[pic] *)
+	[pic]. Optional padding is given by arguments [dx] and [dy]. *)
 
   val rect :  ?dx:Num.t -> ?dy:Num.t -> Point.t -> Picture.t -> t
     (** [rect p pic] creates a rectangular box of center [p] and of contents
-	[pic] *)
+	[pic]. Optional padding is given by arguments [dx] and [dy]. *)
 
-  val round_rect : Point.t -> Picture.t -> t
+  val round_rect : ?dx:Num.t -> ?dy:Num.t -> Point.t -> Picture.t -> t
+    (** [round_rect p pic] creates a rectangular box of center [p] and of contents
+	[pic], with rounded corners. Optional padding is given by [dx] and
+	[dy] ; default is 2bp *)
+
 
   (** Get the bounding path of a box *)
   val bpath : t -> Path.t
@@ -442,6 +450,7 @@ and Box : sig
 
   (** Box alignment *)
 
+  (** TODO *)
   val valign : ?dx:Num.t -> ?dy:Num.t -> Picture.t list -> t list
 
 end
@@ -500,8 +509,7 @@ and Picture : sig
     (** Make a picture from a drawing command *)
 
   val tex : string -> t
-   (** Take a string in Latex format and transform it into a picture
-    *)
+   (** Take a string in Latex format and transform it into a picture *)
 
 (*
   val currentpicture : t
@@ -519,7 +527,7 @@ and Picture : sig
 
   val corner_bbox : ?dx:Num.t -> ?dy:Num.t -> t -> Path.t
     (** Get the bounding box of a picture, according to its corners
-        and supplied padding *)
+        and supplied padding [dx] and [dy]. *)
 
   val center : t -> Point.t -> t
     (** Place a picture centered at some point *)

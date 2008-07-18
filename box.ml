@@ -51,12 +51,10 @@ let ellipse ?(dx=F 0.) ?(dy=F 0.) c pic =
   let ry = ry +/ dy in
     { c = c; pic = pic; bpath = Path.shift c (Shapes.full_ellipse_path rx ry) }
 
-let round_rect c p =
+let round_rect ?(dx=margin) ?(dy=margin) c p =
   let pic = center p c in
-  let dx = length (sub (urcorner pic) (ulcorner pic)) in
-  let dy = length (sub (urcorner pic) (lrcorner pic)) in
-  let dx = dx +/ margin in
-  let dy = dy +/ margin in
+  let dx = length (sub (urcorner pic) (ulcorner pic)) +/ dx in
+  let dy = length (sub (urcorner pic) (lrcorner pic)) +/ dy in
   let rx = min (dx // (F 10.)) (dy // (F 10.)) in
   { c = c; 
     bpath = Path.shift c (Shapes.rounded_rect_path dx dy rx rx); 
