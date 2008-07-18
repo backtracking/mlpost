@@ -366,13 +366,25 @@ let yannick =
   let scale d = Num.bp (d *. 70.) in
     [draw ~scale ~fill:Color.orange tree]
 
+let stack =
+  let bl = 
+    Box.valign ~dx:Num.one ~dy:two
+      [Picture.tex "$x$"; 
+       Picture.tex "topo"; 
+       Picture.tex "{\\Large I}"] 
+  in
+  let cbl = List.map 
+    (fun b -> fill ~color:Color.cyan (Picture.corner_bbox (Box.picture b))) bl 
+  in
+  seq cbl :: List.map Command.draw_box bl
+
+let figs = [ stack ]
 (*
-let figs = [ yannick ]
-*)
 let figs = [[Command.draw_pic shapes1]; [Command.draw_pic shapes2];
 d16; d1; d15; florence; d14; d13; 
  d11; d7; d6; d5; d4; cheno011; proval; d3;  
               d2sq; d2hsq; d2s; d2c; ] 
+*)
 
 let figs =
   let r = ref 0 in

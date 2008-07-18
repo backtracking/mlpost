@@ -20,6 +20,10 @@ type t = num
 
 let f x = F x
 
+let zero = f 0.
+let one = f 1.
+let two = f 2.
+
 let num_of_int i = F (float_of_int i)
 
 let bp f = F f

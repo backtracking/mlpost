@@ -240,8 +240,8 @@ let print_prelude s fmt () =
   fprintf fmt "%%&latex@\n";
   fprintf fmt "%s" s;
   fprintf fmt "\\begin{document}@\n";
-  fprintf fmt "etex@\n";
-  fprintf fmt "input boxes;@\n"
+  fprintf fmt "etex@\n"
+  (* fprintf fmt "input boxes;@\n" *)
 
 let defaultprelude =
   print_prelude "\\documentclass{article}\n\\usepackage[T1]{fontenc}\n" 

@@ -29,6 +29,10 @@ module rec Num : sig
   (** The base unit in Mlpost are bp. The following functions 
       permit to specify values in other common units *)
 
+  val zero : t
+  val one : t
+  val two : t
+
   val f : float -> t
   val bp : float -> t
   val pt : float -> t
@@ -412,7 +416,7 @@ and Box : sig
     (** [ellipse p pic] creates a elliptic box of center [p] and of contents
 	[pic] *)
 
-  val rect : Point.t -> Picture.t -> t
+  val rect :  ?dx:Num.t -> ?dy:Num.t -> Point.t -> Picture.t -> t
     (** [rect p pic] creates a rectangular box of center [p] and of contents
 	[pic] *)
 
@@ -420,6 +424,9 @@ and Box : sig
 
   (** Get the bounding path of a box *)
   val bpath : t -> Path.t
+
+  (** Get the picture enclosed in a box *)
+  val picture : t -> Picture.t
 
   (** {2 Special points on a box} *)
 
@@ -432,6 +439,10 @@ and Box : sig
   val south_west : t -> Point.t
   val north_east : t -> Point.t
   val south_east : t -> Point.t
+
+  (** Box alignment *)
+
+  val valign : ?dx:Num.t -> ?dy:Num.t -> Picture.t list -> t list
 
 end
 
@@ -503,7 +514,12 @@ and Picture : sig
     (** Apply a transformation to a picture *)
 
   val bbox : t -> Path.t
-    (** Get the bounding box of a picture *)
+    (** Get the bounding box of a picture (with default padding, as
+	in MetaPost) *)
+
+  val corner_bbox : ?dx:Num.t -> ?dy:Num.t -> t -> Path.t
+    (** Get the bounding box of a picture, according to its corners
+        and supplied padding *)
 
   val center : t -> Point.t -> t
     (** Place a picture centered at some point *)
@@ -536,6 +552,11 @@ and Picture : sig
   val clip : t -> Path.t -> t
   (** [clip pic path] limits [pic] to the cyclic path [path]; all elements 
    *   outside of [path] are cut off. *)
+
+  (** {2 Dimensions} *)
+
+  val width : t -> Num.t
+  val height : t -> Num.t
 
 end
 

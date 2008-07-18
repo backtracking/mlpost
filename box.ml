@@ -1,4 +1,3 @@
-
 (**************************************************************************)
 (*                                                                        *)
 (*  Copyright (C) Johannes Kanig, Stephane Lescuyer                       *)
@@ -23,9 +22,18 @@ open Num.Infix
 
 type t = box
 
-let rect c p = 
+let rect ?(dx=Num.zero) ?(dy=Num.zero) c p = 
   let pic = center p c in
-    { c = c; bpath = bbox pic ; pic = pic }
+  let pdx = Point.pt (dx, Num.zero) in
+  let pdy = Point.pt (Num.zero, dy) in
+  let path = 
+    Path.pathp ~style:JLine ~cycle:JLine 
+      [Point.add (Point.sub (ulcorner pic) pdx) pdy;
+       Point.sub (Point.sub (llcorner pic) pdx) pdy;
+       Point.sub (Point.add (lrcorner pic) pdx) pdy;
+       Point.add (Point.add (urcorner pic) pdx) pdy]
+  in
+  { c = c; bpath = path ; pic = pic }
 
 let margin = Num.bp 2.
 
@@ -70,3 +78,28 @@ let west  b = segment 0.5 (north_west b) (north_west b)
 let east  b = segment 0.5 (south_east b) (north_east b) 
 
 let bpath {bpath = p} = p
+
+let picture p = p.pic
+
+
+(* Box alignment *)
+
+open Num.Infix
+
+let valign ?(dx=Num.zero) ?(dy=Num.zero) pl = 
+  let wmax = 
+    List.fold_left (fun w p -> Num.maxn w (Picture.width p)) Num.zero pl 
+  in
+  let wmax_2 = wmax // Num.two +/ dx in
+  let rec make_boxes y = function
+    | [] -> 
+	[]
+    | p :: pl ->
+	let wp = Picture.width p in
+	let hp = Picture.height p in
+	let dx = wmax_2 -/ wp // Num.two in
+	let c = Point.pt (wmax_2, y -/ dy -/ hp // Num.two) in 
+	let b = rect ~dx ~dy c p in
+	b :: make_boxes (y -/ hp -/ dy -/ dy) pl
+  in
+  make_boxes Num.zero pl

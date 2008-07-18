@@ -27,6 +27,15 @@ let urcorner pic = PTPicCorner (pic, UR)
 let lrcorner pic = PTPicCorner (pic, LR)
 (* let currentpicture = PIName "currentpicture" *)
 
+let corner_bbox ?(dx=Num.zero) ?(dy=Num.zero) pic = 
+  let pdx = Point.pt (dx, Num.zero) in
+  let pdy = Point.pt (Num.zero, dy) in
+  Path.pathp ~style:JLine ~cycle:JLine 
+    [Point.add (Point.sub (ulcorner pic) pdx) pdy;
+     Point.sub (Point.sub (llcorner pic) pdx) pdy;
+     Point.sub (Point.add (lrcorner pic) pdx) pdy;
+     Point.add (Point.add (urcorner pic) pdx) pdy]
+
 let transform tr = function
   | PITransform (tr', p) -> PITransform (tr'@tr, p)
   | _ as x -> PITransform (tr, x)
@@ -53,3 +62,7 @@ let below p1 p2 =
   make (CSeq [CDrawPic p1; CDrawPic (place_up_left p2 (llcorner p1))])
 
 let clip pic pth = PIClip (pic,pth)
+
+let width p = Point.xpart (Point.sub (urcorner p) (ulcorner p))
+
+let height p = Point.ypart (Point.sub (urcorner p) (lrcorner p))

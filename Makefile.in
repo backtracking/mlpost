@@ -59,7 +59,7 @@ check: byte $(OCAMLBEST) $(TOOL) $(TESTS) check-examples
 CMO := misc.cmo name.cmo compiled_types.cmo compile.cmo  \
        num.cmo point.cmo \
        transform.cmo \
-       color.cmo picture.cmo primPath.cmo path.cmo   \
+       color.cmo primPath.cmo path.cmo picture.cmo     \
        dash.cmo pen.cmo command.cmo shapes.cmo box.cmo metapost.cmo\
        helpers.cmo diag.cmo tree.cmo plot.cmo  \
 	generate.cmo
