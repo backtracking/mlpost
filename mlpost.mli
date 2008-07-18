@@ -458,8 +458,10 @@ and Box : sig
 
   (** Box alignment *)
 
-  (** TODO *)
+  (** DOC TODO *)
   val valign : ?dx:Num.t -> ?dy:Num.t -> Picture.t list -> t list
+  val halign : ?dx:Num.t -> ?dy:Num.t -> Picture.t list -> t list
+  val tabular : ?dx:Num.t -> ?dy:Num.t -> Picture.t list list -> t list list
 
 end
 

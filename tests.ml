@@ -380,7 +380,67 @@ let stack =
   in
   seq cbl :: List.map Command.draw_box bl
 
-let figs = [ stack ]
+let row =
+  let bl = 
+    Box.halign ~dx:Num.one ~dy:two
+      [Picture.tex "$x$"; 
+       Picture.tex "topo"; 
+       Picture.tex "{\\Large I}"] 
+  in
+  let cbl = List.map2 
+    (fun b n -> fill ~color:(Color.color n) (Picture.corner_bbox (Box.picture b))) 
+    bl 
+    ["BlanchedAlmond"; "DarkSlateGray"; "medium violet red"]
+  in
+  seq cbl :: List.map Command.draw_box bl
+
+let stackl =
+  let bll = 
+    Box.tabular ~dx:Num.one ~dy:two
+      [[Picture.tex "$x$"]; 
+       [Picture.tex "topo"]; 
+       [Picture.tex "{\\Large I}"]]
+  in
+  let cbl = List.map2
+    (fun b n -> fill ~color:(Color.color n) (Picture.corner_bbox (Box.picture b)))
+     (List.map List.hd bll)
+    ["BlanchedAlmond"; "DarkSlateGray"; "medium violet red"]
+  in
+    seq cbl :: List.map Command.draw_box (List.flatten bll)
+
+let rowl =
+  let bll = 
+    Box.tabular ~dx:Num.one ~dy:two
+      [[Picture.tex "$x$"; 
+	Picture.tex "topo"; 
+	Picture.tex "{\\Large I}"]]
+  in
+  let cbl = List.map2
+    (fun b n -> fill ~color:(Color.color n) (Picture.corner_bbox (Box.picture b)))
+    (List.hd bll)
+    ["BlanchedAlmond"; "DarkSlateGray"; "medium violet red"]
+  in
+    seq cbl :: List.map Command.draw_box (List.flatten bll)
+
+let array =
+  let bll =
+    Box.tabular ~dx:Num.one ~dy:two
+      [[Picture.tex "$x$"; Picture.tex "topo"; Picture.tex "{\\Large I}"];
+       [Picture.tex "$\\lambda$"; Picture.tex "yippie"; Picture.tex "{\\Large O}"];
+       [Picture.tex "{\\it Lets}"; Picture.tex "go"; Picture.tex "{\\Large PHILS}"]]
+  in
+  let cbl = 
+    List.flatten 
+      (List.map 
+	 (List.map2
+	    (fun n b -> fill ~color:(Color.color n) 
+	       (Picture.corner_bbox (Box.picture b)))
+	    ["BlanchedAlmond"; "DarkSlateGray"; "medium violet red"])
+	 bll)
+  in
+    seq cbl :: List.map Command.draw_box (List.flatten bll)
+
+let figs = [ stack; row; stackl; rowl; array]
 (*
 let figs = [[Command.draw_pic shapes1]; [Command.draw_pic shapes2];
 d16; d1; d15; florence; d14; d13; 

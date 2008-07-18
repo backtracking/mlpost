@@ -84,10 +84,10 @@ let picture p = p.pic
 
 open Num.Infix
 
+let fold_max f = List.fold_left (fun w p -> Num.maxn w (f p))
+
 let valign ?(dx=Num.zero) ?(dy=Num.zero) pl = 
-  let wmax = 
-    List.fold_left (fun w p -> Num.maxn w (Picture.width p)) Num.zero pl 
-  in
+  let wmax = fold_max Picture.width Num.zero pl in
   let wmax_2 = wmax // Num.two +/ dx in
   let rec make_boxes y = function
     | [] -> 
@@ -101,3 +101,53 @@ let valign ?(dx=Num.zero) ?(dy=Num.zero) pl =
 	b :: make_boxes (y -/ hp -/ dy -/ dy) pl
   in
   make_boxes Num.zero pl
+
+let halign ?(dx=Num.zero) ?(dy=Num.zero) pl = 
+  let hmax = fold_max Picture.height Num.zero pl in
+  let hmax_2 = hmax // Num.two +/ dy in
+  let rec make_boxes x = function
+    | [] -> 
+	[]
+    | p :: pl ->
+	let wp = Picture.width p in
+	let hp = Picture.height p in
+	let dy = hmax_2 -/ hp // Num.two in
+	let c = Point.pt (x +/ dx +/ wp // Num.two, hmax_2) in 
+	let b = rect ~dx ~dy c p in
+	b :: make_boxes (x +/ wp +/ dx +/ dx) pl
+  in
+  make_boxes Num.zero pl
+
+let tabular ?(dx=Num.zero) ?(dy=Num.zero) pll =
+  let hmaxl = List.map (fold_max Picture.height Num.zero) pll in
+  let rec calc_wmax pll = 
+    match pll with 
+      | []::_ -> [] 
+      | _ -> let cols, qll = 
+	  List.fold_left 
+	    (fun (col,rem) pl -> (List.hd pl :: col, List.tl pl :: rem)) 
+	    ([],[]) pll in
+	  (fold_max Picture.width Num.zero cols)::(calc_wmax qll)
+  in
+  let wmaxl = calc_wmax pll in
+  let rec make_rows wmaxl x y h_2 pl =
+    match pl, wmaxl with
+      | [], [] -> []
+      | [], _ | _, [] -> raise (Invalid_argument "Lists have different sizes")
+      | p::ql, wrow :: wl ->
+	  let c = Point.pt (x +/ dx +/ wrow // Num.two, y -/ h_2) in
+	  let dx' = dx +/ (wrow -/ Picture.width p) // Num.two in
+	  let dy = h_2 -/ (Picture.height p) // Num.two in
+	  let b = rect ~dx:dx' ~dy c p in
+	    b::(make_rows wl (x +/ wrow +/ dx +/ dx) y h_2 ql)
+  in
+  let rec make_array hmaxl y pll = 
+    match pll, hmaxl with
+      | [], [] -> []
+      | [], _ | _, [] -> raise (Invalid_argument "Lists have different sizes")
+      | row :: qll, hrow :: hl -> 
+	  let brow = 
+	    make_rows wmaxl Num.zero y (hrow // Num.two +/ dy) row in
+	    brow :: (make_array hl (y -/ hrow -/ dy -/ dy) qll)
+  in
+    make_array hmaxl Num.zero pll
