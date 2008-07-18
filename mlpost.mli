@@ -383,6 +383,8 @@ and Color : sig
   val rgb : float -> float -> float -> t
     (** [rgb r g b] constructs the color that corresponds to the color code 
 	RGB(r,g,b)  *)
+  val rgb8 : int -> int -> int -> t
+    (** similar to [rgb], but takes integers between 0 and 255 as argument *)
 
   val cmyk : float -> float -> float -> float -> t
     (** [cmyk c m y k] constructs the color that corresponds to the color code 
@@ -427,7 +429,8 @@ and Box : sig
 
   val rect :  ?dx:Num.t -> ?dy:Num.t -> Point.t -> Picture.t -> t
     (** [rect p pic] creates a rectangular box of center [p] and of contents
-	[pic]. Optional padding is given by arguments [dx] and [dy]. *)
+	[pic]. Optional padding is given by arguments [dx] and [dy] ; 
+	default is 2bp. *)
 
   val round_rect : ?dx:Num.t -> ?dy:Num.t -> Point.t -> Picture.t -> t
     (** [round_rect p pic] creates a rectangular box of center [p] and of contents

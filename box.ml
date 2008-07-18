@@ -22,7 +22,9 @@ open Num.Infix
 
 type t = box
 
-let rect ?(dx=Num.zero) ?(dy=Num.zero) c p = 
+let margin = Num.bp 2.
+
+let rect ?(dx=margin) ?(dy=margin) c p = 
   let pic = center p c in
   let pdx = Point.pt (dx, Num.zero) in
   let pdy = Point.pt (Num.zero, dy) in
@@ -34,8 +36,6 @@ let rect ?(dx=Num.zero) ?(dy=Num.zero) c p =
        Point.add (Point.add (urcorner pic) pdx) pdy]
   in
   { c = c; bpath = path ; pic = pic }
-
-let margin = Num.bp 2.
 
 let circle ?(dr=F 0.) c pic =
   let pic = center pic c in
