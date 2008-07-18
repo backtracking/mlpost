@@ -440,7 +440,45 @@ let array =
   in
     seq cbl :: List.map Command.draw_box (List.flatten bll)
 
-let figs = [ stack; row; stackl; rowl; array]
+
+(* my bresenham avec tabular *)
+let x2 = 9
+let y2 = 6
+let bresenham_data =
+  let a = Array.create (x2+1) 0 in
+  let y = ref 0 in
+  let e = ref (2 * y2 - x2) in
+  for x = 0 to x2 do
+    a.(x) <- !y;
+    if !e < 0 then
+      e := !e + 2 * y2
+    else begin
+      y := !y + 1;
+      e := !e + 2 * (y2 - x2)
+    end
+  done;
+  a
+
+let mybresenham =
+  let d = 10. in
+  let pen = Pen.default ~tr:([Transform.scaled (f 1.5)]) () in
+  let cell i j = 
+    let sq = Path.scale (f d) unitsquare in
+    let color =
+      if j = bresenham_data.(i) then 
+	Color.color "OrangeRed"
+      else Color.white 
+    in
+      fill ~color sq
+  in
+  let grid = Array.init y2 
+    (fun j -> Array.init x2 (fun i -> Picture.make (cell i j))) in
+  let gridl = Array.to_list (Array.map Array.to_list grid) in
+  let bll = Box.tabular gridl in
+    List.map Command.draw_box (List.flatten bll)
+
+
+let figs = [ stack; row; stackl; rowl; array; mybresenham]
 (*
 let figs = [[Command.draw_pic shapes1]; [Command.draw_pic shapes2];
 d16; d1; d15; florence; d14; d13; 
