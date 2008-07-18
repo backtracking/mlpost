@@ -366,14 +366,14 @@ let yannick =
   let scale d = Num.bp (d *. 70.) in
     [draw ~scale ~fill:Color.orange tree]
 
-let figs = [ yannick ]
 (*
+let figs = [ yannick ]
+*)
 let figs = [[Command.draw_pic shapes1]; [Command.draw_pic shapes2];
 d16; d1; d15; florence; d14; d13; 
  d11; d7; d6; d5; d4; cheno011; proval; d3;  
               d2sq; d2hsq; d2s; d2c; ] 
 
-*)
 let figs =
   let r = ref 0 in
   List.map (fun f -> incr r; !r, f) figs
