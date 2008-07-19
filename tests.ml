@@ -396,7 +396,7 @@ let row =
 
 let stackl =
   let bll = 
-    Box.tabular ~dx:Num.one ~dy:two
+    Box.tabularl ~dx:Num.one ~dy:two
       [[Picture.tex "$x$"]; 
        [Picture.tex "topo"]; 
        [Picture.tex "{\\Large I}"]]
@@ -410,7 +410,7 @@ let stackl =
 
 let rowl =
   let bll = 
-    Box.tabular ~dx:Num.one ~dy:two
+    Box.tabularl ~dx:Num.one ~dy:two
       [[Picture.tex "$x$"; 
 	Picture.tex "topo"; 
 	Picture.tex "{\\Large I}"]]
@@ -424,7 +424,7 @@ let rowl =
 
 let array =
   let bll =
-    Box.tabular ~dx:Num.one ~dy:two
+    Box.tabularl ~dx:Num.one ~dy:two
       [[Picture.tex "$x$"; Picture.tex "topo"; Picture.tex "{\\Large I}"];
        [Picture.tex "$\\lambda$"; Picture.tex "yippie"; Picture.tex "{\\Large O}"];
        [Picture.tex "{\\it Lets}"; Picture.tex "go"; Picture.tex "{\\Large PHILS}"]]
@@ -471,12 +471,10 @@ let mybresenham =
     in
       fill ~color sq
   in
-  let grid = Array.init y2 
-    (fun j -> Array.init x2 (fun i -> Picture.make (cell i j))) in
-  let gridl = Array.to_list (Array.map Array.to_list grid) in
-  let bll = Box.tabular gridl in
-    List.map Command.draw_box (List.flatten bll)
-
+  let bm = Box.tabulari x2 y2 (fun i j -> Picture.make (cell i j)) in
+    Array.fold_left 
+      (fun l m -> Array.fold_left (fun l b -> (Command.draw_box b)::l) l m)
+      [] bm
 
 let figs = [ stack; row; stackl; rowl; array; mybresenham]
 (*

@@ -461,8 +461,10 @@ and Box : sig
   (** DOC TODO *)
   val valign : ?dx:Num.t -> ?dy:Num.t -> Picture.t list -> t list
   val halign : ?dx:Num.t -> ?dy:Num.t -> Picture.t list -> t list
-  val tabular : ?dx:Num.t -> ?dy:Num.t -> Picture.t list list -> t list list
-
+  val tabular : ?dx:Num.t -> ?dy:Num.t -> Picture.t array array -> t array array
+  val tabularl : ?dx:Num.t -> ?dy:Num.t -> Picture.t list list -> t list list
+  val tabulari : 
+    ?dx:Num.t -> ?dy:Num.t -> int -> int -> (int -> int -> Picture.t) -> t array array
 end
 
 and Transform : sig

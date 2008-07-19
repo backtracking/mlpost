@@ -118,7 +118,7 @@ let halign ?(dx=Num.zero) ?(dy=Num.zero) pl =
   in
   make_boxes Num.zero pl
 
-let tabular ?(dx=Num.zero) ?(dy=Num.zero) pll =
+let tabularl ?(dx=Num.zero) ?(dy=Num.zero) pll =
   let hmaxl = List.map (fold_max Picture.height Num.zero) pll in
   let rec calc_wmax pll = 
     match pll with 
@@ -151,3 +151,12 @@ let tabular ?(dx=Num.zero) ?(dy=Num.zero) pll =
 	    brow :: (make_array hl (y -/ hrow -/ dy -/ dy) qll)
   in
     make_array hmaxl Num.zero pll
+
+let tabular ?(dx=Num.zero) ?(dy=Num.zero) m =
+  let pll = Array.to_list (Array.map Array.to_list m) in
+  let bll = tabularl ~dx ~dy pll in
+    Array.of_list (List.map Array.of_list bll)
+
+let tabulari ?(dx=Num.zero) ?(dy=Num.zero) w h f =
+  let m = Array.init h (fun j -> Array.init w (fun i -> f i j)) in
+    tabular ~dx ~dy m
