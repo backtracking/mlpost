@@ -40,23 +40,6 @@ let d1 =
     box_arrow ~color:Color.blue a b;
   ]
 
-(*
-let d1' = 
-  let a = Mlbox.circle (0. ++ 0.) (Picture.tex "$\\sqrt2$") in
-  let b = Mlbox.rect (2. ++ 0.) (Picture.tex "$\\pi$") in
-(*   let pen = Pen.default ~tr:[Transform.scaled 3.] () in *)
-  [ draw_mlbox a;
-    draw_mlbox ~fill:Color.purple b;
-    draw
-      ~color:Color.red
-      (Path.shift (1. ++ 1.) (Mlbox.bpath a));
-(*
-    draw_label_arrow ~color:Color.orange ~pen 
-      ~pos:Pupright (Picture.tex "foo") (Mlbox.west a) (Mlbox.south_east b);
-    box_arrow ~color:Color.blue a b;
-*)
-  ]
-*)
 open Tree
 
 let () = Random.self_init ()
@@ -476,14 +459,14 @@ let mybresenham =
       (fun l m -> Array.fold_left (fun l b -> (Command.draw_box b)::l) l m)
       [] bm
 
-let figs = [ stack; row; stackl; rowl; array; mybresenham]
+let figs = [ stack; row; stackl; rowl; array; mybresenham; ]
 (*
-let figs = [[Command.draw_pic shapes1]; [Command.draw_pic shapes2];
-d16; d1; d15; florence; d14; d13; 
- d11; d7; d6; d5; d4; cheno011; proval; d3;  
-              d2sq; d2hsq; d2s; d2c; ] 
-*)
+            [Command.draw_pic shapes1]; [Command.draw_pic shapes2];
+            d16; d1; d15; florence; d14; d13; 
+             d11; d7; d6; d5; d4; cheno011; proval; d3;  
+                          d2sq; d2hsq; d2s; d2c; ] 
 
+*)
 let figs =
   let r = ref 0 in
   List.map (fun f -> incr r; !r, f) figs

@@ -26,16 +26,11 @@ let margin = Num.bp 2.
 
 let rect ?(dx=margin) ?(dy=margin) c p = 
   let pic = center p c in
-  let pdx = Point.pt (dx, Num.zero) in
-  let pdy = Point.pt (Num.zero, dy) in
-  let path = 
-    Path.pathp ~style:JLine ~cycle:JLine 
-      [Point.add (Point.sub (ulcorner pic) pdx) pdy;
-       Point.sub (Point.sub (llcorner pic) pdx) pdy;
-       Point.sub (Point.add (lrcorner pic) pdx) pdy;
-       Point.add (Point.add (urcorner pic) pdx) pdy]
+  let path = Shapes.rectangle_path 
+               (Picture.width pic +/ Num.two */ dx)
+               (Picture.height pic +/ Num.two */ dy)
   in
-  { c = c; bpath = path ; pic = pic }
+  { c = c; bpath = Path.shift c path ; pic = pic }
 
 let circle ?(dr=F 0.) c pic =
   let pic = center pic c in

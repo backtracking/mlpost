@@ -83,6 +83,13 @@ let arc_ellipse_path ?(close=false) rx ry theta1 theta2 =
       cycle ~style:JLine (concat ~style:JLine path (NoDir,origin,NoDir))
     else path
 
+let rectangle_path width height =
+  let w = width // Num.two in
+  let h = height // Num.two in
+  let mw = Num.zero -/ w in
+  let mh = Num.zero -/ h in
+    Path.pathn ~cycle:JLine ~style:JLine [ w, mh; w, h; mw, h; mw, mh]
+      
 
 let draw_func ?fill ?(stroke=Color.black) ?(thickness=0.5) path =
   let fillcmd =
@@ -99,7 +106,8 @@ let rounded_rect ?fill ?stroke ?thickness width height rx ry =
     
 
 let rectangle ?fill ?stroke ?thickness width height =
-    rounded_rect ?fill ?stroke ?thickness width height (F 0.) (F 0.)
+  let path = rectangle_path width height in
+    draw_func ?fill ?stroke ?thickness path
 
 let ellipse ?fill ?stroke ?thickness rx ry =
   let path = full_ellipse_path rx ry in
