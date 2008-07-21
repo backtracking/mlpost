@@ -2,6 +2,9 @@ open Mlpost
 open Command
 open Num
 open Point
+open Unix
+
+let tm = localtime (time ())
 
 let fig =
   let pen = Pen.default ~tr:([Transform.scaled (f 10.0)]) () in
@@ -24,7 +27,7 @@ let fig =
   let pic = Picture.make (seq
     [draw ~color ~pen circle; 
      iter 1 12 (fun i -> draw_pic (num i));
-     time 15 37;
+     time tm.tm_hour tm.tm_min;
      label (Picture.tex "sur une id\\'ee de Claude") (p (0.,0.));
     ]) in
     [draw_pic (Picture.transform [Transform.scaled (f 0.3)] pic)]

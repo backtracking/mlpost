@@ -24,7 +24,7 @@ $(PNGFILES): ../mlpost.cma
 
 %.mp: %_footer.ml
 	ocamlc -I .. -c $*.ml
-	ocaml -I .. ../mlpost.cma $^
+	ocaml -I .. ../mlpost.cma unix.cma $^
 
 %.1: %.mp
 	mpost $^ end

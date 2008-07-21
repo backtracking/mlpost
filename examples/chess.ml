@@ -1,11 +1,8 @@
 open Mlpost
-open Metapost
 open Command
 open Picture
 open Path
 open Num
-open Num.Infix
-open Helpers
 
 let pen = Pen.default ~tr:([Transform.scaled (f 1.5)]) ()
 
