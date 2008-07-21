@@ -59,23 +59,6 @@ let rounded_rect_path width height rx ry =
       cycle ~dir:(Vec right) ~style:(JControls(ul1,ul2))
 	(jointpathk knots joints)
 
-let rounded_rect ?fill ?(stroke=Color.black) ?(thickness=0.5) 
-    width height rx ry =
-  let path = rounded_rect_path width height rx ry in
-  let fillcmd =
-    match fill with
-      | None -> Command.nop
-      | Some color -> Command.fill ~color path in
-  let pen = Pen.square ~tr:([Transform.scaled (F thickness)]) () in
-  let strokecmd = Command.draw ~color:stroke ~pen path in
-    Picture.make (Command.seq [fillcmd; strokecmd])
-
-let rectangle ?fill ?(stroke=Color.black) ?(thickness=0.5) width height =
-  match fill with 
-    | None -> rounded_rect ~stroke ~thickness width height (F 0.) (F 0.)
-    | Some fill -> 
-	rounded_rect ~fill ~stroke ~thickness width height (F 0.) (F 0.)
-
 (** Ellipses and Arcs *)
 
 let full_ellipse_path rx ry =
@@ -92,16 +75,16 @@ let full_ellipse_path rx ry =
     cycle ~dir:(Vec up) 
       ~style:(JControls(b2,r1)) (jointpathk knots joints)
       
-let arc_ellipse ?fill ?(stroke=Color.black) ?(thickness=0.5) ?(close=false)
-    rx ry theta1 theta2 =
+let arc_ellipse_path ?(close=false) rx ry theta1 theta2 =
   let curvabs theta =  (2. *. theta) /. pi in
-  let path = 
-    subpath (curvabs theta1) (curvabs theta2) (full_ellipse_path rx ry) in
   let path =
-    if close || (match fill with Some _ -> true | _ -> false) then
+    subpath (curvabs theta1) (curvabs theta2) (full_ellipse_path rx ry) in
+    if close then
       cycle ~style:JLine (concat ~style:JLine path (NoDir,origin,NoDir))
     else path
-  in
+
+
+let draw_func ?fill ?(stroke=Color.black) ?(thickness=0.5) path =
   let fillcmd =
     match fill with
       | None -> Command.nop
@@ -110,14 +93,21 @@ let arc_ellipse ?fill ?(stroke=Color.black) ?(thickness=0.5) ?(close=false)
   let strokecmd = Command.draw ~color:stroke ~pen path in
     Picture.make (Command.seq [fillcmd; strokecmd])
 
-let ellipse ?fill ?(stroke=Color.black) ?(thickness=0.5) rx ry =
+let rounded_rect ?fill ?stroke ?thickness width height rx ry =
+  let path = rounded_rect_path width height rx ry in
+    draw_func ?fill ?stroke ?thickness path
+    
+
+let rectangle ?fill ?stroke ?thickness width height =
+    rounded_rect ?fill ?stroke ?thickness width height (F 0.) (F 0.)
+
+let ellipse ?fill ?stroke ?thickness rx ry =
   let path = full_ellipse_path rx ry in
-  let fillcmd =
-    match fill with
-      | None -> Command.nop
-      | Some color -> Command.fill ~color path in
-  let pen = Pen.square ~tr:([Transform.scaled (F thickness)]) () in
-  let strokecmd = Command.draw ~color:stroke ~pen path in
-    Picture.make (Command.seq [fillcmd; strokecmd])
+    draw_func ?fill ?stroke ?thickness path
 
+let arc_ellipse ?fill ?stroke ?thickness ?(close=false) rx ry theta1 theta2 =
+  let path = arc_ellipse_path rx ry theta1 theta2 
+              ~close:(close || (match fill with Some _ -> true | _ -> false))
+  in
+    draw_func ?fill ?stroke ?thickness path
 
