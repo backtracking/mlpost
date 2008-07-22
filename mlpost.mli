@@ -5,7 +5,7 @@
 (*                                                                        *)
 (*  This software is free software; you can redistribute it and/or        *)
 (*  modify it under the terms of the GNU Library General Public           *)
-(*  License version 2, with the special exception on linking              *)
+(*  License version 2.1, with the special exception on linking            *)
 (*  described in file LICENSE.                                            *)
 (*                                                                        *)
 (*  This software is distributed in the hope that it will be useful,      *)
@@ -23,16 +23,11 @@ module rec Num : sig
   (** The Mlpost Num module *)
 
   type t
-      (** The Mlpost numeric type is just a float *)
+      (** The Mlpost numeric type is an abstract datatype *)
       
   (** {2 Conversion functions} *)
   (** The base unit in Mlpost are bp. The following functions 
       permit to specify values in other common units *)
-
-  (** The following constants are shortcuts for (bp 0.) (bp 1.) (bp 2.) *)
-  val zero : t
-  val one : t
-  val two : t
 
   val f : float -> t
   val bp : float -> t
@@ -55,6 +50,8 @@ module rec Num : sig
   val minn : t -> t -> t
   val gmean : t -> t -> t
 
+  (** Infix operators for [addn], [subn], [muln] and [divn] *)
+
   module Infix : sig
     val (+/) : t -> t -> t
     val (-/) : t -> t -> t
@@ -64,9 +61,14 @@ module rec Num : sig
 
   (** {2 Useful constants and functions} *)
 
+  val zero : t
+  val one : t
+  val two : t
+  (** Shortcuts for [bp 0.], [bp 1.] and [bp 2.]. *)
+
   val pi : float
   val deg2rad : float -> float
-  (** Converts angles in degree into angles in rad *)
+  (** Converts degrees into radians *)
 
   type scale = float -> t
 
@@ -375,10 +377,10 @@ and Color : sig
   (** Colors *)
 
   type t
-      (** the abstract type of Colors *)
+    (** the abstract type of colors *)
 
   val default : t
-    (** the default Color is black *)
+    (** the default color is black *)
 
   val rgb : float -> float -> float -> t
     (** [rgb r g b] constructs the color that corresponds to the color code 
@@ -389,6 +391,7 @@ and Color : sig
   val cmyk : float -> float -> float -> float -> t
     (** [cmyk c m y k] constructs the color that corresponds to the color code 
 	CMYK(c,m,y,k)  *)
+
   (** {2 Predefined Colors} *)
 
   val red : t
@@ -406,8 +409,8 @@ and Color : sig
   (** {3 X11-named Colors} *)
   val color : string -> t
     (** [color n] returns the RGB color associated to name [n]
-	(as defined in /etc/X11/rgb.txt). Raises Not_found if [n] does not
-	correspond to a colour *)
+	(as defined in /etc/X11/rgb.txt). Raises [Not_found] if [n] does not
+	correspond to a color *)
 end
 
 and Box : sig
@@ -456,15 +459,29 @@ and Box : sig
   val north_east : t -> Point.t
   val south_east : t -> Point.t
 
-  (** Box alignment *)
+  (** {2 Boxes alignment} *)
 
-  (** DOC TODO *)
   val valign : ?dx:Num.t -> ?dy:Num.t -> Picture.t list -> t list
+    (** [valign l] turns a list of pictures into a list of boxes,
+	which contain the given pictures and are vertically aligned. 
+	All boxes have the same width. Some padding can be specified with
+	optional arguments [dx] and [dy]. *)
+
   val halign : ?dx:Num.t -> ?dy:Num.t -> Picture.t list -> t list
-  val tabular : ?dx:Num.t -> ?dy:Num.t -> Picture.t array array -> t array array
+    (** [halign] is similar to [valign], but with an horizontal alignment. *)
+
+  val tabular : 
+    ?dx:Num.t -> ?dy:Num.t -> Picture.t array array -> t array array
+    (** turns a matrix of pictures into a matrix of boxes *)
+
   val tabularl : ?dx:Num.t -> ?dy:Num.t -> Picture.t list list -> t list list
+    (** similar to [tabular], but using lists instead of arrays *)
+
   val tabulari : 
-    ?dx:Num.t -> ?dy:Num.t -> int -> int -> (int -> int -> Picture.t) -> t array array
+    ?dx:Num.t -> ?dy:Num.t -> int -> int -> 
+    (int -> int -> Picture.t) -> t array array
+    (** similar to [tabular], but using a matrix defined with a function *)
+
 end
 
 and Transform : sig
