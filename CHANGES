@@ -1,6 +1,9 @@
 
+version 0.2, July 22nd, 2008
+----------------------------
+ o Box: no more use of boxes.mp, replaced by Ocaml code
  o License: LGPL updated to version 2.1
- o Num: 
+ o Num: t is now an abstract datatype
  o Moved repository to a trunk/branches style
  o Subversion repository updated to schema version 5
 

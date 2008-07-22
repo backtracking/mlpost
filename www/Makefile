@@ -9,6 +9,8 @@ install: all
 
 all: $(ALL) 
 
+$(ALL): macros.prehtml version.prehtml
+
 # RULES
 
 YAMLPP=yamlpp macros.prehtml version.prehtml

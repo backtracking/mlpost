@@ -44,7 +44,7 @@ OFLAGS = -dtypes $(INCLUDES) @FORPACK@
 #############
 
 NAME = mlpost
-VERSION=0.1
+VERSION=0.3
 
 TESTS = handbookgraphs.cmx othergraphs.cmx tests.cmx
 TOOL = tool.$(OCAMLBEST)
@@ -125,8 +125,6 @@ other: $(CMA) othergraphs.ml
 check-examples: mlpost.cma
 	for f in examples/*.ml; do ocamlc -c $$f; done
 
-VERSION=0.1
-
 version.ml: Makefile
 	echo "let version = \""$(VERSION)"\"" > version.ml
 	echo "let date = \""`date`"\"" >> version.ml
@@ -193,7 +191,7 @@ export-doc:
 export-www: www/version.prehtml
 	make -C www
 
-www/version.prehtml:
+www/version.prehtml: Makefile
 	echo "<#def version>$(VERSION)</#def>" > www/version.prehtml
 
 export-examples: 
