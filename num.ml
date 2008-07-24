@@ -53,6 +53,8 @@ let multn x y =
   match x, y with
   | F f1, F f2 -> F (f1 *. f2)
   | _, _ -> NMult (x,y)
+
+let multf f x = multn (F f) x
   
 let divn x y = 
   match x, y with
@@ -92,5 +94,6 @@ module Infix = struct
   let (+/)  = addn
   let (-/)  = subn
   let ( */)  = multn
+  let ( *./)  = multf
   let (//)  = divn
 end

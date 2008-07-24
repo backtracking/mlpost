@@ -45,6 +45,7 @@ module rec Num : sig
   val addn : t -> t -> t
   val subn : t -> t -> t
   val multn : t -> t -> t
+  val multf : float -> t -> t
   val divn : t -> t -> t
   val maxn : t -> t -> t
   val minn : t -> t -> t
@@ -56,6 +57,7 @@ module rec Num : sig
     val (+/) : t -> t -> t
     val (-/) : t -> t -> t
     val ( */) : t -> t -> t
+    val ( *./): float -> t -> t
     val (//) : t -> t -> t
   end
 
