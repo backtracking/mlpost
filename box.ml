@@ -79,10 +79,8 @@ let picture p = p.pic
 
 open Num.Infix
 
-let fold_max f = List.fold_left (fun w p -> Num.maxn w (f p))
-
 let valign ?(dx=Num.zero) ?(dy=Num.zero) pl = 
-  let wmax = fold_max Picture.width Num.zero pl in
+  let wmax = Num.fold_max Picture.width Num.zero pl in
   let wmax_2 = wmax // Num.two +/ dx in
   let rec make_boxes y = function
     | [] -> 
@@ -98,7 +96,7 @@ let valign ?(dx=Num.zero) ?(dy=Num.zero) pl =
   make_boxes Num.zero pl
 
 let halign ?(dx=Num.zero) ?(dy=Num.zero) pl = 
-  let hmax = fold_max Picture.height Num.zero pl in
+  let hmax = Num.fold_max Picture.height Num.zero pl in
   let hmax_2 = hmax // Num.two +/ dy in
   let rec make_boxes x = function
     | [] -> 
@@ -114,7 +112,7 @@ let halign ?(dx=Num.zero) ?(dy=Num.zero) pl =
   make_boxes Num.zero pl
 
 let tabularl ?(dx=Num.zero) ?(dy=Num.zero) pll =
-  let hmaxl = List.map (fold_max Picture.height Num.zero) pll in
+  let hmaxl = List.map (Num.fold_max Picture.height Num.zero) pll in
   let rec calc_wmax pll = 
     match pll with 
       | []::_ -> [] 
@@ -122,7 +120,7 @@ let tabularl ?(dx=Num.zero) ?(dy=Num.zero) pll =
 	  List.fold_left 
 	    (fun (col,rem) pl -> (List.hd pl :: col, List.tl pl :: rem)) 
 	    ([],[]) pll in
-	  (fold_max Picture.width Num.zero cols)::(calc_wmax qll)
+	  (Num.fold_max Picture.width Num.zero cols)::(calc_wmax qll)
   in
   let wmaxl = calc_wmax pll in
   let rec make_rows wmaxl x y h_2 pl =

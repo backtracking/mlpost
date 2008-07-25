@@ -604,6 +604,7 @@ and Picture : sig
   val shift : Point.t -> t -> t
   val yscale : Num.t -> t -> t
   val xscale : Num.t -> t -> t
+  val spin : float -> t -> t
 
 end
 
@@ -690,6 +691,16 @@ and Command : sig
 
 end
 
+module  Pos : sig
+  type 'a pos = 
+    { v : 'a; size : Num.t * Num.t; 
+      center : 'a -> Point.t -> 'a ;
+      move: 'a -> Point.t -> 'a }
+  val halign : ?dx:Num.t -> 'a pos list -> 'a list pos
+  val valign : ?dy:Num.t -> 'a pos list -> 'a list pos
+
+  val from_pic : Picture.t -> Picture.t pos
+end
 (** {2 Helpers and high-level drawing commands} *)
 
 module Helpers : sig

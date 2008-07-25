@@ -40,9 +40,10 @@ let transform tr = function
   | PITransform (tr', p) -> PITransform (tr'@tr, p)
   | _ as x -> PITransform (tr, x)
 
+let ctr pic = Point.segment 0.5 (llcorner pic) (urcorner pic)
+
 let center pic p = 
-  let bp = Point.segment 0.5 (llcorner pic) (urcorner pic) in
-    transform [Transform.shifted (Point.sub p bp)] pic
+    transform [Transform.shifted (Point.sub p (ctr pic))] pic
 
 let place_up_left pic p =
   transform [Transform.shifted (Point.sub p (ulcorner pic))] pic
@@ -52,6 +53,8 @@ let place_up_right pic p =
 
 let place_bot_left pic p =
   transform [Transform.shifted (Point.sub p (llcorner pic))] pic
+
+let shift pt pic = transform [Transform.shifted pt] pic
 
 let place_bot_right pic p =
   transform [Transform.shifted (Point.sub p (lrcorner pic))] pic
@@ -72,3 +75,5 @@ let rotate f p = transform [Transform.rotated f] p
 let shift pt p = transform [Transform.shifted pt] p
 let yscale n p = transform [Transform.yscaled n] p
 let xscale n p = transform [Transform.xscaled n] p
+
+let spin f p = transform [Transform.rotate_around (ctr p) f] p

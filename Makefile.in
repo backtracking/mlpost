@@ -56,13 +56,10 @@ check: byte $(OCAMLBEST) $(TOOL) $(TESTS) check-examples
 # bytecode and native-code compilation
 ######################################
 
-CMO := misc.cmo name.cmo compiled_types.cmo compile.cmo  \
-       num.cmo point.cmo \
-       transform.cmo \
-       color.cmo primPath.cmo path.cmo picture.cmo     \
+CMO := misc.cmo name.cmo compiled_types.cmo compile.cmo num.cmo point.cmo \
+       transform.cmo color.cmo primPath.cmo path.cmo picture.cmo \
        dash.cmo pen.cmo command.cmo shapes.cmo box.cmo metapost.cmo\
-       helpers.cmo diag.cmo tree.cmo plot.cmo  \
-	generate.cmo
+       helpers.cmo diag.cmo tree.cmo pos.cmo plot.cmo generate.cmo
 CMX := $(CMO:.cmo=.cmx)
 
 CMA := mlpost.cma

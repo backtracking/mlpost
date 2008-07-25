@@ -76,6 +76,8 @@ let gmean x y =
   | F f1, F f2 -> F ( sqrt (f1 *. f1 +. f2 *. f2 ))
   | _, _ -> NGMean (x,y)
 
+let fold_max f = List.fold_left (fun w p -> maxn w (f p))
+
 let bpn n = n
 let ptn n = multn (F 0.99626) n
 let cmn n = multn (F 28.34645) n

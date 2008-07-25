@@ -19,6 +19,13 @@
 * accelerer la compilation des images dans examples/
 * se décider où on met nos exemples
 
+Module Pos
+==========
+
+* plus de types de données
+* ranger et factoriser
+* implémenter les autres functions d'alignement en utilisant Pos
+
 
 Module des Plots
 ==================

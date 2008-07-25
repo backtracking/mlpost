@@ -444,7 +444,7 @@ let bresenham_data =
 
 let mybresenham =
   let d = 10. in
-  let pen = Pen.default ~tr:([Transform.scaled (f 1.5)]) () in
+(*   let pen = Pen.default ~tr:([Transform.scaled (f 1.5)]) () in *)
   let cell i j = 
     let sq = Path.scale (f d) unitsquare in
     let color =
@@ -459,7 +459,27 @@ let mybresenham =
       (fun l m -> Array.fold_left (fun l b -> (Command.draw_box b)::l) l m)
       [] bm
 
-let figs = [ stack; row; stackl; rowl; array; mybresenham; ]
+let postest =
+  let pl1 = List.map Pos.from_pic
+    [Picture.tex "toto"; Picture.tex "$2$"; Picture.tex "{\\Large I}"] in
+  let pl2 = List.map Pos.from_pic
+    [Picture.tex "$4$"; Picture.tex "{\\Large $5$}"; Picture.tex "{\\Large I}"] in
+  let pl3 = List.map Pos.from_pic
+    [Picture.tex "$7$"; Picture.tex "$8$"; Picture.tex "{\\Large I}"] in 
+  let bl = 
+    List.flatten 
+      (Pos.valign ~dy:Num.two
+        [Pos.halign ~dx:Num.one pl1;
+         Pos.halign ~dx:Num.one pl2;
+         Pos.halign ~dx:Num.one pl3]
+      ).Pos.v in
+  let bl = Picture.spin 90. (List.hd bl) :: List.tl bl in
+    List.map (Command.draw_pic) bl
+    
+
+
+
+let figs = [ postest; stack; row; stackl; rowl; array; mybresenham; ]
 (*
             [Command.draw_pic shapes1]; [Command.draw_pic shapes2];
             d16; d1; d15; florence; d14; d13; 
