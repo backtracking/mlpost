@@ -587,6 +587,7 @@ and Picture : sig
   val llcorner : t -> Point.t
   val urcorner : t -> Point.t
   val lrcorner : t -> Point.t
+  val ctr : t -> Point.t
 
   val clip : t -> Path.t -> t
   (** [clip pic path] limits [pic] to the cyclic path [path]; all elements 
@@ -694,7 +695,7 @@ end
 module  Pos : sig
   type 'a pos = 
     { v : 'a; size : Num.t * Num.t; 
-      center : 'a -> Point.t -> 'a ;
+      center : Point.t ;
       move: 'a -> Point.t -> 'a }
   val halign : ?dx:Num.t -> 'a pos list -> 'a list pos
   val valign : ?dy:Num.t -> 'a pos list -> 'a list pos

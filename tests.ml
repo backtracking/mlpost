@@ -460,12 +460,10 @@ let mybresenham =
       [] bm
 
 let postest =
-  let pl1 = List.map Pos.from_pic
-    [Picture.tex "toto"; Picture.tex "$2$"; Picture.tex "{\\Large I}"] in
-  let pl2 = List.map Pos.from_pic
-    [Picture.tex "$4$"; Picture.tex "{\\Large $5$}"; Picture.tex "{\\Large I}"] in
-  let pl3 = List.map Pos.from_pic
-    [Picture.tex "$7$"; Picture.tex "$8$"; Picture.tex "{\\Large I}"] in 
+  let str_to_pos s = Pos.from_pic (Picture.tex s) in
+  let pl1 = List.map str_to_pos ["toto"; "$2$"; "{\\Large I}"] in
+  let pl2 = List.map str_to_pos [ "$4$";  "{\\Large $5$}"; "{\\Large I}"] in
+  let pl3 = List.map str_to_pos ["$7$"; "$8$"; "{\\Large I}"] in 
   let bl = 
     List.flatten 
       (Pos.valign ~dy:Num.two
