@@ -66,3 +66,9 @@ let clip pic pth = PIClip (pic,pth)
 let width p = Point.xpart (Point.sub (urcorner p) (ulcorner p))
 
 let height p = Point.ypart (Point.sub (urcorner p) (lrcorner p))
+
+let scale f p = transform [Transform.scaled f] p
+let rotate f p = transform [Transform.rotated f] p
+let shift pt p = transform [Transform.shifted pt] p
+let yscale n p = transform [Transform.yscaled n] p
+let xscale n p = transform [Transform.xscaled n] p

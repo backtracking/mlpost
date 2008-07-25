@@ -597,6 +597,14 @@ and Picture : sig
   val width : t -> Num.t
   val height : t -> Num.t
 
+  (** Predefined Transformations *)
+
+  val scale : Num.t -> t -> t
+  val rotate : float -> t -> t
+  val shift : Point.t -> t -> t
+  val yscale : Num.t -> t -> t
+  val xscale : Num.t -> t -> t
+
 end
 
 and Command : sig
