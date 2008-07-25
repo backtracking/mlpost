@@ -191,3 +191,11 @@ let tabular ?(dx=Num.zero) ?(dy=Num.zero) m =
 let tabulari ?(dx=Num.zero) ?(dy=Num.zero) w h f =
   let m = Array.init h (fun j -> Array.init w (fun i -> f i j)) in
     tabular ~dx ~dy m
+
+let cpath ~style ~outd ~ind a b =
+  let p = 
+    Path.jointpathk 
+      [NoDir, center a, outd; ind, center b, NoDir] [style]
+  in
+  Path.cut_after (bpath b) (Path.cut_before (bpath a) p)
+

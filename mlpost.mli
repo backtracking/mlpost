@@ -494,6 +494,11 @@ and Box : sig
     (int -> int -> Picture.t) -> t array array
     (** similar to [tabular], but using a matrix defined with a function *)
 
+  val cpath :
+    style:PrimPath.joint ->
+    outd:PrimPath.direction ->
+    ind:PrimPath.direction -> t -> t -> Path.t
+    (** the path that connects 2 boxes and stops at the box boundaries *) 
 end
 
 and Transform : sig
@@ -727,10 +732,6 @@ module Helpers : sig
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
     ?pos:Command.position -> Picture.t -> 
     Point.t -> Point.t -> Command.t
-  val box_path :
-    style:PrimPath.joint ->
-    outd:PrimPath.direction ->
-    ind:PrimPath.direction -> Box.t -> Box.t -> Path.t
   val box_arrow :
     ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction -> 
