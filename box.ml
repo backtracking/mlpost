@@ -87,19 +87,18 @@ let picture p = p.pic
 
 open Num.Infix
 
-
 (* These functions should rather be called 
  * "align_block" or something like that *)
-let valign ?(dx=Num.zero) ?(dy=Num.zero) ?spacing pl = 
-  let posl = Pos.valign ~dy ?spacing (List.map Pos.from_pic pl) in
+let valign ?(dx=Num.zero) ?(dy=Num.zero) ?spacing ?pos pl = 
+  let posl = Pos.valign ~dy ?spacing ?pos (List.map Pos.from_pic pl) in
     List.map (fun p ->
       let dx = Point.xpart (Picture.ctr p) +/ dx -/
                Picture.width p // Num.two in
         base_rect ~dx ~dy p)
     posl.Pos.v
 
-let halign ?(dx=Num.zero) ?(dy=Num.zero) ?(spacing) pl =
-  let posl = Pos.halign ~dx ?spacing (List.map Pos.from_pic pl) in
+let halign ?(dx=Num.zero) ?(dy=Num.zero) ?(spacing) ?pos pl =
+  let posl = Pos.halign ~dx ?spacing ?pos (List.map Pos.from_pic pl) in
     List.map 
       (fun p ->
         let dy = Point.ypart (Picture.ctr p) +/ 
@@ -110,8 +109,8 @@ let halign ?(dx=Num.zero) ?(dy=Num.zero) ?(spacing) pl =
 (* That is the function I would call halign, but this one clearly needs an option
  * to put some space between the boxes *)
 (* however, we still need alignment control *)
-let halign_to_box ?(dx=Num.zero) ?(dy=Num.zero) ?(spacing) pl =
-  let posl = Pos.halign ~dx ?spacing (List.map Pos.from_pic pl) in
+let halign_to_box ?(dx=Num.zero) ?(dy=Num.zero) ?spacing ?pos pl =
+  let posl = Pos.halign ~dx ?spacing ?pos (List.map Pos.from_pic pl) in
     List.map (base_rect ~dx ~dy) posl.Pos.v
 
 (*

@@ -468,7 +468,7 @@ let postest =
     List.flatten 
       (Pos.valign ~dy:Num.two
         [Pos.halign ~dx:Num.one pl1;
-         Pos.halign ~dx:Num.one ~spacing:(Num.bp 50.) pl2;
+         Pos.halign ~dx:Num.one ~pos:Pbot ~spacing:(Num.bp 50.) pl2;
          Pos.halign ~dx:Num.one pl3]
       ).Pos.v in
   let bl = Picture.spin 90. (List.hd bl) :: List.tl bl in
@@ -477,7 +477,7 @@ let postest =
 let box_align = 
   let l = List.map Picture.tex ["toto"; "{\\Large I}"; "$1$"] in
     List.map (Command.draw_box) 
-      (Box.halign_to_box ~dy:Num.two ~spacing:(Num.bp 10.) l)
+      (Box.halign_to_box ~dy:Num.two ~spacing:(Num.bp 10.) ~pos:Ptop l)
     
 
 
