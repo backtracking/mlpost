@@ -495,9 +495,9 @@ and Box : sig
     (** similar to [tabular], but using a matrix defined with a function *)
 
   val cpath :
-    style:PrimPath.joint ->
-    outd:PrimPath.direction ->
-    ind:PrimPath.direction -> t -> t -> Path.t
+    ?style:PrimPath.joint ->
+    ?outd:PrimPath.direction ->
+    ?ind:PrimPath.direction -> t -> t -> Path.t
     (** the path that connects 2 boxes and stops at the box boundaries *) 
 end
 
@@ -622,6 +622,11 @@ and Picture : sig
   val xscale : Num.t -> t -> t
   val spin : float -> t -> t
 
+end
+
+and Arrow : sig
+  val simple : ?style:Path.joint -> ?outd:Path.direction -> 
+               ?ind:Path.direction -> Point.t -> Point.t -> Path.t
 end
 
 and Command : sig

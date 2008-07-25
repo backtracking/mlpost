@@ -23,33 +23,26 @@ open Command
 let dotlabels ?(pos=Pcenter) ls lp =
   List.map2 (fun s p -> dotlabel ~pos:pos (Picture.tex s) p) ls lp
 
-let draw_simple_arrow ?color ?pen ?(style=defaultjoint) ?(outd=NoDir) ?(ind=NoDir) a b =
-  let p = jointpathk [NoDir, a, outd; ind, b, NoDir] [style] in
-  draw_arrow ?color ?pen p
+let draw_simple_arrow ?color ?pen ?style ?outd ?ind a b =
+  draw_arrow ?color ?pen (Arrow.simple ?style ?outd ?ind a b)
 
-let draw_label_arrow ?color ?pen ?(style=defaultjoint) ?(outd=NoDir) ?(ind=NoDir) ?pos lab a b =
-  let p = jointpathk [NoDir, a, outd; ind, b, NoDir] [style] in
+let draw_label_arrow ?color ?pen ?style ?outd ?ind ?pos lab a b =
+  let p = Arrow.simple ?style ?outd ?ind a b in
   draw_arrow ?color ?pen p ++
   label ?pos lab (Path.point 0.5 p)
 
-let box_arrow ?color ?pen ?dashed ?(style=defaultjoint) ?(outd=NoDir) ?(ind=NoDir) a b =   
+let box_arrow ?color ?pen ?dashed ?style ?outd ?ind a b =   
   draw_arrow ?color ?pen ?dashed (Box.cpath ?style ?outd ?ind a b)
 
-let box_line ?color ?pen ?dashed ?(style=defaultjoint) ?(outd=NoDir) ?(ind=NoDir) a b =   
+let box_line ?color ?pen ?dashed ?style ?outd ?ind a b =   
   draw ?color ?pen ?dashed (Box.cpath ?style ?outd ?ind a b)
 
-let box_label_line
-    ?color ?pen ?dashed ?(style=defaultjoint) ?(outd=NoDir) ?(ind=NoDir) ?pos lab a b =
-  let p = jointpathk 
-	[NoDir, Box.center a, outd; ind, Box.center b, NoDir] [style] in
-  let p = cut_after (Box.bpath b) (cut_before (Box.bpath a) p) in
+let box_label_line ?color ?pen ?dashed ?style ?outd ?ind ?pos lab a b =
+  let p = Box.cpath ?style ?outd ?ind a b in
   draw ?color ?pen ?dashed p ++
   label ?pos lab (Path.point 0.5 p)
 
-let box_label_arrow 
-    ?color ?pen ?dashed ?(style=defaultjoint) ?(outd=NoDir) ?(ind=NoDir) ?pos lab a b =
-  let p = jointpathk 
-	[NoDir, Box.center a, outd; ind, Box.center b, NoDir] [style] in
-  let p = cut_after (Box.bpath b) (cut_before (Box.bpath a) p) in
+let box_label_arrow ?color ?pen ?dashed ?style ?outd ?ind ?pos lab a b =
+  let p = Box.cpath ?style ?outd ?ind a b in
   draw_arrow ?color ?pen ?dashed p ++
   label ?pos lab (Path.point 0.5 p)
