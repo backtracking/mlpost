@@ -755,6 +755,10 @@ module Helpers : sig
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
     ?pos:Command.position -> Picture.t -> 
     Box.t -> Box.t -> Command.t
+  val hboxjoin : 
+    ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
+    ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position -> 
+    Num.t -> Picture.t list -> Command.t
 
 end
 

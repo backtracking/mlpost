@@ -479,15 +479,21 @@ let box_align =
     List.map (Command.draw_box) 
       (Box.halign_to_box ~dy:Num.two ~spacing:(Num.bp 10.) ~pos:Ptop l)
     
+let boxjoin = 
+  [ Helpers.hboxjoin (Num.bp 50.)
+      (List.map Picture.tex [ "abc"; "next"; "last"; "toto"]) ]
 
 
 
-let figs = [ postest; box_align; 
-             stack; row; stackl; rowl; array; mybresenham;
+
+let figs = [ boxjoin; postest; box_align; 
+stack; row; stackl; rowl; array; mybresenham;]
+(*
             [Command.draw_pic shapes1]; [Command.draw_pic shapes2];
             d16; d1; d15; florence; d14; d13; 
              d11; d7; d6; d5; d4; cheno011; proval; d3;  
                           d2sq; d2hsq; d2s; d2c; ] 
+*)
 
 let figs =
   let r = ref 0 in

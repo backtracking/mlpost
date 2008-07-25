@@ -106,10 +106,8 @@ let halign ?(dx=Num.zero) ?(dy=Num.zero) ?(spacing) ?pos pl =
         base_rect ~dx ~dy p)
       posl.Pos.v
 
-(* That is the function I would call halign, but this one clearly needs an option
- * to put some space between the boxes *)
-(* however, we still need alignment control *)
-let halign_to_box ?(dx=Num.zero) ?(dy=Num.zero) ?spacing ?pos pl =
+(* That is the function I would call halign  *)
+let halign_to_box ?(dx=margin) ?(dy=margin) ?spacing ?pos pl =
   let posl = Pos.halign ~dx ?spacing ?pos (List.map Pos.from_pic pl) in
     List.map (base_rect ~dx ~dy) posl.Pos.v
 

@@ -1,5 +1,6 @@
-* un moyen pour joindre des boîtes à la boxjoin
-* la syntaxe des transformations est encore un peu lourde ...
+* ranger le module Helpers
+
+partiellement fait:
 * des boîtes sans placement explicite
 * Tree pourrait s'en servir pour pour construire des boîtes avant de les
   placer explicitement
