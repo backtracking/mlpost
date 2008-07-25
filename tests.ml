@@ -473,11 +473,16 @@ let postest =
       ).Pos.v in
   let bl = Picture.spin 90. (List.hd bl) :: List.tl bl in
     List.map (Command.draw_pic) bl
+
+let box_align = 
+  let l = List.map Picture.tex ["toto"; "{\\Large I}"; "$1$"] in
+    List.map (Command.draw_box) (Box.halign_to_box l)
     
 
 
 
-let figs = [ postest; stack; row; stackl; rowl; array; mybresenham; ]
+let figs = [ postest; box_align; 
+             stack; row; stackl; rowl; array; mybresenham; ]
 (*
             [Command.draw_pic shapes1]; [Command.draw_pic shapes2];
             d16; d1; d15; florence; d14; d13; 

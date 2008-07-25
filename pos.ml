@@ -1,14 +1,14 @@
 type 'a pos = 
   { v : 'a; size : Num.t * Num.t; 
     center : Point.t ;
-    move: 'a -> Point.t -> 'a }
+    move: Point.t -> 'a -> 'a }
 
 let height posobj = snd (posobj.size)
 let width posobj = fst (posobj.size)
 
 open Num.Infix
 
-let posmove pl l p = List.map2 (fun pos x -> pos.move x p) pl l
+let posmove pl p l = List.map2 (fun pos x -> pos.move p x) pl l
 
 let halign ?(dx=Num.zero) pl =
   let hmax = Num.fold_max height Num.zero pl in
@@ -18,7 +18,7 @@ let halign ?(dx=Num.zero) pl =
     | p :: pl ->
 	let wp,hp = p.size in
 	let c = Point.pt (x +/ dx +/ wp // Num.two, hmax_2) in 
-        let b = p.move p.v (Point.sub c p.center) in
+        let b = p.move (Point.sub c p.center) p.v in
 	  make_new (b::acc) (x +/ wp +/ dx +/ dx) pl
   in
   let l,x = make_new [] Num.zero pl in
@@ -36,7 +36,7 @@ let valign ?(dy=Num.zero) pl =
     | p :: pl ->
 	let wp,hp = p.size in
 	let c = Point.pt (wmax_2, y -/ dy -/ hp // Num.two) in 
-        let b = p.move p.v (Point.sub c p.center) in
+        let b = p.move (Point.sub c p.center) p.v in
 	  make_new (b::acc) (y -/ hp -/ dy -/ dy) pl
   in
   let l,y = make_new [] Num.zero pl in
@@ -49,7 +49,7 @@ let valign ?(dy=Num.zero) pl =
 let from_pic p = 
   { v= p; size = (Picture.width p, Picture.height p);
     center = Picture.ctr p;
-    move = (fun pic p -> Picture.shift p pic) }
+    move = Picture.shift }
 
 let to_pic p = p.v
 

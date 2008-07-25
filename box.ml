@@ -24,13 +24,21 @@ type t = box
 
 let margin = Num.bp 2.
 
+let rect_path pic dx dy = 
+   Shapes.rectangle_path 
+     (Picture.width pic +/ Num.two */ dx)
+     (Picture.height pic +/ Num.two */ dy)
+
+let base_rect ?(dx=margin) ?(dy=margin) pic = 
+  let c = Picture.ctr pic in
+  let path = rect_path pic dx dy in
+  { c = c; bpath = Path.shift c path ; pic = pic }
+
 let rect ?(dx=margin) ?(dy=margin) c p = 
   let pic = center p c in
-  let path = Shapes.rectangle_path 
-               (Picture.width pic +/ Num.two */ dx)
-               (Picture.height pic +/ Num.two */ dy)
-  in
-  { c = c; bpath = Path.shift c path ; pic = pic }
+  let path = rect_path pic dx dy in
+    { c = c; bpath = Path.shift c path; pic = pic}
+
 
 let circle ?(dr=F 0.) c pic =
   let pic = center pic c in
@@ -79,6 +87,33 @@ let picture p = p.pic
 
 open Num.Infix
 
+
+(* These functions should rather be called 
+ * "align_block" or something like that *)
+let valign ?(dx=Num.zero) ?(dy=Num.zero) pl = 
+  let posl = Pos.valign ~dy (List.map Pos.from_pic pl) in
+    List.map (fun p ->
+      let dx = Point.xpart (Picture.ctr p) +/ dx -/
+               Picture.width p // Num.two in
+        base_rect ~dx ~dy p)
+    posl.Pos.v
+
+let halign ?(dx=Num.zero) ?(dy=Num.zero) pl =
+  let posl = Pos.halign ~dx (List.map Pos.from_pic pl) in
+    List.map 
+      (fun p ->
+        let dy = Point.ypart (Picture.ctr p) +/ 
+                 dy -/ Picture.height p // Num.two in
+        base_rect ~dx ~dy p)
+      posl.Pos.v
+
+(* That is the function I would call halign, but this one clearly needs an option
+ * to put some space between the boxes *)
+let halign_to_box ?(dx=Num.zero) ?(dy=Num.zero) pl =
+  let posl = Pos.halign ~dx (List.map Pos.from_pic pl) in
+    List.map (base_rect ~dx ~dy) posl.Pos.v
+
+(*
 let valign ?(dx=Num.zero) ?(dy=Num.zero) pl = 
   let wmax = Num.fold_max Picture.width Num.zero pl in
   let wmax_2 = wmax // Num.two +/ dx in
@@ -94,7 +129,9 @@ let valign ?(dx=Num.zero) ?(dy=Num.zero) pl =
 	b :: make_boxes (y -/ hp -/ dy -/ dy) pl
   in
   make_boxes Num.zero pl
+*)
 
+(*
 let halign ?(dx=Num.zero) ?(dy=Num.zero) pl = 
   let hmax = Num.fold_max Picture.height Num.zero pl in
   let hmax_2 = hmax // Num.two +/ dy in
@@ -110,6 +147,7 @@ let halign ?(dx=Num.zero) ?(dy=Num.zero) pl =
 	b :: make_boxes (x +/ wp +/ dx +/ dx) pl
   in
   make_boxes Num.zero pl
+*)
 
 let tabularl ?(dx=Num.zero) ?(dy=Num.zero) pll =
   let hmaxl = List.map (Num.fold_max Picture.height Num.zero) pll in

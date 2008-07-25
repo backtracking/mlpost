@@ -442,6 +442,9 @@ and Box : sig
 	[pic], with rounded corners. Optional padding is given by [dx] and
 	[dy] ; default is 2bp *)
 
+  val base_rect : ?dx:Num.t -> ?dy:Num.t -> Picture.t -> t
+    (** same as [rect] but do not move the picture *)
+
 
   (** Get the bounding path of a box *)
   val bpath : t -> Path.t
@@ -471,6 +474,10 @@ and Box : sig
 
   val halign : ?dx:Num.t -> ?dy:Num.t -> Picture.t list -> t list
     (** [halign] is similar to [valign], but with an horizontal alignment. *)
+
+  val halign_to_box : ?dx:Num.t -> ?dy:Num.t -> Picture.t list -> t list
+    (** [halign_to_box] aligns the pictures in the argument list and puts them
+     * into boxes, but does not try to create boxes of equal size *)
 
   val tabular : 
     ?dx:Num.t -> ?dy:Num.t -> Picture.t array array -> t array array
@@ -696,7 +703,7 @@ module  Pos : sig
   type 'a pos = 
     { v : 'a; size : Num.t * Num.t; 
       center : Point.t ;
-      move: 'a -> Point.t -> 'a }
+      move: Point.t -> 'a -> 'a }
   val halign : ?dx:Num.t -> 'a pos list -> 'a list pos
   val valign : ?dy:Num.t -> 'a pos list -> 'a list pos
 
