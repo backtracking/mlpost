@@ -466,16 +466,16 @@ and Box : sig
 
   (** {2 Boxes alignment} *)
 
-  val valign : ?dx:Num.t -> ?dy:Num.t -> Picture.t list -> t list
+  val valign : ?dx:Num.t -> ?dy:Num.t -> ?spacing:Num.t -> Picture.t list -> t list
     (** [valign l] turns a list of pictures into a list of boxes,
 	which contain the given pictures and are vertically aligned. 
 	All boxes have the same width. Some padding can be specified with
 	optional arguments [dx] and [dy]. *)
 
-  val halign : ?dx:Num.t -> ?dy:Num.t -> Picture.t list -> t list
+  val halign : ?dx:Num.t -> ?dy:Num.t -> ?spacing:Num.t -> Picture.t list -> t list
     (** [halign] is similar to [valign], but with an horizontal alignment. *)
 
-  val halign_to_box : ?dx:Num.t -> ?dy:Num.t -> Picture.t list -> t list
+  val halign_to_box : ?dx:Num.t -> ?dy:Num.t -> ?spacing:Num.t -> Picture.t list -> t list
     (** [halign_to_box] aligns the pictures in the argument list and puts them
      * into boxes, but does not try to create boxes of equal size *)
 
@@ -704,8 +704,8 @@ module  Pos : sig
     { v : 'a; size : Num.t * Num.t; 
       center : Point.t ;
       move: Point.t -> 'a -> 'a }
-  val halign : ?dx:Num.t -> 'a pos list -> 'a list pos
-  val valign : ?dy:Num.t -> 'a pos list -> 'a list pos
+  val halign : ?dx:Num.t -> ?spacing:Num.t -> 'a pos list -> 'a list pos
+  val valign : ?dy:Num.t -> ?spacing:Num.t -> 'a pos list -> 'a list pos
 
   val from_pic : Picture.t -> Picture.t pos
 end

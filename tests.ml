@@ -365,7 +365,7 @@ let stack =
 
 let row =
   let bl = 
-    Box.halign ~dx:Num.one ~dy:two
+    Box.halign ~dx:Num.one ~dy:two ~spacing:Num.two
       [Picture.tex "$x$"; 
        Picture.tex "topo"; 
        Picture.tex "{\\Large I}"] 
@@ -468,7 +468,7 @@ let postest =
     List.flatten 
       (Pos.valign ~dy:Num.two
         [Pos.halign ~dx:Num.one pl1;
-         Pos.halign ~dx:Num.one pl2;
+         Pos.halign ~dx:Num.one ~spacing:(Num.bp 50.) pl2;
          Pos.halign ~dx:Num.one pl3]
       ).Pos.v in
   let bl = Picture.spin 90. (List.hd bl) :: List.tl bl in
@@ -476,7 +476,8 @@ let postest =
 
 let box_align = 
   let l = List.map Picture.tex ["toto"; "{\\Large I}"; "$1$"] in
-    List.map (Command.draw_box) (Box.halign_to_box l)
+    List.map (Command.draw_box) 
+      (Box.halign_to_box ~dy:Num.two ~spacing:(Num.bp 10.) l)
     
 
 

@@ -42,6 +42,7 @@ type scale = float -> t
 let addn x y = 
   match x, y with
   | F f1, F f2 -> F (f1 +. f2)
+  | ( x, F y | F y, x) when is_zero y -> x
   | _, _ -> NAdd (x,y)
 
 let subn x y = 
