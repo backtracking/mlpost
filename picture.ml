@@ -17,6 +17,7 @@
 open Types
 
 type t = picture
+type repr = t
 
 let tex s = PITex s
 let make l = PIMake l
@@ -77,3 +78,5 @@ let yscale n p = transform [Transform.yscaled n] p
 let xscale n p = transform [Transform.xscaled n] p
 
 let spin f p = transform [Transform.rotate_around (ctr p) f] p
+
+let v x = x

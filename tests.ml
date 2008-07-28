@@ -459,18 +459,20 @@ let mybresenham =
       (fun l m -> Array.fold_left (fun l b -> (Command.draw_box b)::l) l m)
       [] bm
 
+module PA = Pos.Align (Picture)
+module Al = Pos.Align (PA)
+
 let postest =
-  let str_to_pos s = Pos.from_pic (Picture.tex s) in
-  let pl1 = List.map str_to_pos ["toto"; "$2$"; "{\\Large I}"] in
-  let pl2 = List.map str_to_pos [ "$4$";  "{\\Large $5$}"; "{\\Large I}"] in
-  let pl3 = List.map str_to_pos ["$7$"; "$8$"; "{\\Large I}"] in 
+  let pl1 = List.map Picture.tex ["toto"; "$2$"; "{\\Large I}"] in
+  let pl2 = List.map Picture.tex [ "$4$";  "{\\Large $5$}"; "{\\Large I}"] in
+  let pl3 = List.map Picture.tex ["$7$"; "$8$"; "{\\Large I}"] in 
   let bl = 
     List.flatten 
-      (Pos.valign ~dy:Num.two
-        [Pos.halign ~dx:Num.one pl1;
-         Pos.halign ~dx:Num.one ~pos:Pbot ~spacing:(Num.bp 50.) pl2;
-         Pos.halign ~dx:Num.one pl3]
-      ).Pos.v in
+      (Al.v (Al.vertical ~dy:Num.two
+              [PA.horizontal ~dx:Num.one pl1;
+               PA.horizontal ~dx:Num.one ~pos:Pbot ~spacing:(Num.bp 50.) pl2;
+               PA.horizontal ~dx:Num.one pl3]
+      )) in
   let bl = Picture.spin 90. (List.hd bl) :: List.tl bl in
     List.map (Command.draw_pic) bl
 
@@ -486,7 +488,7 @@ let boxjoin =
 
 
 
-let figs = [ boxjoin; postest; box_align; 
+let figs = [ boxjoin; box_align; 
 stack; row; stackl; rowl; array; mybresenham;]
 (*
             [Command.draw_pic shapes1]; [Command.draw_pic shapes2];

@@ -551,6 +551,8 @@ and Picture : sig
   type t
     (** The abstract type of pictures *)
 
+  type repr = t
+
   val make : Command.t -> t
     (** Make a picture from a drawing command *)
 
@@ -621,6 +623,8 @@ and Picture : sig
   val yscale : Num.t -> t -> t
   val xscale : Num.t -> t -> t
   val spin : float -> t -> t
+
+  val v : t -> repr
 
 end
 
@@ -713,15 +717,34 @@ and Command : sig
 end
 
 module  Pos : sig
-  type 'a pos = 
-    { v : 'a; size : Num.t * Num.t; 
-      center : Point.t ;
-      move: Point.t -> 'a -> 'a }
-  val halign : ?dx:Num.t -> ?spacing:Num.t -> ?pos:Command.position ->
-                 'a pos list -> 'a list pos
-  val valign : ?dy:Num.t -> ?spacing:Num.t -> ?pos:Command.position-> 'a pos list -> 'a list pos
+  module type POS =
+  sig
+    type t
+    type repr
+    val ctr : t -> Point.t
+    val height : t -> Num.t
+    val width : t -> Num.t
+    val shift : Point.t -> repr -> repr
+    val v : t -> repr
+  end
+  module type ALIGN =
+  sig
+    module P : POS
+    type t
+    type repr = P.repr list
+    val ctr : t -> Point.t
+    val height : t -> Num.t
+    val width : t -> Num.t
+    val shift : Point.t -> repr -> repr
+    val v : t -> repr
+    val horizontal :
+      ?dx:Num.t -> ?spacing:Num.t -> ?pos:Command.position -> P.t list -> t
+    val vertical :
+      ?dy:Num.t -> ?spacing:Num.t -> ?pos:Command.position -> P.t list -> t
+  end
 
-  val from_pic : Picture.t -> Picture.t pos
+  module Align : functor (P : POS) -> ALIGN with module P = P 
+
 end
 (** {2 Helpers and high-level drawing commands} *)
 

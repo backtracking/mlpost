@@ -87,29 +87,30 @@ let picture p = p.pic
 
 open Num.Infix
 
+module PicAlign = Pos.Align (Picture)
 (* These functions should rather be called 
  * "align_block" or something like that *)
 let valign ?(dx=Num.zero) ?(dy=Num.zero) ?spacing ?pos pl = 
-  let posl = Pos.valign ~dy ?spacing ?pos (List.map Pos.from_pic pl) in
+  let posl = PicAlign.vertical ~dy ?spacing ?pos pl in
     List.map (fun p ->
       let dx = Point.xpart (Picture.ctr p) +/ dx -/
                Picture.width p // Num.two in
         base_rect ~dx ~dy p)
-    posl.Pos.v
+    (PicAlign.v posl)
 
 let halign ?(dx=Num.zero) ?(dy=Num.zero) ?(spacing) ?pos pl =
-  let posl = Pos.halign ~dx ?spacing ?pos (List.map Pos.from_pic pl) in
+  let posl = PicAlign.horizontal ~dx ?spacing ?pos pl in
     List.map 
       (fun p ->
         let dy = Point.ypart (Picture.ctr p) +/ 
                  dy -/ Picture.height p // Num.two in
         base_rect ~dx ~dy p)
-      posl.Pos.v
+      (PicAlign.v posl)
 
 (* That is the function I would call halign  *)
 let halign_to_box ?(dx=margin) ?(dy=margin) ?spacing ?pos pl =
-  let posl = Pos.halign ~dx ?spacing ?pos (List.map Pos.from_pic pl) in
-    List.map (base_rect ~dx ~dy) posl.Pos.v
+  let posl = PicAlign.horizontal ~dx ?spacing ?pos pl in
+    List.map (base_rect ~dx ~dy) (PicAlign.v posl)
 
 (*
 let valign ?(dx=Num.zero) ?(dy=Num.zero) pl = 
