@@ -82,6 +82,20 @@ let bpath {bpath = p} = p
 
 let picture p = p.pic
 
+(* POS compliance *)
+
+type repr = t
+
+let v b = b
+
+let width b = Picture.width (Picture.make (Command.draw_box b))
+
+let height b = Picture.height (Picture.make (Command.draw_box b))
+
+let ctr b = b.c
+
+let shift p b = { c = Point.shift p b.c; pic = Picture.shift p b.pic;
+		  bpath = Path.shift p b.bpath }
 
 (* Box alignment *)
 

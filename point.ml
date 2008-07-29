@@ -71,6 +71,7 @@ and sub p1 p2 =
     | PTSub (p1',p2'), _ -> sub p1' (add p2' p2)
     | _, _ -> PTSub (p1,p2)
 
+let shift = add
 
 let segment f p1 p2 = add (mult (F (1.-.f)) p1) (mult (F f) p2)
 let rec rotated f = function

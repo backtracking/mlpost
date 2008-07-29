@@ -126,6 +126,7 @@ and Point : sig
 
   (** Sum two points *)
   val add : t -> t -> t
+  val shift : t -> t -> t
   
   (** Substract two points *)
   val sub : t -> t -> t
@@ -463,6 +464,15 @@ and Box : sig
   val south_west : t -> Point.t
   val north_east : t -> Point.t
   val south_east : t -> Point.t
+
+  (** {2 POS compliance} *)
+
+  type repr = t
+  val v : t -> repr
+  val ctr : t -> Point.t
+  val height : t -> Num.t
+  val width : t -> Num.t
+  val shift : Point.t -> repr -> repr
 
   (** {2 Boxes alignment} *)
 
