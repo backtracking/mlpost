@@ -111,7 +111,7 @@ and picture =
   | PIClip of picture * path
 
 and box = 
-  { c : point ; bpath : path; pic : picture }
+  { c : point ; bpath : path; pic : picture; height : num ; width : num }
 
 and dash =
   | DEvenly

@@ -25,26 +25,29 @@ type t = box
 let margin = Num.bp 2.
 
 let rect_path pic dx dy = 
-   Shapes.rectangle_path 
-     (Picture.width pic +/ Num.two */ dx)
-     (Picture.height pic +/ Num.two */ dy)
+  (* construct rectangular path and return path + width + height *)
+  let width = Picture.width pic +/ Num.two */ dx in
+  let height = Picture.height pic +/ Num.two */ dy in
+   Shapes.rectangle_path width height, width, height
 
 let base_rect ?(dx=margin) ?(dy=margin) pic = 
   let c = Picture.ctr pic in
-  let path = rect_path pic dx dy in
-  { c = c; bpath = Path.shift c path ; pic = pic }
+  let path, w, h = rect_path pic dx dy in
+  { c = c; bpath = Path.shift c path ; pic = pic ; height = h; width = w }
 
 let rect ?(dx=margin) ?(dy=margin) c p = 
   let pic = center p c in
-  let path = rect_path pic dx dy in
-    { c = c; bpath = Path.shift c path; pic = pic}
+  let path,w, h = rect_path pic dx dy in
+    { c = c; bpath = Path.shift c path; pic = pic; width = w; height = h}
 
 
 let circle ?(dr=F 0.) c pic =
   let pic = center pic c in
   let r = length (sub (urcorner pic) (llcorner pic)) in
   let r = r +/ margin +/ dr in
-  { c = c; pic = pic ; bpath = Path.shift c (Path.scale r Path.fullcircle)}
+  let r2 = r */ Num.two in
+  { c = c; pic = pic ; bpath = Path.shift c (Path.scale r Path.fullcircle);
+    height = r2; width = r2}
 
 let ellipse ?(dx=F 0.) ?(dy=F 0.) c pic =
   let pic = center pic c in 
@@ -52,7 +55,8 @@ let ellipse ?(dx=F 0.) ?(dy=F 0.) c pic =
   let ry = length (sub (urcorner pic) (lrcorner pic)) in
   let rx = rx +/ dx in
   let ry = ry +/ dy in
-    { c = c; pic = pic; bpath = Path.shift c (Shapes.full_ellipse_path rx ry) }
+    { c = c; pic = pic; bpath = Path.shift c (Shapes.full_ellipse_path rx ry); 
+      height = ry */ Num.two ; width = rx */ Num.two }
 
 let round_rect ?(dx=margin) ?(dy=margin) c p =
   let pic = center p c in
@@ -61,7 +65,7 @@ let round_rect ?(dx=margin) ?(dy=margin) c p =
   let rx = min (dx // (F 10.)) (dy // (F 10.)) in
   { c = c; 
     bpath = Path.shift c (Shapes.rounded_rect_path dx dy rx rx); 
-    pic = pic }
+    pic = pic; width = dx; height = dy }
             
 
 
@@ -94,7 +98,7 @@ let height b = Picture.height (Picture.make (Command.draw_box b))
 
 let ctr b = b.c
 
-let shift p b = { c = Point.shift p b.c; pic = Picture.shift p b.pic;
+let shift p b = { b with c = Point.shift p b.c; pic = Picture.shift p b.pic;
 		  bpath = Path.shift p b.bpath }
 
 (* Box alignment *)
