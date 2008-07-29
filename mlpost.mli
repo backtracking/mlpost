@@ -474,6 +474,11 @@ and Box : sig
   val width : t -> Num.t
   val shift : Point.t -> repr -> repr
 
+  val draw : ?fill:Color.t -> ?boxed:bool -> t -> Command.t
+    (** Draw a box 
+	@param fill the color used to fill the box 
+	@param boxed if set, the box border is drawn (default is [true]) *)
+
   (** {2 Boxes alignment} *)
 
   val valign : ?dx:Num.t -> ?dy:Num.t -> ?spacing:Num.t -> ?pos:Command.position
@@ -673,11 +678,6 @@ and Command : sig
   val fill : ?color:Color.t -> Path.t -> t
     (** Fill a contour given by a closed path 
 	@param color the color used to fill the area; default is black *)
-
-  val draw_box : ?fill:Color.t -> ?boxed:bool -> Box.t -> t
-    (** Draw a box 
-	@param fill the color used to fill the box 
-	@param boxed if set, the box border is drawn (default is [true]) *)
 
   val draw_pic : Picture.t -> t
     (** draws a picture *) 

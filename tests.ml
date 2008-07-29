@@ -30,8 +30,8 @@ let d1 =
   let a = Box.circle (0. ++ 0.) (Picture.tex "$\\sqrt2$") in
   let b = Box.rect (2. ++ 0.) (Picture.tex "$\\pi$") in
   let pen = Pen.default ~tr:[Transform.scaled (f 3.)] () in
-  [ draw_box a;
-    draw_box ~fill:Color.purple b;
+  [ Box.draw a;
+    Box.draw ~fill:Color.purple b;
     draw
       ~color:Color.red
       (Path.shift (1. ++ 1.) (Box.bpath a));
@@ -114,8 +114,8 @@ let d5 =
   let t2 = random_tree 6 in
   let pic2 = Picture.make (Tree.draw t2) in
   let b2 = Box.rect (cmp (4.,0.)) pic2 in
-  [ draw_box b1;
-    draw_box b2;
+  [ Box.draw b1;
+    Box.draw b2;
     box_arrow b1 b2 ]
 
 let d7 =
@@ -361,7 +361,7 @@ let stack =
     bl 
     ["BlanchedAlmond"; "DarkSlateGray"; "medium violet red"]
   in
-  seq cbl :: List.map Command.draw_box bl
+  seq cbl :: List.map Box.draw bl
 
 let row =
   let bl = 
@@ -375,7 +375,7 @@ let row =
     bl 
     ["BlanchedAlmond"; "DarkSlateGray"; "medium violet red"]
   in
-  seq cbl :: List.map Command.draw_box bl
+  seq cbl :: List.map Box.draw bl
 
 let stackl =
   let bll = 
@@ -389,7 +389,7 @@ let stackl =
      (List.map List.hd bll)
     ["BlanchedAlmond"; "DarkSlateGray"; "medium violet red"]
   in
-    seq cbl :: List.map Command.draw_box (List.flatten bll)
+    seq cbl :: List.map Box.draw (List.flatten bll)
 
 let rowl =
   let bll = 
@@ -403,7 +403,7 @@ let rowl =
     (List.hd bll)
     ["BlanchedAlmond"; "DarkSlateGray"; "medium violet red"]
   in
-    seq cbl :: List.map Command.draw_box (List.flatten bll)
+    seq cbl :: List.map Box.draw (List.flatten bll)
 
 let array =
   let bll =
@@ -421,7 +421,7 @@ let array =
 	    ["BlanchedAlmond"; "DarkSlateGray"; "medium violet red"])
 	 bll)
   in
-    seq cbl :: List.map Command.draw_box (List.flatten bll)
+    seq cbl :: List.map Box.draw (List.flatten bll)
 
 
 (* my bresenham avec tabular *)
@@ -456,7 +456,7 @@ let mybresenham =
   in
   let bm = Box.tabulari x2 y2 (fun i j -> Picture.make (cell i j)) in
     Array.fold_left 
-      (fun l m -> Array.fold_left (fun l b -> (Command.draw_box b)::l) l m)
+      (fun l m -> Array.fold_left (fun l b -> (Box.draw b)::l) l m)
       [] bm
 
 module PA = Pos.Align (Picture)
@@ -478,7 +478,7 @@ let postest =
 
 let box_align = 
   let l = List.map Picture.tex ["toto"; "{\\Large I}"; "$1$"] in
-    List.map (Command.draw_box) 
+    List.map (Box.draw) 
       (Box.halign_to_box ~dy:Num.two ~spacing:(Num.bp 10.) ~pos:Ptop l)
     
 let boxjoin = 

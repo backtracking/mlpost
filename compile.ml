@@ -346,21 +346,6 @@ and command = function
       let pic, c1 = picture pic in
       let pt, c2 = point pt in
       c1 ++ c2 ++ C.CLabel (pic,pos,pt)
-  | CDrawBox (c, b, {bpath = pa; pic = pi}) ->
-      let pa, c1 = path pa in
-      let pi, c2 = picture pi in
-      let path_cmd =
-        match b with
-        | Boxed -> C.CDraw (pa, None, None, None)
-        | Unboxed -> nop
-      in
-      let box_cmd =
-        match c with
-          | None -> C.CDrawPic pi
-          | Some c -> C.CFill (pa, Some c) ++ C.CDrawPic pi
-      in
-        C.CSeq [c1;c2; path_cmd ++ box_cmd]
-
 
 let reset () = 
   HPath.clear known_paths;

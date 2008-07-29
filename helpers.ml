@@ -56,8 +56,8 @@ let hboxjoin ?color ?pen ?dashed ?dx ?dy ?pos spacing pl =
         let cmd,_ = 
           List.fold_left
           (fun (cmd,b1) b2 ->
-            draw_box b2 ++ box_arrow ?color ?pen ?dashed b1 b2 ++ cmd,b2 )
-          (draw_box hd,hd) tl
+            Box.draw b2 ++ box_arrow ?color ?pen ?dashed b1 b2 ++ cmd,b2 )
+          (Box.draw hd,hd) tl
         in 
           cmd
 

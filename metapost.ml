@@ -37,10 +37,6 @@ let print_piccorner fmt = function
   | UR -> fprintf fmt "urcorner"
   | LR -> fprintf fmt "lrcorner"
 
-let print_boxed fmt = function
-  | Boxed -> pp_print_string fmt "drawboxed"
-  | Unboxed -> pp_print_string fmt "drawunboxed"
-
 let print_position fmt = function
   | Pcenter  -> fprintf fmt ""
   | Pleft   -> fprintf fmt ".lft"

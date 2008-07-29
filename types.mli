@@ -24,7 +24,6 @@ type name = string
 type corner = N | S | W | E | NE | NW | SW | SE
 type piccorner = UL | UR | LL | LR
 
-type boxed = Boxed | Unboxed
 
 type position =
   | Pcenter
@@ -110,9 +109,6 @@ and picture =
   | PIName of name
   | PIClip of picture * path
 
-and box = 
-  { c : point ; bpath : path; pic : picture; height : num ; width : num }
-
 and dash =
   | DEvenly
   | DWithdots
@@ -134,7 +130,6 @@ and command =
   | CLabel of picture * position * point
   | CDotLabel of picture * position * point
   | CLoop of int * int * (int -> command)
-  | CDrawBox of color option * boxed * box
   | CSeq of command list
 (*
   These have moved into the compiled AST

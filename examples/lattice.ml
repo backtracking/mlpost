@@ -14,7 +14,7 @@ let pic s =
   let s = "\\rule[-0.1em]{0in}{0.8em}" ^ s in 
   Box.circle Point.origin (Picture.tex s)
 
-let draw_boxes = List.map (draw_box ~boxed:true)
+let draw_boxes = List.map (Box.draw ~boxed:true)
 
 let cross_arrows b l = seq (List.map (box_arrow b) l)
 

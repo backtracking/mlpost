@@ -103,7 +103,7 @@ let draw ?(scale=Num.cm)
 	box node_style (point x y) s, (x */ scale 1., y */ scale 1.) in
       let x = ref (x -/ (w // (f 2.))) in
       b, 
-      draw_box ?fill ~boxed b :: 
+      Box.draw ?fill ~boxed b :: 
 	List.map 
 	(fun (wc,fc) -> 
 	   let x',y' = (!x +/ (wc // f 2.)), (y -/ ls) in

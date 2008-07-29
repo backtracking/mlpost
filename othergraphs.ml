@@ -183,7 +183,7 @@ let d267 =
 	      [knotp ~r:(Vec (dir angle)) (Box.center a); 
 	       knotp ~r:(Vec (dir (-. angle))) (Box.center b)] [JCurve])) 
   in
-  [draw_box ~fill:rose a; draw_box ~fill:rose b;
+  [Box.draw ~fill:rose a; Box.draw ~fill:rose b;
    draw_arrow (path 45. a b); draw_arrow (path (-135.) b a)]
 
 let figs = 

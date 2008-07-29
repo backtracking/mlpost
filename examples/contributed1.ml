@@ -10,11 +10,11 @@ let repository ?wc patches =
   let draw_wbox = match wc with
     | None -> nop
     | Some wc ->
-        draw_box ~fill: yellow (circle (south pbox) wc)
+        Box.draw ~fill: yellow (circle (south pbox) wc)
   in
    [
     draw_wbox;
-    draw_box ~fill: green pbox;
+    Box.draw ~fill: green pbox;
   ]
 
 let fig = 

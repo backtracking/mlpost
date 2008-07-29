@@ -20,7 +20,7 @@ open Point
 
 open Num.Infix
 
-type t = box
+type t = { c : point ; bpath : path; pic : picture; height : num ; width : num }
 
 let margin = Num.bp 2.
 
@@ -92,9 +92,9 @@ type repr = t
 
 let v b = b
 
-let width b = Picture.width (Picture.make (Command.draw_box b))
+let width b = b.width
 
-let height b = Picture.height (Picture.make (Command.draw_box b))
+let height b = b.height
 
 let ctr b = b.c
 
@@ -165,6 +165,17 @@ let halign ?(dx=Num.zero) ?(dy=Num.zero) pl =
   in
   make_boxes Num.zero pl
 *)
+
+open Command 
+
+let draw ?fill ?(boxed=true) b = 
+  let path_cmd = if boxed then draw b.bpath else nop in
+  let box_cmd =
+    match fill with
+      | None -> draw_pic b.pic
+      | Some color -> Command.fill ~color b.bpath ++ draw_pic b.pic
+  in
+    path_cmd ++ box_cmd
 
 let tabularl ?(dx=Num.zero) ?(dy=Num.zero) pll =
   let hmaxl = List.map (Num.fold_max Picture.height Num.zero) pll in
