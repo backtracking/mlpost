@@ -485,10 +485,27 @@ let boxjoin =
   [ Helpers.hboxjoin (Num.bp 50.)
       (List.map Picture.tex [ "abc"; "next"; "last"; "toto"]) ]
 
+open Pos
+
+module Tr = Tree (Box)
+
+let rec fold f acc (N (a,l)) =
+  let acc = List.fold_left (fold f) acc l in
+    f acc a
+    
+let placetest = 
+  let pic s = Box.base_rect (Picture.tex s) in
+  let t = N (pic "hey", 
+              [ N (pic "1", [N (pic "2",[]); N (pic "topo",[]) ]); 
+               N (pic "two", [N (pic "2",[]); N (pic "topo",[]) ]) ] ) in
+  let al = Tr.v (Tr.place ~dx:(Num.bp 15.) ~dy:(Num.bp 15.) t) in
+    fold (fun acc x -> Box.draw x :: acc) [] al
 
 
 
-let figs = [ boxjoin; box_align; 
+
+
+let figs = [ placetest; boxjoin; box_align; 
 stack; row; stackl; rowl; array; mybresenham;]
 (*
             [Command.draw_pic shapes1]; [Command.draw_pic shapes2];

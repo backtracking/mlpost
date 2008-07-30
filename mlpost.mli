@@ -740,20 +740,25 @@ module  Pos : sig
   module type ALIGN =
   sig
     module P : POS
-    type t
-    type repr = P.repr list
-    val ctr : t -> Point.t
-    val height : t -> Num.t
-    val width : t -> Num.t
-    val shift : Point.t -> repr -> repr
-    val v : t -> repr
+    include POS with type repr = P.repr list
     val horizontal :
       ?dx:Num.t -> ?spacing:Num.t -> ?pos:Command.position -> P.t list -> t
     val vertical :
       ?dy:Num.t -> ?spacing:Num.t -> ?pos:Command.position -> P.t list -> t
   end
 
+  type 'a tree = N of 'a * 'a tree list
+
+  module type TREE =
+  sig
+    module P : POS
+    include POS with type repr = P.repr tree
+    val place : ?dx:Num.t -> ?dy:Num.t -> P.t tree -> t
+  end
+
   module Align : functor (P : POS) -> ALIGN with module P = P 
+
+  module Tree : functor (P : POS) -> TREE with module P = P
 
 end
 (** {2 Helpers and high-level drawing commands} *)

@@ -36,6 +36,14 @@ sig
     ?dy:Num.t -> ?spacing:Num.t -> ?pos:Command.position -> P.t list -> t
 end
 
+type 'a tree = N of 'a * 'a tree list
+
+module type TREE =
+sig
+  module P : POS
+  include POS with type repr = P.repr tree
+  val place : ?dx:Num.t -> ?dy:Num.t -> P.t tree -> t
+end
 
 module Align (P : POS) : ALIGN with module P = P  =
 struct
@@ -95,3 +103,41 @@ struct
     { v = l; width = wmax; height = y; center = mycenter }
 end
 
+module Tree (P : POS) : TREE with module P = P =
+struct
+  module P = P
+  type repr = P.repr tree
+  type repr' = repr
+  type t = {ctr : Point.t; w : Num.t ; h : Num.t ; v : repr}
+  type t' = t
+
+  let v x = x.v
+  let ctr x = x.ctr
+  let height x = x.h
+  let width x = x.w
+
+  let rec shift pt (N (a,l)) = 
+    N (P.shift pt a, List.map (shift pt) l)
+
+  module Aux : POS with type repr = repr' and type t = t' =
+  struct
+    type repr = repr'
+    type t = t'
+    let v = v
+    let ctr = ctr
+    let height = height
+    let width = width
+    let shift = shift
+  end
+
+  module TA = Align (Aux)
+
+  let rec place ?dx ?(dy=Num.zero) (N (a,l)) = 
+    let pl = TA.horizontal ?dx (List.map (place ?dx ~dy) l) in
+    let ctr = 
+      Point.add (TA.ctr pl) (Point.pt (Num.zero, P.height a // Num.two +/ dy))
+    in
+    let new_point = Point.add (TA.ctr pl) (Point.pt (Num.zero, dy)) in
+      { v = N (P.shift (Point.sub new_point (P.ctr a)) (P.v a), TA.v pl);
+        w = TA.width pl; h = TA.height pl; ctr = ctr; }
+end
