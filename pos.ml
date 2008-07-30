@@ -28,19 +28,14 @@ open Command
 module type ALIGN =
 sig
   module P : POS
-  type t
-  type repr = P.repr list
-  val ctr : t -> Point.t
-  val height : t -> Num.t
-  val width : t -> Num.t
-  val shift : Point.t -> repr -> repr
-  val v : t -> repr
+  include POS with type repr = P.repr list
   val horizontal : 
     ?dx:Num.t -> ?spacing:Num.t -> ?pos:Command.position -> P.t list -> t
 
   val vertical : 
     ?dy:Num.t -> ?spacing:Num.t -> ?pos:Command.position -> P.t list -> t
 end
+
 
 module Align (P : POS) : ALIGN with module P = P  =
 struct
