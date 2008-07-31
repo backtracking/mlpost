@@ -481,19 +481,19 @@ and Box : sig
 
   (** {2 Boxes alignment} *)
 
-  val valign : ?dx:Num.t -> ?dy:Num.t -> ?spacing:Num.t -> ?pos:Command.position
+  val valign : ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position
                 -> Picture.t list -> t list
     (** [valign l] turns a list of pictures into a list of boxes,
 	which contain the given pictures and are vertically aligned. 
 	All boxes have the same width. Some padding can be specified with
 	optional arguments [dx] and [dy]. *)
 
-  val halign : ?dx:Num.t -> ?dy:Num.t -> ?spacing:Num.t -> ?pos:Command.position
+  val halign : ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position
                   -> Picture.t list -> t list
     (** [halign] is similar to [valign], but with an horizontal alignment. *)
 
-  val halign_to_box : ?dx:Num.t -> ?dy:Num.t -> ?spacing:Num.t -> ?pos:Command.position ->
-                        Picture.t list -> t list
+  val halign_to_box : ?dx:Num.t -> ?dy:Num.t -> ?spacing:Num.t -> 
+                      ?pos:Command.position -> Picture.t list -> t list
     (** [halign_to_box] aligns the pictures in the argument list and puts them
      * into boxes, but does not try to create boxes of equal size *)
 
@@ -742,9 +742,9 @@ module  Pos : sig
     module P : POS
     include POS with type repr = P.repr list
     val horizontal :
-      ?dx:Num.t -> ?spacing:Num.t -> ?pos:Command.position -> P.t list -> t
+      ?dx:Num.t -> ?pos:Command.position -> P.t list -> t
     val vertical :
-      ?dy:Num.t -> ?spacing:Num.t -> ?pos:Command.position -> P.t list -> t
+      ?dy:Num.t -> ?pos:Command.position -> P.t list -> t
   end
 
   type 'a tree = N of 'a * 'a tree list
@@ -795,8 +795,8 @@ module Helpers : sig
     Box.t -> Box.t -> Command.t
   val hboxjoin : 
     ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
-    ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position -> 
-    Num.t -> Picture.t list -> Command.t
+    ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position -> ?spacing:Num.t -> 
+     Picture.t list -> Command.t
 
 end
 

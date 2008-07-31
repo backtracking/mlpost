@@ -365,7 +365,7 @@ let stack =
 
 let row =
   let bl = 
-    Box.halign ~dx:Num.one ~dy:two ~spacing:Num.two
+    Box.halign ~dx:Num.one ~dy:two
       [Picture.tex "$x$"; 
        Picture.tex "topo"; 
        Picture.tex "{\\Large I}"] 
@@ -470,7 +470,7 @@ let postest =
     List.flatten 
       (Al.v (Al.vertical ~dy:Num.two
               [PA.horizontal ~dx:Num.one pl1;
-               PA.horizontal ~dx:Num.one ~pos:Pbot ~spacing:(Num.bp 50.) pl2;
+               PA.horizontal ~dx:Num.one ~pos:Pbot pl2;
                PA.horizontal ~dx:Num.one pl3]
       )) in
   let bl = Picture.spin 90. (List.hd bl) :: List.tl bl in
@@ -482,7 +482,7 @@ let box_align =
       (Box.halign_to_box ~dy:Num.two ~spacing:(Num.bp 10.) ~pos:Ptop l)
     
 let boxjoin = 
-  [ Helpers.hboxjoin (Num.bp 50.)
+  [ Helpers.hboxjoin ~dx:(Num.bp 2.) ~spacing:(Num.bp 50.)
       (List.map Picture.tex [ "abc"; "next"; "last"; "toto"]) ]
 
 open Pos
@@ -498,7 +498,7 @@ let placetest =
   let t = N (pic "hey", 
               [ N (pic "1", [N (pic "2",[]); N (pic "topo",[]) ]); 
                N (pic "two", [N (pic "2",[]); N (pic "topo",[]) ]) ] ) in
-  let al = Tr.v (Tr.place ~dx:(Num.bp 15.) ~dy:(Num.bp 15.) t) in
+  let al = Tr.v (Tr.place ~dx:(Num.bp 5.) ~dy:(Num.bp 15.) t) in
     fold (fun acc x -> Box.draw x :: acc) [] al
 
 

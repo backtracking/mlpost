@@ -108,63 +108,27 @@ open Num.Infix
 module PicAlign = Pos.Align (Picture)
 (* These functions should rather be called 
  * "align_block" or something like that *)
-let valign ?(dx=Num.zero) ?(dy=Num.zero) ?spacing ?pos pl = 
-  let posl = PicAlign.vertical ~dy ?spacing ?pos pl in
+let valign ?(dx=Num.zero) ?(dy=Num.zero)  ?pos pl = 
+  let posl = PicAlign.vertical ~dy  ?pos pl in
     List.map (fun p ->
       let dx = Point.xpart (Picture.ctr p) +/ dx -/
                Picture.width p // Num.two in
-        base_rect ~dx ~dy p)
+        base_rect ~dx ~dy:(0.5 *./ dy) p)
     (PicAlign.v posl)
 
-let halign ?(dx=Num.zero) ?(dy=Num.zero) ?(spacing) ?pos pl =
-  let posl = PicAlign.horizontal ~dx ?spacing ?pos pl in
+let halign ?(dx=Num.zero) ?(dy=Num.zero) ?pos pl =
+  let posl = PicAlign.horizontal ~dx ?pos pl in
     List.map 
       (fun p ->
         let dy = Point.ypart (Picture.ctr p) +/ 
                  dy -/ Picture.height p // Num.two in
-        base_rect ~dx ~dy p)
+        base_rect ~dx:(0.5 *./ dx) ~dy p)
       (PicAlign.v posl)
 
 (* That is the function I would call halign  *)
-let halign_to_box ?(dx=margin) ?(dy=margin) ?spacing ?pos pl =
-  let posl = PicAlign.horizontal ~dx ?spacing ?pos pl in
-    List.map (base_rect ~dx ~dy) (PicAlign.v posl)
-
-(*
-let valign ?(dx=Num.zero) ?(dy=Num.zero) pl = 
-  let wmax = Num.fold_max Picture.width Num.zero pl in
-  let wmax_2 = wmax // Num.two +/ dx in
-  let rec make_boxes y = function
-    | [] -> 
-	[]
-    | p :: pl ->
-	let wp = Picture.width p in
-	let hp = Picture.height p in
-	let dx = wmax_2 -/ wp // Num.two in
-	let c = Point.pt (wmax_2, y -/ dy -/ hp // Num.two) in 
-	let b = rect ~dx ~dy c p in
-	b :: make_boxes (y -/ hp -/ dy -/ dy) pl
-  in
-  make_boxes Num.zero pl
-*)
-
-(*
-let halign ?(dx=Num.zero) ?(dy=Num.zero) pl = 
-  let hmax = Num.fold_max Picture.height Num.zero pl in
-  let hmax_2 = hmax // Num.two +/ dy in
-  let rec make_boxes x = function
-    | [] -> 
-	[]
-    | p :: pl ->
-	let wp = Picture.width p in
-	let hp = Picture.height p in
-	let dy = hmax_2 -/ hp // Num.two in
-	let c = Point.pt (x +/ dx +/ wp // Num.two, hmax_2) in 
-	let b = rect ~dx ~dy c p in
-	b :: make_boxes (x +/ wp +/ dx +/ dx) pl
-  in
-  make_boxes Num.zero pl
-*)
+let halign_to_box ?(dx=margin) ?(dy=margin) ?(spacing=Num.zero) ?pos pl =
+  let posl = PicAlign.horizontal ~dx:(dx +/ spacing) ?pos pl in
+    List.map (base_rect ~dx:(0.5 *./ dx) ~dy) (PicAlign.v posl)
 
 open Command 
 

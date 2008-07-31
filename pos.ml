@@ -30,10 +30,10 @@ sig
   module P : POS
   include POS with type repr = P.repr list
   val horizontal : 
-    ?dx:Num.t -> ?spacing:Num.t -> ?pos:Command.position -> P.t list -> t
+    ?dx:Num.t -> ?pos:Command.position -> P.t list -> t
 
   val vertical : 
-    ?dy:Num.t -> ?spacing:Num.t -> ?pos:Command.position -> P.t list -> t
+    ?dy:Num.t -> ?pos:Command.position -> P.t list -> t
 end
 
 type 'a tree = N of 'a * 'a tree list
@@ -58,11 +58,11 @@ struct
 
   let shift pt t = List.map (P.shift pt) t
 
-  let horizontal ?(dx=Num.zero) ?(spacing=Num.zero) ?(pos=Pcenter) pl =
+  let horizontal ?(dx=Num.zero) ?(pos=Pcenter) pl =
     let hmax = Num.fold_max P.height Num.zero pl in
     let hmax_2 = hmax // Num.two in
     let rec make_new acc x = function
-      | [] -> List.rev acc, x
+      | [] -> List.rev acc, x -/ dx
       | p :: pl ->
           let wp,hp = P.width p, P.height p in
           let y = 
@@ -72,19 +72,19 @@ struct
               | Pbot -> hp // Num.two
               | _ -> failwith "alignment not supported"
           in
-          let c = Point.pt (x +/ dx +/ wp // Num.two, y) in 
+          let c = Point.pt (x +/ wp // Num.two, y) in 
           let b = P.shift (Point.sub c (P.ctr p)) (P.v p) in
-            make_new (b::acc) (x +/ wp +/ dx +/ dx +/spacing) pl
+            make_new (b::acc) (x +/ wp +/ dx) pl
     in
     let l,x = make_new [] Num.zero pl in
     let mycenter = Point.pt (x // Num.two, hmax_2) in
     { v = l; width = x; height = hmax; center = mycenter }
 
-  let vertical ?(dy=Num.zero) ?(spacing=Num.zero) ?(pos=Pcenter) pl =
+  let vertical ?(dy=Num.zero) ?(pos=Pcenter) pl =
     let wmax = Num.fold_max P.width Num.zero pl in
     let wmax_2 = wmax // Num.two in
     let rec make_new acc y = function
-      | [] -> List.rev acc, y
+      | [] -> List.rev acc, y +/ dy
       | p :: pl ->
           let wp,hp = P.width p, P.height p in
           let x = 
@@ -94,9 +94,9 @@ struct
               | Pleft ->  wp // Num.two
               | _ -> failwith "alignment not supported"
           in
-          let c = Point.pt (x, y -/ dy -/ hp // Num.two) in 
+          let c = Point.pt (x, y -/ hp // Num.two) in 
           let b = P.shift (Point.sub c (P.ctr p)) (P.v p) in
-            make_new (b::acc) (y -/ hp -/ dy -/ dy -/ spacing) pl
+            make_new (b::acc) (y -/ hp -/ dy) pl
     in
     let l,y = make_new [] Num.zero pl in
     let mycenter = Point.pt (wmax_2, y // Num.two) in
@@ -106,38 +106,32 @@ end
 module Tree (P : POS) : TREE with module P = P =
 struct
   module P = P
-  type repr = P.repr tree
-  type repr' = repr
-  type t = {ctr : Point.t; w : Num.t ; h : Num.t ; v : repr}
-  type t' = t
-
-  let v x = x.v
-  let ctr x = x.ctr
-  let height x = x.h
-  let width x = x.w
-
-  let rec shift pt (N (a,l)) = 
-    N (P.shift pt a, List.map (shift pt) l)
-
-  module Aux : POS with type repr = repr' and type t = t' =
+  module Aux =
   struct
-    type repr = repr'
-    type t = t'
-    let v = v
-    let ctr = ctr
-    let height = height
-    let width = width
-    let shift = shift
+    type repr = P.repr tree
+    type repr' = repr
+    type t = {ctr : Point.t; w : Num.t ; h : Num.t ; v : repr}
+    type t' = t
+
+    let v x = x.v
+    let ctr x = x.ctr
+    let height x = x.h
+    let width x = x.w
+
+    let rec shift pt (N (a,l)) = 
+      N (P.shift pt a, List.map (shift pt) l)
   end
+
+  include Aux
 
   module TA = Align (Aux)
 
   let rec place ?dx ?(dy=Num.zero) (N (a,l)) = 
-    let pl = TA.horizontal ?dx (List.map (place ?dx ~dy) l) in
-    let ctr = 
-      Point.add (TA.ctr pl) (Point.pt (Num.zero, P.height a // Num.two +/ dy))
-    in
-    let new_point = Point.add (TA.ctr pl) (Point.pt (Num.zero, dy)) in
+    let pl = TA.horizontal ?dx ~pos:Ptop (List.map (place ?dx ~dy) l) in
+    let w = Num.maxn (TA.width pl) (P.width a) in
+    let h = TA.height pl +/ dy +/ P.height a in
+    let ctr = Point.pt (0.5 *./ w , 0.5 *./ h) in 
+    let new_point = Point.pt (0.5 *./ w, h -/ (0.5 *./ P.height a)) in
       { v = N (P.shift (Point.sub new_point (P.ctr a)) (P.v a), TA.v pl);
-        w = TA.width pl; h = TA.height pl; ctr = ctr; }
+        w = w; h = h; ctr = ctr; }
 end
