@@ -7,8 +7,12 @@ open Num
 open Num.Infix
 open Helpers
 
+(* type of Box lattice *)
+
 type node = N of Box.t * node list (* a node and its successors *)
 type lattice = node list list (* nodes lines, from top to bottom *)
+
+(* drawing *)
 
 let dx = bp 12.
 let dy = bp 12.
@@ -34,27 +38,51 @@ let draw la =
   in
   iterl (iterl draw_node) la
 
-(* example *)
+(* example: the subwords lattice *)
 
 let node s l = 
+  let s = if s = "" then "$\\varepsilon$" else s in
   let s = "\\rule[-0.1em]{0in}{0.8em}" ^ s in 
   N (Box.circle Point.origin (Picture.tex s), l)
 
-let draw_boxes = List.map (Box.draw ~boxed:true)
+(* folds over the bits of an integer (as powers of two) *)
+let fold_bit f =
+  let rec fold acc n =
+    if n = 0 then acc else let b = n land (-n) in fold (f acc b) (n - b) 
+  in
+  fold 
 
-let cross_arrows b l = seq (List.map (box_arrow b) l)
+(* the bits in [n] indicate the selected characters of [s] *)
+let subword s n =
+  let len = fold_bit (fun l _ -> l+1) 0 n in
+  let w = String.create len in
+  let j = ref 0 in
+  for i = 0 to String.length s - 1 do
+    if n land (1 lsl i) != 0 then begin w.[!j] <- s.[i]; incr j end
+  done;
+  w
+
+(* builds the lattice of [s]'s subwords *)
+let subwords s =
+  let n = String.length s in
+  let levels = Array.create (n+1) [] in
+  let memo = Hashtbl.create 97 in
+  let rec make_node lvl x =
+    try 
+      Hashtbl.find memo x
+    with Not_found ->
+      let n = 
+	node (subword s x)
+	  (fold_bit (fun l b -> make_node (lvl - 1) (x - b) :: l) [] x) 
+      in
+      Hashtbl.add memo x n;
+      levels.(lvl) <- n :: levels.(lvl);
+      n
+  in
+  let _ = make_node n (lnot ((-1) lsl n)) in
+  Array.to_list levels 
 
 let fig =
-  let a = node "a" [] and b = node "b" [] 
-  and c = node "c" [] and d = node "d" [] in
-  let ab = node "ab" [a;b] and ac = node "ac" [a;c] 
-  and ad = node "ad" [a;d] and bc = node "bc" [b;c] 
-  and bd = node "bd" [b;d] and cd = node "cd" [c;d] in
-  let abc = node "abc" [ab; ac; bc] 
-  and abd = node "abd" [ab; ad; bd]
-  and acd = node "acd" [ac; ad; cd]
-  and bcd = node "bcd" [bc; bd; cd] in
-  let abcd = node "abcd" [abc; abd; acd; bcd] in
-  let l : lattice = [[abcd]; [abc; abd; acd; bcd]; 
-		     [ab; ac; ad; bc; bd; cd]; [a; b; c; d]] in
-  [draw l]
+  [draw (subwords "abcd")]
+
+
