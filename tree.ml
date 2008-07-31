@@ -50,6 +50,12 @@ module Pic = struct
   let bin  ?(style=Box.circle) ?fill s x y = N (mk_node fill style s, [x; y])
 end
 
+module Bx = struct
+  let leaf ?fill b = N ({fill=fill; box=b}, [])
+  let node ?fill b l = N ({fill=fill; box=b}, l)
+  let bin  ?fill b x y = N ({fill=fill; box=b}, [x; y])
+end
+
 type arrow_style = Directed | Undirected
 
 type edge_style = Straight | Curve | Square | HalfSquare

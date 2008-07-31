@@ -844,6 +844,13 @@ module Tree : sig
     val bin  : ?style:node_style -> ?fill:Color.t -> Picture.t -> t -> t -> t
   end
 
+  (** Variants to create trees with boxes *)
+  module Bx : sig
+    val leaf : ?fill:Color.t -> Box.t -> t
+    val node : ?fill:Color.t -> Box.t -> t list -> t
+    val bin  : ?fill:Color.t -> Box.t -> t -> t -> t
+  end
+
   (** {2 Drawing} *)
 
   (** The style of arrows between nodes *)
