@@ -49,7 +49,7 @@ let rec random_tree = function
       leaf "1"
   | 2 -> 
 (*       node ~style:Rect ~fill:(Color.cmyk 1. 0.5 0.3 0.2) "2" [leaf "1"] *)
-      node ~style:Rect ~fill:(Color.rgb 0.5 0.3 0.2) "2" [leaf "1"]
+      node ~style:Box.rect ~fill:(Color.rgb 0.5 0.3 0.2) "2" [leaf "1"]
 (*
   | n when Random.bool () -> 
       node (string_of_int n) [random_tree (n-1)]
@@ -329,10 +329,10 @@ let shapes2 =
       Shapes.ellipse ~fill:Color.black ~stroke:Color.red (f 30.) (f 10.);
     ]
 
-let yannick =
+let yannick style =
   let tt s = Picture.tex ("\\texttt{" ^ s ^ "}") in
-  let node s = node ~style:Rect (tt s) in
-  let leaf s = leaf ~style:Rect (tt s) in
+  let node s = node ~style (tt s) in
+  let leaf s = leaf ~style (tt s) in
 
   let tree =
     node "ComposerPage"
@@ -510,8 +510,8 @@ let patates =
     List.map Box.draw (BA.v al)
 
 
-let figs = [ patates; yannick; placetest; boxjoin; box_align; 
-stack; row; stackl; rowl; array; mybresenham;]
+let figs = [ patates; yannick Box.rect; yannick Box.patatoid; 
+             placetest; boxjoin; box_align; stack; row; stackl; rowl; array; mybresenham;]
 (*
             [Command.draw_pic shapes1]; [Command.draw_pic shapes2];
             d16; d1; d15; florence; d14; d13; 

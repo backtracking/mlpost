@@ -41,10 +41,9 @@ let rect ?(dx=margin) ?(dy=margin) c p =
     { c = c; bpath = Path.shift c path; pic = pic; width = w; height = h}
 
 
-let circle ?(dr=F 0.) c pic =
+let circle ?(dx=margin) ?(dy=margin) c pic =
   let pic = center pic c in
-  let r = length (sub (urcorner pic) (llcorner pic)) in
-  let r = r +/ margin +/ dr in
+  let r = length (add (pt (dx,dy)) (sub (urcorner pic) (llcorner pic))) in
   { c = c; pic = pic ; bpath = Path.shift c (Path.scale r Path.fullcircle);
     height = r; width = r}
 
@@ -67,11 +66,14 @@ let round_rect ?(dx=margin) ?(dy=margin) c p =
     pic = pic; width = dx; height = dy }
             
 let patatoid ?(dx=2. *./ margin) ?(dy=2. *./ margin) c p =
+  (* size is wrong for patatoids *)
   let pic = center p c in
   let w = Picture.width p in
   let h = Picture.height p in
-  { c = c; pic = pic; width = w; height = h;
-    bpath = Shapes.patatoid (w +/ 2. *./ dx) (h +/ 2. *./ dy) }
+  let path = Shapes.patatoid (w +/ 2. *./ dx) (h +/ 2. *./ dy) in
+  let dummypic = Picture.make (Command.draw path) in
+    { c = c; pic = pic; width = Picture.width dummypic; 
+      height = Picture.height dummypic; bpath =  path}
 
 
 let center {c = c} = c

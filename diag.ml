@@ -97,7 +97,7 @@ let make_box ~style ~scale d n =
   let p = Point.pt (scale n.x, scale n.y) in
   let pic = n.s in
   let b = match style with 
-    | Circle dr -> Box.circle ~dr p pic 
+    | Circle dr -> Box.circle ~dx:dr p pic 
     | Rect -> Box.rect p pic 
   in
   Hnode.add d.boxes n b;

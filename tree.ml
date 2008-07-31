@@ -21,7 +21,7 @@ open Num
 open Num.Infix
 open Pos
 
-type node_style = Circle | Rect
+type node_style = ?dx:Num.t -> ?dy:Num.t -> Point.t -> Picture.t -> Box.t
 
 module Node = struct
   type t = { box : Box.t; fill : Color.t option }
@@ -36,19 +36,18 @@ open Node
 
 type t = Node.t Pos.tree 
 
-let mk_node fill style pic = match style with
-  | Circle -> { fill = fill; box = Box.circle Point.origin pic }
-  | Rect -> { fill = fill; box = Box.rect Point.origin pic }
+let mk_node fill style pic = 
+  { fill = fill; box = style Point.origin pic }
 
-let leaf ?(style=Circle) ?fill s = N (mk_node fill style (Picture.tex s), [])
-let node ?(style=Circle) ?fill s l = N (mk_node fill style (Picture.tex s), l)
-let bin  ?(style=Circle) ?fill s x y = 
+let leaf ?(style=Box.circle) ?fill s = N (mk_node fill style (Picture.tex s), [])
+let node ?(style=Box.circle) ?fill s l = N (mk_node fill style (Picture.tex s), l)
+let bin  ?(style=Box.circle) ?fill s x y = 
   N (mk_node fill style (Picture.tex s), [x; y])
 
 module Pic = struct
-  let leaf ?(style=Circle) ?fill s = N (mk_node fill style s, [])
-  let node ?(style=Circle) ?fill s l = N (mk_node fill style s, l)
-  let bin  ?(style=Circle) ?fill s x y = N (mk_node fill style s, [x; y])
+  let leaf ?(style=Box.circle) ?fill s = N (mk_node fill style s, [])
+  let node ?(style=Box.circle) ?fill s l = N (mk_node fill style s, l)
+  let bin  ?(style=Box.circle) ?fill s x y = N (mk_node fill style s, [x; y])
 end
 
 type arrow_style = Directed | Undirected
@@ -112,38 +111,3 @@ let draw
 	   arc ?stroke ?pen arrow_style edge_style n.box n'.box) l)
   in
   draw (T.v t)
-
-(***
-
-let draw ?(scale=Num.cm)
-    ?(node_style=Circle) ?(arrow_style=Directed) ?(edge_style=Straight)
-    ?(boxed=true) ?fill ?stroke ?pen
-    ?(ls=f 1.0) ?(nw=f 0.5) ?(cs=f 0.2) t =
-  let point x y = Point.pt (scale 1. */ x, scale 1. */ y) in
-  (* tree -> float * (float -> float -> box * figure) *)
-  let rec draw (N (nstyle, nfill, s, l)) =
-    let l = List.map draw l in
-      (** XXX *)
-    let w = max nw (width cs l) in
-    w,
-    fun x y -> 
-      let node_style = match nstyle with None -> node_style | Some s -> s in
-      let fill = match nfill with None -> fill | Some _ -> nfill in
-      let (b,_) as bx = 
-	box node_style (point x y) s, (x */ scale 1., y */ scale 1.) in
-      let x = ref (x -/ (w // (f 2.))) in
-      b, 
-      Box.draw ?fill ~boxed b :: 
-	List.map 
-	(fun (wc,fc) -> 
-	   let x',y' = (!x +/ (wc // f 2.)), (y -/ ls) in
-	   let b',fig = fc x' y' in
-	   let bx' = b', (scale 1. */ x', scale 1. */ y') in
-	   x := !x +/ wc +/ cs;
-	   Command.append (seq fig) (arc ?stroke ?pen arrow_style edge_style bx bx')
-	) l
-  in
-  let _,f = draw t in
-  Command.seq (snd (f (bp 0.) (bp 0.)))
-
-***)

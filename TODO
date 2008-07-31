@@ -1,16 +1,5 @@
 * ranger le module Helpers
 
-partiellement fait:
-* des boîtes sans placement explicite
-* Tree pourrait s'en servir pour pour construire des boîtes avant de les
-  placer explicitement
-* On pourrait donc avoir une fonction get_picture : node -> picture
-  qui rend la picture du node (avec ou sans la boîte autour ?)
-* ce qui permettrait de résoudre le problème suivant :
-  * pour l'instant on ne peut pas se servir des éléments créés avec Diag ou
-    Tree, pour faire d'autres parties du dessin (flèche d'une boîte du diagram
-    vers un autre objet du dessin, ...)
-
 * intersection entre deux segments, chemins, ...
 * compilation
   - optimisation des inefficacités les plus évidentes 
@@ -19,14 +8,6 @@ partiellement fait:
 
 * accelerer la compilation des images dans examples/
 * se décider où on met nos exemples
-
-Module Pos
-==========
-
-* plus de types de données
-* ranger et factoriser
-* implémenter les autres functions d'alignement en utilisant Pos
-
 
 Module des Plots
 ==================

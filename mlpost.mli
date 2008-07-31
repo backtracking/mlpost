@@ -425,7 +425,7 @@ and Box : sig
 
   (** {2 Creating boxes} *)
 
-  val circle : ?dr:Num.t -> Point.t -> Picture.t -> t
+  val circle : ?dx:Num.t -> ?dy:Num.t -> Point.t -> Picture.t -> t
     (** [circle p pic] creates a circle box of center [p] and of contents
 	[pic]. Optional padding is given by arguments [dr]. *)
 
@@ -447,6 +447,9 @@ and Box : sig
     (** same as [rect] but do not move the picture *)
 
   val patatoid : ?dx:Num.t -> ?dy:Num.t -> Point.t -> Picture.t -> t
+    (** [patatoid p pic] creates an undefined, vaguely rectangular box of center
+     * [p] and contents [pic]. It may happen that the content overlaps with the
+     * box. *)
 
   (** Get the bounding path of a box *)
   val bpath : t -> Path.t
@@ -814,10 +817,8 @@ module Tree : sig
     (** The abstract type of trees *)
 
   (** {2 Creation} *)
+  type node_style = ?dx:Num.t -> ?dy:Num.t -> Point.t -> Picture.t -> Box.t
     
-  (** The style for tree nodes *) 
-  type node_style = Circle | Rect
-
   val leaf : ?style:node_style -> ?fill:Color.t -> string -> t
     (** [leaf label] creates a leaf with label [label]. 
 	@param style a [node_style] describing how the leaf should be drawn
