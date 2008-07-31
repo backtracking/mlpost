@@ -89,6 +89,19 @@ let rectangle_path width height =
   let mw = Num.zero -/ w in
   let mh = Num.zero -/ h in
     Path.pathn ~cycle:JLine ~style:JLine [ w, mh; w, h; mw, h; mw, mh]
+
+let patatoid width height = 
+  let wmin,wmax = -0.5 *./ width, 0.5 *./ width in
+  let hmin,hmax = -0.5 *./ height, 0.5 *./ height in
+  let ll = pt (wmin,hmin) in
+  let lr = pt (wmax,hmin) in
+  let ur = pt (wmax,hmax) in
+  let ul = pt (wmin, hmax) in
+  let a = segment (Random.float 1.) ll lr in
+  let b = segment (Random.float 1.) lr ur in
+  let c = segment (Random.float 1.) ur ul in
+  let d = segment (Random.float 1.) ul ll in
+    pathp ~cycle:JCurve [a;b;c;d]
       
 
 let draw_func ?fill ?(stroke=Color.black) ?(thickness=0.5) path =

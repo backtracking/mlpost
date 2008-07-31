@@ -446,6 +446,7 @@ and Box : sig
   val base_rect : ?dx:Num.t -> ?dy:Num.t -> Picture.t -> t
     (** same as [rect] but do not move the picture *)
 
+  val patatoid : ?dx:Num.t -> ?dy:Num.t -> Point.t -> Picture.t -> t
 
   (** Get the bounding path of a box *)
   val bpath : t -> Path.t

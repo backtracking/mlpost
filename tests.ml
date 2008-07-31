@@ -502,10 +502,15 @@ let placetest =
     fold (fun acc x -> Box.draw x :: acc) [] al
 
 
+module BA = List_ (Box)
+
+let patates = 
+  let pic s = Box.patatoid origin (Picture.tex s) in
+  let al = BA.horizontal ~dx:(Num.bp 20.) [pic "universe"; pic "time"; pic "knowledge"] in
+    List.map Box.draw (BA.v al)
 
 
-
-let figs = [ yannick; placetest; boxjoin; box_align; 
+let figs = [ patates; yannick; placetest; boxjoin; box_align; 
 stack; row; stackl; rowl; array; mybresenham;]
 (*
             [Command.draw_pic shapes1]; [Command.draw_pic shapes2];

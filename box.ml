@@ -66,6 +66,12 @@ let round_rect ?(dx=margin) ?(dy=margin) c p =
     bpath = Path.shift c (Shapes.rounded_rect_path dx dy rx rx); 
     pic = pic; width = dx; height = dy }
             
+let patatoid ?(dx=2. *./ margin) ?(dy=2. *./ margin) c p =
+  let pic = center p c in
+  let w = Picture.width p in
+  let h = Picture.height p in
+  { c = c; pic = pic; width = w; height = h;
+    bpath = Shapes.patatoid (w +/ 2. *./ dx) (h +/ 2. *./ dy) }
 
 
 let center {c = c} = c
