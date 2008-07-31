@@ -164,6 +164,7 @@ FTP = $(WWW)/download
 FILES = *.ml *.mli *.mll \
 	Makefile.in configure configure.in .depend \
 	.depend README.txt INSTALL LICENSE CHANGES
+EXFILES = examples/Makefile examples/*.ml examples/all.template
 
 export: source export-www export-examples export-doc
 	cp README.txt INSTALL LICENSE CHANGES $(FTP)
@@ -171,6 +172,8 @@ export: source export-www export-examples export-doc
 source: 
 	mkdir -p export/$(EXPORTDIR)
 	cp $(FILES) export/$(EXPORTDIR)
+	mkdir -p export/$(EXPORTDIR)/examples
+	cp $(EXFILES) export/$(EXPORTDIR)/examples
 	cd export ; tar cf $(TAR) $(EXPORTDIR) ; gzip -f --best $(TAR)
 	cp export/$(TAR).gz $(FTP)
 
