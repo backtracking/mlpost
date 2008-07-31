@@ -37,3 +37,54 @@ let fig =
    cross_arrows ab [a;b]; cross_arrows ac [a;c]; cross_arrows bc [b;c];
    ]
 
+(***
+
+type node = N of Box.t * node list (* a node and its successors *)
+type lattice = node list list (* nodes lines, from top to bottom *)
+
+let dx = bp 4.
+let dy = bp 6.
+
+module Ab = Pos.Align(Box)
+module Abl = Pos.Align(Ab)
+module H = Hashtbl.Make(struct 
+  type t = node let hash (N (b,_)) = Hashtbl.hash b let equal = (==) 
+end)
+
+let draw_lattice l =
+  let nodes = H.create 97 in
+  let rec draw = function
+    | [] ->
+	[]
+    | l :: ll ->
+	let ll = draw ll in
+	let bl = List.map (function N (b,l) -> b) l in
+	let bl = Ab.horizontal ~dx bl in
+	let map = List.map (H.find nodes) in
+	(List.map2 
+	    (fun (N (_,l) as n) b' -> 
+	      let n' = N (b', map l) in H.add nodes n n'; n') 
+	    l (Ab.v bl)) 
+	:: ll
+  in
+  draw l
+
+(* example *)
+
+let node s l = 
+  let s = "\\rule[-0.1em]{0in}{0.8em}" ^ s in 
+  N (Box.circle Point.origin (Picture.tex s), l)
+
+let draw_boxes = List.map (Box.draw ~boxed:true)
+
+let cross_arrows b l = seq (List.map (box_arrow b) l)
+
+let fig =
+  let a = node "a" [] and b = node "b" [] and c = node "c" [] in
+  let ab = node "ab" [a;b] and ac = node "ac" [a;c] and bc = node "bc" [b;c] in
+  let abc = node "abc" [ab; ac; bc] in
+  let l : lattice = [[abc]; [ab; ac; bc]; [a; b; c]] in
+  [nop]
+
+
+***)
