@@ -51,6 +51,10 @@ sig
 
   val vertical : 
     ?dy:Num.t -> ?pos:Command.position -> P.t seq -> t
+
+  val tabular : 
+    ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position -> P.t seq seq -> t seq
+
 end
 
 module List_ (P : POS) : SEQ with type 'a seq = 'a list and module P = P  =
@@ -86,8 +90,8 @@ struct
             make_new (b::acc) (x +/ wp +/ dx) pl
     in
     let l,x = make_new [] Num.zero pl in
-    let mycenter = Point.pt (x // Num.two, hmax_2) in
-    { v = l; width = x; height = hmax; center = mycenter }
+    let mycenter = Point.pt (x // Num.two, hmax_2) in     
+      { v = l; width = x; height = hmax; center = mycenter }
 
   let vertical ?(dy=Num.zero) ?(pos=Pcenter) pl =
     let wmax = Num.fold_max P.width Num.zero pl in
@@ -110,6 +114,47 @@ struct
     let l,y = make_new [] Num.zero pl in
     let mycenter = Point.pt (wmax_2, y // Num.two) in
     { v = l; width = wmax; height = y; center = mycenter }
+
+  let tabular ?(dx=Num.zero) ?(dy=Num.zero) ?(pos=Pcenter) pll =
+    let hmaxl = List.map (Num.fold_max P.height Num.zero) pll in
+    let rec calc_wmax pll =
+      match pll with
+	| []::_ -> []
+	| _ -> let cols, qll =
+	    List.fold_left
+	      (fun (col,rem) pl -> (List.hd pl :: col, List.tl pl :: rem))
+	      ([],[]) pll in
+	    (Num.fold_max P.width Num.zero cols)::(calc_wmax qll)
+    in
+    let wmaxl = calc_wmax pll in
+    let rec make_rows acc wmaxl x y h_2 pl =
+      match pl, wmaxl with
+	| [], [] -> List.rev acc, x -/ dx
+	| [], _ | _, [] -> raise (Invalid_argument "Lists have different sizes")
+	| p::ql, wrow :: wl ->
+(*             let wp,hp = P.width p, P.height p in *)
+(* 	    let dx' = (dx +/ wrow -/ wp) // Num.two in *)
+(* 	    let dy = h_2 -/ hp // Num.two in *)
+	    let c = Point.pt (x +/ (dx +/ wrow) // Num.two, y -/ h_2) in
+	    let b = P.shift (Point.sub c (P.ctr p)) (P.v p) in
+(*  	    let b = rect ~dx:dx' ~dy c p in *)
+	      make_rows (b::acc) wl (x +/ wrow +/ dx) y h_2 ql
+    in
+    let rec make_array hmaxl y pll =
+      match pll, hmaxl with
+	| [], [] -> []
+	| [], _ | _, [] -> raise (Invalid_argument "Lists have different sizes")
+	| row :: qll, hrow :: hl ->
+	    let brow, w =
+	      make_rows [] wmaxl Num.zero y ((hrow +/ dy) // Num.two) row
+	    in
+	    let mycenter = Point.pt (w // Num.two, hrow // Num.two) in
+	      {v = brow; width = w; height = hrow; center = mycenter}::
+		(make_array hl (y -/ hrow -/ dy) qll)
+    in
+      make_array hmaxl Num.zero pll
+
+
 end
 
 module Array_ (P : POS) : SEQ with type 'a seq = 'a array and module P = P  =
@@ -138,6 +183,13 @@ struct
     { v = Array.of_list (L.v pl); center = L.ctr pl;
       width = L.width pl; height = L.height pl }
 
+  let tabular ?(dx=Num.zero) ?(dy=Num.zero) ?(pos=Pcenter) paa =
+    let pll = 
+      L.tabular ~dx ~dy ~pos (List.map Array.to_list (Array.to_list paa)) in
+      Array.of_list 
+	(List.map 
+	   (fun pl -> { v = Array.of_list (L.v pl); center = L.ctr pl;
+			width = L.width pl; height = L.height pl }) pll)
 end
 
 type 'a tree = N of 'a * 'a tree list

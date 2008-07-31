@@ -510,8 +510,29 @@ let patates =
     List.map Box.draw (BA.v al)
 
 
-let figs = [ patates; yannick Box.rect; yannick Box.patatoid; 
-             placetest; boxjoin; box_align; stack; row; stackl; rowl; array; mybresenham;]
+let newarray =
+  let bll =
+    PA.tabular ~dx:Num.one ~dy:two
+      [[Picture.tex "$x$"; Picture.tex "topo"; Picture.tex "{\\Large I}"];
+       [Picture.tex "$\\lambda$"; Picture.tex "yippie"; Picture.tex "{\\Large O}"];
+       [Picture.tex "{\\it Lets}"; Picture.tex "go"; Picture.tex "{\\Large PHILS}"]]
+  in
+  let pics =    
+    List.map (fun b -> draw_pic (PA.P.v b)) (List.flatten (List.map PA.v bll))
+  in
+  let boxes = 
+    List.map2
+      (fun n bl -> 
+	 List.map (fun b -> fill ~color:(Color.color n)
+		     (Picture.corner_bbox (PA.P.v b))) bl)
+      ["BlanchedAlmond"; "DarkSlateGray"; "medium violet red"]
+      (List.map PA.v bll) 
+  in
+    (List.flatten boxes)@pics
+
+let figs = [ newarray; patates; yannick Box.rect; yannick Box.patatoid; 
+             placetest; boxjoin; box_align; stack; row; stackl; rowl; 
+	     array; mybresenham;]
 (*
             [Command.draw_pic shapes1]; [Command.draw_pic shapes2];
             d16; d1; d15; florence; d14; d13; 

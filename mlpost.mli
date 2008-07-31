@@ -750,6 +750,8 @@ module  Pos : sig
       ?dx:Num.t -> ?pos:Command.position -> P.t seq -> t
     val vertical :
       ?dy:Num.t -> ?pos:Command.position -> P.t seq -> t
+    val tabular :
+      ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position -> P.t seq seq -> t seq
   end
 
   module List_ : 
