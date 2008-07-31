@@ -347,7 +347,7 @@ let yannick =
       ]
   in
   [draw ~ls:(bp 20.) ~cs:(bp 10.) ~fill:Color.orange 
-      ~edge_style:HalfSquare tree]
+      ~edge_style:Square tree]
 
 let stack =
   let bl = 
@@ -459,8 +459,8 @@ let mybresenham =
       (fun l m -> Array.fold_left (fun l b -> (Box.draw b)::l) l m)
       [] bm
 
-module PA = Pos.Align (Picture)
-module Al = Pos.Align (PA)
+module PA = Pos.List_ (Picture)
+module Al = Pos.List_ (PA)
 
 let postest =
   let pl1 = List.map Picture.tex ["toto"; "$2$"; "{\\Large I}"] in

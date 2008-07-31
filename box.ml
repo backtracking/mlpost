@@ -104,7 +104,7 @@ let shift p b = { b with c = Point.shift p b.c; pic = Picture.shift p b.pic;
 
 open Num.Infix
 
-module PicAlign = Pos.Align (Picture)
+module PicAlign = Pos.List_ (Picture)
 (* These functions should rather be called 
  * "align_block" or something like that *)
 let valign ?(dx=Num.zero) ?(dy=Num.zero)  ?pos pl = 

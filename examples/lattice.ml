@@ -18,8 +18,8 @@ let draw_boxes = List.map (Box.draw ~boxed:true)
 
 let cross_arrows b l = seq (List.map (box_arrow b) l)
 
-module Ab = Pos.Align(Box)
-module Abl = Pos.Align(Ab)
+module Ab = Pos.List_(Box)
+module Abl = Pos.List_(Ab)
 
 let fig =
   let abc = pic "abc" in

@@ -41,29 +41,22 @@ end
 open Num.Infix
 open Command
 
-module type ALIGN =
+module type SEQ =
 sig
   module P : POS
-  include POS with type repr = P.repr list
+  type 'a seq
+  include POS with type repr = P.repr seq
   val horizontal : 
-    ?dx:Num.t -> ?pos:Command.position -> P.t list -> t
+    ?dx:Num.t -> ?pos:Command.position -> P.t seq -> t
 
   val vertical : 
-    ?dy:Num.t -> ?pos:Command.position -> P.t list -> t
+    ?dy:Num.t -> ?pos:Command.position -> P.t seq -> t
 end
 
-type 'a tree = N of 'a * 'a tree list
-
-module type TREE =
-sig
-  module P : POS
-  include POS with type repr = P.repr tree
-  val place : ?dx:Num.t -> ?dy:Num.t -> P.t tree -> t
-end
-
-module Align (P : POS) : ALIGN with module P = P  =
+module List_ (P : POS) : SEQ with type 'a seq = 'a list and module P = P  =
 struct
   type repr = P.repr list
+  type 'a seq = 'a list
   type t = { v : P.repr list; center : Point.t; height : Num.t; width : Num.t}
   
   let height x = x.height
@@ -119,6 +112,43 @@ struct
     { v = l; width = wmax; height = y; center = mycenter }
 end
 
+module Array_ (P : POS) : SEQ with type 'a seq = 'a array and module P = P  =
+struct
+  type repr = P.repr array
+  type 'a seq = 'a array
+  type t = { v : P.repr array; center : Point.t; height : Num.t; width : Num.t}
+  
+  let height x = x.height
+  let width x = x.width
+  let ctr x = x.center
+  let v x = x.v
+  module P = P
+
+  let shift pt t = Array.map (P.shift pt) t
+
+  module L = List_(P)
+
+  let horizontal ?(dx=Num.zero) ?(pos=Pcenter) pa =
+    let pl = L.horizontal ~dx ~pos (Array.to_list pa) in
+    { v = Array.of_list (L.v pl); center = L.ctr pl;
+      width = L.width pl; height = L.height pl }
+
+  let vertical ?(dy=Num.zero) ?(pos=Pcenter) pa =
+    let pl = L.vertical ~dy ~pos (Array.to_list pa) in
+    { v = Array.of_list (L.v pl); center = L.ctr pl;
+      width = L.width pl; height = L.height pl }
+
+end
+
+type 'a tree = N of 'a * 'a tree list
+
+module type TREE =
+sig
+  module P : POS
+  include POS with type repr = P.repr tree
+  val place : ?dx:Num.t -> ?dy:Num.t -> P.t tree -> t
+end
+
 module Tree (P : POS) : TREE with module P = P =
 struct
   module P = P
@@ -140,7 +170,7 @@ struct
 
   include Aux
 
-  module TA = Align (Aux)
+  module TA = List_ (Aux)
 
   let rec place ?dx ?(dy=Num.zero) (N (a,l)) = 
     let pl = TA.horizontal ?dx ~pos:Ptop (List.map (place ?dx ~dy) l) in
