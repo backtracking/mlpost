@@ -45,9 +45,8 @@ let circle ?(dr=F 0.) c pic =
   let pic = center pic c in
   let r = length (sub (urcorner pic) (llcorner pic)) in
   let r = r +/ margin +/ dr in
-  let r2 = r */ Num.two in
   { c = c; pic = pic ; bpath = Path.shift c (Path.scale r Path.fullcircle);
-    height = r2; width = r2}
+    height = r; width = r}
 
 let ellipse ?(dx=F 0.) ?(dy=F 0.) c pic =
   let pic = center pic c in 

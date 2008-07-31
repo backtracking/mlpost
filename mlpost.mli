@@ -852,21 +852,17 @@ module Tree : sig
 		      branch out from below nodes *)
 
   val draw : 
-    ?scale:(float -> Num.t) -> 
-    ?node_style:node_style -> ?arrow_style:arrow_style -> 
+    ?arrow_style:arrow_style -> 
     ?edge_style:edge_style ->
     ?boxed:bool -> ?fill:Color.t -> ?stroke:Color.t -> ?pen:Pen.t ->
-    ?ls:Num.t -> ?nw:Num.t -> ?cs:Num.t -> 
+    ?ls:Num.t -> ?cs:Num.t -> 
     t -> Command.t
-    (** Default scale is [Num.cm].
-	Default node_style is [Circle].
-	Default arrow_style is [Directed].
+    (** Default arrow_style is [Directed].
 	Default edge_style is [Straight].
 
 	Drawing parameters are:
 	- [ls] (level sep): vertical distance between levels.
         The default value is 1.0. A negative value draws the tree upward.
-	- [nw] (node width): width of one node. The default value is 0.5.
 	- [cs] (children sep): horizontal distance between siblings.
         The default value is 0.2.
     *)

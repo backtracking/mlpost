@@ -252,6 +252,10 @@ tags:
 	      "--regex=/val[ \t]+\([^ \t]+\)/\1/" \
 	      "--regex=/module[ \t]+\([^ \t]+\)/\1/"
 
+.PHONY: ocamlwizard
+ocamlwizard:
+	ocamlwizard compile $(CMO:.cmo=.ml)
+
 # Makefile is rebuilt whenever Makefile.in or configure.in is modified
 ######################################################################
 

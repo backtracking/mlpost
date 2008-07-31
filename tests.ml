@@ -61,13 +61,13 @@ let rec random_tree = function
 let d2c, d2s, d2sq, d2hsq = 
   let ls = bp (-1.0) in
   let tree = random_tree 17 in
-  [draw ~ls ~node_style:Circle ~arrow_style:Directed ~edge_style:Curve
+  [draw ~ls ~arrow_style:Directed ~edge_style:Curve
        ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree],
-  [draw ~ls ~node_style:Circle ~arrow_style:Directed ~edge_style:Straight
+  [draw ~ls ~arrow_style:Directed ~edge_style:Straight
        ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree],
-  [draw ~ls ~node_style:Circle ~arrow_style:Directed ~edge_style:Square
+  [draw ~ls ~arrow_style:Directed ~edge_style:Square
        ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree],
-  [draw ~ls ~node_style:Circle ~arrow_style:Directed ~edge_style:HalfSquare
+  [draw ~ls ~arrow_style:Directed ~edge_style:HalfSquare
        ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree]
 
 let proval =
@@ -147,7 +147,7 @@ let rec random_tree2 = function
       node (tree1 ()) [random_tree2 k; random_tree2 (n - 1 - k)]
 
 let d6 =
-  [Tree.draw ~scale:(Scale.cm 3.) ~cs:(mm 0.2) (random_tree2 10)]
+  [Tree.draw ~cs:(mm 0.2) (random_tree2 10)]
 
 let half pic = Picture.transform [Transform.scaled (f 0.5)] pic
 
@@ -346,8 +346,8 @@ let yannick =
       ]
       ]
   in
-  let scale d = Num.bp (d *. 70.) in
-    [draw ~scale ~fill:Color.orange tree]
+  [draw ~ls:(bp 20.) ~cs:(bp 10.) ~fill:Color.orange 
+      ~edge_style:HalfSquare tree]
 
 let stack =
   let bl = 
@@ -505,7 +505,7 @@ let placetest =
 
 
 
-let figs = [ placetest; boxjoin; box_align; 
+let figs = [ yannick; placetest; boxjoin; box_align; 
 stack; row; stackl; rowl; array; mybresenham;]
 (*
             [Command.draw_pic shapes1]; [Command.draw_pic shapes2];

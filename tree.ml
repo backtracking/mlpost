@@ -19,35 +19,45 @@ open Helpers
 open Path
 open Num
 open Num.Infix
+open Pos
 
 type node_style = Circle | Rect
 
-type t = N of node_style option * Color.t option * Picture.t * t list
+module Node = struct
+  type t = { box : Box.t; fill : Color.t option }
+  type repr = t
+  let v n = n
+  let width n = Box.width n.box
+  let height n = Box.height n.box
+  let ctr n = Box.ctr n.box
+  let shift p n = { n with box = Box.shift p n.box }
+end
+open Node
 
-let leaf ?style ?fill s = N (style, fill, Picture.tex s, [])
-let node ?style ?fill s l = N (style, fill, Picture.tex s, l)
-let bin  ?style ?fill s x y = N (style, fill, Picture.tex s, [x; y])
+type t = Node.t Pos.tree 
+
+let mk_node fill style pic = match style with
+  | Circle -> { fill = fill; box = Box.circle Point.origin pic }
+  | Rect -> { fill = fill; box = Box.rect Point.origin pic }
+
+let leaf ?(style=Circle) ?fill s = N (mk_node fill style (Picture.tex s), [])
+let node ?(style=Circle) ?fill s l = N (mk_node fill style (Picture.tex s), l)
+let bin  ?(style=Circle) ?fill s x y = 
+  N (mk_node fill style (Picture.tex s), [x; y])
 
 module Pic = struct
-  let leaf ?style ?fill s = N (style, fill, s, [])
-  let node ?style ?fill s l = N (style, fill, s, l)
-  let bin  ?style ?fill s x y = N (style, fill, s, [x; y])
+  let leaf ?(style=Circle) ?fill s = N (mk_node fill style s, [])
+  let node ?(style=Circle) ?fill s l = N (mk_node fill style s, l)
+  let bin  ?(style=Circle) ?fill s x y = N (mk_node fill style s, [x; y])
 end
-
-let rec width cs = function
-  | [] -> f 0.
-  | [w, _] -> w
-  | (w, _) :: l -> w +/ cs +/ width cs l
-
-let box style p pic = match style with
-  | Circle -> Box.circle p pic
-  | Rect -> Box.rect p pic
 
 type arrow_style = Directed | Undirected
 
 type edge_style = Straight | Curve | Square | HalfSquare
 
-let arc astyle estyle ?stroke ?pen (b1,(x1,y1)) (b2,(x2,y2)) =
+let arc astyle estyle ?stroke ?pen b1 b2 =
+  let x1,y1 = let p = Box.ctr b1 in Point.xpart p, Point.ypart p 
+  and x2,y2 = let p = Box.ctr b2 in Point.xpart p, Point.ypart p in
   let boxdraw, linedraw  = match astyle with 
     | Directed -> 
 	box_arrow ?color:stroke ?pen, draw_arrow ?color:stroke ?pen
@@ -85,6 +95,26 @@ let arc astyle estyle ?stroke ?pen (b1,(x1,y1)) (b2,(x2,y2)) =
 	  in
 	    linedraw parrow
 
+module T = Pos.Tree(Node)
+
+let draw 
+    ?(arrow_style=Directed) ?(edge_style=Straight)
+    ?(boxed=true) ?fill ?stroke ?pen
+    ?(ls=f 12.) ?(cs=f 5.) t =
+  let t = T.place ~dx:cs ~dy:ls t in
+  let rec draw (N (n, l)) = 
+    let fill = match n.fill with None -> fill | Some _ -> n.fill in
+    seq 
+      (Box.draw ?fill ~boxed n.box ::
+       iterl draw l ::
+       List.map 
+         (function (N (n', _)) -> 
+	   arc ?stroke ?pen arrow_style edge_style n.box n'.box) l)
+  in
+  draw (T.v t)
+
+(***
+
 let draw ?(scale=Num.cm)
     ?(node_style=Circle) ?(arrow_style=Directed) ?(edge_style=Straight)
     ?(boxed=true) ?fill ?stroke ?pen
@@ -116,5 +146,4 @@ let draw ?(scale=Num.cm)
   let _,f = draw t in
   Command.seq (snd (f (bp 0.) (bp 0.)))
 
-
-  
+***)
