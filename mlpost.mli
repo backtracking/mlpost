@@ -770,6 +770,7 @@ module  Pos : sig
   module Tree : functor (P : POS) -> TREE with module P = P
 
 end
+
 (** {2 Helpers and high-level drawing commands} *)
 
 module Helpers : sig
