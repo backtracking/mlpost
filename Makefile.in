@@ -257,7 +257,7 @@ tags:
 
 .PHONY: ocamlwizard
 ocamlwizard:
-	ocamlwizard compile $(CMO:.cmo=.ml)
+	ocamlrun -bt ocamlwizard compile types.mli $(CMO:.cmo=.ml) mlpost.mli
 
 # Makefile is rebuilt whenever Makefile.in or configure.in is modified
 ######################################################################
