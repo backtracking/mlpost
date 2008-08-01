@@ -21,9 +21,10 @@ let fig =
   let num i = 
     let tr = [Transform.rotated (float_of_int (-30*i))] in
       Picture.transform tr 
-	(Picture.center (Picture.transform [Transform.scaled (f 2.0)]
-			   (Picture.tex (string_of_int i)))
-	   (Point.pt (Num.cm 0., Num.cm 3.9))) in
+	(Picture.center (Point.pt (Num.cm 0., Num.cm 3.9))
+          (Picture.transform [Transform.scaled (f 2.0)]
+			   (Picture.tex (string_of_int i))))
+	    in
   let pic = Picture.make (seq
     [draw ~color ~pen circle; 
      iter 1 12 (fun i -> draw_pic (num i));

@@ -31,6 +31,7 @@ module Node = struct
   let height n = Box.height n.box
   let ctr n = Box.ctr n.box
   let shift p n = { n with box = Box.shift p n.box }
+  let center pt x = shift (Point.sub pt (ctr x)) (v x)
 end
 open Node
 
@@ -72,7 +73,7 @@ let arc astyle estyle ?stroke ?pen b1 b2 =
     match estyle with
       | Straight -> boxdraw ~style:JLine b1 b2
       | Curve -> 
-	  let p1, p2 = Box.center b1, Box.center b2 in
+	  let p1, p2 = Box.ctr b1, Box.ctr b2 in
 	  let corner = Point.pt (x2-/(x2-/x1)//(f 4.),(y1+/y2)//(f 2.)) in
 	  let p = pathk ~style:JCurve
 	    [NoDir, p1, Vec (Point.sub corner p1); 
@@ -85,7 +86,7 @@ let arc astyle estyle ?stroke ?pen b1 b2 =
       | Square -> 
 	  let corner = Point.pt (x2,y1) in
 	  let p = pathp ~style:JLine 
-	    [Box.center b1; corner; Box.center b2] in
+	    [Box.ctr b1; corner; Box.ctr b2] in
 	  let parrow = 
 	    cut_after (Box.bpath b2) (cut_before (Box.bpath b1) p) 
 	  in
@@ -94,7 +95,7 @@ let arc astyle estyle ?stroke ?pen b1 b2 =
 	  let m = (y1+/y2)//(f 2.) in
 	  let corner1, corner2 = Point.pt (x1,m), Point.pt (x2,m) in
 	  let p = pathp ~style:JLine 
-	    [Box.center b1; corner1; corner2; Box.center b2] in
+	    [Box.ctr b1; corner1; corner2; Box.ctr b2] in
 	  let parrow = 
 	    cut_after (Box.bpath b2) (cut_before (Box.bpath b1) p) 
 	  in

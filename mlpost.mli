@@ -459,7 +459,7 @@ and Box : sig
 
   (** {2 Special points on a box} *)
 
-  val center : t -> Point.t
+  val ctr : t -> Point.t
   val north : t -> Point.t
   val south : t -> Point.t
   val west  : t -> Point.t
@@ -477,6 +477,7 @@ and Box : sig
   val height : t -> Num.t
   val width : t -> Num.t
   val shift : Point.t -> repr -> repr
+  val center : Point.t -> t -> repr
 
   val draw : ?fill:Color.t -> ?boxed:bool -> t -> Command.t
     (** Draw a box 
@@ -596,7 +597,7 @@ and Picture : sig
     (** Get the bounding box of a picture, according to its corners
         and supplied padding [dx] and [dy]. *)
 
-  val center : t -> Point.t -> t
+  val center :  Point.t -> t -> t
     (** Place a picture centered at some point *)
 
   val place_up_left : t -> Point.t -> t
@@ -739,6 +740,7 @@ module  Pos : sig
     val height : t -> Num.t
     val width : t -> Num.t
     val shift : Point.t -> repr -> repr
+    val center : Point.t -> t -> repr
     val v : t -> repr
   end
   module type SEQ =

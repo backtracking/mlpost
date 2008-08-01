@@ -30,7 +30,12 @@ sig
   val ctr : t -> Point.t
   val height : t -> Num.t
   val width : t -> Num.t
+
+  (** shift an object wrt to an offset *)
   val shift : Point.t -> repr -> repr
+
+  (** center an object at a certain point, get back its contents *)
+  val center : Point.t -> t -> repr
 
   (* get back the structure of the object *)
   val v : t -> repr
@@ -71,6 +76,8 @@ struct
 
   let shift pt t = List.map (P.shift pt) t
 
+  let center pt x = shift (Point.sub pt (ctr x)) (v x)
+
   let horizontal ?(dx=Num.zero) ?(pos=Pcenter) pl =
     let hmax = Num.fold_max P.height Num.zero pl in
     let hmax_2 = hmax // Num.two in
@@ -86,7 +93,7 @@ struct
               | _ -> failwith "alignment not supported"
           in
           let c = Point.pt (x +/ wp // Num.two, y) in 
-          let b = P.shift (Point.sub c (P.ctr p)) (P.v p) in
+          let b = P.center c p in
             make_new (b::acc) (x +/ wp +/ dx) pl
     in
     let l,x = make_new [] Num.zero pl in
@@ -108,7 +115,7 @@ struct
               | _ -> failwith "alignment not supported"
           in
           let c = Point.pt (x, y -/ hp // Num.two) in 
-          let b = P.shift (Point.sub c (P.ctr p)) (P.v p) in
+          let b = P.center c p in
             make_new (b::acc) (y -/ hp -/ dy) pl
     in
     let l,y = make_new [] Num.zero pl in
@@ -136,7 +143,7 @@ struct
 (* 	    let dx' = (dx +/ wrow -/ wp) // Num.two in *)
 (* 	    let dy = h_2 -/ hp // Num.two in *)
 	    let c = Point.pt (x +/ (dx +/ wrow) // Num.two, y -/ h_2) in
-	    let b = P.shift (Point.sub c (P.ctr p)) (P.v p) in
+	    let b = P.center c p in
 (*  	    let b = rect ~dx:dx' ~dy c p in *)
 	      make_rows (b::acc) wl (x +/ wrow +/ dx) y h_2 ql
     in
@@ -170,6 +177,8 @@ struct
   module P = P
 
   let shift pt t = Array.map (P.shift pt) t
+
+  let center pt x = shift (Point.sub pt (ctr x)) (v x)
 
   module L = List_(P)
 
@@ -218,6 +227,8 @@ struct
 
     let rec shift pt (N (a,l)) = 
       N (P.shift pt a, List.map (shift pt) l)
+
+    let center pt x = shift (Point.sub pt (ctr x)) (v x)
   end
 
   include Aux
@@ -230,6 +241,6 @@ struct
     let h = TA.height pl +/ dy +/ P.height a in
     let ctr = Point.pt (0.5 *./ w , 0.5 *./ h) in 
     let new_point = Point.pt (0.5 *./ w, h -/ (0.5 *./ P.height a)) in
-      { v = N (P.shift (Point.sub new_point (P.ctr a)) (P.v a), TA.v pl);
+      { v = N (P.center new_point a, TA.v pl);
         w = w; h = h; ctr = ctr; }
 end

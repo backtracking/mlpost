@@ -180,8 +180,8 @@ let d267 =
     cut_after (bpath b) 
       (cut_before (bpath a) 
 	  (jointpathk
-	      [knotp ~r:(Vec (dir angle)) (Box.center a); 
-	       knotp ~r:(Vec (dir (-. angle))) (Box.center b)] [JCurve])) 
+	      [knotp ~r:(Vec (dir angle)) (Box.ctr a); 
+	       knotp ~r:(Vec (dir (-. angle))) (Box.ctr b)] [JCurve])) 
   in
   [Box.draw ~fill:rose a; Box.draw ~fill:rose b;
    draw_arrow (path 45. a b); draw_arrow (path (-135.) b a)]

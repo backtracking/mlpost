@@ -36,19 +36,19 @@ let base_rect ?(dx=margin) ?(dy=margin) pic =
   { c = c; bpath = Path.shift c path ; pic = pic ; height = h; width = w }
 
 let rect ?(dx=margin) ?(dy=margin) c p = 
-  let pic = center p c in
+  let pic = Picture.center c p in
   let path,w, h = rect_path pic dx dy in
     { c = c; bpath = Path.shift c path; pic = pic; width = w; height = h}
 
 
 let circle ?(dx=margin) ?(dy=margin) c pic =
-  let pic = center pic c in
+  let pic = center c pic in
   let r = length (add (pt (dx,dy)) (sub (urcorner pic) (llcorner pic))) in
   { c = c; pic = pic ; bpath = Path.shift c (Path.scale r Path.fullcircle);
     height = r; width = r}
 
 let ellipse ?(dx=F 0.) ?(dy=F 0.) c pic =
-  let pic = center pic c in 
+  let pic = center c pic in 
   let rx = length (sub (urcorner pic) (ulcorner pic)) in
   let ry = length (sub (urcorner pic) (lrcorner pic)) in
   let rx = rx +/ dx in
@@ -57,7 +57,7 @@ let ellipse ?(dx=F 0.) ?(dy=F 0.) c pic =
       height = ry */ Num.two ; width = rx */ Num.two }
 
 let round_rect ?(dx=margin) ?(dy=margin) c p =
-  let pic = center p c in
+  let pic = center c p in
   let dx = length (sub (urcorner pic) (ulcorner pic)) +/ dx in
   let dy = length (sub (urcorner pic) (lrcorner pic)) +/ dy in
   let rx = min (dx // (F 10.)) (dy // (F 10.)) in
@@ -67,7 +67,7 @@ let round_rect ?(dx=margin) ?(dy=margin) c p =
             
 let patatoid ?(dx=2. *./ margin) ?(dy=2. *./ margin) c p =
   (* size is wrong for patatoids *)
-  let pic = center p c in
+  let pic = center c p in
   let w = Picture.width p in
   let h = Picture.height p in
   let path = Shapes.patatoid (w +/ 2. *./ dx) (h +/ 2. *./ dy) in
@@ -75,8 +75,6 @@ let patatoid ?(dx=2. *./ margin) ?(dy=2. *./ margin) c p =
     { c = c; pic = pic; width = Picture.width dummypic; 
       height = Picture.height dummypic; bpath =  path}
 
-
-let center {c = c} = c
 
 let north_west {pic = pic} = ulcorner pic
 let north_east {pic = pic} = urcorner pic
@@ -107,6 +105,8 @@ let ctr b = b.c
 
 let shift p b = { b with c = Point.shift p b.c; pic = Picture.shift p b.pic;
 		  bpath = Path.shift p b.bpath }
+
+let center pt x = shift (Point.sub pt (ctr x)) (v x)
 
 (* Box alignment *)
 
@@ -195,6 +195,6 @@ open Path
 
 let cpath ?style ?outd ?ind a b =
   let r,l  = outd, ind in
-  let p = pathk ?style [knotp ?r (center a); knotp ?l (center b)] in
+  let p = pathk ?style [knotp ?r (ctr a); knotp ?l (ctr b)] in
     cut_after (bpath b) (cut_before (bpath a) p)
 

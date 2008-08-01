@@ -90,8 +90,9 @@ let pointe l h w =
     [(0., 0.); (l, 0.); (l +. h, w/.2.); (l, w); (0., w)]
      
 let pointe1 = 
-  center (make (draw ~pen:boxpen (pointe 100. 30. 25.)))
-    (Point.pt (f 0., f 120.))
+  center (Point.pt (f 0., f 120.))
+    (make (draw ~pen:boxpen (pointe 100. 30. 25.)))
+    
 let ltac =
   center_tex ~scale:2. (-100.) 100. 170.
     (texbox ~fill:Color.white
@@ -100,9 +101,10 @@ let ltac =
              \\end{tabular}"))
 
 let pointe2 =
-  center (Picture.transform [Transform.rotated 180.] 
+  center (Point.pt (f 0., f (-155.))) 
+    (Picture.transform [Transform.rotated 180.] 
 	    (make (draw ~pen:boxpen (pointe 100. 30. 25.))))
-    (Point.pt (f 0., f (-155.)))
+    
 let sound =
   center_tex ~scale:2. (-100.) 100. (-105.)
     (texbox ~fill:Color.white
@@ -119,9 +121,9 @@ let counter_model =
 let cm =
   let c = 
     Point.segment 0.5 (ulcorner counter_model) (lrcorner counter_model) in
-    Picture.center 
+    Picture.center c
       (Picture.transform [Transform.scaled (f 1.3)]
-	 (tex "\\begin{tabular}{c} Counter \\\\ Model \\end{tabular}")) c
+	 (tex "\\begin{tabular}{c} Counter \\\\ Model \\end{tabular}"))
     
 
 let bigfig =

@@ -43,7 +43,7 @@ let transform tr = function
 
 let ctr pic = Point.segment 0.5 (llcorner pic) (urcorner pic)
 
-let center pic p = 
+let center p pic = 
     transform [Transform.shifted (Point.sub p (ctr pic))] pic
 
 let place_up_left pic p =
