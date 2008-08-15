@@ -30,6 +30,16 @@ module HPic = Hashtbl.Make(struct
 end)
 let known_pictures = HPic.create 17
 
+module HPt = Hashtbl.Make(struct 
+  type t = point let equal = (==) let hash = Hashtbl.hash 
+end)
+let known_points = HPt.create 17
+
+module HNum = Hashtbl.Make(struct 
+  type t = num let equal = (==) let hash = Hashtbl.hash 
+end)
+let known_nums = HNum.create 17
+
 module HPath = Hashtbl.Make(struct 
   type t = path let equal = (==) let hash = Hashtbl.hash 
 end)
@@ -41,84 +51,135 @@ let option_compile f = function
       let obj, c = f obj in
         Some obj, c
 
-let rec num = function
-  | F f -> C.F f, nop
-  | NXPart p -> 
-      let p,c = point p in
-      C.NXPart p, c
-  | NYPart p ->
-      let p,c = point p in
-      C.NYPart p, c
-  | NAdd (n1,n2) ->
-      let n1,c1 = num n1 in
-      let n2,c2 = num n2 in
-        C.NAdd (n1,n2), c1 ++ c2
-  | NMinus (n1,n2) ->
-      let n1,c1 = num n1 in
-      let n2,c2 = num n2 in
-        C.NMinus (n1,n2), c1 ++ c2
-  | NMult (n1,n2) ->
-      let n1,c1 = num n1 in
-      let n2,c2 = num n2 in
-        C.NMult (n1,n2), c1 ++ c2
-  | NDiv (n1,n2) ->
-      let n1,c1 = num n1 in
-      let n2,c2 = num n2 in
-        C.NDiv (n1,n2), c1 ++ c2
-  | NMax (n1,n2) ->
-      let n1,c1 = num n1 in
-      let n2,c2 = num n2 in
-	C.NMax (n1,n2), c1 ++ c2
-  | NMin (n1,n2) ->
-      let n1,c1 = num n1 in
-      let n2,c2 = num n2 in
-	C.NMin (n1,n2), c1 ++ c2
-  | NGMean (n1,n2) ->
-      let n1,c1 = num n1 in
-      let n2,c2 = num n2 in
-	C.NGMean (n1,n2), c1 ++ c2
+let rec num nm =
+  let is_simple = function
+    | F _ -> true | _ -> false
+  in
+  let find_name_with_cont k nm =
+    (* find the name of point [p] if it exists,
+     * otherwise go on with continuation [k] *)
+     try
+       let n = HNum.find known_nums nm in
+         C.NName n, nop
+     with Not_found -> k nm
+  in
+  let rec new_name old =
+    (* give a new name to the point [old] *)
+    let p, code = compile_num' old in
+    let n = Name.num () in
+    let () = HNum.add known_nums old n in
+      C.NName n, code ++ C.CDeclNum (n,p)
 
-and point = function
-  | PTPair (f1,f2) -> 
-      let f1, c1 = num f1 in
-      let f2,c2 = num f2 in 
-      C.PTPair (f1,f2), c1 ++ c2
-  | PTPointOf (f,p) -> 
-      let p, code = path p in
-        C.PTPointOf (f,p) , code
-  | PTAdd (p1,p2) -> 
-      let p1,c1 = point p1 in
-      let p2,c2 = point p2 in
-        C.PTAdd (p1,p2),  c1 ++ c2
-  | PTSub (p1,p2) ->
-      let p1,c1 = point p1 in
-      let p2,c2 = point p2 in
-        C.PTSub (p1,p2),  c1 ++ c2
-  | PTMult (f,p) ->
-      let f, c1 = num f in
-      let p1,c2 = point p in
-        C.PTMult (f,p1), c1 ++ c2
-  | PTRotated (f,p) ->
-      let p1,c1 = point p in
-        C.PTRotated (f,p1), c1
-  | PTPicCorner (pic, corner) ->
-      let pic, code = picture pic in
-        C.PTPicCorner (pic, corner) , code
-  | PTTransformed (p,tr) ->
-      let p, c1 = point p in
-      let tr, c2 = transform_list tr in
-        C.PTTransformed (p,tr),  c1 ++ c2
+      (* compile [p], if it hasn't a name yet *)
+  and compile_num nm = find_name_with_cont compile_num' nm
+
+      (* compile [p] and give it a name, if it hasn't a name yet *)
+  and comp_save_num nm = find_name_with_cont new_name nm
+  and compile_num' = function
+    | F f -> C.F f, nop
+    | NXPart p -> 
+        let p,c = point p in
+        C.NXPart p, c
+    | NYPart p ->
+        let p,c = point p in
+        C.NYPart p, c
+    | NAdd (n1,n2) ->
+        let n1,c1 = compile_num n1 in
+        let n2,c2 = compile_num n2 in
+          C.NAdd (n1,n2), c1 ++ c2
+    | NMinus (n1,n2) ->
+        let n1,c1 = compile_num n1 in
+        let n2,c2 = compile_num n2 in
+          C.NMinus (n1,n2), c1 ++ c2
+    | NMult (n1,n2) ->
+        let n1,c1 = compile_num n1 in
+        let n2,c2 = compile_num n2 in
+          C.NMult (n1,n2), c1 ++ c2
+    | NDiv (n1,n2) ->
+        let n1,c1 = compile_num n1 in
+        let n2,c2 = compile_num n2 in
+          C.NDiv (n1,n2), c1 ++ c2
+    | NMax (n1,n2) ->
+        let n1,c1 = compile_num n1 in
+        let n2,c2 = compile_num n2 in
+          C.NMax (n1,n2), c1 ++ c2
+    | NMin (n1,n2) ->
+        let n1,c1 = compile_num n1 in
+        let n2,c2 = compile_num n2 in
+          C.NMin (n1,n2), c1 ++ c2
+    | NGMean (n1,n2) ->
+        let n1,c1 = compile_num n1 in
+        let n2,c2 = compile_num n2 in
+          C.NGMean (n1,n2), c1 ++ c2
+  in
+    if is_simple nm then compile_num nm else comp_save_num nm
+
+and point pt =
+  let is_simple = function
+    | PTPair _ -> true | _ -> false
+  in
+  let find_name_with_cont k p =
+    (* find the name of point [p] if it exists,
+     * otherwise go on with continuation [k] *)
+     try
+       let n = HPt.find known_points p in
+         C.PTName n, nop
+     with Not_found -> k p
+  in
+  let rec new_name old =
+    (* give a new name to the point [old] *)
+    let p, code = compile_point' old in
+    let n = Name.point () in
+    let () = HPt.add known_points old n in
+      C.PTName n, code ++ C.CDeclPoint (n,p)
+
+      (* compile [p], if it hasn't a name yet *)
+  and compile_point p = find_name_with_cont compile_point' p
+
+      (* compile [p] and give it a name, if it hasn't a name yet *)
+  and comp_save_point p = find_name_with_cont new_name p
+  and compile_point' = function
+    | PTPair (f1,f2) -> 
+        let f1, c1 = num f1 in
+        let f2,c2 = num f2 in 
+        C.PTPair (f1,f2), c1 ++ c2
+    | PTPointOf (f,p) -> 
+        let p, code = path p in
+          C.PTPointOf (f,p) , code
+    | PTAdd (p1,p2) -> 
+        let p1,c1 = compile_point p1 in
+        let p2,c2 = compile_point p2 in
+          C.PTAdd (p1,p2),  c1 ++ c2
+    | PTSub (p1,p2) ->
+        let p1,c1 = compile_point p1 in
+        let p2,c2 = compile_point p2 in
+          C.PTSub (p1,p2),  c1 ++ c2
+    | PTMult (f,p) ->
+        let f, c1 = num f in
+        let p1,c2 = compile_point p in
+          C.PTMult (f,p1), c1 ++ c2
+    | PTRotated (f,p) ->
+        let p1,c1 = compile_point p in
+          C.PTRotated (f,p1), c1
+    | PTPicCorner (pic, corner) ->
+        let pic, code = picture pic in
+          C.PTPicCorner (pic, corner) , code
+    | PTTransformed (p,tr) ->
+        let p, c1 = compile_point p in
+        let tr, c2 = transform_list tr in
+          C.PTTransformed (p,tr),  c1 ++ c2
+  in
+    if is_simple pt then compile_point pt else comp_save_point pt
+
 
 and path p =
   let find_name_with_cont k p =
     (* find the name of path [p] if it exists,
      * otherwise go on with continuation [k] *)
-    match p with
-      | PAName n -> C.PAName n, nop
-      | _ -> try
-              let n = HPath.find known_paths p in
-                C.PAName n, nop
-             with Not_found -> k p
+    try
+      let n = HPath.find known_paths p in
+      C.PAName n, nop
+    with Not_found -> k p
   in
   let rec new_name old =
     (* give a new name to the path [old] *)
@@ -185,7 +246,6 @@ and path p =
     | PAKnot k ->
         let k, code = knot k in
         C.PAKnot k, code
-    | PAName n -> C.PAName n, nop
     | PAUnitSquare -> C.PAUnitSquare, nop
     | PAQuarterCircle -> C.PAQuarterCircle, nop
     | PAHalfCircle -> C.PAHalfCircle, nop
@@ -250,9 +310,8 @@ and transform_list l =
                      tr::trl, c::cl ) l ([],[]) in
     l1, C.CSeq l2
 
-and picture =
+and picture pic =
   let compile_picture pn = function
-    | PIName _ -> assert false
     | PIMake c -> C.CDefPic (pn, command c)
     | PITransform (tr,p) ->
         let tr, c1 = transform_list tr in
@@ -268,19 +327,14 @@ and picture =
              *)
           c1 ++ c2 ++ C.CSimplePic (pn,C.PSimPic pic) ++ C.CClip (pn,pth)
   in
-  function
-  | PIName n -> C.PIName n, nop
-  | _ as p ->
-       begin
-         try
-           let pic = HPic.find known_pictures p in
-             C.PIName pic, nop
-         with Not_found ->
-           let pn = Name.picture () in
-           let cmd = compile_picture pn p in
-             HPic.add known_pictures p pn;
-             C.PIName pn, cmd
-       end
+    try
+      let pn = HPic.find known_pictures pic in
+      C.PIName pn, nop
+    with Not_found ->
+      let pn = Name.picture () in
+      let cmd = compile_picture pn pic in
+      HPic.add known_pictures pic pn;
+      C.PIName pn, cmd
 
 and pen = function
   | PenCircle -> C.PenCircle, nop

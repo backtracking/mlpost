@@ -89,7 +89,6 @@ and path =
   | PABuildCycle of path list
   | PASub of float * float * path
   | PABBox of picture
-  | PAName of name
 
 and transform =
   | TRRotated of float
@@ -106,7 +105,6 @@ and picture =
   | PITex of string
   | PIMake of command
   | PITransform of transform list * picture
-  | PIName of name
   | PIClip of picture * path
 
 and dash =

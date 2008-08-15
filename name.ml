@@ -34,3 +34,10 @@ let picture =
   let r = ref 0 in
   fun () -> incr r; "pic" ^ alpha !r
 
+let point =
+  let r = ref 0 in
+  fun () -> incr r; "pot" ^ alpha !r
+
+let num =
+  let r = ref 0 in
+  fun () -> incr r; "num" ^ alpha !r

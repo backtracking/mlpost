@@ -26,7 +26,6 @@ let ulcorner pic = PTPicCorner (pic, UL)
 let llcorner pic = PTPicCorner (pic, LL)
 let urcorner pic = PTPicCorner (pic, UR)
 let lrcorner pic = PTPicCorner (pic, LR)
-(* let currentpicture = PIName "currentpicture" *)
 
 let corner_bbox ?(dx=Num.zero) ?(dy=Num.zero) pic = 
   let pdx = Point.pt (dx, Num.zero) in

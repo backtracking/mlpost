@@ -25,6 +25,7 @@ type num =
   | NMax of num * num
   | NMin of num * num
   | NGMean of num * num
+  | NName of name
 
 and point =
   | PTPair of num * num
@@ -35,6 +36,7 @@ and point =
   | PTMult of num * point
   | PTRotated of float * point
   | PTTransformed of point * transform list
+  | PTName of name
 
 and direction = 
   | Vec of point
@@ -110,6 +112,8 @@ and command =
   | CLoop of int * int * (int -> command)
   | CSeq of command list
   | CDeclPath of name * path
+  | CDeclPoint of name * point
+  | CDeclNum of name * num
   | CDefPic of name * command
   | CSimplePic of name * picture_expr
   | CClip of name * path
