@@ -52,6 +52,9 @@ let option_compile f = function
         Some obj, c
 
 let rec num nm =
+  (* TODO
+   * ce code est copié collé de la compilation des paths
+   * -> Refactoring *)
   let is_simple = function
     | F _ -> true | _ -> false
   in
@@ -115,6 +118,9 @@ let rec num nm =
     if is_simple nm then compile_num nm else comp_save_num nm
 
 and point pt =
+  (* TODO
+   * ce code est copié collé de la compilation des paths
+   * -> Refactoring *)
   let is_simple = function
     | PTPair _ -> true | _ -> false
   in
