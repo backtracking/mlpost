@@ -12,7 +12,7 @@ let boxpen = Pen.circle ~tr:[Transform.scaled (f 2.5)] ()
 
 let separation = path ~style:JLine [(0., 270.); (0., -270.)]
 let sepdash = Dash.scaled 8. Dash.evenly
-let frame = [draw ~pen:boxpen box; 
+let frame = [draw ~pen:boxpen (Shapes.path box); 
 	     draw ~pen:boxpen ~dashed:sepdash  separation]
 
 let ccolor = Color.color "light green"

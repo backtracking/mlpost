@@ -986,7 +986,13 @@ module Shapes : sig
 
 (** Various Basic Geometric Shapes *)
 
-  val rounded_rect_path : Num.t -> Num.t -> Num.t -> Num.t -> Path.t
+  type t
+  type repr = t
+
+  val v : t -> repr
+  val path : t -> Path.t
+
+  val rounded_rect_path : Num.t -> Num.t -> Num.t -> Num.t -> t
 
   val rounded_rect : 
     ?fill:Color.t -> ?stroke:Color.t -> ?thickness:float ->
@@ -1028,9 +1034,11 @@ module Shapes : sig
 	  the outline ; 1. is default
     *)
 
+(*
   val arc_ellipse :
     ?fill:Color.t -> ?stroke:Color.t -> ?thickness:float -> ?close:bool ->
     Num.t -> Num.t -> float -> float -> Picture.t
+*)
     (** [arc_ellipse rx ry th1 th2] draws an arc of the ellipse 
 	of great axis [rx] and small axis [ry] starting at angle [th1] and
 	ending at angle [th2] (in radians).

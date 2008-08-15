@@ -20,9 +20,12 @@ open Point
 
 open Num.Infix
 
-type t = { c : point ; bpath : path; pic : picture; height : num ; width : num }
+type t = { c : point ; bpath : Shapes.t; pic : picture; height : num ; width : num }
+type repr = t
 
 let margin = Num.bp 2.
+
+open Shapes
 
 let rect_path pic dx dy = 
   (* construct rectangular path and return path + width + height *)
@@ -33,19 +36,24 @@ let rect_path pic dx dy =
 let base_rect ?(dx=margin) ?(dy=margin) pic = 
   let c = Picture.ctr pic in
   let path, w, h = rect_path pic dx dy in
-  { c = c; bpath = Path.shift c path ; pic = pic ; height = h; width = w }
+  { c = c; bpath = Shapes.shift c path ; pic = pic ; 
+    height = h; width = w }
 
 let rect ?(dx=margin) ?(dy=margin) c p = 
   let pic = Picture.center c p in
   let path,w, h = rect_path pic dx dy in
-    { c = c; bpath = Path.shift c path; pic = pic; width = w; height = h}
+    { c = c; bpath = Shapes.shift c path; 
+      pic = pic; width = w; height = h}
 
 
 let circle ?(dx=margin) ?(dy=margin) c pic =
   let pic = center c pic in
   let r = length (add (pt (dx,dy)) (sub (urcorner pic) (llcorner pic))) in
-  { c = c; pic = pic ; bpath = Path.shift c (Path.scale r Path.fullcircle);
-    height = r; width = r}
+  { c = c; pic = pic ; 
+    height = r; width = r;
+    bpath = Shapes.shift c { p= Path.scale r Path.fullcircle;
+    b = let hr = 0.5 *./ r in Shapes.build_border hr hr }
+  }
 
 let ellipse ?(dx=F 0.) ?(dy=F 0.) c pic =
   let pic = center c pic in 
@@ -53,7 +61,8 @@ let ellipse ?(dx=F 0.) ?(dy=F 0.) c pic =
   let ry = length (sub (urcorner pic) (lrcorner pic)) in
   let rx = rx +/ dx in
   let ry = ry +/ dy in
-    { c = c; pic = pic; bpath = Path.shift c (Shapes.full_ellipse_path rx ry); 
+    { c = c; pic = pic; bpath = 
+      Shapes.shift c (Shapes.full_ellipse_path rx ry); 
       height = ry */ Num.two ; width = rx */ Num.two }
 
 let round_rect ?(dx=margin) ?(dy=margin) c p =
@@ -62,7 +71,7 @@ let round_rect ?(dx=margin) ?(dy=margin) c p =
   let dy = length (sub (urcorner pic) (lrcorner pic)) +/ dy in
   let rx = min (dx // (F 10.)) (dy // (F 10.)) in
   { c = c; 
-    bpath = Path.shift c (Shapes.rounded_rect_path dx dy rx rx); 
+    bpath = Shapes.shift c (Shapes.rounded_rect_path dx dy rx rx); 
     pic = pic; width = dx; height = dy }
             
 let patatoid ?(dx=2. *./ margin) ?(dy=2. *./ margin) c p =
@@ -71,11 +80,23 @@ let patatoid ?(dx=2. *./ margin) ?(dy=2. *./ margin) c p =
   let w = Picture.width p in
   let h = Picture.height p in
   let path = Shapes.patatoid (w +/ 2. *./ dx) (h +/ 2. *./ dy) in
-  let dummypic = Picture.make (Command.draw path) in
+  let dummypic = Picture.make (Command.draw path.p) in
     { c = c; pic = pic; width = Picture.width dummypic; 
       height = Picture.height dummypic; bpath =  path}
 
 
+let center {c = c} = c
+
+let build_point a b = Point.pt (xpart a, ypart b)
+let north_west x = build_point x.bpath.b.w x.bpath.b.n
+let north_east x = build_point x.bpath.b.e x.bpath.b.n
+let south_west x = build_point x.bpath.b.w x.bpath.b.s
+let south_east x = build_point x.bpath.b.e x.bpath.b.s
+let north x = x.bpath.b.n
+let south x = x.bpath.b.s
+let west  x = x.bpath.b.w
+let east  x = x.bpath.b.e
+(*
 let north_west {pic = pic} = ulcorner pic
 let north_east {pic = pic} = urcorner pic
 let south_west {pic = pic} = llcorner pic
@@ -86,14 +107,14 @@ let north b = segment 0.5 (north_west b) (north_east b)
 let south b = segment 0.5 (south_west b) (south_east b) 
 let west  b = segment 0.5 (north_west b) (north_west b) 
 let east  b = segment 0.5 (south_east b) (north_east b) 
+*)
 
-let bpath {bpath = p} = p
+let bpath {bpath = p} = p.p
 
 let picture p = p.pic
 
 (* POS compliance *)
 
-type repr = t
 
 let v b = b
 
@@ -103,8 +124,9 @@ let height b = b.height
 
 let ctr b = b.c
 
-let shift p b = { b with c = Point.shift p b.c; pic = Picture.shift p b.pic;
-		  bpath = Path.shift p b.bpath }
+let shift p b = { b with c = Point.shift p b.c; 
+                  pic = Picture.shift p b.pic;
+		  bpath = Shapes.shift p b.bpath }
 
 let center pt x = shift (Point.sub pt (ctr x)) (v x)
 
@@ -140,11 +162,11 @@ let halign_to_box ?(dx=margin) ?(dy=margin) ?(spacing=Num.zero) ?pos pl =
 open Command 
 
 let draw ?fill ?(boxed=true) b = 
-  let path_cmd = if boxed then draw b.bpath else nop in
+  let path_cmd = if boxed then draw b.bpath.p else nop in
   let box_cmd =
     match fill with
       | None -> draw_pic b.pic
-      | Some color -> Command.fill ~color b.bpath ++ draw_pic b.pic
+      | Some color -> Command.fill ~color b.bpath.p ++ draw_pic b.pic
   in
     path_cmd ++ box_cmd
 

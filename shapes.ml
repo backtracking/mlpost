@@ -24,14 +24,29 @@ let pi = 4. *. (atan 1.)
 let kappa = F (4. *. (sqrt 2. -. 1.) /. 3.)
 let mkappa = F (1. -. (4. *. (sqrt 2. -. 1.) /. 3.))
 
-let neg f = (F 0.) -/ f
+let zero = Num.zero
+let neg f = zero -/ f
+
+type borders = { n : Point.t; s : Point.t ; w : Point.t ; e : Point.t }
+
+type t = { p : path ; b : borders }
+
+type repr = t
+
+let v x = x
+
+let ctr x = Point.origin
 
 (** Rectangles *)
 
+let build_border w h =
+  { n = pt (zero, h) ; s = pt (zero, neg h);
+    e = pt (w,zero); w = pt (neg w, zero) }
+
 let rounded_rect_path width height rx ry =
     let hw,hh = width//(F 2.),height//(F 2.) in
-    let rx = Num.maxn (F 0.) (Num.minn rx hw) in
-    let ry = Num.maxn (F 0.) (Num.minn ry hh) in
+    let rx = Num.maxn zero (Num.minn rx hw) in
+    let ry = Num.maxn zero (Num.minn ry hh) in
       (*     let ul, ur, br, bl =  *)
       (*       pt (-.hw, hh), pt (hw, hh),  *)
       (*       pt (hw, -.hh), pt (-.hw, -.hh) in *)
@@ -56,8 +71,11 @@ let rounded_rect_path width height rx ry =
       [JLine; JControls(ur1,ur2);
        JLine; JControls(br1,br2); 
        JLine; JControls(bl1,bl2); JLine] in
+    let path =
       cycle ~dir:(Vec right) ~style:(JControls(ul1,ul2))
 	(jointpathk knots joints)
+    in
+    { p = path; b = build_border hw hh }
 
 (** Ellipses and Arcs *)
 
@@ -72,9 +90,13 @@ let full_ellipse_path rx ry =
   let b1, b2 = pt (neg (rx*/kappa), neg ry), pt (rx*/kappa, neg ry) in
   let joints =
     [JControls(r2,t1); JControls(t2,l1); JControls(l2,b1)] in
+  let path =
     cycle ~dir:(Vec up) 
       ~style:(JControls(b2,r1)) (jointpathk knots joints)
+  in 
+    { p = path; b = build_border rx ry }
       
+(*
 let arc_ellipse_path ?(close=false) rx ry theta1 theta2 =
   let curvabs theta =  (2. *. theta) /. pi in
   let path =
@@ -82,13 +104,18 @@ let arc_ellipse_path ?(close=false) rx ry theta1 theta2 =
     if close then
       cycle ~style:JLine (concat ~style:JLine path (NoDir,origin,NoDir))
     else path
+*)
 
 let rectangle_path width height =
   let w = width // Num.two in
   let h = height // Num.two in
   let mw = Num.zero -/ w in
   let mh = Num.zero -/ h in
+  let path = 
     Path.pathn ~cycle:JLine ~style:JLine [ w, mh; w, h; mw, h; mw, mh]
+  in
+    { p = path; b = build_border w h }
+    
 
 let patatoid width height = 
   let wmin,wmax = -0.5 *./ width, 0.5 *./ width in
@@ -101,7 +128,8 @@ let patatoid width height =
   let b = segment (Random.float 1.) lr ur in
   let c = segment (Random.float 1.) ur ul in
   let d = segment (Random.float 1.) ul ll in
-    pathp ~cycle:JCurve [a;b;c;d]
+   (* corners are wrong *)
+    { p= pathp ~cycle:JCurve [a;b;c;d]; b = build_border wmax hmax }
       
 
 let draw_func ?fill ?(stroke=Color.black) ?(thickness=0.5) path =
@@ -115,20 +143,35 @@ let draw_func ?fill ?(stroke=Color.black) ?(thickness=0.5) path =
 
 let rounded_rect ?fill ?stroke ?thickness width height rx ry =
   let path = rounded_rect_path width height rx ry in
-    draw_func ?fill ?stroke ?thickness path
+    draw_func ?fill ?stroke ?thickness path.p
     
 
 let rectangle ?fill ?stroke ?thickness width height =
   let path = rectangle_path width height in
-    draw_func ?fill ?stroke ?thickness path
+    draw_func ?fill ?stroke ?thickness path.p
 
 let ellipse ?fill ?stroke ?thickness rx ry =
   let path = full_ellipse_path rx ry in
-    draw_func ?fill ?stroke ?thickness path
+    draw_func ?fill ?stroke ?thickness path.p
 
+let shift_border pt x = 
+  { n = Point.shift pt x.n;
+    e = Point.shift pt x.e;
+    w = Point.shift pt x.w;
+    s = Point.shift pt x.s
+  }
+
+let shift pt x = 
+  { p = Path.shift pt x.p;
+    b = shift_border pt x.b
+  }
+
+let path x = x.p
+(*
 let arc_ellipse ?fill ?stroke ?thickness ?(close=false) rx ry theta1 theta2 =
   let path = arc_ellipse_path rx ry theta1 theta2 
               ~close:(close || (match fill with Some _ -> true | _ -> false))
   in
     draw_func ?fill ?stroke ?thickness path
+*)
 

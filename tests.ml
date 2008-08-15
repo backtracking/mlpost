@@ -59,15 +59,15 @@ let rec random_tree = function
       node (string_of_int n) [random_tree k; random_tree (n - 1 - k)]
 
 let d2c, d2s, d2sq, d2hsq = 
-  let ls = bp (-1.0) in
+(*   let ls = bp (-1.0) in *)
   let tree = random_tree 17 in
-  [draw ~ls ~arrow_style:Directed ~edge_style:Curve
+  [draw ~arrow_style:Directed ~edge_style:Curve
        ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree],
-  [draw ~ls ~arrow_style:Directed ~edge_style:Straight
+  [draw ~arrow_style:Directed ~edge_style:Straight
        ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree],
-  [draw ~ls ~arrow_style:Directed ~edge_style:Square
+  [draw  ~arrow_style:Directed ~edge_style:Square
        ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree],
-  [draw ~ls ~arrow_style:Directed ~edge_style:HalfSquare
+  [draw  ~arrow_style:Directed ~edge_style:HalfSquare
        ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree]
 
 let proval =
@@ -319,11 +319,13 @@ let shapes2 =
   List.fold_left Picture.below
     (Picture.tex "Shapes 2 !")
     [
+(*
       Shapes.arc_ellipse (f 10.) (f 10.) 0. 1.7;
       Shapes.arc_ellipse ~stroke:Color.red (f 30.) (f 10.) 0. 1.7;
       Shapes.arc_ellipse ~stroke:Color.red ~close:true (f 30.) (f 10.) 0. 1.7;
       Shapes.arc_ellipse 
 	~fill:Color.black ~stroke:Color.red (f 30.) (f 10.) 0. 1.7;
+*)
       Shapes.ellipse (f 10.) (f 10.);
       Shapes.ellipse ~stroke:Color.red (f 30.) (f 10.);
       Shapes.ellipse ~fill:Color.black ~stroke:Color.red (f 30.) (f 10.);
@@ -530,15 +532,14 @@ let newarray =
   in
     (List.flatten boxes)@pics
 
-let figs = [ newarray; patates; yannick Box.rect; yannick Box.patatoid; 
+let figs = [
+  newarray; patates; yannick Box.rect; yannick Box.patatoid; 
              placetest; boxjoin; box_align; stack; row; stackl; rowl; 
-	     array; mybresenham;]
-(*
+	     array; mybresenham;
             [Command.draw_pic shapes1]; [Command.draw_pic shapes2];
             d16; d1; d15; florence; d14; d13; 
              d11; d7; d6; d5; d4; cheno011; proval; d3;  
                           d2sq; d2hsq; d2s; d2c; ] 
-*)
 
 let figs =
   let r = ref 0 in
