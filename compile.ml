@@ -25,229 +25,265 @@ let (++) c1 c2 =
     | _, _ -> C.CSeq [c1 ; c2]
 
 
-module HPic = Hashtbl.Make(struct 
-  type t = picture let equal = (==) let hash = Hashtbl.hash 
-end)
-let known_pictures = HPic.create 17
+module type COMP =
+sig
+  type map
+  type t
+  type out
+  val hmap : map
+  val find : map -> t -> name
+  val add : map -> t -> name -> unit
+  val is_simple : t -> bool
+  val name : name -> out
+  val compile : (t -> out * C.command) -> (t -> out * C.command) -> t 
+                 -> out * C.command
+  val new_name : unit -> name
+  val declare : name -> out -> C.command
+  val reset : unit -> unit
+end
 
-module HPt = Hashtbl.Make(struct 
-  type t = point let equal = (==) let hash = Hashtbl.hash 
-end)
-let known_points = HPt.create 17
+module Remember 
+  (E : COMP) =
+struct
+  let find_name_with_cont k o =
+    (* find the name of object [o] if it exists,
+     * otherwise go on with continuation [k] *)
+     try
+       let n = E.find E.hmap o in
+         E.name n, nop
+     with Not_found -> k o
 
-module HNum = Hashtbl.Make(struct 
-  type t = num let equal = (==) let hash = Hashtbl.hash 
-end)
-let known_nums = HNum.create 17
+  let rec new_name old =
+    let p, code = compile' old in
+    let n = E.new_name () in
+    let () = E.add E.hmap old n in
+      E.name n, code ++ E.declare n p
 
-module HPath = Hashtbl.Make(struct 
-  type t = path let equal = (==) let hash = Hashtbl.hash 
-end)
-let known_paths = HPath.create 17
+  (* compile [o], if it hasn't a name yet *)
+  and compile o = find_name_with_cont compile' o
 
+  (* compile [o] and give it a name, if it hasn't a name yet *)
+  and comp_save o = find_name_with_cont new_name o
+
+  (* compile [o], here we now it hasn't got a name yet *)
+  and compile' o = E.compile compile comp_save o
+  
+  let compile o =
+    if E.is_simple o then compile o else comp_save o
+end
+  
 let option_compile f = function
   | None -> None, nop
   | Some obj -> 
       let obj, c = f obj in
         Some obj, c
 
-let rec num nm =
-  (* TODO
-   * ce code est copié collé de la compilation des paths
-   * -> Refactoring *)
+module rec NumBase : COMP =
+struct
+  module HNum = Hashtbl.Make(struct 
+    type t = num let equal = (==) let hash = Hashtbl.hash 
+  end)
+  type map = name HNum.t
+  type t = num
+  type out = C.num
+
+  
+  let hmap = HNum.create 17
+  let find = HNum.find
+  let add = HNum.add
+  let new_name = Name.num
+  let reset () = HNum.clear hmap
+
   let is_simple = function
     | F _ -> true | _ -> false
-  in
-  let find_name_with_cont k nm =
-    (* find the name of point [p] if it exists,
-     * otherwise go on with continuation [k] *)
-     try
-       let n = HNum.find known_nums nm in
-         C.NName n, nop
-     with Not_found -> k nm
-  in
-  let rec new_name old =
-    (* give a new name to the point [old] *)
-    let p, code = compile_num' old in
-    let n = Name.num () in
-    let () = HNum.add known_nums old n in
-      C.NName n, code ++ C.CDeclNum (n,p)
+  let name n = C.NName n
+  let declare n nm = C.CDeclNum (n,nm)
 
-      (* compile [p], if it hasn't a name yet *)
-  and compile_num nm = find_name_with_cont compile_num' nm
-
-      (* compile [p] and give it a name, if it hasn't a name yet *)
-  and comp_save_num nm = find_name_with_cont new_name nm
-  and compile_num' = function
+  let compile k _ = function
     | F f -> C.F f, nop
     | NXPart p -> 
-        let p,c = point p in
+        let p,c = Point.compile p in
         C.NXPart p, c
     | NYPart p ->
-        let p,c = point p in
+        let p,c = Point.compile p in
         C.NYPart p, c
     | NAdd (n1,n2) ->
-        let n1,c1 = compile_num n1 in
-        let n2,c2 = compile_num n2 in
+        let n1,c1 = k n1 in
+        let n2,c2 = k n2 in
           C.NAdd (n1,n2), c1 ++ c2
     | NMinus (n1,n2) ->
-        let n1,c1 = compile_num n1 in
-        let n2,c2 = compile_num n2 in
+        let n1,c1 = k n1 in
+        let n2,c2 = k n2 in
           C.NMinus (n1,n2), c1 ++ c2
     | NMult (n1,n2) ->
-        let n1,c1 = compile_num n1 in
-        let n2,c2 = compile_num n2 in
+        let n1,c1 = k n1 in
+        let n2,c2 = k n2 in
           C.NMult (n1,n2), c1 ++ c2
     | NDiv (n1,n2) ->
-        let n1,c1 = compile_num n1 in
-        let n2,c2 = compile_num n2 in
+        let n1,c1 = k n1 in
+        let n2,c2 = k n2 in
           C.NDiv (n1,n2), c1 ++ c2
     | NMax (n1,n2) ->
-        let n1,c1 = compile_num n1 in
-        let n2,c2 = compile_num n2 in
+        let n1,c1 = k n1 in
+        let n2,c2 = k n2 in
           C.NMax (n1,n2), c1 ++ c2
     | NMin (n1,n2) ->
-        let n1,c1 = compile_num n1 in
-        let n2,c2 = compile_num n2 in
+        let n1,c1 = k n1 in
+        let n2,c2 = k n2 in
           C.NMin (n1,n2), c1 ++ c2
     | NGMean (n1,n2) ->
-        let n1,c1 = compile_num n1 in
-        let n2,c2 = compile_num n2 in
+        let n1,c1 = k n1 in
+        let n2,c2 = k n2 in
           C.NGMean (n1,n2), c1 ++ c2
-  in
-    if is_simple nm then compile_num nm else comp_save_num nm
+end
+and PointBase : COMP =
+struct
+  module HPt = Hashtbl.Make(struct 
+    type t = point let equal = (==) let hash = Hashtbl.hash 
+  end)
 
-and point pt =
-  (* TODO
-   * ce code est copié collé de la compilation des paths
-   * -> Refactoring *)
+  type map = name HPt.t
+  type t = point
+  type out = C.point
+  let hmap = HPt.create 17
+  let find = HPt.find
+  let add = HPt.add
+  let new_name = Name.point
+  let reset () = HPt.clear hmap
+
   let is_simple = function
     | PTPair _ -> true | _ -> false
-  in
-  let find_name_with_cont k p =
-    (* find the name of point [p] if it exists,
-     * otherwise go on with continuation [k] *)
-     try
-       let n = HPt.find known_points p in
-         C.PTName n, nop
-     with Not_found -> k p
-  in
-  let rec new_name old =
-    (* give a new name to the point [old] *)
-    let p, code = compile_point' old in
-    let n = Name.point () in
-    let () = HPt.add known_points old n in
-      C.PTName n, code ++ C.CDeclPoint (n,p)
+  let name n = C.PTName n
+  let declare n pt = C.CDeclPoint (n,pt)
 
-      (* compile [p], if it hasn't a name yet *)
-  and compile_point p = find_name_with_cont compile_point' p
-
-      (* compile [p] and give it a name, if it hasn't a name yet *)
-  and comp_save_point p = find_name_with_cont new_name p
-  and compile_point' = function
+  let compile k _ = function
     | PTPair (f1,f2) -> 
-        let f1, c1 = num f1 in
-        let f2,c2 = num f2 in 
+        let f1, c1 = Num.compile f1 in
+        let f2,c2 = Num.compile f2 in 
         C.PTPair (f1,f2), c1 ++ c2
     | PTPointOf (f,p) -> 
-        let p, code = path p in
+        let p, code = Path.compile p in
           C.PTPointOf (f,p) , code
     | PTAdd (p1,p2) -> 
-        let p1,c1 = compile_point p1 in
-        let p2,c2 = compile_point p2 in
+        let p1,c1 = k p1 in
+        let p2,c2 = k p2 in
           C.PTAdd (p1,p2),  c1 ++ c2
     | PTSub (p1,p2) ->
-        let p1,c1 = compile_point p1 in
-        let p2,c2 = compile_point p2 in
+        let p1,c1 = k p1 in
+        let p2,c2 = k p2 in
           C.PTSub (p1,p2),  c1 ++ c2
     | PTMult (f,p) ->
-        let f, c1 = num f in
-        let p1,c2 = compile_point p in
+        let f, c1 = Num.compile f in
+        let p1,c2 = k p in
           C.PTMult (f,p1), c1 ++ c2
     | PTRotated (f,p) ->
-        let p1,c1 = compile_point p in
+        let p1,c1 = k p in
           C.PTRotated (f,p1), c1
     | PTPicCorner (pic, corner) ->
-        let pic, code = picture pic in
+        let pic, code = Picture.compile pic in
           C.PTPicCorner (pic, corner) , code
     | PTTransformed (p,tr) ->
-        let p, c1 = compile_point p in
-        let tr, c2 = transform_list tr in
+        let p, c1 = k p in
+        let tr, c2 = Other.transform_list tr in
           C.PTTransformed (p,tr),  c1 ++ c2
-  in
-    if is_simple pt then compile_point pt else comp_save_point pt
+end
+and PathBase : COMP =
+struct
+  module HPath = Hashtbl.Make(struct 
+    type t = path let equal = (==) let hash = Hashtbl.hash 
+  end)
+  type map = name HPath.t
+  type t = path
+  type out = C.path
+  let hmap = HPath.create 17
+  let find = HPath.find
+  let add = HPath.add
+  let new_name = Name.path
+  let reset () = HPath.clear hmap
 
+  let is_simple = function
+  | PAFullCircle
+  | PAHalfCircle
+  | PAQuarterCircle
+  | PAUnitSquare
+  | PAKnot _
+  | PABBox _ -> true
+  | _ -> false
 
-and path p =
-  let find_name_with_cont k p =
-    (* find the name of path [p] if it exists,
-     * otherwise go on with continuation [k] *)
-    try
-      let n = HPath.find known_paths p in
-      C.PAName n, nop
-    with Not_found -> k p
-  in
-  let rec new_name old =
-    (* give a new name to the path [old] *)
-    let p, code = compile_path' old in
-    let n = Name.path () in
-    let () = HPath.add known_paths old n in
-      C.PAName n, code ++ C.CDeclPath (n,p)
+  let name n = C.PAName n
+  let declare n p = C.CDeclPath (n,p)
 
-      (* compile [p], if it hasn't a name yet *)
-  and compile_path p = find_name_with_cont compile_path' p
+  let rec knot (d1,p,d2) =
+    let d1, c1 = direction d1 in
+    let p, c2 = Point.compile p in
+    let d2, c3 = direction d2 in
+      (d1,p,d2), c1 ++ c2 ++ c3
 
-      (* compile [p] and give it a name, if it hasn't a name yet *)
-  and comp_save_path p = find_name_with_cont new_name p
-  and compile_path' = function
+  and joint = function
+    | JLine -> C.JLine, nop
+    | JCurve -> C.JCurve, nop
+    | JCurveNoInflex -> C.JCurveNoInflex, nop
+    | JTension (a,b) -> C.JTension (a,b), nop
+    | JControls (p1,p2) ->
+        let p1,c1 = Point.compile p1 in
+        let p2,c2 = Point.compile p2 in
+          C.JControls (p1,p2), c1 ++ c2
+
+  and direction = function
+    | Vec p -> 
+        let p, code = Point.compile p in
+          C.Vec p, code
+    | Curl f -> C.Curl f, nop
+    | NoDir  -> C.NoDir, nop
+
+  and compile k ks = function
     (* compile the argument path ; 
-     * use [compile_path] for path components to be able to use
+     * use [k] for path components to be able to use
      * path components that already have a name *)
     | PACycle (d,j,p) ->
         let d, c1 = direction d in
         let j, c2 = joint j in
-        let p, c3 = compile_path p in
+        let p, c3 = k p in
         C.PACycle (d,j,p), c1 ++ c2 ++ c3
-    | PAConcat (k,j,p) ->
-        let p, c1 = compile_path p in
-        let k, c2 = knot k in
+    | PAConcat (k',j,p) ->
+        let p, c1 = k p in
+        let k', c2 = knot k' in
         let j, c3 = joint j in
-        C.PAConcat (k,j,p), c1 ++ c2 ++ c3
+        C.PAConcat (k',j,p), c1 ++ c2 ++ c3
     | PATransformed (p,tr) ->
-        let p, c1 = compile_path p in
-        let tr, c2 = transform_list tr in
+        let p, c1 = k p in
+        let tr, c2 = Other.transform_list tr in
         (* group transformations, for slightly smaller metapost code *)
         (* this only happens in the Metapost AST, to be able to use
          * path components that already have a name *)
         C.pa_transformed p tr, c1 ++ c2
     | PACutAfter (p1,p2) ->
-        let p1, c1 = compile_path p1 in
-        let p2, c2 = compile_path p2 in
+        let p1, c1 = k p1 in
+        let p2, c2 = k p2 in
         C.PACutAfter (p1,p2), c1 ++ c2
     | PACutBefore (p1,p2) ->
-        let p1, c1 = compile_path p1 in
-        let p2, c2 = compile_path p2 in
+        let p1, c1 = k p1 in
+        let p2, c2 = k p2 in
         C.PACutBefore (p1,p2), c1 ++ c2
     | PAAppend (p1,j,p2) ->
-        let p1, c1 = compile_path p1 in
+        let p1, c1 = k p1 in
         let j, c2 = joint j in
-        let p2, c3 = compile_path p2 in
+        let p2, c3 = k p2 in
         C.PAAppend (p1,j,p2), c1 ++ c2 ++ c3
     | PABuildCycle pl ->
-        let npl = List.map compile_path pl in
+        let npl = List.map k pl in
         C.PABuildCycle (List.map fst npl), C.CSeq (List.map snd npl)
     | PASub (f1, f2, p) ->
         (* the Metapost subpath command needs a path name as argument
-         * we use comp_save_path here to assure that *)
-        let p, code = comp_save_path p in
+         * we use the ks argument here to assure that *)
+        let p, code = ks p in
         begin
           match p with
             | C.PAName n -> C.PASub (f1,f2,n), code
             | _ -> assert false
         end
-        (* simple paths are not compiled nor given names *)
     | PABBox p ->
-        let p, code = picture p in
+        let p, code = Picture.compile p in
         C.PABBox p, code
     | PAKnot k ->
         let k, code = knot k in
@@ -256,58 +292,101 @@ and path p =
     | PAQuarterCircle -> C.PAQuarterCircle, nop
     | PAHalfCircle -> C.PAHalfCircle, nop
     | PAFullCircle -> C.PAFullCircle, nop
-  in
-    comp_save_path p
+end
+and PicBase : COMP =
+struct
+  module HPic = Hashtbl.Make(struct 
+    type t = picture let equal = (==) let hash = Hashtbl.hash 
+  end)
+  type map = name HPic.t
+  type t = picture
+  type out = C.picture
+  let hmap = HPic.create 17
+  let find = HPic.find
+  let add = HPic.add
+  let new_name = Name.picture
+  let reset () = HPic.clear hmap
+  let name n = C.PIName n
+  let declare n p = C.CSimplePic (n,p)
 
-and knot (d1,p,d2) =
-  let d1, c1 = direction d1 in
-  let p, c2 = point p in
-  let d2, c3 = direction d2 in
-    (d1,p,d2), c1 ++ c2 ++ c3
+  let is_simple = function
+    | PITransform _ -> false
+    | PITex _ -> true
+    (* we don't want names for complicated pictures 
+     * for now, we do the memoization for these by hand
+     * (see compile function below) *)
+    | PIMake _ -> true
+    | PIClip _ -> true
 
-and joint = function
-  | JLine -> C.JLine, nop
-  | JCurve -> C.JCurve, nop
-  | JCurveNoInflex -> C.JCurveNoInflex, nop
-  | JTension (a,b) -> C.JTension (a,b), nop
-  | JControls (p1,p2) ->
-      let p1,c1 = point p1 in
-      let p2,c2 = point p2 in
-        C.JControls (p1,p2), c1 ++ c2
 
-and direction = function
-  | Vec p -> 
-      let p, code = point p in
-        C.Vec p, code
-  | Curl f -> C.Curl f, nop
-  | NoDir  -> C.NoDir, nop
+  and compile k ks pic = 
+    match pic with
+    | PITransform (tr,p) ->
+        let tr, c1 = Other.transform_list tr in
+        let pic, c2 = k p in
+        C.PITransform (tr,pic), c1 ++ c2
+    | PITex s -> C.PITex s, nop
+    (* TODO
+     * for the moment, we do memo for complicated pictures by hand *)
+    | PIMake c -> begin
+        try 
+          let pn = find hmap pic in
+          C.PIName pn, nop
+        with Not_found ->
+          let pn = new_name () in
+          C.PIName pn, C.CDefPic (pn,Other.command c)
+    end
+    | PIClip (pic,pth) -> begin
+        try
+          let pn = find hmap pic in
+            C.PIName pn, nop
+        with Not_found ->
+          let pic, c1 = k pic in
+          let pth, c2 = Path.compile pth in
+          let pn = new_name () in
+          C.PIName pn, c1 ++ c2 ++ C.CSimplePic (pn,C.PSimPic pic) ++ C.CClip (pn,pth)
+    end
+end
+and Num :sig val compile : num -> C.num * C.command end = Remember (NumBase)
+and Point : sig val compile : point -> C.point * C.command end = 
+  Remember (PointBase)
+and Path : sig val compile : path -> C.path * C.command end = 
+  Remember (PathBase)
+and Picture : sig val compile : picture -> C.picture * C.command end = 
+  Remember (PicBase)
+and Other : 
+  sig
+    val command : command -> C.command
+    val transform_list : transform list -> C.transform list * C.command
+  end = 
+struct
 
-and transform = function
+  let rec transform = function
   | TRRotated f -> C.TRRotated f, nop
   | TRScaled f -> 
-      let f,c = num f in
+      let f,c = Num.compile f in
       C.TRScaled f, c
   | TRSlanted f -> 
-      let f,c = num f in
+      let f,c = Num.compile f in
       C.TRSlanted f, c
   | TRXscaled f -> 
-      let f,c = num f in
+      let f,c = Num.compile f in
       C.TRXscaled f, c
   | TRYscaled f -> 
-      let f,c = num f in
+      let f,c = Num.compile f in
       C.TRYscaled f, c
   | TRShifted p -> 
-      let p, code = point p in
+      let p, code = Point.compile p in
         C.TRShifted p, code
   | TRZscaled p -> 
-      let p, code = point p in
+      let p, code = Point.compile p in
         C.TRZscaled p, code
   | TRReflect (p1,p2) ->
-      let p1, c1 = point p1 in
-      let p2, c2 = point p2 in
+      let p1, c1 = Point.compile p1 in
+      let p2, c2 = Point.compile p2 in
         C.TRReflect (p1,p2), c1 ++ c2
   | TRRotateAround (p,f) ->
-      let p, code = point p in
+      let p, code = Point.compile p in
         C.TRRotateAround (p,f), code
 and transform_list l =
   let l1,l2 = List.fold_right
@@ -316,37 +395,11 @@ and transform_list l =
                      tr::trl, c::cl ) l ([],[]) in
     l1, C.CSeq l2
 
-and picture pic =
-  let compile_picture pn = function
-    | PIMake c -> C.CDefPic (pn, command c)
-    | PITransform (tr,p) ->
-        let tr, c1 = transform_list tr in
-        let pic, c2 = picture p in
-          c1 ++ c2 ++ C.CSimplePic (pn, C.PITransform (tr,pic))
-    | PITex s -> C.CSimplePic (pn,C.PITex s)
-    | PIClip (pic,pth) ->
-        let pic, c1 = picture pic in
-        let pth, c2 = path pth in
-          (* clip (pic,pth) is compiled to:
-             newpic := pic;
-             clip newpic to pth;
-             *)
-          c1 ++ c2 ++ C.CSimplePic (pn,C.PSimPic pic) ++ C.CClip (pn,pth)
-  in
-    try
-      let pn = HPic.find known_pictures pic in
-      C.PIName pn, nop
-    with Not_found ->
-      let pn = Name.picture () in
-      let cmd = compile_picture pn pic in
-      HPic.add known_pictures pic pn;
-      C.PIName pn, cmd
-
 and pen = function
   | PenCircle -> C.PenCircle, nop
   | PenSquare -> C.PenSquare, nop
   | PenFromPath p -> 
-      let p, code = path p in
+      let p, code = Path.compile p in
         C.PenFromPath p, code
   | PenTransformed (p, tr) ->
       let p, c1 = pen p in
@@ -361,7 +414,7 @@ and dash = function
       let d,c = dash d in
         C.DScaled (f,d) , c
   | DShifted (p,d) ->
-      let p, c1 = point p in
+      let p, c1 = Point.compile p in
       let d, c2 = dash d in
         C.DShifted (p,d), c1 ++ c2
   | DPattern l -> 
@@ -373,40 +426,45 @@ and dash = function
 
 and dash_pattern = function
   | On f -> 
-      let f1, c1 = num f in C.On f1, c1
+      let f1, c1 = Num.compile f in C.On f1, c1
   | Off f -> 
-      let f1, c1 = num f in C.Off f1, c1
+      let f1, c1 = Num.compile f in C.Off f1, c1
 
 and command = function
   | CDraw (p, color, pe, dsh) ->
-      let p, c1 = path p in
+      let p, c1 = Path.compile p in
       let pe, c2 = (option_compile pen) pe in
       let dsh, c3 = (option_compile dash) dsh in
       C.CSeq [c1; c2; c3; C.CDraw (p, color, pe, dsh)]
   | CDrawArrow (p, color, pe, dsh) ->
-      let p, c1 = path p in
+      let p, c1 = Path.compile p in
       let pe, c2 = (option_compile pen) pe in
       let dsh, c3 = (option_compile dash) dsh in
       C.CSeq [c1; c2; c3; C.CDrawArrow (p, color, pe, dsh)]
   | CDrawPic p ->
-      let p, code = picture p in
+      let p, code = Picture.compile p in
       C.CSeq [code; C.CDrawPic p]
   | CFill (p, c) ->
-      let p, code = path p in
+      let p, code = Path.compile p in
       C.CSeq [code; C.CFill (p, c)]
   | CSeq l ->
       C.CSeq (List.map command l)
   | CLoop (i, j, f) ->
       C.CLoop (i, j, fun k -> command (f k))
   | CDotLabel (pic, pos, pt) -> 
-      let pic, c1 = picture pic in
-      let pt, c2 = point pt in
+      let pic, c1 = Picture.compile pic in
+      let pt, c2 = Point.compile pt in
         c1 ++ c2 ++ C.CDotLabel (pic,pos,pt)
   | CLabel (pic, pos ,pt) -> 
-      let pic, c1 = picture pic in
-      let pt, c2 = point pt in
+      let pic, c1 = Picture.compile pic in
+      let pt, c2 = Point.compile pt in
       c1 ++ c2 ++ C.CLabel (pic,pos,pt)
+end
+
+let command = Other.command
 
 let reset () = 
-  HPath.clear known_paths;
-  HPic.clear known_pictures;
+  PicBase.reset ();
+  PathBase.reset ();
+  NumBase.reset ();
+  PointBase.reset ()

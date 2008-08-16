@@ -107,13 +107,11 @@ and print_transform fmt = function
 
 and print_transform_list fmt l = Misc.print_list space print_transform fmt l
 
-and print_picture_expr fmt = function
+and print_picture fmt = function
   | C.PITex s -> fprintf fmt "btex %s etex" s
   | C.PITransform (tr, p) ->
       fprintf fmt "((%a) %a)" print_picture p print_transform_list tr
   | C.PSimPic p -> print_picture fmt p
-and print_picture fmt = function
-  (* compiled pictures are always names *)
   | C.PIName n -> pp_print_string fmt n
 
 and print_path fmt = function
@@ -216,8 +214,13 @@ and print_command fmt  = function
       fprintf fmt "numeric %s ;@\n%s = %a;@\n" n n print_num nm
   | C.CSimplePic (pn1, pexpr) ->
       fprintf fmt "picture %s;@\n" pn1;
-      fprintf fmt "%s := %a;@\n" pn1 print_picture_expr pexpr;
+      fprintf fmt "%s := %a;@\n" pn1 print_picture pexpr;
   | C.CDefPic (pic, cmd) ->
+      (* Declpic (savepic, currentpicture);
+       * Assign (currentpicture, nullpicture);
+       * cmd;
+       * Assign (pic, currentpicture);
+       * Assign (currentpicture, savepic) *)
       let savepic = Name.picture () in
       fprintf fmt "picture %s, %s ;@\n" savepic pic;
       fprintf fmt "%s = currentpicture;@\n" savepic;
