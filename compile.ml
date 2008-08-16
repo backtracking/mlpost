@@ -78,7 +78,7 @@ let option_compile f = function
       let obj, c = f obj in
         Some obj, c
 
-module rec NumBase : COMP =
+module rec NumBase : COMP with type t = num and type out = C.num =
 struct
   module HNum = Hashtbl.Make(struct 
     type t = num let equal = (==) let hash = Hashtbl.hash 
@@ -136,7 +136,7 @@ struct
         let n2,c2 = k n2 in
           C.NGMean (n1,n2), c1 ++ c2
 end
-and PointBase : COMP =
+and PointBase : COMP with type t = point and type out = C.point =
 struct
   module HPt = Hashtbl.Make(struct 
     type t = point let equal = (==) let hash = Hashtbl.hash 
@@ -187,7 +187,7 @@ struct
         let tr, c2 = Other.transform_list tr in
           C.PTTransformed (p,tr),  c1 ++ c2
 end
-and PathBase : COMP =
+and PathBase : COMP with type t = path and type out = C.path =
 struct
   module HPath = Hashtbl.Make(struct 
     type t = path let equal = (==) let hash = Hashtbl.hash 
@@ -293,7 +293,7 @@ struct
     | PAHalfCircle -> C.PAHalfCircle, nop
     | PAFullCircle -> C.PAFullCircle, nop
 end
-and PicBase : COMP =
+and PicBase : COMP with type t = picture and type out = C.picture =
 struct
   module HPic = Hashtbl.Make(struct 
     type t = picture let equal = (==) let hash = Hashtbl.hash 
