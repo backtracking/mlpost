@@ -25,11 +25,6 @@ let (++) c1 c2 =
     | _, _ -> C.CSeq [c1 ; c2]
 
 
-module HPic = Hashtbl.Make(struct 
-  type t = picture let equal = (==) let hash = Hashtbl.hash 
-end)
-let known_pictures = HPic.create 17
-
 module type COMP =
 sig
   type map
@@ -51,7 +46,7 @@ module Remember
   (E : COMP) =
 struct
   let find_name_with_cont k o =
-    (* find the name of object [p] if it exists,
+    (* find the name of object [o] if it exists,
      * otherwise go on with continuation [k] *)
      try
        let n = E.find E.hmap o in
@@ -185,7 +180,7 @@ struct
         let p1,c1 = k p in
           C.PTRotated (f,p1), c1
     | PTPicCorner (pic, corner) ->
-        let pic, code = Other.picture pic in
+        let pic, code = Picture.compile pic in
           C.PTPicCorner (pic, corner) , code
     | PTTransformed (p,tr) ->
         let p, c1 = k p in
@@ -243,7 +238,7 @@ struct
 
   and compile k ks = function
     (* compile the argument path ; 
-     * use [compile_path] for path components to be able to use
+     * use [k] for path components to be able to use
      * path components that already have a name *)
     | PACycle (d,j,p) ->
         let d, c1 = direction d in
@@ -288,7 +283,7 @@ struct
             | _ -> assert false
         end
     | PABBox p ->
-        let p, code = Other.picture p in
+        let p, code = Picture.compile p in
         C.PABBox p, code
     | PAKnot k ->
         let k, code = knot k in
@@ -298,16 +293,69 @@ struct
     | PAHalfCircle -> C.PAHalfCircle, nop
     | PAFullCircle -> C.PAFullCircle, nop
 end
+and PicBase : COMP =
+struct
+  module HPic = Hashtbl.Make(struct 
+    type t = picture let equal = (==) let hash = Hashtbl.hash 
+  end)
+  type map = name HPic.t
+  type t = picture
+  type out = C.picture
+  let hmap = HPic.create 17
+  let find = HPic.find
+  let add = HPic.add
+  let new_name = Name.picture
+  let reset () = HPic.clear hmap
+  let name n = C.PIName n
+  let declare n p = C.CSimplePic (n,p)
+
+  let is_simple = function
+    | PITransform _ -> false
+    | PITex _ -> true
+    (* we don't want names for complicated pictures 
+     * for now, we do the memoization for these by hand
+     * (see compile function below) *)
+    | PIMake _ -> true
+    | PIClip _ -> true
 
 
+  and compile k ks pic = 
+    match pic with
+    | PITransform (tr,p) ->
+        let tr, c1 = Other.transform_list tr in
+        let pic, c2 = k p in
+        C.PITransform (tr,pic), c1 ++ c2
+    | PITex s -> C.PITex s, nop
+    (* TODO
+     * for the moment, we do memo for complicated pictures by hand *)
+    | PIMake c -> begin
+        try 
+          let pn = find hmap pic in
+          C.PIName pn, nop
+        with Not_found ->
+          let pn = new_name () in
+          C.PIName pn, C.CDefPic (pn,Other.command c)
+    end
+    | PIClip (pic,pth) -> begin
+        try
+          let pn = find hmap pic in
+            C.PIName pn, nop
+        with Not_found ->
+          let pic, c1 = k pic in
+          let pth, c2 = Path.compile pth in
+          let pn = new_name () in
+          C.PIName pn, c1 ++ c2 ++ C.CSimplePic (pn,C.PSimPic pic) ++ C.CClip (pn,pth)
+    end
+end
 and Num :sig val compile : num -> C.num * C.command end = Remember (NumBase)
 and Point : sig val compile : point -> C.point * C.command end = 
   Remember (PointBase)
 and Path : sig val compile : path -> C.path * C.command end = 
   Remember (PathBase)
+and Picture : sig val compile : picture -> C.picture * C.command end = 
+  Remember (PicBase)
 and Other : 
   sig
-    val picture : picture -> C.picture * C.command
     val command : command -> C.command
     val transform_list : transform list -> C.transform list * C.command
   end = 
@@ -346,32 +394,6 @@ and transform_list l =
                    let tr,c =  transform tr in
                      tr::trl, c::cl ) l ([],[]) in
     l1, C.CSeq l2
-
-and picture pic =
-  let compile_picture pn = function
-    | PIMake c -> C.CDefPic (pn, command c)
-    | PITransform (tr,p) ->
-        let tr, c1 = transform_list tr in
-        let pic, c2 = picture p in
-          c1 ++ c2 ++ C.CSimplePic (pn, C.PITransform (tr,pic))
-    | PITex s -> C.CSimplePic (pn,C.PITex s)
-    | PIClip (pic,pth) ->
-        let pic, c1 = picture pic in
-        let pth, c2 = Path.compile pth in
-          (* clip (pic,pth) is compiled to:
-             newpic := pic;
-             clip newpic to pth;
-             *)
-          c1 ++ c2 ++ C.CSimplePic (pn,C.PSimPic pic) ++ C.CClip (pn,pth)
-  in
-    try
-      let pn = HPic.find known_pictures pic in
-      C.PIName pn, nop
-    with Not_found ->
-      let pn = Name.picture () in
-      let cmd = compile_picture pn pic in
-      HPic.add known_pictures pic pn;
-      C.PIName pn, cmd
 
 and pen = function
   | PenCircle -> C.PenCircle, nop
@@ -420,7 +442,7 @@ and command = function
       let dsh, c3 = (option_compile dash) dsh in
       C.CSeq [c1; c2; c3; C.CDrawArrow (p, color, pe, dsh)]
   | CDrawPic p ->
-      let p, code = picture p in
+      let p, code = Picture.compile p in
       C.CSeq [code; C.CDrawPic p]
   | CFill (p, c) ->
       let p, code = Path.compile p in
@@ -430,11 +452,11 @@ and command = function
   | CLoop (i, j, f) ->
       C.CLoop (i, j, fun k -> command (f k))
   | CDotLabel (pic, pos, pt) -> 
-      let pic, c1 = picture pic in
+      let pic, c1 = Picture.compile pic in
       let pt, c2 = Point.compile pt in
         c1 ++ c2 ++ C.CDotLabel (pic,pos,pt)
   | CLabel (pic, pos ,pt) -> 
-      let pic, c1 = picture pic in
+      let pic, c1 = Picture.compile pic in
       let pt, c2 = Point.compile pt in
       c1 ++ c2 ++ C.CLabel (pic,pos,pt)
 end
@@ -442,7 +464,7 @@ end
 let command = Other.command
 
 let reset () = 
-  HPic.clear known_pictures;
+  PicBase.reset ();
   PathBase.reset ();
   NumBase.reset ();
   PointBase.reset ()
