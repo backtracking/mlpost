@@ -81,10 +81,12 @@ and transform =
   | TRReflect of point * point
   | TRRotateAround of point * float
 
-and picture =
+and picture_expr =
   | PITex of string
   | PITransform of transform list * picture
   | PSimPic of picture
+and picture =
+  (* compiled pictures are always names *)
   | PIName of name
 
 and dash =
@@ -113,7 +115,7 @@ and command =
   | CDeclPoint of name * point
   | CDeclNum of name * num
   | CDefPic of name * command
-  | CSimplePic of name * picture
+  | CSimplePic of name * picture_expr
   | CClip of name * path
 
 and color = Types.color
