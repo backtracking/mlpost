@@ -98,7 +98,7 @@ let option_compile f = function
       let obj, c = f obj in
         Some obj, c
 
-module rec NumBase : COMP =
+module rec NumBase : COMP with type t = num and type out = C.num =
 struct
   type t = num
   type out = C.num
@@ -146,7 +146,7 @@ struct
         let n2,c2 = k n2 in
           C.NGMean (n1,n2), c1 ++ c2
 end
-and PointBase : COMP =
+and PointBase : COMP with type t = point and type out = C.point =
 struct
   type t = point
   type out = C.point
@@ -188,7 +188,7 @@ struct
         let tr, c2 = Other.transform_list tr in
           C.PTTransformed (p,tr),  c1 ++ c2
 end
-and PathBase : COMP =
+and PathBase : COMP with type t = path and type out = C.path =
 struct
   type t = path
   type out = C.path
@@ -286,7 +286,7 @@ struct
     | PAHalfCircle -> C.PAHalfCircle, nop
     | PAFullCircle -> C.PAFullCircle, nop
 end
-and PicBase : COMP =
+and PicBase : COMP with type t = picture and type out = C.picture =
 struct
   type t = picture
   type out = C.picture
