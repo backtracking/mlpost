@@ -27,36 +27,56 @@ let (++) c1 c2 =
 
 module type COMP =
 sig
-  type map
   type t
   type out
-  val hmap : map
-  val find : map -> t -> name
-  val add : map -> t -> name -> unit
   val is_simple : t -> bool
   val name : name -> out
-  val compile : (t -> out * C.command) -> (t -> out * C.command) -> t 
-                 -> out * C.command
   val new_name : unit -> name
   val declare : name -> out -> C.command
+  (* [compile] takes two functions as argument
+   * both are intended to be used by [compile] for
+   * recursive subcalls instead of calling itself
+   * the first function simply checks if its argument has already been defined,
+   * and returns that name instead of compiling it
+   * the second enforces that a name is given to its argument *)
+  val compile : (t -> out * C.command) -> (t -> out * C.command) -> t 
+                 -> out * C.command
+end
+
+module type OUT =
+sig
+  type t
+  type out
+  val compile : t -> out * C.command 
   val reset : unit -> unit
 end
 
 module Remember 
   (E : COMP) =
 struct
+  module HM = Hashtbl.Make(
+    struct
+      type t = E.t let equal = (==) let hash = Hashtbl.hash
+  end)
+
+  type t = E.t
+  type out = E.out
+ 
+  let hmap = HM.create 17
+  let reset () = HM.clear hmap
+
   let find_name_with_cont k o =
     (* find the name of object [o] if it exists,
      * otherwise go on with continuation [k] *)
      try
-       let n = E.find E.hmap o in
+       let n = HM.find hmap o in
          E.name n, nop
      with Not_found -> k o
 
   let rec new_name old =
     let p, code = compile' old in
     let n = E.new_name () in
-    let () = E.add E.hmap old n in
+    let () = HM.add hmap old n in
       E.name n, code ++ E.declare n p
 
   (* compile [o], if it hasn't a name yet *)
@@ -80,20 +100,10 @@ let option_compile f = function
 
 module rec NumBase : COMP =
 struct
-  module HNum = Hashtbl.Make(struct 
-    type t = num let equal = (==) let hash = Hashtbl.hash 
-  end)
-  type map = name HNum.t
   type t = num
   type out = C.num
-
   
-  let hmap = HNum.create 17
-  let find = HNum.find
-  let add = HNum.add
   let new_name = Name.num
-  let reset () = HNum.clear hmap
-
   let is_simple = function
     | F _ -> true | _ -> false
   let name n = C.NName n
@@ -138,18 +148,9 @@ struct
 end
 and PointBase : COMP =
 struct
-  module HPt = Hashtbl.Make(struct 
-    type t = point let equal = (==) let hash = Hashtbl.hash 
-  end)
-
-  type map = name HPt.t
   type t = point
   type out = C.point
-  let hmap = HPt.create 17
-  let find = HPt.find
-  let add = HPt.add
   let new_name = Name.point
-  let reset () = HPt.clear hmap
 
   let is_simple = function
     | PTPair _ -> true | _ -> false
@@ -189,17 +190,9 @@ struct
 end
 and PathBase : COMP =
 struct
-  module HPath = Hashtbl.Make(struct 
-    type t = path let equal = (==) let hash = Hashtbl.hash 
-  end)
-  type map = name HPath.t
   type t = path
   type out = C.path
-  let hmap = HPath.create 17
-  let find = HPath.find
-  let add = HPath.add
   let new_name = Name.path
-  let reset () = HPath.clear hmap
 
   let is_simple = function
   | PAFullCircle
@@ -295,17 +288,9 @@ struct
 end
 and PicBase : COMP =
 struct
-  module HPic = Hashtbl.Make(struct 
-    type t = picture let equal = (==) let hash = Hashtbl.hash 
-  end)
-  type map = name HPic.t
   type t = picture
   type out = C.picture
-  let hmap = HPic.create 17
-  let find = HPic.find
-  let add = HPic.add
   let new_name = Name.picture
-  let reset () = HPic.clear hmap
   let name n = C.PIName n
   let declare n p = C.CSimplePic (n,p)
 
@@ -315,8 +300,8 @@ struct
     (* we don't want names for complicated pictures 
      * for now, we do the memoization for these by hand
      * (see compile function below) *)
-    | PIMake _ -> true
-    | PIClip _ -> true
+    | PIMake _ -> false
+    | PIClip _ -> false
 
 
   and compile k ks pic = 
@@ -326,33 +311,21 @@ struct
         let pic, c2 = k p in
         C.PITransform (tr,pic), c1 ++ c2
     | PITex s -> C.PITex s, nop
-    (* TODO
-     * for the moment, we do memo for complicated pictures by hand *)
-    | PIMake c -> begin
-        try 
-          let pn = find hmap pic in
-          C.PIName pn, nop
-        with Not_found ->
-          let pn = new_name () in
-          C.PIName pn, C.CDefPic (pn,Other.command c)
-    end
-    | PIClip (pic,pth) -> begin
-        try
-          let pn = find hmap pic in
-            C.PIName pn, nop
-        with Not_found ->
-          let pic, c1 = k pic in
-          let pth, c2 = Path.compile pth in
-          let pn = new_name () in
-          C.PIName pn, c1 ++ c2 ++ C.CSimplePic (pn,C.PSimPic pic) ++ C.CClip (pn,pth)
-    end
+    | PIMake c -> 
+        let pn = new_name () in
+        C.PIName pn, C.CDefPic (pn, Other.command c)
+    | PIClip (pic',pth) -> 
+        let pic', c1 = ks pic' in
+        let pth, c2 = Path.compile pth in
+        let pn = new_name () in
+        (* slight redundance here *)
+        C.PIName pn, c1 ++ c2 ++ C.CSimplePic (pn,pic') 
+        ++ C.CClip (pn,pth)
 end
-and Num :sig val compile : num -> C.num * C.command end = Remember (NumBase)
-and Point : sig val compile : point -> C.point * C.command end = 
-  Remember (PointBase)
-and Path : sig val compile : path -> C.path * C.command end = 
-  Remember (PathBase)
-and Picture : sig val compile : picture -> C.picture * C.command end = 
+and Num : OUT with type t = num and type out = C.num = Remember (NumBase)
+and Point :OUT with type t = point and type out = C.point = Remember (PointBase)
+and Path : OUT with type t = path and type out = C.path = Remember (PathBase)
+and Picture : OUT with type t = picture and type out = C.picture = 
   Remember (PicBase)
 and Other : 
   sig
@@ -464,7 +437,7 @@ end
 let command = Other.command
 
 let reset () = 
-  PicBase.reset ();
-  PathBase.reset ();
-  NumBase.reset ();
-  PointBase.reset ()
+  Num.reset ();
+  Path.reset ();
+  Point.reset ();
+  Picture.reset ()

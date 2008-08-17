@@ -84,7 +84,6 @@ and transform =
 and picture =
   | PITex of string
   | PITransform of transform list * picture
-  | PSimPic of picture
   | PIName of name
 
 and dash =
