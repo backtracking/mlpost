@@ -4,7 +4,7 @@ open Picture
 open Path
 open Num
 
-let pen = Pen.default ~tr:([Transform.scaled (f 1.5)]) ()
+let pen = Pen.default ~tr:([Transform.scaled (bp 1.5)]) ()
 
 let grid w h d f =
   let p i j = bp (float i *. d), bp (float j *. d) in
@@ -23,7 +23,7 @@ let fig =
   let cell i j = 
     let l = 
       if (i+j) mod 2 = 1 then 
-	let sq = Path.scale (f d) unitsquare in
+	let sq = Path.scale (bp d) unitsquare in
 	let sq = shift (Point.pt (p i j)) sq in
 	[fill ~color:(Color.gray 0.7) sq] 
       else 

@@ -69,7 +69,7 @@ let round_rect ?(dx=margin) ?(dy=margin) c p =
   let pic = center c p in
   let dx = length (sub (urcorner pic) (ulcorner pic)) +/ dx in
   let dy = length (sub (urcorner pic) (lrcorner pic)) +/ dy in
-  let rx = min (dx // (F 10.)) (dy // (F 10.)) in
+  let rx = min (dx /./ 10.) (dy /./ 10.) in
   { c = c; 
     bpath = Shapes.shift c (Shapes.rounded_rect_path dx dy rx rx); 
     pic = pic; width = dx; height = dy }
@@ -141,7 +141,7 @@ let valign ?(dx=Num.zero) ?(dy=Num.zero)  ?pos pl =
   let posl = PicAlign.vertical ~dy  ?pos pl in
     List.map (fun p ->
       let dx = Point.xpart (Picture.ctr p) +/ dx -/
-               Picture.width p // Num.two in
+               Picture.width p /./ 2. in
         base_rect ~dx ~dy:(0.5 *./ dy) p)
     (PicAlign.v posl)
 
@@ -150,7 +150,7 @@ let halign ?(dx=Num.zero) ?(dy=Num.zero) ?pos pl =
     List.map 
       (fun p ->
         let dy = Point.ypart (Picture.ctr p) +/ 
-                 dy -/ Picture.height p // Num.two in
+                 dy -/ Picture.height p /./ 2. in
         base_rect ~dx:(0.5 *./ dx) ~dy p)
       (PicAlign.v posl)
 
@@ -187,9 +187,9 @@ let tabularl ?(dx=Num.zero) ?(dy=Num.zero) pll =
       | [], [] -> []
       | [], _ | _, [] -> raise (Invalid_argument "Lists have different sizes")
       | p::ql, wrow :: wl ->
-	  let c = Point.pt (x +/ dx +/ wrow // Num.two, y -/ h_2) in
-	  let dx' = dx +/ (wrow -/ Picture.width p) // Num.two in
-	  let dy = h_2 -/ (Picture.height p) // Num.two in
+	  let c = Point.pt (x +/ dx +/ wrow /./ 2., y -/ h_2) in
+	  let dx' = dx +/ (wrow -/ Picture.width p) /./ 2. in
+	  let dy = h_2 -/ (Picture.height p) /./ 2. in
 	  let b = rect ~dx:dx' ~dy c p in
 	    b::(make_rows wl (x +/ wrow +/ dx +/ dx) y h_2 ql)
   in
@@ -199,7 +199,7 @@ let tabularl ?(dx=Num.zero) ?(dy=Num.zero) pll =
       | [], _ | _, [] -> raise (Invalid_argument "Lists have different sizes")
       | row :: qll, hrow :: hl -> 
 	  let brow = 
-	    make_rows wmaxl Num.zero y (hrow // Num.two +/ dy) row in
+	    make_rows wmaxl Num.zero y (hrow /./ 2. +/ dy) row in
 	    brow :: (make_array hl (y -/ hrow -/ dy -/ dy) qll)
   in
     make_array hmaxl Num.zero pll

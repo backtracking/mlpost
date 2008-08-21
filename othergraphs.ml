@@ -34,11 +34,11 @@ let d1 = 1, [draw (path ~style:JLine ~scale:N.cm l)]
 let d2 = 2, [draw (path ~style:JLine ~scale:N.cm ~cycle:JLine l)]
 
 let d4 =  
-  let pen = Pen.circle ~tr:[T.scaled (f 4.)] () in
+  let pen = Pen.circle ~tr:[T.scaled (bp 4.)] () in
     4, [draw ~pen (path ~scale:N.cm [a]) ]
 
 let d5 = 5,
-         let pen = P.circle ~tr:[T.scaled (f 4.)] () in
+         let pen = P.circle ~tr:[T.scaled (bp 4.)] () in
            [draw (path ~style:JLine ~scale:N.cm ~cycle:JLine l)] @
            (List.map  (fun point -> draw ~pen (path ~scale:N.cm [point])) l)
 
@@ -50,7 +50,7 @@ let d7 = 7,
             draw (pathp [ segment 0.5 c a ; b]) ; ]
 
 let d12 = 12,
-          let pen = P.circle ~tr:[T.scaled (f 2.)] () in
+          let pen = P.circle ~tr:[T.scaled two] () in
           let cl = List.map Color.gray [0.8;0.6;0.4] in
             List.map2
               (fun (a,b) color ->
@@ -67,12 +67,12 @@ let d21 =
   21, [fill ~color:(Color.gray 0.8) triangle; draw triangle]
 
 let d22 =
-  let pen = Pen.circle ~tr:[T.scaled (f 2.)] () in
+  let pen = Pen.circle ~tr:[T.scaled two] () in
   22, [fill ~color:(Color.gray 0.8) triangle; 
        draw ~pen triangle]
 
 let d23 =
-  let pen = Pen.circle ~tr:[T.scaled (f 2.)] () in
+  let pen = Pen.circle ~tr:[T.scaled two] () in
   23, [draw ~pen triangle;
        fill ~color:(Color.gray 0.8) triangle]
 
@@ -81,7 +81,7 @@ let d60 =
   let b = p ~scale:N.cm ((-0.5), 1.) in
   let c = p ~scale:N.cm (2., 1.5) in
   let d = p ~scale:N.cm (1.5, 0.) in
-  let pen = Pen.circle ~tr:[T.scaled (f 2.)] () in
+  let pen = Pen.circle ~tr:[T.scaled two] () in
     [ draw ~pen (jointpathp [a;d] [JControls (b,c)]);
       draw ~color:(Co.gray 0.8) (pathp ~style:JLine [b;c]);
       H.draw_simple_arrow a b; H.draw_simple_arrow d c; ]
@@ -109,7 +109,7 @@ let d130 =
   let ratio = sqrt (3.28 /. 4.) in
   let angle = atan (0.2 /. 1.8) *. 360. /. deuxpi in
   let v = pt (Num.cm 0.2, Num.cm 0.) in
-  let t = [T.rotated angle; T.scaled (f ratio); T.shifted v] in
+  let t = [T.rotated angle; T.scaled (bp ratio); T.shifted v] in
   let rec apply acc = function 0 -> acc | n -> apply (transform t acc) (n-1) in
   let cmd i = 
     let p = apply sq (2*i) in
@@ -125,7 +125,7 @@ let d140 =
         (Path.scale (Num.cm (2.*.s)) fullcircle)
   in
   140, [iter 0 99 cmd;
-	draw ~pen:(P.circle ~tr:[T.scaled (f 2.)] ())
+	draw ~pen:(P.circle ~tr:[T.scaled two] ())
           (Path.scale (Num.cm 2.) fullcircle)]
 
 let d149 =
@@ -135,7 +135,7 @@ let d149 =
       if x > 0.5 then Color.rgb (dblx-.1.) 0. (2.-.dblx)
       else Color.rgb (1.-.dblx) 0. dblx in
   let pt angle = (2.*.sin(2.*.angle), 2.*.cos(3.*.angle)) in
-  let pen = P.circle ~tr:[T.scaled (f 2.)] () in
+  let pen = P.circle ~tr:[T.scaled two] () in
   let cmd i =
     let angle = step *. (float_of_int i) in
     draw  ~color:(couleur (angle /. deuxpi)) ~pen 

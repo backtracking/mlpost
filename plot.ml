@@ -39,11 +39,11 @@ let get_style = function
   | None -> fun i -> Dash.evenly, Pen.default ()
   | Some f -> f
 
-let off_pattern = fun i -> Dash.pattern [Dash.On (f 5.)]
+let off_pattern = fun i -> Dash.pattern [Dash.On (bp 5.)]
 let defpen = fun i -> Pen.default ()
 
-let get_borders sx sy h w = f 0., sx */ (num_of_int w), 
-                            sy */ (num_of_int h), f 0.
+let get_borders sx sy h w = bp 0., sx */ (num_of_int w), 
+                            sy */ (num_of_int h), bp 0.
 
 let draw_grid ?(hdash=off_pattern) ?(vdash=off_pattern) 
               ?(hpen=defpen) ?(vpen=defpen) 
@@ -67,9 +67,10 @@ let draw_grid ?(hdash=off_pattern) ?(vdash=off_pattern)
               [] 0 w) 0 h)
 
 let deflabel = Some (fun i -> Picture.tex (string_of_int i)) 
-let defticks = Some ((f 0.25), Pen.default ())
+let defticks = Some ((bp 0.25), Pen.default ())
 
-let get_corners maxu maxr = (f 0., maxu), (maxr, maxu), (f 0., f 0.), (maxr, f 0.)
+let get_corners maxu maxr = 
+  (bp 0., maxu), (maxr, maxu), (bp 0., bp 0.), (maxr, bp 0.)
 
 let draw_axes ?(hpen=Pen.default ()) ?(vpen=Pen.default ()) 
          ?(hlabel= deflabel) ?(vlabel=deflabel)
@@ -81,14 +82,14 @@ let draw_axes ?(hpen=Pen.default ()) ?(vpen=Pen.default ())
     | None -> Command.nop
     | Some labl -> 
 	Command.label ~pos:Plowleft labl 
-	  (Point.pt (num_of_int w */ sx, f 0. -/sy))
+	  (Point.pt (num_of_int w */ sx, bp 0. -/sy))
   in
   let vcaptcmd = match vcaption with 
     | None -> Command.nop
     | Some labl -> 
 	Command.label ~pos:Plowleft 
 	  (Picture.transform [Transform.rotated 90.] labl)
-	  (Point.pt (f 0. -/ sx, num_of_int h */ sy))
+	  (Point.pt (bp 0. -/ sx, num_of_int h */ sy))
   in
   let labelcmd pos p i = function
     | None -> Command.nop
@@ -137,24 +138,24 @@ let draw_func ?(pen) ?(drawing=Normal) ?(style) ?(dashed) ?(label)
   let ul, ur, ll, lr = get_corners maxu maxr in
   let box = pathn ~style:JLine ~cycle:JLine [ul;ll;lr;ur] in
   let normal acc i =
-    let x, y = (num_of_int i) */ sx, (Num.f (f i)) */ sy 
+    let x, y = (num_of_int i) */ sx, (Num.bp (f i)) */ sy 
     in 
       (x,y)::acc
   in
   let stepwise (acc,x,y) i =
-    let nx, ny = (num_of_int i) */ sx, (Num.f (f i)) */ sy in
+    let nx, ny = (num_of_int i) */ sx, (Num.bp (f i)) */ sy in
       (nx,ny) :: (nx,y) :: acc, nx, ny
   in
   let graph = 
     match drawing with
     | Normal -> Misc.fold_from_to normal [] 0 w
     | Stepwise -> 
-        let p, _,_ = Misc.fold_from_to stepwise ([],Num.f 0.,Num.f 0.) 0 w in p
+        let p, _,_ = Misc.fold_from_to stepwise ([],Num.bp 0.,Num.bp 0.) 0 w in p
   in
   let pic = Picture.clip 
     (Picture.make (Command.draw ?pen ?dashed (pathn ?style graph))) box in 
     match label with 
       | None -> draw_pic pic 
       | Some (lab, pos, i) -> 
-	  let pt = Point.pt (num_of_int i */ sx, (Num.f (f i)) */ sy) in
+	  let pt = Point.pt (num_of_int i */ sx, (Num.bp (f i)) */ sy) in
 	    seq [Command.label ~pos lab pt; draw_pic pic]

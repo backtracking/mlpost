@@ -13,7 +13,7 @@ let proj x y z =
   mag *. float (x - y) *. cos alpha, 
   mag *. (float (x + y) *. sin alpha *. sin beta +. float z *. cos beta)
 
-let pen = Pen.default ~tr:([Transform.scaled (f 2.5)]) ()
+let pen = Pen.default ~tr:([Transform.scaled (bp 2.5)]) ()
 
 let square color p i j =
   let pt i j = let x,y = p i j in Point.pt (bp x, bp y) in

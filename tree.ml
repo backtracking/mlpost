@@ -74,7 +74,7 @@ let arc astyle estyle ?stroke ?pen b1 b2 =
       | Straight -> boxdraw ~style:JLine b1 b2
       | Curve -> 
 	  let p1, p2 = Box.ctr b1, Box.ctr b2 in
-	  let corner = Point.pt (x2-/(x2-/x1)//(f 4.),(y1+/y2)//(f 2.)) in
+	  let corner = Point.pt (x2-/(x2-/x1) /./ 4.,(y1+/y2) /./ 2.) in
 	  let p = pathk ~style:JCurve
 	    [NoDir, p1, Vec (Point.sub corner p1); 
 	     NoDir, corner, NoDir; 
@@ -92,7 +92,7 @@ let arc astyle estyle ?stroke ?pen b1 b2 =
 	  in
 	    linedraw parrow
       | HalfSquare -> 
-	  let m = (y1+/y2)//(f 2.) in
+	  let m = (y1+/y2) /./ 2. in
 	  let corner1, corner2 = Point.pt (x1,m), Point.pt (x2,m) in
 	  let p = pathp ~style:JLine 
 	    [Box.ctr b1; corner1; corner2; Box.ctr b2] in
@@ -106,7 +106,7 @@ module T = Pos.Tree(Node)
 let draw 
     ?(arrow_style=Directed) ?(edge_style=Straight)
     ?(boxed=true) ?fill ?stroke ?pen
-    ?(ls=f 12.) ?(cs=f 5.) t =
+    ?(ls=Num.bp 12.) ?(cs=Num.bp 5.) t =
   let t = T.place ~dx:cs ~dy:ls t in
   let rec draw (N (n, l)) = 
     let fill = match n.fill with None -> fill | Some _ -> n.fill in

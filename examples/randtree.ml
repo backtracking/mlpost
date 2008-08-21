@@ -10,7 +10,7 @@ let fig =
   let thinning =  0.7 in
   let shortening = 0.8 in
   let drawit a b thickness =
-    let pen = Pen.circle ~tr:[Transform.scaled (f thickness)] () in
+    let pen = Pen.circle ~tr:[Transform.scaled (bp thickness)] () in
     Command.draw ~pen (pathp [a ; b])
   in
   let randrotate a b neg =
@@ -28,5 +28,5 @@ let fig =
       let acc = tree b c (n-1) newsize acc in
           tree b d (n-1) newsize acc
   in
-    tree (p (0.,0.)) (pt (f 0., Num.cm 1.)) 10  2. []
+    tree (p (0.,0.)) (pt (bp 0., Num.cm 1.)) 10  2. []
 

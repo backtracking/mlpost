@@ -15,6 +15,7 @@
 (**************************************************************************)
 
 open Command
+open Num
 open Point
 open Path
 open Num.Infix
@@ -23,9 +24,6 @@ open Types
 let pi = 4. *. (atan 1.)
 let kappa = F (4. *. (sqrt 2. -. 1.) /. 3.)
 let mkappa = F (1. -. (4. *. (sqrt 2. -. 1.) /. 3.))
-
-let zero = Num.zero
-let neg f = zero -/ f
 
 type borders = { n : Point.t; s : Point.t ; w : Point.t ; e : Point.t }
 
@@ -44,9 +42,9 @@ let build_border w h =
     e = pt (w,zero); w = pt (neg w, zero) }
 
 let rounded_rect_path width height rx ry =
-    let hw,hh = width//(F 2.),height//(F 2.) in
-    let rx = Num.maxn zero (Num.minn rx hw) in
-    let ry = Num.maxn zero (Num.minn ry hh) in
+    let hw,hh = width/./ 2.,height/./ 2. in
+    let rx = maxn zero (minn rx hw) in
+    let ry = maxn zero (minn ry hh) in
       (*     let ul, ur, br, bl =  *)
       (*       pt (-.hw, hh), pt (hw, hh),  *)
       (*       pt (hw, -.hh), pt (-.hw, -.hh) in *)
@@ -107,10 +105,10 @@ let arc_ellipse_path ?(close=false) rx ry theta1 theta2 =
 *)
 
 let rectangle_path width height =
-  let w = width // Num.two in
-  let h = height // Num.two in
-  let mw = Num.zero -/ w in
-  let mh = Num.zero -/ h in
+  let w = width /./ 2. in
+  let h = height /./ 2. in
+  let mw = neg w in
+  let mh = neg h in
   let path = 
     Path.pathn ~cycle:JLine ~style:JLine [ w, mh; w, h; mw, h; mw, mh]
   in

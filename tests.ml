@@ -29,7 +29,7 @@ let shift x y = transform [Transform.shifted (x ++ y)]
 let d1 = 
   let a = Box.circle (0. ++ 0.) (Picture.tex "$\\sqrt2$") in
   let b = Box.rect (2. ++ 0.) (Picture.tex "$\\pi$") in
-  let pen = Pen.default ~tr:[Transform.scaled (f 3.)] () in
+  let pen = Pen.default ~tr:[Transform.scaled (bp 3.)] () in
   [ Box.draw a;
     Box.draw ~fill:Color.purple b;
     draw
@@ -81,7 +81,7 @@ let proval =
 
 let cheno011 =
   let p = path ~cycle:JCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)] in
-  let pen = Pen.circle ~tr:[T.scaled (f 1.5)] () in
+  let pen = Pen.circle ~tr:[T.scaled (bp 1.5)] () in
   [Command.draw p;
    seq (List.map
 	   (fun (pos, l, i) -> 
@@ -120,7 +120,7 @@ let d5 =
 
 let d7 =
   let pic = 
-    Picture.transform [T.scaled (f 4.)] (Picture.tex "bound this!") in
+    Picture.transform [T.scaled (bp 4.)] (Picture.tex "bound this!") in
   let pbox = pathp ~style:JLine ~cycle:JLine
     [Picture.ulcorner pic; Picture.urcorner pic; 
      Picture.lrcorner pic; Picture.llcorner pic] in
@@ -149,7 +149,7 @@ let rec random_tree2 = function
 let d6 =
   [Tree.draw ~cs:(mm 0.2) (random_tree2 10)]
 
-let half pic = Picture.transform [Transform.scaled (f 0.5)] pic
+let half pic = Picture.transform [Transform.scaled (bp 0.5)] pic
 
 let rec right_split n pic = 
   if n <= 0 then pic
@@ -187,9 +187,9 @@ let d14 =
   let vdash _ = Dash.scaled 2. Dash.evenly in
   let hvpen i = 
     if i mod 5 = 0 then
-      Pen.default ~tr:([Transform.scaled (f 2.5)]) ()
+      Pen.default ~tr:([Transform.scaled (Num.bp 2.5)]) ()
     else Pen.default () in
-  let pen = Pen.default ~tr:[Transform.scaled (f 4.)] () in
+  let pen = Pen.default ~tr:[Transform.scaled (Num.bp 4.)] () in
      [draw_grid ~hdash ~vdash ~hpen:hvpen ~vpen:hvpen sk;
        draw_func ~pen f2 sk;
        draw_func ~pen f3 sk
@@ -237,12 +237,12 @@ let f3 i =
   float_of_int ((i+3)/5)
 
 let flab i = (Picture.transform
-		[Transform.scaled (f 1.7)]
+		[Transform.scaled (bp 1.7)]
 		(Picture.tex (Printf.sprintf "$f_{\\omega_%d}$" i)),
 	      Command.Ptop, 19)
 	
 let instants = 
-  let pen = Pen.default ~tr:[Transform.scaled (f 2.5)] () in
+  let pen = Pen.default ~tr:[Transform.scaled (bp 2.5)] () in
   let base = 
     Command.draw ~pen (Path.path ~style:JLine [(0.,-65.); (280.,-65.)]) in
   let tick i = 
@@ -253,18 +253,18 @@ let instants =
   in
     Command.seq 
       [base; Command.iter 0 20 tick; 
-       Command.label (Picture.transform [Transform.scaled (f 2.)]
-			(Picture.tex "$\\omega_1$")) (pt (f (-20.), f (-55.)))]
+       Command.label (Picture.transform [Transform.scaled two]
+			(Picture.tex "$\\omega_1$")) (p (-20., -55.))]
 
 let florence =
-  let sk = mk_skeleton 20 14 (f 14.) (f 20.) in
-  let pen = Pen.default ~tr:[Transform.scaled (f 4.)] () in
-  let pen2 = Pen.default ~tr:[Transform.scaled (f 3.)] () in
+  let sk = mk_skeleton 20 14 (bp 14.) (bp 20.) in
+  let pen = Pen.default ~tr:[Transform.scaled (bp 4.)] () in
+  let pen2 = Pen.default ~tr:[Transform.scaled (bp 3.)] () in
   let dash _ = Dash.scaled 0.5 Dash.withdots in
   let dash2 = Dash.scaled 0.66 Dash.withdots in
   let dash3 = Dash.scaled 0.9 Dash.evenly in
   let vcaption, hcaption = 
-    let tr = [Transform.scaled (f 1.5)] in
+    let tr = [Transform.scaled (bp 1.5)] in
       Picture.transform tr (Picture.tex "\\textsf{Number of ones}"),
     Picture.transform tr (Picture.tex "\\textsf{Instants}") in
   let plot = draw_func ~drawing:Stepwise ~style:JLine in
@@ -303,16 +303,16 @@ let d16 =
 let shapes1 =
   List.fold_left Picture.below
     (Picture.tex "Shapes 1 !")
-    [Shapes.rectangle (f 10.) (f 20.);
-     Shapes.rectangle ~stroke:Color.purple ~thickness:4. (f 35.) (f 15.);
+    [Shapes.rectangle (bp 10.) (bp 20.);
+     Shapes.rectangle ~stroke:Color.purple ~thickness:4. (bp 35.) (bp 15.);
      Shapes.rectangle 
-       ~fill:Color.blue ~stroke:Color.orange ~thickness:4. (f 15.) (f 35.);
-     Shapes.rounded_rect (f 55.) (f 25.) (f 10.) (f 10.);
-     Shapes.rounded_rect ~stroke:Color.green (f 55.) (f 25.) (f 20.) (f 5.);
+       ~fill:Color.blue ~stroke:Color.orange ~thickness:4. (bp 15.) (bp 35.);
+     Shapes.rounded_rect (bp 55.) (bp 25.) (bp 10.) (bp 10.);
+     Shapes.rounded_rect ~stroke:Color.green (bp 55.) (bp 25.) (bp 20.) (bp 5.);
 (*      Shapes.rounded_rect ~fill:Color.black ~stroke:Color.red  *)
 (*        ~thickness:2. 70. 25. 12.5 12.5; *)
      Shapes.rounded_rect ~fill:Color.black ~stroke:Color.red 
-       ~thickness:2. (f 70.) (f 25.) (f 14.) (f 14.);
+       ~thickness:2. (bp 70.) (bp 25.) (bp 14.) (bp 14.);
     ]
   
 let shapes2 =
@@ -326,9 +326,9 @@ let shapes2 =
       Shapes.arc_ellipse 
 	~fill:Color.black ~stroke:Color.red (f 30.) (f 10.) 0. 1.7;
 *)
-      Shapes.ellipse (f 10.) (f 10.);
-      Shapes.ellipse ~stroke:Color.red (f 30.) (f 10.);
-      Shapes.ellipse ~fill:Color.black ~stroke:Color.red (f 30.) (f 10.);
+      Shapes.ellipse (bp 10.) (bp 10.);
+      Shapes.ellipse ~stroke:Color.red (bp 30.) (bp 10.);
+      Shapes.ellipse ~fill:Color.black ~stroke:Color.red (bp 30.) (bp 10.);
     ]
 
 let yannick style =
@@ -448,7 +448,7 @@ let mybresenham =
   let d = 10. in
 (*   let pen = Pen.default ~tr:([Transform.scaled (f 1.5)]) () in *)
   let cell i j = 
-    let sq = Path.scale (f d) unitsquare in
+    let sq = Path.scale (bp d) unitsquare in
     let color =
       if j = bresenham_data.(i) then 
 	Color.color "OrangeRed"

@@ -28,7 +28,7 @@ let bresenham_data =
 
 (* drawing *)
 
-let pen = Pen.default ~tr:([Transform.scaled (f 1.5)]) ()
+let pen = Pen.default ~tr:([Transform.scaled (bp 1.5)]) ()
 
 let grid w h d f =
   let p i j = bp (float i *. d), bp (float j *. d) in
@@ -43,7 +43,7 @@ let fig =
   let pic q i j = draw_pic (Picture.center (Point.pt (p2 i j)) q) in
   let cell i j = 
     if j = bresenham_data.(i) then
-      let sq = Path.scale (f d) unitsquare in
+      let sq = Path.scale (bp d) unitsquare in
       let sq = shift (Point.pt (p i j)) sq in
       fill ~color:Color.red sq
     else

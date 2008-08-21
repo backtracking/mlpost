@@ -80,7 +80,7 @@ struct
 
   let horizontal ?(dx=Num.zero) ?(pos=Pcenter) pl =
     let hmax = Num.fold_max P.height Num.zero pl in
-    let hmax_2 = hmax // Num.two in
+    let hmax_2 = hmax /./ 2. in
     let rec make_new acc x = function
       | [] -> List.rev acc, x -/ dx
       | p :: pl ->
@@ -88,21 +88,21 @@ struct
           let y = 
             match pos with
               | Pcenter -> hmax_2
-              | Ptop -> hmax -/ hp // Num.two
-              | Pbot -> hp // Num.two
+              | Ptop -> hmax -/ hp /./ 2.
+              | Pbot -> hp /./ 2.
               | _ -> failwith "alignment not supported"
           in
-          let c = Point.pt (x +/ wp // Num.two, y) in 
+          let c = Point.pt (x +/ wp /./ 2., y) in 
           let b = P.center c p in
             make_new (b::acc) (x +/ wp +/ dx) pl
     in
     let l,x = make_new [] Num.zero pl in
-    let mycenter = Point.pt (x // Num.two, hmax_2) in     
+    let mycenter = Point.pt (x /./ 2., hmax_2) in     
       { v = l; width = x; height = hmax; center = mycenter }
 
   let vertical ?(dy=Num.zero) ?(pos=Pcenter) pl =
     let wmax = Num.fold_max P.width Num.zero pl in
-    let wmax_2 = wmax // Num.two in
+    let wmax_2 = wmax /./ 2. in
     let rec make_new acc y = function
       | [] -> List.rev acc, y +/ dy
       | p :: pl ->
@@ -110,16 +110,16 @@ struct
           let x = 
             match pos with
               | Pcenter -> wmax_2
-              | Pright -> wmax -/ wp // Num.two
-              | Pleft ->  wp // Num.two
+              | Pright -> wmax -/ wp /./ 2.
+              | Pleft ->  wp /./ 2.
               | _ -> failwith "alignment not supported"
           in
-          let c = Point.pt (x, y -/ hp // Num.two) in 
+          let c = Point.pt (x, y -/ hp /./ 2.) in 
           let b = P.center c p in
             make_new (b::acc) (y -/ hp -/ dy) pl
     in
     let l,y = make_new [] Num.zero pl in
-    let mycenter = Point.pt (wmax_2, y // Num.two) in
+    let mycenter = Point.pt (wmax_2, y /./ 2.) in
     { v = l; width = wmax; height = y; center = mycenter }
 
   let tabular ?(dx=Num.zero) ?(dy=Num.zero) ?(pos=Pcenter) pll =
@@ -142,7 +142,7 @@ struct
 (*             let wp,hp = P.width p, P.height p in *)
 (* 	    let dx' = (dx +/ wrow -/ wp) // Num.two in *)
 (* 	    let dy = h_2 -/ hp // Num.two in *)
-	    let c = Point.pt (x +/ (dx +/ wrow) // Num.two, y -/ h_2) in
+	    let c = Point.pt (x +/ (dx +/ wrow) /./ 2., y -/ h_2) in
 	    let b = P.center c p in
 (*  	    let b = rect ~dx:dx' ~dy c p in *)
 	      make_rows (b::acc) wl (x +/ wrow +/ dx) y h_2 ql
@@ -153,9 +153,9 @@ struct
 	| [], _ | _, [] -> raise (Invalid_argument "Lists have different sizes")
 	| row :: qll, hrow :: hl ->
 	    let brow, w =
-	      make_rows [] wmaxl Num.zero y ((hrow +/ dy) // Num.two) row
+	      make_rows [] wmaxl Num.zero y ((hrow +/ dy) /./ 2.) row
 	    in
-	    let mycenter = Point.pt (w // Num.two, hrow // Num.two) in
+	    let mycenter = Point.pt (w /./ 2., hrow /./ 2.) in
 	      {v = brow; width = w; height = hrow; center = mycenter}::
 		(make_array hl (y -/ hrow -/ dy) qll)
     in

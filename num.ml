@@ -18,11 +18,10 @@ open Types
 
 type t = num
 
-let f x = F x
 
-let zero = f 0.
-let one = f 1.
-let two = f 2.
+let zero = F 0.
+let one = F 1.
+let two = F 2.
 
 let num_of_int i = F (float_of_int i)
 
@@ -62,6 +61,8 @@ let divn x y =
   | F f1, F f2 -> F (f1 /. f2)
   | _, _ -> NDiv (x,y)
 
+let divf x f = divn x (F f)
+
 let maxn x y =
   match x, y with
     | F f1, F f2 -> F (max f1 f2)
@@ -97,6 +98,11 @@ module Infix = struct
   let (+/)  = addn
   let (-/)  = subn
   let ( */)  = multn
-  let ( *./)  = multf
   let (//)  = divn
+  let ( *./)  = multf
+  let (/./)  = divf
 end
+
+open Infix
+
+let neg a = zero -/ a

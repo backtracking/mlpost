@@ -146,8 +146,8 @@ let draw11 =
 let draw17 =
   let a, b = Num.inch (0.7), Num.inch (0.5) in
   let z0 = p (0.,0.) in
-  let z1 = pt (a, f 0.) and z3 = pt (f 0. -/ a, f 0.) in
-  let z2 = pt (f 0., b) and z4 = pt (f 0., f 0. -/ b) in
+  let z1 = pt (a, bp 0.) and z3 = pt (neg a, bp 0.) in
+  let z2 = pt (bp 0., b) and z4 = pt (bp 0., neg a) in
     17, [draw (pathp ~cycle:JCurve [z1;z2;z3;z4]);
 	 draw (pathp ~style:JLine [z1; z0; z2]);
 	 label ~pos:Ptop (tex "a") (segment 0.5 z0 z1);
@@ -157,31 +157,31 @@ let draw17 =
 
 let draw18 =
   let u = Num.cm in
-  let pen = Pen.circle ~tr:[Transform.scaled (f 1.)] () in 
+  let pen = Pen.circle ~tr:[Transform.scaled one] () in 
   let rec pg = function
     | 0 -> start (knot ~r:(Vec up) ~scale:u (0.,0.))
     | n -> let f = (float_of_int n /. 2.) in 
 	concat ~style:JCurve (pg (n-1)) (knot ~scale:u (f, sqrt f)) in
-    18, [draw (pathn ~style:JLine [(f 0.,u 2.); (f 0.,f 0.); (u 4.,f 0.)]);
+    18, [draw (pathn ~style:JLine [(zero,u 2.); (zero,zero); (u 4.,zero)]);
 	 draw ~pen (pg 8);
 	 label ~pos:Plowright (tex "$ \\sqrt x$") (pt (u 3., u (sqrt 3.)));
-	 label ~pos:Pbot (tex "$x$") (pt (u 2., f 0.));
-	 label ~pos:Plowleft (tex "$y$") (pt (f 0., u 1.))]
+	 label ~pos:Pbot (tex "$x$") (pt (u 2., zero));
+	 label ~pos:Plowleft (tex "$y$") (pt (zero, u 1.))]
 	 
 let draw19 =
   let ux, uy = Num.inch 0.01, Num.inch 0.6 in
-  let dux, duy = f 120. */ ux, f 4. */ uy in
-  let pen = Pen.circle ~tr:[Transform.scaled (f 1.)] () in 
+  let dux, duy = bp 120. */ ux, bp 4. */ uy in
+  let pen = Pen.circle ~tr:[Transform.scaled one] () in 
   let axey = Picture.transform [Transform.rotated 90.] (tex "axe $y$") in
   let rec pg = function
-    | 0 -> start (knotn ~r:(Vec right) (f 0.,uy))
+    | 0 -> start (knotn ~r:(Vec right) (zero,uy))
     | n -> let k = (float_of_int n)*.15. in 
 	concat ~style:JCurve (pg (n-1)) 
-	  (knotn (f k */ ux, f 2. // (f 1.+/ f (cos (Num.deg2rad k)))*/uy)) in
-    19, [draw (pathn ~style:JLine [(f 0.,duy); (f 0.,f 0.); (dux,f 0.)]);
+	  (knotn (bp k */ ux, two // (one +/ bp (cos (Num.deg2rad k)))*/uy)) in
+    19, [draw (pathn ~style:JLine [(zero,duy); (zero,zero); (dux,zero)]);
 	 draw ~pen (pg 8);
-	 label ~pos:Pbot (tex "axe $x$") (pt (f 60.*/ux, f 0.));
-	 label ~pos:Pleft axey (pt (f 0., f 2.*/uy));
+	 label ~pos:Pbot (tex "axe $x$") (pt (bp 60.*/ux, zero));
+	 label ~pos:Pleft axey (pt (zero, bp 2.*/uy));
 	 label ~pos:Pleft (tex "$\\displaystyle y={2\\over1+\\cos x}$")
 	   (pt (dux, duy))]
 
@@ -206,9 +206,9 @@ let draw21 =
 let draw22 =
   let a = Path.scale (cm 2.) fullcircle in
   let aa = Path.scale (cm 2.) halfcircle in
-  let b = Path.shift (pt (f 0., Num.cm 1.)) a in
-  let pa = make (label (tex "$A$") (pt (f 0., Num.cm (-0.5)))) in
-  let pb= make (label (tex "$B$") (pt (f 0., Num.cm 1.5))) in  
+  let b = Path.shift (pt (zero, Num.cm 1.)) a in
+  let pa = make (label (tex "$A$") (pt (zero, Num.cm (-0.5)))) in
+  let pb= make (label (tex "$B$") (pt (zero, Num.cm 1.5))) in  
   let ab = build_cycle [aa; b] in
   let pic = make
     (seq [fill ~color:(Color.gray 0.7) a;
@@ -226,7 +226,7 @@ let draw40 =
   let k3 = knot ~scale:Num.pt ~l:(Curl 0.) (10.,0.) in
   let p1 = pathk [k1;k2;k3] in
   let p2 = append p1 (Path.shift (p ~scale:Num.pt (10.,0.)) 
-                       (Path.yscale (f (-1.)) p1)) in
+                       (Path.yscale (neg one) p1)) in
   let p2 = 
     Misc.fold_from_to
       (fun acc i -> 

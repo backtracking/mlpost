@@ -27,4 +27,4 @@ let edges =
   done
 
 let graph = draw ~fill:(Color.gray 0.8) ~style:(Circle (Num.bp 6.)) diag
-let fig = [draw_pic (Picture.transform [Transform.scaled (f 0.5)] (Picture.make graph))]
+let fig = [draw_pic (Picture.transform [Transform.scaled (bp 0.5)] (Picture.make graph))]

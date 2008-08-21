@@ -29,7 +29,6 @@ module rec Num : sig
   (** The base unit in Mlpost are bp. The following functions 
       permit to specify values in other common units *)
 
-  val f : float -> t
   val bp : float -> t
   val pt : float -> t
   val cm : float -> t
@@ -46,6 +45,8 @@ module rec Num : sig
   val subn : t -> t -> t
   val multn : t -> t -> t
   val multf : float -> t -> t
+  val divf : t -> float -> t
+  val neg : t -> t
   val divn : t -> t -> t
   val maxn : t -> t -> t
   val minn : t -> t -> t
@@ -57,8 +58,9 @@ module rec Num : sig
     val (+/) : t -> t -> t
     val (-/) : t -> t -> t
     val ( */) : t -> t -> t
-    val ( *./): float -> t -> t
     val (//) : t -> t -> t
+    val ( *./): float -> t -> t
+    val (/./): t -> float -> t
   end
 
   (** {2 Useful constants and functions} *)

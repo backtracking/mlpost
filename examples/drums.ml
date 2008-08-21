@@ -5,7 +5,7 @@ open Path
 open Num
 open Num.Infix
 
-let scale k = f 2.0 */ Num.mm k
+let scale k = two */ Num.mm k
 
 let drawover p = seq [fill ~color:Color.white p; draw p]
 let filldraw p c = seq [fill ~color:c p; draw p]
