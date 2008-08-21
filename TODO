@@ -1,3 +1,14 @@
+
+BUGS
+==========
+* un "faux bug" : 
+  la sortie standard metapost "written output.1" a l'air de venir de mlpost
+  solution: supprimer la sortie standard pour mpost
+* compilation :
+  comment faire quand l'utilisateur ce sert d'autres fichiers ml, cmo, cma 
+  etc ...
+
+
 * ranger le module Helpers
 
 * intersection entre deux segments, chemins, ...
@@ -19,6 +30,13 @@ Module des Plots
       lineaires par morceaux
       continues
       debut / fin
+
+
+
+
+
+* de la transparence
+  http://wwwmathlabo.univ-poitiers.fr/~phan/metalpha.html
     
 
 -------------------------------------------------------------------------------
