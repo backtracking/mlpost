@@ -173,3 +173,7 @@ let arc_ellipse ?fill ?stroke ?thickness ?(close=false) rx ry theta1 theta2 =
     draw_func ?fill ?stroke ?thickness path
 *)
 
+let north s = s.b.n
+let south s = s.b.s
+let west  s = s.b.w
+let east  s = s.b.e

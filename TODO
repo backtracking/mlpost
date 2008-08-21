@@ -4,7 +4,6 @@
 * compilation
   - optimisation des inefficacités les plus évidentes 
       (draw_pic (make_pic cmd)) -> cmd ...
-  - common subexpressions pour les points, les nums ?
 
 * accelerer la compilation des images dans examples/
 * se décider où on met nos exemples

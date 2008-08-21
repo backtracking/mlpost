@@ -15,125 +15,116 @@
 (**************************************************************************)
 
 open Types
-open Picture
+open Num
 open Point
 
 open Num.Infix
 
-type t = { c : point ; bpath : Shapes.t; pic : picture; height : num ; width : num }
-type repr = t
+open Pos
 
 let margin = Num.bp 2.
 
-open Shapes
+module Make (P  : POS) =
+struct
+  (* A functor to construct boxes
+   * It does nothing more than draw a Shape of the right size around a
+   * positionable object. In particular, it does not reposition the object *)
+  type 'a box = { p : 'a ; bs : Shapes.t ; c : Point.t ; 
+             height : Num.t ; width : Num.t }
+  type t = P.t box
+  type repr = P.repr box
+  let v x = { x with p = P.v x.p}
 
-let rect_path pic dx dy = 
-  (* construct rectangular path and return path + width + height *)
-  let width = Picture.width pic +/ Num.two */ dx in
-  let height = Picture.height pic +/ Num.two */ dy in
-   Shapes.rectangle_path width height, width, height
+  let rect ?(dx=margin) ?(dy=margin) p = 
+    let c = P.ctr p in
+    let w = P.width p +/ 2. *./ dx in
+    let h = P.height p +/ 2. *./ dy in
+    let s = Shapes.shift c (Shapes.rectangle_path w h) in
+    { c = c; p = p;  bs = s ; height = h; width = w }
 
-let base_rect ?(dx=margin) ?(dy=margin) pic = 
-  let c = Picture.ctr pic in
-  let path, w, h = rect_path pic dx dy in
-  { c = c; bpath = Shapes.shift c path ; pic = pic ; 
-    height = h; width = w }
+  let circle ?(dx=margin) ?(dy=margin) p =
+    let r = Point.length (add (pt (P.width p, P.height p)) (pt (dx,dy))) in
+    let c = P.ctr p in
+    let bpath = 
+      Shapes.shift c 
+        { Shapes.p= Path.scale r Path.fullcircle;
+          b = let hr = 0.5 *./ r in Shapes.build_border hr hr }
+    in
+    { c = c; p = p; bs = bpath; height = r; width = r; }
 
-let rect ?(dx=margin) ?(dy=margin) c p = 
-  let pic = Picture.center c p in
-  let path,w, h = rect_path pic dx dy in
-    { c = c; bpath = Shapes.shift c path; 
-      pic = pic; width = w; height = h}
+  let ellipse ?(dx=zero) ?(dy=zero) p =
+    let c = P.ctr p in 
+    let rx = P.width p +/ dx in
+    let ry = P.height p +/ dy in
+      { c = c; p = p; bs = Shapes.shift c (Shapes.full_ellipse_path rx ry); 
+        height = 2. *./ ry ; width = 2. *./ rx }
 
-
-let circle ?(dx=margin) ?(dy=margin) c pic =
-  let pic = center c pic in
-  let r = length (add (pt (dx,dy)) (sub (urcorner pic) (llcorner pic))) in
-  { c = c; pic = pic ; 
-    height = r; width = r;
-    bpath = Shapes.shift c { p= Path.scale r Path.fullcircle;
-    b = let hr = 0.5 *./ r in Shapes.build_border hr hr }
-  }
-
-let ellipse ?(dx=F 0.) ?(dy=F 0.) c pic =
-  let pic = center c pic in 
-  let rx = length (sub (urcorner pic) (ulcorner pic)) in
-  let ry = length (sub (urcorner pic) (lrcorner pic)) in
-  let rx = rx +/ dx in
-  let ry = ry +/ dy in
-    { c = c; pic = pic; bpath = 
-      Shapes.shift c (Shapes.full_ellipse_path rx ry); 
-      height = ry */ Num.two ; width = rx */ Num.two }
-
-let round_rect ?(dx=margin) ?(dy=margin) c p =
-  let pic = center c p in
-  let dx = length (sub (urcorner pic) (ulcorner pic)) +/ dx in
-  let dy = length (sub (urcorner pic) (lrcorner pic)) +/ dy in
-  let rx = min (dx /./ 10.) (dy /./ 10.) in
-  { c = c; 
-    bpath = Shapes.shift c (Shapes.rounded_rect_path dx dy rx rx); 
-    pic = pic; width = dx; height = dy }
-            
-let patatoid ?(dx=2. *./ margin) ?(dy=2. *./ margin) c p =
-  (* size is wrong for patatoids *)
-  let pic = center c p in
-  let w = Picture.width p in
-  let h = Picture.height p in
-  let path = Shapes.patatoid (w +/ 2. *./ dx) (h +/ 2. *./ dy) in
-  let dummypic = Picture.make (Command.draw path.p) in
-    { c = c; pic = pic; width = Picture.width dummypic; 
-      height = Picture.height dummypic; bpath =  path}
+  let round_rect ?(dx=margin) ?(dy=margin) p =
+    let c = P.ctr p in
+    let dx = P.width p +/ dx in
+    let dy = P.height p +/ dy in
+    let rx = min (dx /./ 10.) (dy /./ 10.) in
+    { c = c; p = p; bs = Shapes.shift c (Shapes.rounded_rect_path dx dy rx rx);
+      width = dx; height = dy }
+              
+  let patatoid ?(dx=2. *./ margin) ?(dy=2. *./ margin) p =
+    let c = P.ctr p in
+    let w = P.width p in
+    let h = P.height p in
+    let path = Shapes.patatoid (w +/ 2. *./ dx) (h +/ 2. *./ dy) in
+    let dummypic = Picture.make (Command.draw path.Shapes.p) in
+    { c = c; p = p; bs = Shapes.shift c path; width = Picture.width dummypic; 
+      height = Picture.height dummypic}
 
 
-let center {c = c} = c
+  let bshape b = b.bs
+  let bpath b = Shapes.path b.bs
 
-let build_point a b = Point.pt (xpart a, ypart b)
-let north_west x = build_point x.bpath.b.w x.bpath.b.n
-let north_east x = build_point x.bpath.b.e x.bpath.b.n
-let south_west x = build_point x.bpath.b.w x.bpath.b.s
-let south_east x = build_point x.bpath.b.e x.bpath.b.s
-let north x = x.bpath.b.n
-let south x = x.bpath.b.s
-let west  x = x.bpath.b.w
-let east  x = x.bpath.b.e
-(*
-let north_west {pic = pic} = ulcorner pic
-let north_east {pic = pic} = urcorner pic
-let south_west {pic = pic} = llcorner pic
-let south_east {pic = pic} = lrcorner pic
+  let north x = Shapes.north (bshape x)
+  let south x = Shapes.south (bshape x)
+  let west  x = Shapes.west (bshape x)
+  let east  x = Shapes.east (bshape x)
 
-let north b = segment 0.5 (north_west b) (north_east b)
-  
-let south b = segment 0.5 (south_west b) (south_east b) 
-let west  b = segment 0.5 (north_west b) (north_west b) 
-let east  b = segment 0.5 (south_east b) (north_east b) 
-*)
-
-let bpath {bpath = p} = p.p
-
-let picture p = p.pic
-
-(* POS compliance *)
+  let build_point a b = Point.pt (xpart a, ypart b)
+  let north_west x = build_point (west x) (north x)
+  let north_east x = build_point (east x) (north x)
+  let south_west x = build_point (west x) (south x)
+  let south_east x = build_point (east x) (south x)
 
 
-let v b = b
+  (* POS compliance *)
 
-let width b = b.width
+  let width b = b.width
 
-let height b = b.height
+  let height b = b.height
 
-let ctr b = b.c
+  let ctr b = b.c
 
-let shift p b = { b with c = Point.shift p b.c; 
-                  pic = Picture.shift p b.pic;
-		  bpath = Shapes.shift p b.bpath }
+  let shift pt x = 
+    { x with p = P.shift pt x.p; bs = Shapes.shift pt x.bs;
+      c = Point.shift pt x.c }
 
-let center pt x = shift (Point.sub pt (ctr x)) (v x)
+  let center pt x = shift (Point.sub pt (ctr x)) (v x)
 
-(* Box alignment *)
+end
+
+module PicBox = Make (Picture)
+include PicBox
+
+(*define the "centering" box construction fonctions *)
+let base_rect = rect
+let rect ?dx ?dy c p = center c (rect ?dx ?dy p)
+let circle ?dx ?dy c p = center c (circle ?dx ?dy p)
+let round_rect ?dx ?dy c p = center c (round_rect ?dx ?dy p)
+let ellipse ?dx ?dy c p = center c (ellipse ?dx ?dy p)
+let patatoid ?dx ?dy c p = center c (patatoid ?dx ?dy p)
+
+let picture b = b.PicBox.p
+
 
 open Num.Infix
 
+(* Box alignment *)
 module PicAlign = Pos.List_ (Picture)
 (* These functions should rather be called 
  * "align_block" or something like that *)
@@ -162,11 +153,11 @@ let halign_to_box ?(dx=margin) ?(dy=margin) ?(spacing=Num.zero) ?pos pl =
 open Command 
 
 let draw ?fill ?(boxed=true) b = 
-  let path_cmd = if boxed then draw b.bpath.p else nop in
+  let path_cmd = if boxed then draw (bpath b) else nop in
   let box_cmd =
     match fill with
-      | None -> draw_pic b.pic
-      | Some color -> Command.fill ~color b.bpath.p ++ draw_pic b.pic
+      | None -> draw_pic (picture b)
+      | Some color -> Command.fill ~color (bpath b) ++ draw_pic (picture b)
   in
     path_cmd ++ box_cmd
 
