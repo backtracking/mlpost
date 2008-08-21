@@ -989,9 +989,6 @@ module Shapes : sig
 (** Various Basic Geometric Shapes *)
 
   type t
-  type repr = t
-
-  val v : t -> repr
   val path : t -> Path.t
 
   val rounded_rect_path : Num.t -> Num.t -> Num.t -> Num.t -> t
@@ -1055,6 +1052,15 @@ module Shapes : sig
 	the origin by straight lines, thus closing path. If [fill] is provided,
 	then [close] will be true by default ; otherwise it is false.
     *)
+
+  (* POS compliance *)
+  type repr = t
+  val v : t -> repr
+  val ctr : t -> Point.t
+  val height : t -> Num.t
+  val width : t -> Num.t
+  val shift : Point.t -> repr -> repr
+  val center : Point.t -> t -> repr
 
 end
 

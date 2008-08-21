@@ -29,53 +29,39 @@ struct
   (* A functor to construct boxes
    * It does nothing more than draw a Shape of the right size around a
    * positionable object. In particular, it does not reposition the object *)
-  type 'a box = { p : 'a ; bs : Shapes.t ; c : Point.t ; 
-             height : Num.t ; width : Num.t }
+  type 'a box = { p : 'a ; bs : Shapes.t }
   type t = P.t box
   type repr = P.repr box
   let v x = { x with p = P.v x.p}
 
   let rect ?(dx=margin) ?(dy=margin) p = 
-    let c = P.ctr p in
     let w = P.width p +/ 2. *./ dx in
     let h = P.height p +/ 2. *./ dy in
-    let s = Shapes.shift c (Shapes.rectangle_path w h) in
-    { c = c; p = p;  bs = s ; height = h; width = w }
+    let s = Shapes.shift (P.ctr p) (Shapes.rectangle_path w h) in
+    { p = p;  bs = s }
 
   let circle ?(dx=margin) ?(dy=margin) p =
-    let r = Point.length (add (pt (P.width p, P.height p)) (pt (dx,dy))) in
-    let c = P.ctr p in
-    let bpath = 
-      Shapes.shift c 
-        { Shapes.p= Path.scale r Path.fullcircle;
-          b = let hr = 0.5 *./ r in Shapes.build_border hr hr }
-    in
-    { c = c; p = p; bs = bpath; height = r; width = r; }
+    let d = Point.length (add (pt (P.width p, P.height p)) (pt (dx,dy))) in
+    let s = Shapes.shift (P.ctr p) (Shapes.circle d) in
+    { p = p; bs = s}
 
   let ellipse ?(dx=zero) ?(dy=zero) p =
-    let c = P.ctr p in 
     let rx = P.width p +/ dx in
     let ry = P.height p +/ dy in
-      { c = c; p = p; bs = Shapes.shift c (Shapes.full_ellipse_path rx ry); 
-        height = 2. *./ ry ; width = 2. *./ rx }
+    { p = p; bs = Shapes.shift (P.ctr p) (Shapes.full_ellipse_path rx ry) }
 
   let round_rect ?(dx=margin) ?(dy=margin) p =
-    let c = P.ctr p in
     let dx = P.width p +/ dx in
     let dy = P.height p +/ dy in
     let rx = min (dx /./ 10.) (dy /./ 10.) in
-    { c = c; p = p; bs = Shapes.shift c (Shapes.rounded_rect_path dx dy rx rx);
-      width = dx; height = dy }
+    { p = p; 
+      bs = Shapes.shift (P.ctr p) (Shapes.rounded_rect_path dx dy rx rx)}
               
   let patatoid ?(dx=2. *./ margin) ?(dy=2. *./ margin) p =
-    let c = P.ctr p in
     let w = P.width p in
     let h = P.height p in
     let path = Shapes.patatoid (w +/ 2. *./ dx) (h +/ 2. *./ dy) in
-    let dummypic = Picture.make (Command.draw path.Shapes.p) in
-    { c = c; p = p; bs = Shapes.shift c path; width = Picture.width dummypic; 
-      height = Picture.height dummypic}
-
+    { p = p; bs = Shapes.shift (P.ctr p) path}
 
   let bshape b = b.bs
   let bpath b = Shapes.path b.bs
@@ -94,15 +80,11 @@ struct
 
   (* POS compliance *)
 
-  let width b = b.width
+  let width b = Shapes.width b.bs
+  let height b = Shapes.height b.bs
+  let ctr b = Shapes.ctr b.bs
 
-  let height b = b.height
-
-  let ctr b = b.c
-
-  let shift pt x = 
-    { x with p = P.shift pt x.p; bs = Shapes.shift pt x.bs;
-      c = Point.shift pt x.c }
+  let shift pt x = {p = P.shift pt x.p; bs = Shapes.shift pt x.bs}
 
   let center pt x = shift (Point.sub pt (ctr x)) (v x)
 

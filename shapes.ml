@@ -25,21 +25,16 @@ let pi = 4. *. (atan 1.)
 let kappa = F (4. *. (sqrt 2. -. 1.) /. 3.)
 let mkappa = F (1. -. (4. *. (sqrt 2. -. 1.) /. 3.))
 
-type borders = { n : Point.t; s : Point.t ; w : Point.t ; e : Point.t }
+type borders = 
+  { n : Point.t; s : Point.t ; w : Point.t ; e : Point.t; c : Point.t }
 
-type t = { p : path ; b : borders }
-
-type repr = t
-
-let v x = x
-
-let ctr x = Point.origin
+type t = { p : path ; b : borders ; ht : Num.t ; wt : Num.t  }
 
 (** Rectangles *)
 
 let build_border w h =
   { n = pt (zero, h) ; s = pt (zero, neg h);
-    e = pt (w,zero); w = pt (neg w, zero) }
+    e = pt (w,zero); w = pt (neg w, zero) ; c = origin }
 
 let rounded_rect_path width height rx ry =
     let hw,hh = width/./ 2.,height/./ 2. in
@@ -73,7 +68,7 @@ let rounded_rect_path width height rx ry =
       cycle ~dir:(Vec right) ~style:(JControls(ul1,ul2))
 	(jointpathk knots joints)
     in
-    { p = path; b = build_border hw hh }
+    { p = path; b = build_border hw hh ; wt = width; ht = height }
 
 (** Ellipses and Arcs *)
 
@@ -92,7 +87,7 @@ let full_ellipse_path rx ry =
     cycle ~dir:(Vec up) 
       ~style:(JControls(b2,r1)) (jointpathk knots joints)
   in 
-    { p = path; b = build_border rx ry }
+  { p = path; b = build_border rx ry; wt = 2. *./ rx; ht = 2. *./ ry }
       
 (*
 let arc_ellipse_path ?(close=false) rx ry theta1 theta2 =
@@ -112,7 +107,7 @@ let rectangle_path width height =
   let path = 
     Path.pathn ~cycle:JLine ~style:JLine [ w, mh; w, h; mw, h; mw, mh]
   in
-    { p = path; b = build_border w h }
+  { p = path; b = build_border w h; wt = width; ht = height }
     
 
 let patatoid width height = 
@@ -126,8 +121,15 @@ let patatoid width height =
   let b = segment (Random.float 1.) lr ur in
   let c = segment (Random.float 1.) ur ul in
   let d = segment (Random.float 1.) ul ll in
+  let p = pathp ~cycle:JCurve [a;b;c;d] in
+  let dummypic = Picture.make (Command.draw p) in
    (* corners are wrong *)
-    { p= pathp ~cycle:JCurve [a;b;c;d]; b = build_border wmax hmax }
+  { p = p ; b = build_border wmax hmax;
+    wt = Picture.width dummypic; ht = Picture.height dummypic }
+
+let circle d =
+  { p= Path.scale d Path.fullcircle;
+    b = (let r = 0.5 *./ d in build_border r r); wt = d ; ht = d}
       
 
 let draw_func ?fill ?(stroke=Color.black) ?(thickness=0.5) path =
@@ -156,11 +158,12 @@ let shift_border pt x =
   { n = Point.shift pt x.n;
     e = Point.shift pt x.e;
     w = Point.shift pt x.w;
-    s = Point.shift pt x.s
+    s = Point.shift pt x.s;
+    c = Point.shift pt x.c
   }
 
 let shift pt x = 
-  { p = Path.shift pt x.p;
+  { x with p = Path.shift pt x.p;
     b = shift_border pt x.b
   }
 
@@ -177,3 +180,13 @@ let north s = s.b.n
 let south s = s.b.s
 let west  s = s.b.w
 let east  s = s.b.e
+
+(* POS compliance *)
+type repr = t
+
+let v x = x
+let ctr x = x.b.c
+let height x = x.ht
+let width x = x.wt
+
+let center pt x = shift (Point.sub pt (ctr x)) x
