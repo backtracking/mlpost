@@ -146,8 +146,8 @@ let draw11 =
 let draw17 =
   let a, b = Num.inch (0.7), Num.inch (0.5) in
   let z0 = p (0.,0.) in
-  let z1 = pt (a, bp 0.) and z3 = pt (neg a, bp 0.) in
-  let z2 = pt (bp 0., b) and z4 = pt (bp 0., neg a) in
+  let z1 = pt (a, zero) and z3 = pt (neg a, zero) in
+  let z2 = pt (zero, b) and z4 = pt (zero, neg a) in
     17, [draw (pathp ~cycle:JCurve [z1;z2;z3;z4]);
 	 draw (pathp ~style:JLine [z1; z0; z2]);
 	 label ~pos:Ptop (tex "a") (segment 0.5 z0 z1);
@@ -170,18 +170,18 @@ let draw18 =
 	 
 let draw19 =
   let ux, uy = Num.inch 0.01, Num.inch 0.6 in
-  let dux, duy = bp 120. */ ux, bp 4. */ uy in
+  let dux, duy = 120. *./ ux, 4. *./ uy in
   let pen = Pen.circle ~tr:[Transform.scaled one] () in 
   let axey = Picture.transform [Transform.rotated 90.] (tex "axe $y$") in
   let rec pg = function
     | 0 -> start (knotn ~r:(Vec right) (zero,uy))
     | n -> let k = (float_of_int n)*.15. in 
 	concat ~style:JCurve (pg (n-1)) 
-	  (knotn (bp k */ ux, two // (one +/ bp (cos (Num.deg2rad k)))*/uy)) in
+	  (knotn (k *./ ux, 2. /. (1. +. (cos (Num.deg2rad k))) *./ uy)) in
     19, [draw (pathn ~style:JLine [(zero,duy); (zero,zero); (dux,zero)]);
 	 draw ~pen (pg 8);
-	 label ~pos:Pbot (tex "axe $x$") (pt (bp 60.*/ux, zero));
-	 label ~pos:Pleft axey (pt (zero, bp 2.*/uy));
+	 label ~pos:Pbot (tex "axe $x$") (pt (60.*./ux, zero));
+	 label ~pos:Pleft axey (pt (zero, 2.*./uy));
 	 label ~pos:Pleft (tex "$\\displaystyle y={2\\over1+\\cos x}$")
 	   (pt (dux, duy))]
 
