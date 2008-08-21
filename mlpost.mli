@@ -1090,11 +1090,12 @@ module Metapost : sig
 
   val generate_mp :
     string ->
-    ?prelude:(Format.formatter -> unit -> unit) ->
+    ?prelude:string ->
+    ?eps:bool ->
     (int * Command.t list) list -> unit
 
   val emit : string -> Command.t list -> unit
-  val dump : ?prelude:string -> ?pdf:bool -> string -> unit
+  val dump : ?prelude:string -> ?pdf:bool -> ?eps:bool -> string -> unit
     (** [dump ?prelude ?pdf f] builds a Metapost file [f.mp] for all figures,
 	then runs Metapost on it, and renames figure files according to the
 	names specified to [emit]. The file suffix is [.mps] if [pdf] is

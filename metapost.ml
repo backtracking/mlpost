@@ -239,7 +239,9 @@ let print i fmt l =
     (fun fmt l -> List.iter (print_command fmt) l)
     l
 
-let print_prelude s fmt () =
+let print_prelude ?(eps=false) s fmt () =
+  if eps then 
+    fprintf fmt "prologues := 2;@\n";
   fprintf fmt "verbatimtex@\n";
   fprintf fmt "%%&latex@\n";
   fprintf fmt "%s" s;
@@ -247,13 +249,12 @@ let print_prelude s fmt () =
   fprintf fmt "etex@\n"
   (* fprintf fmt "input boxes;@\n" *)
 
-let defaultprelude =
-  print_prelude "\\documentclass{article}\n\\usepackage[T1]{fontenc}\n" 
+let defaultprelude = "\\documentclass{article}\n\\usepackage[T1]{fontenc}\n"
 
-let generate_mp fn ?(prelude=defaultprelude) l =
+let generate_mp fn ?(prelude=defaultprelude) ?eps l =
   Misc.write_to_formatted_file fn
     (fun fmt -> 
-       prelude fmt ();
+       print_prelude ?eps prelude fmt ();
        List.iter (fun (i,f) -> print i fmt f) l)
 
 (* batch processing *)
@@ -288,14 +289,10 @@ let dump_tex ?prelude f =
   fprintf fmt "\\end{document}@.";
   close_out c
 
-let dump ?prelude ?(pdf=false) bn = 
+let dump ?prelude ?(pdf=false) ?eps bn = 
   let f = bn ^ ".mp" in
-  let prelude = match prelude with
-    | None -> defaultprelude
-    | Some s -> print_prelude s
-  in
   let figl = Queue.fold (fun l (i,_,f) -> (i,f) :: l) [] figures in
-  generate_mp f ~prelude figl;
+  generate_mp f ?prelude ?eps figl;
   let out = Sys.command (sprintf "mpost %s end" f) in
   if out <> 0 then exit 1;
   let suf = if pdf then ".mps" else ".1" in

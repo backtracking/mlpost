@@ -9,6 +9,9 @@ BUGS
   etc ...
 
 
+TODO
+============
+
 * ranger le module Helpers
 
 * intersection entre deux segments, chemins, ...
@@ -18,6 +21,8 @@ BUGS
 
 * accelerer la compilation des images dans examples/
 * se décider où on met nos exemples
+* le Makefile dans examples ne se sert pas de l'outil mlpost
+* une série de tests pour l'outil mlpost 
 
 Module des Plots
 ==================

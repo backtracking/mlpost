@@ -45,14 +45,15 @@
   let use_ocamlbuild = ref false
   let ccopt = ref ""
   let execopt = ref ""
+  let eps = ref false
 
   let add_ccopt x = ccopt := !ccopt ^ " " ^ x
   let add_execopt x = execopt := !execopt ^ " " ^ x
 
   let spec = Arg.align
     [ "-pdf", Set pdf, " Generate .mps files";
-      "-latex", String set_latex_file, 
-      "<main.tex> Scan the LaTeX prelude";
+      "-latex", String set_latex_file, "<main.tex> Scan the LaTeX prelude";
+      "-eps", Set eps, " Generate encapsulated postscript files";
       "-xpdf", Set xpdf, " wysiwyg mode using xpdf";
       "-ocamlbuild", Set use_ocamlbuild, " Use ocamlbuild to compile";
       "-ccopt", String add_ccopt, "\"<options>\" Pass <options> to the compiler";
@@ -120,6 +121,7 @@ rule scan = parse
       with End_of_file -> ()
     end;
     let pdf = if !pdf || !xpdf then "~pdf:true" else "" in
+    let eps = if !eps then "~eps:true" else "" in
     let prelude = match !latex_file with
       | None -> ""
       | Some f -> 
@@ -129,7 +131,7 @@ rule scan = parse
 	  sprintf "~prelude:%S" s
     in
     Printf.fprintf cout 
-      "\nlet () = Mlpost.Metapost.dump %s %s \"%s\"\n" prelude pdf bn;
+      "\nlet () = Mlpost.Metapost.dump %s %s %s \"%s\"\n" prelude pdf eps bn;
     if !xpdf then 
       Printf.fprintf cout 
 	"\nlet () = Mlpost.Metapost.dump_tex %s \"_mlpost\"\n" prelude;
