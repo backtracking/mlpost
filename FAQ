@@ -28,4 +28,6 @@ not display the figure correctly / gives some error.
 Answer:
 
 These generated files are not proper PostScript files. They need to be
-included in a Latex file using \includegraphics.
+included in a Latex file using \includegraphics. If you pass the -eps option
+to mlpost, it generates encapsulated PostScript files that can be viewed with
+a PostScript viewer like gv. However, the rendering may be slightly different.
