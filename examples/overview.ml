@@ -1,4 +1,3 @@
-open Mlpost
 open Metapost
 open Command
 open Picture

@@ -7,6 +7,7 @@ BUGS
 * compilation :
   comment faire quand l'utilisateur ce sert d'autres fichiers ml, cmo, cma 
   etc ...
+* mettre la FAQ en ligne
 
 
 TODO
@@ -21,7 +22,6 @@ TODO
 
 * accelerer la compilation des images dans examples/
 * se décider où on met nos exemples
-* le Makefile dans examples ne se sert pas de l'outil mlpost
 * une série de tests pour l'outil mlpost 
 
 Module des Plots

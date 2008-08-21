@@ -46,6 +46,7 @@
   let ccopt = ref ""
   let execopt = ref ""
   let eps = ref false
+  let verbose = ref false
 
   let add_ccopt x = ccopt := !ccopt ^ " " ^ x
   let add_execopt x = execopt := !execopt ^ " " ^ x
@@ -55,6 +56,7 @@
       "-latex", String set_latex_file, "<main.tex> Scan the LaTeX prelude";
       "-eps", Set eps, " Generate encapsulated postscript files";
       "-xpdf", Set xpdf, " wysiwyg mode using xpdf";
+      "-v", Set verbose, " be a bit more verbose";
       "-ocamlbuild", Set use_ocamlbuild, " Use ocamlbuild to compile";
       "-ccopt", String add_ccopt, "\"<options>\" Pass <options> to the compiler";
       "-execopt", String add_execopt,
@@ -84,6 +86,7 @@ rule scan = parse
 
 {
   let command s =
+    let () = if !verbose then Format.eprintf "%s@." s in
     let out = Sys.command s in
     if out <> 0 then begin
       eprintf "mlpost: the following command failed:@\n%s@." s;
@@ -92,6 +95,7 @@ rule scan = parse
 
   let ocaml args =
     let cmd = "ocaml " ^ String.concat " " (Array.to_list args) in
+    let () = if !verbose then Format.eprintf "%s@." cmd in
     let out = Sys.command cmd in
     if out <> 0 then exit 1
 
@@ -146,7 +150,7 @@ rule scan = parse
          !execopt];
       Sys.remove mlf2
     end else
-      ocaml [|"mlpost.cma"; mlf; !ccopt; !execopt|];
+      ocaml [|!ccopt; "mlpost.cma"; mlf; !execopt|];
 
     Sys.remove mlf;
     if !xpdf then begin

@@ -1,7 +1,6 @@
 (* taken from
  * http://www.cs.ucc.ie/~dongen/mpost/mp/Escher87.mp
 *)
-open Mlpost
 open Command
 open Point
 open Path

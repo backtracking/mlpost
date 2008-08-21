@@ -19,15 +19,10 @@ $(PNGFILES): ../mlpost.cma
 
 %_footer.ml: %.ml
 	cp -f $^ $@
-	echo 'let mpfile = "'$*'.mp"' >> $@
-	echo "let () = Metapost.generate_mp mpfile [1,fig]" >> $@
+	echo 'let () = Metapost.emit "$*" fig' >> $@
 
-%.mp: %_footer.ml
-	ocamlc -I .. -c $*.ml
-	ocaml -I .. ../mlpost.cma unix.cma $^
-
-%.1: %.mp
-	mpost $^ end
+%.1: %_footer.ml
+	../tool.opt -ccopt "unix.cma" -eps -v $^
 
 %.png: %.ps
 	convert $*.ps $@
