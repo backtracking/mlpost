@@ -31,7 +31,7 @@ type skeleton =
 let mk_skeleton width height stepx stepy =
   {width = width; height = height; stepx = stepx; stepy = stepy}
 
-type labels = int -> Picture.t option
+type labels = int -> Num.t ->  Picture.t option
 
 type ticks = (Num.t * Pen.t) option
 
@@ -42,8 +42,8 @@ let get_style = function
 let off_pattern = fun i -> Dash.pattern [Dash.On (bp 5.)]
 let defpen = fun i -> Pen.default ()
 
-let get_borders sx sy h w = bp 0., sx */ (num_of_int w), 
-                            sy */ (num_of_int h), bp 0.
+let get_borders sx sy h w = zero, sx */ (num_of_int w), 
+                            sy */ (num_of_int h), zero
 
 let draw_grid ?(hdash=off_pattern) ?(vdash=off_pattern) 
               ?(hpen=defpen) ?(vpen=defpen) 
@@ -66,7 +66,18 @@ let draw_grid ?(hdash=off_pattern) ?(vdash=off_pattern)
               (fun acc i -> (vertical i) :: acc) 
               [] 0 w) 0 h)
 
-let deflabel i = Some (Picture.tex (string_of_int i))
+(* This is a hack, we need the maximal size a label can take *)
+let label_scale stepx =
+  let max_width = Picture.width ( Picture.tex "$55$") in
+   ( 4. /. 5.) *./ stepx // max_width
+
+(* The default label function, it is quite generic as the labels are resized
+ * when they do not fit into a cell *)
+let deflabel x w =
+   Some (Picture.transform
+         [Transform.scaled (label_scale w)]
+          (Picture.tex (Printf.sprintf "$%d$" x)))
+
 let defticks = Some ((bp 0.25), Pen.default ())
 
 let get_corners maxu maxr = 
@@ -92,7 +103,7 @@ let draw_axes ?(hpen=Pen.default ()) ?(vpen=Pen.default ())
 	  (Point.pt (bp 0. -/ sx, num_of_int h */ sy))
   in
   let labelcmd pos p i f = 
-    match f i with
+    match f i sx with
     | None -> Command.nop
     | Some x -> Command.label ~pos x p
   in
