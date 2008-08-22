@@ -81,7 +81,7 @@ let draw_axes ?(hpen=Pen.default ()) ?(vpen=Pen.default ())
   let hcaptcmd = match hcaption with 
     | None -> Command.nop
     | Some labl -> 
-	Command.label ~pos:Plowleft labl 
+	Command.label ~pos:Pleft labl 
 	  (Point.pt (num_of_int w */ sx, bp 0. -/sy))
   in
   let vcaptcmd = match vcaption with 

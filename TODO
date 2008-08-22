@@ -9,12 +9,25 @@
   comment faire quand l'utilisateur ce sert d'autres fichiers ml, cmo, cma 
   etc ...
 * mettre la FAQ en ligne
+* Dash.withdots ne marche pas ?
+* option -latex : 
+    \input{toto.tex} ne marche pas si toto.tex n'est pas accessible par
+    TEXINPUTS
+    (situation: on inclut le fichier principal main.tex qui est situé
+     dans un autre répertoire que les figures. main.tex inclue d'autres
+     fichiers (de macro, par ex.) qui sont dans _son_ répertoire courant,
+     mais qui ne seront pas trouvés quand mlpost recopie le prélude.)
 
 
 2) TODO
 (améliorer du comportement interne, doc, des bugs pas très importants)
 ============
 
+* doc : le fichier latex doit être un fichier "complet",
+        c'est à dire avec un \documentclass et \begin{document} au moins,
+        pas seulement des macros
+* FAQ : workaround pour le problème de l'option -latex décrit plus haut:
+        hacker la variable d'environnement TEXINPUTS
 * ranger le module Helpers
 
 * compilation

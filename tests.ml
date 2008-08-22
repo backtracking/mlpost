@@ -191,9 +191,9 @@ let d14 =
     else Pen.default () in
   let pen = Pen.default ~tr:[Transform.scaled (Num.bp 4.)] () in
      [draw_grid ~hdash ~vdash ~hpen:hvpen ~vpen:hvpen sk;
-       draw_func ~pen f2 sk;
-       draw_func ~pen f3 sk
-      ]
+      draw_func ~pen f2 sk;
+      draw_func ~pen f3 sk
+     ]
 
 let f1 i =
   let aux = function
