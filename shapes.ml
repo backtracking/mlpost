@@ -167,7 +167,7 @@ let shift pt x =
     b = shift_border pt x.b
   }
 
-let path x = x.p
+let bpath x = x.p
 (*
 let arc_ellipse ?fill ?stroke ?thickness ?(close=false) rx ry theta1 theta2 =
   let path = arc_ellipse_path rx ry theta1 theta2 

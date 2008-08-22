@@ -989,7 +989,7 @@ module Shapes : sig
 (** Various Basic Geometric Shapes *)
 
   type t
-  val path : t -> Path.t
+  val bpath : t -> Path.t
 
   val rounded_rect_path : Num.t -> Num.t -> Num.t -> Num.t -> t
 

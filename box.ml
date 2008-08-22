@@ -64,7 +64,7 @@ struct
     { p = p; bs = Shapes.shift (P.ctr p) path}
 
   let bshape b = b.bs
-  let bpath b = Shapes.path b.bs
+  let bpath b = Shapes.bpath b.bs
 
   let north x = Shapes.north (bshape x)
   let south x = Shapes.south (bshape x)

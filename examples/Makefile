@@ -22,7 +22,7 @@ $(PNGFILES): ../mlpost.cma
 	echo 'let () = Metapost.emit "$*" fig' >> $@
 
 %.1: %_footer.ml
-	../tool.opt -ccopt "unix.cma" -eps -v $^
+	../tool.opt -ccopt "-I ../ unix.cma" -v $^
 
 %.png: %.ps
 	convert $*.ps $@

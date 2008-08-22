@@ -150,7 +150,7 @@ rule scan = parse
          !execopt];
       Sys.remove mlf2
     end else
-      ocaml [|!ccopt; "mlpost.cma"; mlf; !execopt|];
+      ocaml [|"mlpost.cma"; !ccopt; mlf; !execopt|];
 
     Sys.remove mlf;
     if !xpdf then begin
