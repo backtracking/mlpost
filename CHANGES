@@ -5,6 +5,7 @@ version 0.3, current
 --------------------
 o new module Pos to place lists, arrays, trees
 * Num.f function removed
+o new commandline arguments -v, -eps
 
 
 version 0.2, July 22nd, 2008

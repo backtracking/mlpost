@@ -1,5 +1,6 @@
 
-BUGS
+1) BUGS
+(des erreurs ou des TODOs très importantes)
 ==========
 * un "faux bug" : 
   la sortie standard metapost "written output.1" a l'air de venir de mlpost
@@ -10,12 +11,12 @@ BUGS
 * mettre la FAQ en ligne
 
 
-TODO
+2) TODO
+(améliorer du comportement interne, doc, des bugs pas très importants)
 ============
 
 * ranger le module Helpers
 
-* intersection entre deux segments, chemins, ...
 * compilation
   - optimisation des inefficacités les plus évidentes 
       (draw_pic (make_pic cmd)) -> cmd ...
@@ -23,6 +24,13 @@ TODO
 * accelerer la compilation des images dans examples/
 * se décider où on met nos exemples
 * une série de tests pour l'outil mlpost 
+* -v n'agit pas encore sur tout
+
+
+3) FEATURES
+(choses qui n'existent pas encore dans mlpost)
+
+* intersection entre deux segments, chemins, ...
 
 Module des Plots
 ==================
@@ -35,9 +43,6 @@ Module des Plots
       lineaires par morceaux
       continues
       debut / fin
-
-
-
 
 
 * de la transparence
