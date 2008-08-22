@@ -29,6 +29,8 @@
 * FAQ : workaround pour le problème de l'option -latex décrit plus haut:
         hacker la variable d'environnement TEXINPUTS
 * ranger le module Helpers
+* les fonctions de scale : pourquoi prennent-elles des Num.t, et non pas de
+  float ?
 
 * compilation
   - optimisation des inefficacités les plus évidentes 
@@ -42,6 +44,7 @@
 
 3) FEATURES
 (choses qui n'existent pas encore dans mlpost)
+===========================
 
 * intersection entre deux segments, chemins, ...
 

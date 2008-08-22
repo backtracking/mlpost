@@ -31,7 +31,7 @@ type skeleton =
 let mk_skeleton width height stepx stepy =
   {width = width; height = height; stepx = stepx; stepy = stepy}
 
-type labels = (int -> Picture.t) option
+type labels = int -> Picture.t option
 
 type ticks = (Num.t * Pen.t) option
 
@@ -66,7 +66,7 @@ let draw_grid ?(hdash=off_pattern) ?(vdash=off_pattern)
               (fun acc i -> (vertical i) :: acc) 
               [] 0 w) 0 h)
 
-let deflabel = Some (fun i -> Picture.tex (string_of_int i)) 
+let deflabel i = Some (Picture.tex (string_of_int i))
 let defticks = Some ((bp 0.25), Pen.default ())
 
 let get_corners maxu maxr = 
@@ -91,9 +91,10 @@ let draw_axes ?(hpen=Pen.default ()) ?(vpen=Pen.default ())
 	  (Picture.transform [Transform.rotated 90.] labl)
 	  (Point.pt (bp 0. -/ sx, num_of_int h */ sy))
   in
-  let labelcmd pos p i = function
+  let labelcmd pos p i f = 
+    match f i with
     | None -> Command.nop
-    | Some f -> Command.label ~pos (f i) p
+    | Some x -> Command.label ~pos x p
   in
   let ticks_cmd pathf = 
     match ticks with

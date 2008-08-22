@@ -962,7 +962,7 @@ module Plot : sig
     (** [mk_skeleton w h dx dy] builds a skeleton of width [w] and height [h],
 	each cell being [dx] units wide and [dy] units high. *)
 
-  type labels = (int -> Picture.t) option
+  type labels = int -> Picture.t option
   type ticks =  (Num.t * Pen.t) option
 	
   type drawing = Stepwise | Normal
