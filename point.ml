@@ -72,27 +72,28 @@ and sub p1 p2 =
     | _, _ -> PTSub (p1,p2)
 
 let shift = add
+let scale = mult
 
 let segment f p1 p2 = add (mult (F (1.-.f)) p1) (mult (F f) p2)
-let rec rotated f = function
+let rec rotate f = function
   | PTPair (a,b) -> 
       let angle = Num.deg2rad f in
         PTPair ( (F (cos angle) */ a) -/ (F (sin angle) */ b),
                  (F (sin angle) */ a) +/ (F (cos angle) */ b))
-  | PTAdd (p1, p2) -> add (rotated f p1) (rotated f p2)
-  | PTSub (p1, p2) -> sub (rotated f p1) (rotated f p2)
+  | PTAdd (p1, p2) -> add (rotate f p1) (rotate f p2)
+  | PTSub (p1, p2) -> sub (rotate f p1) (rotate f p2)
   | PTRotated (f', p) -> PTRotated (f+.f', p)
-  | PTMult (f', p) -> PTMult(f', rotated f p)
+  | PTMult (f', p) -> PTMult(f', rotate f p)
   | _ as p -> PTRotated (f, p)
 
 (* rotate p2 around p1 *)
-let rotate_around p1 f p2 = add p1 (rotated f (sub p2 p1))
+let rotate_around p1 f p2 = add p1 (rotate f (sub p2 p1))
 
-let xscaled f = function
+let xscale f = function
   | PTPair (a,b) -> PTPair (NMult(f,a), b)
   | _ as p -> simple_transform (TRXscaled f) p
 
-let yscaled f = function
+let yscale f = function
   | PTPair (a,b) -> PTPair (a, NMult(f,b))
   | _ as p -> simple_transform (TRYscaled f) p
 
@@ -101,9 +102,9 @@ let transform tr p =
     (fun acc -> function
        | TRScaled f -> mult f acc
        | TRShifted p -> add acc p
-       | TRRotated f -> rotated f acc
-       | TRXscaled f -> xscaled f acc
-       | TRYscaled f -> yscaled f acc
+       | TRRotated f -> rotate f acc
+       | TRXscaled f -> xscale f acc
+       | TRYscaled f -> yscale f acc
        | TRRotateAround (p,f) -> rotate_around p f acc
        | _ as str -> simple_transform str acc
     ) p tr

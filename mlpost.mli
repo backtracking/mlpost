@@ -22,6 +22,10 @@ module rec Num : sig
 
   (** The Mlpost Num module *)
 
+  (** Numerics are intended to be lengths in some unit. In addition, values of
+   * type {!Num.t} may actually be unknown to Mlpost. This is why there is no
+   * function that gives back a [float]. *)
+
   type t
       (** The Mlpost numeric type is an abstract datatype *)
       
@@ -30,17 +34,15 @@ module rec Num : sig
       permit to specify values in other common units *)
 
   val bp : float -> t
+
   val pt : float -> t
+  (** pt are PostScript points. This is the same unit as the pt unit in Latex *)
+
   val cm : float -> t
   val mm : float -> t
   val inch : float -> t
 
-  val bpn : t -> t
-  val ptn : t -> t
-  val cmn : t -> t
-  val mmn : t -> t
-  val inchn : t -> t
-
+  (** {2 Useful operations on Nums} *)
   val addn : t -> t -> t
   val subn : t -> t -> t
   val multn : t -> t -> t
@@ -50,17 +52,31 @@ module rec Num : sig
   val divn : t -> t -> t
   val maxn : t -> t -> t
   val minn : t -> t -> t
-  val gmean : t -> t -> t
 
-  (** Infix operators for [addn], [subn], [muln] and [divn] *)
+  val gmean : t -> t -> t
+  (** the geometric mean of two nums : sqrt(a * a + b * b) *)
+
+  (** {3 Infix operators}  *)
 
   module Infix : sig
     val (+/) : t -> t -> t
+    (** alias for {!Num.addn} *)
+     
     val (-/) : t -> t -> t
+    (** alias for {!Num.subn} *)
+
     val ( */) : t -> t -> t
+    (** alias for {!Num.multn} *)
+
     val (//) : t -> t -> t
+    (** alias for {!Num.divn} *)
+
     val ( *./): float -> t -> t
+    (** alias for {!Num.multf} *)
+
     val (/./): t -> float -> t
+    (** alias for {!Num.divf} *)
+
   end
 
   (** {2 Useful constants and functions} *)
@@ -71,6 +87,7 @@ module rec Num : sig
   (** Shortcuts for [bp 0.], [bp 1.] and [bp 2.]. *)
 
   val pi : float
+  (** 3 .14159 *)
   val deg2rad : float -> float
   (** Converts degrees into radians *)
 
@@ -112,42 +129,44 @@ and Point : sig
   val length : t -> Num.t
   (** [length p] is the length of vector from the origin to [p] *)
 
-  (** [xpart p] is the x coordinate of point [p] *)
   val xpart : t -> Num.t
+  (** [xpart p] is the x coordinate of point [p] *)
 
-  (** [ypart p] is the y coordinate of point [p] *)
   val ypart : t -> Num.t
+  (** [ypart p] is the y coordinate of point [p] *)
 
   (** {2 Operations on points} *)
     
-  (** Apply a transformation to a point *)
   val transform : Transform.t -> t -> t
+  (** Apply a transformation to a point *)
 
-  (** [segment f p1 p2] is the point [(1-f)p1 + fp2] *)
   val segment : float -> t -> t -> t
+  (** [segment f p1 p2] is the point [(1-f)p1 + fp2]. Stated otherwise, if
+    * [p1] is at [0.] and [p2] is at [1.], return the point that lies at [f] *)
 
-  (** Sum two points *)
   val add : t -> t -> t
   val shift : t -> t -> t
+  (** Sum two points *)
   
-  (** Substract two points *)
   val sub : t -> t -> t
+  (** Substract two points *)
   
-  (** Multiply a point by a scalar *)
   val mult : Num.t -> t -> t
+  val scale : Num.t -> t -> t
+  (** Multiply a point by a scalar *)
   
+  val rotate : float -> t -> t
   (** Rotate a point by an angle in degrees *)
-  val rotated : float -> t -> t
 
   (** [rotate_around p1 f p2] rotates [p2] around [p1] by an angle [f] 
       in degrees *)
   val rotate_around : t -> float -> t -> t
 
   (** Scales the X coordinate of a point by a scalar *)
-  val xscaled : Num.t -> t -> t
+  val xscale : Num.t -> t -> t
 
   (** Scales the Y coordinate of a point by a scalar *)
-  val yscaled : Num.t -> t -> t
+  val yscale : Num.t -> t -> t
 
   (** {2 Convenient constructors} *)
 
@@ -299,6 +318,7 @@ and Path : sig
   val shift : Point.t -> t -> t
   val yscale : Num.t -> t -> t
   val xscale : Num.t -> t -> t
+  (** Shortcuts for transformations of Paths *)
 
   (** [cut_after p1 p2] cuts [p2] after the intersection with [p1]. 
       To memorize the order of the arguments, 
@@ -339,8 +359,8 @@ and Pen : sig
   val transform : Transform.t -> t -> t
     (** Apply a transformation to pens *)
   val default : ?tr:Transform.t -> unit -> t
-    (** The default pen; it corresponds to [transform [Transform.scaled 0.5]
-   circle] *)
+    (** The default pen; it corresponds to 
+     * [Pen.scale (Num.bp 0.5) (Pen.circle ())] *)
   val circle : ?tr:Transform.t -> unit -> t
     (** A circular pen of diameter 1 bp *)
   val square : ?tr:Transform.t -> unit -> t
@@ -348,6 +368,12 @@ and Pen : sig
   val from_path : Path.t -> t
     (** Construct a pen from a closed path *)
 
+  val scale : Num.t -> t -> t
+  val rotate : float -> t -> t
+  val shift : Point.t -> t -> t
+  val yscale : Num.t -> t -> t
+  val xscale : Num.t -> t -> t
+  (** Shortcuts for transformations of pens *)
 end
 
 and Dash : sig
@@ -368,7 +394,6 @@ and Dash : sig
     (** Shift a dash pattern *)
 
   type on_off = On of Num.t | Off of Num.t
-
 
   val pattern : on_off list -> t
     (** This function, together with the type [on_off]  permits to construct
@@ -476,10 +501,15 @@ and Box : sig
   type repr = t
   val v : t -> repr
   val ctr : t -> Point.t
+  (** return the center of the object *)
   val height : t -> Num.t
+  (** return the height of the object *)
   val width : t -> Num.t
+  (** return the width of the object *)
   val shift : Point.t -> repr -> repr
+  (** [shift pt x] shifts the object [x] about the point [pt]  *)
   val center : Point.t -> t -> repr
+  (** [center pt x] centers the object [x] at the point [pt]  *)
 
   val draw : ?fill:Color.t -> ?boxed:bool -> t -> Command.t
     (** Draw a box 
@@ -651,8 +681,13 @@ and Picture : sig
 end
 
 and Arrow : sig
+  (** The Beginning of a module for building arrows. Actually, an arrow is just
+   * a path. Use {!Command.draw_arrow} to draw arrows. *)
+
   val simple : ?style:Path.joint -> ?outd:Path.direction -> 
                ?ind:Path.direction -> Point.t -> Point.t -> Path.t
+  (** A simple arrow between two points. You can choose ingoing and outgoing
+   * directions. *)
 end
 
 and Command : sig
@@ -734,46 +769,103 @@ and Command : sig
 end
 
 module  Pos : sig
+  (** This module consists of several functors for generic placement of objects.
+   * Instantiations with the {!Picture} module exist in other places of Mlpost.
+   *)
+
+  (** {2 Placing requirements } *)
+
   module type POS =
   sig
     type t
+    (** the type of objects that can be positioned. *)
+
     type repr
+    (** the type of objects once they have been placed. Often this will be the
+     * same type as [t]. *)
+
     val ctr : t -> Point.t
+    (** return the center of the object *)
+
     val height : t -> Num.t
+    (** return the height of the object *)
+
     val width : t -> Num.t
+    (** return the width of the object *)
+
     val shift : Point.t -> repr -> repr
+    (** [shift pt x] shifts the object [x] about the point [pt]  *)
+
     val center : Point.t -> t -> repr
+    (** [center pt x] centers the object [x] at the point [pt]  *)
+
     val v : t -> repr
+    (** get the "raw" object back *)
   end
+  (** The signature [POS] describes the requirements for positionnable objects
+   *)
+
+  (** {2 Alignment of sequences} *)
+
   module type SEQ =
   sig
     module P : POS
+    (** The input module of signature {!POS} *)
+
     type 'a seq
+    (** The container sequence type *)
+
     include POS with type repr = P.repr seq
+    (** A sequence can also be positioned. *)
+
     val horizontal :
       ?dx:Num.t -> ?pos:Command.position -> P.t seq -> t
+    (** Align the input objects horizontally and return the sequence of their
+     * representations. *)
+
     val vertical :
       ?dy:Num.t -> ?pos:Command.position -> P.t seq -> t
+    (** Align the input objects vertically and return the sequence of their
+     * representations. *)
+
     val tabular :
       ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position -> P.t seq seq -> t seq
+    (** Align the input objects in a table and return the table of their
+     * representations. *)
+
   end
+  (** This signature describes the output type of the {!List_} and {!Array_}
+   functors.  *)
 
   module List_ : 
     functor (P : POS) -> SEQ with type 'a seq = 'a list and module P = P 
+  (** Use this functor to align lists of objects *)
 
   module Array_ : 
     functor (P : POS) -> SEQ with type 'a seq = 'a array and module P = P 
+  (** Use this functor to align arrays of objects *)
 
+  (** {2 Tree placement } *)
+
+  (** The type of trees *)
   type 'a tree = N of 'a * 'a tree list
 
   module type TREE =
   sig
     module P : POS
+    (** The input module of signature {!POS} *)
+
     include POS with type repr = P.repr tree
+    (** Positioned trees can be repositioned using one of the other functors. *)
+
     val place : ?dx:Num.t -> ?dy:Num.t -> P.t tree -> t
+    (** Position a tree. *)
+
   end
+  (** The output signature of the {!Tree} functor.  *)
 
   module Tree : functor (P : POS) -> TREE with module P = P
+  (** Use this functor to position trees.  *)
 
 end
 

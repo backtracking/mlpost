@@ -49,6 +49,6 @@ let rec pave t a b c n =
 let fig = 
   let a = cmp (0., 0.) in
   let b = cmp (3., 0.) in
-  let d = Point.rotated 72. b in
+  let d = Point.rotate 72. b in
   let c = Point.add d (cmp (3.,0.)) in
     (pave Three a c d 6)@(pave Four a b c 6)

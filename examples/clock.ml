@@ -13,9 +13,9 @@ let fig =
     let m = (float_of_int (mn mod 60)) in
     let h = -.30. *. ((float_of_int (hr mod 12)) +. (m /. 60.)) in
       seq [Helpers.draw_simple_arrow ~color ~pen 
-	     (p (0.,0.)) (rotated h (pt (zero,Num.cm 2.)));
+	     (p (0.,0.)) (rotate h (pt (zero,Num.cm 2.)));
 	   Helpers.draw_simple_arrow ~color ~pen 
-	     (p (0.,0.)) (rotated (-.6.*.m) (pt (zero,Num.cm 3.5)))]
+	     (p (0.,0.)) (rotate (-.6.*.m) (pt (zero,Num.cm 3.5)))]
   in
   let num i = 
     let tr = [Transform.rotated (float_of_int (-30*i))] in

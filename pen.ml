@@ -30,4 +30,8 @@ let circle ?(tr=id) () = transform tr PenCircle
 let square ?(tr=id) () = transform tr PenSquare
 let from_path p = PenFromPath p
 
-
+let scale f p = transform [Transform.scaled f] p
+let rotate f p = transform [Transform.rotated f] p
+let shift pt path = transform [Transform.shifted pt] path
+let yscale n p = transform [Transform.yscaled n] p
+let xscale n p = transform [Transform.xscaled n] p

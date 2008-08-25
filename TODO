@@ -9,7 +9,6 @@
   comment faire quand l'utilisateur ce sert d'autres fichiers ml, cmo, cma 
   etc ...
 * mettre la FAQ en ligne
-* Dash.withdots ne marche pas ?
 * option -latex : 
     \input{toto.tex} ne marche pas si toto.tex n'est pas accessible par
     TEXINPUTS

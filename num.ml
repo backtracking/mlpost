@@ -80,11 +80,13 @@ let gmean x y =
 
 let fold_max f = List.fold_left (fun w p -> maxn w (f p))
 
+(*
 let bpn n = n
 let ptn n = multn (F 0.99626) n
 let cmn n = multn (F 28.34645) n
 let mmn n = multn (F 2.83464) n
 let inchn n = multn (F 72.) n
+*)
 
 module Scale = struct
   let bp x y = bp (x *. y)
