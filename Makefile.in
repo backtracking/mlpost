@@ -163,7 +163,7 @@ FTP = $(WWW)/download
 
 FILES = *.ml *.mli *.mll \
 	Makefile.in configure configure.in .depend \
-	.depend README.txt INSTALL LICENSE CHANGES
+	.depend README.txt INSTALL LICENSE CHANGES FAQ
 EXFILES = examples/Makefile examples/*.ml examples/all.template
 
 export: source export-www export-examples export-doc
