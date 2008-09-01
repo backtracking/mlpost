@@ -362,11 +362,15 @@ struct
       let p, code = Point.compile p in
         C.TRRotateAround (p,f), code
 and transform_list l =
-  let l1,l2 = List.fold_right
-                (fun tr (trl, cl) -> 
+  (* since the compilation has side effects (memoization), things have to be
+   * done in order
+   * that's why we first do a fold_left, and at the end reverse the two lists
+   * instead of a fold_right *)
+  let l1,l2 = List.fold_left
+                (fun (trl, cl) tr -> 
                    let tr,c =  transform tr in
-                     tr::trl, c::cl ) l ([],[]) in
-    l1, C.CSeq l2
+                     tr::trl, c::cl ) ([],[]) l in
+    List.rev l1, C.CSeq (List.rev l2)
 
 and pen = function
   | PenCircle -> C.PenCircle, nop

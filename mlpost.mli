@@ -23,8 +23,8 @@ module rec Num : sig
   (** The Mlpost Num module *)
 
   (** Numerics are intended to be lengths in some unit. In addition, values of
-   * type {!Num.t} may actually be unknown to Mlpost. This is why there is no
-   * function that gives back a [float]. *)
+    type {!Num.t} may actually be unknown to Mlpost. This is why there is no
+    function that gives back a [float]. *)
 
   type t
       (** The Mlpost numeric type is an abstract datatype *)
@@ -142,7 +142,7 @@ and Point : sig
 
   val segment : float -> t -> t -> t
   (** [segment f p1 p2] is the point [(1-f)p1 + fp2]. Stated otherwise, if
-    * [p1] is at [0.] and [p2] is at [1.], return the point that lies at [f] *)
+     [p1] is at [0.] and [p2] is at [1.], return the point that lies at [f] *)
 
   val add : t -> t -> t
   val shift : t -> t -> t
@@ -360,7 +360,7 @@ and Pen : sig
     (** Apply a transformation to pens *)
   val default : ?tr:Transform.t -> unit -> t
     (** The default pen; it corresponds to 
-     * [Pen.scale (Num.bp 0.5) (Pen.circle ())] *)
+      [Pen.scale (Num.bp 0.5) (Pen.circle ())] *)
   val circle : ?tr:Transform.t -> unit -> t
     (** A circular pen of diameter 1 bp *)
   val square : ?tr:Transform.t -> unit -> t
@@ -475,8 +475,8 @@ and Box : sig
 
   val patatoid : ?dx:Num.t -> ?dy:Num.t -> Point.t -> Picture.t -> t
     (** [patatoid p pic] creates an undefined, vaguely rectangular box of center
-     * [p] and contents [pic]. It may happen that the content overlaps with the
-     * box. *)
+      [p] and contents [pic]. It may happen that the content overlaps with the
+      box. *)
 
   (** Get the bounding path of a box *)
   val bpath : t -> Path.t
@@ -532,7 +532,7 @@ and Box : sig
   val halign_to_box : ?dx:Num.t -> ?dy:Num.t -> ?spacing:Num.t -> 
                       ?pos:Command.position -> Picture.t list -> t list
     (** [halign_to_box] aligns the pictures in the argument list and puts them
-     * into boxes, but does not try to create boxes of equal size *)
+      into boxes, but does not try to create boxes of equal size *)
 
   val tabular : 
     ?dx:Num.t -> ?dy:Num.t -> Picture.t array array -> t array array
@@ -614,7 +614,7 @@ and Picture : sig
 (*
   val currentpicture : t
     (* Corresponds to the picture that has been drawn so far and can be used in
-     * commands to manipulate it *)
+      commands to manipulate it *)
 
 *)
 
@@ -660,7 +660,7 @@ and Picture : sig
 
   val clip : t -> Path.t -> t
   (** [clip pic path] limits [pic] to the cyclic path [path]; all elements 
-   *   outside of [path] are cut off. *)
+      outside of [path] are cut off. *)
 
   (** {2 Dimensions} *)
 
@@ -682,12 +682,12 @@ end
 
 and Arrow : sig
   (** The Beginning of a module for building arrows. Actually, an arrow is just
-   * a path. Use {!Command.draw_arrow} to draw arrows. *)
+    a path. Use {!Command.draw_arrow} to draw arrows. *)
 
   val simple : ?style:Path.joint -> ?outd:Path.direction -> 
                ?ind:Path.direction -> Point.t -> Point.t -> Path.t
   (** A simple arrow between two points. You can choose ingoing and outgoing
-   * directions. *)
+    directions. *)
 end
 
 and Command : sig
@@ -770,7 +770,7 @@ end
 
 module  Pos : sig
   (** This module consists of several functors for generic placement of objects.
-   * Instantiations with the {!Picture} module exist in other places of Mlpost.
+    Instantiations with the {!Picture} module exist in other places of Mlpost.
    *)
 
   (** {2 Placing requirements } *)
@@ -782,7 +782,7 @@ module  Pos : sig
 
     type repr
     (** the type of objects once they have been placed. Often this will be the
-     * same type as [t]. *)
+      same type as [t]. *)
 
     val ctr : t -> Point.t
     (** return the center of the object *)
@@ -821,17 +821,17 @@ module  Pos : sig
     val horizontal :
       ?dx:Num.t -> ?pos:Command.position -> P.t seq -> t
     (** Align the input objects horizontally and return the sequence of their
-     * representations. *)
+      representations. *)
 
     val vertical :
       ?dy:Num.t -> ?pos:Command.position -> P.t seq -> t
     (** Align the input objects vertically and return the sequence of their
-     * representations. *)
+      representations. *)
 
     val tabular :
       ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position -> P.t seq seq -> t seq
     (** Align the input objects in a table and return the table of their
-     * representations. *)
+      representations. *)
 
   end
   (** This signature describes the output type of the {!List_} and {!Array_}
@@ -1173,8 +1173,8 @@ module Misc : sig
 
   val fold_from_to : ('a -> int -> 'a) -> 'a -> int -> int -> 'a
   (** [fold_from_to f acc i j] is equivalent to 
-   *   [List.fold_left f acc [i; i +1; .. j] ],
-   *  where i <= j *)
+      [List.fold_left f acc [i; i +1; .. j] ],
+     where i <= j *)
 end
 (**/**)
 
