@@ -106,7 +106,6 @@ and command =
   | CFill of path * color option
   | CLabel of picture * position * point
   | CDotLabel of picture * position * point
-  | CLoop of int * int * (int -> command)
   | CSeq of command list
   | CDeclPath of name * path
   | CDeclPoint of name * point

@@ -51,9 +51,9 @@ let print_position fmt = function
 let rec print_num fmt = function
   | C.F f ->
       if f = infinity then fprintf fmt "infinity"
-      else
-	if f > 4095. then fprintf fmt "% 4f" 4095.
-	else fprintf fmt "% .4f" f
+      else if f > 4095. then fprintf fmt "%g" 4095.
+      else if abs_float f < 0.0001 then fprintf fmt "0"
+      else fprintf fmt "%g" f
   | C.NXPart p -> fprintf fmt "xpart %a" print_point p
   | C.NYPart p -> fprintf fmt "ypart %a" print_point p
   | C.NAdd (f1, f2) -> fprintf fmt "(%a +@ %a)" print_num f1 print_num f2
@@ -198,10 +198,6 @@ and print_command fmt  = function
   | C.CDotLabel (pic,pos,p) ->
       fprintf fmt "@[<hov 2>dotlabel%a(%a,@ %a);@]@\n"
         print_position pos print_picture pic print_point p
-  | C.CLoop(from,until,cmd) ->
-      for i = from to until do
-	print_command fmt (cmd i);
-      done
   | C.CDrawPic p ->
       fprintf fmt "draw %a;@\n" print_picture p
   | C.CSeq l -> List.iter (fun c -> print_command fmt c) l

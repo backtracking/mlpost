@@ -34,7 +34,7 @@ let inch f = F (72. *. f)
 let pi = 3.14159
 let deg2rad f = pi *. f /. 180.
 
-let is_zero f = abs_float f < 0.00001
+let is_zero f = abs_float f < 0.0001
 
 type scale = float -> t
 
@@ -47,11 +47,13 @@ let addn x y =
 let subn x y = 
   match x, y with
   | F f1, F f2 -> F (f1 -. f2)
+  | x, F y  when is_zero y -> x
   | _, _ -> NMinus (x,y)
 
 let multn x y = 
   match x, y with
   | F f1, F f2 -> F (f1 *. f2)
+  | (F x, _ | _ , F x) when is_zero x -> F 0.
   | _, _ -> NMult (x,y)
 
 let multf f x = multn (F f) x
@@ -59,6 +61,7 @@ let multf f x = multn (F f) x
 let divn x y = 
   match x, y with
   | F f1, F f2 -> F (f1 /. f2)
+  | F x, _ when is_zero x -> F 0.
   | _, _ -> NDiv (x,y)
 
 let divf x f = divn x (F f)
@@ -76,6 +79,7 @@ let minn x y =
 let gmean x y = 
   match x, y with
   | F f1, F f2 -> F ( sqrt (f1 *. f1 +. f2 *. f2 ))
+  | (z, F x | F x, z) when is_zero x -> z
   | _, _ -> NGMean (x,y)
 
 let fold_max f = List.fold_left (fun w p -> maxn w (f p))
@@ -107,4 +111,4 @@ end
 
 open Infix
 
-let neg a = zero -/ a
+let neg x = zero -/ x

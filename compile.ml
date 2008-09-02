@@ -56,7 +56,8 @@ module Remember
 struct
   module HM = Hashtbl.Make(
     struct
-      type t = E.t let equal = (==) let hash = Hashtbl.hash
+      (* structural equality : slow but precise *)
+      type t = E.t let equal = (=) let hash = Hashtbl.hash
   end)
 
   type t = E.t
@@ -296,7 +297,7 @@ struct
 
   let is_simple = function
     | PITransform _ -> false
-    | PITex _ -> true
+    | PITex _ -> false
     (* we don't want names for complicated pictures 
      * for now, we do the memoization for these by hand
      * (see compile function below) *)
@@ -427,7 +428,12 @@ and command = function
   | CSeq l ->
       C.CSeq (List.map command l)
   | CLoop (i, j, f) ->
-      C.CLoop (i, j, fun k -> command (f k))
+      (* unroll the loop to avoid memo problems *)
+      let l = 
+        Misc.fold_from_to (fun acc k -> let c' = command (f k) in c' :: acc) []
+        i j
+      in
+      C.CSeq (List.rev l)
   | CDotLabel (pic, pos, pt) -> 
       let pic, c1 = Picture.compile pic in
       let pt, c2 = Point.compile pt in
