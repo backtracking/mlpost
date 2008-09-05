@@ -547,9 +547,9 @@ and Box : sig
     (** similar to [tabular], but using a matrix defined with a function *)
 
   val cpath :
-    ?style:PrimPath.joint ->
-    ?outd:PrimPath.direction ->
-    ?ind:PrimPath.direction -> t -> t -> Path.t
+    ?style:Path.joint ->
+    ?outd:Path.direction ->
+    ?ind:Path.direction -> t -> t -> Path.t
     (** the path that connects 2 boxes and stops at the box boundaries *) 
 end
 
