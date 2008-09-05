@@ -707,11 +707,11 @@ and Arrow : sig
 
   val draw : 
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
-    ?feet:head ->
+    ?foot:head ->
     ?head:head ->
     Point.t -> Point.t -> Command.t
   (** Draw a complex arrow between two points. You can specify the head
-    and the feet (which is the head at the beginning of the arrow). *)
+    and the foot (which is the head at the beginning of the arrow). *)
 end
 
 and Command : sig

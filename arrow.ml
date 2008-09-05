@@ -37,13 +37,13 @@ let simple_head ?color ?pen ?dashed ?(angle = 60.) ?(size = Num.bp 4.) p dir =
     Command.draw ?color ?pen ?dashed (Path.pathp [p; b]);
   ]
 
-let draw ?style ?outd ?ind ?(feet = fun x -> no_head x)
+let draw ?style ?outd ?ind ?(foot = fun x -> no_head x)
     ?(head = fun x -> simple_head x) a b =
   let path = pathk ?style [knotp ?r: outd a; knotp ?l: ind b] in
   let head_dir = Point.sub (Path.point 1. path) (Path.point 0.99 path) in
-  let feet_dir = Point.sub (Path.point 0. path) (Path.point 0.01 path) in
+  let foot_dir = Point.sub (Path.point 0. path) (Path.point 0.01 path) in
   Command.seq [
-    feet a feet_dir;
+    foot a foot_dir;
     Command.draw path;
     head b head_dir;
   ]

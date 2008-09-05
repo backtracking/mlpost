@@ -58,10 +58,10 @@
       "-xpdf", Set xpdf, " wysiwyg mode using xpdf";
       "-v", Set verbose, " be a bit more verbose";
       "-ocamlbuild", Set use_ocamlbuild, " Use ocamlbuild to compile";
-      "-ccopt", String add_ccopt, "\"<options>\" Pass <options> to the compiler";
+      "-ccopt", String add_ccopt, 
+      "\"<options>\" Pass <options> to the Ocaml compiler";
       "-execopt", String add_execopt,
-      "\"<options>\" Pass <options> to ocaml (same as -ccopt) or, \
-if using -ocamlbuild, to the compiled program";
+      "\"<options>\" Pass <options> to the compiled program";
     ]
 
   let () = 
