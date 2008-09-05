@@ -159,7 +159,7 @@ let rec right_split n pic =
 
 let d11 =
   let p1 = Picture.transform [Transform.rotated 90.] (Picture.tex "recursion") in
-    [Command.draw_pic (right_split 5 p1)]
+    [Command.draw_pic (right_split 3 p1)]
 
 let rec sierpinski p n =
   if n = 0 then p else
@@ -533,13 +533,13 @@ let newarray =
     (List.flatten boxes)@pics
 
 let figs = [
-  newarray; patates; yannick Box.rect; yannick Box.patatoid; 
-             placetest; boxjoin; box_align; stack; row; stackl; rowl; 
-	     array; mybresenham;
+  newarray; patates; yannick Box.rect; yannick Box.patatoid;
+             placetest; boxjoin; box_align; stack; row; stackl; rowl;
+	     array; mybresenham; 
             [Command.draw_pic shapes1]; [Command.draw_pic shapes2];
-            d16; d1; d15; florence; d14; d13; 
-             d11; d7; d6; d5; d4; cheno011; proval; d3;  
-                          d2sq; d2hsq; d2s; d2c; ] 
+            d16; d1; d15; florence; d14; d13;
+             d11; d7; d6; d5; d4; cheno011; proval; d3;
+                          d2sq; d2hsq; d2s; d2c;] 
 
 let figs =
   let r = ref 0 in
