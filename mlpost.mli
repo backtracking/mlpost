@@ -689,23 +689,29 @@ and Arrow : sig
   (** A simple arrow between two points. You can choose ingoing and outgoing
     directions. *)
 
-  val draw : 
-    ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
-    ?feet:(Point.t -> Point.t -> Command.t) ->
-    ?head:(Point.t -> Point.t -> Command.t) ->
-    Point.t -> Point.t -> Command.t
-  (** Draw a complex arrow between two points. You can specify the head
-    and the feet (which is the head at the beginning of the arrow). *)
-
   (** {2 Heads} *)
 
-  val no_head : Point.t -> Point.t -> Command.t
+  type head = Point.t -> Point.t -> Command.t
+  (** A head is simply a function which takes a point and a direction and
+    return a command which draws the head. *)
+
+  val no_head : head
   (** The empty head, meaning there is no head at all. *)
 
   val simple_head :
     ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> ?angle:float ->
-    ?size:Num.t -> Point.t -> Point.t -> Command.t
+    ?size:Num.t -> head
   (** A simple head with two straight lines. *)
+
+  (** {2 Drawing} *)
+
+  val draw : 
+    ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
+    ?feet:head ->
+    ?head:head ->
+    Point.t -> Point.t -> Command.t
+  (** Draw a complex arrow between two points. You can specify the head
+    and the feet (which is the head at the beginning of the arrow). *)
 end
 
 and Command : sig

@@ -20,6 +20,8 @@ let simple ?style ?outd ?ind a b =
   let r,l = outd, ind in
    pathk ?style [knotp ?r a; knotp ?l b]
 
+type head = Point.t -> Point.t -> Command.t
+
 let no_head p dir =
   Command.nop
 
