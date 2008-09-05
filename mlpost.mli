@@ -701,12 +701,12 @@ and Arrow : sig
 
   val no_head :
     ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> ?angle:float ->
-    ?size:Num.t -> unit -> Point.t -> Point.t -> Command.t
+    ?size:Num.t -> Point.t -> Point.t -> Command.t
   (** The empty head, meaning there is no head at all. *)
 
   val simple_head :
     ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> ?angle:float ->
-    ?size:Num.t -> unit -> Point.t -> Point.t -> Command.t
+    ?size:Num.t -> Point.t -> Point.t -> Command.t
   (** A simple head with two straight lines. *)
 end
 

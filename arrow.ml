@@ -20,10 +20,10 @@ let simple ?style ?outd ?ind a b =
   let r,l = outd, ind in
    pathk ?style [knotp ?r a; knotp ?l b]
 
-let no_head ?color ?pen ?dashed ?(angle = 60.) ?(size = Num.bp 4.) () p dir =
+let no_head ?color ?pen ?dashed ?(angle = 60.) ?(size = Num.bp 4.) p dir =
   Command.nop
 
-let simple_head ?color ?pen ?dashed ?(angle = 60.) ?(size = Num.bp 4.) () p dir =
+let simple_head ?color ?pen ?dashed ?(angle = 60.) ?(size = Num.bp 4.) p dir =
   let dir = Point.scale (Num.divn size (Point.length dir)) dir in
   let neg = Point.scale (Num.bp (-1.)) in
   let dir_a = neg (Point.rotate (angle /. 2.) dir) in
@@ -35,7 +35,8 @@ let simple_head ?color ?pen ?dashed ?(angle = 60.) ?(size = Num.bp 4.) () p dir 
     Command.draw ?color ?pen ?dashed (Path.pathp [p; b]);
   ]
 
-let draw ?style ?outd ?ind ?(feet = no_head ()) ?(head = simple_head ()) a b =
+let draw ?style ?outd ?ind ?(feet = fun x -> no_head x)
+    ?(head = fun x -> simple_head x) a b =
   let path = pathk ?style [knotp ?r: outd a; knotp ?l: ind b] in
   let head_dir = Point.sub (Path.point 1. path) (Path.point 0.99 path) in
   let feet_dir = Point.sub (Path.point 0. path) (Path.point 0.01 path) in
