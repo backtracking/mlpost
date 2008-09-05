@@ -20,7 +20,7 @@ let simple ?style ?outd ?ind a b =
   let r,l = outd, ind in
    pathk ?style [knotp ?r a; knotp ?l b]
 
-let no_head ?color ?pen ?dashed ?(angle = 60.) ?(size = Num.bp 4.) p dir =
+let no_head p dir =
   Command.nop
 
 let simple_head ?color ?pen ?dashed ?(angle = 60.) ?(size = Num.bp 4.) p dir =
