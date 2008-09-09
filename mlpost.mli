@@ -701,7 +701,12 @@ and Arrow : sig
   val simple_head :
     ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> ?angle:float ->
     ?size:Num.t -> head
-  (** A simple head with two straight lines. *)
+  (** A simple head with two straight lines.
+  @param color the color of the head; default is black
+  @param pen the pen used to draw the head; default is {!Pen.default}
+  @param dashed if given, the head is drawn using that dash_style
+  @param angle the angle between the two lines in degrees, default is 60 degrees
+  @param size the length of the two lines, default is 4bp *)
 
   (** {2 Drawing} *)
 
@@ -710,8 +715,14 @@ and Arrow : sig
     ?foot:head ->
     ?head:head ->
     Point.t -> Point.t -> Command.t
-  (** Draw a complex arrow between two points. You can specify the head
-    and the foot (which is the head at the beginning of the arrow). *)
+  (** Draw a complex arrow between two points.
+  @param style the joint style used for all joints in the path
+  @param outd the direction of the beginning of the arrow, for curved arrows
+  @param ind the direction of the end of the arrow, for curved arrows
+  @param foot the style used for the arrow head at the beginning of the arrow
+  (default is {!no_head})
+  @param head the style used for the arrow head at the end of the arrow
+  (default is {!simple_head}) *)
 end
 
 and Command : sig
