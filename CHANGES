@@ -6,8 +6,9 @@ version 0.3, current
 o new module Pos to place lists, arrays, trees
 * Num.f function removed
 o new commandline arguments -v, -eps
-* The functions in the Shapes module now build objects
-  of type Shapes.t instead of Path.t
+* The functions in the Shapes module now build objects of type Shapes.t
+  instead of Path.t
+* In Diag, one can now specify more (and different) types of boxes for nodes
 
 
 version 0.2, July 22nd, 2008
