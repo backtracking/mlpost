@@ -54,6 +54,7 @@ type arrow = {
   src : node; 
   dst : node; 
   lab : string; 
+  line_width : Num.t option;
   head : bool;
   dashed : Types.dash option;
   pos : Command.position option;
@@ -70,9 +71,10 @@ type t = {
 let create l = 
   { nodes = l; boxes = Hnode.create 17; arrows = [] }
 
-let arrow d ?(lab="") ?pos ?(head=true) ?dashed ?outd ?ind n1 n2 =
+let arrow d ?(lab="") ?line_width ?pos ?(head=true) ?dashed ?outd ?ind n1 n2 =
   d.arrows <- 
-    { src = n1; dst = n2; lab = lab; head = head;  dashed = dashed;
+    { src = n1; dst = n2; lab = lab; line_width = line_width ;
+      head = head;  dashed = dashed;
       pos = pos; outd = outd; ind = ind } 
   :: d.arrows
 
@@ -110,17 +112,25 @@ let box_of d = Hnode.find d.boxes
 let draw_arrow ?stroke ?pen ?dashed d a =
   let src = box_of d a.src in
   let dst = box_of d a.dst in
-  let ba, bla = 
-    if a.head then box_arrow, box_label_arrow
-    else box_line, box_label_line in
-  if a.lab = "" then 
-    ba ?color:stroke ?pen ?dashed:a.dashed 
-      ?outd:(outdir a.outd) ?ind:(indir a.ind) src dst
-  else
-    bla 
-      ?color:stroke ?pen ?dashed:a.dashed 
-      ?outd:(outdir a.outd) ?ind:(indir a.ind) 
-      ?pos:a.pos (Picture.tex a.lab) src dst
+  match a.line_width with
+    | None ->
+	let ba, bla = 
+	  if a.head then box_arrow, box_label_arrow
+	  else box_line, box_label_line in
+	if a.lab = "" then 
+	  ba ?color:stroke ?pen ?dashed:a.dashed 
+	    ?outd:(outdir a.outd) ?ind:(indir a.ind) src dst
+	else
+	  bla 
+	    ?color:stroke ?pen ?dashed:a.dashed 
+	    ?outd:(outdir a.outd) ?ind:(indir a.ind) 
+	    ?pos:a.pos (Picture.tex a.lab) src dst
+    | Some width ->
+	let path = Box.cpath ?outd:(outdir a.outd) ?ind:(indir a.ind) src dst in
+	let src = Path.point 0. path in
+	let dst = Path.point 1. path in
+	Arrow.draw_thick ?outd:(outdir a.outd) ?ind:(indir a.ind) 
+	    ~width src dst
 
 let fortybp x = Num.bp (40. *. x)
 

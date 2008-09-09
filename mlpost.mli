@@ -1061,13 +1061,16 @@ module Diag : sig
   type dir = Up | Down | Left | Right | Angle of float
 
   val arrow : 
-    t -> ?lab:string -> ?pos:Command.position -> 
+    t -> ?lab:string -> 
+    ?line_width:Num.t ->
+    ?pos:Command.position ->  
     ?head:bool -> ?dashed:Dash.t -> ?outd:dir -> ?ind:dir -> 
     node -> node -> unit
     (** [arrow d n1 n2] adds an arrow between n1 and n2 in the diagram d, by
         side effect.
 	@param lab The label of the arrow, in Latex format
 	@param pos The position of the label, relative to the arrow
+	@param line_width Draws a thick arrow of that width, if present (experimental)
 	@param head If true, the arrow has a head. Otherwise, it's just a line.
 	@param outd The outgoing direction of the arrow
 	@param ind The ingoing direction of the arrow *)
