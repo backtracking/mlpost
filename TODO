@@ -30,6 +30,9 @@
 * ranger le module Helpers
 * les fonctions de scale : pourquoi prennent-elles des Num.t, et non pas de
   float ?
+* exporter num_of_int
+* espace entre les captions de plot et le grid dépend de la largeur d'une
+  cellule - il ne devrait pas !
 
 * compilation
   - optimisation des inefficacités les plus évidentes 
@@ -46,6 +49,7 @@
 ===========================
 
 * intersection entre deux segments, chemins, ...
+* les Compound !!
 
 Module des Plots
 ==================
