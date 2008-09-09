@@ -167,7 +167,7 @@ FILES = *.ml *.mli *.mll \
 EXFILES = examples/Makefile examples/*.ml examples/all.template
 
 export: source export-www export-examples export-doc
-	cp README.txt INSTALL LICENSE CHANGES $(FTP)
+	cp README.txt INSTALL LICENSE CHANGES FAQ $(FTP)
 
 source: 
 	mkdir -p export/$(EXPORTDIR)
