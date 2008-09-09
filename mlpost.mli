@@ -301,8 +301,8 @@ and Path : sig
   (** {2 More complex constructions on paths} *)
 
   (** [point f p] returns a certain point on the path [p]; [f] is
-      given "in control points": [1.] means the first control point,
-      [2.] the second and so on; intermediate values are accepted. *)
+      given "in control points": [0.] means the first control point,
+      [1.] the second and so on; intermediate values are accepted. *)
   val point : float -> t -> Point.t
 
   (** [subpath start end path] selects the subpath of [path] that lies

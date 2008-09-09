@@ -50,6 +50,10 @@
 
 * intersection entre deux segments, chemins, ...
 * les Compound !!
+* refaire Diag : 
+    - pouvoir mettre n'importe quelle boîte
+    - pouvoir choisir les flêches
+    - interface fonctionelle
 
 Module des Plots
 ==================
