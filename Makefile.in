@@ -44,7 +44,7 @@ OFLAGS = -dtypes $(INCLUDES) @FORPACK@
 #############
 
 NAME = mlpost
-VERSION=0.3
+VERSION=0.4
 
 TESTS = handbookgraphs.cmx othergraphs.cmx tests.cmx
 TOOL = tool.$(OCAMLBEST)
