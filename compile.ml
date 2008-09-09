@@ -147,6 +147,9 @@ struct
         let n1,c1 = k n1 in
         let n2,c2 = k n2 in
           C.NGMean (n1,n2), c1 ++ c2
+    | NLength p ->
+        let p,c = Path.compile p in
+        C.NLength p, c
 end
 and PointBase : COMP with type t = point and type out = C.point =
 struct
@@ -167,6 +170,9 @@ struct
     | PTPointOf (f,p) -> 
         let p, code = Path.compile p in
           C.PTPointOf (f,p) , code
+    | PTDirectionOf (f,p) -> 
+        let p, code = Path.compile p in
+          C.PTDirectionOf (f,p) , code
     | PTAdd (p1,p2) -> 
         let p1,c1 = k p1 in
         let p2,c2 = k p2 in

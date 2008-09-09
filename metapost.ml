@@ -64,6 +64,7 @@ let rec print_num fmt = function
   | C.NMin (f1, f2) -> fprintf fmt "min(@ %a,@ %a)" print_num f1 print_num f2
   | C.NGMean (f1, f2) -> fprintf fmt "(%a@ ++@ %a)" print_num f1 print_num f2
   | C.NName n -> pp_print_string fmt n
+  | C.NLength p -> fprintf fmt "length (%a)" print_path p
 
 and print_float fmt f = print_num fmt (C.F f)
 
@@ -86,6 +87,8 @@ and print_point fmt = function
       fprintf fmt "(%a rotated %a)" print_point p print_float f
   | C.PTPointOf (f, p) ->
       fprintf fmt "(point %a of (%a))" print_float f print_path p
+  | C.PTDirectionOf (f, p) ->
+      fprintf fmt "(direction %a of (%a))" print_float f print_path p
   | C.PTTransformed (p,tr) -> fprintf fmt "((%a) %a)"
       print_point p print_transform_list (List.rev tr)
   | C.PTName pn -> pp_print_string fmt pn

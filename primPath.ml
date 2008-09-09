@@ -49,5 +49,8 @@ let build_cycle l = PABuildCycle l
 let subpath f1 f2 p = PASub (f1, f2, p)
 
 let point f p = PTPointOf (f, p)
+let direction f p = PTDirectionOf (f, p)
+
+let length p = NLength p
 
 let defaultjoint = JCurve

@@ -26,11 +26,13 @@ type num =
   | NMin of num * num
   | NGMean of num * num
   | NName of name
+  | NLength of path
 
 and point =
   | PTPair of num * num
   | PTPicCorner of picture * piccorner
   | PTPointOf of float * path
+  | PTDirectionOf of float * path
   | PTAdd of point * point
   | PTSub of point * point
   | PTMult of num * point

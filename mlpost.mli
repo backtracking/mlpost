@@ -692,8 +692,8 @@ and Arrow : sig
   (** {2 Heads} *)
 
   type head = Point.t -> Point.t -> Command.t
-  (** A head is simply a function which takes a point and a direction and
-    return a command which draws the head. *)
+  (** A head is simply a function which takes a point and a normalized
+    direction and return a command which draws the head. *)
 
   val no_head : head
   (** The empty head, meaning there is no head at all. *)
@@ -723,6 +723,14 @@ and Arrow : sig
   (default is {!no_head})
   @param head the style used for the arrow head at the end of the arrow
   (default is {!simple_head}) *)
+
+  val draw_thick :
+    ?style:Path.joint ->
+    ?outd:Path.direction ->
+    ?ind:Path.direction ->
+    ?width:Num.t ->
+    ?head_length:Num.t ->
+    ?head_width:Num.t -> Point.t -> Point.t -> Command.t
 end
 
 and Command : sig
