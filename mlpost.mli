@@ -454,7 +454,7 @@ and Box : sig
 
   val circle : ?dx:Num.t -> ?dy:Num.t -> Point.t -> Picture.t -> t
     (** [circle p pic] creates a circle box of center [p] and of contents
-	[pic]. Optional padding is given by arguments [dr]. *)
+    [pic]. Optional padding is given by arguments [dx] and [dy]. *)
 
   val ellipse : ?dx:Num.t -> ?dy:Num.t -> Point.t -> Picture.t -> t
     (** [ellipse p pic] creates a elliptic box of center [p] and of contents
@@ -1031,10 +1031,17 @@ module Diag : sig
   type node
     (** The abstract type of nodes *)
 
-  val node : ?fill:Color.t -> float -> float -> string -> node
+  type node_style = Point.t -> Picture.t -> Box.t
+  (** The type for node styles; It corresponds to the type of the box
+    creation functions in the {!Box} module *)
+
+  val node : ?style:node_style -> ?fill:Color.t -> 
+                float -> float -> string -> node
     (** Construct a node at a given position with a given content in Latex
-        format *)
-  val pic_node : ?fill:Color.t -> float -> float -> Picture.t -> node
+        format and a box style *)
+
+  val pic_node : ?style:node_style -> ?fill:Color.t -> 
+                   float -> float -> Picture.t -> node
     (** Construct a node at a given position with a given picture in it *)
 
   type t
@@ -1058,8 +1065,6 @@ module Diag : sig
 	@param ind The ingoing direction of the arrow *)
 
   (** {2 Drawing} *)
-
-  type node_style = Circle of Num.t | Rect
 
   val draw : 
     ?scale:(float -> Num.t) -> ?style:node_style -> 

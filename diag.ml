@@ -19,6 +19,7 @@ open Helpers
 module Node = struct
 
   type t = { 
+    box_style : (Point.t -> Picture.t -> Box.t) option;
     id : int; 
     fill : Color.t option;
     x : float; 
@@ -27,7 +28,8 @@ module Node = struct
 
   let create = 
     let c = ref min_int in 
-    fun fill x y s -> incr c; { id = !c; fill = fill; x = x; y = y; s = s; }
+    fun ?style fill x y s -> 
+      incr c; { box_style = style; id = !c; fill = fill; x = x; y = y; s = s; }
 
   let hash n = 
     n.id
@@ -43,8 +45,8 @@ open Node
 
 type node = Node.t
 
-let node ?fill x y s = Node.create fill x y (Picture.tex s)
-let pic_node ?fill = Node.create fill
+let node ?style ?fill x y s = Node.create ?style fill x y (Picture.tex s)
+let pic_node ?style ?fill = Node.create ?style fill
 
 type dir = Up | Down | Left | Right | Angle of float
 
@@ -91,14 +93,14 @@ let indir = function
 let outdir = function None -> None | Some x -> Some (outdir x)
 let indir = function None -> None | Some x -> Some (indir x)
 
-type node_style = Circle of Num.t | Rect
+type node_style = Point.t -> Picture.t -> Box.t
 
 let make_box ~style ~scale d n = 
   let p = Point.pt (scale n.x, scale n.y) in
   let pic = n.s in
-  let b = match style with 
-    | Circle dr -> Box.circle ~dx:dr p pic 
-    | Rect -> Box.rect p pic 
+  let b = match n.box_style with 
+  | None -> style p pic
+  | Some f -> f p pic
   in
   Hnode.add d.boxes n b;
   b
@@ -122,7 +124,9 @@ let draw_arrow ?stroke ?pen ?dashed d a =
 
 let fortybp x = Num.bp (40. *. x)
 
-let draw ?(scale=fortybp) ?(style=Circle (Num.bp 0.)) 
+let defaultbox = Box.round_rect ~dx:Num.two ~dy:Num.two
+
+let draw ?(scale=fortybp) ?(style=defaultbox) 
     ?boxed ?fill ?stroke ?pen d =
   let l = 
     List.map 
