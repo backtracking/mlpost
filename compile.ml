@@ -33,6 +33,7 @@ sig
   val name : name -> out
   val new_name : unit -> name
   val declare : name -> out -> C.command
+
   (* [compile] takes two functions as argument
    * both are intended to be used by [compile] for
    * recursive subcalls instead of calling itself

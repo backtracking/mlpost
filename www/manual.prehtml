@@ -87,14 +87,19 @@ file_a.1, file_b.1, etc.</#fr>
         <#en>indicates the main LaTeX file, from which the prelude is
         extracted to be passed to Metapost (this way you can use
         macros, fonts and packages from your LaTeX document in your
-        figures). </#en>
+        figures). main.tex has to contain at least a <em>documentclass</em> and the
+        line "\begin{document}". The contents of this file are taken into
+        account up to the "\begin{document}" part. </#en>
 	<#fr>spécifie le fichier LaTeX principal, dont le prélude est
 	extrait et passé à Metapost (on peut ainsi utiliser les
-	macros, polices et paquets du document LaTeX en question).</#fr>
+	macros, polices et paquets du document LaTeX en question). main.tex
+        doit contenir au moins une commande <em>documentclass</em> et la
+        commande "\begin{document}". </#fr>
         <#de>spezifiziert die LaTeX-Hauptdatei, deren LaTeX-Präambel an Metapost
         weitergegeben wird. Auf diese Weise können die gleichen Makros, Fonts
         und LaTeX-Pakete wie im LaTeX-Dokument in den Abbildungen verwendet
-        werden.  </#de>
+        werden. Die Datei main.tex muss mindestens den <em>documentclass</em>
+        Befehl und die Zeile "\begin{document}" enthalten.</#de>
 </dl>
 
 <hr>

@@ -40,6 +40,9 @@ Mlpost ist ein <#ocaml> Interface für <#metapost>.
 <#en>There is a <a href="manual.en.html">small manual</a>.</#en>
 <#de>Es gibt ein <a href="manual.en.html">kleines Handbuch</a>.</#de>
 
+<#fr>Il y a également une <a href="download/FAQ">FAQ</a>.</#fr>
+<#en>There also is a <a href="download/FAQ">FAQ</a>.</#en>
+<#de>Es gibt ebenfalls eine <a href="download/FAQ">FAQ</a>.</#de>
 <p>
 
 <#fr>Parcourir l'<a href="doc/">API</a>.Note : Tous les modules sont
