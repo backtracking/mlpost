@@ -68,15 +68,24 @@ let thick_path ?style ?outd ?ind ?(width = Num.bp 10.)
   let c2 = Point.add (Point.scale (Num.divf width (-2.)) b_normal) c in
   let c1' = Point.add (Point.scale (Num.divf head_width 2.) b_normal) c in
   let c2' = Point.add (Point.scale (Num.divf head_width (-2.)) b_normal) c in
+(*  let path_ac = simple ?style ?outd ?ind a c in
+  let m = Path.point 0.5 path_ac in
+  let m_dir = normalize (Path.direction 0.5 path_ac) in
+  let m_dir2 = Point.scale (Num.bp 0.) m_dir in
+  let m_normal = Point.rotate 90. m_dir in
+  let m1 = Point.add (Point.scale (Num.divf width 2.) m_normal) m in
+  let m2 = Point.add (Point.scale (Num.divf width (-2.)) m_normal) m in*)
   let path1 =
     pathk ~style: JCurve [
       knotp ~r: (Path.Vec a_dir) a1;
+(*      knotp m1;*)
       knotp ~l: (Path.Vec b_dir) c1;
     ]
   in
   let path2 =
     pathk ~style: JCurve [
       knotp ~r: (Path.Vec (neg b_dir)) c2;
+(*      knotp m2;*)
       knotp ~l: (Path.Vec (neg a_dir)) a2;
     ]
   in
