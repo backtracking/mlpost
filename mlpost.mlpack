@@ -1,5 +1,6 @@
 Num
 Point
+PrimPath
 Path
 Pen
 Dash
@@ -18,3 +19,5 @@ Shapes
 Misc
 Metapost
 Generate
+Compile
+Compiled_types
