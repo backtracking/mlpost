@@ -75,6 +75,7 @@ let () = dispatch begin function
           Cmd(S[A "convert"; A(env "%.ps"); A(env "%.png")])
         end;
 
+      flag ["ocaml"; "compile"] (S [A "-I";A "../../"; A "mlpost.cma"]);
       flag ["ocaml"; "link"] (A "../../mlpost.cma")
   | _ -> ()
 end
