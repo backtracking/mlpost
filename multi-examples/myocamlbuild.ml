@@ -1,4 +1,5 @@
 open Ocamlbuild_plugin
+open Command
 open Pathname
 
 let find_files base =
