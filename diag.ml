@@ -55,6 +55,9 @@ type arrow = {
   dst : node; 
   lab : string; 
   line_width : Num.t option;
+  boxed:bool;
+  line_color: Color.t option;
+  fill_color : Color.t option;
   head : bool;
   dashed : Types.dash option;
   pos : Command.position option;
@@ -71,9 +74,12 @@ type t = {
 let create l = 
   { nodes = l; boxes = Hnode.create 17; arrows = [] }
 
-let arrow d ?(lab="") ?line_width ?pos ?(head=true) ?dashed ?outd ?ind n1 n2 =
+let arrow d ?(lab="") ?line_width ?(boxed=true) ?line_color ?fill_color 
+    ?pos ?(head=true) ?dashed ?outd ?ind n1 n2 =
   d.arrows <- 
-    { src = n1; dst = n2; lab = lab; line_width = line_width ;
+    { src = n1; dst = n2; lab = lab; 
+      line_width = line_width ; boxed = boxed ;
+      line_color = line_color ; fill_color = fill_color ;
       head = head;  dashed = dashed;
       pos = pos; outd = outd; ind = ind } 
   :: d.arrows
@@ -129,8 +135,9 @@ let draw_arrow ?stroke ?pen ?dashed d a =
 	let path = Box.cpath ?outd:(outdir a.outd) ?ind:(indir a.ind) src dst in
 	let src = Path.point 0. path in
 	let dst = Path.point 1. path in
-	Arrow.draw_thick ?outd:(outdir a.outd) ?ind:(indir a.ind) 
-	    ~width src dst
+	Arrow.draw_thick ~boxed:a.boxed ?line_color:a.line_color 
+	  ?fill_color:a.fill_color 
+	  ?outd:(outdir a.outd) ?ind:(indir a.ind) ~width src dst
 
 let fortybp x = Num.bp (40. *. x)
 
@@ -142,7 +149,7 @@ let draw ?(scale=fortybp) ?(style=defaultbox)
     List.map 
       (fun n -> 
 	 let fill = if n.fill <> None then n.fill else fill in
-	   Box.draw ?fill ?boxed (make_box ~style ~scale d n)) d.nodes
+	 Box.draw ?fill ?boxed (make_box ~style ~scale d n)) d.nodes
   in
   Command.seq (l @ List.map (draw_arrow ?stroke ?pen d) d.arrows)
 

@@ -726,6 +726,9 @@ and Arrow : sig
 
   val draw_thick :
     ?style:Path.joint ->
+    ?boxed:bool ->
+   ?line_color:Color.t ->
+    ?fill_color:Color.t ->
     ?outd:Path.direction ->
     ?ind:Path.direction ->
     ?width:Num.t ->
@@ -1063,6 +1066,9 @@ module Diag : sig
   val arrow : 
     t -> ?lab:string -> 
     ?line_width:Num.t ->
+    ?boxed:bool ->
+    ?line_color:Color.t ->
+    ?fill_color:Color.t ->
     ?pos:Command.position ->  
     ?head:bool -> ?dashed:Dash.t -> ?outd:dir -> ?ind:dir -> 
     node -> node -> unit

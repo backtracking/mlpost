@@ -99,6 +99,15 @@ let thick_path ?style ?outd ?ind ?(width = Num.bp 10.)
   cycle ~style: JLine
     (append ~style: JLine (append ~style: JLine path1 path_head) path2)
 
-let draw_thick ?style ?outd ?ind ?width ?head_length ?head_width a b =
+let draw_thick ?style ?(boxed=true) ?line_color ?fill_color ?outd ?ind ?width ?head_length ?head_width a b =
   let p = thick_path ?style ?outd ?ind ?width ?head_length ?head_width a b in
-  Command.draw p
+  let draw_cmd =
+    if boxed then Command.draw ?color:line_color p else Command.nop
+  in
+  let fill_cmd =
+    match fill_color with
+      | None -> Command.nop
+      | Some c -> Command.fill ~color:c p
+  in
+  Command.append fill_cmd draw_cmd
+
