@@ -1046,12 +1046,12 @@ module Diag : sig
   (** The type for node styles; It corresponds to the type of the box
     creation functions in the {!Box} module *)
 
-  val node : ?style:node_style -> ?fill:Color.t -> 
+  val node : ?style:node_style -> ?fill:Color.t -> ?boxed:bool ->
                 float -> float -> string -> node
     (** Construct a node at a given position with a given content in Latex
         format and a box style *)
 
-  val pic_node : ?style:node_style -> ?fill:Color.t -> 
+  val pic_node : ?style:node_style -> ?fill:Color.t -> ?boxed:bool ->
                    float -> float -> Picture.t -> node
     (** Construct a node at a given position with a given picture in it *)
 

@@ -22,14 +22,17 @@ module Node = struct
     box_style : (Point.t -> Picture.t -> Box.t) option;
     id : int; 
     fill : Color.t option;
+    boxed: bool option;
     x : float; 
     y : float; 
     s : Picture.t; }
 
   let create = 
     let c = ref min_int in 
-    fun ?style fill x y s -> 
-      incr c; { box_style = style; id = !c; fill = fill; x = x; y = y; s = s; }
+    fun style fill boxed x y s -> 
+      incr c; 
+      { box_style = style; id = !c; fill = fill; boxed = boxed; 
+	x = x; y = y; s = s; }
 
   let hash n = 
     n.id
@@ -45,8 +48,10 @@ open Node
 
 type node = Node.t
 
-let node ?style ?fill x y s = Node.create ?style fill x y (Picture.tex s)
-let pic_node ?style ?fill = Node.create ?style fill
+let node ?style ?fill ?boxed x y s = 
+  Node.create style fill boxed x y (Picture.tex s)
+let pic_node ?style ?fill ?boxed = 
+  Node.create style fill boxed
 
 type dir = Up | Down | Left | Right | Angle of float
 
@@ -149,6 +154,7 @@ let draw ?(scale=fortybp) ?(style=defaultbox)
     List.map 
       (fun n -> 
 	 let fill = if n.fill <> None then n.fill else fill in
+	 let boxed = if n.Node.boxed <> None then n.Node.boxed else boxed in
 	 Box.draw ?fill ?boxed (make_box ~style ~scale d n)) d.nodes
   in
   Command.seq (l @ List.map (draw_arrow ?stroke ?pen d) d.arrows)
