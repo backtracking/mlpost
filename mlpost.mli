@@ -424,17 +424,34 @@ and Color : sig
 
   (** {2 Predefined Colors} *)
 
-  val red : t
-  val orange : t
-  val blue : t
-  val purple : t
-  val gray : float -> t
+  (** base colors *)
   val white : t
   val black : t
+  val red : t
+  val blue : t
   val green : t
   val cyan : t
   val yellow : t
   val magenta : t
+    
+  (** lighter colors *)
+  val lightred : t
+  val lightblue : t
+  val lightgreen : t
+  val lightcyan : t
+  val lightyellow : t
+  val lightmagenta : t
+
+  (** grays *)
+  val gray : float -> t
+  val lightgray : t
+  val mediumgray : t
+  val darkgray : t
+
+  (** additional colors *)
+
+  val orange : t
+  val purple : t
 
   (** {3 X11-named Colors} *)
   val color : string -> t

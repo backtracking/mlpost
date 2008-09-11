@@ -22,15 +22,24 @@ type t = Types.color =
   | Gray of float
          
 let red = RGB (1.0,0.0,0.0)
+let lightred = RGB (1.0,0.5,0.5)
 let blue = RGB (0.0,0.0,1.0)
+let lightblue = RGB (0.5,0.5,1.0)
 let green = RGB (0.0,1.0,0.0)
+let lightgreen = RGB (0.5,1.0,0.5)
 let orange = RGB (1.0,0.4,0.0)
 let purple = RGB (0.6,0.0,0.6)
 let magenta = RGB (1.0,0.0,1.0)
+let lightmagenta = RGB (1.0,0.5,1.0)
 let cyan =  RGB (0.0,1.0,1.0)
+let lightcyan =  RGB (0.5,1.0,1.0)
 let yellow = RGB (1.0,1.0,0.0)
+let lightyellow = RGB (1.0,1.0,0.0)
 let gray f = Gray f
 let white = gray 1.0
+let lightgray = gray 0.75
+let mediumgray = gray 0.5
+let darkgray = gray 0.25
 let black = gray 0.0
 let default = black
 let rgb r g b = RGB (r,g,b)
