@@ -53,7 +53,7 @@ struct
   let round_rect ?(dx=margin) ?(dy=margin) p =
     let dx = P.width p +/ dx in
     let dy = P.height p +/ dy in
-    let rx = min (dx /./ 10.) (dy /./ 10.) in
+    let rx = (minn dx dy) /./ 10. in
     { p = p; 
       bs = Shapes.shift (P.ctr p) (Shapes.rounded_rect_path dx dy rx rx)}
               
