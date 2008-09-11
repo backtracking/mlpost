@@ -424,7 +424,8 @@ and Color : sig
 
   (** {2 Predefined Colors} *)
 
-  (** base colors *)
+  (** {3 base colors} *)
+
   val white : t
   val black : t
   val red : t
@@ -434,7 +435,8 @@ and Color : sig
   val yellow : t
   val magenta : t
     
-  (** lighter colors *)
+  (** {3 lighter colors} *)
+
   val lightred : t
   val lightblue : t
   val lightgreen : t
@@ -442,18 +444,20 @@ and Color : sig
   val lightyellow : t
   val lightmagenta : t
 
-  (** grays *)
+  (** {3 grays} *)
+
   val gray : float -> t
   val lightgray : t
   val mediumgray : t
   val darkgray : t
 
-  (** additional colors *)
+  (** {3 additional colors} *)
 
   val orange : t
   val purple : t
 
   (** {3 X11-named Colors} *)
+
   val color : string -> t
     (** [color n] returns the RGB color associated to name [n]
 	(as defined in /etc/X11/rgb.txt). Raises [Not_found] if [n] does not
