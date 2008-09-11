@@ -486,10 +486,16 @@ and Box : sig
 	[pic]. Optional padding is given by arguments [dx] and [dy] ; 
 	default is 2bp. *)
 
+  val round_rect_gen : ?dx:Num.t -> ?dy:Num.t -> ?rx:Num.t -> ?ry:Num.t -> 
+    Point.t -> Picture.t -> t
+    (** [round_rect_gen p pic] creates a rectangular box of center [p] and 
+	of contents [pic], with rounded corners of radii [rx] and [ry]. 
+	Optional padding is given by [dx] and [dy] ; default is 2bp *)
+
   val round_rect : ?dx:Num.t -> ?dy:Num.t -> Point.t -> Picture.t -> t
-    (** [round_rect p pic] creates a rectangular box of center [p] and of contents
-	[pic], with rounded corners. Optional padding is given by [dx] and
-	[dy] ; default is 2bp *)
+    (** [round_rect p pic] creates a rectangular box of center [p] and of 
+	contents [pic], with rounded corners. Optional padding is given by [dx] 
+	and [dy] ; default is 2bp *)
 
   val base_rect : ?dx:Num.t -> ?dy:Num.t -> Picture.t -> t
     (** same as [rect] but do not move the picture *)

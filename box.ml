@@ -50,13 +50,18 @@ struct
     let ry = P.height p +/ dy in
     { p = p; bs = Shapes.shift (P.ctr p) (Shapes.full_ellipse_path rx ry) }
 
-  let round_rect ?(dx=margin) ?(dy=margin) p =
+  let round_rect_gen ?(dx=margin) ?(dy=margin) ?(rx=margin) ?(ry=margin) p =
     let dx = P.width p +/ dx in
     let dy = P.height p +/ dy in
-    let rx = (minn dx dy) /./ 10. in
     { p = p; 
-      bs = Shapes.shift (P.ctr p) (Shapes.rounded_rect_path dx dy rx rx)}
-              
+      bs = Shapes.shift (P.ctr p) (Shapes.rounded_rect_path dx dy rx ry)}
+
+  let round_rect ?(dx=margin) ?(dy=margin) p =
+    let dx' = P.width p +/ dx in
+    let dy' = P.height p +/ dy in
+    let rx = (minn dx' dy') /./ 10. in
+      round_rect_gen ~dx ~dy ~rx ~ry:rx p
+
   let patatoid ?(dx=2. *./ margin) ?(dy=2. *./ margin) p =
     let w = P.width p in
     let h = P.height p in
@@ -97,6 +102,8 @@ include PicBox
 let base_rect = rect
 let rect ?dx ?dy c p = center c (rect ?dx ?dy p)
 let circle ?dx ?dy c p = center c (circle ?dx ?dy p)
+let round_rect_gen ?dx ?dy ?rx ?ry c p = 
+  center c (round_rect_gen ?dx ?dy ?rx ?ry p)
 let round_rect ?dx ?dy c p = center c (round_rect ?dx ?dy p)
 let ellipse ?dx ?dy c p = center c (ellipse ?dx ?dy p)
 let patatoid ?dx ?dy c p = center c (patatoid ?dx ?dy p)
