@@ -305,6 +305,9 @@ and Path : sig
       [1.] the second and so on; intermediate values are accepted. *)
   val point : float -> t -> Point.t
 
+  (** [direction f p] returns the direction of the tangent at [point f p]. *)
+  val direction : float -> t -> Point.t
+
   (** [subpath start end path] selects the subpath of [path] that lies
       between [start] and [end]. [start] and [end] are given in
       control points, as in {!point}. *)
@@ -761,6 +764,120 @@ and Arrow : sig
     ?width:Num.t ->
     ?head_length:Num.t ->
     ?head_width:Num.t -> Point.t -> Point.t -> Command.t
+end
+
+and ExtArrow : sig
+  (** Draw simple or complex arrows. *)
+
+  (** To draw an arrow, choose your arrow [kind], then call the [draw] function
+      (giving the path that the arrow will follow) or the [draw2] function
+      (giving the starting and ending points of the arrow). If your favorite
+      arrow [kind] does not exist, use the tools from this module to build your
+      own! *)
+
+  (** {2 Bodies} *)
+
+  type body
+    (** The abstract type for arrow bodies *)
+
+  (** {3 Building Your Own Body} *)
+
+  (** Start from the empty body [body_empty] and add features to it using
+      [add_line]. *)
+
+  val body_empty: body
+    (** The invisible body. *)
+
+  val add_line: ?dashed: Dash.t -> ?color: Color.t -> ?pen: Pen.t ->
+    ?from_point: float -> ?to_point: float -> ?dist: Num.t -> body -> body
+    (** Add a line to a body. The line will be parallel to the path used
+        to draw the arrow.
+        @param dashed the dash style used to draw the line (default is plain)
+        @param color the color of the line (default is black)
+        @param pen the pen used to draw the line (default is {!Pen.default})
+        @param from_point from [0.] (foot of the arrow) to [1.] (head of the
+          arrow), the line will start from this point
+        @param to_point from [0.] (foot of the arrow) to [1.] (head of the
+          arrow), the line will end at this point
+        @param dist the distance between the path of the arrow and this line
+          (may be negative) *)
+
+  (** {3 Built-in Bodies} *)
+
+  val body_simple: body
+    (** A simple body with one line. *)
+
+  val body_double: body
+    (** A body with two parallel lines. *)
+
+  (** {2 Heads} *)
+
+  type head = Point.t -> Point.t -> Command.t * Path.t
+    (** If [h] is a head, [h p d] returns [c, p] where [c] is a command that can
+        be used to draw the head at point [p] with direction [d], and [p] is a
+        path that can be used to cut the arrow lines. [d] is normalized before
+        being given to the function. *)
+
+  val head_classic : ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
+    ?angle:float -> ?size:Num.t -> head
+  (** A simple head with two straight lines.
+      @param color the color of the head; default is black
+      @param pen the pen used to draw the head; default is {!Pen.default}
+      @param dashed if given, the head is drawn using that dash_style
+      @param angle the angle between the two lines in degrees, default is 60
+        degrees
+      @param size the length of the two lines, default is 4bp *)
+
+  (** {2 Arrow Kinds} *)
+
+  type kind
+    (** The abstract type for arrow kinds *)
+
+  (** {3 Buildind Your Own Kind} *)
+
+  (** Start from your favorite body, build an empty kind from it using
+      [kind_empty], and then add arrow heads to it. *)
+
+  val add_head: ?head: head -> kind -> kind
+    (** Add a head at the end of the arrow.
+        @param head the kind of head to add (default is {!head_classic}) *)
+
+  val add_foot: ?head: head -> kind -> kind
+    (** Add a foot (an inverted head) at the beginning of the arrow.
+        @param head the kind of head to add (default is {!head_classic}) *)
+
+  val add_belt: ?clip: bool -> ?rev: bool -> ?point: float -> ?head: head ->
+    kind -> kind
+    (** Add an arrow head at any point of an arrow.
+        @param clip if [true], the arrow lines will be clipped after the belt
+          (or before if the [rev] is [true]) (default is [false])
+        @param rev if [true], the head will be drawn in the opposite direction
+          (default is [false])
+        @param point the point where to draw the arrow ([0.] for the beginning,
+          and [1.] for the end, or any number in-between) (default is [0.5])
+        @param head the kind of head to add (default is {!head_classic}) *)
+
+  (** {3 Built-in Kinds} *)
+
+  val simple: kind
+    (** A simple arrow with one line and two straight lines for the head. *)
+
+  val double: kind
+    (** An arrow with two parallel lines and two straight lines for the head.
+        Can be used for logical implications, for instance. *)
+
+  (** {2 Drawing Arrows} *)
+
+  val draw: ?kind: kind -> Path.t -> Command.t
+    (** Draw an arrow following the given path.
+        @param kind the kind of arrow (default is {!simple}) *)
+
+  val draw2: ?kind: kind -> ?outd: Path.direction -> ?ind: Path.direction ->
+    Point.t -> Point.t -> Command.t
+    (** Use [draw2 a b] to draw an arrow from [a] to [b].
+        @param kind the kind of arrow (default is {!simple})
+        @param outd the outgoing direction, at the beginning of the arrow
+        @param ind the ingoing direction, at the end of the arrow *)
 end
 
 and Command : sig

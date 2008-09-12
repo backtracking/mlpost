@@ -110,4 +110,3 @@ let draw_thick ?style ?(boxed=true) ?line_color ?fill_color ?outd ?ind ?width ?h
       | Some c -> Command.fill ~color:c p
   in
   Command.append fill_cmd draw_cmd
-
