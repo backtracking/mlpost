@@ -28,6 +28,9 @@ let (++) c1 c2 =
 module type COMP =
 sig
   type t
+(*
+  val hash : t -> int
+*)
   type out
   val is_simple : t -> bool
   val name : name -> out
@@ -58,7 +61,14 @@ struct
   module HM = Hashtbl.Make(
     struct
       (* structural equality : slow but precise *)
-      type t = E.t let equal = (=) let hash = Hashtbl.hash
+      type t = E.t 
+      let equal = (=) 
+      let hash x = 
+	let n = (* E.hash *)  Hashtbl.hash x (* land 0x3FFFFFFF *) in
+(*
+	Format.eprintf "%d@." n;
+*)
+	n
   end)
 
   type t = E.t
@@ -103,6 +113,9 @@ let option_compile f = function
 module rec NumBase : COMP with type t = num and type out = C.num =
 struct
   type t = num
+(*
+  let hash = Hash.num
+*)
   type out = C.num
   
   let new_name = Name.num
@@ -154,6 +167,9 @@ end
 and PointBase : COMP with type t = point and type out = C.point =
 struct
   type t = point
+(*
+  let hash = Hash.point
+*)
   type out = C.point
   let new_name = Name.point
 
@@ -199,6 +215,9 @@ end
 and PathBase : COMP with type t = path and type out = C.path =
 struct
   type t = path
+(*
+  let hash = Hash.path
+*)
   type out = C.path
   let new_name = Name.path
 
@@ -297,6 +316,9 @@ end
 and PicBase : COMP with type t = picture and type out = C.picture =
 struct
   type t = picture
+(*
+  let hash = Hash.picture
+*)
   type out = C.picture
   let new_name = Name.picture
   let name n = C.PIName n

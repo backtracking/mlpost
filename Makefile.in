@@ -38,7 +38,7 @@ LIBEXT = @LIBEXT@
 OBJEXT = @OBJEXT@
 
 BFLAGS = -dtypes -g $(INCLUDES) 
-OFLAGS = -dtypes $(INCLUDES) @FORPACK@
+OFLAGS = -p -g -dtypes $(INCLUDES) @FORPACK@
 
 # main target
 #############
