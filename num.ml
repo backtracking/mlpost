@@ -21,7 +21,7 @@ type t = num
 
 let zero = mkF 0.
 let one = mkF 1.
-let minus_one = mkF 1.
+let minus_one = mkF (-.1.)
 let two = mkF 2.
 
 let num_of_int i = mkF (float_of_int i)
