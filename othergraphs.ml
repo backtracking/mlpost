@@ -30,8 +30,8 @@ let a = 0., 0.
 let b = 1., 0.
 let c = 0., 1.
 let l = [a ; b ; c]
-let d1 = 1, [draw (path ~style:JLine ~scale:N.cm l)]
-let d2 = 2, [draw (path ~style:JLine ~scale:N.cm ~cycle:JLine l)]
+let d1 = 1, [draw (path ~style:jLine ~scale:N.cm l)]
+let d2 = 2, [draw (path ~style:jLine ~scale:N.cm ~cycle:jLine l)]
 
 let d4 =  
   let pen = Pen.circle ~tr:[T.scaled (bp 4.)] () in
@@ -39,12 +39,12 @@ let d4 =
 
 let d5 = 5,
          let pen = P.circle ~tr:[T.scaled (bp 4.)] () in
-           [draw (path ~style:JLine ~scale:N.cm ~cycle:JLine l)] @
+           [draw (path ~style:jLine ~scale:N.cm ~cycle:jLine l)] @
            (List.map  (fun point -> draw ~pen (path ~scale:N.cm [point])) l)
 
 let d7 = 7,
          let a , b, c = cmp a, cmp b, cmp c in
-           [draw (path ~style:JLine ~scale:N.cm ~cycle:JLine l) ;
+           [draw (path ~style:jLine ~scale:N.cm ~cycle:jLine l) ;
             draw (pathp [ segment 0.5 a b ; c]) ;
             draw (pathp [ segment 0.5 b c ; a]) ;
             draw (pathp [ segment 0.5 c a ; b]) ; ]
@@ -54,11 +54,11 @@ let d12 = 12,
           let cl = List.map Color.gray [0.8;0.6;0.4] in
             List.map2
               (fun (a,b) color ->
-                 draw ~pen ~color (path ~style:JLine ~scale:N.cm [a;b]))
+                 draw ~pen ~color (path ~style:jLine ~scale:N.cm [a;b]))
               [a,b;b,c;c,a] cl
 
 let triangle = 
-  path ~scale:N.cm ~style:JLine ~cycle:JLine [(0.,0.);(1.,0.);(0.,1.)]
+  path ~scale:N.cm ~style:jLine ~cycle:jLine [(0.,0.);(1.,0.);(0.,1.)]
 
 let d20 =
   20, [fill ~color:(Color.gray 0.8) triangle]
@@ -82,8 +82,8 @@ let d60 =
   let c = p ~scale:N.cm (2., 1.5) in
   let d = p ~scale:N.cm (1.5, 0.) in
   let pen = Pen.circle ~tr:[T.scaled two] () in
-    [ draw ~pen (jointpathp [a;d] [JControls (b,c)]);
-      draw ~color:(Co.gray 0.8) (pathp ~style:JLine [b;c]);
+    [ draw ~pen (jointpathp [a;d] [jControls b c]);
+      draw ~color:(Co.gray 0.8) (pathp ~style:jLine [b;c]);
       H.draw_simple_arrow a b; H.draw_simple_arrow d c; ]
 
 
@@ -102,7 +102,7 @@ let d111 =
 let deuxpi = 2.*.3.14159
 
 let d130 =
-  let sq = path ~style:JLine ~scale:N.cm ~cycle:JLine 
+  let sq = path ~style:jLine ~scale:N.cm ~cycle:jLine 
     [(0.,0.);(2.,0.);(2.,2.);(0.,2.)] in
     (** on peut pas utiliser la resolution de MetaPost donc on
 	construit la transform à la main.. :-/ *)
@@ -158,7 +158,7 @@ let d195 =
 	    if k mod 2 = 1 then [(kf,0.); (u1,umk); (u1,udm); (udp,0.)]
 	    else [(0.,kf); (umk,u1); (udm,u1); (0.,udp)]
 	  in fill ~color (transform [t i j]
-			    (path ~style:JLine ~scale:N.mm ~cycle:JLine l))
+			    (path ~style:jLine ~scale:N.mm ~cycle:jLine l))
 	in
 	Command.iter 0 4 strip
       else Command.nop
@@ -167,8 +167,8 @@ let d195 =
   in
   let grid i =
     let ui = u i in
-    seq [draw (path ~style:JLine ~scale:N.mm [(0.,ui); (un, ui)]);
-	 draw (path ~style:JLine ~scale:N.mm [(ui,0.); (ui, un)])]
+    seq [draw (path ~style:jLine ~scale:N.mm [(0.,ui); (un, ui)]);
+	 draw (path ~style:jLine ~scale:N.mm [(ui,0.); (ui, un)])]
   in
     (195, [Command.iter 0 (n-1) row; Command.iter 0 (n) grid])
 
@@ -180,8 +180,8 @@ let d267 =
     cut_after (bpath b) 
       (cut_before (bpath a) 
 	  (jointpathk
-	      [knotp ~r:(Vec (dir angle)) (Box.ctr a); 
-	       knotp ~r:(Vec (dir (-. angle))) (Box.ctr b)] [JCurve])) 
+	      [knotp ~r:(vec (dir angle)) (Box.ctr a); 
+	       knotp ~r:(vec (dir (-. angle))) (Box.ctr b)] [jCurve])) 
   in
   [Box.draw ~fill:rose a; Box.draw ~fill:rose b;
    draw_arrow (path 45. a b); draw_arrow (path (-135.) b a)]

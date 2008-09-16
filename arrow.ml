@@ -76,28 +76,28 @@ let thick_path ?style ?outd ?ind ?(width = Num.bp 10.)
   let m1 = Point.add (Point.scale (Num.divf width 2.) m_normal) m in
   let m2 = Point.add (Point.scale (Num.divf width (-2.)) m_normal) m in*)
   let path1 =
-    pathk ~style: JCurve [
-      knotp ~r: (Path.Vec a_dir) a1;
+    pathk ~style:jCurve [
+      knotp ~r: (vec a_dir) a1;
 (*      knotp m1;*)
-      knotp ~l: (Path.Vec b_dir) c1;
+      knotp ~l: (vec b_dir) c1;
     ]
   in
   let path2 =
-    pathk ~style: JCurve [
-      knotp ~r: (Path.Vec (neg b_dir)) c2;
+    pathk ~style:jCurve [
+      knotp ~r: (vec (neg b_dir)) c2;
 (*      knotp m2;*)
-      knotp ~l: (Path.Vec (neg a_dir)) a2;
+      knotp ~l: (vec (neg a_dir)) a2;
     ]
   in
   let path_head =
-    pathk ~style: JLine [
+    pathk ~style:jLine [
       knotp c1';
       knotp b;
       knotp c2';
     ]
   in
-  cycle ~style: JLine
-    (append ~style: JLine (append ~style: JLine path1 path_head) path2)
+  cycle ~style:jLine
+    (append ~style:jLine (append ~style:jLine path1 path_head) path2)
 
 let draw_thick ?style ?(boxed=true) ?line_color ?fill_color ?outd ?ind ?width ?head_length ?head_width a b =
   let p = thick_path ?style ?outd ?ind ?width ?head_length ?head_width a b in

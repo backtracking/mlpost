@@ -17,14 +17,16 @@
 module S = Point
 include PrimPath
 
-let knotp ?(l=NoDir) ?(r=NoDir) p = (l, p, r)
+let knotp ?(l=defaultdir) ?(r=defaultdir) p = Types.mkKnot l p r 
 
 let knot ?(l) ?(r) ?(scale) p = knotp ?l (S.p ?scale p) ?r
 let knotn ?(l) ?(r) p = knotp ?l (S.pt p) ?r
 
-let cycle_tmp ?(dir=NoDir) ?(style=defaultjoint) p = PrimPath.cycle dir style p
+let knotlist = List.map (fun (x,y,z) -> Types.mkKnot x y z)
+
+let cycle_tmp ?(dir=defaultdir) ?(style=defaultjoint) p = PrimPath.cycle dir style p
 let cycle = cycle_tmp
-let concat ?(style=JCurve) p k = concat p style k
+let concat ?(style=defaultjoint) p k = concat p style k
 
 (* construct a path with a given style from a knot list *)
 let pathk ?(style) ?(cycle) = function
@@ -54,7 +56,7 @@ let jointpathp lp lj  = jointpathk (List.map (knotp) lp) lj
 let jointpathn lp lj  = jointpathk (List.map knotn lp) lj
 let jointpath ?(scale) lp lj  = jointpathk (List.map (knot ?scale) lp) lj
 
-let append ?(style=JCurve) p1 p2 = append p1 style p2
+let append ?(style=defaultjoint) p1 p2 = append p1 style p2
 
 let scale f p = transform [Transform.scaled f] p
 let rotate f p = transform [Transform.rotated f] p

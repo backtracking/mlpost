@@ -7,7 +7,7 @@ let fig =
   let k = 7. in
   let pen = Pen.square ~tr:[T.yscaled (bp 0.5); T.rotated 40.] () in
   let check = 
-    jointpath [-1.2,1.2; 0., -2. ; 2., 2. ; 5., 5.] [JLine ; JCurve; JCurve]
+    jointpath [-1.2,1.2; 0., -2. ; 2., 2. ; 5., 5.] [jLine ; jCurve; jCurve]
   in
   [fill ~color:Color.black 
       (Path.scale (bp k) Path.fullcircle) ;

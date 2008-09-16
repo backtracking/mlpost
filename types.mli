@@ -36,12 +36,12 @@ type position =
   | Plowleft
   | Plowright
 
-type num = 
+type num = private
   | F of float
   | NXPart of point
   | NYPart of point
   | NAdd of num * num
-  | NMinus of num * num
+  | NSub of num * num
   | NMult of num * num
   | NDiv of num * num
   | NMax of num * num
@@ -49,7 +49,7 @@ type num =
   | NGMean of num * num
   | NLength of path
 
-and point = 
+and point = private
   | PTPair of num * num
   | PTPicCorner of picture * piccorner
   | PTPointOf of float * path
@@ -60,23 +60,26 @@ and point =
   | PTRotated of float * point
   | PTTransformed of point * transform list
 
-and on_off = On of num | Off of num
+and on_off = private 
+  | On of num 
+  | Off of num
 
-and direction = 
+and direction = private
   | Vec of point
   | Curl of float
   | NoDir 
 
-and joint = 
+and joint = private
   | JLine
   | JCurve
   | JCurveNoInflex
   | JTension of float * float
   | JControls of point * point
 
-and knot = direction * point * direction
+and knot = private 
+    { knot_in : direction ; knot_p : point ; knot_out : direction }
 
-and path =
+and path = private
   | PAConcat of knot * joint * path
   | PACycle of direction * joint * path
   | PAFullCircle
@@ -92,7 +95,7 @@ and path =
   | PASub of float * float * path
   | PABBox of picture
 
-and transform =
+and transform = private
   | TRRotated of float
   | TRScaled of num
   | TRShifted of point
@@ -103,26 +106,26 @@ and transform =
   | TRReflect of point * point
   | TRRotateAround of point * float
 
-and picture = 
+and picture = private
   | PITex of string
   | PIMake of command
   | PITransform of transform list * picture
   | PIClip of picture * path
 
-and dash =
+and dash = private
   | DEvenly
   | DWithdots
   | DScaled of float * dash
   | DShifted of point * dash
   | DPattern of on_off list
 
-and pen = 
+and pen = private
   | PenCircle
   | PenSquare
   | PenFromPath of path
   | PenTransformed of pen * transform list
 
-and command =
+and command = private
   | CDraw of path * color option * pen option * dash option
   | CDrawArrow of path * color option * pen option * dash option
   | CDrawPic of picture
@@ -131,8 +134,139 @@ and command =
   | CDotLabel of picture * position * point
   | CLoop of int * int * (int -> command)
   | CSeq of command list
-(*
-  These have moved into the compiled AST
-  | CDeclPath of name * path
-  | CDefPic of name * command
-    *)
+
+(* num *)
+
+val mkF: float -> num
+
+val mkNAdd : num -> num -> num
+
+val mkNSub : num -> num -> num
+
+val mkNMult : num -> num -> num
+
+val mkNDiv : num -> num -> num
+
+val mkNMax : num -> num -> num
+
+val mkNMin : num -> num -> num
+
+val mkNGMean : num -> num -> num
+
+val mkNXPart : point -> num
+
+val mkNYPart : point -> num
+
+val mkNLength : path -> num
+
+(* point *)
+
+val mkPTPair : num -> num -> point
+
+val mkPTAdd : point -> point -> point
+
+val mkPTSub : point -> point -> point
+
+val mkPTMult : num -> point -> point
+
+val mkPTRotated : float -> point -> point
+
+val mkPTTransformed : point -> transform list -> point
+
+val mkPTPointOf : float -> path -> point
+val mkPTDirectionOf : float -> path -> point
+
+val mkPTPicCorner : picture -> piccorner -> point
+
+(* transform *)
+
+val mkTRScaled :  num -> transform
+
+val mkTRXscaled :  num -> transform
+
+val mkTRYscaled :  num -> transform
+
+val mkTRZscaled :  point -> transform
+
+val mkTRRotated : float -> transform
+
+val mkTRShifted : point -> transform
+
+val mkTRSlanted : num -> transform
+
+val mkTRReflect : point -> point -> transform
+
+val mkTRRotateAround : point -> float -> transform
+
+(* knot *)
+
+val mkKnot : direction -> point -> direction -> knot
+
+(* path *)
+
+val mkPAKnot : knot -> path
+val mkPAConcat : knot -> joint -> path -> path
+val mkPACycle : direction -> joint -> path -> path
+val mkPAAppend : path -> joint -> path -> path
+val mkPAFullCircle : path
+val mkPAHalfCircle : path
+val mkPAQuarterCircle : path
+val mkPAUnitSquare : path
+val mkPATransformed : path -> transform list -> path
+val mkPACutAfter : path -> path -> path
+val mkPACutBefore : path -> path -> path
+val mkPABuildCycle : path list -> path
+val mkPASub : float -> float -> path -> path
+val mkPABBox : picture -> path
+
+(* joint *)
+val mkJCurve : joint
+val mkJLine : joint
+val mkJCurveNoInflex : joint
+val mkJTension: float -> float -> joint
+val mkJControls: point -> point -> joint
+
+
+(* direction *)
+
+val mkNoDir : direction
+val mkVec : point -> direction
+val mkCurl : float -> direction
+
+(* picture *)
+
+val mkPITex : string -> picture
+val mkPIMake : command -> picture
+val mkPITransform : transform list -> picture -> picture
+val mkPIClip : picture -> path -> picture
+
+(* command *)
+
+val mkCDraw: path -> color option -> pen option -> dash option -> command
+val mkCDrawArrow: path -> color option -> pen option -> dash option -> command
+val mkCDrawPic: picture -> command
+val mkCFill: path -> color option -> command
+val mkCLabel: picture -> position -> point -> command
+val mkCDotLabel: picture -> position -> point -> command
+val mkCLoop: int -> int -> (int -> command) -> command
+val mkCSeq: command list -> command
+
+(* dash *)
+
+val mkDEvenly: dash
+val mkDWithdots: dash
+val mkDScaled: float -> dash -> dash
+val mkDShifted: point -> dash -> dash
+val mkDPattern: on_off list -> dash
+
+(* pen *)
+
+val mkPenCircle: pen
+val mkPenSquare: pen
+val mkPenFromPath: path -> pen
+val mkPenTransformed: pen -> transform list -> pen
+
+(* on_off *)
+
+val mkOn : num -> on_off
+val mkOff : num -> on_off

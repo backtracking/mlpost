@@ -19,19 +19,21 @@ open Types
 type t = num
 
 
-let zero = F 0.
-let one = F 1.
-let two = F 2.
+let zero = mkF 0.
+let one = mkF 1.
+let minus_one = mkF 1.
+let two = mkF 2.
 
-let num_of_int i = F (float_of_int i)
+let num_of_int i = mkF (float_of_int i)
 
-let bp f = F f
-let pt f = F (0.99626 *. f)
-let cm f = F (28.34645 *. f)
-let mm f = F (2.83464 *. f)
-let inch f = F (72. *. f)
+let bp f = mkF f
+let pt f = mkF (0.99626 *. f)
+let cm f = mkF (28.34645 *. f)
+let mm f = mkF (2.83464 *. f)
+let inch f = mkF (72. *. f)
 
-let pi = 3.14159
+let pi = 4.0 *. atan 1.0
+
 let deg2rad f = pi *. f /. 180.
 
 let is_zero f = abs_float f < 0.0001
@@ -40,47 +42,47 @@ type scale = float -> t
 
 let addn x y = 
   match x, y with
-  | F f1, F f2 -> F (f1 +. f2)
+  | F f1, F f2 -> mkF (f1 +. f2)
   | ( x, F y | F y, x) when is_zero y -> x
-  | _, _ -> NAdd (x,y)
+  | _, _ -> mkNAdd x y
 
 let subn x y = 
   match x, y with
-  | F f1, F f2 -> F (f1 -. f2)
+  | F f1, F f2 -> mkF (f1 -. f2)
   | x, F y  when is_zero y -> x
-  | _, _ -> NMinus (x,y)
+  | _, _ -> mkNSub x y
 
 let multn x y = 
   match x, y with
-  | F f1, F f2 -> F (f1 *. f2)
-  | (F x, _ | _ , F x) when is_zero x -> F 0.
-  | _, _ -> NMult (x,y)
+  | F f1, F f2 -> mkF (f1 *. f2)
+  | (F x, _ | _ , F x) when is_zero x -> zero
+  | _, _ -> mkNMult x y
 
-let multf f x = multn (F f) x
+let multf f x = multn (mkF f) x
   
 let divn x y = 
   match x, y with
-  | F f1, F f2 -> F (f1 /. f2)
-  | F x, _ when is_zero x -> F 0.
-  | _, _ -> NDiv (x,y)
+  | F f1, F f2 -> mkF (f1 /. f2)
+  | F x, _ when is_zero x -> zero
+  | _, _ -> mkNDiv x y
 
-let divf x f = divn x (F f)
+let divf x f = divn x (mkF f)
 
 let maxn x y =
   match x, y with
-    | F f1, F f2 -> F (max f1 f2)
-    | _, _ -> NMax (x,y)
+    | F f1, F f2 -> mkF (max f1 f2)
+    | _, _ -> mkNMax x y
 
 let minn x y =
   match x, y with
-    | F f1, F f2 -> F (min f1 f2)
-    | _, _ -> NMin (x,y)
+    | F f1, F f2 -> mkF (min f1 f2)
+    | _, _ -> mkNMin x y
 
 let gmean x y = 
   match x, y with
-  | F f1, F f2 -> F ( sqrt (f1 *. f1 +. f2 *. f2 ))
+  | F f1, F f2 -> mkF ( sqrt (f1 *. f1 +. f2 *. f2 ))
   | (z, F x | F x, z) when is_zero x -> z
-  | _, _ -> NGMean (x,y)
+  | _, _ -> mkNGMean x y
 
 let fold_max f = List.fold_left (fun w p -> maxn w (f p))
 

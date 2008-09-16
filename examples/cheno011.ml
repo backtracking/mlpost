@@ -3,7 +3,7 @@ open Path
 module T = Transform
 
 let fig =
-  let p = path ~cycle:JCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)] in
+  let p = path ~cycle:jCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)] in
   let pen = Pen.circle ~tr:[T.scaled (Num.bp 1.5)] () in
   [Command.draw p;
    Command.seq 

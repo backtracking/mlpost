@@ -20,15 +20,14 @@ type t' = transform
 
 type t = t' list
 
-let scaled a = TRScaled a
-let rotated a = TRRotated a
-let shifted a = TRShifted a
-let slanted a = TRSlanted a
-let xscaled a = TRXscaled a
-let yscaled a = TRYscaled a
-let zscaled a = TRZscaled a
-let reflect p1 p2 = TRReflect (p1,p2)
-let rotate_around p f = TRRotateAround (p,f)
-
+let scaled a = mkTRScaled a
+let rotated a = mkTRRotated a
+let shifted a = mkTRShifted a
+let slanted a = mkTRSlanted a
+let xscaled a = mkTRXscaled a
+let yscaled a = mkTRYscaled a
+let zscaled a = mkTRZscaled a
+let reflect p1 p2 = mkTRReflect p1 p2
+let rotate_around p f = mkTRRotateAround p f
 
 let id = []

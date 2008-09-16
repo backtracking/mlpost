@@ -22,13 +22,13 @@ type t = Types.pen
 let transform tr p = 
   match tr, p with
     | [], _ -> p
-    | _, PenTransformed (t,tr') -> PenTransformed (t,tr'@tr)
-    | _, _ -> PenTransformed (p,tr)
+    | _, PenTransformed (t,tr') -> mkPenTransformed t (tr'@tr)
+    | _, _ -> mkPenTransformed p tr
 
-let default ?(tr=id) () = PenTransformed (PenCircle, (scaled (F 0.5))::tr)
-let circle ?(tr=id) () = transform tr PenCircle
-let square ?(tr=id) () = transform tr PenSquare
-let from_path p = PenFromPath p
+let default ?(tr=id) () = mkPenTransformed mkPenCircle (scaled (mkF 0.5)::tr)
+let circle ?(tr=id) () = transform tr mkPenCircle
+let square ?(tr=id) () = transform tr mkPenSquare
+let from_path p = mkPenFromPath p
 
 let scale f p = transform [Transform.scaled f] p
 let rotate f p = transform [Transform.rotated f] p

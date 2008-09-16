@@ -8,7 +8,7 @@ let scale k = 2. *./ Num.mm k
 
 let drawover p = seq [fill ~color:Color.white p; draw p]
 let filldraw p c = seq [fill ~color:c p; draw p]
-let polyg fl = path ~scale ~style:JLine ~cycle:JLine fl
+let polyg fl = path ~scale ~style:jLine ~cycle:jLine fl
 
 let mydraw b c p = if b then filldraw p c else drawover p
 

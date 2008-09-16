@@ -19,26 +19,26 @@ open Types
 type t = picture
 type repr = t
 
-let tex s = PITex s
-let make l = PIMake l
-let bbox pic = PABBox pic
-let ulcorner pic = PTPicCorner (pic, UL)
-let llcorner pic = PTPicCorner (pic, LL)
-let urcorner pic = PTPicCorner (pic, UR)
-let lrcorner pic = PTPicCorner (pic, LR)
+let tex s = mkPITex s
+let make l = mkPIMake l
+let bbox pic = mkPABBox pic
+let ulcorner pic = mkPTPicCorner pic UL
+let llcorner pic = mkPTPicCorner pic LL
+let urcorner pic = mkPTPicCorner pic UR
+let lrcorner pic = mkPTPicCorner pic LR
 
 let corner_bbox ?(dx=Num.zero) ?(dy=Num.zero) pic = 
   let pdx = Point.pt (dx, Num.zero) in
   let pdy = Point.pt (Num.zero, dy) in
-  Path.pathp ~style:JLine ~cycle:JLine 
+  Path.pathp ~style:PrimPath.jLine ~cycle:PrimPath.jLine 
     [Point.add (Point.sub (ulcorner pic) pdx) pdy;
      Point.sub (Point.sub (llcorner pic) pdx) pdy;
      Point.sub (Point.add (lrcorner pic) pdx) pdy;
      Point.add (Point.add (urcorner pic) pdx) pdy]
 
 let transform tr = function
-  | PITransform (tr', p) -> PITransform (tr'@tr, p)
-  | _ as x -> PITransform (tr, x)
+  | PITransform (tr', p) -> mkPITransform (tr'@tr) p
+  | _ as x -> mkPITransform tr x
 
 let ctr pic = Point.segment 0.5 (llcorner pic) (urcorner pic)
 
@@ -59,12 +59,12 @@ let shift pt pic = transform [Transform.shifted pt] pic
 let place_bot_right pic p =
   transform [Transform.shifted (Point.sub p (lrcorner pic))] pic
 let beside p1 p2 = 
-  make (CSeq [CDrawPic p1; CDrawPic (place_up_left p2 (urcorner p1))])
+  make (mkCSeq [mkCDrawPic p1; mkCDrawPic (place_up_left p2 (urcorner p1))])
 
 let below p1 p2 =
-  make (CSeq [CDrawPic p1; CDrawPic (place_up_left p2 (llcorner p1))])
+  make (mkCSeq [mkCDrawPic p1; mkCDrawPic (place_up_left p2 (llcorner p1))])
 
-let clip pic pth = PIClip (pic,pth)
+let clip pic pth = mkPIClip pic pth
 
 let width p = Point.xpart (Point.sub (urcorner p) (ulcorner p))
 

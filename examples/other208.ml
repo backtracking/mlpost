@@ -35,7 +35,7 @@ let rec pave t a b c n =
     let pen = Pen.circle () in
     let gb = Color.rgb 0. 1. 1. in
     let gr = Color.rgb 1. 1. 0. in
-    let path = pathp ~style:JLine ~cycle:JLine [a;b;c] in
+    let path = pathp ~style:jLine ~cycle:jLine [a;b;c] in
     let color, segs =
       match t with 
       | One -> gb, [a;c]::[a;b]::[]
@@ -44,7 +44,7 @@ let rec pave t a b c n =
       | Four -> gr, [b;c]::[a;b]::[]
     in
       [draw path; fill path ~color]@
-	(List.map (fun l -> draw ~pen (pathp ~style:JLine l)) segs)
+	(List.map (fun l -> draw ~pen (pathp ~style:jLine l)) segs)
 
 let fig = 
   let a = cmp (0., 0.) in

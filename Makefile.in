@@ -56,7 +56,8 @@ check: byte $(OCAMLBEST) $(TOOL) $(TESTS) check-examples
 # bytecode and native-code compilation
 ######################################
 
-CMO := misc.cmo name.cmo compiled_types.cmo print.cmo compile.cmo num.cmo point.cmo \
+CMO := misc.cmo name.cmo compiled_types.cmo print.cmo types.cmo \
+	compile.cmo num.cmo point.cmo \
        transform.cmo color.cmo primPath.cmo path.cmo picture.cmo \
        dash.cmo pen.cmo command.cmo shapes.cmo pos.cmo arrow.cmo \
 	extArrow.cmo box.cmo\

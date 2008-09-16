@@ -24,7 +24,7 @@ open Num.Infix
 open Point
 
 let draw1 = 1, [ draw 
-                   (path ~style:JLine [20.,20.; 0.,0.; 0.,30.; 30.,0.; 0.,0.])]
+                   (path ~style:jLine [20.,20.; 0.,0.; 0.,30.; 30.,0.; 0.,0.])]
 
 let z0 = 0.,0.
 let z1 = 60.,40.
@@ -38,18 +38,18 @@ let labels1 =
    [dotlabel ~pos:Pleft (tex "3") (bpp z3);
     dotlabel ~pos:Pright (tex "1") (bpp z1) ]
 
-let draw3 = 3, [ draw (path ~style:JCurve  l1) ] @ labels1
+let draw3 = 3, [ draw (path ~style:jCurve  l1) ] @ labels1
 
 let draw4a, draw4b = 
   let labels = H.dotlabels ~pos:Ptop ["2";"4"] (map_bp [z2;z4]) @
                H.dotlabels ~pos:Pleft ["0";"3"] (map_bp [z0;z3]) @
                [dotlabel ~pos:Plowright (tex "1") (bpp z1)]
   in
-    (104, [ draw (path ~cycle:JCurve l1)] @ labels) ,
+    (104, [ draw (path ~cycle:jCurve l1)] @ labels) ,
     (204, 
      [ draw 
-         (Path.append ~style:JLine (path [z0;z1;z2;z3]) 
-            (path ~style:JLine [z4;z0]) )
+         (Path.append ~style:jLine (path [z0;z1;z2;z3]) 
+            (path ~style:jLine [z4;z0]) )
      ] @ labels)
 
 (* no easy alternative way to draw this one, and that's fine *)
@@ -59,7 +59,7 @@ let lcontrols =
    (67.1, 61.), (59.8,84.6);
    (25.4, 94.), (10.5,84.5);
    (9.6, 58.8), (18.8,49.6)]
-let lcontrolsbp = List.map (fun (a,b) -> JControls (bpp a, bpp b)) lcontrols
+let lcontrolsbp = List.map (fun (a,b) -> jControls (bpp a) (bpp b)) lcontrols
 
 let draw5 = 5,
   [ draw (jointpath l1 lcontrolsbp) ;
@@ -69,38 +69,38 @@ let draw5 = 5,
     in
       (* As long as we dont have the dashed lines : gray *)
       draw ~dashed:(Dash.scaled 0.5 Dash.evenly) 
-        (path ~style:JLine (List.rev hull)) ] @ labels1
+        (path ~style:jLine (List.rev hull)) ] @ labels1
 
 let draw6 = 6, 
   [ draw (pathk
-           [ knot z0; knot ~r:(Vec up) z1; 
-             knot ~r:(Vec left) z2; knot z3; knot z4] ) ] @ labels1
+           [ knot z0; knot ~r:(vec up) z1; 
+             knot ~r:(vec left) z2; knot z3; knot z4] ) ] @ labels1
 
 
-let lex = knot ~r:(Vec(dir 45.)) (0.,0.)
-let rex a = knot ~l:(Vec(dir (10.*.a))) ~scale:cm (6., 0.)
+let lex = knot ~r:(vec (dir 45.)) (0.,0.)
+let rex a = knot ~l:(vec (dir (10.*.a))) ~scale:cm (6., 0.)
 let draw7 = 7, 
             [Command.iter 0 9
                (fun a ->
-                  draw (concat (start lex) ~style:JCurve 
+                  draw (concat (start lex) ~style:jCurve 
                           (rex (float_of_int (-a))))) ]
 
 let draw8 = 8,
             [Command.iter 0 7
                (fun a ->
-                  draw (concat (start lex) ~style:JCurve 
+                  draw (concat (start lex) ~style:jCurve 
                           (rex (float_of_int a)))) ]
 
 let z0 = (-1., 0.)
 let z1 = (0., 0.2)
 let z2 = ( 1., 0.)
 let labels9 = H.dotlabels ~pos:Pbot ["0";"1";"2"] (map_in [z0;z1;z2])
-let z0 = knot ~r:(Vec up) ~scale:inch z0
-let z1 = knot ~r:(Vec right) ~scale:inch z1
-let z2 = knot ~r:(Vec down) ~scale:inch z2
+let z0 = knot ~r:(vec up) ~scale:inch z0
+let z1 = knot ~r:(vec right) ~scale:inch z1
+let z2 = knot ~r:(vec down) ~scale:inch z2
 
 let draw9a = 109, [draw (pathk [z0;z1;z2])] @ labels9
-let draw9b = 209, [draw (pathk ~style:JCurveNoInflex [z0;z1;z2])] @labels9
+let draw9b = 209, [draw (pathk ~style:jCurveNoInflex [z0;z1;z2])] @labels9
 
 let u l = 1.5 /. 10. *. l
 let z0 = (u (-5.)), 0.
@@ -113,10 +113,10 @@ let labels10 = H.dotlabels ~pos:Pbot ["0";"1";"2";"3"] (map_in l1)
 let draw10a = 110, [draw (path ~scale:inch l1) ] @ labels10
 
 let draw10b = 210, 
-  [ draw (jointpath ~scale:inch l1 [JCurve; JTension(1.3,1.3); JCurve] ) ] 
+  [ draw (jointpath ~scale:inch l1 [jCurve; jTension 1.3 1.3; jCurve] ) ] 
   @ labels10
 let draw10c = 310, 
-  [ draw (jointpath ~scale:inch l1 [JCurve; JTension(1.5,1.0); JCurve] ) ]
+  [ draw (jointpath ~scale:inch l1 [jCurve; jTension 1.5 1.0; jCurve] ) ]
   @ labels10
 
 let u l = 1.4 /. 10. *. l
@@ -130,9 +130,9 @@ let z0 = u (2.), u (-5.)
 let z1 = 0., 0.
 let z2 = u 2., u 5.
 let cl = [0.; 1.; 2.; infinity]
-let pat c = [ knot ~r:(Curl c) ~scale:inch z0 ; 
+let pat c = [ knot ~r:(curl c) ~scale:inch z0 ; 
               knot ~scale:inch z1; 
-              knot ~l:(Curl c) ~scale:inch z2 ]
+              knot ~l:(curl c) ~scale:inch z2 ]
 
 let draw11 =
   let numbers = [111; 211; 311; 411] in
@@ -148,8 +148,8 @@ let draw17 =
   let z0 = p (0.,0.) in
   let z1 = pt (a, zero) and z3 = pt (neg a, zero) in
   let z2 = pt (zero, b) and z4 = pt (zero, neg a) in
-    17, [draw (pathp ~cycle:JCurve [z1;z2;z3;z4]);
-	 draw (pathp ~style:JLine [z1; z0; z2]);
+    17, [draw (pathp ~cycle:jCurve [z1;z2;z3;z4]);
+	 draw (pathp ~style:jLine [z1; z0; z2]);
 	 label ~pos:Ptop (tex "a") (segment 0.5 z0 z1);
 	 label ~pos:Pleft (tex "b") (segment 0.5 z0 z2);
 	 dotlabel ~pos:Pbot (tex "(0,0)") z0
@@ -159,10 +159,10 @@ let draw18 =
   let u = Num.cm in
   let pen = Pen.circle ~tr:[Transform.scaled one] () in 
   let rec pg = function
-    | 0 -> start (knot ~r:(Vec up) ~scale:u (0.,0.))
+    | 0 -> start (knot ~r:(vec up) ~scale:u (0.,0.))
     | n -> let f = (float_of_int n /. 2.) in 
-	concat ~style:JCurve (pg (n-1)) (knot ~scale:u (f, sqrt f)) in
-    18, [draw (pathn ~style:JLine [(zero,u 2.); (zero,zero); (u 4.,zero)]);
+	concat ~style:jCurve (pg (n-1)) (knot ~scale:u (f, sqrt f)) in
+    18, [draw (pathn ~style:jLine [(zero,u 2.); (zero,zero); (u 4.,zero)]);
 	 draw ~pen (pg 8);
 	 label ~pos:Plowright (tex "$ \\sqrt x$") (pt (u 3., u (sqrt 3.)));
 	 label ~pos:Pbot (tex "$x$") (pt (u 2., zero));
@@ -174,11 +174,11 @@ let draw19 =
   let pen = Pen.circle ~tr:[Transform.scaled one] () in 
   let axey = Picture.transform [Transform.rotated 90.] (tex "axe $y$") in
   let rec pg = function
-    | 0 -> start (knotn ~r:(Vec right) (zero,uy))
+    | 0 -> start (knotn ~r:(vec right) (zero,uy))
     | n -> let k = (float_of_int n)*.15. in 
-	concat ~style:JCurve (pg (n-1)) 
+	concat ~style:jCurve (pg (n-1)) 
 	  (knotn (k *./ ux, 2. /. (1. +. (cos (Num.deg2rad k))) *./ uy)) in
-    19, [draw (pathn ~style:JLine [(zero,duy); (zero,zero); (dux,zero)]);
+    19, [draw (pathn ~style:jLine [(zero,duy); (zero,zero); (dux,zero)]);
 	 draw ~pen (pg 8);
 	 label ~pos:Pbot (tex "axe $x$") (pt (60.*./ux, zero));
 	 label ~pos:Pleft axey (pt (zero, 2.*./uy));
@@ -194,11 +194,11 @@ let draw19 =
 (*     cycle (Vec up) JCurve (concat path JCurve (C.p ~r ~scale:C.CM (0.,0.))) in *)
 (*     21, [fill fillp; draw (transform t fullcircle)] *)
 let draw21 = 
-  let mp d pt = knot ~r:(Vec d) ~scale:cm pt in
+  let mp d pt = knot ~r:(vec d) ~scale:cm pt in
   let kl = [mp down (-1.,0.); mp right (0.,-1.); mp up (1.,0.)] in
   let path = pathk kl in
-  let r = Vec (p (-.1., -.2.)) in
-  let fillp = cycle ~dir:(Vec up)
+  let r = vec (p (-.1., -.2.)) in
+  let fillp = cycle ~dir:(vec up)
       (concat path (knot ~r ~scale:cm (0.,0.))) in
   let fullp = cycle (concat path (mp left (0.,1.))) in
     21, [fill fillp; draw fullp]
@@ -221,9 +221,9 @@ let draw22 =
     22, [draw_pic pic; draw (bbox pic)]
 
 let draw40 =
-  let k1 = knot ~r:(Curl 0.) ~scale:Num.pt (0.,0.) in
+  let k1 = knot ~r:(curl 0.) ~scale:Num.pt (0.,0.) in
   let k2 = knot ~scale:Num.pt (5., -3.) in
-  let k3 = knot ~scale:Num.pt ~l:(Curl 0.) (10.,0.) in
+  let k3 = knot ~scale:Num.pt ~l:(curl 0.) (10.,0.) in
   let p1 = pathk [k1;k2;k3] in
   let p2 = append p1 (Path.shift (p ~scale:Num.pt (10.,0.)) 
                        (Path.yscale (neg one) p1)) in

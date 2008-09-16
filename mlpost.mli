@@ -203,32 +203,40 @@ and Path : sig
       more generally almost everything that is drawn with Mlpost *) 
 
   (** A [direction] is used to put constraints on paths:
-      {ul {- [Vec p] defines a direction by a point (interpreted as a vector)}
-      {- [Curl f] changes the curling factor of the extremity of a path; 
+      {ul {- [vec p] defines a direction by a point (interpreted as a vector)}
+      {- [curl f] changes the curling factor of the extremity of a path; 
       higher curling factor means flatter curves}
-      {- [NoDir] means no particular direction} } *)
-  type direction =
-      | Vec of Point.t
-      | Curl of float
-      | NoDir 
+      {- [noDir] means no particular direction} } *)
+  type direction
+
+  val vec : Point.t -> direction
+  val curl : float -> direction
+  val noDir : direction
 
   (** A [knot] is the basic element of a path, and is simply a point 
       with an incoming and outgoing direction constraint *)
-  type knot = direction * Point.t * direction
+  type knot
+
+  (** Build a knot from a point; the optional arguments are the incoming directions *)
+  val knotp :
+    ?l:direction -> ?r:direction -> Point.t -> knot
+
+  val knotlist : (direction * Point.t * direction) list -> knot list
+    
 
   (** A joint is the connection between two knots in a path. It is either
-      {ul {- [JLine] for a straight line}
-      {- [JCurve] for a spline curve}
-      {- [JCurveNoInflex] to avoid inflexion points}
-      {- [JTension] to specify "tension" on the joint; [JCurve] uses a default
+      {ul {- [jLine] for a straight line}
+      {- [jCurve] for a spline curve}
+      {- [jCurveNoInflex] to avoid inflexion points}
+      {- [jTension f1 f2] to specify "tension" on the joint; [jCurve] uses a default
       tension of 1. Higher tension means less "wild" curves}
-      {- [JControls] to explicitely specify control points}} *)
-  type joint =
-      | JLine
-      | JCurve
-      | JCurveNoInflex
-      | JTension of float * float
-      | JControls of Point.t * Point.t
+      {- [jControls p1 p2] to explicitely specify control points}} *)
+  type joint 
+  val jLine : joint
+  val jCurve : joint
+  val jCurveNoInflex : joint
+  val jTension : float -> float -> joint
+  val jControls : Point.t -> Point.t -> joint
 
   (** The abstract type of paths *)
   type t
@@ -244,10 +252,6 @@ and Path : sig
 
   (** Build a knot from a Num.t pair; the optional arguments are as in {!knot} *)
   val knotn : ?l:direction -> ?r:direction -> Num.t * Num.t -> knot
-
-  (** Build a knot from a point; the optional arguments are as in {!knot} *)
-  val knotp :
-    ?l:direction -> ?r:direction -> Point.t -> knot
 
   (** Build a path from a list of pairs of floats
       @param style the joint style used for all joints in the path
@@ -396,11 +400,14 @@ and Dash : sig
   val shifted : Point.t -> t -> t
     (** Shift a dash pattern *)
 
-  type on_off = On of Num.t | Off of Num.t
+  type on_off 
+
+  val on : Num.t -> on_off
+  val off : Num.t -> on_off
 
   val pattern : on_off list -> t
     (** This function, together with the type [on_off]  permits to construct
-     custom dash patterns, by giving a list of [On] / [Off] constructors, with 
+     custom dash patterns, by giving a list of [on] / [off] constructors, with 
       corresponding lengths *)
 
 end

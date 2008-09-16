@@ -16,41 +16,44 @@
 
 open Types
 
-type direction = Types.direction =
-  | Vec of Point.t
-  | Curl of float
-  | NoDir 
+type direction = Types.direction 
 
-type joint = Types.joint =
-    JLine
-  | JCurve
-  | JCurveNoInflex
-  | JTension of float * float
-  | JControls of Point.t * Point.t
+let vec = mkVec
+let curl = mkCurl
+let noDir = mkNoDir
 
-type knot = direction * Point.t * direction
+type joint = Types.joint 
+
+let jLine = mkJLine
+let jCurve = mkJCurve
+let jCurveNoInflex = mkJCurveNoInflex
+let jTension = mkJTension
+let jControls = mkJControls
+
+type knot = Types.knot
 
 (* the intention is to add new knots in front,
  * i. e. the list has to be reversed for printing *)
 type t = path
 
-let start k = PAKnot k
-let concat p j k = PAConcat (k,j,p)
-let cycle d j p = PACycle (d,j,p)
-let append p1 j p2 = PAAppend (p1,j,p2)
-let fullcircle = PAFullCircle
-let halfcircle = PAHalfCircle
-let quartercircle = PAQuarterCircle
-let unitsquare = PAUnitSquare
-let transform tr p = PATransformed (p,tr)
-let cut_after p1 p2 = PACutAfter (p1, p2)
-let cut_before p1 p2 = PACutBefore (p1, p2)
-let build_cycle l = PABuildCycle l
-let subpath f1 f2 p = PASub (f1, f2, p)
+let start k = mkPAKnot k
+let concat p j k = mkPAConcat k j p
+let cycle d j p = mkPACycle d j p
+let append p1 j p2 = mkPAAppend p1 j p2
+let fullcircle = mkPAFullCircle
+let halfcircle = mkPAHalfCircle
+let quartercircle = mkPAQuarterCircle
+let unitsquare = mkPAUnitSquare
+let transform tr p = mkPATransformed p tr
+let cut_after p1 p2 = mkPACutAfter p1 p2
+let cut_before p1 p2 = mkPACutBefore p1 p2
+let build_cycle l = mkPABuildCycle l
+let subpath f1 f2 p = mkPASub f1 f2 p
 
-let point f p = PTPointOf (f, p)
-let direction f p = PTDirectionOf (f, p)
+let point f p = mkPTPointOf f p
+let direction f p = mkPTDirectionOf f p
 
-let length p = NLength p
+let length p = mkNLength p
 
-let defaultjoint = JCurve
+let defaultjoint = jCurve
+let defaultdir = noDir

@@ -19,7 +19,7 @@ type num =
   | NXPart of point
   | NYPart of point
   | NAdd of num * num
-  | NMinus of num * num
+  | NSub of num * num
   | NMult of num * num
   | NDiv of num * num
   | NMax of num * num

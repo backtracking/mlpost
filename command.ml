@@ -33,33 +33,33 @@ type t = command
 
 type figure = t list
 
-let label ?(pos=Pcenter) pic point = CLabel (pic,pos,point)
+let label ?(pos=Pcenter) pic point = mkCLabel pic pos point
 (* replace later *)
-let dotlabel ?(pos=Pcenter) pic point = CDotLabel (pic,pos,point)
+let dotlabel ?(pos=Pcenter) pic point = mkCDotLabel pic pos point
 
 let draw ?color ?pen ?dashed t = 
   (* We don't use a default to avoid the output of 
      ... withcolor (0.00red+0.00green+0.00blue) withpen .... 
      for each command in the output file *)
-    CDraw (t, color, pen, dashed)
+    mkCDraw t color pen dashed
 
-let draw_arrow ?color ?pen ?dashed t = CDrawArrow (t, color, pen, dashed)
+let draw_arrow ?color ?pen ?dashed t = mkCDrawArrow t color pen dashed
 
-let fill ?color t = CFill (t, color)
+let fill ?color t = mkCFill t color
 
-let iter from until f = CLoop (from, until, f)
+let iter from until f = mkCLoop from until f
 
-let draw_pic p = CDrawPic p
+let draw_pic p = mkCDrawPic p
 
-let append c1 c2 = CSeq [c1; c2]
+let append c1 c2 = mkCSeq [c1; c2]
 let (++) = append
-let seq l = CSeq l
+let seq l = mkCSeq l
 
 (* syntactic sugar *)
 
 let iterl f l = seq (List.map f l)
 
-let nop = CSeq []
+let nop = mkCSeq []
 
 (*
 let logo =

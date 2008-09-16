@@ -9,5 +9,5 @@ let fig =
   let cl = List.map Color.gray [0.8;0.6;0.4] in
     List.map2
       (fun (a,b) color ->
-         draw ~pen ~color (path ~style:JLine ~scale:Num.cm [a;b]))
+         draw ~pen ~color (path ~style:jLine ~scale:Num.cm [a;b]))
       [a,b;b,c;c,a] cl

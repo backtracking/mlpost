@@ -39,7 +39,7 @@ let head_classic ?color ?pen ?dashed ?(angle = 60.) ?(size = Num.bp 4.) p dir =
   let dir_b = neg (Point.rotate (-. angle /. 2.) dir) in
   let a = Point.add p dir_a in
   let b = Point.add p dir_b in
-  let path = Path.pathp ~style: Path.JLine [a; p; b] in
+  let path = Path.pathp ~style:Path.jLine [a; p; b] in
   Command.draw ?color ?pen ?dashed path, path
 
 type belt = {

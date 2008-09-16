@@ -89,19 +89,21 @@ let arrow d ?(lab="") ?line_width ?(boxed=true) ?line_color ?fill_color
       pos = pos; outd = outd; ind = ind } 
   :: d.arrows
 
+open Path
+
 let outdir = function
-  | Up -> Path.Vec Point.up
-  | Down -> Path.Vec Point.down
-  | Left -> Path.Vec Point.left
-  | Right -> Path.Vec Point.right
-  | Angle f -> Path.Vec (Point.dir f)
+  | Up -> vec Point.up
+  | Down -> vec Point.down
+  | Left -> vec Point.left
+  | Right -> vec Point.right
+  | Angle f -> vec (Point.dir f)
 
 let indir = function
-  | Up -> Path.Vec Point.down
-  | Down -> Path.Vec Point.up
-  | Left -> Path.Vec Point.right
-  | Right -> Path.Vec Point.left
-  | Angle f -> Path.Vec (Point.dir f)
+  | Up -> vec Point.down
+  | Down -> vec Point.up
+  | Left -> vec Point.right
+  | Right -> vec Point.left
+  | Angle f -> vec (Point.dir f)
 
 let outdir = function None -> None | Some x -> Some (outdir x)
 let indir = function None -> None | Some x -> Some (indir x)

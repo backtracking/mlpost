@@ -71,21 +71,22 @@ let arc astyle estyle ?stroke ?pen b1 b2 =
 	box_line ?color:stroke ?pen, draw ?color:stroke ?pen 
   in
     match estyle with
-      | Straight -> boxdraw ~style:JLine b1 b2
+      | Straight -> boxdraw ~style:jLine b1 b2
       | Curve -> 
 	  let p1, p2 = Box.ctr b1, Box.ctr b2 in
 	  let corner = Point.pt (x2-/(x2-/x1) /./ 4.,(y1+/y2) /./ 2.) in
-	  let p = pathk ~style:JCurve
-	    [NoDir, p1, Vec (Point.sub corner p1); 
-	     NoDir, corner, NoDir; 
-	     Vec (Point.sub p2 corner), p2, NoDir] in
+	  let p = pathk ~style:jCurve
+	    (knotlist
+	       [noDir, p1, vec (Point.sub corner p1); 
+		noDir, corner, noDir; 
+		vec (Point.sub p2 corner), p2, noDir]) in
 	  let parrow = 
 	    cut_after (Box.bpath b2) (cut_before (Box.bpath b1) p)
 	  in
 	    linedraw parrow
       | Square -> 
 	  let corner = Point.pt (x2,y1) in
-	  let p = pathp ~style:JLine 
+	  let p = pathp ~style:jLine 
 	    [Box.ctr b1; corner; Box.ctr b2] in
 	  let parrow = 
 	    cut_after (Box.bpath b2) (cut_before (Box.bpath b1) p) 
@@ -94,7 +95,7 @@ let arc astyle estyle ?stroke ?pen b1 b2 =
       | HalfSquare -> 
 	  let m = (y1+/y2) /./ 2. in
 	  let corner1, corner2 = Point.pt (x1,m), Point.pt (x2,m) in
-	  let p = pathp ~style:JLine 
+	  let p = pathp ~style:jLine 
 	    [Box.ctr b1; corner1; corner2; Box.ctr b2] in
 	  let parrow = 
 	    cut_after (Box.bpath b2) (cut_before (Box.bpath b1) p) 

@@ -17,7 +17,7 @@ let pen = Pen.default ~tr:([Transform.scaled (bp 2.5)]) ()
 let square color p i j =
   let pt i j = let x,y = p i j in Point.pt (bp x, bp y) in
   let points = [pt i j; pt (i+1) j; pt (i+1) (j+1); pt i (j+1)] in
-  let path = pathp ~style:JLine ~cycle:JLine points in
+  let path = pathp ~style:jLine ~cycle:jLine points in
   seq [fill ~color path; draw ~pen path]
 
 let right = square Color.orange (fun i j -> proj i 0 j)

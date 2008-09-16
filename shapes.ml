@@ -21,9 +21,9 @@ open Path
 open Num.Infix
 open Types
 
-let pi = 4. *. (atan 1.)
-let kappa = F (4. *. (sqrt 2. -. 1.) /. 3.)
-let mkappa = F (1. -. (4. *. (sqrt 2. -. 1.) /. 3.))
+let pi = Num.pi
+let kappa = mkF (4. *. (sqrt 2. -. 1.) /. 3.)
+let mkappa = mkF (1. -. (4. *. (sqrt 2. -. 1.) /. 3.))
 
 type borders = 
   { n : Point.t; s : Point.t ; w : Point.t ; e : Point.t; c : Point.t }
@@ -51,21 +51,22 @@ let rounded_rect_path width height rx ry =
       pt (hw, mkappa*/ry-/hh), pt (hw-/mkappa*/rx, neg hh) in
     let bl1, bl2 = 
       pt (mkappa*/rx-/hw, neg hh), pt (neg hw, mkappa*/ry-/hh) in
-    let knots = 
-      [(NoDir, pt (rx-/hw, hh), Vec right);
-       (NoDir, pt (hw-/rx, hh), Vec right);
-       (NoDir, pt (hw, hh-/ry), Vec down); 
-       (NoDir, pt (hw, ry-/hh), Vec down);
-       (NoDir, pt (hw-/rx, neg hh), Vec left); 
-       (NoDir, pt (rx-/hw, neg hh), Vec left);
-       (NoDir, pt (neg hw, ry-/hh), Vec up);
-       (NoDir, pt (neg hw, hh-/ry), Vec up)] in
+    let knots = knotlist
+	[(noDir, pt (rx-/hw, hh), mkVec right);
+	 (noDir, pt (hw-/rx, hh), mkVec right);
+	 (noDir, pt (hw, hh-/ry), mkVec down); 
+	 (noDir, pt (hw, ry-/hh), mkVec down);
+	 (noDir, pt (hw-/rx, neg hh), mkVec left); 
+	 (noDir, pt (rx-/hw, neg hh), mkVec left);
+	 (noDir, pt (neg hw, ry-/hh), mkVec up);
+	 (noDir, pt (neg hw, hh-/ry), mkVec up)] 
+    in
     let joints = 
-      [JLine; JControls(ur1,ur2);
-       JLine; JControls(br1,br2); 
-       JLine; JControls(bl1,bl2); JLine] in
+      [jLine; mkJControls ur1 ur2;
+       jLine; mkJControls br1 br2; 
+       jLine; mkJControls bl1 bl2; jLine] in
     let path =
-      cycle ~dir:(Vec right) ~style:(JControls(ul1,ul2))
+      cycle ~dir:(mkVec right) ~style:(mkJControls ul1 ul2)
 	(jointpathk knots joints)
     in
     { p = path; b = build_border hw hh ; wt = width; ht = height }
@@ -73,19 +74,19 @@ let rounded_rect_path width height rx ry =
 (** Ellipses and Arcs *)
 
 let full_ellipse_path rx ry =
-  let m theta = pt (rx */ (F (cos theta)), ry */ (F (sin theta))) in
-  let knots = 
-    [(NoDir, m 0., Vec up); (NoDir, m (pi /. 2.), Vec left);
-     (NoDir, m pi, Vec down); (NoDir, m (-. pi /. 2.), Vec right)] in
+  let m theta = pt (rx */ (mkF (cos theta)), ry */ (mkF (sin theta))) in
+  let knots = knotlist
+    [(noDir, m 0., mkVec up); (noDir, m (pi /. 2.), mkVec left);
+     (noDir, m pi, mkVec down); (noDir, m (-. pi /. 2.), mkVec right)] in
   let r1, r2 = pt (rx, neg (ry*/kappa)), pt (rx, ry*/kappa) in
   let t1, t2 = pt (rx*/kappa , ry), pt (neg (rx*/kappa), ry) in
   let l1, l2 = pt (neg rx, ry*/kappa), pt (neg rx, neg (ry*/kappa)) in
   let b1, b2 = pt (neg (rx*/kappa), neg ry), pt (rx*/kappa, neg ry) in
   let joints =
-    [JControls(r2,t1); JControls(t2,l1); JControls(l2,b1)] in
+    [mkJControls r2 t1; mkJControls t2 l1; mkJControls l2 b1] in
   let path =
-    cycle ~dir:(Vec up) 
-      ~style:(JControls(b2,r1)) (jointpathk knots joints)
+    cycle ~dir:(mkVec up) 
+      ~style:(mkJControls b2 r1) (jointpathk knots joints)
   in 
   { p = path; b = build_border rx ry; wt = 2. *./ rx; ht = 2. *./ ry }
       
@@ -105,7 +106,7 @@ let rectangle_path width height =
   let mw = neg w in
   let mh = neg h in
   let path = 
-    Path.pathn ~cycle:JLine ~style:JLine [ w, mh; w, h; mw, h; mw, mh]
+    Path.pathn ~cycle:jLine ~style:jLine [ w, mh; w, h; mw, h; mw, mh]
   in
   { p = path; b = build_border w h; wt = width; ht = height }
     
@@ -121,7 +122,7 @@ let patatoid width height =
   let b = segment (Random.float 1.) lr ur in
   let c = segment (Random.float 1.) ur ul in
   let d = segment (Random.float 1.) ul ll in
-  let p = pathp ~cycle:JCurve [a;b;c;d] in
+  let p = pathp ~cycle:jCurve [a;b;c;d] in
   let dummypic = Picture.make (Command.draw p) in
    (* corners are wrong *)
   { p = p ; b = build_border wmax hmax;
@@ -137,7 +138,7 @@ let draw_func ?fill ?(stroke=Color.black) ?(thickness=0.5) path =
     match fill with
       | None -> Command.nop
       | Some color -> Command.fill ~color path in
-  let pen = Pen.square ~tr:([Transform.scaled (F thickness)]) () in
+  let pen = Pen.square ~tr:([Transform.scaled (mkF thickness)]) () in
   let strokecmd = Command.draw ~color:stroke ~pen path in
     Picture.make (Command.seq [fillcmd; strokecmd])
 

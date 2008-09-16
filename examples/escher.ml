@@ -5,7 +5,7 @@ open Command
 open Point
 open Path
 
-let rec fold_append ?(style=JCurve) = function
+let rec fold_append ?(style=jCurve) = function
   | [] -> failwith "No empty list allowed"
   | [x] -> x
   | (x::xs) -> append ~style x (fold_append xs)
@@ -104,7 +104,7 @@ let fig =
   let p81 = (2375.,8000. -. 4550. ) in
   let line1 = path (myscale [p79;p1;p2;p3;p4;p5]) in
   let line2 = 
-    fold_append ~style:JLine 
+    fold_append ~style:jLine 
       (List.map (fun l -> path (myscale l) )
       [  [p9;p10;p11;p12] ; [p12; p13; p14] ;
          [p14; p15; p16] ; [p16; p17; p18] ;
@@ -126,8 +126,8 @@ let fig =
   let line6  = path (myscale [p6; p6; p7; p8; p9 ]) in
   let line7  = path (myscale [p74; p75; p76; p77; p78; p78; p79]) in
   let line8  = path (myscale [p68; p69; p70; p71; p72]) in
-  let bird = cycle ~style:JLine 
-               (fold_append ~style:JLine 
+  let bird = cycle ~style:jLine 
+               (fold_append ~style:jLine 
                   [line1 ; line6; line2; line8; line4; line7])
   in
     [ Command.iter (-1) 1

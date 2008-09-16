@@ -9,7 +9,7 @@ open Helpers
 let box = Shapes.rounded_rect_path (bp 740.) (bp 540.) zero zero
 let boxpen = Pen.circle ~tr:[Transform.scaled (bp 2.5)] ()
 
-let separation = path ~style:JLine [(0., 270.); (0., -270.)]
+let separation = path ~style:jLine [(0., 270.); (0., -270.)]
 let sepdash = Dash.scaled 8. Dash.evenly
 let frame = [draw ~pen:boxpen (Shapes.bpath box); 
 	     draw ~pen:boxpen ~dashed:sepdash  separation]
@@ -62,8 +62,8 @@ let dpll =
                \\texttt{formula $\\rightarrow$ result} \
              \\end{tabular}"))))
        
-let myarrow ?(scale=1.) ?(outd=NoDir) ?(ind=NoDir) place label p1 p2 =
-  let p = jointpathk [NoDir, p1, outd; ind, p2, NoDir] [JCurve] in
+let myarrow ?(scale=1.) ?(outd=noDir) ?(ind=noDir) place label p1 p2 =
+  let p = jointpathk (knotlist [noDir, p1, outd; ind, p2, noDir]) [jCurve] in
   let dp = draw_arrow ~pen:boxpen p in
   let lbl = 
     place (Picture.transform [Transform.scaled (bp scale)] label) 
@@ -71,21 +71,21 @@ let myarrow ?(scale=1.) ?(outd=NoDir) ?(ind=NoDir) place label p1 p2 =
     Command.seq [dp; draw_pic lbl]
 
 let uarrow =
-  myarrow ~scale:1.66 ~outd:(Vec Point.down) ~ind:(Vec Point.left)
+  myarrow ~scale:1.66 ~outd:(vec Point.down) ~ind:(vec Point.left)
     place_up_left 
     (texbox ~fill:acolor (tex "\\texttt{UNSAT}"))
     (Point.segment 0.5 (llcorner absform) (lrcorner absform))
     (Point.pt (Point.xpart (llcorner absform) +/ bp 30., bp (-155.)))
 
 let sarrow =
-  myarrow ~scale:1.66 ~outd:(Vec Point.down) ~ind:(Vec Point.right)
+  myarrow ~scale:1.66 ~outd:(vec Point.down) ~ind:(vec Point.right)
     place_up_right
     (texbox ~fill:acolor (tex "\\texttt{SAT}"))
     (Point.segment 0.5 (llcorner absform) (lrcorner absform))
     (Point.pt (Point.xpart (lrcorner absform) -/ bp 30., bp (-155.)))
 
 let pointe l h w =
-  Path.path ~cycle:JLine ~style:JLine
+  Path.path ~cycle:jLine ~style:jLine
     [(0., 0.); (l, 0.); (l +. h, w/.2.); (l, w); (0., w)]
      
 let pointe1 = 
@@ -112,7 +112,7 @@ let sound =
              \\end{tabular}"))
 
 let trapeze bl d h =
-  Path.path ~cycle:JLine ~style:JLine
+  Path.path ~cycle:jLine ~style:jLine
     [(0., 0.); (bl, 0.); (bl -. d, h); (d, h)]
 let counter_model =
   place_up_left (make (draw ~pen:boxpen (trapeze 90. 20. 60.)))

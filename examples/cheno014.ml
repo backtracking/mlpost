@@ -8,9 +8,10 @@ let z1 = cmp (4., 1.)
 
 let cercle = Path.shift z0 (Path.scale (Num.cm 1.) fullcircle)
 let rectangle = Path.shift z1
-  (path ~style:JLine ~cycle:JLine ~scale:Num.mm
+  (path ~style:jLine ~cycle:jLine ~scale:Num.mm
       [-5., -5.; 5., -5.; 5., 5.; -5., 5.])
-let p = pathk [NoDir, z0, Vec (dir 150.); NoDir, z1, Vec (dir (-30.))]
+let p = pathk 
+  (knotlist [noDir, z0, vec (dir 150.); noDir, z1, vec (dir (-30.))])
 
 let fig = 
   [Command.draw cercle;

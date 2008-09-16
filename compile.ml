@@ -132,14 +132,14 @@ struct
     | NYPart p ->
         let p,c = Point.compile p in
         C.NYPart p, c
-    | NAdd (n1,n2) ->
+    | NAdd(n1,n2) ->
         let n1,c1 = k n1 in
         let n2,c2 = k n2 in
           C.NAdd (n1,n2), c1 ++ c2
-    | NMinus (n1,n2) ->
+    | NSub(n1,n2) ->
         let n1,c1 = k n1 in
         let n2,c2 = k n2 in
-          C.NMinus (n1,n2), c1 ++ c2
+          C.NSub (n1,n2), c1 ++ c2
     | NMult (n1,n2) ->
         let n1,c1 = k n1 in
         let n2,c2 = k n2 in
@@ -233,7 +233,7 @@ struct
   let name n = C.PAName n
   let declare n p = C.CDeclPath (n,p)
 
-  let rec knot (d1,p,d2) =
+  let rec knot { knot_in = d1 ; knot_p = p ; knot_out = d2 } =
     let d1, c1 = direction d1 in
     let p, c2 = Point.compile p in
     let d2, c3 = direction d2 in

@@ -57,7 +57,7 @@ let rec print_num fmt = function
   | C.NXPart p -> fprintf fmt "xpart %a" print_point p
   | C.NYPart p -> fprintf fmt "ypart %a" print_point p
   | C.NAdd (f1, f2) -> fprintf fmt "(%a +@ %a)" print_num f1 print_num f2
-  | C.NMinus (f1, f2) -> fprintf fmt "(%a -@ %a)" print_num f1 print_num f2
+  | C.NSub (f1, f2) -> fprintf fmt "(%a -@ %a)" print_num f1 print_num f2
   | C.NMult (f1, f2) -> fprintf fmt "(%a *@ %a)" print_num f1 print_num f2
   | C.NDiv (f1, f2) -> fprintf fmt "(%a /@ %a)" print_num f1 print_num f2
   | C.NMax (f1, f2) -> fprintf fmt "max(@ %a,@ %a)" print_num f1 print_num f2

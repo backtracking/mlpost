@@ -12,11 +12,11 @@ let rec num fmt = function
   | F f -> fprintf fmt "%f" f
   | NXPart p -> fprintf fmt "xpart(%a)" point p
   | NYPart p -> fprintf fmt "ypart(%a)" point p
-  | NAdd (n1,n2) -> fprintf fmt "(%a + %a)" num n1 num n2
-  | NMinus (n1,n2) -> fprintf fmt "(%a - %a)" num n1 num n2
-  | NMult (n1,n2) -> fprintf fmt "(%a * %a)" num n1 num n2
-  | NDiv (n1,n2) -> fprintf fmt "(%a / %a)" num n1 num n2
-  | NMax (n1,n2) -> fprintf fmt "max(%a,%a)" num n1 num n2
+  | NAdd(n1,n2) -> fprintf fmt "(%a + %a)" num n1 num n2
+  | NSub(n1,n2) -> fprintf fmt "(%a - %a)" num n1 num n2
+  | NMult(n1,n2) -> fprintf fmt "(%a * %a)" num n1 num n2
+  | NDiv(n1,n2) -> fprintf fmt "(%a / %a)" num n1 num n2
+  | NMax(n1,n2) -> fprintf fmt "max(%a,%a)" num n1 num n2
   | _ -> assert false
 
 and point fmt = function

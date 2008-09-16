@@ -73,14 +73,14 @@ let d2c, d2s, d2sq, d2hsq =
 let proval =
   let f = 7. in
   let pen = Pen.square ~tr:[T.yscaled (bp 0.5); T.rotated 40.] () in
-  let check = jointpath [-1.2,1.2; 0., -2. ; 2., 2. ; 5., 5.] [JLine ; JCurve; JCurve] in
+  let check = jointpath [-1.2,1.2; 0., -2. ; 2., 2. ; 5., 5.] [jLine ; jCurve; jCurve] in
     [ fill ~color:(Color.gray 0.2) (Path.scale (Num.bp f) fullcircle) ;
       label ~pos:Pleft (Picture.tex "Pr") (Point.p (f /. (-4.),0.)) ;
       label ~pos:Pright (Picture.tex "al") (Point.p (f /. 4.,0.)) ;
       Command.draw ~color:Color.green ~pen check;]
 
 let cheno011 =
-  let p = path ~cycle:JCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)] in
+  let p = path ~cycle:jCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)] in
   let pen = Pen.circle ~tr:[T.scaled (bp 1.5)] () in
   [Command.draw p;
    seq (List.map
@@ -94,7 +94,7 @@ open Dash
 
 let d3 =
   let p = pathp [cmp (0., 0.); cmp (5., 0.)] in
-  let pat = pattern [On (bp 6.); Off (bp 12.); On (bp 6.)] in
+  let pat = pattern [on (bp 6.); off (bp 12.); on (bp 6.)] in
   [Command.draw p ~dashed:pat]
 
 
@@ -121,7 +121,7 @@ let d5 =
 let d7 =
   let pic = 
     Picture.transform [T.scaled (bp 4.)] (Picture.tex "bound this!") in
-  let pbox = pathp ~style:JLine ~cycle:JLine
+  let pbox = pathp ~style:jLine ~cycle:jLine
     [Picture.ulcorner pic; Picture.urcorner pic; 
      Picture.lrcorner pic; Picture.llcorner pic] in
     [Command.draw_pic pic;
@@ -244,11 +244,11 @@ let flab i = (Picture.transform
 let instants = 
   let pen = Pen.default ~tr:[Transform.scaled (bp 2.5)] () in
   let base = 
-    Command.draw ~pen (Path.path ~style:JLine [(0.,-65.); (280.,-65.)]) in
+    Command.draw ~pen (Path.path ~style:jLine [(0.,-65.); (280.,-65.)]) in
   let tick i = 
     let xi = float_of_int i *. 14. in
     let yi = if f1 i = f1 (i-1) then -60. else -45. in
-    let p = Path.path ~style:JLine [(xi,-65.); (xi, yi)] in
+    let p = Path.path ~style:jLine [(xi,-65.); (xi, yi)] in
       Command.draw ~pen p
   in
     Command.seq 
@@ -267,7 +267,7 @@ let florence =
     let tr = [Transform.scaled (bp 1.5)] in
       Picture.transform tr (Picture.tex "\\textsf{Number of ones}"),
     Picture.transform tr (Picture.tex "\\textsf{Instants}") in
-  let plot = draw_func ~drawing:Stepwise ~style:JLine in
+  let plot = draw_func ~drawing:Stepwise ~style:jLine in
   [ draw_grid ~hdash:dash ~vdash:dash sk;
     draw_axes ~closed:true ~hcaption ~vcaption sk;
     plot ~pen ~label:(flab 1) f1 sk;
@@ -296,7 +296,7 @@ let d16 =
   let l = Point.length p1 in
   let p2 = Point.pt (l,l) in
   let p3 = Point.p (50.,0.) in
-    [ Command.draw (pathp ~style:JLine [p3;p2;p1])]
+    [ Command.draw (pathp ~style:jLine [p3;p2;p1])]
 
 (* let d17 = Command.logo *)
 

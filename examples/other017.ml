@@ -7,5 +7,5 @@ let fig =
   let b = cmp (1., 0.) in
   let c = cmp (0., 1.) in
   let pen = Pen.circle ~tr:[Transform.scaled (Num.bp 2.)] () in
-    [ draw_arrow (pathp ~style:JLine [c;b;a]);
+    [ draw_arrow (pathp ~style:jLine [c;b;a]);
       draw_arrow ~pen (pathp [a;c]) ; ]

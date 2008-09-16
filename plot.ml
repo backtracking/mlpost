@@ -39,7 +39,7 @@ let get_style = function
   | None -> fun i -> Dash.evenly, Pen.default ()
   | Some f -> f
 
-let off_pattern = fun i -> Dash.pattern [Dash.On (bp 5.)]
+let off_pattern = fun i -> Dash.pattern [Dash.on (bp 5.)]
 let defpen = fun i -> Pen.default ()
 
 let get_borders sx sy h w = zero, sx */ (num_of_int w), 
@@ -148,7 +148,7 @@ let draw_func ?(pen) ?(drawing=Normal) ?(style) ?(dashed) ?(label)
     f {width=w; height=h; stepx=sx; stepy=sy} =
   let maxl, maxr, maxu, maxd = get_borders sx sy h w in
   let ul, ur, ll, lr = get_corners maxu maxr in
-  let box = pathn ~style:JLine ~cycle:JLine [ul;ll;lr;ur] in
+  let box = pathn ~style:jLine ~cycle:jLine [ul;ll;lr;ur] in
   let normal acc i =
     let x, y = (num_of_int i) */ sx, (Num.bp (f i)) */ sy 
     in 
