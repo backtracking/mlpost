@@ -94,7 +94,7 @@ mlpost.cmx: mlpost.cmi
 mlpost.cmx: $(CMX)
 	$(OCAMLOPT) $(INCLUDES) -pack -o $@ $(CMX)
 
-TOOLCMO=tool.cmo
+TOOLCMO=version.cmo tool.cmo
 TOOLCMX := $(TOOLCMO:.cmo=.cmx)
 
 tool.byte: $(TOOLCMO)
@@ -103,18 +103,38 @@ tool.byte: $(TOOLCMO)
 tool.opt: $(TOOLCMX)
 	$(OCAMLOPT) -o $@ unix.cmxa $^
 
-tests: $(CMA) tests.ml
+tests: $(CMXA) tests.ml
+	$(OCAMLOPT) -o tests.exe $(CMXA) tests.ml
+	./tests.exe
+	make -C test tests
+	gv test/tests.ps
+
+tests.byte: $(CMA) tests.ml
 	ocaml $(CMA) tests.ml
 	make -C test tests
 	gv test/tests.ps
 
-handbook: $(CMA) handbookgraphs.ml
+handbook: $(CMXA) handbookgraphs.ml
+	$(OCAMLOPT) -o handbook.exe $(CMXA) handbookgraphs.ml
+	./handbook.exe
+	make -C test manual
+	make -C test/manual mpost
+	gv test/testmanual.ps
+
+handbook.byte: $(CMA) handbookgraphs.ml
 	ocaml $(CMA) handbookgraphs.ml
 	make -C test manual
 	make -C test/manual mpost
 	gv test/testmanual.ps
 
-other: $(CMA) othergraphs.ml
+other: $(CMXA) othergraphs.ml
+	$(OCAMLOPT) -o othergraphs.exe $(CMXA) othergraphs.ml
+	./othergraphs.exe
+	make -C test other
+	make -C test/othergraphs mpost
+	gv test/othergraphs.ps
+
+other.byte: $(CMA) othergraphs.ml
 	ocaml $(CMA) othergraphs.ml
 	make -C test other
 	make -C test/othergraphs mpost
@@ -127,6 +147,7 @@ check-examples: mlpost.cma
 version.ml: Makefile
 	echo "let version = \""$(VERSION)"\"" > version.ml
 	echo "let date = \""`date`"\"" >> version.ml
+	echo "let ocamlopt = \""$(OCAMLOPT)"\"" >> version.ml
 
 dep:
 	$(OCAMLDEP) *.mli *.ml | ocamldot | dot -Tps | gv -

@@ -59,8 +59,7 @@
       "-xpdf", Set xpdf, " wysiwyg mode using xpdf";
       "-v", Set verbose, " be a bit more verbose";
       "-ocamlbuild", Set use_ocamlbuild, " Use ocamlbuild to compile";
-      "-native", Set native,
-      " Compile a native executable (only with -ocamlbuild)";
+      "-native", Set native, " Compile to native code";
       "-ccopt", String add_ccopt, 
       "\"<options>\" Pass <options> to the Ocaml compiler";
       "-execopt", String add_execopt,
@@ -100,6 +99,15 @@ rule scan = parse
     let cmd = "ocaml " ^ String.concat " " (Array.to_list args) in
     let () = if !verbose then Format.eprintf "%s@." cmd in
     let out = Sys.command cmd in
+    if out <> 0 then exit 1
+
+  let ocamlopt args =
+    let exe = Filename.temp_file "mlpost" ".exe" in
+    let cmd = "ocamlopt.opt -o " ^ exe ^ " " ^ String.concat " " (Array.to_list args) in
+    let () = if !verbose then Format.eprintf "%s@." cmd in
+    let out = Sys.command cmd in
+    if out <> 0 then exit 2;
+    let out = Sys.command exe in
     if out <> 0 then exit 1
 
   let ocamlbuild args =
@@ -154,6 +162,9 @@ rule scan = parse
          !execopt];
       Sys.remove mlf2
     end else
+      if !native then
+        ocamlopt [|"mlpost.cmxa"; !ccopt; mlf; !execopt|]
+      else
       ocaml [|"mlpost.cma"; !ccopt; mlf; !execopt|];
 
     Sys.remove mlf;
