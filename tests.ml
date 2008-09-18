@@ -42,7 +42,7 @@ let d1 =
 
 open Tree
 
-let () = Random.self_init ()
+let () = Random.init 1234
 
 let rec random_tree = function
   | 1 -> 

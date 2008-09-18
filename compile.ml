@@ -62,7 +62,7 @@ struct
     struct
       (* structural equality : slow but precise *)
       type t = E.t 
-      let equal = (=) 
+      let equal x y = (Pervasives.compare x y = 0)
       let hash x = 
 	let n = (* E.hash *)  Hashtbl.hash x (* land 0x3FFFFFFF *) in
 (*
