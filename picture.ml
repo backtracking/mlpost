@@ -36,9 +36,10 @@ let corner_bbox ?(dx=Num.zero) ?(dy=Num.zero) pic =
      Point.sub (Point.add (lrcorner pic) pdx) pdy;
      Point.add (Point.add (urcorner pic) pdx) pdy]
 
-let transform tr = function
+let transform tr p = 
+  match p.Hashcons.node with
   | PITransform (tr', p) -> mkPITransform (tr'@tr) p
-  | _ as x -> mkPITransform tr x
+  | _ -> mkPITransform tr p
 
 let ctr pic = Point.segment 0.5 (llcorner pic) (urcorner pic)
 

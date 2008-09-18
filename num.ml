@@ -15,6 +15,7 @@
 (**************************************************************************)
 
 open Types
+open Hashcons
 
 type t = num
 
@@ -32,56 +33,60 @@ let cm f = mkF (28.34645 *. f)
 let mm f = mkF (2.83464 *. f)
 let inch f = mkF (72. *. f)
 
-let pi = 4.0 *. atan 1.0
+let pi = 3.1415926535897932384626433832795029
 
-let deg2rad f = pi *. f /. 180.
+let pi_div_180 = pi /. 180.0
+
+let deg2rad f = pi_div_180 *. f 
 
 let is_zero f = abs_float f < 0.0001
 
 type scale = float -> t
 
 let addn x y = 
-  match x, y with
+  match x.node, y.node with
   | F f1, F f2 -> mkF (f1 +. f2)
-  | ( x, F y | F y, x) when is_zero y -> x
+  | _, F f when is_zero f -> x
+  | F f, _ when is_zero f -> y
   | _, _ -> mkNAdd x y
 
 let subn x y = 
-  match x, y with
+  match x.node, y.node with
   | F f1, F f2 -> mkF (f1 -. f2)
-  | x, F y  when is_zero y -> x
+  | _, F f  when is_zero f -> x
   | _, _ -> mkNSub x y
 
 let multn x y = 
-  match x, y with
+  match x.node, y.node with
   | F f1, F f2 -> mkF (f1 *. f2)
-  | (F x, _ | _ , F x) when is_zero x -> zero
+  | (F f, _ | _ , F f) when is_zero f -> zero
   | _, _ -> mkNMult x y
 
 let multf f x = multn (mkF f) x
   
 let divn x y = 
-  match x, y with
+  match x.node, y.node with
   | F f1, F f2 -> mkF (f1 /. f2)
-  | F x, _ when is_zero x -> zero
+  | F f, _ when is_zero f -> zero
   | _, _ -> mkNDiv x y
 
 let divf x f = divn x (mkF f)
 
 let maxn x y =
-  match x, y with
+  match x.node, y.node with
     | F f1, F f2 -> mkF (max f1 f2)
     | _, _ -> mkNMax x y
 
 let minn x y =
-  match x, y with
+  match x.node, y.node with
     | F f1, F f2 -> mkF (min f1 f2)
     | _, _ -> mkNMin x y
 
 let gmean x y = 
-  match x, y with
+  match x.node, y.node with
   | F f1, F f2 -> mkF ( sqrt (f1 *. f1 +. f2 *. f2 ))
-  | (z, F x | F x, z) when is_zero x -> z
+  | _, F f when is_zero f -> x
+  | F f, _ when is_zero f -> y
   | _, _ -> mkNGMean x y
 
 let fold_max f = List.fold_left (fun w p -> maxn w (f p))

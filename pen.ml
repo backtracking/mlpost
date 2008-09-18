@@ -20,7 +20,7 @@ open Transform
 type t = Types.pen
 
 let transform tr p = 
-  match tr, p with
+  match tr, p.Hashcons.node with
     | [], _ -> p
     | _, PenTransformed (t,tr') -> mkPenTransformed t (tr'@tr)
     | _, _ -> mkPenTransformed p tr

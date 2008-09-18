@@ -36,7 +36,9 @@ type position =
   | Plowleft
   | Plowright
 
-type num = private
+open Hashcons
+
+type num_node = private
   | F of float
   | NXPart of point
   | NYPart of point
@@ -49,7 +51,9 @@ type num = private
   | NGMean of num * num
   | NLength of path
 
-and point = private
+and num = num_node hash_consed
+
+and point_node = private
   | PTPair of num * num
   | PTPicCorner of picture * piccorner
   | PTPointOf of float * path
@@ -60,26 +64,34 @@ and point = private
   | PTRotated of float * point
   | PTTransformed of point * transform list
 
+and point = point_node hash_consed
+
 and on_off = private 
   | On of num 
   | Off of num
 
-and direction = private
+and direction_node = private
   | Vec of point
   | Curl of float
   | NoDir 
 
-and joint = private
+and direction = direction_node hash_consed
+
+and joint_node = private
   | JLine
   | JCurve
   | JCurveNoInflex
   | JTension of float * float
   | JControls of point * point
 
-and knot = private 
+and joint = joint_node hash_consed
+
+and knot_node = private 
     { knot_in : direction ; knot_p : point ; knot_out : direction }
 
-and path = private
+and knot = knot_node hash_consed
+
+and path_node = private
   | PAConcat of knot * joint * path
   | PACycle of direction * joint * path
   | PAFullCircle
@@ -95,7 +107,9 @@ and path = private
   | PASub of float * float * path
   | PABBox of picture
 
-and transform = private
+and path = path_node hash_consed
+
+and transform_node = private
   | TRRotated of float
   | TRScaled of num
   | TRShifted of point
@@ -106,11 +120,15 @@ and transform = private
   | TRReflect of point * point
   | TRRotateAround of point * float
 
-and picture = private
+and transform = transform_node hash_consed
+
+and picture_node = private
   | PITex of string
   | PIMake of command
   | PITransform of transform list * picture
   | PIClip of picture * path
+
+and picture = picture_node hash_consed
 
 and dash = private
   | DEvenly
@@ -119,13 +137,15 @@ and dash = private
   | DShifted of point * dash
   | DPattern of on_off list
 
-and pen = private
+and pen_node = private
   | PenCircle
   | PenSquare
   | PenFromPath of path
   | PenTransformed of pen * transform list
 
-and command = private
+and pen = pen_node hash_consed
+
+and command_node = private
   | CDraw of path * color option * pen option * dash option
   | CDrawArrow of path * color option * pen option * dash option
   | CDrawPic of picture
@@ -134,6 +154,10 @@ and command = private
   | CDotLabel of picture * position * point
   | CLoop of int * int * (int -> command)
   | CSeq of command list
+
+and command = command_node hash_consed
+
+(* smart constructors *)
 
 (* num *)
 

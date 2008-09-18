@@ -27,10 +27,8 @@ let (++) c1 c2 =
 
 module type COMP =
 sig
-  type t
-(*
-  val hash : t -> int
-*)
+  type node
+  type t = node Hashcons.hash_consed
   type out
   val is_simple : t -> bool
   val name : name -> out
@@ -60,21 +58,16 @@ module Remember
 struct
   module HM = Hashtbl.Make(
     struct
-      (* structural equality : slow but precise *)
       type t = E.t 
-      let equal x y = (Pervasives.compare x y = 0)
-      let hash x = 
-	let n = (* E.hash *)  Hashtbl.hash x (* land 0x3FFFFFFF *) in
-(*
-	Format.eprintf "%d@." n;
-*)
-	n
+      let equal = (==) 
+      let hash x = x.Hashcons.hkey
   end)
+
 
   type t = E.t
   type out = E.out
  
-  let hmap = HM.create 17
+  let hmap = HM.create 257
   let reset () = HM.clear hmap
 
   let find_name_with_cont k o =
@@ -110,21 +103,22 @@ let option_compile f = function
       let obj, c = f obj in
         Some obj, c
 
-module rec NumBase : COMP with type t = num and type out = C.num =
+module rec NumBase : COMP with type node = num_node and type out = C.num =
 struct
+  type node = num_node
   type t = num
-(*
-  let hash = Hash.num
-*)
   type out = C.num
   
   let new_name = Name.num
-  let is_simple = function
-    | F _ -> true | _ -> false
+  let is_simple n = 
+    match n.Hashcons.node with
+      | F _ -> true 
+      | _ -> false
   let name n = C.NName n
   let declare n nm = C.CDeclNum (n,nm)
 
-  let compile k _ = function
+  let compile k _ n = 
+    match n.Hashcons.node with
     | F f -> C.F f, nop
     | NXPart p -> 
         let p,c = Point.compile p in
@@ -164,21 +158,19 @@ struct
         let p,c = Path.compile p in
         C.NLength p, c
 end
-and PointBase : COMP with type t = point and type out = C.point =
+and PointBase : COMP with type node = point_node and type out = C.point =
 struct
+  type node = point_node
   type t = point
-(*
-  let hash = Hash.point
-*)
   type out = C.point
   let new_name = Name.point
 
-  let is_simple = function
+  let is_simple p = match p.Hashcons.node with
     | PTPair _ -> true | _ -> false
   let name n = C.PTName n
   let declare n pt = C.CDeclPoint (n,pt)
 
-  let compile k _ = function
+  let compile k _ p = match p.Hashcons.node with
     | PTPair (f1,f2) -> 
         let f1, c1 = Num.compile f1 in
         let f2,c2 = Num.compile f2 in 
@@ -212,34 +204,36 @@ struct
         let tr, c2 = Other.transform_list tr in
           C.PTTransformed (p,tr),  c1 ++ c2
 end
-and PathBase : COMP with type t = path and type out = C.path =
+and PathBase : COMP with type node = path_node and type out = C.path =
 struct
+  type node = path_node
   type t = path
-(*
-  let hash = Hash.path
-*)
   type out = C.path
   let new_name = Name.path
 
-  let is_simple = function
+  let is_simple p = match p.Hashcons.node with
   | PAFullCircle
   | PAHalfCircle
   | PAQuarterCircle
-  | PAUnitSquare
+  | PAUnitSquare -> true
+      (* DOUTEUX: peuvent etre tres complexe !!! *)
   | PAKnot _
-  | PABBox _ -> true
+  | PABBox _ -> false
   | _ -> false
 
   let name n = C.PAName n
   let declare n p = C.CDeclPath (n,p)
 
-  let rec knot { knot_in = d1 ; knot_p = p ; knot_out = d2 } =
-    let d1, c1 = direction d1 in
-    let p, c2 = Point.compile p in
-    let d2, c3 = direction d2 in
-      (d1,p,d2), c1 ++ c2 ++ c3
+  let rec knot k =
+    match k.Hashcons.node with
+      | { knot_in = d1 ; knot_p = p ; knot_out = d2 } ->
+	  let d1, c1 = direction d1 in
+	  let p, c2 = Point.compile p in
+	  let d2, c3 = direction d2 in
+	  (d1,p,d2), c1 ++ c2 ++ c3
 
-  and joint = function
+  and joint j = 
+    match j.Hashcons.node with
     | JLine -> C.JLine, nop
     | JCurve -> C.JCurve, nop
     | JCurveNoInflex -> C.JCurveNoInflex, nop
@@ -249,14 +243,15 @@ struct
         let p2,c2 = Point.compile p2 in
           C.JControls (p1,p2), c1 ++ c2
 
-  and direction = function
+  and direction d = 
+    match d.Hashcons.node with
     | Vec p -> 
         let p, code = Point.compile p in
           C.Vec p, code
     | Curl f -> C.Curl f, nop
     | NoDir  -> C.NoDir, nop
 
-  and compile k ks = function
+  and compile k ks p = match p.Hashcons.node with
     (* compile the argument path ; 
      * use [k] for path components to be able to use
      * path components that already have a name *)
@@ -313,18 +308,16 @@ struct
     | PAHalfCircle -> C.PAHalfCircle, nop
     | PAFullCircle -> C.PAFullCircle, nop
 end
-and PicBase : COMP with type t = picture and type out = C.picture =
+and PicBase : COMP with type node = picture_node and type out = C.picture =
 struct
+  type node = picture_node
   type t = picture
-(*
-  let hash = Hash.picture
-*)
   type out = C.picture
   let new_name = Name.picture
   let name n = C.PIName n
   let declare n p = C.CSimplePic (n,p)
 
-  let is_simple = function
+  let is_simple p = match p.Hashcons.node with
     | PITransform _ -> false
     | PITex _ -> false
     (* we don't want names for complicated pictures 
@@ -335,7 +328,7 @@ struct
 
 
   and compile k ks pic = 
-    match pic with
+    match pic.Hashcons.node with
     | PITransform (tr,p) ->
         let tr, c1 = Other.transform_list tr in
         let pic, c2 = k p in
@@ -364,7 +357,8 @@ and Other :
   end = 
 struct
 
-  let rec transform = function
+  let rec transform t = 
+    match t.Hashcons.node with
   | TRRotated f -> C.TRRotated f, nop
   | TRScaled f -> 
       let f,c = Num.compile f in
@@ -402,7 +396,8 @@ and transform_list l =
                      tr::trl, c::cl ) ([],[]) l in
     List.rev l1, C.CSeq (List.rev l2)
 
-and pen = function
+and pen p = 
+    match p.Hashcons.node with
   | PenCircle -> C.PenCircle, nop
   | PenSquare -> C.PenSquare, nop
   | PenFromPath p -> 
@@ -437,7 +432,8 @@ and dash_pattern = function
   | Off f -> 
       let f1, c1 = Num.compile f in C.Off f1, c1
 
-and command = function
+and command c = 
+    match c.Hashcons.node with 
   | CDraw (p, color, pe, dsh) ->
       let p, c1 = Path.compile p in
       let pe, c2 = (option_compile pen) pe in

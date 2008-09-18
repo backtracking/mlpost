@@ -38,7 +38,7 @@ LIBEXT = @LIBEXT@
 OBJEXT = @OBJEXT@
 
 BFLAGS = -dtypes -g $(INCLUDES) 
-OFLAGS = -p -g -dtypes $(INCLUDES) @FORPACK@
+OFLAGS = -g -dtypes $(INCLUDES) @FORPACK@
 
 # main target
 #############
@@ -56,7 +56,7 @@ check: byte $(OCAMLBEST) $(TOOL) $(TESTS) check-examples
 # bytecode and native-code compilation
 ######################################
 
-CMO := misc.cmo name.cmo compiled_types.cmo print.cmo types.cmo \
+CMO := misc.cmo name.cmo compiled_types.cmo print.cmo hashcons.cmo types.cmo \
 	compile.cmo num.cmo point.cmo \
        transform.cmo color.cmo primPath.cmo path.cmo picture.cmo \
        dash.cmo pen.cmo command.cmo shapes.cmo pos.cmo arrow.cmo \
