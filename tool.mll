@@ -47,6 +47,7 @@
   let execopt = ref ""
   let eps = ref false
   let verbose = ref false
+  let native = ref false
 
   let add_ccopt x = ccopt := !ccopt ^ " " ^ x
   let add_execopt x = execopt := !execopt ^ " " ^ x
@@ -58,6 +59,8 @@
       "-xpdf", Set xpdf, " wysiwyg mode using xpdf";
       "-v", Set verbose, " be a bit more verbose";
       "-ocamlbuild", Set use_ocamlbuild, " Use ocamlbuild to compile";
+      "-native", Set native,
+      " Compile a native executable (only with -ocamlbuild)";
       "-ccopt", String add_ccopt, 
       "\"<options>\" Pass <options> to the Ocaml compiler";
       "-execopt", String add_execopt,
@@ -145,8 +148,9 @@ rule scan = parse
       (* Ocamlbuild cannot compile a file which is in /tmp *)
       let mlf2 = temp_file_name bn ".ml" in
       command ("cp " ^ mlf ^ " " ^ mlf2);
+      let ext = if !native then ".native" else ".byte" in
       ocamlbuild
-        ["-lib mlpost"; Filename.chop_extension mlf2 ^ ".byte"; !ccopt; "--";
+        ["-lib mlpost"; Filename.chop_extension mlf2 ^ ext; !ccopt; "--";
          !execopt];
       Sys.remove mlf2
     end else
