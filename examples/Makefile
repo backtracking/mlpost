@@ -25,7 +25,7 @@ $(PNGFILES): ../mlpost.cma
 	../tool.opt -ccopt "-I ../ unix.cma" -v $^
 
 %.png: %.ps
-	convert $*.ps $@
+	convert $*.ps $@ 
 
 %.ps: %.1
 	sed -e 's/all/$*/' all.template > $*.tex

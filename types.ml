@@ -367,7 +367,8 @@ let eq_path_node p1 p2 =
   match p1,p2 with
     | PAConcat(k1,j1,p1),PAConcat(k2,j2,p2) ->
 	eq_hashcons k1 k2 && eq_hashcons j1 j2 && eq_hashcons p1 p2
-    | PACycle(d1,j1,p1),PACycle(d2,j2,p2) ->	eq_hashcons d1 d2 && eq_hashcons j1 j2 && eq_hashcons p1 p2
+    | PACycle(d1,j1,p1),PACycle(d2,j2,p2) ->	
+	eq_hashcons d1 d2 && eq_hashcons j1 j2 && eq_hashcons p1 p2
     | PAFullCircle, PAFullCircle 
     | PAHalfCircle, PAHalfCircle
     | PAQuarterCircle, PAQuarterCircle
@@ -382,7 +383,7 @@ let eq_path_node p1 p2 =
     | PACutBefore(p11,p12),PACutBefore(p21,p22) 
 	-> eq_hashcons p11 p21 && eq_hashcons p12 p22
     | PABuildCycle(l1),PABuildCycle(l2) ->
-	assert false (* TODO *)
+	eq_hashcons_list l1 l2
     | PASub(f11,f12,p1), PASub(f21,f22,p2) ->
 	eq_float f11 f21 && eq_float f12 f22 && eq_hashcons p1 p2
     | PABBox(p1), PABBox(p2) ->

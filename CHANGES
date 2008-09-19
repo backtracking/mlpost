@@ -1,3 +1,5 @@
+
+* new option -native to use native compilation, useful for complicated pictures
 o - changes in behaviour, new features
 * - incompatible changes in the interface
 
