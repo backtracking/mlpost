@@ -170,7 +170,7 @@ let rec sierpinski p n =
 
 let d12 = 
   let p1 = Picture.tex "A" in
-    [Command.draw_pic (sierpinski p1 8)]
+    [Command.draw_pic (sierpinski p1 7)]
 
 (** plots *)
 open Plot
@@ -532,7 +532,7 @@ let newarray =
   in
     (List.flatten boxes)@pics
 
-let figs = [
+let figs = [d12;
   newarray; patates; yannick Box.rect; yannick Box.patatoid;
              placetest; boxjoin; box_align; stack; row; stackl; rowl;
 	     array; mybresenham; 
