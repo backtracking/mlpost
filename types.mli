@@ -66,9 +66,11 @@ and point_node = private
 
 and point = point_node hash_consed
 
-and on_off = private 
+and on_off_node = private 
   | On of num 
   | Off of num
+
+and on_off = on_off_node hash_consed 
 
 and direction_node = private
   | Vec of point
@@ -130,12 +132,14 @@ and picture_node = private
 
 and picture = picture_node hash_consed
 
-and dash = private
+and dash_node = private
   | DEvenly
   | DWithdots
   | DScaled of float * dash
   | DShifted of point * dash
   | DPattern of on_off list
+
+and dash = dash_node hash_consed
 
 and pen_node = private
   | PenCircle

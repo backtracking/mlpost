@@ -66,7 +66,12 @@ and point_node =
   | PTTransformed of point * transform list
 
 and point = point_node hash_consed
-and on_off = On of num | Off of num
+
+and on_off_node = 
+  | On of num 
+  | Off of num
+
+and on_off = on_off_node hash_consed 
 
 and direction_node = 
   | Vec of point
@@ -128,12 +133,14 @@ and picture_node =
 
 and picture = picture_node hash_consed
 
-and dash =
+and dash_node =
   | DEvenly
   | DWithdots
   | DScaled of float * dash
   | DShifted of point * dash
   | DPattern of on_off list
+
+and dash = dash_node hash_consed
 
 and pen_node = 
   | PenCircle
@@ -156,7 +163,11 @@ and command_node =
 
 and command = command_node hash_consed
 
-open Hashtbl
+let hash_float = Hashtbl.hash
+
+let hash_piccorner = Hashtbl.hash
+
+let hash_string = Hashtbl.hash
 
 let combine n acc = acc * 65599 + n
 
@@ -168,7 +179,7 @@ let combine4 n acc1 acc2 acc3 acc4 = combine n (combine3 acc1 acc2 acc3 acc4)
 
 
 let num = function 
-  | F f -> combine 1 (Hashtbl.hash f)
+  | F f -> combine 1 (hash_float f)
   | NXPart p -> combine 2 p.hkey
   | NYPart p -> combine 3 p.hkey
   | NAdd(n,m) -> combine2 4 n.hkey m.hkey
@@ -182,33 +193,32 @@ let num = function
 
 let point = function
   | PTPair(n,m) -> combine2 12 n.hkey m.hkey
-  | PTPicCorner(p,pc) -> combine2 13 p.hkey (hash pc)
-  | PTPointOf(f,p) -> combine2 14 (hash f) p.hkey
-  | PTDirectionOf(f,p) -> combine2 15 (hash f) p.hkey
+  | PTPicCorner(p,pc) -> combine2 13 p.hkey (hash_piccorner pc)
+  | PTPointOf(f,p) -> combine2 14 (hash_float f) p.hkey
+  | PTDirectionOf(f,p) -> combine2 15 (hash_float f) p.hkey
   | PTAdd(p,q) -> combine2 16 p.hkey q.hkey
   | PTSub(p,q) -> combine2 17 p.hkey q.hkey
   | PTMult(n,q) -> combine2 18 n.hkey q.hkey
-  | PTRotated(f,p) -> combine2 19 (hash f) p.hkey
+  | PTRotated(f,p) -> combine2 19 (hash_float f) p.hkey
   | PTTransformed(p,l) ->
       List.fold_left (fun acc t -> combine2 21 acc t.hkey)
 	(combine 20 p.hkey) l
-(*
-and on_off = On of num | Off of num
-*)
+
+let on_off = function 
+  | On n -> combine 65 n.hkey
+  | Off n -> combine 66 n.hkey
 
 let direction = function
   | Vec p -> combine 61 p.hkey
-  | Curl f -> combine 62 (hash f)
+  | Curl f -> combine 62 (hash_float f)
   | NoDir -> 63
 
-let joint = hash
-(*
-  | JLine
-  | JCurve
-  | JCurveNoInflex
-  | JTension of float * float
-  | JControls of point * point
-*)
+let joint = function
+  | JLine -> 67
+  | JCurve -> 68
+  | JCurveNoInflex -> 69
+  | JTension(f1,f2) -> combine2 70 (hash_float f1) (hash_float f2) 
+  | JControls(p1,p2) -> combine2 71 p1.hkey p2.hkey
 
 let knot k = 
   combine3 64 k.knot_in.hkey k.knot_p.hkey k.knot_out.hkey
@@ -216,7 +226,7 @@ let knot k =
 
 let path = function
   | PAConcat(k,j,p) -> 
-      combine3 22 k.hkey (joint j) p.hkey
+      combine3 22 k.hkey j.hkey p.hkey
   | PACycle(d,j,p) ->
       combine3 23 d.hkey j.hkey p.hkey
   | PAFullCircle -> 24
@@ -227,17 +237,17 @@ let path = function
       List.fold_left (fun acc t -> combine2 28 acc t.hkey)
 	(combine 29 p.hkey) l
   | PAKnot k -> combine 30 k.hkey
-  | PAAppend(p1,j,p2) -> combine3 31 p1.hkey (joint j) p2.hkey
+  | PAAppend(p1,j,p2) -> combine3 31 p1.hkey j.hkey p2.hkey
   | PACutAfter(p,q) -> combine2 32 p.hkey q.hkey
   | PACutBefore(p,q) -> combine2 33 p.hkey q.hkey
   | PABuildCycle l ->
       List.fold_left (fun acc p -> combine2 35 acc p.hkey) 34 l
   | PASub(f1,f2,p) ->
-      combine3 36 (hash f1) (hash f2) p.hkey
+      combine3 36 (hash_float f1) (hash_float f2) p.hkey
   | PABBox p -> combine 37 p.hkey
 
 let transform = function
-  | TRRotated f -> combine 52 (hash f)
+  | TRRotated f -> combine 52 (hash_float f)
   | TRScaled n -> combine 53 n.hkey
   | TRShifted p -> combine 57 p.hkey
   | TRSlanted n -> combine 54 n.hkey
@@ -245,46 +255,57 @@ let transform = function
   | TRYscaled n -> combine 56 n.hkey
   | TRZscaled p -> combine 58 p.hkey
   | TRReflect(p,q) -> combine2 59 p.hkey q.hkey
-  | TRRotateAround(p,q) -> combine2 60 p.hkey (hash q)
+  | TRRotateAround(p,q) -> combine2 60 p.hkey (hash_float q)
 
-and picture = function
-  | PITex s -> combine 38 (hash s)
+let picture = function
+  | PITex s -> combine 38 (hash_string s)
   | PIMake c -> combine 39 c.hkey
   | PITransform(l,p) ->
       List.fold_left (fun acc t -> combine2 40 acc t.hkey)
 	(combine 41 p.hkey) l
   | PIClip(p,q) -> combine2 42 p.hkey q.hkey
 
-and dash = hash
-(*
-  | DEvenly
-  | DWithdots
-  | DScaled of float * dash
-  | DShifted of point * dash
-  | DPattern of on_off list
-*)
-and pen =  hash
-(*
-  | PenCircle
-  | PenSquare
-  | PenFromPath of path
-  | PenTransformed of pen * transform list
-*)
-and command = function
+let dash = function
+  | DEvenly -> 72
+  | DWithdots -> 73
+  | DScaled(f,d) -> combine2 74 (hash_float f) d.hkey
+  | DShifted(p,d) -> combine2 75 p.hkey d.hkey
+  | DPattern l -> 
+      List.fold_left (fun acc o -> combine2 76 acc o.hkey) 77 l
+
+let pen = function
+  | PenCircle -> 78
+  | PenSquare -> 79
+  | PenFromPath p -> combine 80 p.hkey
+  | PenTransformed(p,l) ->
+      List.fold_left (fun acc t -> combine2 81 acc t.hkey)
+	(combine 82 p.hkey) l
+
+let hash_opt f = function
+  | None -> 83
+  | Some o -> combine 84 (f o)
+
+let hash_key x = x.hkey
+
+let hash_color = Hashtbl.hash
+
+let hash_position = Hashtbl.hash
+
+let command = function
   | CDraw(pa,c,p,d) ->
-      combine4 43 pa.hkey (hash c) (hash p) (hash d)
+      combine4 43 pa.hkey (hash_opt hash_color c) (hash_opt hash_color p) (hash_opt hash_key d)
   | CDrawArrow(pa,c,p,d) ->
-      combine4 44 pa.hkey (hash c) (hash p) (hash d)
+      combine4 44 pa.hkey (hash_opt hash_color c) (hash_opt hash_color p) (hash_opt hash_key d)
   | CDrawPic p -> combine 45 p.hkey
-  | CFill(p,c) -> combine2 46 p.hkey (hash c)
-  | CLabel(pic,pos,poi) -> combine3 47 pic.hkey (hash pos) poi.hkey
+  | CFill(p,c) -> combine2 46 p.hkey (hash_color c)
+  | CLabel(pic,pos,poi) -> combine3 47 pic.hkey (hash_position pos) poi.hkey
   | CDotLabel(pic,pos,poi) -> 
-      combine3 48 pic.hkey (hash pos) poi.hkey
+      combine3 48 pic.hkey (hash_position pos) poi.hkey
   | CLoop(n,m,_) ->  combine2 49 n m
   | CSeq l ->
       List.fold_left (fun acc t -> combine2 50 acc t.hkey) 51 l
 
-(* equality *)
+(** equality *)
 
 (* equality of floats with correct handling of nan *)
 let eq_float (f1:float) (f2:float) =
@@ -295,8 +316,11 @@ let eq_float (f1:float) (f2:float) =
 let eq_hashcons (x:'a hash_consed) (y:'a hash_consed) =
   x == y
 
-let eq_hashcons_list (x:'a hash_consed list) (y:'a hash_consed list) =
-  x == y
+let rec eq_hashcons_list (x:'a hash_consed list) (y:'a hash_consed list) =
+  match x,y with
+    | [], [] -> true
+    | h1::t1,h2::t2 -> h1 == h2 && eq_hashcons_list t1 t2
+    | _ -> false
 
 let eq_opt f o1 o2 =
   match o1,o2 with
@@ -316,8 +340,23 @@ let eq_pen_node p1 p2 =
 	eq_hashcons p1 p2 && eq_hashcons_list l1 l2
     | _ -> false
 
-let eq_dash d1 d2 =
-  assert false
+let eq_dash_node d1 d2 =
+  match d1, d2 with
+  | DEvenly, DEvenly 
+  | DWithdots, DWithdots -> true
+  | DScaled(f1,d1), DScaled(f2,d2) ->
+      eq_float f1 f2 && eq_hashcons d1 d2
+  | DShifted(p1,d1), DShifted(p2,d2) ->
+      eq_hashcons p1 p2 && eq_hashcons d1 d2
+  | DPattern l1, DPattern l2 ->
+      eq_hashcons_list l1 l2
+  | _ -> false
+
+let eq_on_off o1 o2 =
+  match o1,o2 with
+    | Off n1, Off n2
+    | On n1, On n2 -> eq_hashcons n1 n2
+    | _ -> false
 
 let eq_position (p1:position) (p2:position) = 
   p1 == p2 (* correct because this type contains only constants *)
@@ -359,7 +398,7 @@ let eq_point_node p1 p2 =
     | PTRotated(f1,p1),PTRotated(f2,p2) ->
 	eq_float f1 f2 && eq_hashcons p1 p2
     | PTTransformed(p1,l1), PTTransformed(p2,l2) ->
-	eq_hashcons p1 p2 && (assert false (* TODO *))
+	eq_hashcons p1 p2 && eq_hashcons_list l1 l2
     | _ -> false
 
 
@@ -451,7 +490,7 @@ let eq_command_node c1 c2 =
       eq_hashcons p1 p2 && 
 	eq_opt eq_color c1 c2 &&
 	eq_opt eq_hashcons pen1 pen2 &&
-	eq_opt eq_dash d1 d2
+	eq_opt eq_hashcons d1 d2
   | CDrawPic p1, CDrawPic p2 -> eq_hashcons p1 p2
   | CFill(p1,c1), CFill(p2,c2) ->
       eq_hashcons p1 p2 && eq_opt eq_color c1 c2
@@ -702,15 +741,24 @@ let mkCSeq l = hashcommand (CSeq l)
 
 (* dash *)
 
-let mkDEvenly = DEvenly
+module HashDash = 
+  Hashcons.Make(struct type t = dash_node
+		       let equal = eq_dash_node
+		       let hash = unsigned dash end)
 
-let mkDWithdots = DWithdots
+let hashdash_table = HashDash.create 257;;
 
-let mkDScaled x y = DScaled(x,y)
+let hashdash = HashDash.hashcons hashdash_table
 
-let mkDShifted x y = DShifted(x,y)
+let mkDEvenly = hashdash DEvenly
 
-let mkDPattern l = DPattern l
+let mkDWithdots = hashdash DWithdots
+
+let mkDScaled x y = hashdash (DScaled(x,y))
+
+let mkDShifted x y = hashdash (DShifted(x,y))
+
+let mkDPattern l = hashdash (DPattern l)
 
 (* pen *)
 
@@ -733,7 +781,16 @@ let mkPenTransformed x y = hashpen (PenTransformed(x,y))
 
 (* on_off *)
 
-let mkOn f = On f
+module HashOnOff = 
+  Hashcons.Make(struct type t = on_off_node
+		       let equal = eq_on_off
+		       let hash = unsigned on_off end)
 
-let mkOff f = Off f
+let hashon_off_table = HashOnOff.create 257;;
+
+let hashon_off = HashOnOff.hashcons hashon_off_table
+
+let mkOn n = hashon_off (On n)
+
+let mkOff n = hashon_off (Off n)
 

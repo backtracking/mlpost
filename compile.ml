@@ -409,7 +409,8 @@ and pen p =
         C.PenTransformed (p,tr), c1 ++ c2
 
 
-and dash = function
+and dash d = 
+    match d.Hashcons.node with
   | DEvenly -> C.DEvenly, nop
   | DWithdots -> C.DWithdots, nop
   | DScaled (f, d) -> 
@@ -426,12 +427,13 @@ and dash = function
              pat::patl, c::cl ) l ([],[]) in
 	C.DPattern l1, C.CSeq l2
 
-and dash_pattern = function
-  | On f -> 
-      let f1, c1 = Num.compile f in C.On f1, c1
-  | Off f -> 
-      let f1, c1 = Num.compile f in C.Off f1, c1
-
+and dash_pattern o = 
+    match o.Hashcons.node with
+      | On f -> 
+	  let f1, c1 = Num.compile f in C.On f1, c1
+      | Off f -> 
+	  let f1, c1 = Num.compile f in C.Off f1, c1
+	
 and command c = 
     match c.Hashcons.node with 
   | CDraw (p, color, pe, dsh) ->
