@@ -1,17 +1,20 @@
 \documentclass[twoside]{article}
 \usepackage[latin1]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{actes}
+\usepackage{actes,alltt,url}
 \usepackage[french]{babel}
 
-\title{Faire bonne figure avec Mlpost}
+% macros
+\newcommand{\mlpost}{\textsc{Mlpost}}
+
+\title{Faire bonne figure avec \mlpost}
 
 \author{R. Bardou$^1$
         \& J. Kanig$^1$
         \& J.-C. Filliâtre$^1$
         \& S. Lescuyer$^1$}
 
-\titlehead{Faire bonne figure avec Mlpost}%  a droite (page impaire)
+\titlehead{Faire bonne figure avec \mlpost}%  a droite (page impaire)
 
 \authorhead{Bardou \& Kanig \& Filliâtre \& Lescuyer}% a gauche (page paire)
 
@@ -31,14 +34,31 @@
   
 \end{abstract}
 
-% Ici commence votre texte
+\section{Introduction}
+
+\cite{metapost}
+
+\section{Architecture Logicielle}
+
+\section{Exemples}
+
+
+\paragraph{Remerciements.} Les auteurs tiennent à remercier Florence
+Plateau, Yannick Moy et Claude Marché pour leur contribution à \mlpost.
 
 % La bibliographie
-\begin{thebibliography}{10} % N'oubliez pas de l'inclure lors
-\bibitem{...}               % de votre soumission.
-\end{thebibliography}
+% N'oubliez pas de l'inclure lors de votre soumission.
+\bibliographystyle{plain}
+\bibliography{./biblio}
+
+\vfill
 
 \pagebreak
 \thispagestyle{colloquetitle}
 \cleardoublepage
 \end{document}
+
+% Local Variables:
+% coding: iso-latin-1
+% ispell-local-dictionary: "francais"
+% End:
