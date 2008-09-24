@@ -10,10 +10,17 @@ other: othergraphs.mp
 	latex othergraphs.tex
 	dvips othergraphs.dvi -o othergraphs.ps
 
-tests: tests.mp
+tests: tests.dvi
+	dvips tests.dvi -o tests.ps
+
+tests.dvi: tests.mp
 	mpost tests.mp end
 	latex tests
-	dvips tests.dvi -o tests.ps
+
+
+tests.pdf: tests.dvi
+	dvipdf tests.dvi
+
 
 clean: 
 	make -C manual clean

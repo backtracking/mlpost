@@ -159,7 +159,7 @@ let rec right_split n pic =
 
 let d11 =
   let p1 = Picture.transform [Transform.rotated 90.] (Picture.tex "recursion") in
-    [Command.draw_pic (right_split 3 p1)]
+    [Command.draw_pic (right_split 4 p1)]
 
 let rec sierpinski p n =
   if n = 0 then p else
@@ -545,11 +545,21 @@ let figs =
   let r = ref 0 in
   List.map (fun f -> incr r; !r, f) figs
 
+(* CM fonts do not scale well *)
+
+let theprelude = "\\documentclass[a4paper]{article}
+\\usepackage[T1]{fontenc}
+\\usepackage{times}
+"
+
+
 let () =
-  Metapost.generate_mp "test/tests.mp" figs;
+  Metapost.generate_mp ~prelude:theprelude "test/tests.mp" figs;
   Misc.write_to_formatted_file "test/tests.tex"
     (fun fmt ->
       fprintf fmt "\\documentclass[a4paper]{article}@.";
+      fprintf fmt "\\usepackage[T1]{fontenc}@.";
+      fprintf fmt "\\usepackage{times}@.";
       fprintf fmt "\\usepackage[]{graphicx}@.";
       fprintf fmt "@[<hov 2>\\begin{document}@.";
       List.iter

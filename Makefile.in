@@ -109,6 +109,13 @@ tests: $(CMXA) tests.ml
 	make -C test tests
 	gv test/tests.ps
 
+tests.pdf: $(CMXA) tests.ml
+	$(OCAMLOPT) -o tests.exe $(CMXA) tests.ml
+	./tests.exe
+	make -C test tests.pdf
+	xpdf test/tests.pdf
+
+
 tests.byte: $(CMA) tests.ml
 	ocaml $(CMA) tests.ml
 	make -C test tests
