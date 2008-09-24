@@ -218,7 +218,7 @@ struct
   | PAUnitSquare -> true
       (* DOUTEUX: peuvent etre tres complexe !!! *)
   | PAKnot _
-  | PABBox _ -> false
+  | PABBox _ -> true
   | _ -> false
 
   let name n = C.PAName n
@@ -241,13 +241,13 @@ struct
     | JControls (p1,p2) ->
         let p1,c1 = Point.compile p1 in
         let p2,c2 = Point.compile p2 in
-          C.JControls (p1,p2), c1 ++ c2
+        C.JControls (p1,p2), c1 ++ c2
 
   and direction d = 
     match d.Hashcons.node with
     | Vec p -> 
         let p, code = Point.compile p in
-          C.Vec p, code
+        C.Vec p, code
     | Curl f -> C.Curl f, nop
     | NoDir  -> C.NoDir, nop
 
