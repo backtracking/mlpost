@@ -57,7 +57,7 @@ check: byte $(OCAMLBEST) $(TOOL) $(TESTS) check-examples
 ######################################
 
 CMO := misc.cmo name.cmo compiled_types.cmo print.cmo hashcons.cmo types.cmo \
-	compile.cmo num.cmo point.cmo duplicate.cmo \
+	compile.cmo num.cmo point.cmo duplicate.cmo newcompile.cmo \
        transform.cmo color.cmo primPath.cmo path.cmo picture.cmo \
        dash.cmo pen.cmo command.cmo shapes.cmo pos.cmo arrow.cmo \
 	extArrow.cmo box.cmo\
@@ -311,7 +311,7 @@ clean::
 	rm -f *.aux *.log $(NAME).tex $(NAME).dvi $(NAME).ps
 	make -C test clean
 	make -C www clean
-	rm -f *.opt test.dvi test.ps
+	rm -f *.opt test.dvi test.ps *.exe
 
 dist-clean distclean:: clean
 	rm -f Makefile config.cache config.log config.status

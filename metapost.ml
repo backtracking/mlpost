@@ -233,7 +233,7 @@ let print i fmt l =
   (* resetting is actually not needed; variables other than 
      x,y are not local to figures *)
 (*   Compile.reset (); *)
-  let l = List.map Compile.command l in
+  let l = List.map Newcompile.command l in
   fprintf fmt "@[beginfig(%d)@\n  @[%a@] endfig;@]@." i 
     (fun fmt l -> List.iter (print_command fmt) l)
     l

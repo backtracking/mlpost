@@ -117,6 +117,7 @@ and path' = function
   | PAKnot k -> knot k
   | PAUnitSquare | PAQuarterCircle | PAHalfCircle | PAFullCircle -> ()
 and path p = 
+(*   Format.printf "%a@." Print.path p; *)
   if test_and_incr_path p then () else path' p.node
 
 and picture' = function
@@ -153,16 +154,14 @@ and pen p =
   match p.Hashcons.node with
   | PenCircle | PenSquare -> ()
   | PenFromPath p -> path p
-  | PenTransformed (p, tr) ->
-      pen p; transform_list tr
+  | PenTransformed (p, tr) -> pen p; transform_list tr
 
 and dash d = 
   match d.Hashcons.node with
   | DEvenly | DWithdots -> ()
   | DScaled (f, d) -> dash d
   | DShifted (p,d) -> point p; dash d
-  | DPattern l -> 
-      List.iter dash_pattern l
+  | DPattern l -> List.iter dash_pattern l
 
 and dash_pattern o = 
   match o.Hashcons.node with
