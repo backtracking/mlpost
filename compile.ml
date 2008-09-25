@@ -454,13 +454,6 @@ and command c =
       C.CSeq [code; C.CFill (p, c)]
   | CSeq l ->
       C.CSeq (List.map command l)
-  | CLoop (i, j, f) ->
-      (* unroll the loop to avoid memo problems *)
-      let l = 
-        Misc.fold_from_to (fun acc k -> let c' = command (f k) in c' :: acc) []
-        i j
-      in
-      C.CSeq (List.rev l)
   | CDotLabel (pic, pos, pt) -> 
       let pic, c1 = Picture.compile pic in
       let pt, c2 = Point.compile pt in

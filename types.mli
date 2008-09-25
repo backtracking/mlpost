@@ -156,7 +156,6 @@ and command_node = private
   | CFill of path * color option
   | CLabel of picture * position * point
   | CDotLabel of picture * position * point
-  | CLoop of int * int * (int -> command)
   | CSeq of command list
 
 and command = command_node hash_consed
@@ -276,7 +275,6 @@ val mkCDrawPic: picture -> command
 val mkCFill: path -> color option -> command
 val mkCLabel: picture -> position -> point -> command
 val mkCDotLabel: picture -> position -> point -> command
-val mkCLoop: int -> int -> (int -> command) -> command
 val mkCSeq: command list -> command
 
 (* dash *)

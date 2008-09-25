@@ -147,7 +147,6 @@ and command c =
   | CDrawPic p -> picture p
   | CFill (p, c) -> path p
   | CSeq l -> List.iter command l
-  | CLoop (i, j, f) -> (* TODO *) ()
   | CDotLabel (pic, pos, pt) -> picture pic; point pt
   | CLabel (pic, pos ,pt) -> picture pic; point pt
 and pen p = 

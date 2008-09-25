@@ -158,7 +158,6 @@ and command_node =
   | CFill of path * color option
   | CLabel of picture * position * point
   | CDotLabel of picture * position * point
-  | CLoop of int * int * (int -> command)
   | CSeq of command list
 
 and command = command_node hash_consed
@@ -301,7 +300,6 @@ let command = function
   | CLabel(pic,pos,poi) -> combine3 47 pic.hkey (hash_position pos) poi.hkey
   | CDotLabel(pic,pos,poi) -> 
       combine3 48 pic.hkey (hash_position pos) poi.hkey
-  | CLoop(n,m,_) ->  combine2 49 n m
   | CSeq l ->
       List.fold_left (fun acc t -> combine2 50 acc t.hkey) 51 l
 
@@ -497,8 +495,6 @@ let eq_command_node c1 c2 =
   | CLabel(pic1,pos1,poi1), CLabel(pic2,pos2,poi2) 
   | CDotLabel(pic1,pos1,poi1), CDotLabel(pic2,pos2,poi2) ->
       eq_hashcons pic1 pic2 && eq_position pos1 pos2 && eq_hashcons poi1 poi2
-  | CLoop(n1,m1,f1) , CLoop(n2,m2,f2) ->
-      n1 = n2 && m1 = m2 && f1 == f2
   | CSeq l1, CSeq l2 ->
       eq_hashcons_list l1 l2
   | _ -> false
@@ -734,8 +730,6 @@ let mkCFill x y = hashcommand (CFill(x,y))
 let mkCLabel x y z = hashcommand (CLabel(x,y,z))
 
 let mkCDotLabel x y z = hashcommand (CDotLabel(x,y,z))
-
-let mkCLoop x y z = hashcommand (CLoop(x,y,z))
 
 let mkCSeq l = hashcommand (CSeq l)
 

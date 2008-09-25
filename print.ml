@@ -57,6 +57,5 @@ let rec command fmt c =
   | CFill _ -> ()
   | CLabel _ -> ()
   | CDotLabel _ -> ()
-  | CLoop _ -> ()
   | CSeq l -> Misc.print_list Misc.space command fmt l
 

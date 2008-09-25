@@ -47,13 +47,16 @@ let draw_arrow ?color ?pen ?dashed t = mkCDrawArrow t color pen dashed
 
 let fill ?color t = mkCFill t color
 
-let iter from until f = mkCLoop from until f
+let seq l = mkCSeq l
+
+let iter from until f = 
+  let l = Misc.fold_from_to (fun acc i -> f i :: acc) [] from until in
+  seq (List.rev l)
 
 let draw_pic p = mkCDrawPic p
 
 let append c1 c2 = mkCSeq [c1; c2]
 let (++) = append
-let seq l = mkCSeq l
 
 (* syntactic sugar *)
 
