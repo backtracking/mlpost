@@ -13,15 +13,15 @@ let piccorner fmt = function
   | LR -> fprintf fmt "lrcorner"
 
 let position fmt = function
-  | Pcenter  -> fprintf fmt ""
-  | Pleft   -> fprintf fmt ".lft"
-  | Pright  -> fprintf fmt ".rt"
-  | Ptop    -> fprintf fmt ".top"
-  | Pbot    -> fprintf fmt ".bot"
-  | Pupleft  -> fprintf fmt ".ulft"
-  | Pupright -> fprintf fmt ".urt"
-  | Plowleft -> fprintf fmt ".llft"
-  | Plowright -> fprintf fmt ".lrt"
+  | `Pcenter  -> fprintf fmt ""
+  | `Pleft   -> fprintf fmt ".lft"
+  | `Pright  -> fprintf fmt ".rt"
+  | `Ptop    -> fprintf fmt ".top"
+  | `Pbot    -> fprintf fmt ".bot"
+  | `Pupleft  -> fprintf fmt ".ulft"
+  | `Pupright -> fprintf fmt ".urt"
+  | `Plowleft -> fprintf fmt ".llft"
+  | `Plowright -> fprintf fmt ".lrt"
 
 let rec num fmt n = 
   match n.Hashcons.node with

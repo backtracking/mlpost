@@ -566,13 +566,13 @@ and Box : sig
   val hbox : 
     ?name:string -> ?stroke:Color.t option ->
     ?style:style -> ?fill:Color.t ->
-    ?padding:Num.t -> ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position -> 
+    ?padding:Num.t -> ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.vposition -> 
     t list -> t
 
   val vbox : 
     ?name:string -> ?stroke:Color.t option ->
     ?style:style -> ?fill:Color.t ->
-    ?padding:Num.t -> ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position -> 
+    ?padding:Num.t -> ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.hposition -> 
     t list -> t
 
   (** {2 Sub-boxes accessors} *)
@@ -973,16 +973,16 @@ and Command : sig
   (** {2 Labels} *)
 
   (** Positions; useful to place labels *)
-  type position =
-      | Pcenter
-      | Pleft
-      | Pright
-      | Ptop
-      | Pbot
-      | Pupleft
-      | Pupright
-      | Plowleft
-      | Plowright
+  type hposition = [`Pcenter | `Pleft | `Pright]
+  type vposition = [`Pcenter | `Ptop | `Pbot]
+  type position = [
+  | hposition 
+  | vposition 
+  | `Pupleft
+  | `Pupright
+  | `Plowleft
+  | `Plowright
+  ]
 
   (** [label ~pos:Pleft pic p] puts picture [pic] at the left of point [p] *)
   val label : ?pos:position -> Picture.t -> Point.t -> t
@@ -1043,12 +1043,12 @@ module  Pos : sig
     (** A sequence can also be positioned. *)
 
     val horizontal :
-      ?padding:Num.t -> ?pos:Command.position -> P.t seq -> t
+      ?padding:Num.t -> ?pos:Command.vposition -> P.t seq -> t
     (** Align the input objects horizontally and return the sequence of their
       representations. *)
 
     val vertical :
-      ?padding:Num.t -> ?pos:Command.position -> P.t seq -> t
+      ?padding:Num.t -> ?pos:Command.hposition -> P.t seq -> t
     (** Align the input objects vertically and return the sequence of their
       representations. *)
 
@@ -1314,7 +1314,6 @@ module Plot : sig
                   ?label:(Picture.t * Command.position * int) ->
                     (int -> float) -> skeleton -> Command.t
 end
-
 
 module Shapes : sig
 

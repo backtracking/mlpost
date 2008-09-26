@@ -25,16 +25,16 @@ type corner = N | S | W | E | NE | NW | SW | SE
 type piccorner = UL | UR | LL | LR
 
 
-type position =
-  | Pcenter
-  | Pleft
-  | Pright
-  | Ptop
-  | Pbot
-  | Pupleft
-  | Pupright
-  | Plowleft
-  | Plowright
+type hposition = [`Pcenter | `Pleft | `Pright]
+type vposition = [`Pcenter | `Ptop | `Pbot]
+type position = [
+  | hposition 
+  | vposition 
+  | `Pupleft
+  | `Pupright
+  | `Plowleft
+  | `Plowright
+]
 
 open Hashcons
 

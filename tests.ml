@@ -38,7 +38,7 @@ let d1 =
       ~color:Color.red
       (Path.shift (1. ++ 1.) (Box.bpath a));
     draw_label_arrow ~color:Color.orange ~pen 
-      ~pos:Pupright (Picture.tex "foo") (Box.west a) (Box.south_east b);
+      ~pos:`Pupright (Picture.tex "foo") (Box.west a) (Box.south_east b);
     box_arrow ~color:Color.blue a b;
   ]
 
@@ -46,10 +46,10 @@ open Box
 
 let d2 =
   let b = 
-    hbox ~padding:(bp 10.) ~pos:Ptop ~stroke:(Some Color.red) ~dx:(bp 2.)
+    hbox ~padding:(bp 10.) ~pos:`Ptop ~stroke:(Some Color.red) ~dx:(bp 2.)
       ~dy:(bp 2.)
-      [vbox ~padding:(bp 4.) ~pos:Pright [tex "A"; tex "BC"; tex "D"];
-       vbox ~padding:(bp 4.) ~pos:Pleft [tex "E"; tex "FGH"]]
+      [vbox ~padding:(bp 4.) ~pos:`Pright [tex "A"; tex "BC"; tex "D"];
+       vbox ~padding:(bp 4.) ~pos:`Pleft [tex "E"; tex "FGH"]]
   in
   [draw ~debug:false b;
    box_arrow (nth 1 (nth 0 b)) (nth 0 (nth 1 b))]

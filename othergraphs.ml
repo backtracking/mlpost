@@ -173,9 +173,10 @@ let d195 =
     (195, [Command.iter 0 (n-1) row; Command.iter 0 (n) grid])
 
 let d267 = 
-  let a = Box.round_rect (cmp (0., 0.)) (Picture.tex "D\\'ebut") in
-  let b = Box.round_rect (cmp (2., 0.)) (Picture.tex "Fin") in
   let rose = Color.rgb 1. 0.5 0.5 in
+  let a = Box.tex ~fill:rose ~style:Box.RoundRect "D\\'ebut" in
+  let b = Box.shift (cmp (2., 0.)) 
+    (Box.tex ~fill:rose ~style:Box.RoundRect "Fin") in
   let path angle a b =
     cut_after (bpath b) 
       (cut_before (bpath a) 
@@ -183,7 +184,7 @@ let d267 =
 	      [knotp ~r:(vec (dir angle)) (Box.ctr a); 
 	       knotp ~r:(vec (dir (-. angle))) (Box.ctr b)] [jCurve])) 
   in
-  [Box.draw ~fill:rose a; Box.draw ~fill:rose b;
+    [Box.draw a; Box.draw b;
    draw_arrow (path 45. a b); draw_arrow (path (-135.) b a)]
 
 let figs = 

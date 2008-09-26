@@ -18,24 +18,17 @@ open Misc
 open Types
 module T = Transform
 
-type position = Types.position =
-  | Pcenter
-  | Pleft
-  | Pright
-  | Ptop
-  | Pbot
-  | Pupleft
-  | Pupright
-  | Plowleft
-  | Plowright
+type hposition = Types.hposition
+type vposition = Types.vposition
+type position = Types.position
 
 type t = command
 
 type figure = t list
 
-let label ?(pos=Pcenter) pic point = mkCLabel pic pos point
+let label ?(pos=`Pcenter) pic point = mkCLabel pic pos point
 (* replace later *)
-let dotlabel ?(pos=Pcenter) pic point = mkCDotLabel pic pos point
+let dotlabel ?(pos=`Pcenter) pic point = mkCDotLabel pic pos point
 
 let draw ?color ?pen ?dashed t = 
   (* We don't use a default to avoid the output of 
