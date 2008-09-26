@@ -3,7 +3,7 @@ manual: testmanual.mp
 	make -C manual
 	latex testmanual.tex
 	dvips testmanual.dvi -o testmanual.ps
-	
+
 other: othergraphs.mp
 	mpost othergraphs.mp end
 	make -C othergraphs
@@ -13,10 +13,12 @@ other: othergraphs.mp
 tests: tests.dvi
 	dvips tests.dvi -o tests.ps
 
-tests.dvi: tests.mp
-	mpost tests.mp end
-	latex tests
+testbox: testbox.dvi
+	dvips testbox.dvi -o testbox.ps
 
+%.dvi: %.mp
+	mpost $*.mp end
+	latex $*
 
 tests.pdf: tests.dvi
 	dvipdf tests.dvi

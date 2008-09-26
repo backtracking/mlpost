@@ -579,6 +579,8 @@ and Box : sig
 
   val nth : int -> t -> t
 
+  val get : string -> t -> t
+
 
 (****
   val valign : ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position

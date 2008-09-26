@@ -67,10 +67,23 @@ end
 
 include B
 
+let bshape b = b.contour
+let bpath b = Shapes.bpath b.contour
+
+let north x = Shapes.north (bshape x)
+let south x = Shapes.south (bshape x)
+let west  x = Shapes.west (bshape x)
+let east  x = Shapes.east (bshape x)
+
+let build_point a b = Point.pt (xpart a, ypart b)
+let north_west x = build_point (west x) (north x)
+let north_east x = build_point (east x) (north x)
+let south_west x = build_point (west x) (south x)
+let south_east x = build_point (east x) (south x)
+
 let rec draw ?(debug=false) b = 
   let bpath = Shapes.bpath b.contour in
   let path_cmd = match b.stroke with
-    | None when debug -> Command.draw ~dashed:Dash.evenly bpath
     | None -> Command.nop
     | Some color -> Command.draw ~color bpath 
   in
@@ -84,21 +97,32 @@ let rec draw ?(debug=false) b =
     | Grp (a, _) -> 
 	Command.iter 0 (Array.length a - 1) (fun i -> draw ~debug a.(i))
   in
-  Command.seq [fill_cmd; path_cmd; contents_cmd]
+  let debug_cmd = 
+    if debug then 
+      Command.seq 
+	[Command.draw ~color:Color.red ~dashed:Dash.evenly bpath;
+	 match b.name with
+	   | None -> Command.draw ~color:Color.red (Path.pathp [b.ctr])
+	   | Some n -> 
+	       Command.label ~pos:`Pcenter (Picture.tex ("\\tiny " ^ n))
+		 (north_west b)]
+    else 
+      Command.nop
+  in
+  Command.seq [fill_cmd; path_cmd; contents_cmd; debug_cmd]
 
 type style = 
   | Rect | Circle | Ellipse | RoundRect | Patatoid
 
 let rect ?(dx=margin) ?(dy=margin) w h c = 
-  let w = w +/ 2. *./ dx in
-  let h = h +/ 2. *./ dy in
+  let w = w +/ 2. *./ dx in  let h = h +/ 2. *./ dy in
   let s = Shapes.shift c (Shapes.rectangle_path w h) in
   w, h, s
 
 let circle ?(dx=margin) ?(dy=margin) w h c =
   let d = Point.length (add (pt (w, h)) (pt (dx, dy))) in
   let s = Shapes.shift c (Shapes.circle d) in
-  w +/ dx, h +/ dy, s
+  d, d, s
 
 let ellipse ?(dx=zero) ?(dy=zero) w h c =
   let rx = w +/ dx in
@@ -119,20 +143,6 @@ let round_rect ?(dx=margin) ?(dy=margin) w h c =
 let patatoid ?(dx=2. *./ margin) ?(dy=2. *./ margin) w h c =
   let path = Shapes.patatoid (w +/ 2. *./ dx) (h +/ 2. *./ dy) in
   w +/ 2. *./ dx, h +/ 2. *./ dy, Shapes.shift c path
-
-let bshape b = b.contour
-let bpath b = Shapes.bpath b.contour
-
-let north x = Shapes.north (bshape x)
-let south x = Shapes.south (bshape x)
-let west  x = Shapes.west (bshape x)
-let east  x = Shapes.east (bshape x)
-
-let build_point a b = Point.pt (xpart a, ypart b)
-let north_west x = build_point (west x) (north x)
-let north_east x = build_point (east x) (north x)
-let south_west x = build_point (west x) (south x)
-let south_east x = build_point (east x) (south x)
 
 let make_contour style ?dx ?dy w h c =
   let f = match style with
@@ -155,6 +165,16 @@ let pic ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black) ?fill pic =
 
 module BoxAlign = Pos.List_(B)
 
+let merge_maps =
+  let add_one m b =
+    let m = match b.desc with
+      | Pic _ -> m
+      | Grp (_, m') -> Smap.fold Smap.add m' m
+    in
+    match b.name with Some n -> Smap.add n b m | None -> m
+  in
+  List.fold_left add_one Smap.empty
+
 let align_boxes 
     f ?name ?(stroke=None) ?(style=Rect) ?fill ?padding ?(dx=Num.zero) 
     ?(dy=Num.zero) ?pos bl =
@@ -164,7 +184,7 @@ let align_boxes
   let c = BoxAlign.ctr bl in
   let w,h,s = make_contour style ~dx ~dy w h c in
   let bl = BoxAlign.v bl in
-  { desc = Grp (Array.of_list bl, Smap.empty);
+  { desc = Grp (Array.of_list bl, merge_maps bl);
     name = name; stroke = stroke; fill = fill;
     width = w; height = h; ctr = c; contour = s }
 
@@ -187,6 +207,11 @@ let tex ?style ?dx ?dy ?name ?stroke ?fill s =
 let nth i b = match b.desc with
   | Grp (a, _ ) -> a.(i)
   | Pic _ -> invalid_arg "Box.nth"
+
+let get n b = 
+  if b.name = Some n then b else match b.desc with
+    | Pic _ -> invalid_arg "Box.get"
+    | Grp (_, m) -> try Smap.find n m with Not_found -> invalid_arg "Box.get"
 
 (****
 

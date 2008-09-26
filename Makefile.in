@@ -109,6 +109,12 @@ tests: $(CMXA) tests.ml
 	make -C test tests
 	gv test/tests.ps
 
+testbox: $(CMXA) testbox.ml
+	$(OCAMLOPT) -o testbox.exe $(CMXA) testbox.ml
+	./testbox.exe
+	make -C test testbox
+	gv test/testbox.ps
+
 tests.pdf: $(CMXA) tests.ml
 	$(OCAMLOPT) -o tests.exe $(CMXA) tests.ml
 	./tests.exe
