@@ -483,43 +483,51 @@ and Box : sig
 
   (** {2 Creating boxes} *)
 
-  val circle : ?dx:Num.t -> ?dy:Num.t -> Point.t -> Picture.t -> t
+  type style = Rect | Circle | Ellipse | RoundRect | Patatoid
+
+  type box_creator = 
+    ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 
+    ?stroke:Color.t option -> ?fill:Color.t -> Picture.t -> t
+
+  val pic : ?style:style -> box_creator
+    (** [pic p] creates a box containing the picture [p] *)
+
+  val tex : ?style:style -> ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 
+    ?stroke:Color.t option -> ?fill:Color.t -> string -> t
+
+  val circle : box_creator
     (** [circle p pic] creates a circle box of center [p] and of contents
     [pic]. Optional padding is given by arguments [dx] and [dy]. *)
 
-  val ellipse : ?dx:Num.t -> ?dy:Num.t -> Point.t -> Picture.t -> t
+  val ellipse : box_creator
     (** [ellipse p pic] creates a elliptic box of center [p] and of contents
 	[pic]. Optional padding is given by arguments [dx] and [dy]. *)
 
-  val rect :  ?dx:Num.t -> ?dy:Num.t -> Point.t -> Picture.t -> t
+  val rect :  box_creator
     (** [rect p pic] creates a rectangular box of center [p] and of contents
 	[pic]. Optional padding is given by arguments [dx] and [dy] ; 
 	default is 2bp. *)
 
+(***
   val round_rect_gen : ?dx:Num.t -> ?dy:Num.t -> ?rx:Num.t -> ?ry:Num.t -> 
     Point.t -> Picture.t -> t
     (** [round_rect_gen p pic] creates a rectangular box of center [p] and 
 	of contents [pic], with rounded corners of radii [rx] and [ry]. 
 	Optional padding is given by [dx] and [dy] ; default is 2bp *)
+***)
 
-  val round_rect : ?dx:Num.t -> ?dy:Num.t -> Point.t -> Picture.t -> t
+  val round_rect : box_creator
     (** [round_rect p pic] creates a rectangular box of center [p] and of 
 	contents [pic], with rounded corners. Optional padding is given by [dx] 
 	and [dy] ; default is 2bp *)
 
-  val base_rect : ?dx:Num.t -> ?dy:Num.t -> Picture.t -> t
-    (** same as [rect] but do not move the picture *)
-
-  val patatoid : ?dx:Num.t -> ?dy:Num.t -> Point.t -> Picture.t -> t
+  val patatoid : box_creator
     (** [patatoid p pic] creates an undefined, vaguely rectangular box of center
       [p] and contents [pic]. It may happen that the content overlaps with the
       box. *)
 
   (** Get the bounding path of a box *)
   val bpath : t -> Path.t
-
-  (** Get the picture enclosed in a box *)
-  val picture : t -> Picture.t
 
   (** {2 Special points on a box} *)
 
@@ -548,13 +556,31 @@ and Box : sig
   val center : Point.t -> t -> repr
   (** [center pt x] centers the object [x] at the point [pt]  *)
 
-  val draw : ?fill:Color.t -> ?boxed:bool -> t -> Command.t
+  val draw : ?debug:bool -> t -> Command.t
     (** Draw a box 
 	@param fill the color used to fill the box 
 	@param boxed if set, the box border is drawn (default is [true]) *)
 
   (** {2 Boxes alignment} *)
 
+  val hbox : 
+    ?name:string -> ?stroke:Color.t option ->
+    ?style:style -> ?fill:Color.t ->
+    ?padding:Num.t -> ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position -> 
+    t list -> t
+
+  val vbox : 
+    ?name:string -> ?stroke:Color.t option ->
+    ?style:style -> ?fill:Color.t ->
+    ?padding:Num.t -> ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position -> 
+    t list -> t
+
+  (** {2 Sub-boxes accessors} *)
+
+  val nth : int -> t -> t
+
+
+(****
   val valign : ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position
                 -> Picture.t list -> t list
     (** [valign l] turns a list of pictures into a list of boxes,
@@ -588,6 +614,7 @@ and Box : sig
     ?outd:Path.direction ->
     ?ind:Path.direction -> t -> t -> Path.t
     (** the path that connects 2 boxes and stops at the box boundaries *) 
+***)
 end
 
 and Transform : sig
@@ -1016,12 +1043,12 @@ module  Pos : sig
     (** A sequence can also be positioned. *)
 
     val horizontal :
-      ?dx:Num.t -> ?pos:Command.position -> P.t seq -> t
+      ?padding:Num.t -> ?pos:Command.position -> P.t seq -> t
     (** Align the input objects horizontally and return the sequence of their
       representations. *)
 
     val vertical :
-      ?dy:Num.t -> ?pos:Command.position -> P.t seq -> t
+      ?padding:Num.t -> ?pos:Command.position -> P.t seq -> t
     (** Align the input objects vertically and return the sequence of their
       representations. *)
 
@@ -1098,12 +1125,16 @@ module Helpers : sig
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
     ?pos:Command.position -> Picture.t -> 
     Box.t -> Box.t -> Command.t
+(***
   val hboxjoin : 
     ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position -> ?spacing:Num.t -> 
      Picture.t list -> Command.t
+***)
 
 end
+
+(****
 
 module Tree : sig
 
@@ -1248,6 +1279,7 @@ module Diag : sig
 	@param pen The pen used for arrows *)
 end
 
+****)
 
 module Plot : sig
 

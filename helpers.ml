@@ -47,6 +47,8 @@ let box_label_arrow ?color ?pen ?dashed ?style ?outd ?ind ?pos lab a b =
   draw_arrow ?color ?pen ?dashed p ++
   label ?pos lab (Path.point 0.5 p)
 
+(***
+
 let hboxjoin ?color ?pen ?dashed ?dx ?dy ?pos ?spacing pl =
   (* align the pictures in pl, put them in boxes and connect these boxes *)
   let bl = Box.halign_to_box ?dx ?pos ?spacing pl in
@@ -61,3 +63,4 @@ let hboxjoin ?color ?pen ?dashed ?dx ?dy ?pos ?spacing pl =
         in 
           cmd
 
+***)

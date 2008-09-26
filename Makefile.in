@@ -61,7 +61,7 @@ CMO := misc.cmo name.cmo compiled_types.cmo print.cmo hashcons.cmo types.cmo \
        transform.cmo color.cmo primPath.cmo path.cmo picture.cmo \
        dash.cmo pen.cmo command.cmo shapes.cmo pos.cmo arrow.cmo \
 	extArrow.cmo box.cmo\
-       metapost.cmo helpers.cmo diag.cmo tree.cmo plot.cmo generate.cmo
+       metapost.cmo helpers.cmo  plot.cmo generate.cmo
 CMX := $(CMO:.cmo=.cmx)
 
 CMA := mlpost.cma

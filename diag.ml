@@ -110,7 +110,7 @@ let indir = function None -> None | Some x -> Some (indir x)
 
 type node_style = Point.t -> Picture.t -> Box.t
 
-let make_box ~style ~scale d n = 
+let make_box ?fill ?boxed ~style ~scale d n = 
   let p = Point.pt (scale n.x, scale n.y) in
   let pic = n.s in
   let b = match n.box_style with 
@@ -157,7 +157,7 @@ let draw ?(scale=fortybp) ?(style=defaultbox)
       (fun n -> 
 	 let fill = if n.fill <> None then n.fill else fill in
 	 let boxed = if n.Node.boxed <> None then n.Node.boxed else boxed in
-	 Box.draw ?fill ?boxed (make_box ~style ~scale d n)) d.nodes
+	 Box.draw (make_box ?fill ?boxed ~style ~scale d n)) d.nodes
   in
   Command.seq (l @ List.map (draw_arrow ?stroke ?pen d) d.arrows)
 

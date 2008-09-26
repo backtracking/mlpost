@@ -27,11 +27,13 @@ let (++) x y = pt (cm x, cm y)
 let shift x y = transform [Transform.shifted (x ++ y)]
 
 let d1 = 
-  let a = Box.circle (0. ++ 0.) (Picture.tex "$\\sqrt2$") in
-  let b = Box.rect (2. ++ 0.) (Picture.tex "$\\pi$") in
+  let a = Box.circle (Picture.tex "$\\sqrt2$") in
+  let b = 
+    Box.shift (2. ++ 0.) (Box.rect ~fill:Color.purple (Picture.tex "$\\pi$"))
+  in
   let pen = Pen.default ~tr:[Transform.scaled (bp 3.)] () in
   [ Box.draw a;
-    Box.draw ~fill:Color.purple b;
+    Box.draw b;
     draw
       ~color:Color.red
       (Path.shift (1. ++ 1.) (Box.bpath a));
@@ -39,6 +41,20 @@ let d1 =
       ~pos:Pupright (Picture.tex "foo") (Box.west a) (Box.south_east b);
     box_arrow ~color:Color.blue a b;
   ]
+
+open Box
+
+let d2 =
+  let b = 
+    hbox ~padding:(bp 10.) ~pos:Ptop ~stroke:(Some Color.red) ~dx:(bp 2.)
+      ~dy:(bp 2.)
+      [vbox ~padding:(bp 4.) ~pos:Pright [tex "A"; tex "BC"; tex "D"];
+       vbox ~padding:(bp 4.) ~pos:Pleft [tex "E"; tex "FGH"]]
+  in
+  [draw ~debug:false b;
+   box_arrow (nth 1 (nth 0 b)) (nth 0 (nth 1 b))]
+
+(****
 
 open Tree
 
@@ -532,14 +548,21 @@ let newarray =
   in
     (List.flatten boxes)@pics
 
-let figs = [d12;
+****)
+
+let figs = [
+  d2;
+(*
+d12;
   newarray; patates; yannick Box.rect; yannick Box.patatoid;
              placetest; boxjoin; box_align; stack; row; stackl; rowl;
 	     array; mybresenham; 
             [Command.draw_pic shapes1]; [Command.draw_pic shapes2];
             d16; d1; d15; florence; d14; d13;
              d11; d7; d6; d5; d4; cheno011; proval; d3;
-                          d2sq; d2hsq; d2s; d2c;] 
+                          d2sq; d2hsq; d2s; d2c;
+*)
+] 
 
 let figs =
   let r = ref 0 in

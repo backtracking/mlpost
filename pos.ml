@@ -52,10 +52,10 @@ sig
   type 'a seq
   include POS with type repr = P.repr seq
   val horizontal : 
-    ?dx:Num.t -> ?pos:Command.position -> P.t seq -> t
+    ?padding:Num.t -> ?pos:Command.position -> P.t seq -> t
 
   val vertical : 
-    ?dy:Num.t -> ?pos:Command.position -> P.t seq -> t
+    ?padding:Num.t -> ?pos:Command.position -> P.t seq -> t
 
   val tabular : 
     ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position -> P.t seq seq -> t seq
@@ -78,11 +78,11 @@ struct
 
   let center pt x = shift (Point.sub pt (ctr x)) (v x)
 
-  let horizontal ?(dx=Num.zero) ?(pos=Pcenter) pl =
+  let horizontal ?(padding=Num.zero) ?(pos=Pcenter) pl =
     let hmax = Num.fold_max P.height Num.zero pl in
     let hmax_2 = hmax /./ 2. in
     let rec make_new acc x = function
-      | [] -> List.rev acc, x -/ dx
+      | [] -> List.rev acc, x -/ padding
       | p :: pl ->
           let wp,hp = P.width p, P.height p in
           let y = 
@@ -94,17 +94,17 @@ struct
           in
           let c = Point.pt (x +/ wp /./ 2., y) in 
           let b = P.center c p in
-            make_new (b::acc) (x +/ wp +/ dx) pl
+            make_new (b::acc) (x +/ wp +/ padding) pl
     in
     let l,x = make_new [] Num.zero pl in
     let mycenter = Point.pt (x /./ 2., hmax_2) in     
       { v = l; width = x; height = hmax; center = mycenter }
 
-  let vertical ?(dy=Num.zero) ?(pos=Pcenter) pl =
+  let vertical ?(padding=Num.zero) ?(pos=Pcenter) pl =
     let wmax = Num.fold_max P.width Num.zero pl in
     let wmax_2 = wmax /./ 2. in
     let rec make_new acc y = function
-      | [] -> List.rev acc, y +/ dy
+      | [] -> List.rev acc, y +/ padding
       | p :: pl ->
           let wp,hp = P.width p, P.height p in
           let x = 
@@ -116,11 +116,11 @@ struct
           in
           let c = Point.pt (x, y -/ hp /./ 2.) in 
           let b = P.center c p in
-            make_new (b::acc) (y -/ hp -/ dy) pl
+            make_new (b::acc) (y -/ hp -/ padding) pl
     in
     let l,y = make_new [] Num.zero pl in
     let mycenter = Point.pt (wmax_2, y /./ 2.) in
-    { v = l; width = wmax; height = y; center = mycenter }
+    { v = l; width = wmax; height = Num.neg y; center = mycenter }
 
   let tabular ?(dx=Num.zero) ?(dy=Num.zero) ?(pos=Pcenter) pll =
     let hmaxl = List.map (Num.fold_max P.height Num.zero) pll in
@@ -182,13 +182,13 @@ struct
 
   module L = List_(P)
 
-  let horizontal ?(dx=Num.zero) ?(pos=Pcenter) pa =
-    let pl = L.horizontal ~dx ~pos (Array.to_list pa) in
+  let horizontal ?(padding=Num.zero) ?(pos=Pcenter) pa =
+    let pl = L.horizontal ~padding ~pos (Array.to_list pa) in
     { v = Array.of_list (L.v pl); center = L.ctr pl;
       width = L.width pl; height = L.height pl }
 
-  let vertical ?(dy=Num.zero) ?(pos=Pcenter) pa =
-    let pl = L.vertical ~dy ~pos (Array.to_list pa) in
+  let vertical ?(padding=Num.zero) ?(pos=Pcenter) pa =
+    let pl = L.vertical ~padding ~pos (Array.to_list pa) in
     { v = Array.of_list (L.v pl); center = L.ctr pl;
       width = L.width pl; height = L.height pl }
 
@@ -236,7 +236,7 @@ struct
   module TA = List_ (Aux)
 
   let rec place ?dx ?(dy=Num.zero) (N (a,l)) = 
-    let pl = TA.horizontal ?dx ~pos:Ptop (List.map (place ?dx ~dy) l) in
+    let pl = TA.horizontal ?padding:dx ~pos:Ptop (List.map (place ?dx ~dy) l) in
     let w = Num.maxn (TA.width pl) (P.width a) in
     let h = TA.height pl +/ dy +/ P.height a in
     let ctr = Point.pt (0.5 *./ w , 0.5 *./ h) in 

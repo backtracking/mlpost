@@ -24,105 +24,182 @@ open Pos
 
 let margin = Num.bp 2.
 
-module Make (P  : POS) =
-struct
-  (* A functor to construct boxes
-   * It does nothing more than draw a Shape of the right size around a
-   * positionable object. In particular, it does not reposition the object *)
-  type 'a box = { p : 'a ; bs : Shapes.t }
-  type t = P.t box
-  type repr = P.repr box
-  let v x = { x with p = P.v x.p}
+module Smap = Map.Make(String)
 
-  let rect ?(dx=margin) ?(dy=margin) p = 
-    let w = P.width p +/ 2. *./ dx in
-    let h = P.height p +/ 2. *./ dy in
-    let s = Shapes.shift (P.ctr p) (Shapes.rectangle_path w h) in
-    { p = p;  bs = s }
+module B = struct
 
-  let circle ?(dx=margin) ?(dy=margin) p =
-    let d = Point.length (add (pt (P.width p, P.height p)) (pt (dx,dy))) in
-    let s = Shapes.shift (P.ctr p) (Shapes.circle d) in
-    { p = p; bs = s}
+  type t = {
+    name : string option;
+    width : Num.t;
+    height : Num.t;
+    ctr : Point.t;
+    stroke : Color.t option;
+    fill : Color.t option;
+    contour : Shapes.t; 
+    desc : desc
+  }
+      
+  and desc = 
+    | Pic of Picture.t
+    | Grp of t array * t Smap.t
 
-  let ellipse ?(dx=zero) ?(dy=zero) p =
-    let rx = P.width p +/ dx in
-    let ry = P.height p +/ dy in
-    { p = p; bs = Shapes.shift (P.ctr p) (Shapes.full_ellipse_path rx ry) }
+  type repr = t
 
-  let round_rect_gen ?(dx=margin) ?(dy=margin) ?(rx=margin) ?(ry=margin) p =
-    let dx = P.width p +/ dx in
-    let dy = P.height p +/ dy in
-    { p = p; 
-      bs = Shapes.shift (P.ctr p) (Shapes.rounded_rect_path dx dy rx ry)}
+  let v b = b
 
-  let round_rect ?(dx=margin) ?(dy=margin) p =
-    let dx' = P.width p +/ dx in
-    let dy' = P.height p +/ dy in
-    let rx = (minn dx' dy') /./ 10. in
-      round_rect_gen ~dx ~dy ~rx ~ry:rx p
+  let width b = b.width
+  let height b = b.height
+  let ctr b = b.ctr
 
-  let patatoid ?(dx=2. *./ margin) ?(dy=2. *./ margin) p =
-    let w = P.width p in
-    let h = P.height p in
-    let path = Shapes.patatoid (w +/ 2. *./ dx) (h +/ 2. *./ dy) in
-    { p = p; bs = Shapes.shift (P.ctr p) path}
+  let rec shift pt b = 
+    { b with 
+      ctr = Point.shift pt b.ctr; 
+      contour = Shapes.shift pt b.contour;
+      desc = shift_desc pt b.desc }
+      
+  and shift_desc pt = function
+    | Pic pic -> Pic (Picture.shift pt pic)
+    | Grp (a, m) -> Grp (Array.map (shift pt) a, Smap.map (shift pt) m)
 
-  let bshape b = b.bs
-  let bpath b = Shapes.bpath b.bs
+  let center pt x = shift (Point.sub pt x.ctr) x
+  
+end 
 
-  let north x = Shapes.north (bshape x)
-  let south x = Shapes.south (bshape x)
-  let west  x = Shapes.west (bshape x)
-  let east  x = Shapes.east (bshape x)
+include B
 
-  let build_point a b = Point.pt (xpart a, ypart b)
-  let north_west x = build_point (west x) (north x)
-  let north_east x = build_point (east x) (north x)
-  let south_west x = build_point (west x) (south x)
-  let south_east x = build_point (east x) (south x)
+let rec draw ?(debug=false) b = 
+  let bpath = Shapes.bpath b.contour in
+  let path_cmd = match b.stroke with
+    | None when debug -> Command.draw ~dashed:Dash.evenly bpath
+    | None -> Command.nop
+    | Some color -> Command.draw ~color bpath 
+  in
+  let fill_cmd = match b.fill with
+    | None -> Command.nop
+    | Some color -> Command.fill ~color bpath
+  in
+  let contents_cmd = match b.desc with
+    | Pic pic -> 
+	Command.draw_pic pic
+    | Grp (a, _) -> 
+	Command.iter 0 (Array.length a - 1) (fun i -> draw ~debug a.(i))
+  in
+  Command.seq [fill_cmd; path_cmd; contents_cmd]
 
+type style = 
+  | Rect | Circle | Ellipse | RoundRect | Patatoid
 
-  (* POS compliance *)
+let rect ?(dx=margin) ?(dy=margin) w h c = 
+  let w = w +/ 2. *./ dx in
+  let h = h +/ 2. *./ dy in
+  let s = Shapes.shift c (Shapes.rectangle_path w h) in
+  w, h, s
 
-  let width b = Shapes.width b.bs
-  let height b = Shapes.height b.bs
-  let ctr b = Shapes.ctr b.bs
+let circle ?(dx=margin) ?(dy=margin) w h c =
+  let d = Point.length (add (pt (w, h)) (pt (dx, dy))) in
+  let s = Shapes.shift c (Shapes.circle d) in
+  w +/ dx, h +/ dy, s
 
-  let shift pt x = {p = P.shift pt x.p; bs = Shapes.shift pt x.bs}
+let ellipse ?(dx=zero) ?(dy=zero) w h c =
+  let rx = w +/ dx in
+  let ry = h +/ dy in
+  rx, ry, Shapes.shift c (Shapes.full_ellipse_path rx ry) 
 
-  let center pt x = shift (Point.sub pt (ctr x)) (v x)
+let round_rect_gen ?(dx=margin) ?(dy=margin) ?(rx=margin) ?(ry=margin) w h c =
+  let dx = w +/ dx in
+  let dy = h +/ dy in
+  dx, dy, Shapes.shift c (Shapes.rounded_rect_path dx dy rx ry)
 
-end
+let round_rect ?(dx=margin) ?(dy=margin) w h c =
+  let dx' = w +/ dx in
+  let dy' = h +/ dy in
+  let rx = (minn dx' dy') /./ 10. in
+  round_rect_gen ~dx ~dy ~rx ~ry:rx w h c
 
-module PicBox = Make (Picture)
-include PicBox
+let patatoid ?(dx=2. *./ margin) ?(dy=2. *./ margin) w h c =
+  let path = Shapes.patatoid (w +/ 2. *./ dx) (h +/ 2. *./ dy) in
+  w +/ 2. *./ dx, h +/ 2. *./ dy, Shapes.shift c path
 
-(*define the "centering" box construction fonctions *)
-let base_rect = rect
-let rect ?dx ?dy c p = center c (rect ?dx ?dy p)
-let circle ?dx ?dy c p = center c (circle ?dx ?dy p)
-let round_rect_gen ?dx ?dy ?rx ?ry c p = 
-  center c (round_rect_gen ?dx ?dy ?rx ?ry p)
-let round_rect ?dx ?dy c p = center c (round_rect ?dx ?dy p)
-let ellipse ?dx ?dy c p = center c (ellipse ?dx ?dy p)
-let patatoid ?dx ?dy c p = center c (patatoid ?dx ?dy p)
+let bshape b = b.contour
+let bpath b = Shapes.bpath b.contour
 
-let picture b = b.PicBox.p
+let north x = Shapes.north (bshape x)
+let south x = Shapes.south (bshape x)
+let west  x = Shapes.west (bshape x)
+let east  x = Shapes.east (bshape x)
 
+let build_point a b = Point.pt (xpart a, ypart b)
+let north_west x = build_point (west x) (north x)
+let north_east x = build_point (east x) (north x)
+let south_west x = build_point (west x) (south x)
+let south_east x = build_point (east x) (south x)
 
-open Num.Infix
+let make_contour style ?dx ?dy w h c =
+  let f = match style with
+    | Rect -> rect 
+    | Circle -> circle
+    | Ellipse -> ellipse
+    | RoundRect -> round_rect
+    | Patatoid -> patatoid
+  in
+  f ?dx ?dy w h c
 
-(* Box alignment *)
-module PicAlign = Pos.List_ (Picture)
+let pic ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black) ?fill pic =
+  let c = Picture.ctr pic in
+  let w,h,s = 
+    make_contour style ?dx ?dy (Picture.width pic) (Picture.height pic) c 
+  in
+  { desc = Pic pic;
+    name = name; stroke = stroke; fill = fill;
+    width = w; height = h; ctr = c; contour = s }
+
+module BoxAlign = Pos.List_(B)
+
+let align_boxes 
+    f ?name ?(stroke=None) ?(style=Rect) ?fill ?padding ?(dx=Num.zero) 
+    ?(dy=Num.zero) ?pos bl =
+  let bl = f ?padding ?pos bl in
+  let w = BoxAlign.width bl in
+  let h = BoxAlign.height bl in
+  let c = BoxAlign.ctr bl in
+  let w,h,s = make_contour style ~dx ~dy w h c in
+  let bl = BoxAlign.v bl in
+  { desc = Grp (Array.of_list bl, Smap.empty);
+    name = name; stroke = stroke; fill = fill;
+    width = w; height = h; ctr = c; contour = s }
+
+let hbox = align_boxes BoxAlign.horizontal
+let vbox = align_boxes BoxAlign.vertical
+
+type box_creator = 
+  ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 
+  ?stroke:Color.t option -> ?fill:Color.t -> Picture.t -> t
+
+let rect = pic ~style:Rect
+let circle = pic ~style:Circle
+let ellipse = pic ~style:Ellipse
+let round_rect = pic ~style:RoundRect
+let patatoid = pic ~style:Patatoid
+
+let tex ?style ?dx ?dy ?name ?stroke ?fill s = 
+  pic ?style ?dx ?dy ?name ?stroke ?fill (Picture.tex s)
+
+let nth i b = match b.desc with
+  | Grp (a, _ ) -> a.(i)
+  | Pic _ -> invalid_arg "Box.nth"
+
+(****
+
 (* These functions should rather be called 
  * "align_block" or something like that *)
 let valign ?(dx=Num.zero) ?(dy=Num.zero)  ?pos pl = 
-  let posl = PicAlign.vertical ~dy  ?pos pl in
-    List.map (fun p ->
+  let posl = BoxAlign.vertical ~dy  ?pos pl in
+  List.map 
+    (fun p ->
       let dx = Point.xpart (Picture.ctr p) +/ dx -/
-               Picture.width p /./ 2. in
-        base_rect ~dx ~dy:(0.5 *./ dy) p)
+	Picture.width p /./ 2. 
+      in
+      rect ~dx ~dy:(0.5 *./ dy) p)
     (PicAlign.v posl)
 
 let halign ?(dx=Num.zero) ?(dy=Num.zero) ?pos pl =
@@ -140,15 +217,6 @@ let halign_to_box ?(dx=margin) ?(dy=margin) ?(spacing=Num.zero) ?pos pl =
     List.map (base_rect ~dx:(0.5 *./ dx) ~dy) (PicAlign.v posl)
 
 open Command 
-
-let draw ?fill ?(boxed=true) b = 
-  let path_cmd = if boxed then draw (bpath b) else nop in
-  let box_cmd =
-    match fill with
-      | None -> draw_pic (picture b)
-      | Some color -> Command.fill ~color (bpath b) ++ draw_pic (picture b)
-  in
-    path_cmd ++ box_cmd
 
 let tabularl ?(dx=Num.zero) ?(dy=Num.zero) pll =
   let hmaxl = List.map (Num.fold_max Picture.height Num.zero) pll in
@@ -193,10 +261,11 @@ let tabulari ?(dx=Num.zero) ?(dy=Num.zero) w h f =
   let m = Array.init h (fun j -> Array.init w (fun i -> f i j)) in
     tabular ~dx ~dy m
 
+****)
+
 open Path
 
 let cpath ?style ?outd ?ind a b =
   let r,l  = outd, ind in
   let p = pathk ?style [knotp ?r (ctr a); knotp ?l (ctr b)] in
-    cut_after (bpath b) (cut_before (bpath a) p)
-
+  cut_after (bpath b) (cut_before (bpath a) p)
