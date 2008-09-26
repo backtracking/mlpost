@@ -42,7 +42,7 @@ let f2 =
   let f = hbox ~padding:(bp 20.) [b;b;b] in
   let arrow = box_arrow ~outd:(vec (dir (-60.))) in
   let node i = get "b" (nth i f) in
-  [draw f;
+  [draw ~debug:false f;
    arrow (node 0) (node 1); arrow (node 1) (node 2)]
 
 let figs = [

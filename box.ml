@@ -127,7 +127,7 @@ let circle ?(dx=margin) ?(dy=margin) w h c =
 let ellipse ?(dx=zero) ?(dy=zero) w h c =
   let rx = w +/ dx in
   let ry = h +/ dy in
-  rx, ry, Shapes.shift c (Shapes.full_ellipse_path rx ry) 
+  2. *./ rx, 2. *./ ry, Shapes.shift c (Shapes.full_ellipse_path rx ry) 
 
 let round_rect_gen ?(dx=margin) ?(dy=margin) ?(rx=margin) ?(ry=margin) w h c =
   let dx = w +/ dx in
@@ -142,7 +142,8 @@ let round_rect ?(dx=margin) ?(dy=margin) w h c =
 
 let patatoid ?(dx=2. *./ margin) ?(dy=2. *./ margin) w h c =
   let path = Shapes.patatoid (w +/ 2. *./ dx) (h +/ 2. *./ dy) in
-  w +/ 2. *./ dx, h +/ 2. *./ dy, Shapes.shift c path
+  let s = Shapes.shift c path in
+  s.Shapes.wt, s.Shapes.ht, s
 
 let make_contour style ?dx ?dy w h c =
   let f = match style with
@@ -241,18 +242,21 @@ let halign_to_box ?(dx=margin) ?(dy=margin) ?(spacing=Num.zero) ?pos pl =
   let posl = PicAlign.horizontal ~dx:(dx +/ spacing) ?pos pl in
     List.map (base_rect ~dx:(0.5 *./ dx) ~dy) (PicAlign.v posl)
 
-open Command 
+****)
 
+(***
 let tabularl ?(dx=Num.zero) ?(dy=Num.zero) pll =
-  let hmaxl = List.map (Num.fold_max Picture.height Num.zero) pll in
-  let rec calc_wmax pll = 
-    match pll with 
-      | []::_ -> [] 
-      | _ -> let cols, qll = 
+  let hmaxl = List.map (Num.fold_max height Num.zero) pll in
+  let rec calc_wmax pll = match pll with 
+    | [] :: _ -> 
+	[] 
+    | _ -> 
+	let cols, qll = 
 	  List.fold_left 
 	    (fun (col,rem) pl -> (List.hd pl :: col, List.tl pl :: rem)) 
-	    ([],[]) pll in
-	  (Num.fold_max Picture.width Num.zero cols)::(calc_wmax qll)
+	    ([],[]) pll 
+	in
+	(Num.fold_max width Num.zero cols) :: (calc_wmax qll)
   in
   let wmaxl = calc_wmax pll in
   let rec make_rows wmaxl x y h_2 pl =
@@ -261,10 +265,10 @@ let tabularl ?(dx=Num.zero) ?(dy=Num.zero) pll =
       | [], _ | _, [] -> raise (Invalid_argument "Lists have different sizes")
       | p::ql, wrow :: wl ->
 	  let c = Point.pt (x +/ dx +/ wrow /./ 2., y -/ h_2) in
-	  let dx' = dx +/ (wrow -/ Picture.width p) /./ 2. in
-	  let dy = h_2 -/ (Picture.height p) /./ 2. in
-	  let b = rect ~dx:dx' ~dy c p in
-	    b::(make_rows wl (x +/ wrow +/ dx +/ dx) y h_2 ql)
+	  let dx' = dx +/ (wrow -/ width p) /./ 2. in
+	  let dy = h_2 -/ (height p) /./ 2. in
+	  let b = shift c p in
+	  b :: (make_rows wl (x +/ wrow +/ dx +/ dx) y h_2 ql)
   in
   let rec make_array hmaxl y pll = 
     match pll, hmaxl with
@@ -272,25 +276,25 @@ let tabularl ?(dx=Num.zero) ?(dy=Num.zero) pll =
       | [], _ | _, [] -> raise (Invalid_argument "Lists have different sizes")
       | row :: qll, hrow :: hl -> 
 	  let brow = 
-	    make_rows wmaxl Num.zero y (hrow /./ 2. +/ dy) row in
-	    brow :: (make_array hl (y -/ hrow -/ dy -/ dy) qll)
+	    make_rows wmaxl Num.zero y (hrow /./ 2. +/ dy) row 
+	  in
+	  brow :: (make_array hl (y -/ hrow -/ dy -/ dy) qll)
   in
-    make_array hmaxl Num.zero pll
+  make_array hmaxl Num.zero pll
 
 let tabular ?(dx=Num.zero) ?(dy=Num.zero) m =
   let pll = Array.to_list (Array.map Array.to_list m) in
   let bll = tabularl ~dx ~dy pll in
-    Array.of_list (List.map Array.of_list bll)
+  Array.of_list (List.map Array.of_list bll)
 
 let tabulari ?(dx=Num.zero) ?(dy=Num.zero) w h f =
   let m = Array.init h (fun j -> Array.init w (fun i -> f i j)) in
-    tabular ~dx ~dy m
-
-****)
+  tabular ~dx ~dy m
+***)
 
 open Path
 
 let cpath ?style ?outd ?ind a b =
-  let r,l  = outd, ind in
+  let r,l = outd, ind in
   let p = pathk ?style [knotp ?r (ctr a); knotp ?l (ctr b)] in
   cut_after (bpath b) (cut_before (bpath a) p)

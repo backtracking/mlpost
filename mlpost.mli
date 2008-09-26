@@ -578,9 +578,13 @@ and Box : sig
   (** {2 Sub-boxes accessors} *)
 
   val nth : int -> t -> t
+    (** [nth i b] returns the [i]-th sub-box of [b]. The first sub-box
+	has index 0. *)
 
   val get : string -> t -> t
-
+    (** [get n b] returns the sub-box of [b] of name [n], if any, and
+	raises [Invalid_argument] otherwise. The behavior is not specified
+	if [b] contains several sub-boxes with name [n]. *)
 
 (****
   val valign : ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position
@@ -598,25 +602,28 @@ and Box : sig
                       ?pos:Command.position -> Picture.t list -> t list
     (** [halign_to_box] aligns the pictures in the argument list and puts them
       into boxes, but does not try to create boxes of equal size *)
+***)
 
+(***
   val tabular : 
-    ?dx:Num.t -> ?dy:Num.t -> Picture.t array array -> t array array
-    (** turns a matrix of pictures into a matrix of boxes *)
+    ?dx:Num.t -> ?dy:Num.t -> t array array -> t
+    (** aligns the given boxes both vertically and horizontally and returns
+	a box containing all these boxes (with rows as first sub-components,
+	and then individual boxes as sub-components of each row). *)
 
-  val tabularl : ?dx:Num.t -> ?dy:Num.t -> Picture.t list list -> t list list
+  val tabularl : ?dx:Num.t -> ?dy:Num.t -> t list list -> t
     (** similar to [tabular], but using lists instead of arrays *)
 
   val tabulari : 
-    ?dx:Num.t -> ?dy:Num.t -> int -> int -> 
-    (int -> int -> Picture.t) -> t array array
+    ?dx:Num.t -> ?dy:Num.t -> int -> int -> (int -> int -> t) -> t 
     (** similar to [tabular], but using a matrix defined with a function *)
+***)
 
   val cpath :
     ?style:Path.joint ->
     ?outd:Path.direction ->
     ?ind:Path.direction -> t -> t -> Path.t
     (** the path that connects 2 boxes and stops at the box boundaries *) 
-***)
 end
 
 and Transform : sig
