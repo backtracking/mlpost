@@ -1,6 +1,10 @@
 open Types
 open Hashcons
 
+
+(* A duplicate analysis - find out the number of times a node is used *)
+
+
 module Num = 
 struct
   type t = num_node hash_consed
