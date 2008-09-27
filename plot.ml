@@ -92,13 +92,13 @@ let draw_axes ?(hpen=Pen.default ()) ?(vpen=Pen.default ())
   let hcaptcmd = match hcaption with 
     | None -> Command.nop
     | Some labl -> 
-	Command.label ~pos:`Pleft labl 
+	Command.label ~pos:`Left labl 
 	  (Point.pt (num_of_int w */ sx, bp 0. -/sy))
   in
   let vcaptcmd = match vcaption with 
     | None -> Command.nop
     | Some labl -> 
-	Command.label ~pos:`Plowleft 
+	Command.label ~pos:`Lowleft 
 	  (Picture.transform [Transform.rotated 90.] labl)
 	  (Point.pt (bp 0. -/ sx, num_of_int h */ sy))
   in
@@ -114,7 +114,7 @@ let draw_axes ?(hpen=Pen.default ()) ?(vpen=Pen.default ())
   in
   let horizontal i =
     let x = num_of_int i */ sx in
-      seq [ labelcmd `Pbot (Point.pt (x,maxd)) i hlabel; 
+      seq [ labelcmd `Bot (Point.pt (x,maxd)) i hlabel; 
             ticks_cmd (fun f -> pathn [x,maxd; x, maxd +/ (sy */ f)]);
             if closed then
               ticks_cmd (fun f -> pathn [x,maxu; x, maxu -/ sy */f])
@@ -122,7 +122,7 @@ let draw_axes ?(hpen=Pen.default ()) ?(vpen=Pen.default ())
   in
   let vertical i =
     let y = num_of_int i */ sy in
-      seq [labelcmd `Pleft (Point.pt (maxl, y)) i vlabel; 
+      seq [labelcmd `Left (Point.pt (maxl, y)) i vlabel; 
            ticks_cmd (fun f ->  pathn [maxl,y; maxl +/ sx */ f,y]);
             if closed then
               ticks_cmd (fun f -> pathn [maxr,y; maxr -/ sy */ f, y])

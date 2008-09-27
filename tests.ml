@@ -38,7 +38,7 @@ let d1 =
       ~color:Color.red
       (Path.shift (1. ++ 1.) (Box.bpath a));
     draw_label_arrow ~color:Color.orange ~pen 
-      ~pos:`Pupright (Picture.tex "foo") (Box.west a) (Box.south_east b);
+      ~pos:`Upright (Picture.tex "foo") (Box.west a) (Box.south_east b);
     box_arrow ~color:Color.blue a b;
   ]
 
@@ -46,10 +46,10 @@ open Box
 
 let d2 =
   let b = 
-    hbox ~padding:(bp 10.) ~pos:`Ptop ~stroke:(Some Color.red) ~dx:(bp 2.)
+    hbox ~padding:(bp 10.) ~pos:`Top ~stroke:(Some Color.red) ~dx:(bp 2.)
       ~dy:(bp 2.)
-      [vbox ~padding:(bp 4.) ~pos:`Pright [tex "A"; tex "BC"; tex "D"];
-       vbox ~padding:(bp 4.) ~pos:`Pleft [tex "E"; tex "FGH"]]
+      [vbox ~padding:(bp 4.) ~pos:`Right [tex "A"; tex "BC"; tex "D"];
+       vbox ~padding:(bp 4.) ~pos:`Left [tex "E"; tex "FGH"]]
   in
   [draw ~debug:false b;
    box_arrow (nth 1 (nth 0 b)) (nth 0 (nth 1 b))]
@@ -59,8 +59,8 @@ let proval =
   let pen = Pen.square ~tr:[T.yscaled (bp 0.5); T.rotated 40.] () in
   let check = jointpath [-1.2,1.2; 0., -2. ; 2., 2. ; 5., 5.] [jLine ; jCurve; jCurve] in
     [ fill ~color:(Color.gray 0.2) (Path.scale (Num.bp f) fullcircle) ;
-      label ~pos:`Pleft (Picture.tex "Pr") (Point.p (f /. (-4.),0.)) ;
-      label ~pos:`Pright (Picture.tex "al") (Point.p (f /. 4.,0.)) ;
+      label ~pos:`Left (Picture.tex "Pr") (Point.p (f /. (-4.),0.)) ;
+      label ~pos:`Right (Picture.tex "al") (Point.p (f /. 4.,0.)) ;
       Command.draw ~color:Color.green ~pen check;]
 
 open Tree
@@ -136,8 +136,8 @@ let cheno011 =
    seq (List.map
 	   (fun (pos, l, i) -> 
 	     Command.dotlabel ~pos (Picture.tex l) (point i p))
-	   [`Pbot, "0", 0.;  `Pupleft, "1", 1. ;
-	    `Plowleft, "2", 2. ;  `Ptop, "3", 3. ; `Pleft, "4", 4. ]);
+	   [`Bot, "0", 0.;  `Upleft, "1", 1. ;
+	    `Lowleft, "2", 2. ;  `Top, "3", 3. ; `Left, "4", 4. ]);
    Command.draw ~pen (subpath 1.3 3.2 p)]
 
 open Dash
@@ -166,10 +166,10 @@ let d7 =
     [Command.draw_pic pic;
      Command.draw (Picture.bbox pic);
      Command.draw pbox;
-     Command.dotlabel ~pos:`Pleft (Picture.tex "ulcorner") (Picture.ulcorner pic);
-     Command.dotlabel ~pos:`Pleft (Picture.tex "llcorner") (Picture.llcorner pic);
-     Command.dotlabel ~pos:`Pright (Picture.tex "urcorner") (Picture.urcorner pic);
-     Command.dotlabel ~pos:`Pright (Picture.tex "lrcorner") (Picture.lrcorner pic);
+     Command.dotlabel ~pos:`Left (Picture.tex "ulcorner") (Picture.ulcorner pic);
+     Command.dotlabel ~pos:`Left (Picture.tex "llcorner") (Picture.llcorner pic);
+     Command.dotlabel ~pos:`Right (Picture.tex "urcorner") (Picture.urcorner pic);
+     Command.dotlabel ~pos:`Right (Picture.tex "lrcorner") (Picture.lrcorner pic);
     ]
     
 let half pic = Picture.transform [Transform.scaled (bp 0.5)] pic
@@ -263,7 +263,7 @@ let f3 i =
 let flab i = (Picture.transform
 		[Transform.scaled (bp 1.7)]
 		(Picture.tex (Printf.sprintf "$f_{\\omega_%d}$" i)),
-	      `Ptop, 19)
+	      `Top, 19)
 	
 let instants = 
   let pen = Pen.default ~tr:[Transform.scaled (bp 2.5)] () in

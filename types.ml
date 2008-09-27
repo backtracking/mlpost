@@ -25,15 +25,15 @@ type name = string
 type corner = N | S | W | E | NE | NW | SW | SE
 type piccorner = UL | UR | LL | LR
 
-type hposition = [`Pcenter | `Pleft | `Pright]
-type vposition = [`Pcenter | `Ptop | `Pbot]
+type hposition = [`Center | `Left | `Right]
+type vposition = [`Center | `Top | `Bot]
 type position = [
   | hposition 
   | vposition 
-  | `Pupleft
-  | `Pupright
-  | `Plowleft
-  | `Plowright
+  | `Upleft
+  | `Upright
+  | `Lowleft
+  | `Lowright
 ]
 
 open Hashcons

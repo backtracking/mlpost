@@ -20,7 +20,7 @@ open Num
 open Command
 
 (*  puts labels at given points with given text *)
-let dotlabels ?(pos=`Pcenter) ls lp =
+let dotlabels ?(pos=`Center) ls lp =
   List.map2 (fun s p -> dotlabel ~pos:pos (Picture.tex s) p) ls lp
 
 let draw_simple_arrow ?color ?pen ?style ?outd ?ind a b =

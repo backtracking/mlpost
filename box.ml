@@ -104,7 +104,7 @@ let rec draw ?(debug=false) b =
 	 match b.name with
 	   | None -> Command.draw ~color:Color.red (Path.pathp [b.ctr])
 	   | Some n -> 
-	       Command.label ~pos:`Pcenter (Picture.tex ("\\tiny " ^ n))
+	       Command.label ~pos:`Center (Picture.tex ("\\tiny " ^ n))
 		 (north_west b)]
     else 
       Command.nop

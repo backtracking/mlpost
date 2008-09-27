@@ -986,18 +986,18 @@ and Command : sig
   (** {2 Labels} *)
 
   (** Positions; useful to place labels *)
-  type hposition = [`Pcenter | `Pleft | `Pright]
-  type vposition = [`Pcenter | `Ptop | `Pbot]
+  type hposition = [`Center | `Left | `Right]
+  type vposition = [`Center | `Top | `Bot]
   type position = [
   | hposition 
   | vposition 
-  | `Pupleft
-  | `Pupright
-  | `Plowleft
-  | `Plowright
+  | `Upleft
+  | `Upright
+  | `Lowleft
+  | `Lowright
   ]
 
-  (** [label ~pos:Pleft pic p] puts picture [pic] at the left of point [p] *)
+  (** [label ~pos:`Left pic p] puts picture [pic] at the left of point [p] *)
   val label : ?pos:position -> Picture.t -> Point.t -> t
 
   (** Works like [label], but puts a dot at point [p] as well *)

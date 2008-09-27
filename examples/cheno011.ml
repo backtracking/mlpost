@@ -10,7 +10,7 @@ let fig =
      (List.map
 	 (fun (pos, l, i) -> 
 	   Command.dotlabel ~pos (Picture.tex l) (Path.point i p))
-	 [Pbot, "0", 0.;  Pupleft, "1", 1. ;
-	  Plowleft, "2", 2. ;  Ptop, "3", 3. ; Pleft, "4", 4. ]);
+	 [`Bot, "0", 0.;  `Upleft, "1", 1. ;
+	  `Lowleft, "2", 2. ;  `Top, "3", 3. ; `Left, "4", 4. ]);
    Command.draw ~pen (subpath 1.3 3.2 p)]
 

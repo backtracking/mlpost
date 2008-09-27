@@ -38,15 +38,15 @@ let print_piccorner fmt = function
   | LR -> fprintf fmt "lrcorner"
 
 let print_position fmt = function
-  | `Pcenter  -> fprintf fmt ""
-  | `Pleft   -> fprintf fmt ".lft"
-  | `Pright  -> fprintf fmt ".rt"
-  | `Ptop    -> fprintf fmt ".top"
-  | `Pbot    -> fprintf fmt ".bot"
-  | `Pupleft  -> fprintf fmt ".ulft"
-  | `Pupright -> fprintf fmt ".urt"
-  | `Plowleft -> fprintf fmt ".llft"
-  | `Plowright -> fprintf fmt ".lrt"
+  | `Center  -> fprintf fmt ""
+  | `Left   -> fprintf fmt ".lft"
+  | `Right  -> fprintf fmt ".rt"
+  | `Top    -> fprintf fmt ".top"
+  | `Bot    -> fprintf fmt ".bot"
+  | `Upleft  -> fprintf fmt ".ulft"
+  | `Upright -> fprintf fmt ".urt"
+  | `Lowleft -> fprintf fmt ".llft"
+  | `Lowright -> fprintf fmt ".lrt"
 
 let rec print_num fmt = function
   | C.F f ->

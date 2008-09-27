@@ -34,16 +34,16 @@ let z4 = 30.,50.
 let l1 = z0::z1::z2::z3::z4::[]
 
 let labels1 =
-   (H.dotlabels ~pos:`Ptop ["0";"2";"4"] (map_bp [z0;z2;z4])) @
-   [dotlabel ~pos:`Pleft (tex "3") (bpp z3);
-    dotlabel ~pos:`Pright (tex "1") (bpp z1) ]
+   (H.dotlabels ~pos:`Top ["0";"2";"4"] (map_bp [z0;z2;z4])) @
+   [dotlabel ~pos:`Left (tex "3") (bpp z3);
+    dotlabel ~pos:`Right (tex "1") (bpp z1) ]
 
 let draw3 = 3, [ draw (path ~style:jCurve  l1) ] @ labels1
 
 let draw4a, draw4b = 
-  let labels = H.dotlabels ~pos:`Ptop ["2";"4"] (map_bp [z2;z4]) @
-               H.dotlabels ~pos:`Pleft ["0";"3"] (map_bp [z0;z3]) @
-               [dotlabel ~pos:`Plowright (tex "1") (bpp z1)]
+  let labels = H.dotlabels ~pos:`Top ["2";"4"] (map_bp [z2;z4]) @
+               H.dotlabels ~pos:`Left ["0";"3"] (map_bp [z0;z3]) @
+               [dotlabel ~pos:`Lowright (tex "1") (bpp z1)]
   in
     (104, [ draw (path ~cycle:jCurve l1)] @ labels) ,
     (204, 
@@ -94,7 +94,7 @@ let draw8 = 8,
 let z0 = (-1., 0.)
 let z1 = (0., 0.2)
 let z2 = ( 1., 0.)
-let labels9 = H.dotlabels ~pos:`Pbot ["0";"1";"2"] (map_in [z0;z1;z2])
+let labels9 = H.dotlabels ~pos:`Bot ["0";"1";"2"] (map_in [z0;z1;z2])
 let z0 = knot ~r:(vec up) ~scale:inch z0
 let z1 = knot ~r:(vec right) ~scale:inch z1
 let z2 = knot ~r:(vec down) ~scale:inch z2
@@ -108,7 +108,7 @@ let z1 = (u (-3.)),u 2.
 let z2 = (u 3.),u 2.
 let z3 = (u 5.),u 0.
 let l1 = [z0;z1;z2;z3]
-let labels10 = H.dotlabels ~pos:`Pbot ["0";"1";"2";"3"] (map_in l1)
+let labels10 = H.dotlabels ~pos:`Bot ["0";"1";"2";"3"] (map_in l1)
 
 let draw10a = 110, [draw (path ~scale:inch l1) ] @ labels10
 
@@ -136,7 +136,7 @@ let pat c = [ knot ~r:(curl c) ~scale:inch z0 ;
 
 let draw11 =
   let numbers = [111; 211; 311; 411] in
-  let labels11 = H.dotlabels ~pos:`Pright ["0";"1";"2"] (map_in [z0;z1;z2]) in
+  let labels11 = H.dotlabels ~pos:`Right ["0";"1";"2"] (map_in [z0;z1;z2]) in
     List.map2
       (fun c n -> n,
          [draw
@@ -150,9 +150,9 @@ let draw17 =
   let z2 = pt (zero, b) and z4 = pt (zero, neg a) in
     17, [draw (pathp ~cycle:jCurve [z1;z2;z3;z4]);
 	 draw (pathp ~style:jLine [z1; z0; z2]);
-	 label ~pos:`Ptop (tex "a") (segment 0.5 z0 z1);
-	 label ~pos:`Pleft (tex "b") (segment 0.5 z0 z2);
-	 dotlabel ~pos:`Pbot (tex "(0,0)") z0
+	 label ~pos:`Top (tex "a") (segment 0.5 z0 z1);
+	 label ~pos:`Left (tex "b") (segment 0.5 z0 z2);
+	 dotlabel ~pos:`Bot (tex "(0,0)") z0
 	]
 
 let draw18 =
@@ -164,9 +164,9 @@ let draw18 =
 	concat ~style:jCurve (pg (n-1)) (knot ~scale:u (f, sqrt f)) in
     18, [draw (pathn ~style:jLine [(zero,u 2.); (zero,zero); (u 4.,zero)]);
 	 draw ~pen (pg 8);
-	 label ~pos:`Plowright (tex "$ \\sqrt x$") (pt (u 3., u (sqrt 3.)));
-	 label ~pos:`Pbot (tex "$x$") (pt (u 2., zero));
-	 label ~pos:`Plowleft (tex "$y$") (pt (zero, u 1.))]
+	 label ~pos:`Lowright (tex "$ \\sqrt x$") (pt (u 3., u (sqrt 3.)));
+	 label ~pos:`Bot (tex "$x$") (pt (u 2., zero));
+	 label ~pos:`Lowleft (tex "$y$") (pt (zero, u 1.))]
 	 
 let draw19 =
   let ux, uy = Num.inch 0.01, Num.inch 0.6 in
@@ -180,9 +180,9 @@ let draw19 =
 	  (knotn (k *./ ux, 2. /. (1. +. (cos (Num.deg2rad k))) *./ uy)) in
     19, [draw (pathn ~style:jLine [(zero,duy); (zero,zero); (dux,zero)]);
 	 draw ~pen (pg 8);
-	 label ~pos:`Pbot (tex "axe $x$") (pt (60.*./ux, zero));
-	 label ~pos:`Pleft axey (pt (zero, 2.*./uy));
-	 label ~pos:`Pleft (tex "$\\displaystyle y={2\\over1+\\cos x}$")
+	 label ~pos:`Bot (tex "axe $x$") (pt (60.*./ux, zero));
+	 label ~pos:`Left axey (pt (zero, 2.*./uy));
+	 label ~pos:`Left (tex "$\\displaystyle y={2\\over1+\\cos x}$")
 	   (pt (dux, duy))]
 
 (** Cette version de draw21 est assez cool mais ne marche pas car la largeur du trait
@@ -216,7 +216,7 @@ let draw22 =
           fill ~color:(Color.gray 0.4) ab;
           fill ~color:Color.white (bbox pa); draw_pic pa;
           fill ~color:Color.white (bbox pb); draw_pic pb;
-          label ~pos:`Pleft (tex "$U$") (p ~scale:Num.cm (-1.,0.5)); ])
+          label ~pos:`Left (tex "$U$") (p ~scale:Num.cm (-1.,0.5)); ])
   in
     22, [draw_pic pic; draw (bbox pic)]
 

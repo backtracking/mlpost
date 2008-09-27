@@ -26,9 +26,9 @@ type t = command
 
 type figure = t list
 
-let label ?(pos=`Pcenter) pic point = mkCLabel pic pos point
+let label ?(pos=`Center) pic point = mkCLabel pic pos point
 (* replace later *)
-let dotlabel ?(pos=`Pcenter) pic point = mkCDotLabel pic pos point
+let dotlabel ?(pos=`Center) pic point = mkCDotLabel pic pos point
 
 let draw ?color ?pen ?dashed t = 
   (* We don't use a default to avoid the output of 

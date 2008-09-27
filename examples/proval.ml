@@ -11,6 +11,6 @@ let fig =
   in
   [fill ~color:Color.black 
       (Path.scale (bp k) Path.fullcircle) ;
-   label ~pos:Pleft (Picture.tex "Pr") (Point.p (k /. (-4.),0.)) ;
-   label ~pos:Pright (Picture.tex "al") (Point.p (k /. 4.,0.)) ;
+   label ~pos:`Left (Picture.tex "Pr") (Point.p (k /. (-4.),0.)) ;
+   label ~pos:`Right (Picture.tex "al") (Point.p (k /. 4.,0.)) ;
    draw ~color:Color.green ~pen check;]

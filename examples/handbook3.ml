@@ -12,9 +12,9 @@ let z4 = 30.,50.
 let l1 = z0::z1::z2::z3::z4::[]
 
 let labels1 =
-   (H.dotlabels ~pos:Ptop ["0";"2";"4"] (map_bp [z0;z2;z4])) @
-   [dotlabel ~pos:Pleft (tex "3") (bpp z3);
-    dotlabel ~pos:Pright (tex "1") (bpp z1) ]
+   (H.dotlabels ~pos:`Top ["0";"2";"4"] (map_bp [z0;z2;z4])) @
+   [dotlabel ~pos:`Left (tex "3") (bpp z3);
+    dotlabel ~pos:`Right (tex "1") (bpp z1) ]
 
 let fig = [ draw (path ~style:jCurve  l1) ] @ labels1
 

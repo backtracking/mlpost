@@ -78,7 +78,7 @@ struct
 
   let center pt x = shift (Point.sub pt (ctr x)) (v x)
 
-  let horizontal ?(padding=Num.zero) ?(pos=`Pcenter) pl =
+  let horizontal ?(padding=Num.zero) ?(pos=`Center) pl =
     let hmax = Num.fold_max P.height Num.zero pl in
     let hmax_2 = hmax /./ 2. in
     let rec make_new acc x = function
@@ -87,9 +87,9 @@ struct
           let wp,hp = P.width p, P.height p in
           let y = 
             match pos with
-              | `Pcenter -> hmax_2
-              | `Ptop -> hmax -/ hp /./ 2.
-              | `Pbot -> hp /./ 2.
+              | `Center -> hmax_2
+              | `Top -> hmax -/ hp /./ 2.
+              | `Bot -> hp /./ 2.
           in
           let c = Point.pt (x +/ wp /./ 2., y) in 
           let b = P.center c p in
@@ -99,7 +99,7 @@ struct
     let mycenter = Point.pt (x /./ 2., hmax_2) in     
       { v = l; width = x; height = hmax; center = mycenter }
 
-  let vertical ?(padding=Num.zero) ?(pos=`Pcenter) pl =
+  let vertical ?(padding=Num.zero) ?(pos=`Center) pl =
     let wmax = Num.fold_max P.width Num.zero pl in
     let wmax_2 = wmax /./ 2. in
     let rec make_new acc y = function
@@ -108,9 +108,9 @@ struct
           let wp,hp = P.width p, P.height p in
           let x = 
             match pos with
-              | `Pcenter -> wmax_2
-              | `Pright -> wmax -/ wp /./ 2.
-              | `Pleft ->  wp /./ 2.
+              | `Center -> wmax_2
+              | `Right -> wmax -/ wp /./ 2.
+              | `Left ->  wp /./ 2.
           in
           let c = Point.pt (x, y -/ hp /./ 2.) in 
           let b = P.center c p in
@@ -120,7 +120,7 @@ struct
     let mycenter = Point.pt (wmax_2, y /./ 2.) in
     { v = l; width = wmax; height = Num.neg y; center = mycenter }
 
-  let tabular ?(dx=Num.zero) ?(dy=Num.zero) ?(pos=`Pcenter) pll =
+  let tabular ?(dx=Num.zero) ?(dy=Num.zero) ?(pos=`Center) pll =
     let hmaxl = List.map (Num.fold_max P.height Num.zero) pll in
     let rec calc_wmax pll =
       match pll with
@@ -180,17 +180,17 @@ struct
 
   module L = List_(P)
 
-  let horizontal ?(padding=Num.zero) ?(pos=`Pcenter) pa =
+  let horizontal ?(padding=Num.zero) ?(pos=`Center) pa =
     let pl = L.horizontal ~padding ~pos (Array.to_list pa) in
     { v = Array.of_list (L.v pl); center = L.ctr pl;
       width = L.width pl; height = L.height pl }
 
-  let vertical ?(padding=Num.zero) ?(pos=`Pcenter) pa =
+  let vertical ?(padding=Num.zero) ?(pos=`Center) pa =
     let pl = L.vertical ~padding ~pos (Array.to_list pa) in
     { v = Array.of_list (L.v pl); center = L.ctr pl;
       width = L.width pl; height = L.height pl }
 
-  let tabular ?(dx=Num.zero) ?(dy=Num.zero) ?(pos=`Pcenter) paa =
+  let tabular ?(dx=Num.zero) ?(dy=Num.zero) ?(pos=`Center) paa =
     let pll = 
       L.tabular ~dx ~dy ~pos (List.map Array.to_list (Array.to_list paa)) in
       Array.of_list 
@@ -234,7 +234,7 @@ struct
   module TA = List_ (Aux)
 
   let rec place ?dx ?(dy=Num.zero) (N (a,l)) = 
-    let pl = TA.horizontal ?padding:dx ~pos:`Ptop 
+    let pl = TA.horizontal ?padding:dx ~pos:`Top 
       (List.map (place ?dx ~dy) l) in
     let w = Num.maxn (TA.width pl) (P.width a) in
     let h = TA.height pl +/ dy +/ P.height a in
