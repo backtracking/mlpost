@@ -429,10 +429,9 @@ let eq_path_node p1 p2 =
 
 let eq_picture_node p1 p2 =
   match p1,p2 with
-    | PITex s1, PITex s2 -> s1==s2 
-	(* incomplete but fast.
-	   poor chance that same TeX text occurs twice anyway
-	*)
+    | PITex s1, PITex s2 -> 
+        (* it actually happens that the same text appears twice *)
+        s1=s2 
     | PIMake c1, PIMake c2 -> eq_hashcons c1 c2
     | PITransform(l1,p1), PITransform(l2,p2) ->
 	eq_hashcons p1 p2 && eq_hashcons_list l1 l2

@@ -248,9 +248,9 @@ and picture_save pic =
     let x = D.PicM.find picture_names pic in
     C.PIName x, nop
   with Not_found ->
-    let pic', code = picture' pic.node in
     let x = Name.picture () in
     let () = D.PicM.add picture_names pic x in
+    let pic', code = picture' pic.node in
     C.PIName x, code ++ C.CSimplePic (x,pic')
 
 and transform t = 
@@ -357,10 +357,6 @@ and command c =
       let pic, c1 = picture pic in
       let pt, c2 = point pt in
       c1 ++ c2 ++ C.CLabel (pic,pos,pt)
-
-let command c = 
-  let () = Duplicate.command c in
-  command c
 
 let reset () =
   D.NM.clear D.num_map;
