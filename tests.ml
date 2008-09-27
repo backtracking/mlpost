@@ -75,10 +75,7 @@ let yannick style =
       [ leaf "MemSet";
     node "ComposerMessages"
       [ node "ComposerMsg"
-          [
-        leaf "StrCpy";
-        leaf "DeclarerPanneRobustesse"
-          ]
+          [ leaf "StrCpy"; leaf "DeclarerPanneRobustesse" ]
       ]
       ]
   in
@@ -132,8 +129,6 @@ let rec random_tree2 = function
 
 let d6 = [Tree.draw ~cs:(mm 0.2) (random_tree2 10)]
 
-(****
-
 let cheno011 =
   let p = path ~cycle:jCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)] in
   let pen = Pen.circle ~tr:[T.scaled (bp 1.5)] () in
@@ -141,8 +136,8 @@ let cheno011 =
    seq (List.map
 	   (fun (pos, l, i) -> 
 	     Command.dotlabel ~pos (Picture.tex l) (point i p))
-	   [Pbot, "0", 0.;  Pupleft, "1", 1. ;
-	    Plowleft, "2", 2. ;  Ptop, "3", 3. ; Pleft, "4", 4. ]);
+	   [`Pbot, "0", 0.;  `Pupleft, "1", 1. ;
+	    `Plowleft, "2", 2. ;  `Ptop, "3", 3. ; `Pleft, "4", 4. ]);
    Command.draw ~pen (subpath 1.3 3.2 p)]
 
 open Dash
@@ -171,10 +166,10 @@ let d7 =
     [Command.draw_pic pic;
      Command.draw (Picture.bbox pic);
      Command.draw pbox;
-     Command.dotlabel ~pos:Pleft (Picture.tex "ulcorner") (Picture.ulcorner pic);
-     Command.dotlabel ~pos:Pleft (Picture.tex "llcorner") (Picture.llcorner pic);
-     Command.dotlabel ~pos:Pright (Picture.tex "urcorner") (Picture.urcorner pic);
-     Command.dotlabel ~pos:Pright (Picture.tex "lrcorner") (Picture.lrcorner pic);
+     Command.dotlabel ~pos:`Pleft (Picture.tex "ulcorner") (Picture.ulcorner pic);
+     Command.dotlabel ~pos:`Pleft (Picture.tex "llcorner") (Picture.llcorner pic);
+     Command.dotlabel ~pos:`Pright (Picture.tex "urcorner") (Picture.urcorner pic);
+     Command.dotlabel ~pos:`Pright (Picture.tex "lrcorner") (Picture.lrcorner pic);
     ]
     
 let half pic = Picture.transform [Transform.scaled (bp 0.5)] pic
@@ -199,6 +194,7 @@ let rec sierpinski p n =
 let d12 = 
   let p1 = Picture.tex "A" in
     [Command.draw_pic (sierpinski p1 7)]
+
 
 (** plots *)
 open Plot
@@ -267,7 +263,7 @@ let f3 i =
 let flab i = (Picture.transform
 		[Transform.scaled (bp 1.7)]
 		(Picture.tex (Printf.sprintf "$f_{\\omega_%d}$" i)),
-	      Command.Ptop, 19)
+	      `Ptop, 19)
 	
 let instants = 
   let pen = Pen.default ~tr:[Transform.scaled (bp 2.5)] () in
@@ -304,30 +300,6 @@ let florence =
     instants
   ]
 
-let d15 =
-  let s = "010101011111" in
-  let cmd = ref [] in
-  let dist = 5. in
-  let () =
-    String.iter 
-      (fun c -> 
-        let p = Picture.tex (String.make 1 c) in
-          cmd := (p :: !cmd)) s in
-  let i = ref 0 in
-    List.map
-      (fun p -> 
-         incr i; Command.label ~pos:Pleft p 
-                  (Point.p (dist *. (float_of_int !i), 0.))) !cmd
-
-let d16 = 
-  let p1 = Point.p (0.,50.) in
-  let l = Point.length p1 in
-  let p2 = Point.pt (l,l) in
-  let p3 = Point.p (50.,0.) in
-    [ Command.draw (pathp ~style:jLine [p3;p2;p1])]
-
-(* let d17 = Command.logo *)
-
 let shapes1 =
   List.fold_left Picture.below
     (Picture.tex "Shapes 1 !")
@@ -359,26 +331,7 @@ let shapes2 =
       Shapes.ellipse ~fill:Color.black ~stroke:Color.red (bp 30.) (bp 10.);
     ]
 
-let yannick style =
-  let tt s = Picture.tex ("\\texttt{" ^ s ^ "}") in
-  let node s = node ~style (tt s) in
-  let leaf s = leaf ~style (tt s) in
-
-  let tree =
-    node "ComposerPage"
-      [ leaf "MemSet";
-    node "ComposerMessages"
-      [ node "ComposerMsg"
-          [
-        leaf "StrCpy";
-        leaf "DeclarerPanneRobustesse"
-          ]
-      ]
-      ]
-  in
-  [draw ~ls:(bp 20.) ~cs:(bp 10.) ~fill:Color.orange 
-      ~edge_style:Square tree]
-
+(****
 let stack =
   let bl = 
     Box.valign ~dx:Num.one ~dy:two
@@ -534,12 +487,6 @@ let placetest =
 
 module BA = List_ (Box)
 
-let patates = 
-  let pic s = Box.patatoid origin (Picture.tex s) in
-  let al = BA.horizontal ~dx:(Num.bp 20.) [pic "universe"; pic "time"; pic "knowledge"] in
-    List.map Box.draw (BA.v al)
-
-
 let newarray =
   let bll =
     PA.tabular ~dx:Num.one ~dy:two
@@ -562,16 +509,15 @@ let newarray =
 
 ****)
 
-let figs = [ d6; d5; yannick Box.Rect; yannick Box.Patatoid; d1; d2; proval;
-             d2sq; d2hsq; d2s; d2c;
+let figs = [ d6; d5; yannick Box.Rect; yannick Box.Patatoid; d1; d2; 
+             proval; d2sq; d2hsq; d2s; d2c; d12; cheno011; d3; d4; 
+             d7; d11; florence;
 (*
-d12;
-  newarray; patates;
+  newarray;
              placetest; boxjoin; box_align; stack; row; stackl; rowl;
 	     array; mybresenham; 
             [Command.draw_pic shapes1]; [Command.draw_pic shapes2];
-            d16; d1; d15; florence; d14; d13;
-             d11; d7; d4; cheno011; d3;
+             d14; d13;
 *)
 ] 
 
