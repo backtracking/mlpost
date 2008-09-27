@@ -62,7 +62,7 @@ and point_node =
   | PTSub of point * point
   | PTMult of num * point
   | PTRotated of float * point
-  | PTTransformed of point * transform list
+  | PTTransformed of point * transform
 
 and point = point_node hash_consed
 
@@ -100,7 +100,7 @@ and path_node =
   | PAHalfCircle
   | PAQuarterCircle
   | PAUnitSquare
-  | PATransformed of path * transform list
+  | PATransformed of path * transform
   | PAKnot of knot
   | PAAppend of path * joint * path
   | PACutAfter of path * path
@@ -127,7 +127,7 @@ and transform = transform_node hash_consed
 and picture_node = 
   | PITex of string
   | PIMake of command
-  | PITransform of transform list * picture
+  | PITransformed of picture * transform
   | PIClip of picture * path
 
 and picture = picture_node hash_consed
@@ -145,7 +145,7 @@ and pen_node =
   | PenCircle
   | PenSquare
   | PenFromPath of path
-  | PenTransformed of pen * transform list
+  | PenTransformed of pen * transform
 
 and pen = pen_node hash_consed
 
@@ -198,9 +198,7 @@ let point = function
   | PTSub(p,q) -> combine2 17 p.hkey q.hkey
   | PTMult(n,q) -> combine2 18 n.hkey q.hkey
   | PTRotated(f,p) -> combine2 19 (hash_float f) p.hkey
-  | PTTransformed(p,l) ->
-      List.fold_left (fun acc t -> combine2 21 acc t.hkey)
-	(combine 20 p.hkey) l
+  | PTTransformed(p,tr) -> combine2 20 p.hkey tr.hkey
 
 let on_off = function 
   | On n -> combine 65 n.hkey
@@ -231,9 +229,7 @@ let path = function
   | PAHalfCircle -> 25
   | PAQuarterCircle -> 26
   | PAUnitSquare -> 27
-  | PATransformed(p,l) ->
-      List.fold_left (fun acc t -> combine2 28 acc t.hkey)
-	(combine 29 p.hkey) l
+  | PATransformed(p,tr) -> combine2 28 p.hkey tr.hkey
   | PAKnot k -> combine 30 k.hkey
   | PAAppend(p1,j,p2) -> combine3 31 p1.hkey j.hkey p2.hkey
   | PACutAfter(p,q) -> combine2 32 p.hkey q.hkey
@@ -258,9 +254,7 @@ let transform = function
 let picture = function
   | PITex s -> combine 38 (hash_string s)
   | PIMake c -> combine 39 c.hkey
-  | PITransform(l,p) ->
-      List.fold_left (fun acc t -> combine2 40 acc t.hkey)
-	(combine 41 p.hkey) l
+  | PITransformed(p,tr) -> combine2 40 p.hkey tr.hkey
   | PIClip(p,q) -> combine2 42 p.hkey q.hkey
 
 let dash = function
@@ -275,9 +269,7 @@ let pen = function
   | PenCircle -> 78
   | PenSquare -> 79
   | PenFromPath p -> combine 80 p.hkey
-  | PenTransformed(p,l) ->
-      List.fold_left (fun acc t -> combine2 81 acc t.hkey)
-	(combine 82 p.hkey) l
+  | PenTransformed(p,tr) -> combine2 81 p.hkey tr.hkey
 
 let hash_opt f = function
   | None -> 83
@@ -333,8 +325,8 @@ let eq_pen_node p1 p2 =
     | PenSquare, PenSquare -> true
     | PenFromPath p1, PenFromPath p2 ->
 	eq_hashcons p1 p2
-    | PenTransformed(p1,l1), PenTransformed(p2,l2) ->
-	eq_hashcons p1 p2 && eq_hashcons_list l1 l2
+    | PenTransformed(p1,tr1), PenTransformed(p2,tr2) ->
+	eq_hashcons p1 p2 && eq_hashcons tr1 tr2
     | _ -> false
 
 let eq_dash_node d1 d2 =
@@ -394,8 +386,8 @@ let eq_point_node p1 p2 =
 	eq_hashcons n1 n2 && eq_hashcons p1 p2
     | PTRotated(f1,p1),PTRotated(f2,p2) ->
 	eq_float f1 f2 && eq_hashcons p1 p2
-    | PTTransformed(p1,l1), PTTransformed(p2,l2) ->
-	eq_hashcons p1 p2 && eq_hashcons_list l1 l2
+    | PTTransformed(p1,tr1), PTTransformed(p2,tr2) ->
+	eq_hashcons p1 p2 && eq_hashcons tr1 tr2
     | _ -> false
 
 
@@ -410,8 +402,8 @@ let eq_path_node p1 p2 =
     | PAQuarterCircle, PAQuarterCircle
     | PAUnitSquare, PAUnitSquare 
 	-> true
-    | PATransformed(p1,l1),PATransformed(p2,l2) ->
-	eq_hashcons p1 p2 && eq_hashcons_list l1 l2
+    | PATransformed(p1,tr1),PATransformed(p2,tr2) ->
+	eq_hashcons p1 p2 && eq_hashcons tr1 tr2
     | PAKnot(k1), PAKnot(k2) -> eq_hashcons k1 k2
     | PAAppend(p11,j1,p12),PAAppend(p21,j2,p22) ->
 	eq_hashcons p11 p21 && eq_hashcons j1 j2 && eq_hashcons p12 p22
@@ -433,8 +425,8 @@ let eq_picture_node p1 p2 =
         (* it actually happens that the same text appears twice *)
         s1=s2 
     | PIMake c1, PIMake c2 -> eq_hashcons c1 c2
-    | PITransform(l1,p1), PITransform(l2,p2) ->
-	eq_hashcons p1 p2 && eq_hashcons_list l1 l2
+    | PITransformed(p1,tr1), PITransformed(p2,tr2) ->
+	eq_hashcons p1 p2 && eq_hashcons tr1 tr2
     | PIClip(pi1,pa1), PIClip(pi2,pa2) ->
 	eq_hashcons pi1 pi2 && eq_hashcons pa1 pa2
     | _ -> false
@@ -702,7 +694,7 @@ let mkPITex s = hashpicture (PITex s)
 
 let mkPIMake com = hashpicture (PIMake com)
 
-let mkPITransform x y = hashpicture (PITransform (x,y))
+let mkPITransformed x y = hashpicture (PITransformed (x,y))
 
 let mkPIClip p pic = hashpicture (PIClip(p,pic))
 

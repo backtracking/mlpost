@@ -201,7 +201,7 @@ struct
           C.PTPicCorner (pic, corner) , code
     | PTTransformed (p,tr) ->
         let p, c1 = k p in
-        let tr, c2 = Other.transform_list tr in
+        let tr, c2 = Other.transform tr in
           C.PTTransformed (p,tr),  c1 ++ c2
 end
 and PathBase : COMP with type node = path_node and type out = C.path =
@@ -267,11 +267,11 @@ struct
         C.PAConcat (k',j,p), c1 ++ c2 ++ c3
     | PATransformed (p,tr) ->
         let p, c1 = k p in
-        let tr, c2 = Other.transform_list tr in
+        let tr, c2 = Other.transform tr in
         (* group transformations, for slightly smaller metapost code *)
         (* this only happens in the Metapost AST, to be able to use
          * path components that already have a name *)
-        C.pa_transformed p tr, c1 ++ c2
+        C.PATransformed(p,tr), c1 ++ c2
     | PACutAfter (p1,p2) ->
         let p1, c1 = k p1 in
         let p2, c2 = k p2 in
@@ -317,22 +317,14 @@ struct
   let name n = C.PIName n
   let declare n p = C.CSimplePic (n,p)
 
-  let is_simple p = match p.Hashcons.node with
-    | PITransform _ -> false
-    | PITex _ -> false
-    (* we don't want names for complicated pictures 
-     * for now, we do the memoization for these by hand
-     * (see compile function below) *)
-    | PIMake _ -> false
-    | PIClip _ -> false
-
+  let is_simple p = false
 
   and compile k ks pic = 
     match pic.Hashcons.node with
-    | PITransform (tr,p) ->
-        let tr, c1 = Other.transform_list tr in
+    | PITransformed (p,tr) ->
+        let tr, c1 = Other.transform tr in
         let pic, c2 = k p in
-        C.PITransform (tr,pic), c1 ++ c2
+        C.PITransformed (pic,tr), c1 ++ c2
     | PITex s -> C.PITex s, nop
     | PIMake c -> 
         let pn = new_name () in
@@ -353,7 +345,7 @@ and Picture : OUT with type t = picture and type out = C.picture =
 and Other : 
   sig
     val command : command -> C.command
-    val transform_list : transform list -> C.transform list * C.command
+    val transform : transform -> C.transform * C.command
   end = 
 struct
 
@@ -385,16 +377,6 @@ struct
   | TRRotateAround (p,f) ->
       let p, code = Point.compile p in
         C.TRRotateAround (p,f), code
-and transform_list l =
-  (* since the compilation has side effects (memoization), things have to be
-   * done in order
-   * that's why we first do a fold_left, and at the end reverse the two lists
-   * instead of a fold_right *)
-  let l1,l2 = List.fold_left
-                (fun (trl, cl) tr -> 
-                   let tr,c =  transform tr in
-                     tr::trl, c::cl ) ([],[]) l in
-    List.rev l1, C.CSeq (List.rev l2)
 
 and pen p = 
     match p.Hashcons.node with
@@ -405,7 +387,7 @@ and pen p =
         C.PenFromPath p, code
   | PenTransformed (p, tr) ->
       let p, c1 = pen p in
-      let tr, c2 = transform_list tr in
+      let tr, c2 = transform tr in
         C.PenTransformed (p,tr), c1 ++ c2
 
 

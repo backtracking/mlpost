@@ -33,10 +33,7 @@ let down = mkPTPair zero minus_one
 let left = mkPTPair minus_one zero
 let right = mkPTPair one zero
 
-let simple_transform str t = 
-  match t.Hashcons.node with 
-  | PTTransformed (p,tr) -> mkPTTransformed p (str::tr)
-  | _ -> mkPTTransformed t [str]
+let simple_transform t str = mkPTTransformed t str
 
 let xpart p = 
   match p.Hashcons.node with
@@ -96,12 +93,12 @@ let rotate_around p1 f p2 = add p1 (rotate f (sub p2 p1))
 let xscale f p = 
   match p.Hashcons.node with
   | PTPair (a,b) -> mkPTPair (mkNMult f a) b
-  | _ -> simple_transform (mkTRXscaled f) p
+  | _ -> simple_transform p (mkTRXscaled f)
 
 let yscale f p = 
   match p.Hashcons.node with
   | PTPair (a,b) -> mkPTPair a (mkNMult f b)
-  | _ -> simple_transform (mkTRYscaled f) p
+  | _ -> simple_transform p (mkTRYscaled f)
 
 let transform tr p =
   List.fold_left 
@@ -113,7 +110,7 @@ let transform tr p =
        | TRXscaled f -> xscale f acc
        | TRYscaled f -> yscale f acc
        | TRRotateAround (p,f) -> rotate_around p f acc
-       | _ -> simple_transform str acc
+       | _ -> simple_transform acc str
     ) p tr
     
 (* From simplePoint *)

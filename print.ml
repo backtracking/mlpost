@@ -47,17 +47,14 @@ and picture fmt p =
   match p.Hashcons.node with
   | PITex s -> fprintf fmt "tex(%s)" s
   | PIMake _ -> ()
-  | PITransform (tr,p) -> 
-      fprintf fmt "%a transformed %a" picture p transform_list tr
+  | PITransformed (p,tr) -> 
+      fprintf fmt "%a transformed %a" picture p transform tr
   | PIClip _ -> ()
 
 and transform fmt t = 
   match t.Hashcons.node with
     | TRShifted p -> fprintf fmt "shifted %a" point p
     | _ -> assert false
-
-and transform_list fmt l =
-  Misc.print_list Misc.space transform fmt l
 
 and knot fmt k =
   match k.Hashcons.node with

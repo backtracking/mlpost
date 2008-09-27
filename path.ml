@@ -60,6 +60,6 @@ let append ?(style=defaultjoint) p1 p2 = append p1 style p2
 
 let scale f p = transform [Transform.scaled f] p
 let rotate f p = transform [Transform.rotated f] p
-let shift pt path = transform [Transform.shifted pt] path
+let shift pt p = transform [Transform.shifted pt] p
 let yscale n p = transform [Transform.yscaled n] p
 let xscale n p = transform [Transform.xscaled n] p

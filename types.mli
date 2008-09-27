@@ -62,7 +62,7 @@ and point_node = private
   | PTSub of point * point
   | PTMult of num * point
   | PTRotated of float * point
-  | PTTransformed of point * transform list
+  | PTTransformed of point * transform
 
 and point = point_node hash_consed
 
@@ -100,7 +100,7 @@ and path_node = private
   | PAHalfCircle
   | PAQuarterCircle
   | PAUnitSquare
-  | PATransformed of path * transform list
+  | PATransformed of path * transform
   | PAKnot of knot
   | PAAppend of path * joint * path
   | PACutAfter of path * path
@@ -127,7 +127,7 @@ and transform = transform_node hash_consed
 and picture_node = private
   | PITex of string
   | PIMake of command
-  | PITransform of transform list * picture
+  | PITransformed of picture * transform
   | PIClip of picture * path
 
 and picture = picture_node hash_consed
@@ -145,7 +145,7 @@ and pen_node = private
   | PenCircle
   | PenSquare
   | PenFromPath of path
-  | PenTransformed of pen * transform list
+  | PenTransformed of pen * transform
 
 and pen = pen_node hash_consed
 
@@ -198,7 +198,7 @@ val mkPTMult : num -> point -> point
 
 val mkPTRotated : float -> point -> point
 
-val mkPTTransformed : point -> transform list -> point
+val mkPTTransformed : point -> transform -> point
 
 val mkPTPointOf : float -> path -> point
 val mkPTDirectionOf : float -> path -> point
@@ -239,7 +239,7 @@ val mkPAFullCircle : path
 val mkPAHalfCircle : path
 val mkPAQuarterCircle : path
 val mkPAUnitSquare : path
-val mkPATransformed : path -> transform list -> path
+val mkPATransformed : path -> transform -> path
 val mkPACutAfter : path -> path -> path
 val mkPACutBefore : path -> path -> path
 val mkPABuildCycle : path list -> path
@@ -264,7 +264,7 @@ val mkCurl : float -> direction
 
 val mkPITex : string -> picture
 val mkPIMake : command -> picture
-val mkPITransform : transform list -> picture -> picture
+val mkPITransformed : picture -> transform -> picture
 val mkPIClip : picture -> path -> picture
 
 (* command *)
@@ -290,7 +290,7 @@ val mkDPattern: on_off list -> dash
 val mkPenCircle: pen
 val mkPenSquare: pen
 val mkPenFromPath: path -> pen
-val mkPenTransformed: pen -> transform list -> pen
+val mkPenTransformed: pen -> transform -> pen
 
 (* on_off *)
 

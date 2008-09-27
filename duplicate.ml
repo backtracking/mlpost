@@ -74,7 +74,7 @@ and num n =
   if test_and_incr_num n then () else num' n.node
 
 and point' = function
-  | PTPair (f1,f2) -> (num f1; num f2)
+  | PTPair (f1,f2) -> num f1; num f2
   | PTPointOf (f,p) | PTDirectionOf (f,p) -> path p
   | PTAdd (p1,p2) 
   | PTSub (p1,p2) -> point p1; point p2
@@ -82,7 +82,7 @@ and point' = function
   | PTRotated (f,p) -> point p
   | PTPicCorner (pic, corner) -> picture pic
   | PTTransformed (p,tr) ->
-      point p ; transform_list tr
+      point p ; transform tr
 and point p = 
   if test_and_incr_point p then () else point' p.node
 
@@ -102,12 +102,9 @@ and knot k =
       direction d1; point p; direction d2
 
 and path' = function
-  | PACycle (d,j,p) ->
-      direction d; joint j; path p
-  | PAConcat (k,j,p) -> 
-      (knot k; joint j; path p)
-  | PATransformed (p,tr) ->
-      (path p; transform_list tr)
+  | PACycle (d,j,p) -> direction d; joint j; path p
+  | PAConcat (k,j,p) -> knot k; joint j; path p
+  | PATransformed (p,tr) -> path p; transform tr
   | PACutAfter (p1,p2) 
   | PACutBefore (p1,p2) -> path p1; path p2
   | PAAppend (p1,j,p2) -> path p1; joint j; path p2
@@ -121,17 +118,13 @@ and path p =
   if test_and_incr_path p then () else path' p.node
 
 and picture' = function
-    | PITransform (tr,p) ->
-        transform_list tr; picture p
+    | PITransformed (p,tr) -> transform tr; picture p
     | PITex s -> ()
     | PIMake c -> command c
-    | PIClip (pic,pth) -> 
-        picture pic; path pth
+    | PIClip (pic,pth) -> picture pic; path pth
 and picture p = 
   if test_and_incr_pic p then () else picture' p.node
 
-and transform_list l = 
-  List.iter transform l
 and transform t =
   match t.node with
   | TRRotated f -> ()
@@ -154,7 +147,7 @@ and pen p =
   match p.Hashcons.node with
   | PenCircle | PenSquare -> ()
   | PenFromPath p -> path p
-  | PenTransformed (p, tr) -> pen p; transform_list tr
+  | PenTransformed (p, tr) -> pen p; transform tr
 
 and dash d = 
   match d.Hashcons.node with

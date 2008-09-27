@@ -90,7 +90,7 @@ and print_point fmt = function
   | C.PTDirectionOf (f, p) ->
       fprintf fmt "(direction %a of (%a))" print_float f print_path p
   | C.PTTransformed (p,tr) -> fprintf fmt "((%a) %a)"
-      print_point p print_transform_list (List.rev tr)
+      print_point p print_transform tr
   | C.PTName pn -> pp_print_string fmt pn
 
 and print_transform fmt = function
@@ -112,8 +112,8 @@ and print_transform_list fmt l = Misc.print_list space print_transform fmt l
 
 and print_picture fmt = function
   | C.PITex s -> fprintf fmt "btex %s etex" s
-  | C.PITransform (tr, p) ->
-      fprintf fmt "((%a) %a)" print_picture p print_transform_list tr
+  | C.PITransformed (p, tr) ->
+      fprintf fmt "((%a) %a)" print_picture p print_transform tr
   | C.PIName n -> pp_print_string fmt n
 
 and print_path fmt = function
@@ -122,7 +122,7 @@ and print_path fmt = function
   | C.PAQuarterCircle -> fprintf fmt "quartercircle"
   | C.PAUnitSquare -> fprintf fmt "unitsquare"
   | C.PATransformed (p,tr) -> fprintf fmt "((%a) %a)"
-      print_path p print_transform_list tr
+      print_path p print_transform tr
   | C.PAAppend (p1,j,p2) -> 
       fprintf fmt "%a %a@ %a" print_path p1 print_joint j print_path p2
   | C.PACycle (d,j,p) ->
@@ -179,7 +179,7 @@ and print_pen fmt = function
   | C.PenSquare -> fprintf fmt "pensquare"
   | C.PenFromPath p -> fprintf fmt "makepen (%a)" print_path p
   | C.PenTransformed (p,tr) -> 
-      fprintf fmt "%a %a" print_pen p print_transform_list tr
+      fprintf fmt "%a %a" print_pen p print_transform tr
 
 and print_command fmt  = function
   | C.CDraw (path, color, pen, dashed) ->

@@ -20,12 +20,10 @@ open Transform
 type t = Types.pen
 
 let transform tr p = 
-  match tr, p.Hashcons.node with
-    | [], _ -> p
-    | _, PenTransformed (t,tr') -> mkPenTransformed t (tr'@tr)
-    | _, _ -> mkPenTransformed p tr
+  List.fold_left mkPenTransformed p tr
 
-let default ?(tr=id) () = mkPenTransformed mkPenCircle (scaled (mkF 0.5)::tr)
+let default ?(tr=id) () = 
+  transform tr (mkPenTransformed mkPenCircle (scaled (mkF 0.5)))
 let circle ?(tr=id) () = transform tr mkPenCircle
 let square ?(tr=id) () = transform tr mkPenSquare
 let from_path p = mkPenFromPath p

@@ -109,7 +109,7 @@ and point' = function
         C.PTPicCorner (pic, corner) , code
   | PTTransformed (p,tr) ->
       let p, c1 = point p in
-      let tr, c2 = transform_list tr in
+      let tr, c2 = transform tr in
         C.PTTransformed (p,tr),  c1 ++ c2
 and point p =
   match p.node with
@@ -168,11 +168,11 @@ and path' = function
       C.PAConcat (pa,j,p), c1 ++ c2 ++ c3
   | PATransformed (p,tr) ->
       let p, c1 = path p in
-      let tr, c2 = transform_list tr in
+      let tr, c2 = transform tr in
       (* group transformations, for slightly smaller metapost code *)
       (* this only happens in the Metapost AST, to be able to use
        * path components that already have a name *)
-      C.pa_transformed p tr, c1 ++ c2
+      C.PATransformed(p,tr), c1 ++ c2
   | PACutAfter (p1,p2) ->
       let p1, c1 = path p1 in
       let p2, c2 = path p2 in
@@ -225,10 +225,10 @@ and path_save p =
     C.PAName x, code ++ C.CDeclPath (x,p')
 
 and picture' = function
-  | PITransform (tr,p) ->
-      let tr, c1 = transform_list tr in
+  | PITransformed (p,tr) ->
+      let tr, c1 = transform tr in
       let pic, c2 = picture p in
-      C.PITransform (tr,pic), c1 ++ c2
+      C.PITransformed (pic,tr), c1 ++ c2
   | PITex s -> C.PITex s, nop
   | PIMake c -> 
       let pn = Name.picture () in
@@ -281,16 +281,6 @@ and transform t =
   | TRRotateAround (p,f) ->
       let p, code = point p in
         C.TRRotateAround (p,f), code
-and transform_list l =
-  (* since the compilation has side effects (memoization), things have to be
-   * done in order
-   * that's why we first do a fold_left, and at the end reverse the two lists
-   * instead of a fold_right *)
-  let l1,l2 = List.fold_left
-                (fun (trl, cl) tr -> 
-                   let tr,c =  transform tr in
-                     tr::trl, c::cl ) ([],[]) l in
-    List.rev l1, C.CSeq (List.rev l2)
 
 and pen p = 
     match p.Hashcons.node with
@@ -301,7 +291,7 @@ and pen p =
         C.PenFromPath p, code
   | PenTransformed (p, tr) ->
       let p, c1 = pen p in
-      let tr, c2 = transform_list tr in
+      let tr, c2 = transform tr in
         C.PenTransformed (p,tr), c1 ++ c2
 
 and dash d = 

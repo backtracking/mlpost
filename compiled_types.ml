@@ -37,7 +37,7 @@ and point =
   | PTSub of point * point
   | PTMult of num * point
   | PTRotated of float * point
-  | PTTransformed of point * transform list
+  | PTTransformed of point * transform
   | PTName of name
 
 and direction = 
@@ -61,7 +61,7 @@ and path =
   | PAHalfCircle
   | PAQuarterCircle
   | PAUnitSquare
-  | PATransformed of path * transform list
+  | PATransformed of path * transform
   | PAKnot of knot
   | PAAppend of path * joint * path
   | PACutAfter of path * path
@@ -85,7 +85,7 @@ and transform =
 
 and picture =
   | PITex of string
-  | PITransform of transform list * picture
+  | PITransformed of picture * transform
   | PIName of name
 
 and dash =
@@ -99,7 +99,7 @@ and pen =
   | PenCircle
   | PenSquare
   | PenFromPath of path
-  | PenTransformed of pen * transform list
+  | PenTransformed of pen * transform 
 
 and command = 
   | CDraw of path * color option * pen option * dash option
@@ -123,9 +123,3 @@ and corner = Types.corner
 and piccorner = Types.piccorner
 and on_off =
   | On of num | Off of num
-
-let pa_transformed p l =
-  match p with
-    | PATransformed (p',l') ->
-        PATransformed (p', l' @ l)
-    | _ -> PATransformed (p,l)
