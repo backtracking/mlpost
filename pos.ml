@@ -58,7 +58,8 @@ sig
     ?padding:Num.t -> ?pos:Command.hposition -> P.t seq -> t
 
   val tabular : 
-    ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position -> P.t seq seq -> t seq
+    ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position -> 
+    P.t seq seq -> t seq
 
 end
 
@@ -120,7 +121,8 @@ struct
     let mycenter = Point.pt (wmax_2, y /./ 2.) in
     { v = l; width = wmax; height = Num.neg y; center = mycenter }
 
-  let tabular ?(dx=Num.zero) ?(dy=Num.zero) ?(pos=`Center) pll =
+  let tabular ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?(pos=`Center) pll =
+    let dx = hpadding and dy = vpadding in
     let hmaxl = List.map (Num.fold_max P.height Num.zero) pll in
     let rec calc_wmax pll =
       match pll with
@@ -190,13 +192,15 @@ struct
     { v = Array.of_list (L.v pl); center = L.ctr pl;
       width = L.width pl; height = L.height pl }
 
-  let tabular ?(dx=Num.zero) ?(dy=Num.zero) ?(pos=`Center) paa =
+  let tabular ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?(pos=`Center) paa =
     let pll = 
-      L.tabular ~dx ~dy ~pos (List.map Array.to_list (Array.to_list paa)) in
-      Array.of_list 
-	(List.map 
-	   (fun pl -> { v = Array.of_list (L.v pl); center = L.ctr pl;
-			width = L.width pl; height = L.height pl }) pll)
+      L.tabular ~hpadding ~vpadding ~pos 
+	(List.map Array.to_list (Array.to_list paa)) 
+    in
+    Array.of_list 
+      (List.map 
+	 (fun pl -> { v = Array.of_list (L.v pl); center = L.ctr pl;
+		      width = L.width pl; height = L.height pl }) pll)
 end
 
 type 'a tree = N of 'a * 'a tree list

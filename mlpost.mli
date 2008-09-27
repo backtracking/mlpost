@@ -586,6 +586,9 @@ and Box : sig
 	raises [Invalid_argument] otherwise. The behavior is not specified
 	if [b] contains several sub-boxes with name [n]. *)
 
+  val elts : t -> t array
+    (** [elts b] returns the sub-boxes of [b] *)
+
   (** {2 Box properties} *)
   val get_fill : Box.t -> Color.t option
   val set_fill : Color.t -> Box.t -> Box.t
@@ -608,20 +611,21 @@ and Box : sig
       into boxes, but does not try to create boxes of equal size *)
 ***)
 
-(***
   val tabular : 
-    ?dx:Num.t -> ?dy:Num.t -> t array array -> t
+    ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
+    t array array -> t
     (** aligns the given boxes both vertically and horizontally and returns
 	a box containing all these boxes (with rows as first sub-components,
 	and then individual boxes as sub-components of each row). *)
 
-  val tabularl : ?dx:Num.t -> ?dy:Num.t -> t list list -> t
+  val tabularl : ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
+    t list list -> t
     (** similar to [tabular], but using lists instead of arrays *)
 
   val tabulari : 
-    ?dx:Num.t -> ?dy:Num.t -> int -> int -> (int -> int -> t) -> t 
+    ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
+    int -> int -> (int -> int -> t) -> t 
     (** similar to [tabular], but using a matrix defined with a function *)
-***)
 
   val cpath :
     ?style:Path.joint ->
@@ -1066,7 +1070,8 @@ module  Pos : sig
       representations. *)
 
     val tabular :
-      ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position -> P.t seq seq -> t seq
+      ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position -> 
+      P.t seq seq -> t seq
     (** Align the input objects in a table and return the table of their
       representations. *)
 

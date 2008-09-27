@@ -192,6 +192,28 @@ let align_boxes
 let hbox = align_boxes BoxAlign.horizontal
 let vbox = align_boxes BoxAlign.vertical
 
+let group 
+  ?name ?(stroke=None) ?fill ?(style=Rect) ?(dx=Num.zero) ?(dy=Num.zero) bl =
+  let xmin,xmax,ymin,ymax = 
+    List.fold_left 
+      (fun (xmin,xmax,ymin,ymax) b ->
+	 let sw = south_west b in
+	 let ne = north_east b in
+	 (Num.minn xmin (xpart sw),
+	  Num.maxn xmax (xpart ne),
+	  Num.minn ymin (ypart sw),
+	  Num.maxn ymax (ypart ne)))
+      (Num.zero, Num.zero, Num.zero, Num.zero) 
+      bl
+  in
+  let w = xmax -/ xmin in
+  let h = ymax -/ ymin in
+  let c = Point.pt (xmin +/ w /./ 2., ymin +/ h /./ 2.) in
+  let w,h,s = make_contour style ~dx ~dy w h c in
+  { desc = Grp (Array.of_list bl, merge_maps bl);
+    name = name; stroke = stroke; fill = fill;
+    width = w; height = h; ctr = c; contour = s }
+
 type box_creator = 
   ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 
   ?stroke:Color.t option -> ?fill:Color.t -> Picture.t -> t
@@ -208,6 +230,10 @@ let tex ?style ?dx ?dy ?name ?stroke ?fill s =
 let nth i b = match b.desc with
   | Grp (a, _ ) -> a.(i)
   | Pic _ -> invalid_arg "Box.nth"
+
+let elts b = match b.desc with
+  | Pic _ -> [||]
+  | Grp (a, _) -> a
 
 let get n b = 
   if b.name = Some n then b else match b.desc with
@@ -247,8 +273,8 @@ let halign_to_box ?(dx=margin) ?(dy=margin) ?(spacing=Num.zero) ?pos pl =
 
 ****)
 
-(***
-let tabularl ?(dx=Num.zero) ?(dy=Num.zero) pll =
+let tabularl ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?pos pll =
+  let dx = hpadding and dy = vpadding in
   let hmaxl = List.map (Num.fold_max height Num.zero) pll in
   let rec calc_wmax pll = match pll with 
     | [] :: _ -> 
@@ -262,38 +288,34 @@ let tabularl ?(dx=Num.zero) ?(dy=Num.zero) pll =
 	(Num.fold_max width Num.zero cols) :: (calc_wmax qll)
   in
   let wmaxl = calc_wmax pll in
-  let rec make_rows wmaxl x y h_2 pl =
-    match pl, wmaxl with
-      | [], [] -> []
-      | [], _ | _, [] -> raise (Invalid_argument "Lists have different sizes")
-      | p::ql, wrow :: wl ->
-	  let c = Point.pt (x +/ dx +/ wrow /./ 2., y -/ h_2) in
-	  let dx' = dx +/ (wrow -/ width p) /./ 2. in
-	  let dy = h_2 -/ (height p) /./ 2. in
-	  let b = shift c p in
-	  b :: (make_rows wl (x +/ wrow +/ dx +/ dx) y h_2 ql)
+  let rec make_rows wmaxl x y h_2 pl = match pl, wmaxl with
+    | [], [] -> []
+    | [], _ | _, [] -> raise (Invalid_argument "Lists have different sizes")
+    | p::ql, wrow :: wl ->
+	let c = Point.pt (x +/ dx +/ wrow /./ 2., y -/ h_2) in
+	let dx' = dx +/ (wrow -/ width p) /./ 2. in
+	let dy = h_2 -/ (height p) /./ 2. in
+	let b = shift c p in
+	b :: (make_rows wl (x +/ wrow +/ dx +/ dx) y h_2 ql)
   in
-  let rec make_array hmaxl y pll = 
-    match pll, hmaxl with
-      | [], [] -> []
-      | [], _ | _, [] -> raise (Invalid_argument "Lists have different sizes")
-      | row :: qll, hrow :: hl -> 
-	  let brow = 
-	    make_rows wmaxl Num.zero y (hrow /./ 2. +/ dy) row 
-	  in
-	  brow :: (make_array hl (y -/ hrow -/ dy -/ dy) qll)
+  let rec make_array hmaxl y pll = match pll, hmaxl with
+    | [], [] -> []
+    | [], _ | _, [] -> raise (Invalid_argument "Lists have different sizes")
+    | row :: qll, hrow :: hl -> 
+	let brow = 
+	  group (make_rows wmaxl Num.zero y (hrow /./ 2. +/ dy) row)
+	in
+	brow :: (make_array hl (y -/ hrow -/ dy -/ dy) qll)
   in
-  make_array hmaxl Num.zero pll
+  group (make_array hmaxl Num.zero pll)
 
-let tabular ?(dx=Num.zero) ?(dy=Num.zero) m =
+let tabular ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?pos m =
   let pll = Array.to_list (Array.map Array.to_list m) in
-  let bll = tabularl ~dx ~dy pll in
-  Array.of_list (List.map Array.of_list bll)
+  tabularl ~hpadding ~vpadding ?pos pll
 
-let tabulari ?(dx=Num.zero) ?(dy=Num.zero) w h f =
+let tabulari ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?pos w h f =
   let m = Array.init h (fun j -> Array.init w (fun i -> f i j)) in
-  tabular ~dx ~dy m
-***)
+  tabular ~hpadding ~vpadding ?pos m
 
 open Path
 
