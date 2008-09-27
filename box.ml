@@ -214,6 +214,9 @@ let get n b =
     | Pic _ -> invalid_arg "Box.get"
     | Grp (_, m) -> try Smap.find n m with Not_found -> invalid_arg "Box.get"
 
+let get_fill b = b.fill
+let set_fill c b = {b with fill = Some c} 
+
 (****
 
 (* These functions should rather be called 

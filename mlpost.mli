@@ -586,6 +586,10 @@ and Box : sig
 	raises [Invalid_argument] otherwise. The behavior is not specified
 	if [b] contains several sub-boxes with name [n]. *)
 
+  (** {2 Box properties} *)
+  val get_fill : Box.t -> Color.t option
+  val set_fill : Color.t -> Box.t -> Box.t
+
 (****
   val valign : ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position
                 -> Picture.t list -> t list
@@ -1143,7 +1147,6 @@ module Helpers : sig
 
 end
 
-(****
 
 module Tree : sig
 
@@ -1153,36 +1156,20 @@ module Tree : sig
     (** The abstract type of trees *)
 
   (** {2 Creation} *)
-  type node_style = ?dx:Num.t -> ?dy:Num.t -> Point.t -> Picture.t -> Box.t
-    
-  val leaf : ?style:node_style -> ?fill:Color.t -> string -> t
+  val leaf : Box.t -> t
     (** [leaf label] creates a leaf with label [label]. 
 	@param style a [node_style] describing how the leaf should be drawn
 	@param fill if present, this color is used to fill the leaf *)
 
-  val node : ?style:node_style -> ?fill:Color.t -> string -> t list -> t
+  val node : Box.t -> t list -> t
     (** [node label children] creates a node with label [label] and a list
 	of children [children]. 
 	Optional arguments are the same as in [leaf]. *)
 
-  val bin  : ?style:node_style -> ?fill:Color.t -> string -> t -> t -> t
+  val bin  : Box.t -> t -> t -> t
     (** [bin label l r] creates a binary node with label [label] and 
 	children [l] and [r].
 	Optional arguments are the same as in [leaf]. *)
-
-  (** Variants to create trees with pictures at nodes *)
-  module Pic : sig
-    val leaf : ?style:node_style -> ?fill:Color.t -> Picture.t -> t
-    val node : ?style:node_style -> ?fill:Color.t -> Picture.t -> t list -> t
-    val bin  : ?style:node_style -> ?fill:Color.t -> Picture.t -> t -> t -> t
-  end
-
-  (** Variants to create trees with boxes *)
-  module Bx : sig
-    val leaf : ?fill:Color.t -> Box.t -> t
-    val node : ?fill:Color.t -> Box.t -> t list -> t
-    val bin  : ?fill:Color.t -> Box.t -> t -> t -> t
-  end
 
   (** {2 Drawing} *)
 
@@ -1204,7 +1191,7 @@ module Tree : sig
   val draw : 
     ?arrow_style:arrow_style -> 
     ?edge_style:edge_style ->
-    ?boxed:bool -> ?fill:Color.t -> ?stroke:Color.t -> ?pen:Pen.t ->
+    ?stroke:Color.t -> ?pen:Pen.t ->
     ?ls:Num.t -> ?cs:Num.t -> 
     t -> Command.t
     (** Default arrow_style is [Directed].
@@ -1217,8 +1204,11 @@ module Tree : sig
         The default value is 0.2.
     *)
 
+  val set_fill : Color.t -> t -> t
+
 end
 
+(****
 module Diag : sig
 
   (** Diagrams. *)

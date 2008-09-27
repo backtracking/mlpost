@@ -54,46 +54,85 @@ let d2 =
   [draw ~debug:false b;
    box_arrow (nth 1 (nth 0 b)) (nth 0 (nth 1 b))]
 
-(****
-
-open Tree
-
-let () = Random.init 1234
-
-let rec random_tree = function
-  | 1 -> 
-      leaf "1"
-  | 2 -> 
-(*       node ~style:Rect ~fill:(Color.cmyk 1. 0.5 0.3 0.2) "2" [leaf "1"] *)
-      node ~style:Box.rect ~fill:(Color.rgb 0.5 0.3 0.2) "2" [leaf "1"]
-(*
-  | n when Random.bool () -> 
-      node (string_of_int n) [random_tree (n-1)]
-*)
-  | n -> 
-      let k = 1 + Random.int (n - 2) in
-      node (string_of_int n) [random_tree k; random_tree (n - 1 - k)]
-
-let d2c, d2s, d2sq, d2hsq = 
-(*   let ls = bp (-1.0) in *)
-  let tree = random_tree 17 in
-  [draw ~arrow_style:Directed ~edge_style:Curve
-       ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree],
-  [draw ~arrow_style:Directed ~edge_style:Straight
-       ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree],
-  [draw  ~arrow_style:Directed ~edge_style:Square
-       ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree],
-  [draw  ~arrow_style:Directed ~edge_style:HalfSquare
-       ~fill:Color.yellow ~stroke:Color.blue ~pen:(Pen.circle ()) tree]
-
 let proval =
   let f = 7. in
   let pen = Pen.square ~tr:[T.yscaled (bp 0.5); T.rotated 40.] () in
   let check = jointpath [-1.2,1.2; 0., -2. ; 2., 2. ; 5., 5.] [jLine ; jCurve; jCurve] in
     [ fill ~color:(Color.gray 0.2) (Path.scale (Num.bp f) fullcircle) ;
-      label ~pos:Pleft (Picture.tex "Pr") (Point.p (f /. (-4.),0.)) ;
-      label ~pos:Pright (Picture.tex "al") (Point.p (f /. 4.,0.)) ;
+      label ~pos:`Pleft (Picture.tex "Pr") (Point.p (f /. (-4.),0.)) ;
+      label ~pos:`Pright (Picture.tex "al") (Point.p (f /. 4.,0.)) ;
       Command.draw ~color:Color.green ~pen check;]
+
+open Tree
+
+let yannick style =
+  let tt s = Box.tex ~style ~fill:Color.orange ("\\texttt{" ^ s ^ "}") in
+  let node s = node (tt s) in
+  let leaf s = leaf (tt s) in
+
+  let tree =
+    node "ComposerPage"
+      [ leaf "MemSet";
+    node "ComposerMessages"
+      [ node "ComposerMsg"
+          [
+        leaf "StrCpy";
+        leaf "DeclarerPanneRobustesse"
+          ]
+      ]
+      ]
+  in
+  [draw ~ls:(bp 20.) ~cs:(bp 10.)  
+      ~edge_style:Square tree]
+
+let () = Random.init 1234
+
+let rec random_tree = 
+  let tex = tex ~fill:Color.yellow in
+  function
+  | 1 -> leaf (tex "1")
+  | 2 -> 
+      node (Box.tex ~style:Box.Rect ~fill:(Color.rgb 0.5 0.3 0.2) "2") 
+        [leaf (tex "1")]
+  | n -> 
+      let k = 1 + Random.int (n - 2) in
+      node (tex (string_of_int n)) [random_tree k; random_tree (n - 1 - k)]
+
+let d2c, d2s, d2sq, d2hsq = 
+(*   let ls = bp (-1.0) in *)
+  let tree = random_tree 17 in
+  [draw ~arrow_style:Directed ~edge_style:Curve
+        ~stroke:Color.blue ~pen:(Pen.circle ()) tree],
+  [draw ~arrow_style:Directed ~edge_style:Straight
+       ~stroke:Color.blue ~pen:(Pen.circle ()) tree],
+  [draw  ~arrow_style:Directed ~edge_style:Square
+       ~stroke:Color.blue ~pen:(Pen.circle ()) tree],
+  [draw  ~arrow_style:Directed ~edge_style:HalfSquare
+       ~stroke:Color.blue ~pen:(Pen.circle ()) (Tree.set_fill Color.red tree)]
+
+let d5 = 
+  let t1 = random_tree 5 in
+  let pic1 = Picture.make (Tree.draw t1) in
+  let b1 = pic ~name:"1" pic1 in
+  let t2 = random_tree 6 in
+  let pic2 = Picture.make (Tree.draw t2) in
+  let b2 = pic ~name:"2" pic2 in
+  let bl = Box.hbox ~padding:(Num.cm 2.) [ b1; b2] in
+  [ Box.draw bl; box_arrow (get "1" bl) (get "2" bl) ]
+
+
+let tree1 () = pic (Picture.make (Tree.draw (random_tree (1 + Random.int 5))))
+
+let rec random_tree2 = function
+  | 1 -> leaf (tree1 ())
+  | 2 -> node (tree1 ()) [leaf (tree1 ())]
+  | n -> 
+      let k = 1 + Random.int (n - 2) in
+      node (tree1 ()) [random_tree2 k; random_tree2 (n - 1 - k)]
+
+let d6 = [Tree.draw ~cs:(mm 0.2) (random_tree2 10)]
+
+(****
 
 let cheno011 =
   let p = path ~cycle:jCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)] in
@@ -123,17 +162,6 @@ let d4 =
 	draw_pic (Picture.transform [T.rotated (10. *. float i)] pic))
   ]
 
-let d5 = 
-  let t1 = random_tree 5 in
-  let pic1 = Picture.make (Tree.draw t1) in
-  let b1 = Box.rect (cmp (0.,0.)) pic1 in
-  let t2 = random_tree 6 in
-  let pic2 = Picture.make (Tree.draw t2) in
-  let b2 = Box.rect (cmp (4.,0.)) pic2 in
-  [ Box.draw b1;
-    Box.draw b2;
-    box_arrow b1 b2 ]
-
 let d7 =
   let pic = 
     Picture.transform [T.scaled (bp 4.)] (Picture.tex "bound this!") in
@@ -149,22 +177,6 @@ let d7 =
      Command.dotlabel ~pos:Pright (Picture.tex "lrcorner") (Picture.lrcorner pic);
     ]
     
-open Tree.Pic
-
-let tree1 () = Picture.make (Tree.draw (random_tree (1 + Random.int 5)))
-
-let rec random_tree2 = function
-  | 1 -> 
-      leaf (tree1 ())
-  | 2 -> 
-      node (tree1 ()) [leaf (tree1 ())]
-  | n -> 
-      let k = 1 + Random.int (n - 2) in
-      node (tree1 ()) [random_tree2 k; random_tree2 (n - 1 - k)]
-
-let d6 =
-  [Tree.draw ~cs:(mm 0.2) (random_tree2 10)]
-
 let half pic = Picture.transform [Transform.scaled (bp 0.5)] pic
 
 let rec right_split n pic = 
@@ -550,17 +562,16 @@ let newarray =
 
 ****)
 
-let figs = [
-  d2;
+let figs = [ d6; d5; yannick Box.Rect; yannick Box.Patatoid; d1; d2; proval;
+             d2sq; d2hsq; d2s; d2c;
 (*
 d12;
-  newarray; patates; yannick Box.rect; yannick Box.patatoid;
+  newarray; patates;
              placetest; boxjoin; box_align; stack; row; stackl; rowl;
 	     array; mybresenham; 
             [Command.draw_pic shapes1]; [Command.draw_pic shapes2];
             d16; d1; d15; florence; d14; d13;
-             d11; d7; d6; d5; d4; cheno011; proval; d3;
-                          d2sq; d2hsq; d2s; d2c;
+             d11; d7; d4; cheno011; d3;
 *)
 ] 
 

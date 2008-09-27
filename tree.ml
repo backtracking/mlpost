@@ -21,41 +21,11 @@ open Num
 open Num.Infix
 open Pos
 
-type node_style = ?dx:Num.t -> ?dy:Num.t -> Point.t -> Picture.t -> Box.t
+type t = Box.t Pos.tree 
 
-module Node = struct
-  type t = { box : Box.t; fill : Color.t option }
-  type repr = t
-  let v n = n
-  let width n = Box.width n.box
-  let height n = Box.height n.box
-  let ctr n = Box.ctr n.box
-  let shift p n = { n with box = Box.shift p n.box }
-  let center pt x = shift (Point.sub pt (ctr x)) (v x)
-end
-open Node
-
-type t = Node.t Pos.tree 
-
-let mk_node fill style pic = 
-  { fill = fill; box = style Point.origin pic }
-
-let leaf ?(style=Box.circle) ?fill s = N (mk_node fill style (Picture.tex s), [])
-let node ?(style=Box.circle) ?fill s l = N (mk_node fill style (Picture.tex s), l)
-let bin  ?(style=Box.circle) ?fill s x y = 
-  N (mk_node fill style (Picture.tex s), [x; y])
-
-module Pic = struct
-  let leaf ?(style=Box.circle) ?fill s = N (mk_node fill style s, [])
-  let node ?(style=Box.circle) ?fill s l = N (mk_node fill style s, l)
-  let bin  ?(style=Box.circle) ?fill s x y = N (mk_node fill style s, [x; y])
-end
-
-module Bx = struct
-  let leaf ?fill b = N ({fill=fill; box=b}, [])
-  let node ?fill b l = N ({fill=fill; box=b}, l)
-  let bin  ?fill b x y = N ({fill=fill; box=b}, [x; y])
-end
+let leaf s = N (s,[])
+let node s l = N (s, l)
+let bin s x y = N (s, [x; y])
 
 type arrow_style = Directed | Undirected
 
@@ -102,20 +72,21 @@ let arc astyle estyle ?stroke ?pen b1 b2 =
 	  in
 	    linedraw parrow
 
-module T = Pos.Tree(Node)
+module T = Pos.Tree(Box)
 
 let draw 
     ?(arrow_style=Directed) ?(edge_style=Straight)
-    ?(boxed=true) ?fill ?stroke ?pen
-    ?(ls=Num.bp 12.) ?(cs=Num.bp 5.) t =
+    ?stroke ?pen ?(ls=Num.bp 12.) ?(cs=Num.bp 5.) t =
   let t = T.place ~dx:cs ~dy:ls t in
   let rec draw (N (n, l)) = 
-    let fill = match n.fill with None -> fill | Some _ -> n.fill in
     seq 
-      (Box.draw ?fill ~boxed n.box ::
+      (Box.draw n ::
        iterl draw l ::
        List.map 
-         (function (N (n', _)) -> 
-	   arc ?stroke ?pen arrow_style edge_style n.box n'.box) l)
+         (fun (N (n', _)) -> arc ?stroke ?pen arrow_style edge_style n n') l)
   in
   draw (T.v t)
+
+let rec set_fill c (N (n,l)) =
+  N (Box.set_fill c n, List.map (set_fill c) l)
+
