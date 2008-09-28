@@ -1,4 +1,3 @@
-open Metapost
 open Command
 open Picture
 open Path
