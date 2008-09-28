@@ -577,7 +577,12 @@ and Box : sig
     t array array -> t
     (** aligns the given boxes both vertically and horizontally and returns
 	a box containing all these boxes (with rows as first sub-components,
-	and then individual boxes as sub-components of each row). *)
+	and then individual boxes as sub-components of each row). 
+	Columns (resp. rows) are separated by [hpadding] (resp. [vpadding]);
+	both default to 0.
+	Alignment within columns and rows in controlled using [pos]. 
+	The arrays for rows must have the same lengths; otherwise
+	[Invalid_argument] is raised. *)
 
   val tabularl : ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
     t list list -> t

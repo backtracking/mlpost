@@ -277,7 +277,11 @@ let halign_to_box ?(dx=margin) ?(dy=margin) ?(spacing=Num.zero) ?pos pl =
 
 ****)
 
-let tabularl ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?pos pll =
+let tabularl ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?(pos=`Center) pll =
+  if pll = [] then invalid_arg "Box.tabular: empty list";
+  let len = List.length (List.hd pll) in
+  if List.exists (fun l -> List.length l <> len) pll then 
+    invalid_arg "Box.tabular: lists have different lengths";
   let dx = hpadding and dy = vpadding in
   let hmaxl = List.map (Num.fold_max height Num.zero) pll in
   let rec calc_wmax pll = match pll with 
@@ -292,24 +296,36 @@ let tabularl ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?pos pll =
 	(Num.fold_max width Num.zero cols) :: (calc_wmax qll)
   in
   let wmaxl = calc_wmax pll in
-  let rec make_rows wmaxl x y h_2 pl = match pl, wmaxl with
+  (* place the box [b] inside the rectangular region defined by upper left
+     corner [x,y], width [w] and height [h], according to alignment [pos] *)
+  let place_box x y w h b =
+    let xb = match pos with
+      | `Center | `Top | `Bot -> x +/ w /./ 2.
+      | `Left | `Upleft | `Lowleft -> x +/ width b /./ 2.
+      | `Right | `Upright | `Lowright -> x +/ w -/ width b /./ 2.
+    in
+    let yb = match pos with
+      | `Center | `Left | `Right -> y -/ h /./ 2.
+      | `Top | `Upright | `Upleft -> y -/ height b /./ 2.
+      | `Bot | `Lowleft | `Lowright -> y -/ h +/ height b /./ 2.
+    in
+    center (Point.pt (xb, yb)) b
+  in
+  let rec make_row x y hrow wmaxl pl = match pl, wmaxl with
     | [], [] -> []
-    | [], _ | _, [] -> raise (Invalid_argument "Lists have different sizes")
-    | p::ql, wrow :: wl ->
-	let c = Point.pt (x +/ dx +/ wrow /./ 2., y -/ h_2) in
-	let dx' = dx +/ (wrow -/ width p) /./ 2. in
-	let dy = h_2 -/ (height p) /./ 2. in
-	let b = shift c p in
-	b :: (make_rows wl (x +/ wrow +/ dx +/ dx) y h_2 ql)
+    | [], _ | _, [] -> assert false
+    | p :: ql, wrow :: wl ->
+	let b = place_box x y wrow hrow p in
+	b :: make_row (x +/ wrow +/ dx) y hrow wl ql
   in
   let rec make_array hmaxl y pll = match pll, hmaxl with
     | [], [] -> []
-    | [], _ | _, [] -> raise (Invalid_argument "Lists have different sizes")
+    | [], _ | _, [] -> assert false
     | row :: qll, hrow :: hl -> 
 	let brow = 
-	  group (make_rows wmaxl Num.zero y (hrow /./ 2. +/ dy) row)
+	  group (make_row Num.zero y hrow wmaxl row)
 	in
-	brow :: (make_array hl (y -/ hrow -/ dy -/ dy) qll)
+	brow :: make_array hl (y -/ hrow -/ dy) qll
   in
   group (make_array hmaxl Num.zero pll)
 
