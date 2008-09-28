@@ -25,8 +25,8 @@ end)
 let nodes = H.create 97
 
 let draw la =
-  let line l = Ab.horizontal ~dx (List.map (function (N (b,_)) -> b) l) in
-  let la' = Abl.v (Abl.vertical ~dy (List.map line la)) in
+  let line l = Ab.horizontal ~padding:dx (List.map (function (N (b,_)) -> b) l) in
+  let la' = Abl.v (Abl.vertical ~padding:dy (List.map line la)) in
   List.iter2
     (List.iter2 (fun (N (b, _)) b' -> H.add nodes b b'))
     la la';
@@ -42,7 +42,7 @@ let draw la =
 let node s l = 
   let s = if s = "" then "$\\varepsilon$" else s in
   let s = "\\rule[-0.1em]{0in}{0.8em}" ^ s in 
-  N (Box.circle Point.origin (Picture.tex s), l)
+  N (Box.circle (Picture.tex s), l)
 
 (* folds over the bits of an integer (as powers of two) *)
 let fold_bit f =

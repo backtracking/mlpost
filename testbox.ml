@@ -25,6 +25,14 @@ module T = Transform
 
 open Box
 
+let f0 =
+  let b = 
+    box ~style:Patatoid 
+      (box ~style:Circle
+	 (box ~style:Ellipse (box (tex "aBc")))) 
+  in
+  [draw ~debug:false b]
+
 let f1 =
   let b = 
     hbox ~padding:(bp 20.)
@@ -45,8 +53,14 @@ let f2 =
   [draw ~debug:false f;
    arrow (node 0) (node 1); arrow (node 1) (node 2)]
 
+let f3 =
+  let b = tabularl [[tex "a"; tex "BB"; tex "C"]; 
+		    [tex "ddd"; tex "E"; tex "FF"]] in
+  [draw ~debug:true b]
+
 let figs = [
-  f1; f2;
+  f3;
+  f0; f1; f2;
 ] 
 
 let figs =

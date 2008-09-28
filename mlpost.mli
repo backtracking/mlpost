@@ -485,28 +485,41 @@ and Box : sig
 
   type style = Rect | Circle | Ellipse | RoundRect | Patatoid
 
-  type box_creator = 
+  type 'a box_creator = 
     ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 
-    ?stroke:Color.t option -> ?fill:Color.t -> Picture.t -> t
+    ?stroke:Color.t option -> ?fill:Color.t -> 'a -> t
 
-  val pic : ?style:style -> box_creator
+  val pic : ?style:style -> Picture.t box_creator
     (** [pic p] creates a box containing the picture [p] *)
 
-  val tex : ?style:style -> ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 
-    ?stroke:Color.t option -> ?fill:Color.t -> string -> t
+  val tex : ?style:style -> string box_creator
+    (** [tex s] creates a box containing the LaTeX string [s] *)
 
-  val circle : box_creator
+  val box : ?style:style -> t box_creator
+    (** [box b] creates a box containing the box [b] *)
+
+  val circle : Picture.t box_creator
     (** [circle p pic] creates a circle box of center [p] and of contents
     [pic]. Optional padding is given by arguments [dx] and [dy]. *)
 
-  val ellipse : box_creator
+  val ellipse : Picture.t box_creator
     (** [ellipse p pic] creates a elliptic box of center [p] and of contents
 	[pic]. Optional padding is given by arguments [dx] and [dy]. *)
 
-  val rect :  box_creator
+  val rect :  Picture.t box_creator
     (** [rect p pic] creates a rectangular box of center [p] and of contents
 	[pic]. Optional padding is given by arguments [dx] and [dy] ; 
 	default is 2bp. *)
+
+  val round_rect : Picture.t box_creator
+    (** [round_rect p pic] creates a rectangular box of center [p] and of 
+	contents [pic], with rounded corners. Optional padding is given by [dx] 
+	and [dy] ; default is 2bp *)
+
+  val patatoid : Picture.t box_creator
+    (** [patatoid p pic] creates an undefined, vaguely rectangular box of center
+      [p] and contents [pic]. It may happen that the content overlaps with the
+      box. *)
 
 (***
   val round_rect_gen : ?dx:Num.t -> ?dy:Num.t -> ?rx:Num.t -> ?ry:Num.t -> 
@@ -515,16 +528,6 @@ and Box : sig
 	of contents [pic], with rounded corners of radii [rx] and [ry]. 
 	Optional padding is given by [dx] and [dy] ; default is 2bp *)
 ***)
-
-  val round_rect : box_creator
-    (** [round_rect p pic] creates a rectangular box of center [p] and of 
-	contents [pic], with rounded corners. Optional padding is given by [dx] 
-	and [dy] ; default is 2bp *)
-
-  val patatoid : box_creator
-    (** [patatoid p pic] creates an undefined, vaguely rectangular box of center
-      [p] and contents [pic]. It may happen that the content overlaps with the
-      box. *)
 
   (** Get the bounding path of a box *)
   val bpath : t -> Path.t
@@ -563,17 +566,27 @@ and Box : sig
 
   (** {2 Boxes alignment} *)
 
-  val hbox : 
-    ?name:string -> ?stroke:Color.t option ->
-    ?style:style -> ?fill:Color.t ->
-    ?padding:Num.t -> ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.vposition -> 
-    t list -> t
+  val hbox : ?padding:Num.t -> ?pos:Command.vposition -> ?style:style -> 
+    t list box_creator
 
-  val vbox : 
-    ?name:string -> ?stroke:Color.t option ->
-    ?style:style -> ?fill:Color.t ->
-    ?padding:Num.t -> ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.hposition -> 
-    t list -> t
+  val vbox : ?padding:Num.t -> ?pos:Command.hposition -> ?style:style -> 
+    t list box_creator
+
+  val tabular : 
+    ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
+    t array array -> t
+    (** aligns the given boxes both vertically and horizontally and returns
+	a box containing all these boxes (with rows as first sub-components,
+	and then individual boxes as sub-components of each row). *)
+
+  val tabularl : ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
+    t list list -> t
+    (** similar to [tabular], but using lists instead of arrays *)
+
+  val tabulari : 
+    ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
+    int -> int -> (int -> int -> t) -> t 
+    (** similar to [tabular], but using a matrix defined with a function *)
 
   (** {2 Sub-boxes accessors} *)
 
@@ -590,8 +603,9 @@ and Box : sig
     (** [elts b] returns the sub-boxes of [b] *)
 
   (** {2 Box properties} *)
-  val get_fill : Box.t -> Color.t option
-  val set_fill : Color.t -> Box.t -> Box.t
+
+  val get_fill : t -> Color.t option
+  val set_fill : Color.t -> t -> t
 
 (****
   val valign : ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position
@@ -610,22 +624,6 @@ and Box : sig
     (** [halign_to_box] aligns the pictures in the argument list and puts them
       into boxes, but does not try to create boxes of equal size *)
 ***)
-
-  val tabular : 
-    ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
-    t array array -> t
-    (** aligns the given boxes both vertically and horizontally and returns
-	a box containing all these boxes (with rows as first sub-components,
-	and then individual boxes as sub-components of each row). *)
-
-  val tabularl : ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
-    t list list -> t
-    (** similar to [tabular], but using lists instead of arrays *)
-
-  val tabulari : 
-    ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
-    int -> int -> (int -> int -> t) -> t 
-    (** similar to [tabular], but using a matrix defined with a function *)
 
   val cpath :
     ?style:Path.joint ->

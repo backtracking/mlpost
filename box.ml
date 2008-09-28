@@ -124,9 +124,9 @@ let circle ?(dx=margin) ?(dy=margin) w h c =
   let s = Shapes.shift c (Shapes.circle d) in
   d, d, s
 
-let ellipse ?(dx=zero) ?(dy=zero) w h c =
-  let rx = w +/ dx in
-  let ry = h +/ dy in
+let ellipse ?(dx=margin) ?(dy=margin) w h c =
+  let rx = w /./ 2. +/ dx in
+  let ry = h /./ 2. +/ dy in
   2. *./ rx, 2. *./ ry, Shapes.shift c (Shapes.full_ellipse_path rx ry) 
 
 let round_rect_gen ?(dx=margin) ?(dy=margin) ?(rx=margin) ?(ry=margin) w h c =
@@ -176,9 +176,8 @@ let merge_maps =
   in
   List.fold_left add_one Smap.empty
 
-let align_boxes 
-    f ?name ?(stroke=None) ?(style=Rect) ?fill ?padding ?(dx=Num.zero) 
-    ?(dy=Num.zero) ?pos bl =
+let align_boxes f ?padding ?pos ?(style=Rect) 
+  ?(dx=Num.zero) ?(dy=Num.zero) ?name ?(stroke=None) ?fill bl =
   let bl = f ?padding ?pos bl in
   let w = BoxAlign.width bl in
   let h = BoxAlign.height bl in
@@ -191,6 +190,11 @@ let align_boxes
 
 let hbox = align_boxes BoxAlign.horizontal
 let vbox = align_boxes BoxAlign.vertical
+
+let box 
+  ?(style=Rect) ?(dx=margin) ?(dy=margin) ?name 
+  ?(stroke=Some Color.black) ?fill b =
+  hbox ~style ~dx ~dy ?name ~stroke ?fill [b]
 
 let group 
   ?name ?(stroke=None) ?fill ?(style=Rect) ?(dx=Num.zero) ?(dy=Num.zero) bl =
@@ -214,9 +218,9 @@ let group
     name = name; stroke = stroke; fill = fill;
     width = w; height = h; ctr = c; contour = s }
 
-type box_creator = 
+type 'a box_creator = 
   ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 
-  ?stroke:Color.t option -> ?fill:Color.t -> Picture.t -> t
+  ?stroke:Color.t option -> ?fill:Color.t -> 'a -> t
 
 let rect = pic ~style:Rect
 let circle = pic ~style:Circle
