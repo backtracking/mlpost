@@ -231,10 +231,10 @@ let group_rect w h c bl =
     width = w; height = h; ctr = c; 
     contour = Shapes.center c (Shapes.rectangle_path w h) }
 
-let empty =
+let empty ?(width=Num.zero) ?(height=Num.zero) () =
   { desc = Emp; name = None; stroke = None; fill = None;
-    width = Num.zero; height = Num.zero; ctr = Point.origin;
-    contour = Shapes.rectangle_path Num.zero Num.zero }
+    width = width; height = height; ctr = Point.origin;
+    contour = Shapes.rectangle_path width height }
 
 type 'a box_creator = 
   ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 

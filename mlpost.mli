@@ -483,7 +483,7 @@ and Box : sig
 
   (** {2 Creating boxes} *)
 
-  val empty : t
+  val empty : ?width:Num.t -> ?height:Num.t -> unit -> t
     (** the empty box *)
 
   type style = Rect | Circle | Ellipse | RoundRect | Patatoid
