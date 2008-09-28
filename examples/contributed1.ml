@@ -9,7 +9,7 @@ let repository ?wc patches =
   let draw_wbox = match wc with
     | None -> nop
     | Some wc ->
-        Box.draw (Box.shift (south pbox) (circle ~fill:yellow wc))
+        Box.draw (Box.center (south pbox) (circle ~fill:yellow wc))
   in
    [
     draw_wbox;
