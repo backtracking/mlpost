@@ -30,8 +30,9 @@ let abstract_side =
 
 let texbox ?(fill=ccolor) p =
   Picture.make 
-    (Box.draw ~fill ~boxed:false
-       (Box.round_rect ~dx:(bp 10.) ~dy:(bp 10.) (Point.pt (zero, zero)) p))
+    (Box.draw 
+       (Box.round_rect ~fill ~stroke:None 
+         ~dx:(bp 10.) ~dy:(bp 10.) p))
        
 let coqform =
   center_tex ~scale:2. (-370.) 0. 160. 
@@ -56,8 +57,8 @@ let proofphi =
 let dpll =
   center_tex ~scale:2. 0. 370. 40.
     (Picture.make 
-       (Box.draw ~boxed:true ~fill:(Color.color "light cyan")
-	  (Box.rect ~dx:(bp 10.) ~dy:(bp 10.) (Point.pt (zero, zero)) 
+       (Box.draw 
+	  (Box.rect ~dx:(bp 10.) ~dy:(bp 10.) ~fill:(Color.color "light cyan")
 	     (tex "\\begin{tabular}{c} DPLL Procedure \\\\ \\\\ \
                \\texttt{formula $\\rightarrow$ result} \
              \\end{tabular}"))))
