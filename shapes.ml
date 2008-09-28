@@ -140,7 +140,7 @@ let draw_func ?fill ?(stroke=Color.black) ?(thickness=0.5) path =
       | Some color -> Command.fill ~color path in
   let pen = Pen.square ~tr:([Transform.scaled (mkF thickness)]) () in
   let strokecmd = Command.draw ~color:stroke ~pen path in
-    Picture.make (Command.seq [fillcmd; strokecmd])
+  Picture.make (Command.seq [fillcmd; strokecmd])
 
 let rounded_rect ?fill ?stroke ?thickness width height rx ry =
   let path = rounded_rect_path width height rx ry in

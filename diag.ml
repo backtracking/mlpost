@@ -19,7 +19,7 @@ open Helpers
 module Node = struct
 
   type t = { 
-    box_style : (Point.t -> Picture.t -> Box.t) option;
+    box_style : (Picture.t -> Box.t) option;
     id : int; 
     fill : Color.t option;
     boxed: bool option;
@@ -108,14 +108,21 @@ let indir = function
 let outdir = function None -> None | Some x -> Some (outdir x)
 let indir = function None -> None | Some x -> Some (indir x)
 
-type node_style = Point.t -> Picture.t -> Box.t
+type node_style = Picture.t -> Box.t
 
 let make_box ?fill ?boxed ~style ~scale d n = 
   let p = Point.pt (scale n.x, scale n.y) in
   let pic = n.s in
   let b = match n.box_style with 
-  | None -> style p pic
-  | Some f -> f p pic
+    | None -> style pic
+    | Some f -> f pic
+  in
+  let b = Box.center p b in
+  let b = match fill with None -> b | Some f -> Box.set_fill f b in
+  let b = match boxed with 
+    | None -> b 
+    | Some true -> Box.set_stroke Color.black b
+    | Some false -> Box.clear_stroke b
   in
   Hnode.add d.boxes n b;
   b
@@ -148,10 +155,9 @@ let draw_arrow ?stroke ?pen ?dashed d a =
 
 let fortybp x = Num.bp (40. *. x)
 
-let defaultbox = Box.round_rect ~dx:Num.two ~dy:Num.two
+let defaultbox s = Box.round_rect ~dx:Num.two ~dy:Num.two s
 
-let draw ?(scale=fortybp) ?(style=defaultbox) 
-    ?boxed ?fill ?stroke ?pen d =
+let draw ?(scale=fortybp) ?(style=defaultbox) ?boxed ?fill ?stroke ?pen d =
   let l = 
     List.map 
       (fun n -> 

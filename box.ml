@@ -40,6 +40,7 @@ module B = struct
   }
       
   and desc = 
+    | Emp
     | Pic of Picture.t
     | Grp of t array * t Smap.t
 
@@ -58,6 +59,7 @@ module B = struct
       desc = shift_desc pt b.desc }
       
   and shift_desc pt = function
+    | Emp -> Emp
     | Pic pic -> Pic (Picture.shift pt pic)
     | Grp (a, m) -> Grp (Array.map (shift pt) a, Smap.map (shift pt) m)
 
@@ -92,6 +94,8 @@ let rec draw ?(debug=false) b =
     | Some color -> Command.fill ~color bpath
   in
   let contents_cmd = match b.desc with
+    | Emp ->
+	Command.nop
     | Pic pic -> 
 	Command.draw_pic pic
     | Grp (a, _) -> 
@@ -169,7 +173,7 @@ module BoxAlign = Pos.List_(B)
 let merge_maps =
   let add_one m b =
     let m = match b.desc with
-      | Pic _ -> m
+      | Emp | Pic _ -> m
       | Grp (_, m') -> Smap.fold Smap.add m' m
     in
     match b.name with Some n -> Smap.add n b m | None -> m
@@ -196,6 +200,7 @@ let box
   ?(stroke=Some Color.black) ?fill b =
   hbox ~style ~dx ~dy ?name ~stroke ?fill [b]
 
+(* groups the given boxes in a new box *)
 let group 
   ?name ?(stroke=None) ?fill ?(style=Rect) ?(dx=Num.zero) ?(dy=Num.zero) bl =
   let xmin,xmax,ymin,ymax = 
@@ -218,6 +223,19 @@ let group
     name = name; stroke = stroke; fill = fill;
     width = w; height = h; ctr = c; contour = s }
 
+(* groups the given boxes in a rectangular shape of size [w,h]
+   and center [c] *)
+let group_rect w h c bl =
+  { desc = Grp (Array.of_list bl, merge_maps bl);
+    name = None; stroke = None; fill = None;
+    width = w; height = h; ctr = c; 
+    contour = Shapes.center c (Shapes.rectangle_path w h) }
+
+let empty =
+  { desc = Emp; name = None; stroke = None; fill = None;
+    width = Num.zero; height = Num.zero; ctr = Point.origin;
+    contour = Shapes.rectangle_path Num.zero Num.zero }
+
 type 'a box_creator = 
   ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 
   ?stroke:Color.t option -> ?fill:Color.t -> 'a -> t
@@ -233,19 +251,23 @@ let tex ?style ?dx ?dy ?name ?stroke ?fill s =
 
 let nth i b = match b.desc with
   | Grp (a, _ ) -> a.(i)
-  | Pic _ -> invalid_arg "Box.nth"
+  | Emp | Pic _ -> invalid_arg "Box.nth"
 
 let elts b = match b.desc with
-  | Pic _ -> [||]
+  | Emp | Pic _ -> [||]
   | Grp (a, _) -> a
 
 let get n b = 
   if b.name = Some n then b else match b.desc with
-    | Pic _ -> invalid_arg "Box.get"
+    | Emp | Pic _ -> invalid_arg "Box.get"
     | Grp (_, m) -> try Smap.find n m with Not_found -> invalid_arg "Box.get"
 
 let get_fill b = b.fill
-let set_fill c b = {b with fill = Some c} 
+let set_fill c b = { b with fill = Some c } 
+
+let get_stroke b = b.stroke
+let set_stroke s b = {b with stroke = Some s } 
+let clear_stroke b = { b with stroke = None }
 
 (****
 
@@ -283,6 +305,7 @@ let tabularl ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?(pos=`Center) pll =
   if List.exists (fun l -> List.length l <> len) pll then 
     invalid_arg "Box.tabular: lists have different lengths";
   let dx = hpadding and dy = vpadding in
+  (* we first compute the widths of columns and heights of rows *)
   let hmaxl = List.map (Num.fold_max height Num.zero) pll in
   let rec calc_wmax pll = match pll with 
     | [] :: _ -> 
@@ -296,6 +319,9 @@ let tabularl ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?(pos=`Center) pll =
 	(Num.fold_max width Num.zero cols) :: (calc_wmax qll)
   in
   let wmaxl = calc_wmax pll in
+  let tw = List.fold_left (fun a w -> a +/ w +/ dx) Num.zero wmaxl -/ dx in
+  let tw_2 = tw /./ 2. in
+  let th = List.fold_left (fun a h -> a +/ h +/ dy) Num.zero hmaxl -/ dy in
   (* place the box [b] inside the rectangular region defined by upper left
      corner [x,y], width [w] and height [h], according to alignment [pos] *)
   let place_box x y w h b =
@@ -311,6 +337,7 @@ let tabularl ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?(pos=`Center) pll =
     in
     center (Point.pt (xb, yb)) b
   in
+  (* make a single row with upper left corner [x,y] and height [hrow] *)
   let rec make_row x y hrow wmaxl pl = match pl, wmaxl with
     | [], [] -> []
     | [], _ | _, [] -> assert false
@@ -318,16 +345,19 @@ let tabularl ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?(pos=`Center) pll =
 	let b = place_box x y wrow hrow p in
 	b :: make_row (x +/ wrow +/ dx) y hrow wl ql
   in
+  (* make all rows, with upper left corner [0,y] *)
   let rec make_array hmaxl y pll = match pll, hmaxl with
     | [], [] -> []
     | [], _ | _, [] -> assert false
     | row :: qll, hrow :: hl -> 
 	let brow = 
-	  group (make_row Num.zero y hrow wmaxl row)
+	  let c = Point.pt (tw_2, y -/ hrow /./ 2.) in
+	  group_rect tw hrow c (make_row Num.zero y hrow wmaxl row)
 	in
 	brow :: make_array hl (y -/ hrow -/ dy) qll
   in
-  group (make_array hmaxl Num.zero pll)
+  let c = Point.pt (tw_2, Num.neg (th /./ 2.)) in
+  group_rect tw th c (make_array hmaxl Num.zero pll)
 
 let tabular ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?pos m =
   let pll = Array.to_list (Array.map Array.to_list m) in

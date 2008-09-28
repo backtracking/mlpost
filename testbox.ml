@@ -54,10 +54,10 @@ let f2 =
    arrow (node 0) (node 1); arrow (node 1) (node 2)]
 
 let f3 =
-  let b = tabularl ~hpadding:(bp 10.) ~vpadding:(bp 5.) ~pos:`Right
-    [[tex "a"; tex "BB"; tex "C"]; 
-     [tex "ddd"; tex "\\tiny e"; tex "FF"]] in
-  [draw ~debug:true b]
+  let b = tabularl ~hpadding:(bp 10.) ~vpadding:(bp 20.) ~pos:`Left
+    [[tex "a"; tex "BB"; tex ~name:"dst" "C"]; 
+     [tex ~name:"src" "ddd"; tex "\\tiny e"; tex "tagada"]] in
+  [draw ~debug:true b;]
 
 let figs = [
   f3;

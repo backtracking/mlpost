@@ -483,6 +483,9 @@ and Box : sig
 
   (** {2 Creating boxes} *)
 
+  val empty : t
+    (** the empty box *)
+
   type style = Rect | Circle | Ellipse | RoundRect | Patatoid
 
   type 'a box_creator = 
@@ -499,36 +502,38 @@ and Box : sig
     *)
 
   val pic : ?style:style -> Picture.t box_creator
-    (** [pic p] creates a box containing the picture [p] *)
+    (** [pic p] creates a new box containing the picture [p] *)
 
   val tex : ?style:style -> string box_creator
-    (** [tex s] creates a box containing the LaTeX string [s] *)
+    (** [tex s] creates a new box containing the LaTeX string [s] *)
 
   val box : ?style:style -> t box_creator
-    (** [box b] creates a box containing the box [b] *)
+    (** [box b] creates a new box containing the box [b] *)
 
   val circle : Picture.t box_creator
-    (** [circle p pic] creates a circle box of center [p] and of contents
-    [pic]. Optional padding is given by arguments [dx] and [dy]. *)
+    (** [circle pic] creates a circle box containing the picture
+    [pic]. Optional padding is given by arguments [dx] and [dy]; 
+    default is 2bp. *)
 
   val ellipse : Picture.t box_creator
-    (** [ellipse p pic] creates a elliptic box of center [p] and of contents
-	[pic]. Optional padding is given by arguments [dx] and [dy]. *)
+    (** [ellipse p pic] creates a elliptic box containing the picture
+	[pic]. Optional padding is given by arguments [dx] and [dy]; 
+	default is 2bp *)
 
   val rect :  Picture.t box_creator
-    (** [rect p pic] creates a rectangular box of center [p] and of contents
-	[pic]. Optional padding is given by arguments [dx] and [dy] ; 
+    (** [rect p pic] creates a rectangular box containing the picture
+	[pic]. Optional padding is given by arguments [dx] and [dy]; 
 	default is 2bp. *)
 
   val round_rect : Picture.t box_creator
-    (** [round_rect p pic] creates a rectangular box of center [p] and of 
-	contents [pic], with rounded corners. Optional padding is given by [dx]
-	and [dy] ; default is 2bp *)
+    (** [round_rect p pic] creates a rectangular box containing the picture 
+	[pic], with rounded corners. Optional padding is given by [dx] 
+	and [dy]; default is 2bp *)
 
   val patatoid : Picture.t box_creator
-    (** [patatoid p pic] creates an undefined, vaguely rectangular box of 
-	center [p] and contents [pic]. It may happen that the content overlaps 
-	with the box. *)
+    (** [patatoid p pic] creates an undefined, vaguely rectangular box 
+	containing the picture [pic]. It may happen that the content 
+	overlaps with the box. *)
 
 (***
   val round_rect_gen : ?dx:Num.t -> ?dy:Num.t -> ?rx:Num.t -> ?ry:Num.t -> 
@@ -580,8 +585,10 @@ and Box : sig
     t list box_creator
       (** aligns the given boxes horizontally and returns a box containing
 	  these boxes as sub-components. 
-	  @param padding horizontal padding used to separate the boxes
-	  @param pos used to determine the way boxes are aligned
+	  @param padding horizontal padding used to separate the boxes; 
+	  defaults to 0
+	  @param pos used to determine the way boxes are aligned; defaults to
+	  [`Center]
       *)
 
   val vbox : ?padding:Num.t -> ?pos:Command.hposition -> ?style:style -> 
@@ -600,7 +607,7 @@ and Box : sig
 	and then individual boxes as sub-components of each row). 
 	Columns (resp. rows) are separated by [hpadding] (resp. [vpadding]);
 	both default to 0.
-	Alignment within columns and rows in controlled using [pos]. 
+	Alignment within columns and rows is controlled using [pos]. 
 	The arrays for rows must have the same lengths; otherwise
 	[Invalid_argument] is raised. *)
 
@@ -617,7 +624,7 @@ and Box : sig
 
   val nth : int -> t -> t
     (** [nth i b] returns the [i]-th sub-box of [b]. The first sub-box
-	has index 0. *)
+	has index 0. Raises [Invalid_argument] if there is no such sub-box. *)
 
   val get : string -> t -> t
     (** [get n b] returns the sub-box of [b] of name [n], if any, and
@@ -625,12 +632,17 @@ and Box : sig
 	if [b] contains several sub-boxes with name [n]. *)
 
   val elts : t -> t array
-    (** [elts b] returns the sub-boxes of [b] *)
+    (** [elts b] returns the sub-boxes of [b]; returns the empty array for
+        the empty box or a box containing a picture. *)
 
   (** {2 Box properties} *)
 
   val get_fill : t -> Color.t option
   val set_fill : Color.t -> t -> t
+
+  val get_stroke : t -> Color.t option
+  val set_stroke : Color.t -> t -> t
+  val clear_stroke : t -> t
 
 (****
   val valign : ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position
@@ -1236,7 +1248,6 @@ module Tree : sig
 
 end
 
-(****
 module Diag : sig
 
   (** Diagrams. *)
@@ -1251,7 +1262,7 @@ module Diag : sig
   type node
     (** The abstract type of nodes *)
 
-  type node_style = Point.t -> Picture.t -> Box.t
+  type node_style = Picture.t -> Box.t
   (** The type for node styles; It corresponds to the type of the box
     creation functions in the {!Box} module *)
 
@@ -1305,8 +1316,6 @@ module Diag : sig
 	@param stroke The color to draw arrows
 	@param pen The pen used for arrows *)
 end
-
-****)
 
 module Plot : sig
 
