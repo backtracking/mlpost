@@ -59,7 +59,13 @@ let f3 =
      [tex ~name:"src" "ddd"; tex "\\tiny e"; tex "tagada"]] in
   [draw ~debug:true b;]
 
+let f4 =
+  let tex = tex ~stroke:None in
+  let b = vblock ~pos:`Center [tex "a"; tex "b"; tex "c"] in
+  [draw b]
+
 let figs = [
+  f4;
   f3;
   f0; f1; f2;
 ] 

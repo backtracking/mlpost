@@ -620,6 +620,14 @@ and Box : sig
     int -> int -> (int -> int -> t) -> t 
     (** similar to [tabular], but using a matrix defined with a function *)
 
+  val hblock : ?pos:Command.vposition -> t list -> t
+    (** [hblock bl] aligns the boxes of [bl] horizontally and surround
+	them with new rectangular boxes of the same height; all these new
+	boxes are packed together into the returned box. *)
+
+  val vblock : ?pos:Command.hposition -> t list -> t
+    (** similar to [hblock], with vertical alignment *)
+
   (** {2 Sub-boxes accessors} *)
 
   val nth : int -> t -> t
@@ -644,23 +652,7 @@ and Box : sig
   val set_stroke : Color.t -> t -> t
   val clear_stroke : t -> t
 
-(****
-  val valign : ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position
-                -> Picture.t list -> t list
-    (** [valign l] turns a list of pictures into a list of boxes,
-	which contain the given pictures and are vertically aligned. 
-	All boxes have the same width. Some padding can be specified with
-	optional arguments [dx] and [dy]. *)
-
-  val halign : ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position
-                  -> Picture.t list -> t list
-    (** [halign] is similar to [valign], but with an horizontal alignment. *)
-
-  val halign_to_box : ?dx:Num.t -> ?dy:Num.t -> ?spacing:Num.t -> 
-                      ?pos:Command.position -> Picture.t list -> t list
-    (** [halign_to_box] aligns the pictures in the argument list and puts them
-      into boxes, but does not try to create boxes of equal size *)
-***)
+  (** {2 Misc.} *)
 
   val cpath :
     ?style:Path.joint ->

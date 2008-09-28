@@ -86,19 +86,18 @@ struct
       | [] -> List.rev acc, x -/ padding
       | p :: pl ->
           let wp,hp = P.width p, P.height p in
-          let y = 
-            match pos with
-              | `Center -> hmax_2
-              | `Top -> hmax -/ hp /./ 2.
-              | `Bot -> hp /./ 2.
+          let y = match pos with
+            | `Center -> hmax_2
+            | `Top -> hmax -/ hp /./ 2.
+            | `Bot -> hp /./ 2.
           in
           let c = Point.pt (x +/ wp /./ 2., y) in 
           let b = P.center c p in
-            make_new (b::acc) (x +/ wp +/ padding) pl
+          make_new (b::acc) (x +/ wp +/ padding) pl
     in
     let l,x = make_new [] Num.zero pl in
     let mycenter = Point.pt (x /./ 2., hmax_2) in     
-      { v = l; width = x; height = hmax; center = mycenter }
+    { v = l; width = x; height = hmax; center = mycenter }
 
   let vertical ?(padding=Num.zero) ?(pos=`Center) pl =
     let wmax = Num.fold_max P.width Num.zero pl in

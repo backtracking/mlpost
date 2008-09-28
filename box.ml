@@ -367,6 +367,56 @@ let tabulari ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?pos w h f =
   let m = Array.init h (fun j -> Array.init w (fun i -> f i j)) in
   tabular ~hpadding ~vpadding ?pos m
 
+(* blocks *)
+
+let hblock ?(pos=`Center) pl =
+  let hmax = Num.fold_max height Num.zero pl in
+  let hmax_2 = hmax /./ 2. in
+  let rec make_new acc x = function
+    | [] -> 
+	List.rev acc, x
+    | p :: pl ->
+        let wp,hp = width p, height p in
+        let y = match pos with
+          | `Center -> hmax_2
+          | `Top -> hmax -/ hp /./ 2.
+          | `Bot -> hp /./ 2.
+        in
+	let xc = x +/ wp /./ 2. in
+        let c = Point.pt (xc, y) in 
+        let b = center c p in
+	let b = group_rect wp hmax (Point.pt (xc, hmax_2)) [b] in
+	let b = set_stroke Color.black b in
+        make_new (b::acc) (x +/ wp) pl
+  in
+  let l,x = make_new [] Num.zero pl in
+  let mycenter = Point.pt (x /./ 2., hmax_2) in     
+  group_rect x hmax mycenter l
+
+let vblock ?(pos=`Center) pl =
+  let wmax = Num.fold_max width Num.zero pl in
+  let wmax_2 = wmax /./ 2. in
+  let rec make_new acc y = function
+    | [] -> 
+	List.rev acc, y
+    | p :: pl ->
+        let wp,hp = width p, height p in
+        let x = match pos with
+          | `Center -> wmax_2
+          | `Right -> wmax -/ wp /./ 2.
+          | `Left ->  wp /./ 2.
+        in
+	let yc = y -/ hp /./ 2. in
+        let c = Point.pt (x, yc) in 
+        let b = center c p in
+	let b = group_rect wmax hp (Point.pt (wmax_2, yc)) [b] in
+	let b = set_stroke Color.black b in
+        make_new (b::acc) (y -/ hp) pl
+  in
+  let l,y = make_new [] Num.zero pl in
+  let mycenter = Point.pt (wmax_2, y /./ 2.) in
+  group_rect wmax (Num.neg y) mycenter l
+
 open Path
 
 let cpath ?style ?outd ?ind a b =
