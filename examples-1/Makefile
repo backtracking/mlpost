@@ -15,7 +15,7 @@ all: $(PNGFILES)
 
 # dangerous - might be called more than once or even at the same time
 $(OUTFILES): boxes.ml
-	mlpost boxes.ml
+	../tool.opt -ccopt "-I ../ unix.cma" -v $^
 
 clean:
 	rm -f *.aux *.dvi *.ps *.1 *.log $(PNGFILES) *.mp *.mpx *.tex *.html
