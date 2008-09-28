@@ -488,6 +488,15 @@ and Box : sig
   type 'a box_creator = 
     ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 
     ?stroke:Color.t option -> ?fill:Color.t -> 'a -> t
+    (** All functions used to create boxes take the following optional
+	parameters : [dx] (resp. [dy]) is the horizontal
+	(resp. vertical) padding between the box border and its
+	contents ; [name], if present, is associated with the box and
+	can be used to retrieve it using [get] ; [stroke] is the color
+	used to draw the outline of the box ; when equal to [None],
+	the outline will not be drawn ; [fill], if present, is the
+	color used to fill the box.  
+    *)
 
   val pic : ?style:style -> Picture.t box_creator
     (** [pic p] creates a box containing the picture [p] *)
@@ -513,13 +522,13 @@ and Box : sig
 
   val round_rect : Picture.t box_creator
     (** [round_rect p pic] creates a rectangular box of center [p] and of 
-	contents [pic], with rounded corners. Optional padding is given by [dx] 
+	contents [pic], with rounded corners. Optional padding is given by [dx]
 	and [dy] ; default is 2bp *)
 
   val patatoid : Picture.t box_creator
-    (** [patatoid p pic] creates an undefined, vaguely rectangular box of center
-      [p] and contents [pic]. It may happen that the content overlaps with the
-      box. *)
+    (** [patatoid p pic] creates an undefined, vaguely rectangular box of 
+	center [p] and contents [pic]. It may happen that the content overlaps 
+	with the box. *)
 
 (***
   val round_rect_gen : ?dx:Num.t -> ?dy:Num.t -> ?rx:Num.t -> ?ry:Num.t -> 
@@ -560,17 +569,28 @@ and Box : sig
   (** [center pt x] centers the object [x] at the point [pt]  *)
 
   val draw : ?debug:bool -> t -> Command.t
-    (** Draw a box 
-	@param fill the color used to fill the box 
-	@param boxed if set, the box border is drawn (default is [true]) *)
+    (** Draws a box 
+	@param debug if set to to true, the bounding
+	path and the center of the box are drawn as well, default is false
+    *)
 
   (** {2 Boxes alignment} *)
 
   val hbox : ?padding:Num.t -> ?pos:Command.vposition -> ?style:style -> 
     t list box_creator
+      (** aligns the given boxes horizontally and returns a box containing
+	  these boxes as sub-components. 
+	  @param padding horizontal padding used to separate the boxes
+	  @param pos used to determine the way boxes are aligned
+      *)
 
   val vbox : ?padding:Num.t -> ?pos:Command.hposition -> ?style:style -> 
     t list box_creator
+      (** aligns the given boxes vertically and returns a box containing
+	  these boxes as sub-components. 
+	  @param padding vertical padding used to separate the boxes
+	  @param pos used to determine the way boxes are aligned
+      *)
 
   val tabular : 
     ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
