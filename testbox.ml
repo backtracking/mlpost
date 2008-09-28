@@ -64,7 +64,9 @@ let f4 =
   let b = vblock ~pos:`Center [tex "a"; tex "b"; tex "c"] in
   [draw b]
 
-let l = [false; true; true; true; false; false; true]
+let l = [[false; true; true; true; false; false; true];
+	 [true; false; true; false; true; false; false];
+	 [false; true; false; false; false; false; true]]
 let f5 =
   let sz = Num.cm 1. in
   let black = 
@@ -73,8 +75,8 @@ let f5 =
   let white = 
     set_stroke Color.black (empty ~width:sz ~height:sz ()) in
   let bit2box b = if b then black else white in
-  let lb = List.map bit2box l in
-    [draw (hblock lb)]
+  let lb = List.map (List.map bit2box) l in
+    [draw (tabularl lb)]
 
 let figs = [
   f5;
