@@ -2,7 +2,7 @@ PNGFILES := f1.png f2.png
 OUTFILES := $(PNGFILES:.png=.1)
 
 
-all: $(PNGFILES)
+all: $(PNGFILES) parse
 	caml2html -hc -ext "parse:./parse" boxes.ml
 
 %.png: %.ps
@@ -20,7 +20,7 @@ $(OUTFILES): boxes.ml
 parse.ml: parse.mll
 	ocamllex parse.mll
 
-parse.native: parse.ml
+parse: parse.ml
 	ocamlopt.opt -o parse parse.ml
 
 clean:
