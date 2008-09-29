@@ -277,6 +277,8 @@ let set_fill c b = { b with fill = Some c }
 let get_stroke b = b.stroke
 let set_stroke s b = {b with stroke = Some s } 
 let clear_stroke b = { b with stroke = None }
+let get_name b = b.name
+let set_name name b = {b with name = Some name}
 
 let get_pen b = b.pen
 let set_pen p b = { b with pen = Some p }

@@ -108,14 +108,19 @@ let d2c, d2s, d2sq, d2hsq =
        ~stroke:Color.blue ~pen:(Pen.circle ()) ~debug:true tree]
 
 let d5 = 
-  let t1 = random_tree 5 in
-  let pic1 = Picture.make (Tree.draw t1) in
-  let b1 = pic ~name:"1" pic1 in
-  let t2 = random_tree 6 in
-  let pic2 = Picture.make (Tree.draw t2) in
-  let b2 = pic ~name:"2" pic2 in
-  let bl = Box.hbox ~padding:(Num.cm 2.) [ b1; b2] in
-  [ Box.draw bl; box_arrow (get "1" bl) (get "2" bl) ]
+  let rand_tree name i = set_name name (set_stroke Color.black (random_tree i)) in
+  let t1 = rand_tree "1" 5 in
+  let t2 = rand_tree "2" 6 in
+  let bl = Box.hbox ~padding:(Num.cm 2.) [ box t1; box t2] in
+  (* jusqu'ici ca va, mais là ca commence a etre vraiment compliqué !*)
+  let t1 = get "1" bl in
+  let t2 = get "2" bl in
+  let b1 = nth 0 bl in
+  let b2 = nth 1 bl in
+  [ Tree.draw t1; Tree.draw t2;
+    Command.draw (bpath b1);
+    Command.draw (bpath b2);
+    box_arrow b1 b2 ]
 
 
 let tree1 () = pic (Picture.make (Tree.draw (random_tree (1 + Random.int 5))))

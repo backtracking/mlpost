@@ -652,6 +652,8 @@ and Box : sig
   val get_stroke : t -> Color.t option
   val set_stroke : Color.t -> t -> t
   val clear_stroke : t -> t
+  val get_name : t -> string option
+  val set_name : string -> t -> t
 
   val get_pen : t -> Pen.t option
   val set_pen : Pen.t -> t -> t
