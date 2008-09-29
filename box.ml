@@ -34,6 +34,7 @@ module B = struct
     height : Num.t;
     ctr : Point.t;
     stroke : Color.t option;
+    pen : Pen.t option;
     fill : Color.t option;
     contour : Shapes.t; 
     desc : desc
@@ -85,9 +86,10 @@ let south_east x = build_point (east x) (south x)
 
 let rec draw ?(debug=false) b = 
   let bpath = Shapes.bpath b.contour in
-  let path_cmd = match b.stroke with
-    | None -> Command.nop
-    | Some color -> Command.draw ~color bpath 
+  let path_cmd = match b.stroke, b.pen with
+    | None, _ -> Command.nop
+    | Some color, None -> Command.draw ~color bpath 
+    | Some color, Some pen -> Command.draw ~pen ~color bpath
   in
   let fill_cmd = match b.fill with
     | None -> Command.nop
@@ -159,13 +161,13 @@ let make_contour style ?dx ?dy w h c =
   in
   f ?dx ?dy w h c
 
-let pic ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black) ?fill pic =
+let pic ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black) ?pen ?fill pic =
   let c = Picture.ctr pic in
   let w,h,s = 
     make_contour style ?dx ?dy (Picture.width pic) (Picture.height pic) c 
   in
   { desc = Pic pic;
-    name = name; stroke = stroke; fill = fill;
+    name = name; stroke = stroke; pen = pen; fill = fill;
     width = w; height = h; ctr = c; contour = s }
 
 module BoxAlign = Pos.List_(B)
@@ -181,7 +183,7 @@ let merge_maps =
   List.fold_left add_one Smap.empty
 
 let align_boxes f ?padding ?pos ?(style=Rect) 
-  ?(dx=Num.zero) ?(dy=Num.zero) ?name ?(stroke=None) ?fill bl =
+  ?(dx=Num.zero) ?(dy=Num.zero) ?name ?(stroke=None) ?pen ?fill bl =
   let bl = f ?padding ?pos bl in
   let w = BoxAlign.width bl in
   let h = BoxAlign.height bl in
@@ -189,7 +191,7 @@ let align_boxes f ?padding ?pos ?(style=Rect)
   let w,h,s = make_contour style ~dx ~dy w h c in
   let bl = BoxAlign.v bl in
   { desc = Grp (Array.of_list bl, merge_maps bl);
-    name = name; stroke = stroke; fill = fill;
+    name = name; stroke = stroke; pen = pen; fill = fill;
     width = w; height = h; ctr = c; contour = s }
 
 let hbox = align_boxes BoxAlign.horizontal
@@ -197,12 +199,13 @@ let vbox = align_boxes BoxAlign.vertical
 
 let box 
   ?(style=Rect) ?(dx=margin) ?(dy=margin) ?name 
-  ?(stroke=Some Color.black) ?fill b =
-  hbox ~style ~dx ~dy ?name ~stroke ?fill [b]
+  ?(stroke=Some Color.black) ?pen ?fill b =
+  hbox ~style ~dx ~dy ?name ~stroke ?pen ?fill [b]
 
 (* groups the given boxes in a new box *)
 let group 
-  ?name ?(stroke=None) ?fill ?(style=Rect) ?(dx=Num.zero) ?(dy=Num.zero) bl =
+  ?name ?(stroke=None) ?pen ?fill ?(style=Rect) 
+  ?(dx=Num.zero) ?(dy=Num.zero) bl =
   let xmin,xmax,ymin,ymax = 
     List.fold_left 
       (fun (xmin,xmax,ymin,ymax) b ->
@@ -220,7 +223,7 @@ let group
   let c = Point.pt (xmin +/ w /./ 2., ymin +/ h /./ 2.) in
   let w,h,s = make_contour style ~dx ~dy w h c in
   { desc = Grp (Array.of_list bl, merge_maps bl);
-    name = name; stroke = stroke; fill = fill;
+    name = name; stroke = stroke; pen = pen; fill = fill;
     width = w; height = h; ctr = c; contour = s }
 
 let group_array ?name ?stroke ?fill ?dx ?dy ba =
@@ -230,18 +233,19 @@ let group_array ?name ?stroke ?fill ?dx ?dy ba =
    and center [c] *)
 let group_rect w h c bl =
   { desc = Grp (Array.of_list bl, merge_maps bl);
-    name = None; stroke = None; fill = None;
+    name = None; stroke = None; pen = None; fill = None;
     width = w; height = h; ctr = c; 
     contour = Shapes.center c (Shapes.rectangle_path w h) }
 
 let empty ?(width=Num.zero) ?(height=Num.zero) () =
-  { desc = Emp; name = None; stroke = None; fill = None;
+  { desc = Emp; name = None; 
+    stroke = None; pen = None; fill = None;
     width = width; height = height; ctr = Point.origin;
     contour = Shapes.rectangle_path width height }
 
 type 'a box_creator = 
   ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 
-  ?stroke:Color.t option -> ?fill:Color.t -> 'a -> t
+  ?stroke:Color.t option -> ?pen:Pen.t -> ?fill:Color.t -> 'a -> t
 
 let rect = pic ~style:Rect
 let circle = pic ~style:Circle
@@ -249,8 +253,8 @@ let ellipse = pic ~style:Ellipse
 let round_rect = pic ~style:RoundRect
 let patatoid = pic ~style:Patatoid
 
-let tex ?style ?dx ?dy ?name ?stroke ?fill s = 
-  pic ?style ?dx ?dy ?name ?stroke ?fill (Picture.tex s)
+let tex ?style ?dx ?dy ?name ?stroke ?pen ?fill s = 
+  pic ?style ?dx ?dy ?name ?stroke ?pen ?fill (Picture.tex s)
 
 let nth i b = match b.desc with
   | Grp (a, _ ) -> a.(i)
@@ -273,6 +277,9 @@ let set_fill c b = { b with fill = Some c }
 let get_stroke b = b.stroke
 let set_stroke s b = {b with stroke = Some s } 
 let clear_stroke b = { b with stroke = None }
+
+let get_pen b = b.pen
+let set_pen p b = { b with pen = Some p }
 
 (****
 

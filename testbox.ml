@@ -76,7 +76,17 @@ let f5 =
   let lb = List.map (List.map bit2box) l in
   [draw (tabularl lb)]
 
+let sudoku =
+  let sq33 cell = [[cell;cell;cell];[cell;cell;cell];[cell;cell;cell]] in
+  let sz= Num.cm 0.5 in
+  let cell = set_stroke Color.black (empty ~width:sz ~height:sz ()) in
+  let pen = Pen.scale (Num.bp 1.) (Pen.circle ()) in
+  let square = 
+    set_stroke Color.black (set_pen pen (tabularl (sq33 cell))) in
+    [draw (tabularl (sq33 square))]
+
 let figs = [
+  sudoku;
   f5;
   f4;
   f3;

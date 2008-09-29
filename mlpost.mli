@@ -490,15 +490,16 @@ and Box : sig
 
   type 'a box_creator = 
     ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 
-    ?stroke:Color.t option -> ?fill:Color.t -> 'a -> t
+    ?stroke:Color.t option -> ?pen:Pen.t -> ?fill:Color.t -> 'a -> t
     (** All functions used to create boxes take the following optional
 	parameters : [dx] (resp. [dy]) is the horizontal
 	(resp. vertical) padding between the box border and its
 	contents ; [name], if present, is associated with the box and
 	can be used to retrieve it using [get] ; [stroke] is the color
 	used to draw the outline of the box ; when equal to [None],
-	the outline will not be drawn ; [fill], if present, is the
-	color used to fill the box.  
+	the outline will not be drawn ; [pen] is the pen used to draw
+	the box's outline, if absent [Pen.default] is used ; 
+	[fill], if present, is the color used to fill the box.  
     *)
 
   val pic : ?style:style -> Picture.t box_creator
@@ -651,6 +652,9 @@ and Box : sig
   val get_stroke : t -> Color.t option
   val set_stroke : Color.t -> t -> t
   val clear_stroke : t -> t
+
+  val get_pen : t -> Pen.t option
+  val set_pen : Pen.t -> t -> t
 
   (** {2 Misc.} *)
 
