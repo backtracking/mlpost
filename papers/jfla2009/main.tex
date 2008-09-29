@@ -37,14 +37,31 @@
 \section{Introduction}
 
 motivation (dessiner en programmant, inclusion latex)
+\subsection{Les solutions existantes}
+
+Il existent de nombreuses solutions pour des dessin techniques. Tout d'abord,
+les logiciels à base d'interface graphique, notamment {\em dia} et {\em xfig}.
+Ces deux programmes permettent la création à la souris de dessins plus ou
+moins complexes. Ils ont l'avantage d'être assez intuitifs, mais ils partagent
+aussi l'absence d'inclusion de \LaTeX dans un dessin. Avec xfig, on peut
+néanmoins mettre du code \LaTeX dans un document, mais sa taille réelle ne
+pourra être prise en compte. Dia n'offre même pas cette possibilité, il faut
+éditer les fichiers de sortie, si on veut vraiment mettre du code \LaTeX.
+
+Les solutions à base de langages de programmation intègrent toutes une bon
+support pour du texte en \LaTeX. Nous en citons les plus connus.
+
+\begin{itemize}
+  \item {\em pstricks} est un ensemble de macros \LaTeX. Même si c'est
+    relativement puissant, son utilisation est assez lourde et non-intuitive.
+  \item tikz
+  \item metapost
+  \item mlpictex
+  \item functional metapost
+\end{itemize}<++>
+
+
 solutions existantes:
-  * pstricks
-  * tikz
-  * dia
-  * xfig
-  * metapost
-  * functional metapost
-  * mlpictex
 
 \cite{metapost}
 
