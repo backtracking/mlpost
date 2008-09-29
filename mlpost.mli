@@ -1333,7 +1333,8 @@ module Plot : sig
   val draw_grid : ?hdash:(int -> Dash.t) ->
                   ?vdash:(int -> Dash.t) ->
                   ?hpen:(int -> Pen.t) ->
-                  ?vpen:(int -> Pen.t) -> skeleton -> Command.t
+                  ?vpen:(int -> Pen.t) -> ?color:Color.t -> 
+                  skeleton -> Command.t
 
   val draw_axes : ?hpen:Pen.t -> ?vpen:Pen.t -> ?hlabel:labels -> 
                   ?vlabel:labels -> ?ticks:ticks -> ?closed:bool -> 

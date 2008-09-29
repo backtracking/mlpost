@@ -292,7 +292,7 @@ let florence =
       Picture.transform tr (Picture.tex "\\textsf{Number of ones}"),
     Picture.transform tr (Picture.tex "\\textsf{Instants}") in
   let plot = draw_func ~drawing:Stepwise ~style:jLine in
-  [ draw_grid ~hdash:dash ~vdash:dash sk;
+  [ draw_grid ~hdash:dash ~vdash:dash ~color:(Color.gray 0.5) sk;
     draw_axes ~closed:true ~hcaption ~vcaption sk;
     plot ~pen ~label:(flab 1) f1 sk;
     plot ~pen:pen2 ~dashed:dash2 ~label:(flab 2) f2 sk;

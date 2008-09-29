@@ -46,10 +46,10 @@ let get_borders sx sy h w = zero, sx */ (num_of_int w),
                             sy */ (num_of_int h), zero
 
 let draw_grid ?(hdash=off_pattern) ?(vdash=off_pattern) 
-              ?(hpen=defpen) ?(vpen=defpen) 
+              ?(hpen=defpen) ?(vpen=defpen) ?color
               {width=w; height=h; stepx=sx; stepy=sy} =
   let maxl, maxr, maxu, maxd = get_borders sx sy h w in
-  let drawline dashed pen p = Command.draw ~pen ~dashed p in
+  let drawline dashed pen p = Command.draw ~pen ~dashed ?color p in
   let horizontal i =
     let y = num_of_int i */ sy in
     let pi = pathn [maxl, y; maxr, y] in
