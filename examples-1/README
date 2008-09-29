@@ -1,0 +1,10 @@
+* You need the latest version of caml2html:
+  svn checkout svn://svn.forge.ocamlcore.org/svnroot/caml2html
+
+* using (*html, you can put html into the target file
+
+* code hiding is done via (*parse. currently supported:
+   <<name  - open a div with name "name" and show/hide link, defaults to hide
+   >> - close the last opened div
+
+* you can modify parse.mll if you need more than that

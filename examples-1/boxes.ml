@@ -5,8 +5,21 @@ open Path
 open Point
 open Box
 
-(* <p>c'est presque parfait comme solution, mais on ne peut pas cacher le code</p> *)
-(* <img src="f1.png" /> *)
+(*html
+<script type="text/javascript">
+<!--
+    function toggle_visibility(id) {
+       var e = document.getElementById(id);
+       if(e.style.display == 'block')
+          e.style.display = 'none';
+       else
+          e.style.display = 'block';
+    }
+//-->
+</script>
+*)
+
+(*parse <<f1 *)
 let f1 =
   let b = 
     hbox ~padding:(bp 20.)
@@ -18,7 +31,7 @@ let f1 =
   [draw ~debug:false b;
    box_arrow (get "bc" b) (get "e" b)]
 
- (* <img src="f2.png" /> *)
+(*parse >> <<f2 *)
 let f2 =
   let tex = tex ~style:Circle in
   let b = vbox [tex "a"; hbox [tex ~name:"b" "b"; tex "c"]] in
@@ -27,7 +40,7 @@ let f2 =
   let node i = get "b" (nth i f) in
   [draw ~debug:false f;
    arrow (node 0) (node 1); arrow (node 1) (node 2)]
-
+(*parse >> *)
 
 let () = Metapost.emit "f1" f1
 let () = Metapost.emit "f2" f2
