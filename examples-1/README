@@ -1,5 +1,7 @@
 * You need the latest version of caml2html:
-  svn checkout svn://svn.forge.ocamlcore.org/svnroot/caml2html
+    svn checkout svn://svn.forge.ocamlcore.org/svnroot/caml2html
+  To compile that, you also need camlmix, either by godi, or
+    http://martin.jambon.free.fr/camlmix/
 
 * using (*html, you can put html into the target file
 
