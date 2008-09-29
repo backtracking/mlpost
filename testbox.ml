@@ -69,14 +69,12 @@ let l = [[false; true; true; true; false; false; true];
 	 [false; true; false; false; false; false; true]]
 let f5 =
   let sz = Num.cm 1. in
-  let black = 
-    set_fill (Color.gray 0.3)
-      (set_stroke Color.black (empty ~width:sz ~height:sz ())) in
-  let white = 
-    set_stroke Color.black (empty ~width:sz ~height:sz ()) in
+  let empty = empty ~width:sz ~height:sz () in
+  let black = set_fill (Color.gray 0.3) (set_stroke Color.black empty) in
+  let white = set_stroke Color.black empty in
   let bit2box b = if b then black else white in
   let lb = List.map (List.map bit2box) l in
-    [draw (tabularl lb)]
+  [draw (tabularl lb)]
 
 let figs = [
   f5;

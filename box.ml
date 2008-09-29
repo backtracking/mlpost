@@ -223,6 +223,9 @@ let group
     name = name; stroke = stroke; fill = fill;
     width = w; height = h; ctr = c; contour = s }
 
+let group_array ?name ?stroke ?fill ?dx ?dy ba =
+  group ?name ?stroke ?fill ?dx ?dy (Array.to_list ba)
+
 (* groups the given boxes in a rectangular shape of size [w,h]
    and center [c] *)
 let group_rect w h c bl =
@@ -256,6 +259,8 @@ let nth i b = match b.desc with
 let elts b = match b.desc with
   | Emp | Pic _ -> [||]
   | Grp (a, _) -> a
+
+let elts_list b = Array.to_list (elts b)
 
 let get n b = 
   if b.name = Some n then b else match b.desc with

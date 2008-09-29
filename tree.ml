@@ -21,11 +21,7 @@ open Num
 open Num.Infix
 open Pos
 
-type t = Box.t Pos.tree 
-
-let leaf s = N (s,[])
-let node s l = N (s, l)
-let bin s x y = N (s, [x; y])
+type t = Box.t
 
 type arrow_style = Directed | Undirected
 
@@ -74,19 +70,53 @@ let arc astyle estyle ?stroke ?pen b1 b2 =
 
 module T = Pos.Tree(Box)
 
+let my_fold_left f x a =
+  (* iterate starting from index 1 *)
+  let r = ref x in
+  for i = 1 to Array.length a - 1 do
+    r := f !r (Array.unsafe_get a i)
+  done;
+  !r
+
+let arc_wrap ?stroke ?pen arrow_style edge_style b1 b2 =
+  let arc x = arc ?stroke ?pen arrow_style edge_style b1 x in
+  let a = Box.elts b2 in
+  match Array.length a with
+  | 0 -> arc b2
+  | _ -> arc a.(0)
+
 let draw 
     ?(arrow_style=Directed) ?(edge_style=Straight)
-    ?stroke ?pen ?(ls=Num.bp 12.) ?(cs=Num.bp 5.) t =
-  let t = T.place ~dx:cs ~dy:ls t in
-  let rec draw (N (n, l)) = 
-    seq 
-      (Box.draw n ::
-       iterl draw l ::
-       List.map 
-         (fun (N (n', _)) -> arc ?stroke ?pen arrow_style edge_style n n') l)
+    ?stroke ?pen ?debug  t =
+  let rec draw t =
+    let a = Box.elts t in
+    match Array.length a with
+    | 0 -> nop
+    | 1 -> Box.draw ?debug a.(0)
+    | _ -> 
+        seq 
+        [Box.draw ?debug a.(0) ; 
+         seq (my_fold_left (fun acc x -> draw x :: acc) [] a);
+         seq (my_fold_left 
+           (fun acc x -> 
+             (arc_wrap ?stroke ?pen arrow_style edge_style a.(0) x) :: acc) 
+           [] a) 
+        ]
   in
-  draw (T.v t)
+  draw t
 
+
+let leaf s = Box.group [s]
+let node ?(ls=Num.bp 12.) ?(cs=Num.bp 5.) s l = 
+  let l = Box.hbox ~padding:cs ~pos:`Top l in 
+  let n = Box.vbox ~padding:ls [s;l] in
+  let s = Box.nth 0 n in
+  let l = Box.elts_list (Box.nth 1 n) in
+  Box.group (s::l)
+
+let bin ?ls ?cs s x y = node ?ls ?cs s [x;y]
+
+(*
 let rec set_fill c (N (n,l)) =
   N (Box.set_fill c n, List.map (set_fill c) l)
-
+*)

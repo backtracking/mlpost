@@ -1184,8 +1184,8 @@ module Tree : sig
 
   (** This module provides high-level means for creating and drawing Trees *)
 
-  type t
-    (** The abstract type of trees *)
+  type t = Box.t
+    (** The type of trees *)
 
   (** {2 Creation} *)
   val leaf : Box.t -> t
@@ -1193,12 +1193,12 @@ module Tree : sig
 	@param style a [node_style] describing how the leaf should be drawn
 	@param fill if present, this color is used to fill the leaf *)
 
-  val node : Box.t -> t list -> t
+  val node : ?ls:Num.t -> ?cs:Num.t -> Box.t -> t list -> t
     (** [node label children] creates a node with label [label] and a list
 	of children [children]. 
 	Optional arguments are the same as in [leaf]. *)
 
-  val bin  : Box.t -> t -> t -> t
+  val bin  : ?ls:Num.t -> ?cs:Num.t -> Box.t -> t -> t -> t
     (** [bin label l r] creates a binary node with label [label] and 
 	children [l] and [r].
 	Optional arguments are the same as in [leaf]. *)
@@ -1223,8 +1223,7 @@ module Tree : sig
   val draw : 
     ?arrow_style:arrow_style -> 
     ?edge_style:edge_style ->
-    ?stroke:Color.t -> ?pen:Pen.t ->
-    ?ls:Num.t -> ?cs:Num.t -> 
+    ?stroke:Color.t -> ?pen:Pen.t -> ?debug:bool ->
     t -> Command.t
     (** Default arrow_style is [Directed].
 	Default edge_style is [Straight].
@@ -1236,7 +1235,7 @@ module Tree : sig
         The default value is 0.2.
     *)
 
-  val set_fill : Color.t -> t -> t
+(*   val set_fill : Color.t -> t -> t *)
 
 end
 

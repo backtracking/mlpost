@@ -67,7 +67,7 @@ open Tree
 
 let yannick style =
   let tt s = Box.tex ~style ~fill:Color.orange ("\\texttt{" ^ s ^ "}") in
-  let node s = node (tt s) in
+  let node s = node ~ls:(bp 20.) ~cs:(bp 10.) (tt s) in
   let leaf s = leaf (tt s) in
 
   let tree =
@@ -79,7 +79,7 @@ let yannick style =
       ]
       ]
   in
-  [draw ~ls:(bp 20.) ~cs:(bp 10.)  
+  [draw  
       ~edge_style:Square tree]
 
 let () = Random.init 1234
@@ -105,7 +105,7 @@ let d2c, d2s, d2sq, d2hsq =
   [draw  ~arrow_style:Directed ~edge_style:Square
        ~stroke:Color.blue ~pen:(Pen.circle ()) tree],
   [draw  ~arrow_style:Directed ~edge_style:HalfSquare
-       ~stroke:Color.blue ~pen:(Pen.circle ()) (Tree.set_fill Color.red tree)]
+       ~stroke:Color.blue ~pen:(Pen.circle ()) ~debug:true tree]
 
 let d5 = 
   let t1 = random_tree 5 in
@@ -122,12 +122,12 @@ let tree1 () = pic (Picture.make (Tree.draw (random_tree (1 + Random.int 5))))
 
 let rec random_tree2 = function
   | 1 -> leaf (tree1 ())
-  | 2 -> node (tree1 ()) [leaf (tree1 ())]
+  | 2 -> node ~cs:(mm 0.2) (tree1 ()) [leaf (tree1 ())]
   | n -> 
       let k = 1 + Random.int (n - 2) in
-      node (tree1 ()) [random_tree2 k; random_tree2 (n - 1 - k)]
+      node ~cs:(mm 0.2) (tree1 ()) [random_tree2 k; random_tree2 (n - 1 - k)]
 
-let d6 = [Tree.draw ~cs:(mm 0.2) (random_tree2 10)]
+let d6 = [Tree.draw  (random_tree2 10)]
 
 let cheno011 =
   let p = path ~cycle:jCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)] in
@@ -509,8 +509,9 @@ let newarray =
 
 ****)
 
-let figs = [ d6; d5; yannick Box.Rect; yannick Box.Patatoid; d1; d2; 
-             proval; d2sq; d2hsq; d2s; d2c; d12; cheno011; d3; d4; 
+let figs = [
+  d6; d5; yannick Box.Rect; yannick Box.Patatoid; d1; d2; proval;
+              d2sq; d2hsq; d2s; d2c; d12; cheno011; d3; d4; 
              d7; d11; florence;
 (*
   newarray;
