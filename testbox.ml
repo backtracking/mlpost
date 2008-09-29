@@ -64,26 +64,22 @@ let f4 =
   let b = vblock ~pos:`Center [tex "a"; tex "b"; tex "c"] in
   [draw b]
 
-let l = [[false; true; true; true; false; false; true];
-	 [true; false; true; false; true; false; false];
-	 [false; true; false; false; false; false; true]]
 let f5 =
   let sz = Num.cm 1. in
   let empty = empty ~width:sz ~height:sz () in
   let black = set_fill (Color.gray 0.3) (set_stroke Color.black empty) in
   let white = set_stroke Color.black empty in
-  let bit2box b = if b then black else white in
-  let lb = List.map (List.map bit2box) l in
-  [draw (tabularl lb)]
+  let f i j = if (i+j) mod 2 =0 then black else white in
+    [draw (tabulari 7 3 f)]
 
 let sudoku =
-  let sq33 cell = [[cell;cell;cell];[cell;cell;cell];[cell;cell;cell]] in
+  let sq33 cell = tabulari 3 3 (fun _ _ -> cell) in
   let sz= Num.cm 0.5 in
   let cell = set_stroke Color.black (empty ~width:sz ~height:sz ()) in
   let pen = Pen.scale (Num.bp 1.) (Pen.circle ()) in
   let square = 
-    set_stroke Color.black (set_pen pen (tabularl (sq33 cell))) in
-    [draw (tabularl (sq33 square))]
+    set_stroke Color.black (set_pen pen (sq33 cell)) in
+    [draw (sq33 square)]
 
 let figs = [
   sudoku;
