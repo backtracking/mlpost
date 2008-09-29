@@ -1,4 +1,4 @@
-PNGFILES := f1.png f2.png
+PNGFILES := f1.png f2.png traffic.png hierarchy.png
 OUTFILES := $(PNGFILES:.png=.1)
 
 

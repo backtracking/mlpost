@@ -13,9 +13,9 @@ rule scan = parse
   | ">>" { Printf.printf "</p> </div>"; scan lexbuf }
   | "<<" (identifier as i)
       { 
-        Printf.printf "<p><img src=\"%s.png\" /></p>" i;
-        Printf.printf "<a href=\"#\" onclick=\"\
-                       toggle_visibility('%s');\">show / hide</a>" i;
+        Printf.printf "<p id=\"%s1\"><img src=\"%s.png\" /></p>" i i;
+        Printf.printf "<a href=\"#%s1\" onclick=\"\
+                       toggle_visibility('%s');\">show / hide</a>" i i;
         Printf.printf "<div id=\"%s\" style='display:none;'>" i;
         Printf.printf "<p>";
         scan lexbuf
