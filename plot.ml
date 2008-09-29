@@ -92,15 +92,33 @@ let draw_axes ?(hpen=Pen.default ()) ?(vpen=Pen.default ())
   let hcaptcmd = match hcaption with 
     | None -> Command.nop
     | Some labl -> 
-	Command.label ~pos:`Left labl 
-	  (Point.pt (num_of_int w */ sx, bp 0. -/sy))
+
+	let hlabels_height =
+	  match (hlabel w sx) with
+	    | None -> Num.zero
+	    | Some pic -> Picture.height pic
+	in
+	let h_caption_height = Picture.height labl in
+	Command.label ~pos:`Lowleft labl 
+	  (Point.pt (num_of_int w */ sx,
+		     Num.zero -/ hlabels_height  -/
+ 		       (bp 0.5) */ h_caption_height ))
+
   in
-  let vcaptcmd = match vcaption with 
+  let  vcaptcmd = match vcaption with 
     | None -> Command.nop
     | Some labl -> 
-	Command.label ~pos:`Lowleft 
-	  (Picture.transform [Transform.rotated 90.] labl)
-	  (Point.pt (bp 0. -/ sx, num_of_int h */ sy))
+	let rot_labl = (Picture.transform [Transform.rotated 90.] labl) in
+	let vlabels_width =
+	  match (vlabel h sy) with
+	     | None -> Num.zero
+	     | Some pic -> Picture.width pic
+	in
+	let v_caption_width = Picture.width rot_labl in
+	Command.label ~pos:`Lowleft rot_labl
+      	  (Point.pt ( Num.zero -/ vlabels_width -/  (bp 0.5)  
+ 		      */ v_caption_width, 
+		      num_of_int h */ sy))		
   in
   let labelcmd pos p i f = 
     match f i sx with
