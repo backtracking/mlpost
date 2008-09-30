@@ -115,7 +115,7 @@ let rec draw ?(debug=false) b =
     else 
       Command.nop
   in
-  Command.seq [fill_cmd; path_cmd; contents_cmd; debug_cmd]
+  Command.seq [fill_cmd; contents_cmd; path_cmd; debug_cmd]
 
 type style = 
   | Rect | Circle | Ellipse | RoundRect | Patatoid
