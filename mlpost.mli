@@ -630,8 +630,15 @@ and Box : sig
     (** similar to [hblock], with vertical alignment *)
 
   val grid : ?pos:Command.position -> t array array -> t
+    (** Aligns the given boxes in a way that is similar to [hblock] and [vblock]:
+	boxes are aligned in a grid where all cells have the same size. Each one 
+	of these cells is a box containing the original corresponding box. *)
+	
   val gridl : ?pos:Command.position -> t list list -> t
+    (** similar to [grid], but using lists instead of arrays *)
+    
   val gridi : ?pos:Command.position -> int -> int -> (int -> int -> t) -> t
+    (** similar to [gridi], but using a matrix defined with a function *)
 
   (** {2 Sub-boxes accessors} *)
 
