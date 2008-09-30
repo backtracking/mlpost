@@ -1,9 +1,11 @@
-PNGFILES := f1.png f2.png traffic.png hierarchy.png
-OUTFILES := $(PNGFILES:.png=.1)
+BOXPNGFILES := f1.png f2.png traffic.png hierarchy.png
+BOXOUTFILES := $(BOXPNGFILES:.png=.1)
+PATHPNGFILES := path1.png
+PATHOUTFILES := $(PATHPNGFILES:.png=.1)
 
 
-all: $(PNGFILES) parse
-	caml2html -hc -ext "parse:./parse" boxes.ml
+all: $(BOXPNGFILES) $(PATHPNGFILES) parse
+	caml2html -hc -ext "parse:./parse" boxes.ml pathes.ml
 
 %.png: %.ps
 	convert $*.ps $@ 
@@ -14,7 +16,10 @@ all: $(PNGFILES) parse
 	dvips -E $*.dvi -o
 
 # dangerous - might be called more than once or even at the same time
-$(OUTFILES): boxes.ml
+$(BOXOUTFILES): boxes.ml
+	../tool.opt -ccopt "-I ../ unix.cma" -v $^
+
+$(PATHOUTFILES): pathes.ml
 	../tool.opt -ccopt "-I ../ unix.cma" -v $^
 
 parse.ml: parse.mll
@@ -24,5 +29,6 @@ parse: parse.ml
 	ocamlopt.opt -o parse parse.ml
 
 clean:
-	rm -f *.aux *.dvi *.ps *.1 *.log $(PNGFILES) *.mp *.mpx *.tex *.html
+	rm -f *.aux *.dvi *.ps *.1 *.log $(PNGFILES) *.mp *.mpx *.tex
+	rm -f boxes.ml.html pathes.ml.html
 	rm -f parse.ml *.cmx *.cmo *.cmi parse

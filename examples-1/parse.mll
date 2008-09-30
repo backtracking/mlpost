@@ -15,7 +15,7 @@ rule scan = parse
       { 
         Printf.printf "<p id=\"%s1\"><img src=\"%s.png\" /></p>" i i;
         Printf.printf "<a href=\"#%s1\" onclick=\"\
-                       toggle_visibility('%s');\">show / hide</a>" i i;
+                       toggle_visibility('%s');\">show/hide code</a>" i i;
         Printf.printf "<div id=\"%s\" style='display:none;'>" i;
         Printf.printf "<p>";
         scan lexbuf

@@ -26,6 +26,8 @@ module T = Transform
 let (++) x y = pt (cm x, cm y)
 let shift x y = transform [Transform.shifted (x ++ y)]
 
+let () = Random.init 1234
+
 let d1 = 
   let a = Box.circle (Picture.tex "$\\sqrt2$") in
   let b = 
@@ -82,7 +84,6 @@ let yannick style =
   [draw  
       ~edge_style:Square tree]
 
-let () = Random.init 1234
 
 let rec random_tree = 
   let tex = tex ~fill:Color.yellow in
