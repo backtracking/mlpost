@@ -10,7 +10,7 @@ let identifier = alpha_lower (alpha | digit | '\'' | '_')*
 let blank = [' ' '\t' '\n' '\r' ]
 
 rule scan = parse
-  | ">>" { Printf.printf "</p> </div>"; scan lexbuf }
+  | ">>" { Printf.printf "</p> </div><hr>"; scan lexbuf }
   | "<<" (identifier as i)
       { 
         Printf.printf "<p id=\"%s1\"><img src=\"%s.png\" /></p>" i i;
