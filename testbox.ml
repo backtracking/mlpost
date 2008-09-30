@@ -67,23 +67,40 @@ let f4 =
 let f5 =
   let sz = Num.cm 1. in
   let empty = empty ~width:sz ~height:sz () in
-  let black = set_fill (Color.gray 0.3) (set_stroke Color.black empty) in
-  let white = set_stroke Color.black empty in
-  let f i j = if (i+j) mod 2 =0 then black else white in
+  let black = set_fill (Color.gray 0.3) empty in
+  let num n = tex ~stroke:None (string_of_int n) in
+  let f i j = 
+        if i = 0 && j = 0 then black else num ((i+j)*(i+j))
+	  (* if (i+j) mod 2 =0 then black else white in *)
+  in
+    [draw (gridi 7 3 f)]
+
+(** pour comparaison avec f5 *)
+let f6 =
+  let sz = Num.cm 1. in
+  let empty = empty ~width:sz ~height:sz () in
+  let black = set_fill (Color.gray 0.3) empty in
+  let num n = tex ~stroke:None (string_of_int n) in
+  let f i j = 
+        if i = 0 && j = 0 then black else num ((i+j)*(i+j))
+	  (* if (i+j) mod 2 =0 then black else white in *)
+  in
     [draw (tabulari 7 3 f)]
 
 let sudoku =
-  let sq33 cell = tabulari 3 3 (fun _ _ -> cell) in
+  let sq33 cell = gridi 3 3 cell in
   let sz= Num.cm 0.5 in
-  let cell = set_stroke Color.black (empty ~width:sz ~height:sz ()) in
+  let empty_cell = empty ~width:sz ~height:sz () in
+  let num n = tex ~stroke:None (string_of_int n) in
+  let cell i j = 
+    if Random.bool () then empty_cell else num ((Random.int 9) + 1) in
   let pen = Pen.scale (Num.bp 1.) (Pen.circle ()) in
-  let square = 
-    set_stroke Color.black (set_pen pen (sq33 cell)) in
-    [draw (sq33 square)]
+  let square () = set_stroke Color.black (set_pen pen (sq33 cell)) in
+    [draw (sq33 (fun _ _ -> square ()))]
 
 let figs = [
+  f6; f5;
   sudoku;
-  f5;
   f4;
   f3;
   f0; f1; f2;

@@ -66,7 +66,7 @@ module B = struct
 
   let center pt x = shift (Point.sub pt x.ctr) x
   
-end 
+end
 
 include B
 
@@ -313,6 +313,21 @@ let halign_to_box ?(dx=margin) ?(dy=margin) ?(spacing=Num.zero) ?pos pl =
 
 ****)
 
+(* place the box [b] inside the rectangular region defined by upper left
+   corner [x,y], width [w] and height [h], according to alignment [pos] *)
+let place_box pos x y w h b =
+  let xb = match pos with
+    | `Center | `Top | `Bot -> x +/ w /./ 2.
+    | `Left | `Upleft | `Lowleft -> x +/ width b /./ 2.
+    | `Right | `Upright | `Lowright -> x +/ w -/ width b /./ 2.
+  in
+  let yb = match pos with
+    | `Center | `Left | `Right -> y -/ h /./ 2.
+    | `Top | `Upright | `Upleft -> y -/ height b /./ 2.
+    | `Bot | `Lowleft | `Lowright -> y -/ h +/ height b /./ 2.
+  in
+    center (Point.pt (xb, yb)) b
+
 let tabularl ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?(pos=`Center) pll =
   if pll = [] then invalid_arg "Box.tabular: empty list";
   let len = List.length (List.hd pll) in
@@ -336,41 +351,28 @@ let tabularl ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?(pos=`Center) pll =
   let tw = List.fold_left (fun a w -> a +/ w +/ dx) Num.zero wmaxl -/ dx in
   let tw_2 = tw /./ 2. in
   let th = List.fold_left (fun a h -> a +/ h +/ dy) Num.zero hmaxl -/ dy in
-  (* place the box [b] inside the rectangular region defined by upper left
-     corner [x,y], width [w] and height [h], according to alignment [pos] *)
-  let place_box x y w h b =
-    let xb = match pos with
-      | `Center | `Top | `Bot -> x +/ w /./ 2.
-      | `Left | `Upleft | `Lowleft -> x +/ width b /./ 2.
-      | `Right | `Upright | `Lowright -> x +/ w -/ width b /./ 2.
-    in
-    let yb = match pos with
-      | `Center | `Left | `Right -> y -/ h /./ 2.
-      | `Top | `Upright | `Upleft -> y -/ height b /./ 2.
-      | `Bot | `Lowleft | `Lowright -> y -/ h +/ height b /./ 2.
-    in
-    center (Point.pt (xb, yb)) b
-  in
-  (* make a single row with upper left corner [x,y] and height [hrow] *)
-  let rec make_row x y hrow wmaxl pl = match pl, wmaxl with
-    | [], [] -> []
-    | [], _ | _, [] -> assert false
-    | p :: ql, wrow :: wl ->
-	let b = place_box x y wrow hrow p in
-	b :: make_row (x +/ wrow +/ dx) y hrow wl ql
-  in
-  (* make all rows, with upper left corner [0,y] *)
-  let rec make_array hmaxl y pll = match pll, hmaxl with
-    | [], [] -> []
-    | [], _ | _, [] -> assert false
-    | row :: qll, hrow :: hl -> 
-	let brow = 
-	  let c = Point.pt (tw_2, y -/ hrow /./ 2.) in
-	  group_rect tw hrow c (make_row Num.zero y hrow wmaxl row)
-	in
-	brow :: make_array hl (y -/ hrow -/ dy) qll
-  in
   let c = Point.pt (tw_2, Num.neg (th /./ 2.)) in
+    (* make a single row with upper left corner [x,y] and height [hrow] *)
+  let rec make_row x y hrow wmaxl pl = 
+    match pl, wmaxl with
+      | [], [] -> []
+      | [], _ | _, [] -> assert false
+      | p :: ql, wrow :: wl ->
+	  let b = place_box pos x y wrow hrow p in
+	    b :: make_row (x +/ wrow +/ dx) y hrow wl ql
+  in
+    (* make all rows, with upper left corner [0,y] *)
+  let rec make_array hmaxl y pll = 
+    match pll, hmaxl with
+      | [], [] -> []
+      | [], _ | _, [] -> assert false
+      | row :: qll, hrow :: hl -> 
+	  let brow = 
+	    let c = Point.pt (tw_2, y -/ hrow /./ 2.) in
+	      group_rect tw hrow c (make_row Num.zero y hrow wmaxl row)
+	  in
+	    brow :: make_array hl (y -/ hrow -/ dy) qll
+  in
   group_rect tw th c (make_array hmaxl Num.zero pll)
 
 let tabular ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?pos m =
@@ -382,6 +384,42 @@ let tabulari ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?pos w h f =
   tabular ~hpadding ~vpadding ?pos m
 
 (* blocks *)
+let gridl ?(pos=`Center) pll =
+  let hmax = Num.fold_max (Num.fold_max height Num.zero) Num.zero pll in
+  let wmax = Num.fold_max (Num.fold_max width Num.zero) Num.zero pll in
+  let tw = 
+    (match pll with [] -> 0. | a::_ -> float (List.length a)) *./ wmax in
+  let tw_2 = tw /./ 2. in
+  let th = (float (List.length pll)) *./ hmax in
+  let c = Point.pt (tw_2, Num.neg (th /./ 2.)) in
+    (* make a single row with upper left corner [x,y] *)
+  let rec make_row x y = function
+    | [] -> []
+    | p :: ql -> 
+	let b = place_box pos x y wmax hmax p in
+	let b' = set_stroke Color.black (group_rect wmax hmax b.ctr [b]) in
+	  b' :: make_row (x +/ wmax) y ql
+  in
+    (* make all rows, with upper left corner [0,y] *)
+  let rec make_array y pll =
+    match pll with
+      | [] -> []
+      | row :: qll -> 
+	  let brow = 
+	    let c = Point.pt (tw_2, y -/ hmax /./ 2.) in
+	      group_rect tw hmax c (make_row Num.zero y row)
+	  in
+	    brow :: make_array (y -/ hmax) qll
+  in
+  group_rect tw th c (make_array Num.zero pll)
+
+let grid ?pos m =
+  let pll = Array.to_list (Array.map Array.to_list m) in 
+    gridl ?pos pll
+
+let gridi ?pos w h f =
+  let m = Array.init h (fun j -> Array.init w (fun i -> f i j)) in
+    grid ?pos m
 
 let hblock ?(pos=`Center) pl =
   let hmax = Num.fold_max height Num.zero pl in
@@ -431,9 +469,12 @@ let vblock ?(pos=`Center) pl =
   let mycenter = Point.pt (wmax_2, y /./ 2.) in
   group_rect wmax (Num.neg y) mycenter l
 
+
+
 open Path
 
 let cpath ?style ?outd ?ind a b =
   let r,l = outd, ind in
   let p = pathk ?style [knotp ?r (ctr a); knotp ?l (ctr b)] in
   cut_after (bpath b) (cut_before (bpath a) p)
+ 

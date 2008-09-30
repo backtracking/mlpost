@@ -629,6 +629,10 @@ and Box : sig
   val vblock : ?pos:Command.hposition -> t list -> t
     (** similar to [hblock], with vertical alignment *)
 
+  val grid : ?pos:Command.position -> t array array -> t
+  val gridl : ?pos:Command.position -> t list list -> t
+  val gridi : ?pos:Command.position -> int -> int -> (int -> int -> t) -> t
+
   (** {2 Sub-boxes accessors} *)
 
   val nth : int -> t -> t
