@@ -5,7 +5,7 @@ PATHOUTFILES := $(PATHPNGFILES:.png=.1)
 
 
 all: $(BOXPNGFILES) $(PATHPNGFILES) parse
-	caml2html -hc -ext "parse:./parse" boxes.ml pathes.ml
+	caml2html -hc -ext "parse:./parse" boxes.ml paths.ml
 
 %.png: %.ps
 	convert $*.ps $@ 
@@ -19,7 +19,7 @@ all: $(BOXPNGFILES) $(PATHPNGFILES) parse
 $(BOXOUTFILES): boxes.ml
 	../tool.opt -ccopt "-I ../ unix.cma" -v $^
 
-$(PATHOUTFILES): pathes.ml
+$(PATHOUTFILES): paths.ml
 	../tool.opt -ccopt "-I ../ unix.cma" -v $^
 
 parse.ml: parse.mll
@@ -30,5 +30,5 @@ parse: parse.ml
 
 clean:
 	rm -f *.aux *.dvi *.ps *.1 *.log $(PNGFILES) *.mp *.mpx *.tex
-	rm -f boxes.ml.html pathes.ml.html
+	rm -f boxes.ml.html paths.ml.html
 	rm -f parse.ml *.cmx *.cmo *.cmi parse
