@@ -165,6 +165,9 @@ version.ml: Makefile
 dep:
 	$(OCAMLDEP) *.mli *.ml | ocamldot | dot -Tps | gv -
 
+wc:
+	ocamlwc *.ml* -p
+
 # headers
 #########
 
