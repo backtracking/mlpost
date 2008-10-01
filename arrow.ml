@@ -45,7 +45,7 @@ let draw ?style ?outd ?ind ?(foot = fun x -> no_head x)
     ?(head = fun x -> simple_head x) a b =
   let path = simple ?style ?outd ?ind a b in
   let head_dir = normalize (Path.direction 1. path) in
-  let foot_dir = normalize (Path.direction 0. path) in
+  let foot_dir = neg (normalize (Path.direction 0. path)) in
   Command.seq [
     foot a foot_dir;
     Command.draw path;
