@@ -79,12 +79,31 @@ let uml =
     box_label_arrow ~pos:`Left (Picture.tex "owns") 
       (get "Client" diag) (get "BankAccount" diag) ]
 
+let hierarchy =
+  let two = Num.bp 2. in
+  let five = Num.bp 5. in
+  let tex = tex ~dx:two ~dy:two in
+  let tex' s = tex ~stroke:None in
+  let vbox = vbox ~padding:(Num.bp 3.) ~stroke:(Some black) 
+                  ~style:RoundRect ~dy:five ~dx:five
+  in
+  let b = 
+    vbox [ tex' "set of all languages";
+      vbox [ tex' "recursively enumerable languages";
+        vbox [ tex' "decidable languages";
+          vbox [ tex' "context sensitive";
+            vbox [tex' "context free"; tex ~style:RoundRect "regular" ]
+    ] ] ] ]
+  in
+  [ draw b]
+
 (* JC *)
 let bresenham =
   [nop]
 
 let () = Metapost.emit "automate" automate
 let () = Metapost.emit "uml" uml
+let () = Metapost.emit "hierarchy" hierarchy
 let () = Metapost.emit "graph_sqrt" graph_sqrt
 let () = Metapost.emit "architecture" architecture
 let () = Metapost.emit "bresenham" bresenham
