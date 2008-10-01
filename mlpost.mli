@@ -474,6 +474,293 @@ and Color : sig
 	correspond to a color *)
 end
 
+and Transform : sig
+
+  (** Transformations are an important way to modify objects in Mlpost.
+      Objects can be scaled, shifted, rotated, etc, and any combination of
+      these transformations is possible. Currently, transformations can be
+      applied to Pictures, Pens and Paths. *)  
+
+  type t'
+    (** The abstract type of a single transformation *)
+
+  val scaled : Num.t -> t'
+    (** Scale an object by a constant factor.
+      @param scale a scaling function to be applied to each float;
+      see {!Num.t} for scaling functions for usual units. This makes only sense
+      when the object to be transformed is given in "bp" units *)
+  val rotated : float -> t'
+    (** Rotate an object by an angle given in degrees *)
+  val shifted : Point.t -> t'
+    (** Shift an object with respect to a point *)
+  val slanted : Num.t -> t'
+    (** Slant an object: the point [(x,y)] becomes [(x+ay,y)], with slanting
+        factor [a] *)
+  val xscaled : Num.t -> t'
+    (** Scale an object by a constant factor, but only in the [x] direction *)
+  val yscaled : Num.t -> t'
+    (** Scale an object by a constant factor, but only in the [y] direction *)
+  val zscaled : Point.t -> t'
+    (** Zscaled multiplies points of the object by the given point, using
+        "complex" multiplication: [(x,y) * (a,b) = (ax - by, bx + ay)];
+        its effect is to rotate and scale so as to map [(1,0)] into [(a,b)] *)
+  val reflect : Point.t -> Point.t -> t'
+    (** Reflect an object with respect to the line that goes through the two
+        given points *)
+  val rotate_around : Point.t -> float -> t'
+    (** Rotate an object by an angle given in degrees, around a given point *)
+
+  type t = t' list
+    (** A transformation is a list of single transformations *)
+
+  val id : t
+    (** The identity transformation  *)
+end
+
+and Picture : sig
+
+  (** Pictures are a powerful way to reuse and modify parts of a figure *)
+
+  type t
+    (** The abstract type of pictures *)
+
+  type repr = t
+
+  val make : Command.t -> t
+    (** Make a picture from a drawing command *)
+
+  val tex : string -> t
+   (** Take a string in Latex format and transform it into a picture *)
+
+(*
+  val currentpicture : t
+    (* Corresponds to the picture that has been drawn so far and can be used in
+      commands to manipulate it *)
+
+*)
+
+  val transform : Transform.t -> t -> t
+    (** Apply a transformation to a picture *)
+
+  val bbox : t -> Path.t
+    (** Get the bounding box of a picture (with default padding, as
+	in MetaPost) *)
+
+  val corner_bbox : ?dx:Num.t -> ?dy:Num.t -> t -> Path.t
+    (** Get the bounding box of a picture, according to its corners
+        and supplied padding [dx] and [dy]. *)
+
+  val center :  Point.t -> t -> t
+    (** Place a picture centered at some point *)
+
+  val place_up_left : t -> Point.t -> t
+    (** Place a picture with its upper left corner at some point *)
+
+  val place_up_right : t -> Point.t -> t
+    (** Place a picture with its upper right corner at some point *)
+
+  val place_bot_left : t -> Point.t -> t
+    (** Place a picture with its bottom left corner at some point *)
+
+  val place_bot_right : t -> Point.t -> t
+    (** Place a picture with its bottom right corner at some point *)
+
+  val beside : t -> t -> t
+    (** [beside p1 p2] returns a picture in which [p2] is placed right to [p1] *)
+
+  val below : t -> t -> t
+    (** [below p1 p2] returns a picture in which [p2] is placed below [p1] *)
+
+  (** {2 Special points of the bounding box of a picture} *)
+
+  val ulcorner : t -> Point.t
+  val llcorner : t -> Point.t
+  val urcorner : t -> Point.t
+  val lrcorner : t -> Point.t
+  val ctr : t -> Point.t
+
+  val clip : t -> Path.t -> t
+  (** [clip pic path] limits [pic] to the cyclic path [path]; all elements 
+      outside of [path] are cut off. *)
+
+  (** {2 Dimensions} *)
+
+  val width : t -> Num.t
+  val height : t -> Num.t
+
+  (** Predefined Transformations *)
+
+  val scale : Num.t -> t -> t
+  val rotate : float -> t -> t
+  val shift : Point.t -> t -> t
+  val yscale : Num.t -> t -> t
+  val xscale : Num.t -> t -> t
+  val spin : float -> t -> t
+
+  val v : t -> repr
+
+end
+
+and Command : sig
+
+  (** General Commands to build figures *)
+
+  type t
+      (** The abstract commands type *)
+
+  type figure = t list
+      (** A figure is a list of commands *)
+
+(*
+  val logo : figure
+    (** The Mlpost logo. *)
+
+*)
+  (** {2 Drawing Commands} *)
+
+  val draw : ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> Path.t -> t
+    (** Draw a path 
+	@param color the color of the path; default is black
+	@param pen the pen used to draw the path; default is {!Pen.default}
+	@param dashed if given, the path is drawn using that dash_style. *)
+
+  val draw_arrow : ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> Path.t -> t
+    (** Draw a path with an arrow head; the optional arguments 
+	are the same as for {!draw} *)
+
+  val fill : ?color:Color.t -> Path.t -> t
+    (** Fill a contour given by a closed path 
+	@param color the color used to fill the area; default is black *)
+
+  val draw_pic : Picture.t -> t
+    (** draws a picture *) 
+
+  (** {2 Manipulating Commands} *)
+
+  val nop : t
+    (** A command that has no effect *)
+
+  val append : t -> t -> t
+    (** Append two commands to form a compound command *)
+
+  val (++) : t -> t -> t
+    (** Abbreviation for [append] *)
+
+  val seq : t list -> t
+    (** Group a list of commands to a single command *)
+
+  val iter : int -> int -> (int -> t) -> t
+    (** [iter m n f] builds a command that corresponds to the sequence
+	of commands [f m; f (m+1); ... ; f(n)] *)
+
+  val iterl : ('a -> t) -> 'a list -> t
+    (** [iterl f l] builds a command that corresponds to the sequence
+	of commands [f x1; f x2; ... ; f xn] for [l = [x1;x2;...;xn]] *)
+
+  (** {2 Labels} *)
+
+  (** Positions; useful to place labels *)
+  type hposition = [`Center | `Left | `Right]
+  type vposition = [`Center | `Top | `Bot]
+  type position = [
+  | hposition 
+  | vposition 
+  | `Upleft
+  | `Upright
+  | `Lowleft
+  | `Lowright
+  ]
+
+  (** [label ~pos:`Left pic p] puts picture [pic] at the left of point [p] *)
+  val label : ?pos:position -> Picture.t -> Point.t -> t
+
+  (** Works like [label], but puts a dot at point [p] as well *)
+  val dotlabel : ?pos:position -> Picture.t -> Point.t -> t
+
+end
+
+(** {2 Advanced graphical components} *)
+
+module rec Shapes : sig
+
+(** Various Basic Geometric Shapes *)
+
+  type t
+  val bpath : t -> Path.t
+
+  val rounded_rect_path : Num.t -> Num.t -> Num.t -> Num.t -> t
+
+  val rounded_rect : 
+    ?fill:Color.t -> ?stroke:Color.t -> ?thickness:float ->
+    Num.t -> Num.t -> Num.t -> Num.t -> Picture.t
+    (** [rounded_rect w h rx ry] draws a rectangle of width [w] and
+	height [h] with rounded corners. The rounded corners are arcs
+	of an ellipse of radii [rx] and [ry]. [rx] (resp. [ry]) should
+	be positive and smaller than [w/2] (resp. [h/2]).
+	@param fill the color with which to fill the rectangle ;
+	  if no color is provided, the rectangle is not filled.
+	@param stroke the color with which the rectangle's outline
+	  shall be drawn ; default is black.
+	@param thickness the thickness of the pen used to draw
+	  the outline ; 1. is default
+    *)
+      
+  val rectangle :
+    ?fill:Color.t -> ?stroke:Color.t -> ?thickness:float ->
+    Num.t -> Num.t -> Picture.t
+    (** [rectangle w h] draws a rectangle of width [w] and height [h].
+	@param fill the color with which to fill the rectangle ;
+	  if no color is provided, the rectangle is not filled.
+	@param stroke the color with which the rectangle's outline
+	  shall be drawn ; default is black.
+	@param thickness the thickness of the pen used to draw
+	  the outline ; 1. is default
+    *)
+
+  val ellipse :
+    ?fill:Color.t -> ?stroke:Color.t -> ?thickness:float ->
+    Num.t -> Num.t -> Picture.t
+    (** [ellipse rx ry] draws an ellipse of great axis [rx] and small axis [ry].
+	The ellipse is centered on the origin and aligned with the x axis.
+	@param fill the color with which to fill the ellipse ; if no color
+	  is provided, it is not filled.
+	@param stroke the color with which the ellipse's outline shall be
+	  drawn ; default is black.
+	@param thickness the thickness of the pen used to draw
+	  the outline ; 1. is default
+    *)
+
+(*
+  val arc_ellipse :
+    ?fill:Color.t -> ?stroke:Color.t -> ?thickness:float -> ?close:bool ->
+    Num.t -> Num.t -> float -> float -> Picture.t
+*)
+    (** [arc_ellipse rx ry th1 th2] draws an arc of the ellipse 
+	of great axis [rx] and small axis [ry] starting at angle [th1] and
+	ending at angle [th2] (in radians).
+	The ellipse is centered on the origin and aligned with the x axis.
+	@param fill the colod with which to fill the ellipse ; if no color
+	  is provided, it is not filled.
+	@param stroke the color with which the ellipse's outline shall be
+	  drawn ; default is black.
+	@param thickness the thickness of the pen used to draw
+	  the outline ; 1. is default
+	@param close if true, the extremities of the arc are joined to 
+	the origin by straight lines, thus closing path. If [fill] is provided,
+	then [close] will be true by default ; otherwise it is false.
+    *)
+
+  (* POS compliance *)
+  type repr = t
+  val v : t -> repr
+  val ctr : t -> Point.t
+  val height : t -> Num.t
+  val width : t -> Num.t
+  val shift : Point.t -> repr -> repr
+  val center : Point.t -> t -> repr
+
+end
+
 and Box : sig
 
   (** Boxes *)
@@ -663,6 +950,7 @@ and Box : sig
   val get_stroke : t -> Color.t option
   val set_stroke : Color.t -> t -> t
   val clear_stroke : t -> t
+
   val get_name : t -> string option
   val set_name : string -> t -> t
 
@@ -678,134 +966,7 @@ and Box : sig
     (** the path that connects 2 boxes and stops at the box boundaries *) 
 end
 
-and Transform : sig
-
-  (** Transformations are an important way to modify objects in Mlpost.
-      Objects can be scaled, shifted, rotated, etc, and any combination of
-      these transformations is possible. Currently, transformations can be
-      applied to Pictures, Pens and Paths. *)  
-
-  type t'
-    (** The abstract type of a single transformation *)
-
-  val scaled : Num.t -> t'
-    (** Scale an object by a constant factor.
-      @param scale a scaling function to be applied to each float;
-      see {!Num.t} for scaling functions for usual units. This makes only sense
-      when the object to be transformed is given in "bp" units *)
-  val rotated : float -> t'
-    (** Rotate an object by an angle given in degrees *)
-  val shifted : Point.t -> t'
-    (** Shift an object with respect to a point *)
-  val slanted : Num.t -> t'
-    (** Slant an object: the point [(x,y)] becomes [(x+ay,y)], with slanting
-        factor [a] *)
-  val xscaled : Num.t -> t'
-    (** Scale an object by a constant factor, but only in the [x] direction *)
-  val yscaled : Num.t -> t'
-    (** Scale an object by a constant factor, but only in the [y] direction *)
-  val zscaled : Point.t -> t'
-    (** Zscaled multiplies points of the object by the given point, using
-        "complex" multiplication: [(x,y) * (a,b) = (ax - by, bx + ay)];
-        its effect is to rotate and scale so as to map [(1,0)] into [(a,b)] *)
-  val reflect : Point.t -> Point.t -> t'
-    (** Reflect an object with respect to the line that goes through the two
-        given points *)
-  val rotate_around : Point.t -> float -> t'
-    (** Rotate an object by an angle given in degrees, around a given point *)
-
-  type t = t' list
-    (** A transformation is a list of single transformations *)
-
-  val id : t
-    (** The identity transformation  *)
-end
-
-and Picture : sig
-
-  (** Pictures are a powerful way to reuse and modify parts of a figure *)
-
-  type t
-    (** The abstract type of pictures *)
-
-  type repr = t
-
-  val make : Command.t -> t
-    (** Make a picture from a drawing command *)
-
-  val tex : string -> t
-   (** Take a string in Latex format and transform it into a picture *)
-
-(*
-  val currentpicture : t
-    (* Corresponds to the picture that has been drawn so far and can be used in
-      commands to manipulate it *)
-
-*)
-
-  val transform : Transform.t -> t -> t
-    (** Apply a transformation to a picture *)
-
-  val bbox : t -> Path.t
-    (** Get the bounding box of a picture (with default padding, as
-	in MetaPost) *)
-
-  val corner_bbox : ?dx:Num.t -> ?dy:Num.t -> t -> Path.t
-    (** Get the bounding box of a picture, according to its corners
-        and supplied padding [dx] and [dy]. *)
-
-  val center :  Point.t -> t -> t
-    (** Place a picture centered at some point *)
-
-  val place_up_left : t -> Point.t -> t
-    (** Place a picture with its upper left corner at some point *)
-
-  val place_up_right : t -> Point.t -> t
-    (** Place a picture with its upper right corner at some point *)
-
-  val place_bot_left : t -> Point.t -> t
-    (** Place a picture with its bottom left corner at some point *)
-
-  val place_bot_right : t -> Point.t -> t
-    (** Place a picture with its bottom right corner at some point *)
-
-  val beside : t -> t -> t
-    (** [beside p1 p2] returns a picture in which [p2] is placed right to [p1] *)
-
-  val below : t -> t -> t
-    (** [below p1 p2] returns a picture in which [p2] is placed below [p1] *)
-
-  (** {2 Special points of the bounding box of a picture} *)
-
-  val ulcorner : t -> Point.t
-  val llcorner : t -> Point.t
-  val urcorner : t -> Point.t
-  val lrcorner : t -> Point.t
-  val ctr : t -> Point.t
-
-  val clip : t -> Path.t -> t
-  (** [clip pic path] limits [pic] to the cyclic path [path]; all elements 
-      outside of [path] are cut off. *)
-
-  (** {2 Dimensions} *)
-
-  val width : t -> Num.t
-  val height : t -> Num.t
-
-  (** Predefined Transformations *)
-
-  val scale : Num.t -> t -> t
-  val rotate : float -> t -> t
-  val shift : Point.t -> t -> t
-  val yscale : Num.t -> t -> t
-  val xscale : Num.t -> t -> t
-  val spin : float -> t -> t
-
-  val v : t -> repr
-
-end
-
-and Arrow : sig
+module Arrow : sig
   (** The Beginning of a module for building arrows. Actually, an arrow is just
     a path. Use {!Command.draw_arrow} to draw arrows. *)
 
@@ -861,7 +1022,7 @@ and Arrow : sig
     ?head_width:Num.t -> Point.t -> Point.t -> Command.t
 end
 
-and ExtArrow : sig
+module ExtArrow : sig
   (** Draw simple or complex arrows. *)
 
   (** To draw an arrow, choose your arrow [kind], then call the [draw] function
@@ -975,84 +1136,6 @@ and ExtArrow : sig
         @param ind the ingoing direction, at the end of the arrow *)
 end
 
-and Command : sig
-
-  (** General Commands to build figures *)
-
-  type t
-      (** The abstract commands type *)
-
-  type figure = t list
-      (** A figure is a list of commands *)
-
-(*
-  val logo : figure
-    (** The Mlpost logo. *)
-
-*)
-  (** {2 Drawing Commands} *)
-
-  val draw : ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> Path.t -> t
-    (** Draw a path 
-	@param color the color of the path; default is black
-	@param pen the pen used to draw the path; default is {!Pen.default}
-	@param dashed if given, the path is drawn using that dash_style. *)
-
-  val draw_arrow : ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> Path.t -> t
-    (** Draw a path with an arrow head; the optional arguments 
-	are the same as for {!draw} *)
-
-  val fill : ?color:Color.t -> Path.t -> t
-    (** Fill a contour given by a closed path 
-	@param color the color used to fill the area; default is black *)
-
-  val draw_pic : Picture.t -> t
-    (** draws a picture *) 
-
-  (** {2 Manipulating Commands} *)
-
-  val nop : t
-    (** A command that has no effect *)
-
-  val append : t -> t -> t
-    (** Append two commands to form a compound command *)
-
-  val (++) : t -> t -> t
-    (** Abbreviation for [append] *)
-
-  val seq : t list -> t
-    (** Group a list of commands to a single command *)
-
-  val iter : int -> int -> (int -> t) -> t
-    (** [iter m n f] builds a command that corresponds to the sequence
-	of commands [f m; f (m+1); ... ; f(n)] *)
-
-  val iterl : ('a -> t) -> 'a list -> t
-    (** [iterl f l] builds a command that corresponds to the sequence
-	of commands [f x1; f x2; ... ; f xn] for [l = [x1;x2;...;xn]] *)
-
-  (** {2 Labels} *)
-
-  (** Positions; useful to place labels *)
-  type hposition = [`Center | `Left | `Right]
-  type vposition = [`Center | `Top | `Bot]
-  type position = [
-  | hposition 
-  | vposition 
-  | `Upleft
-  | `Upright
-  | `Lowleft
-  | `Lowright
-  ]
-
-  (** [label ~pos:`Left pic p] puts picture [pic] at the left of point [p] *)
-  val label : ?pos:position -> Picture.t -> Point.t -> t
-
-  (** Works like [label], but puts a dot at point [p] as well *)
-  val dotlabel : ?pos:position -> Picture.t -> Point.t -> t
-
-end
-
 module  Pos : sig
   (** This module consists of several functors for generic placement of objects.
     Instantiations with the {!Picture} module exist in other places of Mlpost.
@@ -1155,7 +1238,7 @@ module  Pos : sig
 
 end
 
-(** {2 Helpers and high-level drawing commands} *)
+(** {2 Helpers and Extensions} *)
 
 module Helpers : sig
   val dotlabels :
@@ -1358,86 +1441,6 @@ module Plot : sig
                   ?style:Path.joint -> ?dashed:Dash.t ->
                   ?label:(Picture.t * Command.position * int) ->
                     (int -> float) -> skeleton -> Command.t
-end
-
-module Shapes : sig
-
-(** Various Basic Geometric Shapes *)
-
-  type t
-  val bpath : t -> Path.t
-
-  val rounded_rect_path : Num.t -> Num.t -> Num.t -> Num.t -> t
-
-  val rounded_rect : 
-    ?fill:Color.t -> ?stroke:Color.t -> ?thickness:float ->
-    Num.t -> Num.t -> Num.t -> Num.t -> Picture.t
-    (** [rounded_rect w h rx ry] draws a rectangle of width [w] and
-	height [h] with rounded corners. The rounded corners are arcs
-	of an ellipse of radii [rx] and [ry]. [rx] (resp. [ry]) should
-	be positive and smaller than [w/2] (resp. [h/2]).
-	@param fill the color with which to fill the rectangle ;
-	  if no color is provided, the rectangle is not filled.
-	@param stroke the color with which the rectangle's outline
-	  shall be drawn ; default is black.
-	@param thickness the thickness of the pen used to draw
-	  the outline ; 1. is default
-    *)
-      
-  val rectangle :
-    ?fill:Color.t -> ?stroke:Color.t -> ?thickness:float ->
-    Num.t -> Num.t -> Picture.t
-    (** [rectangle w h] draws a rectangle of width [w] and height [h].
-	@param fill the color with which to fill the rectangle ;
-	  if no color is provided, the rectangle is not filled.
-	@param stroke the color with which the rectangle's outline
-	  shall be drawn ; default is black.
-	@param thickness the thickness of the pen used to draw
-	  the outline ; 1. is default
-    *)
-
-  val ellipse :
-    ?fill:Color.t -> ?stroke:Color.t -> ?thickness:float ->
-    Num.t -> Num.t -> Picture.t
-    (** [ellipse rx ry] draws an ellipse of great axis [rx] and small axis [ry].
-	The ellipse is centered on the origin and aligned with the x axis.
-	@param fill the colod with which to fill the ellipse ; if no color
-	  is provided, it is not filled.
-	@param stroke the color with which the ellipse's outline shall be
-	  drawn ; default is black.
-	@param thickness the thickness of the pen used to draw
-	  the outline ; 1. is default
-    *)
-
-(*
-  val arc_ellipse :
-    ?fill:Color.t -> ?stroke:Color.t -> ?thickness:float -> ?close:bool ->
-    Num.t -> Num.t -> float -> float -> Picture.t
-*)
-    (** [arc_ellipse rx ry th1 th2] draws an arc of the ellipse 
-	of great axis [rx] and small axis [ry] starting at angle [th1] and
-	ending at angle [th2] (in radians).
-	The ellipse is centered on the origin and aligned with the x axis.
-	@param fill the colod with which to fill the ellipse ; if no color
-	  is provided, it is not filled.
-	@param stroke the color with which the ellipse's outline shall be
-	  drawn ; default is black.
-	@param thickness the thickness of the pen used to draw
-	  the outline ; 1. is default
-	@param close if true, the extremities of the arc are joined to 
-	the origin by straight lines, thus closing path. If [fill] is provided,
-	then [close] will be true by default ; otherwise it is false.
-    *)
-
-  (* POS compliance *)
-  type repr = t
-  val v : t -> repr
-  val ctr : t -> Point.t
-  val height : t -> Num.t
-  val width : t -> Num.t
-  val shift : Point.t -> repr -> repr
-  val center : Point.t -> t -> repr
-
 end
 
 (** {2 Metapost generation} *)
