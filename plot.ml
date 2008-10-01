@@ -160,6 +160,13 @@ let draw_axes ?(hpen=Pen.default ()) ?(vpen=Pen.default ())
                  (fun acc i -> (vertical i) :: acc) 
                [] 0 h) 0 w) ]
 
+let draw_simple_axes ?hpen ?vpen hcaption vcaption sk =
+  draw_axes 
+    ?hpen ?vpen
+    ~hlabel:(fun _ _ -> None) ~vlabel:(fun _ _ -> None) ~ticks:None
+    ~hcaption:(Picture.tex hcaption) 
+    ~vcaption:(Picture.rotate (-90.) (Picture.tex vcaption)) sk
+
 type drawing = | Stepwise | Normal
 
 let draw_func ?(pen) ?(drawing=Normal) ?(style) ?(dashed) ?(label)

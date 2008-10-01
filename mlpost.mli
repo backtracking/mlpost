@@ -1437,6 +1437,10 @@ module Plot : sig
                   ?hcaption:Picture.t -> ?vcaption:Picture.t ->
                     skeleton -> Command.t
 
+  val draw_simple_axes : ?hpen:Pen.t -> ?vpen:Pen.t -> string -> string ->
+                            skeleton -> Command.t
+
+
   val draw_func : ?pen:Pen.t -> ?drawing:drawing -> 
                   ?style:Path.joint -> ?dashed:Dash.t ->
                   ?label:(Picture.t * Command.position * int) ->

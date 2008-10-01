@@ -94,18 +94,11 @@ placement relatif plutôt qu'absolu
 \begin{minipage}{0.3\linewidth}
 \small\begin{ocaml}
 let graph_sqrt =
-  let u = Num.cm in
-  let pen = Pen.circle ~tr:[Transform.scaled one] () in 
-  let rec pg = function
-    | 0 -> start (knot ~r:(vec up) ~scale:u (0.,0.))
-    | n -> let f = (float_of_int n /. 2.) in 
-        concat ~style:jCurve (pg (n-1)) (knot ~scale:u (f, sqrt f)) 
-  in
-  [draw (pathn ~style:jLine [(zero,u 2.); (zero,zero); (u 4.,zero)]);
-   draw ~pen (pg 8);
-   label ~pos:`Lowright (tex "$\\sqrt x$") (pt (u 3., u (sqrt 3.)));
-   label ~pos:`Bot (tex "$x$") (pt (u 2., zero));
-   label ~pos:`Lowleft (tex "$y$") (pt (zero, u 1.))]
+  let u = cm 1. in
+  let sk = Plot.mk_skeleton 4 2 u u in
+  let label = Picture.tex "$\\sqrt x$", `Top, 3 in
+  let graph = Plot.draw_func ~label (fun x -> sqrt (float x)) sk in
+    [graph; Plot.draw_simple_axes "$x$" "$y$" sk]
 \end{ocaml}
 \end{minipage}
 

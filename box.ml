@@ -133,18 +133,17 @@ let circle ?(dx=margin) ?(dy=margin) w h c =
 let ellipse ?(dx=margin) ?(dy=margin) w h c =
   let rx = w /./ 2. +/ dx in
   let ry = h /./ 2. +/ dy in
-  2. *./ rx, 2. *./ ry, Shapes.shift c (Shapes.full_ellipse_path rx ry) 
+  let s = Shapes.shift c (Shapes.full_ellipse_path rx ry) in
+    s.Shapes.wt, s.Shapes.ht, s
 
-let round_rect_gen ?(dx=margin) ?(dy=margin) ?(rx=margin) ?(ry=margin) w h c =
-  let dx = w +/ dx in
-  let dy = h +/ dy in
-  dx, dy, Shapes.shift c (Shapes.rounded_rect_path dx dy rx ry)
+let round_rect_gen ?(dx=margin) ?(dy=margin) ?(rx=margin) ?(ry=margin) wt ht c =
+  Shapes.shift c (Shapes.rounded_rect_path wt ht rx ry)
 
 let round_rect ?(dx=margin) ?(dy=margin) w h c =
-  let dx' = w +/ dx in
-  let dy' = h +/ dy in
-  let rx = (minn dx' dy') /./ 10. in
-  round_rect_gen ~dx ~dy ~rx ~ry:rx w h c
+  let wt = w +/ 2. *./ dx in
+  let ht = h +/ 2. *./ dy in
+  let rx = (minn wt ht) /./ 10. in
+    wt, ht, round_rect_gen ~dx ~dy ~rx ~ry:rx wt ht c
 
 let patatoid ?(dx=2. *./ margin) ?(dy=2. *./ margin) w h c =
   let path = Shapes.patatoid (w +/ 2. *./ dx) (h +/ 2. *./ dy) in

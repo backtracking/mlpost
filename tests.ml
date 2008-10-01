@@ -517,7 +517,7 @@ let newarray =
 
 let figs = [
   d6; d5; yannick Box.Rect; yannick Box.Patatoid; d1; d2; proval;
-              d2sq; d2hsq; d2s; d2c; d12; cheno011; d3; d4; 
+              d2sq; d2hsq; d2s; d2c; d12; cheno011; d3; d4;
              d7; d11; florence;
 (*
   newarray;
