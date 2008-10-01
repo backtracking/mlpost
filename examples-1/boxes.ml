@@ -25,7 +25,7 @@ let f1 =
   let b = 
     hbox ~padding:(bp 20.)
       [vbox ~padding:(bp 4.) ~pos:`Right 
-	 [tex "A"; tex ~name:"bc" "BC"; tex "D"];
+        [tex "A"; tex ~name:"bc" "$\\sqrt{x}$"; tex "D"];
        vbox ~padding:(bp 4.) ~pos:`Left  
 	 [tex ~name:"e" "E"; tex "FGH"]]
   in

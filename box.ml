@@ -230,9 +230,9 @@ let group_array ?name ?stroke ?fill ?dx ?dy ba =
 
 (* groups the given boxes in a rectangular shape of size [w,h]
    and center [c] *)
-let group_rect w h c bl =
+let group_rect ?name w h c bl =
   { desc = Grp (Array.of_list bl, merge_maps bl);
-    name = None; stroke = None; pen = None; fill = None;
+    name = name; stroke = None; pen = None; fill = None;
     width = w; height = h; ctr = c; 
     contour = Shapes.center c (Shapes.rectangle_path w h) }
 
@@ -420,7 +420,7 @@ let gridi ?pos w h f =
   let m = Array.init h (fun j -> Array.init w (fun i -> f i j)) in
     grid ?pos m
 
-let hblock ?(pos=`Center) pl =
+let hblock ?(pos=`Center) ?name pl =
   let hmax = Num.fold_max height Num.zero pl in
   let hmax_2 = hmax /./ 2. in
   let rec make_new acc x = function
@@ -442,9 +442,9 @@ let hblock ?(pos=`Center) pl =
   in
   let l,x = make_new [] Num.zero pl in
   let mycenter = Point.pt (x /./ 2., hmax_2) in     
-  group_rect x hmax mycenter l
+  group_rect ?name x hmax mycenter l
 
-let vblock ?(pos=`Center) pl =
+let vblock ?(pos=`Center) ?name pl =
   let wmax = Num.fold_max width Num.zero pl in
   let wmax_2 = wmax /./ 2. in
   let rec make_new acc y = function
@@ -460,7 +460,7 @@ let vblock ?(pos=`Center) pl =
 	let yc = y -/ hp /./ 2. in
         let c = Point.pt (x, yc) in 
         let b = center c p in
-	let b = group_rect wmax hp (Point.pt (wmax_2, yc)) [b] in
+	let b = group_rect ?name wmax hp (Point.pt (wmax_2, yc)) [b] in
 	let b = set_stroke Color.black b in
         make_new (b::acc) (y -/ hp) pl
   in

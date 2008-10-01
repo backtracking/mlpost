@@ -83,8 +83,8 @@ let hierarchy =
   let two = Num.bp 2. in
   let five = Num.bp 5. in
   let tex = tex ~dx:two ~dy:two in
-  let tex' s = tex ~stroke:None in
-  let vbox = vbox ~padding:(Num.bp 3.) ~stroke:(Some black) 
+  let tex' = tex ~stroke:None in
+  let vbox = vbox ~padding:(Num.bp 3.) ~stroke:(Some Color.black) 
                   ~style:RoundRect ~dy:five ~dx:five
   in
   let b = 
