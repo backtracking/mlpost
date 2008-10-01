@@ -27,9 +27,7 @@ let ident = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '_' '0'-'9']*
 rule alltt = parse
   | '{'  { print_string "\\{"; alltt lexbuf }
   | '}'  { print_string "\\}"; alltt lexbuf }
-(*
   | '\\' { print_string "\\ensuremath{\\backslash}"; alltt lexbuf }
-*)
   | '#' { print_string "\\diese{}"; alltt lexbuf }
   | '_'  { print_string "\\_{}"; alltt lexbuf }
   | '%'  { print_string "\\%{}"; alltt lexbuf }

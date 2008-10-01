@@ -1,22 +1,28 @@
 
-all: main-pp.ps
+all: main-pp.pdf
 
 WWW=/users/demons/filliatr/WWW
 
-%.ps: %.tex biblio.bib
-	latex $*.tex
+%.pdf: %.tex biblio.bib figures.ml
+	pdflatex $*.tex
 	bibtex $*
-	latex $*.tex
+	pdflatex $*.tex
 	bibtex $*
-	latex $*.tex
-	latex $*.tex
+	pdflatex $*.tex
+	pdflatex $*.tex
 	dvips $*.dvi -o
 
 %-pp.tex: pp.ml %.tex 
 	ocaml $^ > $@
 
+figures.mp: figures.ml
+	mlpost -pdf -latex main.tex $^
+
 main-pp.dvi: main-pp.tex
 	latex $^
+
+main-pp.pdf: main-pp.tex figures.mp
+	pdflatex $^
 
 pp.ml: pp.mll
 	ocamllex pp.mll

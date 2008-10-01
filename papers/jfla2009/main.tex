@@ -1,11 +1,16 @@
 \documentclass[twoside]{article}
 \usepackage[latin1]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{actes,alltt,url}
+\usepackage{actes,alltt,url,graphicx}
 \usepackage[french]{babel}
+
+%; whizzy -pdf .
 
 % macros
 \newcommand{\mlpost}{\textsc{Mlpost}}
+\newcommand{\metapost}{\textsc{MetaPost}}
+\newcommand{\tikz}{\textsc{Tikz}}
+\newcommand{\pstricks}{\textsc{Pstricks}}
 
 \title{Faire bonne figure avec \mlpost}
 
@@ -39,7 +44,7 @@
 motivation (dessiner en programmant, inclusion latex)
 \subsection{Les solutions existantes}
 
-Il existent de nombreuses solutions pour des dessin techniques. Tout d'abord,
+Il existent de nombreuses solutions pour des dessins techniques. Tout d'abord,
 les logiciels à base d'interface graphique, notamment {\em dia} et {\em xfig}.
 Ces deux programmes permettent la création à la souris de dessins plus ou
 moins complexes. Ils ont l'avantage d'être assez intuitifs, mais ils partagent
@@ -65,22 +70,85 @@ solutions existantes:
 
 \cite{metapost}
 
-\section{Exemples}
+\section{Principes et exemples}
 
-des plus simples aux plus compliqués
+choix de la persistance
 
-\section{Architecture Logicielle}
+placement relatif plutôt qu'absolu
+
+% automate -- RB
+
+% blocs mémoire (listes, etc.) -- JCF
+
+% diagramme simple -- JK
+
+% diagramme UML -- JK
+
+% arbre -- JCF
+
+% plot -- SL
+
+\begin{minipage}{0.3\linewidth}
+  \includegraphics{graph_sqrt.mps}
+\end{minipage}
+\begin{minipage}{0.3\linewidth}
+\small\begin{ocaml}
+let graph_sqrt =
+  let u = Num.cm in
+  let pen = Pen.circle ~tr:[Transform.scaled one] () in 
+  let rec pg = function
+    | 0 -> start (knot ~r:(vec up) ~scale:u (0.,0.))
+    | n -> let f = (float_of_int n /. 2.) in 
+        concat ~style:jCurve (pg (n-1)) (knot ~scale:u (f, sqrt f)) 
+  in
+  [draw (pathn ~style:jLine [(zero,u 2.); (zero,zero); (u 4.,zero)]);
+   draw ~pen (pg 8);
+   label ~pos:`Lowright (tex "$\\sqrt x$") (pt (u 3., u (sqrt 3.)));
+   label ~pos:`Bot (tex "$x$") (pt (u 2., zero));
+   label ~pos:`Lowleft (tex "$y$") (pt (zero, u 1.))]
+\end{ocaml}
+\end{minipage}
+
+% exemples utilisant des calculs en Caml
+
+% bresenham -- JCF
+
+% exemples Florence et Yannick (sans le code)
+
+\section{Architecture logicielle}
+
+% schéma de l'architecture
+
+
+\subsection{Types primitifs de \metapost}
 
 API
 compilation, hashconsing
 modules récursifs - interface de MlPost
-exemples compliqués expliqués
-choix de la persistence
 
-\begin{ocaml}
-  type t = int -> int
-\end{ocaml}
+\subsection{Boîtes}
 
+- principe récursif : boîte = picture ou ensemble de boîtes + contour
++ fond
+
+- boîtes primitives
+- réunion, alignements
+
+\subsubsection{Application : arbres}
+
+\subsection{Flèches} %%% RB
+
+\section{Conclusion}
+
+% pas fait / à faire
+
+résolution d'équations
+
+perspectives infinies d'extensions : 3D, animations, ...
+plus facile de le faire en Caml qu'en \metapost\ ou en \LaTeX\ (\tikz,
+\pstricks) 
+
+plein de sortes de flèches
 
 \paragraph{Remerciements.} Les auteurs tiennent à remercier Florence
 Plateau, Yannick Moy et Claude Marché pour leur contribution à \mlpost.

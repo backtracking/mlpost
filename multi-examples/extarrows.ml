@@ -8,10 +8,10 @@ let b = Point.pt (Num.cm w, Num.cm 0.)
 let c = Point.pt (Num.cm 0., Num.cm w)
 let d = Point.pt (Num.cm w, Num.cm w)
 
-let up = Path.Vec Point.up
-let down = Path.Vec Point.down
-let left = Path.Vec Point.left
-let right = Path.Vec Point.right
+let up = Path.vec Point.up
+let down = Path.vec Point.down
+let left = Path.vec Point.left
+let right = Path.vec Point.right
 
 let double_headed = ExtArrow.add_foot ExtArrow.simple
 
