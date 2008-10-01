@@ -83,6 +83,30 @@ placement relatif plutôt qu'absolu
 % diagramme simple -- JK
 
 % diagramme UML -- JK
+\begin{minipage}{0.3\linewidth}
+  \includegraphics{uml.mps}
+\end{minipage}
+\begin{minipage}{0.3\linewidth}
+\small\begin{ocaml}
+let uml = 
+  let classblock name attr_list method_list = 
+    let tex = Box.tex ~stroke:None in
+    let vbox = Box.vbox ~pos:`Left in
+      Box.vblock ~pos:`Left ~name
+      [ tex ("{\\bf " ^ name ^ "}");
+        vbox (List.map tex attr_list); vbox (List.map tex method_list) ]
+  in
+  let a = classblock "BankAccount" 
+            [ "balance : Dollars = $0$"] 
+            ["deposit (amount : Dollars)"; "withdraw (amount : Dollars)" ] 
+  in
+  let b = classblock "Client" ["name : String"; "address : String" ] [] in
+  let diag = Box.vbox ~padding:(Num.bp 50.) [a;b] in
+  [ Box.draw diag; 
+    box_label_arrow ~pos:`Left (Picture.tex "owns") 
+      (get "Client" diag) (get "BankAccount" diag) ]
+\end{ocaml}
+\end{minipage}
 
 % arbre -- JCF
 

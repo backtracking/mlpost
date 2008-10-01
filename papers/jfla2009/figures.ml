@@ -5,7 +5,7 @@ open Mlpost
 open Command
 open Picture
 open Path
-module H = Helpers
+open Helpers
 open Num
 open Num.Infix
 open Point
@@ -59,15 +59,32 @@ let automate =
   [nop]
 
 (* Johannes *)
-let diagramme =
-  [nop]
+open Box
+let uml = 
+  let classblock name attr_list method_list = 
+    let tex = Box.tex ~stroke:None in
+    let vbox = Box.vbox ~pos:`Left in
+      Box.vblock ~pos:`Left ~name
+      [ tex ("{\\bf " ^ name ^ "}");
+        vbox (List.map tex attr_list); vbox (List.map tex method_list)
+      ]
+  in
+  let a = classblock "BankAccount" 
+            [ "balance : Dollars = $0$"] 
+            ["deposit (amount : Dollars)"; "withdraw (amount : Dollars)" ] 
+  in
+  let b = classblock "Client" ["name : String"; "address : String" ] [] in
+  let diag = Box.vbox ~padding:(Num.bp 50.) [a;b] in
+  [ Box.draw diag; 
+    box_label_arrow ~pos:`Left (Picture.tex "owns") 
+      (get "Client" diag) (get "BankAccount" diag) ]
 
 (* JC *)
 let bresenham =
   [nop]
 
 let () = Metapost.emit "automate" automate
-let () = Metapost.emit "diagramme" diagramme
+let () = Metapost.emit "uml" uml
 let () = Metapost.emit "graph_sqrt" graph_sqrt
 let () = Metapost.emit "architecture" architecture
 let () = Metapost.emit "bresenham" bresenham
