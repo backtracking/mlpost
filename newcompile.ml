@@ -84,11 +84,13 @@ and point' = function
       let f2,c2 = num f2 in 
       C.PTPair (f1,f2), c1 ++ c2
   | PTPointOf (f,p) -> 
+      let f, c = num f in
       let p, code = path p in
-        C.PTPointOf (f,p) , code
+      C.PTPointOf (f, p), c ++ code
   | PTDirectionOf (f,p) -> 
+      let f, c = num f in
       let p, code = path p in
-        C.PTDirectionOf (f,p) , code
+      C.PTDirectionOf (f, p), c ++ code
   | PTAdd (p1,p2) -> 
       let p1,c1 = point p1 in
       let p2,c2 = point p2 in

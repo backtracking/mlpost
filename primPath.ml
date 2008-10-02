@@ -50,8 +50,8 @@ let cut_before p1 p2 = mkPACutBefore p1 p2
 let build_cycle l = mkPABuildCycle l
 let subpath f1 f2 p = mkPASub f1 f2 p
 
-let point f p = mkPTPointOf f p
-let direction f p = mkPTDirectionOf f p
+let point (f: float) p = mkPTPointOf (mkF f) p
+let direction (f: float) p = mkPTDirectionOf (mkF f) p
 
 let length p = mkNLength p
 

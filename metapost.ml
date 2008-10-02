@@ -81,9 +81,9 @@ and point fmt = function
   | C.PTSub (p1, p2) -> fprintf fmt "(%a - %a)" point p1 point p2
   | C.PTMult (f, p) -> fprintf fmt "(%a * %a)" num f point p
   | C.PTRotated (f, p) ->  fprintf fmt "(%a rotated %a)" point p float f
-  | C.PTPointOf (f, p) -> fprintf fmt "(point %a of (%a))" float f path p
+  | C.PTPointOf (f, p) -> fprintf fmt "(point %a of (%a))" num f path p
   | C.PTDirectionOf (f, p) ->
-      fprintf fmt "(direction %a of (%a))" float f path p
+      fprintf fmt "(direction %a of (%a))" num f path p
   | C.PTTransformed (p,tr) -> fprintf fmt "((%a) %a)" point p transform tr
   | C.PTName pn -> pp_print_string fmt pn
 

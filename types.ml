@@ -56,8 +56,8 @@ and num = num_node hash_consed
 and point_node = 
   | PTPair of num * num
   | PTPicCorner of picture * piccorner
-  | PTPointOf of float * path
-  | PTDirectionOf of float * path
+  | PTPointOf of num * path
+  | PTDirectionOf of num * path
   | PTAdd of point * point
   | PTSub of point * point
   | PTMult of num * point
@@ -376,9 +376,9 @@ let eq_point_node p1 p2 =
 	eq_hashcons n11 n21 && eq_hashcons n12 n22 
     | PTPicCorner(pic1,corn1), PTPicCorner(pic2,corn2) ->
 	eq_hashcons pic1 pic2 && eq_piccorner corn1 corn2
-    | PTPointOf(f1,p1), PTPointOf(f2,p2)
-    | PTDirectionOf(f1,p1), PTDirectionOf(f2,p2)
-	-> eq_float f1 f2 && eq_hashcons p1 p2 
+    | PTPointOf(n1,p1), PTPointOf(n2,p2)
+    | PTDirectionOf(n1,p1), PTDirectionOf(n2,p2)
+	-> eq_hashcons n1 n2 && eq_hashcons p1 p2 
     | PTAdd(p11,p12),PTAdd(p21,p22)
     | PTSub(p11,p12),PTSub(p21,p22)
 	-> eq_hashcons p11 p21 && eq_hashcons p12 p22

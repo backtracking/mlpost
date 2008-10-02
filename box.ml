@@ -476,4 +476,3 @@ let cpath ?style ?outd ?ind a b =
   let r,l = outd, ind in
   let p = pathk ?style [knotp ?r (ctr a); knotp ?l (ctr b)] in
   cut_after (bpath b) (cut_before (bpath a) p)
- 

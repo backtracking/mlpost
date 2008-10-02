@@ -304,6 +304,9 @@ and Path : sig
 
   (** {2 More complex constructions on paths} *)
 
+  (** Number of nodes in a path, minus one. *)
+  val length : t -> Num.t
+
   (** [point f p] returns a certain point on the path [p]; [f] is
       given "in control points": [0.] means the first control point,
       [1.] the second and so on; intermediate values are accepted. *)
@@ -1093,6 +1096,9 @@ module ExtArrow : sig
 
   (** Start from your favorite body, build an empty kind from it using
       [kind_empty], and then add arrow heads to it. *)
+
+  val kind_empty: body -> kind
+    (** Build an arrow kind with no head from a given body. *)
 
   val add_head: ?head: head -> kind -> kind
     (** Add a head at the end of the arrow.

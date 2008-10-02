@@ -106,7 +106,8 @@ let draw ?(kind = simple) ?tex ?pos path =
   let belts = List.map (fun (_, x, _) -> x) belts in
   let labels = match tex with
     | None -> []
-    | Some tex -> [Command.label ?pos (Picture.tex tex) (Path.point 0.5 path)]
+    | Some tex -> [Command.label ?pos (Picture.tex tex)
+                     (Path.point 0.5 path)]
   in
   Command.seq (lines @ belts @ labels)
 

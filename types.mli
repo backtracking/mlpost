@@ -56,8 +56,8 @@ and num = num_node hash_consed
 and point_node = private
   | PTPair of num * num
   | PTPicCorner of picture * piccorner
-  | PTPointOf of float * path
-  | PTDirectionOf of float * path
+  | PTPointOf of num * path
+  | PTDirectionOf of num * path
   | PTAdd of point * point
   | PTSub of point * point
   | PTMult of num * point
@@ -200,8 +200,8 @@ val mkPTRotated : float -> point -> point
 
 val mkPTTransformed : point -> transform -> point
 
-val mkPTPointOf : float -> path -> point
-val mkPTDirectionOf : float -> path -> point
+val mkPTPointOf : num -> path -> point
+val mkPTDirectionOf : num -> path -> point
 
 val mkPTPicCorner : picture -> piccorner -> point
 

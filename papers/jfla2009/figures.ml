@@ -102,6 +102,16 @@ let architecture =
 (* Romain *)
 (* Les lignes qui suivent ne sont pas à montrer dans l'article *)
 module Arrow = ExtArrow
+let loop box =
+  let c = Box.ctr box in
+  let a = Point.shift c (pt (cm 0., cm (-0.8))) in
+  let p = Path.pathk [
+    knotp ~r: (vec (dir 225.)) c;
+    knotp a;
+    knotp ~l: (vec (dir 135.)) c;
+  ] in
+  let bp = Box.bpath box in
+  cut_after bp (cut_before bp p)
 
 (* A partir d'ici on a le code qu'on peut montrer dans l'article *)
 open Num
@@ -122,6 +132,9 @@ let automate =
       (cpath ~outd: (vec (dir 25.)) ~ind: (vec (dir 335.)) alpha beta);
     Arrow.draw ~tex: "d" ~pos: `Bot
       (cpath ~outd: (vec (dir 205.)) ~ind: (vec (dir 155.)) beta alpha);
+(*    Arrow.draw ~kind: (Arrow.kind_empty Arrow.body_simple) ~tex: "e" ~pos: `Bot
+      (cpath ~outd: (vec (dir 225.)) ~ind: (vec (dir 315.)) gamma gamma);*)
+    Arrow.draw ~tex: "e" ~pos: `Bot (loop gamma);
     let w = Box.west alpha in
     Arrow.draw (Path.pathp [ Point.shift w (Point.pt (cm (-0.3), zero)); w ]);
   ]
@@ -170,12 +183,8 @@ let bresenham =
   [nop]
 
 let () = Metapost.emit "automate" automate
-let () = Metapost.emit "uml" uml
+(*let () = Metapost.emit "uml" uml
 let () = Metapost.emit "hierarchy" hierarchy
 let () = Metapost.emit "graph_sqrt" graph_sqrt
 let () = Metapost.emit "architecture" architecture
-let () = Metapost.emit "bresenham" bresenham
-
-
-
-
+let () = Metapost.emit "bresenham" bresenham*)
