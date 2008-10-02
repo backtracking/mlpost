@@ -5,6 +5,12 @@ let normalize p =
 
 let neg = Point.scale (Num.bp (-1.))
 
+let direction_on_path f p =
+  Path.directionn (Num.multf f (Path.length p)) p
+
+let point_on_path f p =
+  Path.pointn (Num.multf f (Path.length p)) p
+
 (* Atoms *)
 
 type line = {
@@ -79,10 +85,8 @@ let make_arrow_line path line =
 (* Compute the command and the clipping path of a belt along an arrow path.
    Return the belt (unchanged), the command and the clipping path. *)
 let make_arrow_belt path belt =
-  (* TODO: divide the point by the length of the path, but we need another
-     function Path.point which uses a Num.t instead of a float *)
-  let p = Path.point belt.point path in
-  let d = normalize (Path.direction belt.point path) in
+  let p = point_on_path belt.point path in
+  let d = normalize (direction_on_path belt.point path) in
   let d = if belt.rev then neg d else d in
   let command, clipping_path = belt.head p d in
   belt, command, clipping_path
@@ -106,8 +110,7 @@ let draw ?(kind = simple) ?tex ?pos path =
   let belts = List.map (fun (_, x, _) -> x) belts in
   let labels = match tex with
     | None -> []
-    | Some tex -> [Command.label ?pos (Picture.tex tex)
-                     (Path.point 0.5 path)]
+    | Some tex -> [Command.label ?pos (Picture.tex tex) (point_on_path 0.5 path)]
   in
   Command.seq (lines @ belts @ labels)
 
