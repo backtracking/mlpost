@@ -37,5 +37,6 @@ export: main-pp.ps
 
 clean:
 	rm -f *~ *.aux *.log *.bbl *.blg *-pp.*
-	rm -f main-pp.dvi main-pp.ps
+	rm -f main-pp.dvi main-pp.ps figures.mp
+	rm -f mpxerr.dvi mpxerr.tex
 

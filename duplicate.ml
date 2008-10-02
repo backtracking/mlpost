@@ -79,7 +79,7 @@ and num n =
 
 and point' = function
   | PTPair (f1,f2) -> num f1; num f2
-  | PTPointOf (f,p) | PTDirectionOf (f,p) -> path p
+  | PTPointOf (f,p) | PTDirectionOf (f,p) -> path p ; num f
   | PTAdd (p1,p2) 
   | PTSub (p1,p2) -> point p1; point p2
   | PTMult (f,p) -> num f; point p
