@@ -76,11 +76,11 @@ let architecture =
     Box.vbox ~padding:(mm 2.) ~pen
       ~dx:(bp 5.) ~dy:(bp 5.) ~style:RoundRect ~stroke:(Some Color.black)
       [extensions; advanced; basictypes; compile_ext; metapost_ext] in
-  let mlpost = mk_unbox "mlpost" "\\mlpost" in
+  let mlpost = mk_unbox "mlpost" "Mlpost" in
   let mlpost_ext = 
     let dx = (Box.width pyramid -/ Box.width mlpost) /./ 2. in 
       Box.hbox ~dx [mlpost] in
-  let full = Box.vbox [mlpost_ext; pyramid] in
+  let full = Box.vbox ~padding:(mm (-1.)) [mlpost_ext; pyramid] in
   let _ = Box.set_stroke Color.black (Box.nth 1 full) in
     (* arrows *)
   let arrows = 
