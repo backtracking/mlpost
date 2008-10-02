@@ -44,7 +44,7 @@ let architecture =
   let fill = Color.color "salmon" in 
   let num = mk_box fill "num" "Num" in
   let point = mk_box fill "point" "Point" in
-  let path = mk_box fill "num" "Path" in
+  let path = mk_box fill "path" "Path" in
   let dots = mk_unbox "dots" "$\\ldots$" in
   let cmd = mk_box fill "cmd" "Command" in
   let basictypes = Box.hbox ~padding:(mm 2.) [num; point; path; dots; cmd] in
@@ -82,7 +82,14 @@ let architecture =
       Box.hbox ~dx [mlpost] in
   let full = Box.vbox [mlpost_ext; pyramid] in
   let _ = Box.set_stroke Color.black (Box.nth 1 full) in
-    [Box.draw full]
+    (* arrows *)
+  let arrows = 
+    let mp = Box.get "metapost" full in
+      List.map 
+	(fun n -> Helpers.box_arrow (Box.get n full) mp)
+	["num"; "point"; "path"; "dots"; "cmd"]
+  in
+    arrows@[Box.draw full]
 
 (* Romain *)
 (* Les lignes qui suivent ne sont pas à montrer dans l'article *)
