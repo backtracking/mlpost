@@ -57,7 +57,8 @@ let architecture =
   let metapost = mk_unbox "metapost" "\\metapost" in
   let metapost_ext =
     let dx = (Box.width basictypes -/ Box.width metapost) /./ 2. in
-      Box.hbox ~style:Rect ~dx ~stroke:(Some Color.black) [metapost] in
+      Box.hbox ~name:"mpost_ext" 
+	~style:Rect ~dx ~stroke:(Some Color.black) [metapost] in
     (* composants avancés *)
   let fill = Color.color "pink" in 
   let box_ = mk_box fill "box" "Box" in
@@ -84,9 +85,16 @@ let architecture =
   let _ = Box.set_stroke Color.black (Box.nth 1 full) in
     (* arrows *)
   let arrows = 
-    let mp = Box.get "metapost" full in
+    let mp = Box.get "mpost_ext" full in
       List.map 
-	(fun n -> Helpers.box_arrow (Box.get n full) mp)
+	(fun n -> Helpers.box_label_arrow 
+	   ~outd:(Path.vec Point.down) ~pos:`Bot (Picture.make Command.nop)
+	   (Box.get n full) mp)
+	(* une variante *)
+(*     let mp = Box.get "metapost" full in *)
+(*       List.map  *)
+(* 	(fun n -> Helpers.box_arrow  *)
+(* 	   (Box.get n full) mp) *)
 	["num"; "point"; "path"; "dots"; "cmd"]
   in
     arrows@[Box.draw full]
