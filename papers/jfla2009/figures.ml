@@ -36,23 +36,53 @@ let graph_sqrt =
     [graph; Plot.draw_simple_axes "$x$" "$y$" sk]
 
 let architecture =
-  let fill = Color.color "salmon" in 
-  let mk_box name m = 
+  let mk_box fill name m = 
     Box.tex ~style:RoundRect ~dx:(bp 5.) ~dy:(bp 5.) ~name ~fill m in
   let mk_unbox name m = 
     Box.tex ~style:RoundRect ~stroke:None ~dx:(bp 5.) ~dy:(bp 5.) ~name m in
-  let num = mk_box "num" "Num" in
-  let point = mk_box "point" "Point" in
-  let path = mk_box "num" "Path" in
+    (* les types de base *)
+  let fill = Color.color "salmon" in 
+  let num = mk_box fill "num" "Num" in
+  let point = mk_box fill "point" "Point" in
+  let path = mk_box fill "num" "Path" in
   let dots = mk_unbox "dots" "$\\ldots$" in
-  let cmd = mk_box "cmd" "Command" in
+  let cmd = mk_box fill "cmd" "Command" in
   let basictypes = Box.hbox ~padding:(mm 2.) [num; point; path; dots; cmd] in
+    (* compile *)
   let compile = mk_unbox "compile" "Compile" in
   let compile_ext = 
     let dx = (Box.width basictypes -/ Box.width compile) /./ 2. in
-    Box.hbox ~style:RoundRect ~dx ~fill ~stroke:(Some Color.black) [compile]
-  in
-    [Box.draw (Box.vbox ~padding:(mm 2.) [basictypes; compile_ext])]
+    Box.hbox ~style:RoundRect ~dx ~fill ~stroke:(Some Color.black) [compile] in
+    (* metapost *)
+  let metapost = mk_unbox "metapost" "\\metapost" in
+  let metapost_ext =
+    let dx = (Box.width basictypes -/ Box.width metapost) /./ 2. in
+      Box.hbox ~style:Rect ~dx ~stroke:(Some Color.black) [metapost] in
+    (* composants avancés *)
+  let fill = Color.color "pink" in 
+  let box_ = mk_box fill "box" "Box" in
+  let shapes = mk_box fill "shapes" "Shapes" in
+  let arrows = mk_box fill "arrow" "Arrow" in
+  let advanced = Box.hbox ~padding:(mm 2.) [box_; shapes; arrows] in
+    (* extensions *)
+  let fill = Color.color "blanched almond" in 
+  let tree = mk_box fill "tree" "Tree" in
+  let diag = mk_box fill "diag" "Diag" in
+  let plot = mk_box fill "plot" "Plot" in
+  let extensions = Box.hbox ~padding:(mm 2.) [tree; diag; plot] in
+    (* wrapping *)
+  let pyramid = 
+    let pen = Pen.scale (Num.bp 1.0) (Pen.square ()) in
+    Box.vbox ~padding:(mm 2.) ~pen
+      ~dx:(bp 5.) ~dy:(bp 5.) ~style:RoundRect ~stroke:(Some Color.black)
+      [extensions; advanced; basictypes; compile_ext; metapost_ext] in
+  let mlpost = mk_unbox "mlpost" "\\mlpost" in
+  let mlpost_ext = 
+    let dx = (Box.width pyramid -/ Box.width mlpost) /./ 2. in 
+      Box.hbox ~dx [mlpost] in
+  let full = Box.vbox [mlpost_ext; pyramid] in
+  let _ = Box.set_stroke Color.black (Box.nth 1 full) in
+    [Box.draw full]
 
 (* Romain *)
 (* Les lignes qui suivent ne sont pas à montrer dans l'article *)
