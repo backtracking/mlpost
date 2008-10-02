@@ -132,8 +132,6 @@ let automate =
       (cpath ~outd: (vec (dir 25.)) ~ind: (vec (dir 335.)) alpha beta);
     Arrow.draw ~tex: "d" ~pos: `Bot
       (cpath ~outd: (vec (dir 205.)) ~ind: (vec (dir 155.)) beta alpha);
-(*    Arrow.draw ~kind: (Arrow.kind_empty Arrow.body_simple) ~tex: "e" ~pos: `Bot
-      (cpath ~outd: (vec (dir 225.)) ~ind: (vec (dir 315.)) gamma gamma);*)
     Arrow.draw ~tex: "e" ~pos: `Bot (loop gamma);
     let w = Box.west alpha in
     Arrow.draw (Path.pathp [ Point.shift w (Point.pt (cm (-0.3), zero)); w ]);
@@ -183,8 +181,8 @@ let bresenham =
   [nop]
 
 let () = Metapost.emit "automate" automate
-(*let () = Metapost.emit "uml" uml
+let () = Metapost.emit "uml" uml
 let () = Metapost.emit "hierarchy" hierarchy
 let () = Metapost.emit "graph_sqrt" graph_sqrt
 let () = Metapost.emit "architecture" architecture
-let () = Metapost.emit "bresenham" bresenham*)
+let () = Metapost.emit "bresenham" bresenham

@@ -100,6 +100,7 @@ let automate =
       (cpath ~outd: (vec (dir 25.)) ~ind: (vec (dir 335.)) alpha beta);
     Arrow.draw ~tex: "d" ~pos: `Bot
       (cpath ~outd: (vec (dir 205.)) ~ind: (vec (dir 155.)) beta alpha);
+    Arrow.draw ~tex: "e" ~pos: `Bot (loop gamma);
     let w = Box.west alpha in
     Arrow.draw (Path.pathp [ Point.shift w (Point.pt (cm (-0.3), zero)); w ]);
   ]
