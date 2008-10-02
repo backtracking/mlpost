@@ -62,25 +62,23 @@ module Arrow = ExtArrow
 open Num
 let automate =
   let etat = Box.tex ~style: Circle in
-  (* TODO: comprendre pourquoi ce (~dx, ~dy) marche *)
   let final = Box.box ~style: Circle ~dx:zero ~dy:zero in
-  let etats = Box.vbox ~padding: (cm 0.5) [
-    Box.hbox ~padding: (cm 1.) [ etat "$\\alpha$"; etat "$\\beta$" ];
+  let etats = Box.vbox ~padding: (cm 0.8) [
+    Box.hbox ~padding: (cm 1.4) [ etat "$\\alpha$"; etat "$\\beta$" ];
     final (etat "$\\gamma$");
   ]in
   let alpha = nth 0 (nth 0 etats) in
   let beta = nth 1 (nth 0 etats) in
   let gamma = nth 1 etats in [
     Box.draw etats;
-    (* TODO: texte sur les flèches *)
-    Arrow.draw (cpath alpha gamma);
-    Arrow.draw (cpath gamma beta);
-    Arrow.draw
+    Arrow.draw ~tex: "a" ~pos: `Lowleft (cpath alpha gamma);
+    Arrow.draw ~tex: "b" ~pos: `Lowright (cpath gamma beta);
+    Arrow.draw ~tex: "c" ~pos: `Top
       (cpath ~outd: (vec (dir 25.)) ~ind: (vec (dir 335.)) alpha beta);
-    Arrow.draw
+    Arrow.draw ~tex: "d" ~pos: `Bot
       (cpath ~outd: (vec (dir 205.)) ~ind: (vec (dir 155.)) beta alpha);
     let w = Box.west alpha in
-    Arrow.draw (Path.pathp [ Point.shift w (Point.pt (cm (-0.5), zero)); w ]);
+    Arrow.draw (Path.pathp [ Point.shift w (Point.pt (cm (-0.3), zero)); w ]);
   ]
 
 (* Johannes *)
