@@ -55,8 +55,33 @@ let architecture =
     [Box.draw (Box.vbox ~padding:(mm 2.) [basictypes; compile_ext])]
 
 (* Romain *)
+(* Les lignes qui suivent ne sont pas à montrer dans l'article *)
+module Arrow = ExtArrow
+
+(* A partir d'ici on a le code qu'on peut montrer dans l'article *)
+open Num
 let automate =
-  [nop]
+  let etat = Box.tex ~style: Circle in
+  (* TODO: comprendre pourquoi ce (~dx, ~dy) marche *)
+  let final = Box.box ~style: Circle ~dx: (cm (-0.5)) ~dy: (cm (-0.)) in
+  let etats = Box.vbox ~padding: (cm 0.5) [
+    Box.hbox ~padding: (cm 1.) [ etat "alpha"; etat "beta" ];
+    final (etat "gamma");
+  ]in
+  let alpha = nth 0 (nth 0 etats) in
+  let beta = nth 1 (nth 0 etats) in
+  let gamma = nth 1 etats in [
+    Box.draw etats;
+    (* TODO: texte sur les flèches *)
+    Arrow.draw (cpath alpha gamma);
+    Arrow.draw (cpath gamma beta);
+    Arrow.draw
+      (cpath ~outd: (vec (dir 25.)) ~ind: (vec (dir 335.)) alpha beta);
+    Arrow.draw
+      (cpath ~outd: (vec (dir 205.)) ~ind: (vec (dir 155.)) beta alpha);
+    let w = Box.west alpha in
+    Arrow.draw (Path.pathp [ Point.shift w (Point.pt (cm (-0.5), zero)); w ]);
+  ]
 
 (* Johannes *)
 open Box
