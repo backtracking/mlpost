@@ -16,7 +16,7 @@ WWW=/users/demons/filliatr/WWW
 	ocaml $^ > $@
 
 figures.mp: figures.ml
-	mlpost -pdf -latex main.tex $^
+	../../tool.opt -ccopt "-I ../../" -pdf -latex main.tex $^
 
 main-pp.dvi: main-pp.tex
 	latex $^

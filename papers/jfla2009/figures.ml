@@ -63,10 +63,10 @@ open Num
 let automate =
   let etat = Box.tex ~style: Circle in
   (* TODO: comprendre pourquoi ce (~dx, ~dy) marche *)
-  let final = Box.box ~style: Circle ~dx: (cm (-0.5)) ~dy: (cm (-0.)) in
+  let final = Box.box ~style: Circle ~dx:zero ~dy:zero in
   let etats = Box.vbox ~padding: (cm 0.5) [
-    Box.hbox ~padding: (cm 1.) [ etat "alpha"; etat "beta" ];
-    final (etat "gamma");
+    Box.hbox ~padding: (cm 1.) [ etat "$\\alpha$"; etat "$\\beta$" ];
+    final (etat "$\\gamma$");
   ]in
   let alpha = nth 0 (nth 0 etats) in
   let beta = nth 1 (nth 0 etats) in
