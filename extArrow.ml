@@ -96,7 +96,7 @@ let clip_line_with_belt (line, line_path) (belt, _, clipping_path) =
 let draw_line (line, line_path) =
   Command.draw ?color: line.color ?pen: line.pen ?dashed: line.dashed line_path
 
-let draw ?(kind = simple) path =
+let draw ?(kind = simple) ?tex ?pos path =
   let lines, belts = kind in
   let lines = List.map (make_arrow_line path) lines in
   let belts = List.map (make_arrow_belt path) belts in
@@ -104,7 +104,11 @@ let draw ?(kind = simple) path =
     List.map (fun line -> List.fold_left clip_line_with_belt line belts) lines in
   let lines = List.map draw_line lines in
   let belts = List.map (fun (_, x, _) -> x) belts in
-  Command.seq (lines @ belts)
+  let labels = match tex with
+    | None -> []
+    | Some tex -> [Command.label ?pos (Picture.tex tex) (Path.point 0.5 path)]
+  in
+  Command.seq (lines @ belts @ labels)
 
 (* Non-Default Instances *)
 
@@ -115,6 +119,6 @@ let simple = add_head (kind_empty body_simple)
 
 let double = add_head (kind_empty body_double)
 
-let draw2 ?kind ?outd ?ind a b =
+let draw2 ?kind ?tex ?pos ?outd ?ind a b =
   let r, l = outd, ind in
-  draw ?kind (Path.pathk [Path.knotp ?r a; Path.knotp ?l b])
+  draw ?kind ?tex ?pos (Path.pathk [Path.knotp ?r a; Path.knotp ?l b])

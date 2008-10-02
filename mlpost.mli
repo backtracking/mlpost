@@ -1124,14 +1124,20 @@ module ExtArrow : sig
 
   (** {2 Drawing Arrows} *)
 
-  val draw: ?kind: kind -> Path.t -> Command.t
+  val draw: ?kind: kind -> ?tex: string -> ?pos: Command.position -> Path.t ->
+    Command.t
     (** Draw an arrow following the given path.
-        @param kind the kind of arrow (default is {!simple}) *)
+        @param kind the kind of arrow (default is {!simple})
+        @param tex add a LaTeX label
+        @param pos label position *)
 
-  val draw2: ?kind: kind -> ?outd: Path.direction -> ?ind: Path.direction ->
-    Point.t -> Point.t -> Command.t
+  val draw2: ?kind: kind -> ?tex: string -> ?pos: Command.position ->
+    ?outd: Path.direction -> ?ind: Path.direction -> Point.t -> Point.t ->
+    Command.t
     (** Use [draw2 a b] to draw an arrow from [a] to [b].
         @param kind the kind of arrow (default is {!simple})
+        @param tex add a LaTeX label
+        @param pos label position
         @param outd the outgoing direction, at the beginning of the arrow
         @param ind the ingoing direction, at the end of the arrow *)
 end
