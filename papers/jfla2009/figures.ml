@@ -63,13 +63,13 @@ let architecture =
   let box_ = mk_box fill "box" "Box" in
   let shapes = mk_box fill "shapes" "Shapes" in
   let arrows = mk_box fill "arrow" "Arrow" in
-  let advanced = Box.hbox ~padding:(mm 2.) [box_; shapes; arrows] in
+  let advanced = Box.hbox ~pos:`Bot ~padding:(mm 2.) [box_; shapes; arrows] in
     (* extensions *)
   let fill = Color.color "blanched almond" in 
   let tree = mk_box fill "tree" "Tree" in
   let diag = mk_box fill "diag" "Diag" in
   let plot = mk_box fill "plot" "Plot" in
-  let extensions = Box.hbox ~padding:(mm 2.) [tree; diag; plot] in
+  let extensions = Box.hbox ~pos:`Bot ~padding:(mm 2.) [tree; diag; plot] in
     (* wrapping *)
   let pyramid = 
     let pen = Pen.scale (Num.bp 1.0) (Pen.square ()) in
