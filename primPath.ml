@@ -53,6 +53,9 @@ let subpath f1 f2 p = mkPASub f1 f2 p
 let point (f: float) p = mkPTPointOf (mkF f) p
 let direction (f: float) p = mkPTDirectionOf (mkF f) p
 
+let pointn (n: num) p = mkPTPointOf n p
+let directionn (n: num) p = mkPTDirectionOf n p
+
 let length p = mkNLength p
 
 let defaultjoint = jCurve

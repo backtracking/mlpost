@@ -312,8 +312,14 @@ and Path : sig
       [1.] the second and so on; intermediate values are accepted. *)
   val point : float -> t -> Point.t
 
+  (** Same as [point] but for a [Num.t]. *)
+  val pointn : Num.t -> t -> Point.t
+
   (** [direction f p] returns the direction of the tangent at [point f p]. *)
   val direction : float -> t -> Point.t
+
+  (** Same as [direction] but for a [Num.t]. *)
+  val directionn : Num.t -> t -> Point.t
 
   (** [subpath start end path] selects the subpath of [path] that lies
       between [start] and [end]. [start] and [end] are given in
