@@ -274,10 +274,10 @@ Les autres types \metapost\ (chaînes de caractère, booléen, couleur) sont
 facilement représentés en \ocaml. 
 
 \paragraph{Dépendances circulaires}
-Cette partie de bas niveau de \mlpost\ présente néanmoins quelques difficultés.
-Premièrement, la plupart des modules présentés sont à priori mutuellement
-récursifs : par exemple, les transformations s'appliquent à tous les autres
-objets, donc chaque module contient une fonction
+Cette partie de bas niveau de \mlpost\ présente néanmoins quelques
+difficultés. Premièrement, la plupart des modules présentés sont {\em a
+priori} mutuellement récursifs : par exemple, les transformations s'appliquent
+à tous les autres objets, donc chaque module contient une fonction
 \begin{ocaml}
   val transform : Transform.t -> t -> t
 \end{ocaml}
