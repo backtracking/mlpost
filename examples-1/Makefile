@@ -2,7 +2,7 @@ BOXPNGFILES := f1.png f2.png traffic.png hierarchy.png
 BOXOUTFILES := $(BOXPNGFILES:.png=.1)
 PATHPNGFILES := path1.png path2.png path3.png path4.png path5.png \
 		  path6.png path7.png path8.png path9.png path10.png\
-		  path11.png
+		  path11.png path12.png path13.png path14.png path15.png
 PATHOUTFILES := $(PATHPNGFILES:.png=.1)
 
 

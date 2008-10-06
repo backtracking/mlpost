@@ -93,6 +93,32 @@ let path10 =
 let path11 = 
   [draw ~dashed:(pattern [on (Num.bp 2.) ; off (Num.bp 3.)] ) 
      (path ~scale:Num.cm [0.,0.; 3.,0.]) ; ]
+
+(*parse >> *)
+let triangle = path ~scale:Num.cm ~style:jLine ~cycle:jLine l
+(*html <hr/> *)
+
+(*parse <<path12 *)
+let path12 = 
+  [Command.fill ~color:(Color.gray 0.8) triangle]
+
+(*parse >> <<path13 *)
+let path13 =
+    [ Command.fill ~color:(Color.gray 0.8) triangle; 
+      Command.draw triangle]
+
+(*parse >> *)
+let pen = Pen.circle ~tr:[Transform.scaled (Num.bp 2.)] ()
+(*html <hr/> *)
+(*parse <<path14 *)
+let path14 =
+    [Command.fill ~color:(Color.gray 0.8) triangle; 
+     Command.draw ~pen triangle]
+
+(*parse >> <<path15 *)
+let path15 =
+    [ Command.draw ~pen triangle; 
+      Command.fill ~color:(Color.gray 0.8) triangle]
 (*parse >> *)
 
 let _ = 
@@ -108,4 +134,8 @@ let _ =
       "path9", path9;
       "path10", path10;
       "path11", path11;
+      "path12", path12;
+      "path13", path13;
+      "path14", path14;
+      "path15", path15;
     ]
