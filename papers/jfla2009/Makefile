@@ -36,7 +36,7 @@ export: main-pp.ps
 	cp -f mlpost.pdf $(WWW)/publis/
 
 clean:
-	rm -f *~ *.aux *.log *.bbl *.blg *-pp.*
+	rm -f *~ *.aux *.log *.bbl *.blg
 	rm -f main-pp.dvi main-pp.ps figures.mp
 	rm -f mpxerr.dvi mpxerr.tex
 

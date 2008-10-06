@@ -460,13 +460,13 @@ let vblock ?(pos=`Center) ?name pl =
 	let yc = y -/ hp /./ 2. in
         let c = Point.pt (x, yc) in 
         let b = center c p in
-	let b = group_rect ?name wmax hp (Point.pt (wmax_2, yc)) [b] in
+	let b = group_rect wmax hp (Point.pt (wmax_2, yc)) [b] in
 	let b = set_stroke Color.black b in
         make_new (b::acc) (y -/ hp) pl
   in
   let l,y = make_new [] Num.zero pl in
   let mycenter = Point.pt (wmax_2, y /./ 2.) in
-  group_rect wmax (Num.neg y) mycenter l
+  group_rect ?name wmax (Num.neg y) mycenter l
 
 
 
