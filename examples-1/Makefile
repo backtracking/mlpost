@@ -6,11 +6,12 @@ BOXOUTFILES := $(BOXPNGFILES:.png=.1)
 # all files that are generated from paths.ml
 PATHPNGFILES := path1.png path2.png path3.png path4.png path5.png \
 		  path6.png path7.png path8.png path9.png path10.png\
-		  path11.png path12.png path13.png path14.png path15.png
+		  path11.png path12.png path13.png path14.png path15.png\
+		  cheno11.png cheno14.png
 PATHOUTFILES := $(PATHPNGFILES:.png=.1)
 
 # all files that are generated from misc.ml
-MISCPNGFILES := bresenham.png cfg.png
+MISCPNGFILES := bresenham.png cfg.png chess.png
 MISCOUTFILES := $(MISCPNGFILES:.png=.1)
 
 HTMLFILES := boxes.ml.html paths.ml.html misc.ml.html
@@ -18,7 +19,7 @@ HTMLFILES := boxes.ml.html paths.ml.html misc.ml.html
 all: $(BOXPNGFILES) $(PATHPNGFILES) $(MISCPNGFILES) $(HTMLFILES)
 
 %.ml.html : %.ml parse
-	caml2html -hc -ext "parse:./parse" $^
+	caml2html -hc -ext "parse:./parse" %.ml
 
 
 %.png: %.ps

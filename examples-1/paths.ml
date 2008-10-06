@@ -89,25 +89,55 @@ let triangle = path ~scale:Num.cm ~style:jLine ~cycle:jLine l
 
 (*parse <<path12 *)
 let path12 = 
-  [Command.fill ~color:(Color.gray 0.8) triangle]
+  [fill ~color:(Color.gray 0.8) triangle]
 
 (*parse >> <<path13 *)
 let path13 =
-    [ Command.fill ~color:(Color.gray 0.8) triangle; 
-      Command.draw triangle]
+    [ fill ~color:(Color.gray 0.8) triangle; 
+      draw triangle]
 
 (*parse >> *)
 let pen = Pen.circle ~tr:[Transform.scaled (Num.bp 2.)] ()
 (*html <hr/> *)
 (*parse <<path14 *)
 let path14 =
-    [Command.fill ~color:(Color.gray 0.8) triangle; 
-     Command.draw ~pen triangle]
+    [fill ~color:(Color.gray 0.8) triangle; 
+     draw ~pen triangle]
 
 (*parse >> <<path15 *)
 let path15 =
-    [ Command.draw ~pen triangle; 
-      Command.fill ~color:(Color.gray 0.8) triangle]
+    [ draw ~pen triangle; 
+      fill ~color:(Color.gray 0.8) triangle]
+
+(*parse >> <<cheno11 *)
+let cheno11 =
+  let p = path ~cycle:jCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)] in
+  let pen = Pen.scale (Num.bp 1.5) (Pen.circle ()) in
+  [draw p;
+   seq 
+     (List.map
+	 (fun (pos, l, i) -> 
+	   dotlabel ~pos (Picture.tex l) (Path.point i p))
+	 [`Bot, "0", 0.;  `Upleft, "1", 1. ;
+	  `Lowleft, "2", 2. ;  `Top, "3", 3. ; `Left, "4", 4. ]);
+   draw ~pen (subpath 1.3 3.2 p)]
+
+(*parse >> <<cheno14 *)
+let z0 = cmp (0., 0.)
+let z1 = cmp (4., 1.)
+
+let cercle = Path.shift z0 (Path.scale (Num.cm 1.) fullcircle)
+let rectangle = Path.shift z1
+  (path ~style:jLine ~cycle:jLine ~scale:Num.mm
+      [-5., -5.; 5., -5.; 5., 5.; -5., 5.])
+let p = pathk 
+  (knotlist [noDir, z0, vec (dir 150.); noDir, z1, vec (dir (-30.))])
+
+let cheno14 = 
+  [draw cercle;
+   draw rectangle ~dashed:evenly;
+   draw p ~dashed:(Dash.scaled 0.3 withdots);
+   draw_arrow (cut_before cercle (cut_after rectangle p)) ]
 (*parse >> *)
 
 let _ = 
@@ -127,4 +157,6 @@ let _ =
       "path13", path13;
       "path14", path14;
       "path15", path15;
+      "cheno11", cheno11;
+      "cheno14", cheno14;
     ]
