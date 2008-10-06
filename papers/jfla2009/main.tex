@@ -7,6 +7,8 @@
 %; whizzy -pdf .
 
 % macros
+\newcommand{\ocaml}{OCaml}
+\newcommand{\camllight}{Caml Light}
 \newcommand{\mlpost}{\textsc{Mlpost}}
 \newcommand{\metapost}{\textsc{MetaPost}}
 \newcommand{\fmpost}{\textit{functional} \metapost}
@@ -15,6 +17,8 @@
 \newcommand{\pstricks}{\textsc{Pstricks}}
 \newcommand{\dia}{\textsc{Dia}}
 \newcommand{\xfig}{\textsc{Xfig}}
+\newcommand{\postscript}{PostScript}
+\newcommand{\mlpictex}{mlP\hspace{-0.2em}\raisebox{-0.2em}{i}\hspace{-0.1em}c\hspace{-0.1em}\TeX}
 
 \title{Faire bonne figure avec \mlpost}
 
@@ -92,19 +96,37 @@ des équations. En revanche, le langage de \metapost\ s'inspire de
 celui de \metafont~\cite{metafont} et présente, à l'exception de la
 syntaxe, les défauts soulevés ci-dessus.
 % TODO  exemple metapost ?
+% citer asymptote ?
 
+Une alternative séduisante aux solutions précédentes consiste à
+utiliser un langage de programmation existant. Ainsi l'utilisateur n'a
+pas à apprendre un langage spécialisé et il bénéficie d'autre part de
+tous les avantages d'un langage de programmation moderne : erreurs
+détectées à la compilation, types de données complexes, structuration, etc.
+Toute la difficulté réside alors dans la manipulation des éléments
+\LaTeX, notamment la prise en compte de leur taille dans l'élaboration
+de la figure. Si on considère la famille des langages fonctionnels, on
+peut citer au moins deux exemples de telle intégration :
+\begin{itemize}
+\item \mlpictex~\cite{mlpictex} est\footnote{À notre connaissance,
+    \mlpictex\ n'est plus distribué.} un ensemble de macros \LaTeX\ permettant
+  d'inclure du code \camllight\ arbitraire dans un document \LaTeX.
+  Ce code s'appuie sur une bibliothèque de dessin \postscript\ et peut
+  faire référence à des éléments \LaTeX, ainsi qu'à leur taille.
 
-\fmpost
+\item \fmpost~\cite{fmpost} est une bibliothèque Haskell produisant du
+  code \metapost. C'est une approche légère qui réutilise les
+  capacités graphiques de \metapost\ et ne fait que changer le langage
+  de programmation.
+\end{itemize}
+C'est cette dernière approche qu'adopte \mlpost.
 
-% motivation (dessiner en programmant, inclusion latex)
+\medskip
 
-%%% PROS
-
-% ne pas apprendre un nouveau langage
-
-% LaTeX = pas un langage de programmation
-
-% avec Caml : on bénéficie du typage de Caml, on dispose de tout le langage
+Cet article est organisé de la manière suivante. 
+La section~\ref{exemples} ...
+La section~\ref{archi} ...
+Enfin, la section~\ref{conclusion} ...
 
 %%% CONS
 
@@ -112,35 +134,8 @@ syntaxe, les défauts soulevés ci-dessus.
 
 % pas de mélange entre LaTeX et les graphiques
 
-\subsection{Les solutions existantes}
 
-Il existent de nombreuses solutions pour des dessins techniques. Tout d'abord,
-les logiciels à base d'interface graphique, notamment {\em dia} et {\em xfig}.
-Ces deux programmes permettent la création à la souris de dessins plus ou
-moins complexes. Ils ont l'avantage d'être assez intuitifs, mais ils partagent
-aussi l'absence d'inclusion de \LaTeX\ dans un dessin. Avec xfig, on peut
-néanmoins mettre du code \LaTeX\ dans un document, mais sa taille réelle ne
-pourra être prise en compte. Dia n'offre même pas cette possibilité, il faut
-éditer les fichiers de sortie, si on veut vraiment mettre du code \LaTeX.
-
-Les solutions à base de langages de programmation intègrent toutes une bon
-support pour du texte en \LaTeX. Nous en citons les plus connus.
-
-\begin{itemize}
-  \item {\em pstricks} est un ensemble de macros \LaTeX. Même si c'est
-    relativement puissant, son utilisation est assez lourde et non-intuitive.
-  \item tikz
-  \item metapost
-  \item mlpictex
-  \item functional metapost
-\end{itemize}<++>
-
-
-solutions existantes:
-
-\cite{metapost}
-
-\section{Principes et exemples}
+\section{Principes et exemples}\label{exemples}
 
 choix de la persistance
 
@@ -152,28 +147,19 @@ placement relatif plutôt qu'absolu
 \end{minipage}
 \begin{minipage}{0.2\linewidth}
 \small\begin{ocaml}
-open Num
 let automate =
-  let etat = Box.tex ~style: Circle in
-  let final = Box.box ~style: Circle ~dx:zero ~dy:zero in
-  let etats = Box.vbox ~padding: (cm 0.8) [
-    Box.hbox ~padding: (cm 1.4) [ etat "$\\alpha$"; etat "$\\beta$" ];
-    final (etat "$\\gamma$");
-  ]in
-  let alpha = nth 0 (nth 0 etats) in
-  let beta = nth 1 (nth 0 etats) in
-  let gamma = nth 1 etats in [
-    Box.draw etats;
-    Arrow.draw ~tex: "a" ~pos: `Lowleft (cpath alpha gamma);
-    Arrow.draw ~tex: "b" ~pos: `Lowright (cpath gamma beta);
-    Arrow.draw ~tex: "c" ~pos: `Top
-      (cpath ~outd: (vec (dir 25.)) ~ind: (vec (dir 335.)) alpha beta);
-    Arrow.draw ~tex: "d" ~pos: `Bot
-      (cpath ~outd: (vec (dir 205.)) ~ind: (vec (dir 155.)) beta alpha);
-    Arrow.draw ~tex: "e" ~pos: `Bot (loop gamma);
-    let w = Box.west alpha in
-    Arrow.draw (Path.pathp [ Point.shift w (Point.pt (cm (-0.3), zero)); w ]);
-  ]
+  let states = Box.vbox ~padding:(cm 0.8) [
+    Box.hbox ~padding:(cm 1.4) [ 
+      state ~name:"alpha" "$\\alpha$"; state ~name:"beta" "$\\beta$" ];
+    final (state ~name:"gamma" "$\\gamma$"); ]
+  in
+  [Box.draw states;
+   transition states "a" `Lowleft "alpha" "gamma";
+   transition states "b" `Lowright "gamma" "beta";
+   transition states "c" `Top ~outd:25. ~ind:335. "alpha" "beta";
+   transition states "d" `Bot ~outd:205. ~ind:155. "beta" "alpha";
+   loop states "e" `Bot "gamma";
+   initial states `Left "alpha"]
 \end{ocaml}
 \end{minipage}
 
@@ -231,7 +217,7 @@ let graph_sqrt =
 
 % exemples Florence et Yannick (sans le code)
 
-\section{Architecture logicielle}
+\section{Architecture logicielle}\label{archi}
 
 % schéma de l'architecture
 \begin{figure}[h]
@@ -259,7 +245,7 @@ modules récursifs - interface de MlPost
 
 \subsection{Flèches} %%% RB
 
-\section{Conclusion}
+\section{Conclusion}\label{conclusion}
 
 % pas fait / à faire
 

@@ -115,27 +115,34 @@ let loop box =
 
 (* A partir d'ici on a le code qu'on peut montrer dans l'article *)
 open Num
+let state = Box.tex ~style:Circle 
+let final = Box.box ~style:Circle ~dx:zero ~dy:zero 
+let transition b tex pos ?outd ?ind x y = 
+  let x = Box.get x b and y = Box.get y b in
+  let outd = match outd with None -> None | Some a -> Some (vec (dir a)) in
+  let ind = match ind with None -> None | Some a -> Some (vec (dir a)) in
+  Arrow.draw ~tex ~pos (cpath ?outd ?ind x y) 
+let loop b tex pos x = (* TODO : utiliser pos *)
+  let x = Box.get x b in
+  Arrow.draw ~tex ~pos (loop x)
+let initial b pos x =
+  let x = Box.get x b in
+  let w = Box.west x in (* TODO : utiliser pos *)
+  Arrow.draw (Path.pathp [ Point.shift w (Point.pt (cm (-0.3), zero)); w ])
+
 let automate =
-  let etat = Box.tex ~style: Circle in
-  let final = Box.box ~style: Circle ~dx:zero ~dy:zero in
-  let etats = Box.vbox ~padding: (cm 0.8) [
-    Box.hbox ~padding: (cm 1.4) [ etat "$\\alpha$"; etat "$\\beta$" ];
-    final (etat "$\\gamma$");
-  ]in
-  let alpha = nth 0 (nth 0 etats) in
-  let beta = nth 1 (nth 0 etats) in
-  let gamma = nth 1 etats in [
-    Box.draw etats;
-    Arrow.draw ~tex: "a" ~pos: `Lowleft (cpath alpha gamma);
-    Arrow.draw ~tex: "b" ~pos: `Lowright (cpath gamma beta);
-    Arrow.draw ~tex: "c" ~pos: `Top
-      (cpath ~outd: (vec (dir 25.)) ~ind: (vec (dir 335.)) alpha beta);
-    Arrow.draw ~tex: "d" ~pos: `Bot
-      (cpath ~outd: (vec (dir 205.)) ~ind: (vec (dir 155.)) beta alpha);
-    Arrow.draw ~tex: "e" ~pos: `Bot (loop gamma);
-    let w = Box.west alpha in
-    Arrow.draw (Path.pathp [ Point.shift w (Point.pt (cm (-0.3), zero)); w ]);
-  ]
+  let states = Box.vbox ~padding:(cm 0.8) [
+    Box.hbox ~padding:(cm 1.4) [ 
+      state ~name:"alpha" "$\\alpha$"; state ~name:"beta" "$\\beta$" ];
+    final (state ~name:"gamma" "$\\gamma$"); ]
+  in
+  [Box.draw states;
+   transition states "a" `Lowleft "alpha" "gamma";
+   transition states "b" `Lowright "gamma" "beta";
+   transition states "c" `Top ~outd:25. ~ind:335. "alpha" "beta";
+   transition states "d" `Bot ~outd:205. ~ind:155. "beta" "alpha";
+   loop states "e" `Bot "gamma";
+   initial states `Left "alpha"]
 
 (* Johannes *)
 open Box
