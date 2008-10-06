@@ -6,19 +6,7 @@ open Point
 open Color
 open Box
 
-(*html
-<script type="text/javascript">
-<!--
-    function toggle_visibility(id) {
-       var e = document.getElementById(id);
-       if(e.style.display == 'block')
-          e.style.display = 'none';
-       else
-          e.style.display = 'block';
-    }
-//-->
-</script>
-*)
+(*parse <<togglescript>> *)
 
 (*parse <<f1 *)
 let f1 =

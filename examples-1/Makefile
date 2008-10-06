@@ -1,13 +1,25 @@
+
+# all files that are generated from boxes.ml
 BOXPNGFILES := f1.png f2.png traffic.png hierarchy.png
 BOXOUTFILES := $(BOXPNGFILES:.png=.1)
+
+# all files that are generated from paths.ml
 PATHPNGFILES := path1.png path2.png path3.png path4.png path5.png \
 		  path6.png path7.png path8.png path9.png path10.png\
 		  path11.png path12.png path13.png path14.png path15.png
 PATHOUTFILES := $(PATHPNGFILES:.png=.1)
 
+# all files that are generated from misc.ml
+MISCPNGFILES := bresenham.png cfg.png
+MISCOUTFILES := $(MISCPNGFILES:.png=.1)
 
-all: $(BOXPNGFILES) $(PATHPNGFILES) parse
-	caml2html -hc -ext "parse:./parse" boxes.ml paths.ml
+HTMLFILES := boxes.ml.html paths.ml.html misc.ml.html
+
+all: $(BOXPNGFILES) $(PATHPNGFILES) $(MISCPNGFILES) $(HTMLFILES)
+
+%.ml.html : %.ml parse
+	caml2html -hc -ext "parse:./parse" $^
+
 
 %.png: %.ps
 	convert $*.ps $@ 
@@ -18,11 +30,14 @@ all: $(BOXPNGFILES) $(PATHPNGFILES) parse
 	dvips -E $*.dvi -o
 
 # dangerous - might be called more than once or even at the same time
-$(BOXOUTFILES): boxes.ml
-	../tool.opt -ccopt "-I ../ unix.cma" -v $^
+$(BOXOUTFILES): boxes.dummy
+$(PATHOUTFILES): paths.dummy
+$(MISCOUTFILES): misc.dummy
 
-$(PATHOUTFILES): paths.ml
+
+%.dummy: %.ml
 	../tool.opt -ccopt "-I ../ unix.cma" -v $^
+	touch $@
 
 parse.ml: parse.mll
 	ocamllex parse.mll
@@ -32,5 +47,6 @@ parse: parse.ml
 
 clean:
 	rm -f *.aux *.dvi *.ps *.1 *.log $(PNGFILES) *.mp *.mpx *.tex
-	rm -f boxes.ml.html paths.ml.html
+	rm -f boxes.ml.html paths.ml.html misc.ml.html
 	rm -f parse.ml *.cmx *.cmo *.cmi parse
+	rm -f *.png *.dummy

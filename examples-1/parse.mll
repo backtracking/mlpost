@@ -1,5 +1,18 @@
 {
   open Lexing
+
+  let togglescript = 
+    "<script type=\"text/javascript\">
+<!--
+    function toggle_visibility(id) {
+       var e = document.getElementById(id);
+       if(e.style.display == 'block')
+          e.style.display = 'none';
+       else
+          e.style.display = 'block';
+    }
+//-->
+</script>"
 }
 
 let alpha_lower = ['a'-'z' ]
@@ -10,6 +23,7 @@ let identifier = alpha_lower (alpha | digit | '\'' | '_')*
 let blank = [' ' '\t' '\n' '\r' ]
 
 rule scan = parse
+  | "<<togglescript>>" { Printf.printf "%s" togglescript; scan lexbuf }
   | ">>" { Printf.printf "</p> </div><hr>"; scan lexbuf }
   | "<<" (identifier as i)
       { 
