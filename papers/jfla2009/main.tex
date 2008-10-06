@@ -9,8 +9,12 @@
 % macros
 \newcommand{\mlpost}{\textsc{Mlpost}}
 \newcommand{\metapost}{\textsc{MetaPost}}
+\newcommand{\fmpost}{\textit{functional} \metapost}
+\newcommand{\metafont}{\textsc{Metafont}}
 \newcommand{\tikz}{\textsc{Tikz}}
 \newcommand{\pstricks}{\textsc{Pstricks}}
+\newcommand{\dia}{\textsc{Dia}}
+\newcommand{\xfig}{\textsc{Xfig}}
 
 \title{Faire bonne figure avec \mlpost}
 
@@ -41,15 +45,81 @@
 
 \section{Introduction}
 
-motivation (dessiner en programmant, inclusion latex)
+% justifier la nécessité d'un bon mariage avec LaTeX
+
+Il existe plusieurs familles d'outils pour réaliser des figures à
+intégrer dans un document \LaTeX~:
+\begin{itemize}
+\item des interfaces graphiques disposant d'une sortie \LaTeX, telles
+  que \dia~\cite{dia} ou \xfig~\cite{xfig} ;
+\item des bibliothèques \LaTeX, telles que \pstricks~\cite{pstricks}
+  ou encore \tikz~\cite{tikz} ; 
+\item des outils externes en ligne de commande, tel 
+  \metapost~\cite{metapost}.
+\end{itemize}
+
+Chaque famille a ses avantages et ses inconvénients. Les interfaces
+graphiques sont les plus accessibles, notamment pour un placement
+rapide et intuitif des différents éléments de la figure, mais
+l'intégration de texte mis en forme par \LaTeX\ est délicate. Dans le
+cas de \xfig\ et de \dia, la taille des éléments \LaTeX\ n'est pas
+connue lors de l'édition de la figure ; en outre, 
+dans le cas de \dia, l'intégration de \LaTeX\ dans une figure
+nécessite de l'exporter sous forme de macros \tikz\ et d'éditer le résultat.
+
+Les bibliothèques \LaTeX\ telles que \pstricks\ ou \tikz\ offrent
+l'intégration la plus naturelle avec \LaTeX. En particulier, elles
+permettent de combiner arbitrairement éléments graphiques et textes \LaTeX.
+% TODO un exemple en ligne ici ?
+En revanche, elles demandent d'apprendre un certain nombre de macros
+et de notations et souffrent surtout des défauts inhérents à \LaTeX~:
+\begin{itemize}
+\item des erreurs détectées uniquement à
+  l'interprétation, peu claires et parfois mal localisées ;
+\item un langage \emph{de programmation} peu commode (syntaxe obscure,
+  absence de typage, code difficile à structurer).
+\end{itemize}
+Ces inconvénients sont notamment un frein au développement de
+bibliothèques de haut niveau au dessus de ces langages ainsi qu'à la
+réutilisation de figures.
+
+\metapost\ se présente comme une alternative à ces bibliothèques
+\LaTeX, en proposant un langage de programmation à part entière
+spécialisé dans la construction de figures contenant des éléments
+\LaTeX. Il permet notamment de manipuler symboliquement la taille et
+la position de ces éléments et de les relier de manière implicite par
+des équations. En revanche, le langage de \metapost\ s'inspire de
+celui de \metafont~\cite{metafont} et présente, à l'exception de la
+syntaxe, les défauts soulevés ci-dessus.
+% TODO  exemple metapost ?
+
+
+\fmpost
+
+% motivation (dessiner en programmant, inclusion latex)
+
+%%% PROS
+
+% ne pas apprendre un nouveau langage
+
+% LaTeX = pas un langage de programmation
+
+% avec Caml : on bénéficie du typage de Caml, on dispose de tout le langage
+
+%%% CONS
+
+% pas de baseline
+
+% pas de mélange entre LaTeX et les graphiques
+
 \subsection{Les solutions existantes}
 
 Il existent de nombreuses solutions pour des dessins techniques. Tout d'abord,
 les logiciels à base d'interface graphique, notamment {\em dia} et {\em xfig}.
 Ces deux programmes permettent la création à la souris de dessins plus ou
 moins complexes. Ils ont l'avantage d'être assez intuitifs, mais ils partagent
-aussi l'absence d'inclusion de \LaTeX dans un dessin. Avec xfig, on peut
-néanmoins mettre du code \LaTeX dans un document, mais sa taille réelle ne
+aussi l'absence d'inclusion de \LaTeX\ dans un dessin. Avec xfig, on peut
+néanmoins mettre du code \LaTeX\ dans un document, mais sa taille réelle ne
 pourra être prise en compte. Dia n'offre même pas cette possibilité, il faut
 éditer les fichiers de sortie, si on veut vraiment mettre du code \LaTeX.
 
