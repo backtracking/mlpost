@@ -10,7 +10,6 @@ WWW=/users/demons/filliatr/WWW
 	bibtex $*
 	pdflatex $*.tex
 	pdflatex $*.tex
-	dvips $*.dvi -o
 
 %-pp.tex: pp.ml %.tex 
 	ocaml $^ > $@
@@ -20,9 +19,6 @@ figures.mp: figures.ml
 
 main-pp.dvi: main-pp.tex
 	latex $^
-
-main-pp.pdf: main-pp.tex figures.mp
-	pdflatex $^
 
 pp.ml: pp.mll
 	ocamllex pp.mll
@@ -38,5 +34,5 @@ export: main-pp.ps
 clean:
 	rm -f *~ *.aux *.log *.bbl *.blg
 	rm -f main-pp.dvi main-pp.ps figures.mp
-	rm -f mpxerr.dvi mpxerr.tex
+	rm -f mpxerr.dvi mpxerr.tex main-pp.pdf
 

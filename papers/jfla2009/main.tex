@@ -227,11 +227,109 @@ let graph_sqrt =
   \caption{Architecture de \mlpost}
 \end{figure}
 
+API
 \subsection{Types primitifs de \metapost}
 
-API
+
+La couche bas-niveau de \mlpost est une interface fidèle à \metapost. Elle
+comporte donc tous les types de base de \metapost :
+
+\begin{description}
+
+  \item[Le type numérique (module \texttt{Num})] représente des longeurs.
+    Moralement, ce type peut être assimilé au type \texttt{float} en \ocaml,
+    mais certaines valeurs (par exemple la taille d'un élément \LaTeX) ne sont
+    pas connues à l'execution.  La plupart des calculs sont donc effectués de
+    manière symbolique et le type \texttt{Num.t} doit être abstrait.
+
+  \item[Le type couple ou pair (module \texttt{Point})] représente des points
+    dans l'espace à deux dimensions. Pour les mêmes raisons que les
+    numériques, les points ne sont pas simplement des pairs de floats, mais
+    doivent être représentés de manière symbolique. 
+
+  \item[Les chemins (module \texttt{Path})] sont des lignes représentés par
+    des courbes de Bézier. Ils sont à la base de tout dessin \metapost. Toutes
+    les possibilités de construction de chemin dans \metapost\ ont été
+    interfacés. On peut dessiner des lignes droites ou des lignes courbes en
+    précisent les angles de départ et arrivée, la tension de la courbe, etc.
+    
+  \item[Les transformations (module \texttt{Transform})] permettent
+    d'appliquer une transformation linéaire à un objet quelconque. Il est
+    ainsi possible de déplacer des objets, de les agrandir ou étirer, les
+    faire tourner ou encore combiner toutes ces transformations.
+
+  \item[Les plumes (module \texttt{Pen})] permettent de choisir une autre
+    épaisseur ou une autre forme de stylo, par exemple pour dessiner des
+    chemins.
+
+  \item[Les figures (module \texttt{Picture})] permettent de regrouper une
+    partie du dessin. Celle-ci peut être un élément \LaTeX, une suite de
+    commandes de dessin ou encore un dessin découpé à l'aide d'une surface
+    décrite par un chemin clos.
+\end{description}
+Les autres types \metapost\ (chaînes de caractère, booléen, couleur) sont
+facilement représentés en \ocaml.
+
+\paragraph{Dépendances circulaires}
+Cette partie bas-niveau de \mlpost\ présente néanmoins quelques difficultés.
+Premièrement, la plupart des modules présentés sont à priori mutuellement
+récursifs : par exemple, les transformations s'appliquent à tous les autres
+objets, donc chaque module contient une fonction
+\begin{ocaml}
+  val transform : Transform.t -> t -> t
+\end{ocaml}
+où le type \texttt{t} représente le type principal du module en question.
+D'un autre côté, les transformations sont construits à l'aide de numériques et
+points:
+\begin{ocaml}
+  val shifted : Point.t -> t
+\end{ocaml}
+où \texttt{t} est le type des transformations.  Les dépendances circulaires
+existent aussi entre types et sont aggravés par la representation symbolique
+des objets ( par exemple, la fonction \texttt{xpart} dans le module
+\texttt{Point}). 
+
+Nous voulions présenter les interfaces de \mlpost\ avec des dépendances
+circulaires. Or, \ocaml ne permet pas de dépendances circulaires entre des
+fichiers. Notre solution consiste à définir tous les types dans un seul
+fichier, appellons le \texttt{types.mli}. Chaque module fait maintenant
+réference à ce fichier. Par exemple, dans le fichier \texttt{path.ml}, qui
+fournit l'implémentation du module \texttt{Path}, on trouvera
+\begin{ocaml}
+  module t = Types.path
+\end{ocaml}
+Aucun de ces modules ne possède un fichier d'interface \texttt{.mli}. La
+dépendance circulaire entre les modules est alors cassée, de manière très
+classique.
+
+Comment peut-on réintroduire la circularité (voulue) dans l'interface ? Nous
+avons écrit un fichier /texttt{mlpost.mli} qui contient les définitions des
+signatures des modules à exporter:
+\begin{ocaml}
+module rec Num : sig
+  type t
+  ...
+end
+and Point : sig
+  type t
+  ...
+end
+and Path : sig
+  type t
+  ...
+end
+...
+\end{ocaml}
+Afin de pouvoir écrire ces signatures, tous ces modules sont déclarés de
+manière mutuellement récursive. La signature de \texttt{Point} peut ainsi
+faire réference à \texttt{Path} et inversement. Maintenant il suffit de
+fournir les implémentations de ces modules, à l'aide des fichiers
+\texttt{num.ml}, \texttt{point.ml} etc, qui ont tous été compilés et mis dans
+un {\em pack}. Cet agencement est très pratique aussi pour la documentation.
+C'est ce fichier uniquement qui sert d'entrée pour l'outil \texttt{ocamldoc}.
+
+\paragraph{Hashconsing et traduction vers \metapost}
 compilation, hashconsing
-modules récursifs - interface de MlPost
 
 \subsection{Boîtes}
 

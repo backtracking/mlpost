@@ -93,8 +93,8 @@ let path10 =
 let path11 = 
   [draw ~dashed:(pattern [on (Num.bp 2.) ; off (Num.bp 3.)] ) 
      (path ~scale:Num.cm [0.,0.; 3.,0.]) ; ]
-
 (*parse >> *)
+
 let _ = 
   List.iter (fun (name,fig) -> Metapost.emit name fig)
     [ "path1", path1 ;

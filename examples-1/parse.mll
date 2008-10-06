@@ -13,8 +13,8 @@ rule scan = parse
   | ">>" { Printf.printf "</p> </div><hr>"; scan lexbuf }
   | "<<" (identifier as i)
       { 
-        Printf.printf "<p id=\"%s1\"><img src=\"%s.png\" /></p>" i i;
-        Printf.printf "<a href=\"#%s1\" onclick=\"\
+        Printf.printf "<p id=\"%sa\"><img src=\"%s.png\" /></p>" i i;
+        Printf.printf "<a href=\"#%sa\" onclick=\"\
                        toggle_visibility('%s');\">show/hide code</a>" i i;
         Printf.printf "<div id=\"%s\" style='display:none;'>" i;
         Printf.printf "<p>";
