@@ -231,7 +231,7 @@ API
 \subsection{Types primitifs de \metapost}
 
 
-La couche bas-niveau de \mlpost est une interface fidèle à \metapost. Elle
+La couche de bas niveau de \mlpost est une interface fidèle à \metapost. Elle
 comporte donc tous les types de base de \metapost :
 
 \begin{description}
@@ -265,13 +265,16 @@ comporte donc tous les types de base de \metapost :
   \item[Les figures (module \texttt{Picture})] permettent de regrouper une
     partie du dessin. Celle-ci peut être un élément \LaTeX, une suite de
     commandes de dessin ou encore un dessin découpé à l'aide d'une surface
-    décrite par un chemin clos.
+    décrite par un chemin clos. Ceci permet de traiter une figure
+    arbitrairement complexe comme un objet de base que l'on peut copier,
+    transformer, \ldots.
+
 \end{description}
 Les autres types \metapost\ (chaînes de caractère, booléen, couleur) sont
-facilement représentés en \ocaml.
+facilement représentés en \ocaml. 
 
 \paragraph{Dépendances circulaires}
-Cette partie bas-niveau de \mlpost\ présente néanmoins quelques difficultés.
+Cette partie de bas niveau de \mlpost\ présente néanmoins quelques difficultés.
 Premièrement, la plupart des modules présentés sont à priori mutuellement
 récursifs : par exemple, les transformations s'appliquent à tous les autres
 objets, donc chaque module contient une fonction
@@ -285,12 +288,12 @@ points:
   val shifted : Point.t -> t
 \end{ocaml}
 où \texttt{t} est le type des transformations.  Les dépendances circulaires
-existent aussi entre types et sont aggravés par la représentation symbolique
+existent aussi entre types et sont aggravées par la représentation symbolique
 des objets ( par exemple, la fonction \texttt{xpart} dans le module
 \texttt{Point}). 
 
 Nous voulions présenter les interfaces de \mlpost\ avec des dépendances
-circulaires. Or, \ocaml ne permet pas de dépendances circulaires entre des
+circulaires. Or, \ocaml\ ne permet pas de dépendances circulaires entre des
 fichiers. Notre solution consiste à définir tous les types dans un seul
 fichier, appellons le \texttt{types.mli}. Chaque module fait maintenant
 référence à ce fichier. Par exemple, dans le fichier \texttt{path.ml}, qui
