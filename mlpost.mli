@@ -326,6 +326,9 @@ and Path : sig
       control points, as in {!point}. *)
   val subpath : float -> float -> t -> t
 
+  (** Same as [subpathn] but using [Num.t]. *)
+  val subpathn : Num.t -> Num.t -> t -> t
+
   (** Apply a transformation to a path *)
   val transform : Transform.t -> t -> t
 

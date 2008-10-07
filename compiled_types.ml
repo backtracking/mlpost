@@ -68,7 +68,7 @@ and path =
   | PACutBefore of path * path
   | PABuildCycle of path list
   (* PASub only takes a name *)
-  | PASub of float * float * name
+  | PASub of num * num * name
   | PABBox of picture
   | PAName of name
 

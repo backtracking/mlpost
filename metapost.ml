@@ -119,7 +119,7 @@ and path fmt = function
   | C.PABuildCycle l ->
       fprintf fmt "buildcycle(%a)" (Misc.print_list comma path) l
   | C.PASub (f1, f2, p) ->
-      fprintf fmt "subpath(%a,%a) of %a" float f1 float f2 name p
+      fprintf fmt "subpath(%a,%a) of %a" num f1 num f2 name p
   | C.PABBox p -> fprintf fmt "bbox %a" picture p
   | C.PAName n -> pp_print_string fmt n
 

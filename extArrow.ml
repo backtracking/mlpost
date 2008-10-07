@@ -11,6 +11,12 @@ let direction_on_path f p =
 let point_on_path f p =
   Path.pointn (Num.multf f (Path.length p)) p
 
+let subpath_01 f t p =
+  let l = Path.length p in
+  let f = Num.multf f l in
+  let t = Num.multf t l in
+  Path.subpathn f t p
+
 (* Atoms *)
 
 type line = {
@@ -79,7 +85,12 @@ let simple = add_head (kind_empty body_simple)
 (* Compute the path of a line along an arrow path.
    Return the line (unchanged) and the computed path. *)
 let make_arrow_line path line =
-  (* TODO: use line.dist, line.from_point and line.to_point *)
+  (* TODO: use line.dist *)
+  let path =
+    if line.from_point <> 0. || line.to_point <> 1. then
+      subpath_01 line.from_point line.to_point path
+    else path
+  in
   line, path
 
 (* Compute the command and the clipping path of a belt along an arrow path.

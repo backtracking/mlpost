@@ -106,7 +106,7 @@ and path_node = private
   | PACutAfter of path * path
   | PACutBefore of path * path
   | PABuildCycle of path list
-  | PASub of float * float * path
+  | PASub of num * num * path
   | PABBox of picture
 
 and path = path_node hash_consed
@@ -243,7 +243,7 @@ val mkPATransformed : path -> transform -> path
 val mkPACutAfter : path -> path -> path
 val mkPACutBefore : path -> path -> path
 val mkPABuildCycle : path list -> path
-val mkPASub : float -> float -> path -> path
+val mkPASub : num -> num -> path -> path
 val mkPABBox : picture -> path
 
 (* joint *)

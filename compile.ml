@@ -293,10 +293,12 @@ struct
     | PASub (f1, f2, p) ->
         (* the Metapost subpath command needs a path name as argument
          * we use the ks argument here to assure that *)
+        let f1, c1 = Num.compile f1 in
+        let f2, c2 = Num.compile f2 in
         let p, code = ks p in
         begin
           match p with
-            | C.PAName n -> C.PASub (f1,f2,n), code
+            | C.PAName n -> C.PASub (f1,f2,n), c1 ++ c2 ++ code
             | _ -> assert false
         end
     | PABBox p ->

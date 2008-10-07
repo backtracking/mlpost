@@ -113,7 +113,7 @@ and path' = function
   | PACutBefore (p1,p2) -> path p1; path p2
   | PAAppend (p1,j,p2) -> path p1; joint j; path p2
   | PABuildCycle pl -> List.iter path pl
-  | PASub (f1, f2, p) -> path p
+  | PASub (f1, f2, p) -> num f1; num f2; path p
   | PABBox p -> picture p
   | PAKnot k -> knot k
   | PAUnitSquare | PAQuarterCircle | PAHalfCircle | PAFullCircle -> ()

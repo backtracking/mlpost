@@ -106,7 +106,7 @@ and path_node =
   | PACutAfter of path * path
   | PACutBefore of path * path
   | PABuildCycle of path list
-  | PASub of float * float * path
+  | PASub of num * num * path
   | PABBox of picture
 
 and path = path_node hash_consed
@@ -413,7 +413,7 @@ let eq_path_node p1 p2 =
     | PABuildCycle(l1),PABuildCycle(l2) ->
 	eq_hashcons_list l1 l2
     | PASub(f11,f12,p1), PASub(f21,f22,p2) ->
-	eq_float f11 f21 && eq_float f12 f22 && eq_hashcons p1 p2
+	eq_hashcons f11 f21 && eq_hashcons f12 f22 && eq_hashcons p1 p2
     | PABBox(p1), PABBox(p2) ->
 	eq_hashcons p1 p2
     | _ -> false

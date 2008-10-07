@@ -193,10 +193,12 @@ and path' = function
       C.PABuildCycle (List.map fst npl), C.CSeq (List.map snd npl)
   | PASub (f1, f2, p) ->
       (* the Metapost subpath command needs a path name as argument *)
+      let f1, c1 = num f1 in
+      let f2, c2 = num f2 in
       let p', code = path_save p in
       begin
         match p' with
-        | C.PAName x -> C.PASub (f1,f2,x), nop
+        | C.PAName x -> C.PASub (f1,f2,x), c1 ++ c2
         | _ -> assert false
       end
   | PABBox p ->
