@@ -45,14 +45,30 @@ let add_line ?dashed ?color ?pen ?(from_point = 0.) ?(to_point = 1.)
 
 type head = Point.t -> Point.t -> Command.t * Path.t
 
-let head_classic ?color ?pen ?dashed ?(angle = 60.) ?(size = Num.bp 4.) p dir =
+let head_classic_points ?(angle = 60.) ?(size = Num.bp 4.) p dir =
   let dir = Point.scale size dir in
   let dir_a = neg (Point.rotate (angle /. 2.) dir) in
   let dir_b = neg (Point.rotate (-. angle /. 2.) dir) in
   let a = Point.add p dir_a in
   let b = Point.add p dir_b in
-  let path = Path.pathp ~style:Path.jLine [a; p; b] in
+  a, b
+
+let head_classic ?color ?pen ?dashed ?angle ?size p dir =
+  let a, b = head_classic_points ?angle ?size p dir in
+  let path = Path.pathp ~style: Path.jLine [a; p; b] in
   Command.draw ?color ?pen ?dashed path, path
+
+let head_triangle ?color ?pen ?dashed ?angle ?size p dir =
+  let a, b = head_classic_points ?angle ?size p dir in
+  let path = Path.pathp ~style: Path.jLine ~cycle: Path.jLine [a; p; b] in
+  let clipping_path = Path.pathp ~style: Path.jLine [a; b] in
+  Command.draw ?color ?pen ?dashed path, clipping_path
+
+let head_triangle_full ?color ?angle ?size p dir =
+  let a, b = head_classic_points ?angle ?size p dir in
+  let path = Path.pathp ~style: Path.jLine ~cycle: Path.jLine [a; p; b] in
+  let clipping_path = Path.pathp ~style: Path.jLine [a; b] in
+  Command.fill ?color path, clipping_path
 
 type belt = {
   clip: bool;
@@ -104,8 +120,12 @@ let make_arrow_belt path belt =
 
 (* Clip a line with a belt clipping path if needed. *)
 let clip_line_with_belt (line, line_path) (belt, _, clipping_path) =
-  (* TODO *)
-  line, line_path
+  let cut =
+    if belt.clip then
+      (if belt.rev then Path.cut_before else Path.cut_after) clipping_path
+    else fun x -> x
+  in
+  line, cut line_path
 
 (* Compute the command to draw a line. *)
 let draw_line (line, line_path) =

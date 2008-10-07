@@ -1096,6 +1096,15 @@ module ExtArrow : sig
         degrees
       @param size the length of the two lines, default is 4bp *)
 
+  val head_triangle : ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
+    ?angle:float -> ?size:Num.t -> head
+  (** Same as [head_classic] except that the two lines are joined together
+      to form a triangle. *)
+
+  val head_triangle_full : ?color:Color.t -> ?angle:float -> ?size:Num.t -> head
+  (** Same as [head_triangle] except that the triangle is not drawn (hence the
+      absence of pen properties) but is filled with the given [color]. *)
+
   (** {2 Arrow Kinds} *)
 
   type kind

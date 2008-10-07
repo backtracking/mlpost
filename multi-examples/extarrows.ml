@@ -16,10 +16,15 @@ let right = Path.vec Point.right
 let double_headed = ExtArrow.add_foot ExtArrow.simple
 
 let multiple_headed =
-  ExtArrow.add_belt ~point: 0.
+  ExtArrow.add_foot ~head: ExtArrow.head_triangle
     (ExtArrow.add_belt ~point: 0.25
-       (ExtArrow.add_belt ~point: 0.5
-          (ExtArrow.add_belt ~point: 0.75 ExtArrow.simple)))
+       ~head: (ExtArrow.head_triangle ~size: (Num.bp 10.))
+       (ExtArrow.add_belt ~point: 0.5 ~head: ExtArrow.head_triangle_full
+          (ExtArrow.add_belt ~point: 0.75
+             ~head: (ExtArrow.head_triangle_full ~angle: 140.)
+             (ExtArrow.add_head
+                ~head: (ExtArrow.head_triangle ~size: (Num.bp 15.))
+                (ExtArrow.kind_empty ExtArrow.body_simple)))))
 
 let serial_lines =
   ExtArrow.add_head
