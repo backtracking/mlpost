@@ -325,7 +325,7 @@ let automate =
 \subsection{Diagrammes}
 
 Le but de cette section est de montrer qu'il est très facile d'écrire sa
-propre mini-bibliothèque qui utilise \mlpost\ afin de réaliser ses figures.
+propre extension fondée sur \mlpost\ afin de réaliser ses figures.
 
 % blocs mémoire (listes, etc.) -- JCF
 % introduire Box.vblock
@@ -333,7 +333,8 @@ propre mini-bibliothèque qui utilise \mlpost\ afin de réaliser ses figures.
 \paragraph{Diagrammes de classes}
 
 Avec la fonction \texttt{Box.vblock} vue auparavant, il est facile
-d'implémenter une fonction qui dessine un rectangle correspondant à une classe :
+d'implémenter une fonction qui dessine un rectangle correspondant à
+une classe :
 \begin{ocaml}
 let classblock name attr_list method_list = 
   let tex = Box.tex ~stroke:None in
@@ -381,6 +382,8 @@ flèche avec une étiquette est dessinée entre ces deux classes. En tout, le
 code pour cette figure est conceptuellement très simple, contient aucun
 placement absolu et ne dépasse pas les 20 lignes de code.
 
+
+\subsection{Autres extensions : arbres et graphes de fonctions}
 
 % arbre -- JCF
 
