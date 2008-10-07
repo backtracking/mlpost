@@ -37,7 +37,8 @@ module B = struct
     pen : Pen.t option;
     fill : Color.t option;
     contour : Shapes.t; 
-    desc : desc
+    desc : desc;
+    post_draw : Picture.t
   }
       
   and desc = 
@@ -57,7 +58,8 @@ module B = struct
     { b with 
       ctr = Point.shift pt b.ctr; 
       contour = Shapes.shift pt b.contour;
-      desc = shift_desc pt b.desc }
+      desc = shift_desc pt b.desc;
+      post_draw = Picture.shift pt b.post_draw}
       
   and shift_desc pt = function
     | Emp -> Emp
@@ -115,7 +117,8 @@ let rec draw ?(debug=false) b =
     else 
       Command.nop
   in
-  Command.seq [fill_cmd; contents_cmd; path_cmd; debug_cmd]
+  Command.seq [fill_cmd; contents_cmd; path_cmd; debug_cmd; 
+               Command.draw_pic b.post_draw]
 
 type style = 
   | Rect | Circle | Ellipse | RoundRect | Patatoid
@@ -167,7 +170,8 @@ let pic ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black) ?pen ?fill pic =
   in
   { desc = Pic pic;
     name = name; stroke = stroke; pen = pen; fill = fill;
-    width = w; height = h; ctr = c; contour = s }
+    width = w; height = h; ctr = c; contour = s;
+    post_draw = Picture.empty}
 
 module BoxAlign = Pos.List_(B)
 
@@ -191,7 +195,8 @@ let align_boxes f ?padding ?pos ?(style=Rect)
   let bl = BoxAlign.v bl in
   { desc = Grp (Array.of_list bl, merge_maps bl);
     name = name; stroke = stroke; pen = pen; fill = fill;
-    width = w; height = h; ctr = c; contour = s }
+    width = w; height = h; ctr = c; contour = s ;
+    post_draw = Picture.empty }
 
 let hbox = align_boxes BoxAlign.horizontal
 let vbox = align_boxes BoxAlign.vertical
@@ -223,7 +228,8 @@ let group
   let w,h,s = make_contour style ~dx ~dy w h c in
   { desc = Grp (Array.of_list bl, merge_maps bl);
     name = name; stroke = stroke; pen = pen; fill = fill;
-    width = w; height = h; ctr = c; contour = s }
+    width = w; height = h; ctr = c; contour = s ;
+    post_draw = Picture.empty}
 
 let group_array ?name ?stroke ?fill ?dx ?dy ba =
   group ?name ?stroke ?fill ?dx ?dy (Array.to_list ba)
@@ -234,13 +240,16 @@ let group_rect ?name w h c bl =
   { desc = Grp (Array.of_list bl, merge_maps bl);
     name = name; stroke = None; pen = None; fill = None;
     width = w; height = h; ctr = c; 
-    contour = Shapes.center c (Shapes.rectangle_path w h) }
+    contour = Shapes.center c (Shapes.rectangle_path w h);
+    post_draw = Picture.empty }
 
 let empty ?(width=Num.zero) ?(height=Num.zero) () =
   { desc = Emp; name = None; 
     stroke = None; pen = None; fill = None;
     width = width; height = height; ctr = Point.origin;
-    contour = Shapes.rectangle_path width height }
+    contour = Shapes.rectangle_path width height ;
+    post_draw = Picture.empty
+  }
 
 type 'a box_creator = 
   ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 
@@ -278,6 +287,8 @@ let set_stroke s b = {b with stroke = Some s }
 let clear_stroke b = { b with stroke = None }
 let get_name b = b.name
 let set_name name b = {b with name = Some name}
+
+let set_draw c b = {b with post_draw = Picture.make c}
 
 let get_pen b = b.pen
 let set_pen p b = { b with pen = Some p }

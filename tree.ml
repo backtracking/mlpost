@@ -85,6 +85,7 @@ let arc_wrap ?stroke ?pen arrow_style edge_style b1 b2 =
   | 0 -> arc b2
   | _ -> arc a.(0)
 
+(*
 let draw 
     ?(arrow_style=Directed) ?(edge_style=Straight)
     ?stroke ?pen ?debug  t =
@@ -105,18 +106,18 @@ let draw
   in
   draw t
 
+*)
 
 let leaf s = Box.group [s]
-let node ?(ls=Num.bp 12.) ?(cs=Num.bp 5.) s l = 
+let node ?(ls=Num.bp 12.) ?(cs=Num.bp 5.) ?(arrow_style=Directed)
+         ?(edge_style=Straight) ?stroke ?pen s l = 
   let l = Box.hbox ~padding:cs ~pos:`Top l in 
   let n = Box.vbox ~padding:ls [s;l] in
   let s = Box.nth 0 n in
   let l = Box.elts_list (Box.nth 1 n) in
-  Box.group (s::l)
+  Box.set_draw 
+    (Command.iterl (arc_wrap ?stroke ?pen arrow_style edge_style s) l) 
+    (Box.group (s::l))
 
-let bin ?ls ?cs s x y = node ?ls ?cs s [x;y]
-
-(*
-let rec set_fill c (N (n,l)) =
-  N (Box.set_fill c n, List.map (set_fill c) l)
-*)
+let bin ?ls ?cs ?arrow_style ?edge_style ?stroke ?pen s x y = 
+  node ?ls ?cs ?arrow_style ?edge_style ?stroke ?pen s [x;y]

@@ -28,6 +28,9 @@ let shift x y = transform [Transform.shifted (x ++ y)]
 
 let () = Random.init 1234
 
+open Tree
+open Box
+
 let d1 = 
   let a = Box.circle (Picture.tex "$\\sqrt2$") in
   let b = 
@@ -36,7 +39,7 @@ let d1 =
   let pen = Pen.default ~tr:[Transform.scaled (bp 3.)] () in
   [ Box.draw a;
     Box.draw b;
-    draw
+    Command.draw
       ~color:Color.red
       (Path.shift (1. ++ 1.) (Box.bpath a));
     draw_label_arrow ~color:Color.orange ~pen 
@@ -69,7 +72,7 @@ open Tree
 
 let yannick style =
   let tt s = Box.tex ~style ~fill:Color.orange ("\\texttt{" ^ s ^ "}") in
-  let node s = node ~ls:(bp 20.) ~cs:(bp 10.) (tt s) in
+  let node s = node ~ls:(bp 20.) ~cs:(bp 10.) ~edge_style:Square (tt s) in
   let leaf s = leaf (tt s) in
 
   let tree =
@@ -81,50 +84,46 @@ let yannick style =
       ]
       ]
   in
-  [draw  
-      ~edge_style:Square tree]
+  [draw tree]
 
 
-let rec random_tree = 
+let rec random_tree ?arrow_style ?edge_style ?stroke ?pen n = 
   let tex = tex ~fill:Color.yellow in
-  function
+  match n with
   | 1 -> leaf (tex "1")
   | 2 -> 
-      node (Box.tex ~style:Box.Rect ~fill:(Color.rgb 0.5 0.3 0.2) "2") 
+      node ?arrow_style ?edge_style 
+        (Box.tex ~style:Box.Rect ~fill:(Color.rgb 0.5 0.3 0.2) "2") 
         [leaf (tex "1")]
   | n -> 
       let k = 1 + Random.int (n - 2) in
-      node (tex (string_of_int n)) [random_tree k; random_tree (n - 1 - k)]
+      node ?arrow_style ?edge_style ?stroke ?pen
+        (tex (string_of_int n)) 
+        [random_tree k; random_tree (n - 1 - k)]
 
 let d2c, d2s, d2sq, d2hsq = 
 (*   let ls = bp (-1.0) in *)
-  let tree = random_tree 17 in
-  [draw ~arrow_style:Directed ~edge_style:Curve
-        ~stroke:Color.blue ~pen:(Pen.circle ()) tree],
-  [draw ~arrow_style:Directed ~edge_style:Straight
-       ~stroke:Color.blue ~pen:(Pen.circle ()) tree],
-  [draw  ~arrow_style:Directed ~edge_style:Square
-       ~stroke:Color.blue ~pen:(Pen.circle ()) tree],
-  [draw  ~arrow_style:Directed ~edge_style:HalfSquare
-       ~stroke:Color.blue ~pen:(Pen.circle ()) ~debug:true tree]
+  let stroke = Color.blue and pen = Pen.circle () and arrow_style = Directed in
+  [draw 
+    (random_tree ~edge_style:Curve ~arrow_style ~stroke ~pen 17)],
+  [draw 
+    (random_tree ~edge_style:Straight ~arrow_style ~stroke ~pen 17)],
+  [draw 
+    (random_tree ~edge_style:Square ~arrow_style ~stroke ~pen 17)],
+  [draw 
+    (random_tree ~edge_style:HalfSquare ~arrow_style ~stroke ~pen 17)]
 
 let d5 = 
   let rand_tree name i = set_name name (set_stroke Color.black (random_tree i)) in
   let t1 = rand_tree "1" 5 in
   let t2 = rand_tree "2" 6 in
   let bl = Box.hbox ~padding:(Num.cm 2.) [ box t1; box t2] in
-  (* jusqu'ici ca va, mais là ca commence a etre vraiment compliqué !*)
-  let t1 = get "1" bl in
-  let t2 = get "2" bl in
-  let b1 = nth 0 bl in
-  let b2 = nth 1 bl in
-  [ Tree.draw t1; Tree.draw t2;
-    Command.draw (bpath b1);
-    Command.draw (bpath b2);
-    box_arrow b1 b2 ]
+  let b1 = nth 0 (get "1" bl) in
+  let b2 = nth 0 (nth 1 (get "2" bl)) in
+  [ draw bl; box_arrow b1 b2; ]
 
 
-let tree1 () = pic (Picture.make (Tree.draw (random_tree (1 + Random.int 5))))
+let tree1 () = pic (Picture.make (draw (random_tree (1 + Random.int 5))))
 
 let rec random_tree2 = function
   | 1 -> leaf (tree1 ())
@@ -133,8 +132,7 @@ let rec random_tree2 = function
       let k = 1 + Random.int (n - 2) in
       node ~cs:(mm 0.2) (tree1 ()) [random_tree2 k; random_tree2 (n - 1 - k)]
 
-let d6 = [Tree.draw  (random_tree2 10)]
-
+let d6 = [draw  (random_tree2 10)]
 let cheno011 =
   let p = path ~cycle:jCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)] in
   let pen = Pen.circle ~tr:[T.scaled (bp 1.5)] () in
@@ -337,195 +335,12 @@ let shapes2 =
       Shapes.ellipse ~fill:Color.black ~stroke:Color.red (bp 30.) (bp 10.);
     ]
 
-(****
-let stack =
-  let bl = 
-    Box.valign ~dx:Num.one ~dy:two
-      [Picture.tex "$x$"; 
-       Picture.tex "topo"; 
-       Picture.tex "{\\Large I}"] 
-  in
-  let cbl = List.map2 
-    (fun b n -> fill ~color:(Color.color n) (Picture.corner_bbox (Box.picture b))) 
-    bl 
-    ["BlanchedAlmond"; "DarkSlateGray"; "medium violet red"]
-  in
-  seq cbl :: List.map Box.draw bl
-
-let row =
-  let bl = 
-    Box.halign ~dx:Num.one ~dy:two
-      [Picture.tex "$x$"; 
-       Picture.tex "topo"; 
-       Picture.tex "{\\Large I}"] 
-  in
-  let cbl = List.map2 
-    (fun b n -> fill ~color:(Color.color n) (Picture.corner_bbox (Box.picture b))) 
-    bl 
-    ["BlanchedAlmond"; "DarkSlateGray"; "medium violet red"]
-  in
-  seq cbl :: List.map Box.draw bl
-
-let stackl =
-  let bll = 
-    Box.tabularl ~dx:Num.one ~dy:two
-      [[Picture.tex "$x$"]; 
-       [Picture.tex "topo"]; 
-       [Picture.tex "{\\Large I}"]]
-  in
-  let cbl = List.map2
-    (fun b n -> fill ~color:(Color.color n) (Picture.corner_bbox (Box.picture b)))
-     (List.map List.hd bll)
-    ["BlanchedAlmond"; "DarkSlateGray"; "medium violet red"]
-  in
-    seq cbl :: List.map Box.draw (List.flatten bll)
-
-let rowl =
-  let bll = 
-    Box.tabularl ~dx:Num.one ~dy:two
-      [[Picture.tex "$x$"; 
-	Picture.tex "topo"; 
-	Picture.tex "{\\Large I}"]]
-  in
-  let cbl = List.map2
-    (fun b n -> fill ~color:(Color.color n) (Picture.corner_bbox (Box.picture b)))
-    (List.hd bll)
-    ["BlanchedAlmond"; "DarkSlateGray"; "medium violet red"]
-  in
-    seq cbl :: List.map Box.draw (List.flatten bll)
-
-let array =
-  let bll =
-    Box.tabularl ~dx:Num.one ~dy:two
-      [[Picture.tex "$x$"; Picture.tex "topo"; Picture.tex "{\\Large I}"];
-       [Picture.tex "$\\lambda$"; Picture.tex "yippie"; Picture.tex "{\\Large O}"];
-       [Picture.tex "{\\it Lets}"; Picture.tex "go"; Picture.tex "{\\Large PHILS}"]]
-  in
-  let cbl = 
-    List.flatten 
-      (List.map 
-	 (List.map2
-	    (fun n b -> fill ~color:(Color.color n) 
-	       (Picture.corner_bbox (Box.picture b)))
-	    ["BlanchedAlmond"; "DarkSlateGray"; "medium violet red"])
-	 bll)
-  in
-    seq cbl :: List.map Box.draw (List.flatten bll)
-
-
-(* my bresenham avec tabular *)
-let x2 = 9
-let y2 = 6
-let bresenham_data =
-  let a = Array.create (x2+1) 0 in
-  let y = ref 0 in
-  let e = ref (2 * y2 - x2) in
-  for x = 0 to x2 do
-    a.(x) <- !y;
-    if !e < 0 then
-      e := !e + 2 * y2
-    else begin
-      y := !y + 1;
-      e := !e + 2 * (y2 - x2)
-    end
-  done;
-  a
-
-let mybresenham =
-  let d = 10. in
-(*   let pen = Pen.default ~tr:([Transform.scaled (f 1.5)]) () in *)
-  let cell i j = 
-    let sq = Path.scale (bp d) unitsquare in
-    let color =
-      if j = bresenham_data.(i) then 
-	Color.color "OrangeRed"
-      else Color.white 
-    in
-      fill ~color sq
-  in
-  let bm = Box.tabulari x2 y2 (fun i j -> Picture.make (cell i j)) in
-    Array.fold_left 
-      (fun l m -> Array.fold_left (fun l b -> (Box.draw b)::l) l m)
-      [] bm
-
-module PA = Pos.List_ (Picture)
-module Al = Pos.List_ (PA)
-
-let postest =
-  let pl1 = List.map Picture.tex ["toto"; "$2$"; "{\\Large I}"] in
-  let pl2 = List.map Picture.tex [ "$4$";  "{\\Large $5$}"; "{\\Large I}"] in
-  let pl3 = List.map Picture.tex ["$7$"; "$8$"; "{\\Large I}"] in 
-  let bl = 
-    List.flatten 
-      (Al.v (Al.vertical ~dy:Num.two
-              [PA.horizontal ~dx:Num.one pl1;
-               PA.horizontal ~dx:Num.one ~pos:Pbot pl2;
-               PA.horizontal ~dx:Num.one pl3]
-      )) in
-  let bl = Picture.spin 90. (List.hd bl) :: List.tl bl in
-    List.map (Command.draw_pic) bl
-
-let box_align = 
-  let l = List.map Picture.tex ["toto"; "{\\Large I}"; "$1$"] in
-    List.map (Box.draw) 
-      (Box.halign_to_box ~dy:Num.two ~spacing:(Num.bp 10.) ~pos:Ptop l)
-    
-let boxjoin = 
-  [ Helpers.hboxjoin ~dx:(Num.bp 2.) ~spacing:(Num.bp 50.)
-      (List.map Picture.tex [ "abc"; "next"; "last"; "toto"]) ]
-
-open Pos
-
-module Tr = Tree (Box)
-
-let rec fold f acc (N (a,l)) =
-  let acc = List.fold_left (fold f) acc l in
-    f acc a
-    
-let placetest = 
-  let pic s = Box.base_rect (Picture.tex s) in
-  let t = N (pic "hey", 
-              [ N (pic "1", [N (pic "2",[]); N (pic "topo",[]) ]); 
-               N (pic "two", [N (pic "2",[]); N (pic "topo",[]) ]) ] ) in
-  let al = Tr.v (Tr.place ~dx:(Num.bp 5.) ~dy:(Num.bp 15.) t) in
-    fold (fun acc x -> Box.draw x :: acc) [] al
-
-
-module BA = List_ (Box)
-
-let newarray =
-  let bll =
-    PA.tabular ~dx:Num.one ~dy:two
-      [[Picture.tex "$x$"; Picture.tex "topo"; Picture.tex "{\\Large I}"];
-       [Picture.tex "$\\lambda$"; Picture.tex "yippie"; Picture.tex "{\\Large O}"];
-       [Picture.tex "{\\it Lets}"; Picture.tex "go"; Picture.tex "{\\Large PHILS}"]]
-  in
-  let pics =    
-    List.map (fun b -> draw_pic (PA.P.v b)) (List.flatten (List.map PA.v bll))
-  in
-  let boxes = 
-    List.map2
-      (fun n bl -> 
-	 List.map (fun b -> fill ~color:(Color.color n)
-		     (Picture.corner_bbox (PA.P.v b))) bl)
-      ["BlanchedAlmond"; "DarkSlateGray"; "medium violet red"]
-      (List.map PA.v bll) 
-  in
-    (List.flatten boxes)@pics
-
-****)
-
 let figs = [
   d6; d5; yannick Box.Rect; yannick Box.Patatoid; d1; d2; proval;
               d2sq; d2hsq; d2s; d2c; d12; cheno011; d3; d4;
              d7; d11; florence;
-(*
-  newarray;
-             placetest; boxjoin; box_align; stack; row; stackl; rowl;
-	     array; mybresenham; 
             [Command.draw_pic shapes1]; [Command.draw_pic shapes2];
              d14; d13;
-*)
 ] 
 
 let figs =

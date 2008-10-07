@@ -21,6 +21,7 @@ type repr = t
 
 let tex s = mkPITex s
 let make l = mkPIMake l
+let empty = mkPIMake (mkCSeq [])
 let bbox pic = mkPABBox pic
 let ulcorner pic = mkPTPicCorner pic UL
 let llcorner pic = mkPTPicCorner pic LL
