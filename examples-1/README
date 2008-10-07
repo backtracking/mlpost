@@ -6,6 +6,7 @@
 * using (*html, you can put html into the target file
 
 * code hiding is done via (*parse. currently supported:
+   <<togglescript>> inserts the javascript code to toggle visibility of an element
    <<name  - open a div with name "name" and show/hide link, defaults to hide
    >> - close the last opened div
 

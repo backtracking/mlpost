@@ -59,6 +59,6 @@ parse: parse.ml
 
 clean:
 	rm -f *.aux *.dvi *.ps *.1 *.log $(PNGFILES) *.mp *.mpx *.tex
-	rm -f boxes.ml.html paths.ml.html misc.ml.html tree.ml.html
-	rm -f parse.ml *.cmx *.cmo *.cmi parse
+	rm -f boxes.ml.html paths.ml.html misc.ml.html tree.ml.html label.ml.html
+	rm -f parse.ml *.cmx *.cmo *.cmi parse *.o
 	rm -f *.png *.dummy
