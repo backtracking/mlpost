@@ -183,6 +183,28 @@ let hierarchy =
   in
   [ draw b]
 
+
+open Tree
+let sharing = 
+  let tex s = tex ~name:s ~style:Circle ~dx:two ~dy:two s in
+  let tree = 
+    bin (tex "a")
+      (bin (tex "b")
+        (leaf (tex "c"))
+        (bin (tex "d") 
+          (leaf (tex "e")) 
+          (leaf (tex "f")) 
+        )
+      )
+      (node (tex "g") [leaf (tex "h")])
+  in
+  [ draw tree;
+    box_arrow (get "h" tree) (get "f" tree);
+    box_arrow (get "g" tree) (get "d" tree);
+      ]
+
+
+
 (* JC *)
 let bresenham =
   [nop]
@@ -193,3 +215,4 @@ let () = Metapost.emit "hierarchy" hierarchy
 let () = Metapost.emit "graph_sqrt" graph_sqrt
 let () = Metapost.emit "architecture" architecture
 let () = Metapost.emit "bresenham" bresenham
+let () = Metapost.emit "tree" sharing

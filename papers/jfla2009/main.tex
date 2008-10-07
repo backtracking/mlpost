@@ -307,7 +307,7 @@ classique.
 
 Comment peut-on réintroduire la circularité (voulue) dans l'interface ? Nous
 avons écrit un fichier \texttt{mlpost.mli} qui contient les définitions des
-signatures des modules à exporter:
+signatures des modules à exporter :
 \begin{ocaml}
 module rec Num : sig
   type t
@@ -333,7 +333,50 @@ C'est uniquement le fichier \texttt{mlpost.mli} qui sert d'entrée pour l'outil
 \texttt{ocamldoc}.
 
 \paragraph{Hashconsing et traduction vers \metapost}
-compilation, hashconsing
+
+Le choix de la représentation symbolique de la plupart des objets impose
+des efforts supplémentaires pour minimiser l'utilisation de la mémoire
+et la taille des fichiers \metapost\ de sortie. En effet, l'arbre de
+syntaxe abstraite (AST) contient beaucoup de n\oe uds idéntiques mais
+construits de manière différente, qui prennent donc inutilement de la
+place aussi bien en mémoire que dans le fichier \metapost\ généré. C'est
+d'autant plus gênant que \metapost\ devra lire ce fichier et passera
+donc davantage de temps sur des calculs répétés.
+
+Nous utilisons donc la technique de {\em
+hash-consing}\cite{ConchonFilliatre06wml} appliquée à l'arbre de syntaxe
+abstraite pour profiter au maximum du partage probable entre les
+différents objets. % TODO expliquer plus
+
+Ceci diminue l'utilisation de la mémoire, mais ne change rien à la
+taille des fichiers générés. La structure hash-consée {\em réalise} le
+partage, mais elle ne sait pas quels sont les n\oe uds en effet utilisés
+au moins deux fois. Pour cela, il suffit de traverser la structure une
+fois en entier, en comptant le nombre de fois qu'on a passé chaque n\oe
+ud (cette information peut-être stockée efficacement dans une table,
+à l'aide de la fonction de hash nécessaire pour le hash-consing ainsi
+que la comparaison efficace fourni par ce dernier). Quand on passe un
+n\oe ud déjà rencontré, on ne considère pas ses sous-n\oe uds. Il est
+néanmoins possible de rencontrer une nouvelle fois un sous-n\oe ud d'une
+structure, comme le montre l'arbe ci-dessous :
+
+\begin{center}
+\includegraphics[scale=1.5]{tree.mps}
+\end{center}
+
+Le n\oe ud $f$ est réellement utilisé deux fois, alors que le n\oe ud
+$e$ n'est utilisé qu'un seule fois, par le n\oe ud $d$, même si celui-ci
+est utilié deux fois à son tour.
+
+Après cette analyse, la génération du fichier \metapost\ devient très
+simple : Il suffit de traverser l'AST encore une fois, et quand on passe par
+un n\oe ud qui a été utilisé au moins deux fois, on lui attribue une variable
+et on ajoute une définition correspondante dans le code \metapost. De cette
+façon, on arrive à avoir du code \metapost\ relativement petit, malgré la
+délégation des calculs à \metapost.
+
+% TODO ajouter explications sur les contraintes syntaxiques de \metapost
+
 
 \subsection{Boîtes}
 
