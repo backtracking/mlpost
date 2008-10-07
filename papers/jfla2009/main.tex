@@ -579,14 +579,17 @@ fois, alors que le n\oe ud $e$ n'est utilisé qu'un seule fois, par le
 n\oe ud $d$, même si celui-ci est utilisé deux fois à son tour.
 
 Après cette analyse, la génération du fichier \metapost\ devient très
-simple : il suffit de traverser l'AST encore une fois, et quand on passe par
-un n\oe ud qui a été utilisé au moins deux fois, on lui attribue une variable
-et on ajoute une définition correspondante dans le code \metapost. De cette
-façon, on arrive à avoir du code \metapost\ relativement petit, malgré la
-délégation des calculs à \metapost.
+simple : il suffit de traverser l'AST encore une fois, et quand on passe
+par un n\oe ud qui a été utilisé au moins deux fois, on lui attribue
+une variable et on ajoute une définition correspondante dans le code
+\metapost. Il faut néanmoins prendre en compte les particularités
+syntaxiques de \metapost\ telles que la précédence inhabituelle des
+opérateurs arithmétiques et la restriction de l'application de certaines
+constructions à des variables. De cette façon, on arrive à avoir du
+code \metapost\ relativement petit, malgré la délégation des calculs à
+\metapost.
 
 % TODO : des chiffres pour justifier "relativement petit" ?
-% TODO ajouter explications sur les contraintes syntaxiques de \metapost
 
 \subsection{Boîtes}\label{subsec:boxes}
 
