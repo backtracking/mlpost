@@ -3,7 +3,7 @@ all: main-pp.pdf
 
 WWW=/users/demons/filliatr/WWW
 
-%.pdf: %.tex biblio.bib figures.mp
+%.pdf: %.tex biblio.bib figures.mp figmp.mps
 	pdflatex $*.tex
 	bibtex $*
 	pdflatex $*.tex
@@ -16,6 +16,10 @@ WWW=/users/demons/filliatr/WWW
 
 figures.mp: figures.ml
 	../../tool.opt -ccopt "-I ../../" -pdf -latex main.tex $^
+
+figmp.mps: figmp.mp
+	mpost figmp.mp end
+	mv figmp.1 figmp.mps
 
 main-pp.dvi: main-pp.tex
 	latex $^

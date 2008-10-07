@@ -3,6 +3,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{actes,alltt,url,graphicx}
 \usepackage[french]{babel}
+\usepackage{mflogo} 
 \usepackage{tikz}
 %; whizzy -pdf .
 
@@ -10,9 +11,9 @@
 \newcommand{\ocaml}{OCaml}
 \newcommand{\camllight}{Caml Light}
 \newcommand{\mlpost}{\textsc{Mlpost}}
-\newcommand{\metapost}{\textsc{MetaPost}}
+\newcommand{\metapost}{\MP}
 \newcommand{\fmpost}{\textit{functional} \metapost}
-\newcommand{\metafont}{\textsc{Metafont}}
+\newcommand{\metafont}{\MF}
 \newcommand{\nomdetikz}{\textsc{Tikz}}
 \newcommand{\pstricks}{\textsc{Pstricks}}
 \newcommand{\dia}{\textsc{Dia}}
@@ -110,8 +111,32 @@ spécialisé dans la construction de figures contenant des éléments
 la position de ces éléments et de les relier de manière implicite par
 des équations. En revanche, le langage de \metapost\ s'inspire de
 celui de \metafont~\cite{metafont} et présente, à l'exception de la
-syntaxe, les défauts soulevés ci-dessus.
-% TODO  exemple metapost ?
+syntaxe, les défauts soulevés ci-dessus. La figure~\ref{fig:metapost}
+donne un exemple de programme/figure réalisé avec \metapost.
+\begin{figure}[h]
+\begin{minipage}{.3\linewidth}
+  \includegraphics{figmp.mps}
+\end{minipage}
+\begin{minipage}{.7\linewidth}
+\small
+\begin{alltt}
+  vardef koch(expr A,B,n) =
+    save C; pair C; C = A rotatedaround(1/3[A,B], 120);
+    if n>0:
+      koch( A,        1/3[A,B], n-1);
+      koch( 1/3[A,B], C,        n-1);
+      koch( C,        2/3[A,B], n-1);
+      koch( 2/3[A,B], B,        n-1);
+    else:
+      draw A--1/3[A,B]--C--2/3[A,B]--B;
+    fi;
+  enddef;
+  z0=(4cm,0); z1=z0 rotated 120; z2=z1 rotated 120;
+  koch( z0, z1, 4 ); koch( z1, z2, 4 ); koch( z2, z0, 4 );
+\end{alltt}
+\end{minipage}
+\caption{Exemple de figure \metapost}\label{fig:metapost}
+\end{figure}
 % citer asymptote ?
 
 Une alternative séduisante aux solutions précédentes consiste à
