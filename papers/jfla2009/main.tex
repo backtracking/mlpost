@@ -3,7 +3,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{actes,alltt,url,graphicx}
 \usepackage[french]{babel}
-
+\usepackage{tikz}
 %; whizzy -pdf .
 
 % macros
@@ -13,7 +13,7 @@
 \newcommand{\metapost}{\textsc{MetaPost}}
 \newcommand{\fmpost}{\textit{functional} \metapost}
 \newcommand{\metafont}{\textsc{Metafont}}
-\newcommand{\tikz}{\textsc{Tikz}}
+\newcommand{\nomdetikz}{\textsc{Tikz}}
 \newcommand{\pstricks}{\textsc{Pstricks}}
 \newcommand{\dia}{\textsc{Dia}}
 \newcommand{\xfig}{\textsc{Xfig}}
@@ -57,7 +57,7 @@ intégrer dans un document \LaTeX~:
 \item des interfaces graphiques disposant d'une sortie \LaTeX, telles
   que \dia~\cite{dia} ou \xfig~\cite{xfig} ;
 \item des bibliothèques \LaTeX, telles que \pstricks~\cite{pstricks}
-  ou encore \tikz~\cite{tikz} ; 
+  ou encore \nomdetikz~\cite{tikz} ; 
 \item des outils externes en ligne de commande, tel 
   \metapost~\cite{metapost}.
 \end{itemize}
@@ -67,16 +67,20 @@ graphiques sont les plus accessibles, notamment pour un placement
 rapide et intuitif des différents éléments de la figure, mais
 l'intégration de texte mis en forme par \LaTeX\ est délicate. Dans le
 cas de \xfig\ et de \dia, la taille des éléments \LaTeX\ n'est pas
-connue lors de l'édition de la figure ; en outre, 
-dans le cas de \dia, l'intégration de \LaTeX\ dans une figure
-nécessite de l'exporter sous forme de macros \tikz\ et d'éditer le résultat.
+connue lors de l'édition de la figure ; en outre, dans le cas de \dia,
+l'intégration de \LaTeX\ dans une figure nécessite de l'exporter sous
+forme de macros \nomdetikz\ et d'éditer le résultat.
 
-Les bibliothèques \LaTeX\ telles que \pstricks\ ou \tikz\ offrent
+Les bibliothèques \LaTeX\ telles que \pstricks\ ou \nomdetikz\ offrent
 l'intégration la plus naturelle avec \LaTeX. En particulier, elles
-permettent de combiner arbitrairement éléments graphiques et textes \LaTeX.
-% TODO un exemple en ligne ici ?
-En revanche, elles demandent d'apprendre un certain nombre de macros
-et de notations et souffrent surtout des défauts inhérents à \LaTeX~:
+permettent de combiner arbitrairement éléments graphiques et textes
+\LaTeX\ \begin{tikzpicture}[baseline=(a.base)]
+\path[use as bounding box] (0,0) node[draw] (a) {comme ceci};
+\draw[->] (a) .. controls +(-2cm,1cm) and +(-2cm,-0cm) .. (a);
+\end{tikzpicture}.
+En revanche, elles demandent d'apprendre un certain nombre de
+macros et de notations et souffrent surtout des défauts inhérents à
+\LaTeX~:
 \begin{itemize}
 \item des erreurs détectées uniquement à
   l'interprétation, peu claires et parfois mal localisées ;
@@ -536,9 +540,9 @@ chemin donné.
 
 résolution d'équations
 
-perspectives infinies d'extensions : 3D, animations, ...
-plus facile de le faire en Caml qu'en \metapost\ ou en \LaTeX\ (\tikz,
-\pstricks) 
+perspectives infinies d'extensions : 3D, animations, ...  plus facile
+de le faire en Caml qu'en \metapost\ ou en \LaTeX\ (\nomdetikz,
+\pstricks)
 
 plein de sortes de flèches
 

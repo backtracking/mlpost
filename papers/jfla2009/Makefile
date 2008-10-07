@@ -3,7 +3,7 @@ all: main-pp.pdf
 
 WWW=/users/demons/filliatr/WWW
 
-%.pdf: %.tex biblio.bib figures.ml
+%.pdf: %.tex biblio.bib figures.mp
 	pdflatex $*.tex
 	bibtex $*
 	pdflatex $*.tex
@@ -16,6 +16,7 @@ WWW=/users/demons/filliatr/WWW
 
 figures.mp: figures.ml
 	../../tool.opt -ccopt "-I ../../" -pdf -latex main.tex $^
+	../../tool.opt -ccopt "-I ../../" -latex main.tex $^
 
 main-pp.dvi: main-pp.tex
 	latex $^
@@ -32,7 +33,7 @@ export: main-pp.ps
 	cp -f mlpost.pdf $(WWW)/publis/
 
 clean:
-	rm -f *~ *.aux *.log *.bbl *.blg
+	rm -f *~ *.aux *.log *.bbl *.blg *.mps
 	rm -f main-pp.dvi main-pp.ps figures.mp
 	rm -f mpxerr.dvi mpxerr.tex main-pp.pdf
 
