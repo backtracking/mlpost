@@ -156,6 +156,17 @@ let automate =
    loop states "e" `Bot "gamma";
    initial states `Left "alpha"]
 
+let arrow_metapost =
+  [Helpers.draw_simple_arrow ~outd:(vec (dir 90.)) ~ind:(vec (dir 90.))
+     (Point.pt (bp 0., bp 0.)) (Point.pt (cm 2., bp 0.));
+   Helpers.draw_simple_arrow
+     (Point.pt (cm 4., bp 0.)) (Point.pt (cm 6., bp 0.));
+   Helpers.draw_simple_arrow ~outd:(vec (dir 90.))
+     (Point.pt (cm 8., bp 0.)) (Point.pt (cm 10., bp 0.));
+   Helpers.draw_simple_arrow
+     ~pen:(Pen.scale (bp 2.5) (Pen.square ()))
+     (Point.pt (cm 12., bp 0.)) (Point.pt (cm 14., cm 1.))]
+
 (* Johannes *)
 open Box
 let uml = 
@@ -229,3 +240,4 @@ let () = Metapost.emit "graph_sqrt" graph_sqrt
 let () = Metapost.emit "architecture" architecture
 let () = Metapost.emit "bresenham" bresenham
 let () = Metapost.emit "tree" sharing
+let () = Metapost.emit "arrow_metapost" arrow_metapost
