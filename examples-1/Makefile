@@ -1,4 +1,3 @@
-
 # all files that are generated from boxes.ml
 BOXPNGFILES := f1.png f2.png traffic.png hierarchy.png
 BOXOUTFILES := $(BOXPNGFILES:.png=.1)
@@ -11,15 +10,25 @@ PATHPNGFILES := path1.png path2.png path3.png path4.png path5.png \
 PATHOUTFILES := $(PATHPNGFILES:.png=.1)
 
 # all files that are generated from misc.ml
-MISCPNGFILES := bresenham.png cfg.png chess.png
+MISCPNGFILES := bresenham.png cfg.png chess.png diag1.png diag2.png\
+		drums.png escher.png lattice.png other208.png proval.png\
+		randtree.png rubik.png test.png
 MISCOUTFILES := $(MISCPNGFILES:.png=.1)
 
-HTMLFILES := boxes.ml.html paths.ml.html misc.ml.html
+# all files that are generated from tree.ml
+TREEPNGFILES := tree1.png tree2.png tree3.png tree4.png tree5.png tree6.png
+TREEOUTFILES := $(TREEPNGFILES:.png=.1)
 
-all: $(BOXPNGFILES) $(PATHPNGFILES) $(MISCPNGFILES) $(HTMLFILES)
+# all files that are generated from labels.ml
+LABELPNGFILES := handbook3.png other27.png
+LABELOUTFILES := $(LABELPNGFILES:.png=.1)
+
+HTMLFILES := boxes.ml.html paths.ml.html misc.ml.html tree.ml.html label.ml.html
+
+all: $(BOXPNGFILES) $(PATHPNGFILES) $(MISCPNGFILES) $(TREEPNGFILES) $(LABELPNGFILES) $(HTMLFILES)
 
 %.ml.html : %.ml parse
-	caml2html -hc -ext "parse:./parse" %.ml
+	caml2html -hc -ext "parse:./parse" $*.ml
 
 
 %.png: %.ps
@@ -34,6 +43,8 @@ all: $(BOXPNGFILES) $(PATHPNGFILES) $(MISCPNGFILES) $(HTMLFILES)
 $(BOXOUTFILES): boxes.dummy
 $(PATHOUTFILES): paths.dummy
 $(MISCOUTFILES): misc.dummy
+$(TREEOUTFILES): tree.dummy
+$(LABELOUTFILES): label.dummy
 
 
 %.dummy: %.ml
@@ -48,6 +59,6 @@ parse: parse.ml
 
 clean:
 	rm -f *.aux *.dvi *.ps *.1 *.log $(PNGFILES) *.mp *.mpx *.tex
-	rm -f boxes.ml.html paths.ml.html misc.ml.html
+	rm -f boxes.ml.html paths.ml.html misc.ml.html tree.ml.html
 	rm -f parse.ml *.cmx *.cmo *.cmi parse
 	rm -f *.png *.dummy
