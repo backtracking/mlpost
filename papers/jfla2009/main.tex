@@ -139,9 +139,121 @@ Enfin, la section~\ref{conclusion} ...
 
 choix de la persistance
 
-placement relatif plutôt qu'absolu
+Un  autre principe de  Mlpost consiste  à placer  les objets  de façon
+relative plutôt  qu'absolue.  Ceci  permet d'obtenir des  figures plus
+robustes. En effet, imaginons que  vous vouliez placer une boîte $A$ à
+\emph{droite}  d'une boîte  $B$.  Une  première possibilité  serait de
+spécifier les positions approximativement,  par exemple en donnant les
+abcisses $0cm$ pour $A$ et $2cm$ pour $B$. Mais si vous changez d'avis
+sur le contenu de $A$ et que  la taille de la boîte change, $A$ risque
+alors de se superposer à $B$. Il faut alors replacer toutes les boîtes
+de votre  figure. Pour éviter  ça, \mlpost\ propose  diverses méthodes
+pour  placer les  boîtes \emph{les  unes par  rapport aux  autres}. On
+gagne alors du temps lors de  la création et lors des modifications de
+la figure.
 
 % automate -- RB
+\subsection{Automate}
+
+L'un des principes de  \mlpost\ est la possibilité d'écrire facilement
+des librairies. Par exemple, si  vous étudiez la théorie des langages,
+vous  pouvez   écrire  une   librairie  spécialisée  dans   le  dessin
+d'automates.   Une façon  de  faire consiste  à  écrire les  fonctions
+suivantes :
+\begin{itemize}
+\item \texttt{state} pour créer un état,
+\item \texttt{initial} pour transformer un état en un état initial,
+\item \texttt{final} pour transformer un état en un état final,
+\item \texttt{transition} pour dessiner une transition d'un état à un autre,
+\item \texttt{loop} pour dessiner une transition d'un état vers lui-même.
+\end{itemize}
+
+La  fonction \texttt{state}  renvoie simplement  une boîte  au contour
+circulaire, à placer où  on veut.  La fonction \texttt{final} consiste
+à  rajouter  un  deuxième   cercle  autour  d'un  état.   En  première
+approximation, il  suffit donc  de placer cet  état dans  une deuxième
+boîte circulaire. La fonction \texttt{final} est donc une fonction qui
+prend une boîte et qui renvoie une boîte.
+\begin{ocaml}
+let state = Box.tex ~style:Circle 
+let final = Box.box ~style:Circle ~dx:zero ~dy:zero 
+\end{ocaml}
+Les paramètres \texttt{dy} et  \texttt{dy} permettent de spécifier une
+marge  entre le  contenu de  la boîte  et son  contour. Notez  que les
+fonctions  \texttt{Box.tex} et  \texttt{Box.box} prennent  un argument
+\texttt{name}  permettant de  nommer les  boîtes pour  y  accéder plus
+tard.
+
+La  fonction \texttt{initial} doit  apposer une  flèche entrante  à un
+état.  Il  s'agit donc  d'une fonction  qui prend un  état $q$  et qui
+renvoie une commande dessinant une  flèche vers $q$. On pourrait aussi
+renvoyer une  boîte sans  contour contenant $q$  et la flèche,  ce qui
+permettrait   d'utiliser  \texttt{initial}  de   la  même   façon  que
+\texttt{final}.   Cependant, la  boîte  obtenue n'aurait  pas la  même
+taille et  la même forme que  $q$, ce qui poserait  des problèmes pour
+placer $q$ ou pour dessiner des transitions vers ou à partir de $q$.
+\begin{ocaml}
+let initial states pos name =
+  let x = Box.get name states in
+  let w = match pos with
+    | `Left -> Box.west x
+    | `Right -> Box.east x
+    | `Top -> Box.north x
+    | `Bot -> Box.south x
+  in
+  Arrow.draw (Path.pathp [ Point.shift w (Point.pt (cm (-0.3), zero)); w ])
+\end{ocaml}
+La fonction  accède à  la boîte \texttt{x}  par son  nom \texttt{name}
+dans la  boîte \texttt{states}, qui  doit être une boîte  englobant en
+particulier l'état désigné par \texttt{name}.
+
+On peut maintenant  placer des états, initiaux ou  non, finaux ou non,
+et  les  dessiner.   Pour  le  placement,  on  utilise  les  fonctions
+d'alignement    horizontal    et    vertical   \texttt{Box.hbox}    et
+\texttt{Box.vbox}. On  suit donc le  principe consistant à  placer les
+objets de façon relative, les uns par rapport aux autres.
+
+\begin{minipage}{0.2\linewidth}
+  \includegraphics{automate_1.mps}
+\end{minipage}
+\begin{minipage}{0.2\linewidth}
+\small\begin{ocaml}
+let automate =
+  let states = Box.vbox ~padding:(cm 0.8) [
+    Box.hbox ~padding:(cm 1.4) [ 
+      state ~name:"alpha" "$\\alpha$"; state "$\\beta$" ];
+    final (state "$\\gamma$"); ]
+  in
+  [Box.draw states;
+   initial states `Left "alpha"]
+\end{ocaml}
+\end{minipage}
+
+La fonction  \texttt{transition} doit dessiner une flèche  d'un état à
+un autre. Cette fonction prend deux arguments optionnels \texttt{outd}
+et \texttt{ind} pour spécifier, en degrés, la direction sortante et la
+direction entrante  de la  flèche. On doit  les convertir  en vecteurs
+directeurs  pour les passer  à \texttt{cpath},  qui calcule  un chemin
+allant d'un bord d'une boîte au  bord d'une autre boîte. Ce chemin est
+ensuite donné à la fonction \texttt{Arrow.draw} qui trace la flèche en
+plaçant une étiquette \texttt{tex} à la position \texttt{pos}.
+\begin{ocaml}
+let transition states tex pos ?outd ?ind x_name y_name = 
+  let x = Box.get x_name states and y = Box.get y_name states in
+  let outd = match outd with None -> None | Some a -> Some (vec (dir a)) in
+  let ind = match ind with None -> None | Some a -> Some (vec (dir a)) in
+  Arrow.draw ~tex ~pos (cpath ?outd ?ind x y) 
+\end{ocaml}
+
+La    fonction   \texttt{loop}   est    similaire   à    la   fonction
+\texttt{transition},   mais  elle   doit  calculer   un   chemin  plus
+complexe. En  effet, \texttt{cpath} appliqué à  deux boîtes identiques
+renvoie un chemin vide.
+%TODO: code de loop + illustration de son fonctionnement
+
+On  peut maintenant  dessiner  facilement des  automates en  utilisant
+cette librairie.
+
 \begin{minipage}{0.2\linewidth}
   \includegraphics{automate.mps}
 \end{minipage}
@@ -151,7 +263,7 @@ let automate =
   let states = Box.vbox ~padding:(cm 0.8) [
     Box.hbox ~padding:(cm 1.4) [ 
       state ~name:"alpha" "$\\alpha$"; state ~name:"beta" "$\\beta$" ];
-    final (state ~name:"gamma" "$\\gamma$"); ]
+    final ~name:"gamma" (state "$\\gamma$"); ]
   in
   [Box.draw states;
    transition states "a" `Lowleft "alpha" "gamma";
@@ -163,6 +275,7 @@ let automate =
 \end{ocaml}
 \end{minipage}
 
+\subsection{...}
 % blocs mémoire (listes, etc.) -- JCF
 
 % diagramme simple -- JK

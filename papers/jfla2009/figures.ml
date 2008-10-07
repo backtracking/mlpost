@@ -100,7 +100,6 @@ let architecture =
     arrows@[Box.draw full]
 
 (* Romain *)
-(* Les lignes qui suivent ne sont pas à montrer dans l'article *)
 module Arrow = ExtArrow
 let loop box =
   let c = Box.ctr box in
@@ -113,28 +112,41 @@ let loop box =
   let bp = Box.bpath box in
   cut_after bp (cut_before bp p)
 
-(* A partir d'ici on a le code qu'on peut montrer dans l'article *)
 open Num
 let state = Box.tex ~style:Circle 
 let final = Box.box ~style:Circle ~dx:zero ~dy:zero 
-let transition b tex pos ?outd ?ind x y = 
-  let x = Box.get x b and y = Box.get y b in
+let transition states tex pos ?outd ?ind x_name y_name = 
+  let x = Box.get x_name states and y = Box.get y_name states in
   let outd = match outd with None -> None | Some a -> Some (vec (dir a)) in
   let ind = match ind with None -> None | Some a -> Some (vec (dir a)) in
   Arrow.draw ~tex ~pos (cpath ?outd ?ind x y) 
 let loop b tex pos x = (* TODO : utiliser pos *)
   let x = Box.get x b in
   Arrow.draw ~tex ~pos (loop x)
-let initial b pos x =
-  let x = Box.get x b in
-  let w = Box.west x in (* TODO : utiliser pos *)
+let initial states pos name =
+  let x = Box.get name states in
+  let w = match pos with
+    | `Left -> Box.west x
+    | `Right -> Box.east x
+    | `Top -> Box.north x
+    | `Bot -> Box.south x
+  in
   Arrow.draw (Path.pathp [ Point.shift w (Point.pt (cm (-0.3), zero)); w ])
+
+let automate_1 =
+  let states = Box.vbox ~padding:(cm 0.8) [
+    Box.hbox ~padding:(cm 1.4) [ 
+      state ~name:"alpha" "$\\alpha$"; state "$\\beta$" ];
+    final (state "$\\gamma$"); ]
+  in
+  [Box.draw states;
+   initial states `Left "alpha"]
 
 let automate =
   let states = Box.vbox ~padding:(cm 0.8) [
     Box.hbox ~padding:(cm 1.4) [ 
       state ~name:"alpha" "$\\alpha$"; state ~name:"beta" "$\\beta$" ];
-    final (state ~name:"gamma" "$\\gamma$"); ]
+    final ~name:"gamma" (state "$\\gamma$"); ]
   in
   [Box.draw states;
    transition states "a" `Lowleft "alpha" "gamma";
@@ -209,6 +221,7 @@ let sharing =
 let bresenham =
   [nop]
 
+let () = Metapost.emit "automate_1" automate_1
 let () = Metapost.emit "automate" automate
 let () = Metapost.emit "uml" uml
 let () = Metapost.emit "hierarchy" hierarchy
