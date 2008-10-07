@@ -12,40 +12,39 @@ let tree1 =
 (*parse >> <<tree2 *)
 let tree2 =
   let leaf s = leaf  (tex ~style:Rect s) in
-  let node s = node  (tex ~style:Rect s) in
-  [draw ~arrow_style:Undirected
+  let node s = node ~arrow_style:Undirected (tex ~style:Rect s) in
+  [draw 
      (node "1" [node "2" [leaf "4"; leaf "5"]; 
 		node "3" [leaf "6"; leaf "7"]])]
 
 (*parse >> <<tree3 *)
 let tree3 =
-  let node s = node (tex s) in
+  let node s = node  ~arrow_style:Undirected ~edge_style:Curve (tex s) in
   let leaf s = leaf (tex s) in
-  [draw ~arrow_style:Undirected ~edge_style:Curve
-     (node "1" [node "2" [leaf "4"; leaf "5"]; 
+  [draw     (node "1" [node "2" [leaf "4"; leaf "5"]; 
 		node "3" [leaf "6"; leaf "7"]])]
 
 (*parse >> <<tree4 *)
 let tree4 =
-  let node s = node (tex s) in
+  let node s = node ~arrow_style:Undirected ~edge_style:Square (tex s) in
   let leaf s = leaf (tex s) in
-  [draw ~arrow_style:Undirected ~edge_style:Square
+  [draw 
      (node "1" [node "2" [leaf "4"; leaf "5"]; 
 		node "3" [leaf "6"; leaf "7"]])]
 
 (*parse >> <<tree5 *)
 let tree5 =
-  let node s = node (tex s) in
+  let node s = node  ~arrow_style:Undirected ~edge_style:HalfSquare (tex s) in
   let leaf s = leaf (tex s) in
-  [draw ~arrow_style:Undirected ~edge_style:HalfSquare
-     (node "1" [node "2" [leaf "4"; leaf "5"]; 
+  [draw     
+    (node "1" [node "2" [leaf "4"; leaf "5"]; 
 		node "3" [leaf "6"; leaf "7"]])]
 
 (*parse >> <<tree6 *)
 let tree6 =
-  let node s = node (tex s) in
+  let node s = node ~edge_style:HalfSquare (tex s) in
   let leaf s = leaf (tex s) in
-  [draw ~edge_style:HalfSquare
+  [draw 
      (node "1" [node "2" [leaf "4"; leaf "5"]; 
 		node "3" [leaf "6"; leaf "7"]])]
 (*parse >> *)
