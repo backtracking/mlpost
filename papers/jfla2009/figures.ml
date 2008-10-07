@@ -183,7 +183,7 @@ let uml =
             ["deposit (amount : Dollars)"; "withdraw (amount : Dollars)" ] 
   in
   let b = classblock "Client" ["name : String"; "address : String" ] [] in
-  let diag = Box.vbox ~padding:(Num.bp 50.) [a;b] in
+  let diag = Box.vbox ~padding:(cm 1.) [a;b] in
   [ Box.draw diag; 
     box_label_arrow ~pos:`Left (Picture.tex "owns") 
       (get "Client" diag) (get "BankAccount" diag) ]
