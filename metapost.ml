@@ -203,7 +203,7 @@ let print i fmt l =
      x,y are not local to figures *)
 (*   Compile.reset (); *)
   let () = List.iter (Duplicate.command) l in
-  let l = List.map Newcompile.command l in
+  let l = List.map Compile.command l in
   fprintf fmt "@[beginfig(%d)@\n  @[%a@] endfig;@]@." i 
     (fun fmt l -> List.iter (command fmt) l)
     l
