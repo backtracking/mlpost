@@ -16,7 +16,6 @@ WWW=/users/demons/filliatr/WWW
 
 figures.mp: figures.ml
 	../../tool.opt -ccopt "-I ../../" -pdf -latex main.tex $^
-	../../tool.opt -ccopt "-I ../../" -latex main.tex $^
 
 main-pp.dvi: main-pp.tex
 	latex $^

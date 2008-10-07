@@ -75,7 +75,8 @@ Les bibliothèques \LaTeX\ telles que \pstricks\ ou \nomdetikz\ offrent
 l'intégration la plus naturelle avec \LaTeX. En particulier, elles
 permettent de combiner arbitrairement éléments graphiques et textes
 \LaTeX\ \begin{tikzpicture}[baseline=(a.base)]
-\path[use as bounding box] (0,0) node[draw] (a) {comme ceci};
+\path[use as bounding box] 
+  (0,0) node[draw,style=dashed] (a) {comme ceci};
 \draw[->] (a) .. controls +(-2cm,1cm) and +(-2cm,-0cm) .. (a);
 \end{tikzpicture}.
 En revanche, elles demandent d'apprendre un certain nombre de
@@ -143,18 +144,19 @@ Enfin, la section~\ref{conclusion} ...
 
 choix de la persistance
 
-Un  autre principe de  Mlpost consiste  à placer  les objets  de façon
-relative plutôt  qu'absolue.  Ceci  permet d'obtenir des  figures plus
-robustes. En effet, imaginons que  vous vouliez placer une boîte $A$ à
-\emph{droite}  d'une boîte  $B$.  Une  première possibilité  serait de
-spécifier les positions approximativement,  par exemple en donnant les
-abcisses $0cm$ pour $A$ et $2cm$ pour $B$. Mais si vous changez d'avis
-sur le contenu de $A$ et que  la taille de la boîte change, $A$ risque
-alors de se superposer à $B$. Il faut alors replacer toutes les boîtes
-de votre  figure. Pour éviter  ça, \mlpost\ propose  diverses méthodes
-pour  placer les  boîtes \emph{les  unes par  rapport aux  autres}. On
-gagne alors du temps lors de  la création et lors des modifications de
-la figure.
+Un autre principe de Mlpost consiste à placer les objets de façon
+relative plutôt qu'absolue.  Ceci permet d'obtenir des figures plus
+robustes. En effet, imaginons que vous vouliez placer une boîte $A$ à
+\emph{droite} d'une boîte $B$.  Une première possibilité serait de
+spécifier les positions approximativement, par exemple en donnant les
+abscisses $0cm$ pour $A$ et $2cm$ pour $B$. Mais si vous changez
+d'avis sur le contenu de $A$ et que la taille de la boîte change, $A$
+risque alors de se superposer à $B$. Il faut alors replacer toutes les
+boîtes de votre figure. Pour éviter ça, \mlpost\ propose diverses
+méthodes pour placer les boîtes \emph{les unes par rapport aux
+  autres}. On gagne alors du temps lors de la création et lors des
+modifications de la figure.
+%TODO exemple ici => a développer dans la section Boites de tte façon
 
 % automate -- RB
 \subsection{Automate}
@@ -165,10 +167,10 @@ vous  pouvez   écrire  une   librairie  spécialisée  dans   le  dessin
 d'automates.   Une façon  de  faire consiste  à  écrire les  fonctions
 suivantes :
 \begin{itemize}
-\item \texttt{state} pour créer un état,
-\item \texttt{initial} pour transformer un état en un état initial,
-\item \texttt{final} pour transformer un état en un état final,
-\item \texttt{transition} pour dessiner une transition d'un état à un autre,
+\item \texttt{state} pour créer un état ;
+\item \texttt{initial} pour transformer un état en un état initial ;
+\item \texttt{final} pour transformer un état en un état final ;
+\item \texttt{transition} pour dessiner une transition d'un état à un autre ;
 \item \texttt{loop} pour dessiner une transition d'un état vers lui-même.
 \end{itemize}
 
@@ -347,7 +349,6 @@ let graph_sqrt =
 API
 \subsection{Types primitifs de \metapost}
 
-
 La couche de bas niveau de \mlpost est une interface fidèle à \metapost. Elle
 comporte donc tous les types de base de \metapost :
 
@@ -387,44 +388,48 @@ comporte donc tous les types de base de \metapost :
     transformer, \ldots.
 
 \end{description}
-Les autres types \metapost\ (chaînes de caractère, booléen, couleur) sont
-facilement représentés en \ocaml. 
+Les autres types \metapost\ (chaînes de caractères, booléens,
+couleurs) sont facilement représentés en \ocaml.
 
 \paragraph{Dépendances circulaires}
 Cette partie de bas niveau de \mlpost\ présente néanmoins quelques
-difficultés. Premièrement, la plupart des modules présentés sont {\em a
-priori} mutuellement récursifs : par exemple, les transformations s'appliquent
-à tous les autres objets, donc chaque module contient une fonction
+difficultés. Premièrement, la plupart des modules présentés sont {\em
+  a priori} mutuellement récursifs : par exemple, les transformations
+s'appliquent à tous les autres objets, donc chaque module contient une
+fonction
 \begin{ocaml}
   val transform : Transform.t -> t -> t
 \end{ocaml}
-où le type \texttt{t} représente le type principal du module en question.
-D'un autre côté, les transformations sont construits à l'aide de numériques et
-points:
+où le type \texttt{t} représente le type principal du module en
+question.  D'un autre côté, les transformations sont elles-mêmes
+construites à l'aide de numériques et de points:
 \begin{ocaml}
   val shifted : Point.t -> t
 \end{ocaml}
-où \texttt{t} est le type des transformations.  Les dépendances circulaires
-existent aussi entre types et sont aggravées par la représentation symbolique
-des objets ( par exemple, la fonction \texttt{xpart} dans le module
-\texttt{Point}). 
+où \texttt{t} est le type des transformations.  Des dépendances
+circulaires existent aussi entre types et sont aggravées par la
+représentation symbolique des objets (par exemple, les projections
+\texttt{xpart} et \texttt{ypart} du module \texttt{Point} doivent
+retourner des numériques et non des flottants).
 
-Nous voulions présenter les interfaces de \mlpost\ avec des dépendances
-circulaires. Or, \ocaml\ ne permet pas de dépendances circulaires entre des
-fichiers. Notre solution consiste à définir tous les types dans un seul
-fichier, appellons le \texttt{types.mli}. Chaque module fait maintenant
-référence à ce fichier. Par exemple, dans le fichier \texttt{path.ml}, qui
-fournit l'implémentation du module \texttt{Path}, on trouvera
+Nous voulions présenter les interfaces de \mlpost\ avec des
+dépendances circulaires mais \ocaml\ ne permet pas de dépendances
+circulaires entre des fichiers. Notre solution consiste à définir tous
+les types dans un seul fichier, qu'on appelle \texttt{types.mli}.
+Chaque module fait maintenant référence à ce fichier. Par exemple,
+dans le fichier \texttt{path.ml}, qui fournit l'implémentation du
+module \texttt{Path}, on trouvera
 \begin{ocaml}
-  module t = Types.path
+  type t = Types.path
 \end{ocaml}
 Aucun de ces modules ne possède un fichier d'interface \texttt{.mli}. La
 dépendance circulaire entre les modules est alors cassée, de manière très
 classique.
 
-Comment peut-on réintroduire la circularité (voulue) dans l'interface ? Nous
-avons écrit un fichier \texttt{mlpost.mli} qui contient les définitions des
-signatures des modules à exporter :
+Il nous reste alors à réintroduire la circularité recherchée dans
+l'interface externe. Nous avons pour ce faire écrit un fichier
+\texttt{mlpost.mli} qui contient les définitions des signatures des
+modules à exporter :
 \begin{ocaml}
 module rec Num : sig
   type t
@@ -440,21 +445,22 @@ and Path : sig
 end
 ...
 \end{ocaml}
-Afin de pouvoir écrire ces signatures, tous ces modules sont déclarés de
-manière mutuellement récursive. La signature de \texttt{Point} peut ainsi
-faire référence à \texttt{Path} et inversement. Maintenant il suffit de
-fournir les implémentations de ces modules, à l'aide des fichiers
-\texttt{num.ml}, \texttt{point.ml} etc, qui ont tous été compilés et mis dans
-un {\em pack}. Cet agencement est très pratique aussi pour la documentation.
-C'est uniquement le fichier \texttt{mlpost.mli} qui sert d'entrée pour l'outil
-\texttt{ocamldoc}.
+Afin de pouvoir écrire ces signatures, tous ces modules sont en
+particulier déclarés de manière mutuellement récursive. La signature
+de \texttt{Point} peut ainsi faire référence à \texttt{Path} et
+inversement. Il suffit alors de fournir les implémentations de ces
+modules, à l'aide des fichiers \texttt{num.ml}, \texttt{point.ml} etc,
+qui ont tous été compilés et mis dans un {\em pack}. Cet agencement
+est également très pratique pour la documentation de l'API: c'est
+uniquement le fichier \texttt{mlpost.mli} qui sert d'entrée à
+l'outil \texttt{ocamldoc}.
 
 \paragraph{Hashconsing et traduction vers \metapost}
 
-Le choix de la représentation symbolique de la plupart des objets impose
+Le choix d'une représentation symbolique de la plupart des objets impose
 des efforts supplémentaires pour minimiser l'utilisation de la mémoire
 et la taille des fichiers \metapost\ de sortie. En effet, l'arbre de
-syntaxe abstraite (AST) contient beaucoup de n\oe uds idéntiques mais
+syntaxe abstraite (AST) contient beaucoup de n\oe uds identiques mais
 construits de manière différente, qui prennent donc inutilement de la
 place aussi bien en mémoire que dans le fichier \metapost\ généré. C'est
 d'autant plus gênant que \metapost\ devra lire ce fichier et passera
@@ -472,7 +478,7 @@ au moins deux fois. Pour cela, il suffit de traverser la structure une
 fois en entier, en comptant le nombre de fois qu'on a passé chaque n\oe
 ud (cette information peut-être stockée efficacement dans une table,
 à l'aide de la fonction de hash nécessaire pour le hash-consing ainsi
-que la comparaison efficace fourni par ce dernier). Quand on passe un
+que la comparaison efficace fournie par ce dernier). Quand on passe un
 n\oe ud déjà rencontré, on ne considère pas ses sous-n\oe uds. Il est
 néanmoins possible de rencontrer une nouvelle fois un sous-n\oe ud d'une
 structure, comme le montre l'arbe ci-dessous :
@@ -481,19 +487,19 @@ structure, comme le montre l'arbe ci-dessous :
 \includegraphics[scale=1.5]{tree.mps}
 \end{center}
 
-Le n\oe ud $f$ est réellement utilisé deux fois, alors que le n\oe ud
-$e$ n'est utilisé qu'un seule fois, par le n\oe ud $d$, même si celui-ci
-est utilié deux fois à son tour.
+Dans cette configuration, me n\oe ud $f$ est réellement utilisé deux
+fois, alors que le n\oe ud $e$ n'est utilisé qu'un seule fois, par le
+n\oe ud $d$, même si celui-ci est utilisé deux fois à son tour.
 
 Après cette analyse, la génération du fichier \metapost\ devient très
-simple : Il suffit de traverser l'AST encore une fois, et quand on passe par
+simple : il suffit de traverser l'AST encore une fois, et quand on passe par
 un n\oe ud qui a été utilisé au moins deux fois, on lui attribue une variable
 et on ajoute une définition correspondante dans le code \metapost. De cette
 façon, on arrive à avoir du code \metapost\ relativement petit, malgré la
 délégation des calculs à \metapost.
 
+% TODO : des chiffres pour justifier "relativement petit" ?
 % TODO ajouter explications sur les contraintes syntaxiques de \metapost
-
 
 \subsection{Boîtes}
 
@@ -513,19 +519,19 @@ délégation des calculs à \metapost.
 \end{center}
 Les  flèches peuvent  suivre  n'importe quel  chemin  et peuvent  être
 tracées avec différents styles de  trait, mais il n'y a toujours qu'un
-seul trait  et la tête de  flèche est toujours la  même. Avec \mlpost,
-l'utilisateur peut créer ses propres types de flèche.
+seul trait  et la tête de  flèche est toujours la même. Avec \mlpost,
+l'utilisateur peut créer ses propres types de flèches.
 
-Le module \texttt{Arrow} dispose de trois types.
+Le module \texttt{Arrow} dispose de trois types:
 \begin{itemize}
-\item Le type abstrait \texttt{body}  décrit le corps des flèches, qui
+\item me type abstrait \texttt{body}  décrit le corps des flèches, qui
   peuvent être  composées de plusieurs traits parallèles  ou en série,
-  avec chacun leur style propre.
-\item  Le  type \texttt{head}  décrit  comment  dessiner  une tête  de
+  avec chacun leur style propre;
+\item  le  type \texttt{head}  décrit  comment  dessiner  une tête  de
   flèche.   Les  éléments de  type  \texttt{head}  sont des  fonctions
   prenant en argument la position et la direction de la tête de flèche
-  et renvoyant une commande dessinant la flèche.
-\item Le  type abstrait \texttt{kind} décrit une  catégorie de flèche.
+  et renvoyant une commande dessinant la flèche ;
+\item le type abstrait \texttt{kind} décrit une  catégorie de flèche.
   Il s'agit de la combinaison d'un  corps et de zéro, une ou plusieurs
   têtes.
 \end{itemize}
