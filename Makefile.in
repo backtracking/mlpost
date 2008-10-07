@@ -154,8 +154,11 @@ other.byte: $(CMA) othergraphs.ml
 	gv test/othergraphs.ps
 
 .PHONY: check-examples
-check-examples: mlpost.cma
-	for f in examples/*.ml; do ocamlc -c $$f; done
+check-examples: mlpost.cma tool.opt
+	make -C examples boxes.dummy
+	make -C examples paths.dummy
+	make -C examples tree.dummy
+	make -C examples label.dummy
 
 version.ml: Makefile
 	echo "let version = \""$(VERSION)"\"" > version.ml
@@ -203,7 +206,8 @@ FTP = $(WWW)/download
 FILES = *.ml *.mli *.mll \
 	Makefile.in configure configure.in .depend \
 	.depend README.txt INSTALL LICENSE CHANGES FAQ
-EXFILES = examples/Makefile examples/*.ml examples/all.template
+EXFILES = examples/Makefile examples/*.ml examples/all.template\
+	  examples/index.html examples/parse.mll examples/README
 
 export: source export-www export-examples export-doc
 	cp README.txt INSTALL LICENSE CHANGES FAQ $(FTP)
