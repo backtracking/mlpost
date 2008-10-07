@@ -14,9 +14,9 @@
 \newcommand{\metapost}{\MP}
 \newcommand{\fmpost}{\textit{functional} \metapost}
 \newcommand{\metafont}{\MF}
-\newcommand{\nomdetikz}{\textsc{Tikz}}
+\newcommand{\nomdetikz}{Tikz}
 \newcommand{\pstricks}{\textsc{Pstricks}}
-\newcommand{\dia}{\textsc{Dia}}
+\newcommand{\dia}{Dia}
 \newcommand{\xfig}{\textsc{Xfig}}
 \newcommand{\postscript}{PostScript}
 \newcommand{\mlpictex}{mlP\hspace{-0.2em}\raisebox{-0.2em}{i}\hspace{-0.1em}c\hspace{-0.1em}\TeX}
@@ -379,11 +379,23 @@ let graph_sqrt =
   \begin{center}
     \includegraphics{architecture.mps}
   \end{center}
-  \caption{Architecture de \mlpost}
+  \caption{Architecture de \mlpost}\label{fig:archi}
 \end{figure}
 
-API
-\subsection{Types primitifs de \metapost}
+L'architecture générale de \mlpost{} est schématisée en
+figure~\ref{fig:archi}. Au niveau le plus bas se trouvent les
+interfaces correspondant aux types primitifs de \metapost. Ce sont ces
+objets qui sont {\it in fine} compilés en du code \metapost, et nous
+les décrivons de manière plus détaillée dans la
+section~\ref{subsec:types}. La couche intermédiaire contient des
+éléments que nous estimons être de bas niveau mais qui ne sont pas
+présents dans \metapost: ils sont propres à \mlpost et ont été
+construits à partir de la couche inférieure. Les
+sections~\ref{subsec:boxes} et \ref{subsec:arrows} reviennent plus en
+détail sur deux de ces modules, respectivement \texttt{Box} et
+\texttt{Arrow}.
+
+\subsection{Types primitifs de \metapost}\label{subsec:types}
 
 La couche de bas niveau de \mlpost est une interface fidèle à \metapost. Elle
 comporte donc tous les types de base de \metapost :
@@ -537,7 +549,7 @@ délégation des calculs à \metapost.
 % TODO : des chiffres pour justifier "relativement petit" ?
 % TODO ajouter explications sur les contraintes syntaxiques de \metapost
 
-\subsection{Boîtes}
+\subsection{Boîtes}\label{subsec:boxes}
 
 - principe récursif : boîte = picture ou ensemble de boîtes + contour
 + fond
@@ -547,7 +559,7 @@ délégation des calculs à \metapost.
 
 \subsubsection{Application : arbres}
 
-\subsection{Flèches} %%% RB
+\subsection{Flèches} \label{subsec:arrows} %% RB
 
 \metapost\ ne propose qu'un seul type de flèche :
 \begin{center}
