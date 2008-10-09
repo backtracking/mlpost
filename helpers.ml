@@ -31,6 +31,10 @@ let draw_label_arrow ?color ?pen ?style ?outd ?ind ?pos lab a b =
   draw_arrow ?color ?pen p ++
   label ?pos lab (Path.point 0.5 p)
 
+let draw_labelbox_arrow ?color ?pen ?style ?outd ?ind ?pos lab a b =
+  draw_label_arrow ?color ?pen ?style ?outd ?ind ?pos 
+    (Picture.make (Box.draw lab)) a b
+
 let box_arrow ?color ?pen ?dashed ?style ?outd ?ind a b =   
   draw_arrow ?color ?pen ?dashed (Box.cpath ?style ?outd ?ind a b)
 
@@ -46,6 +50,11 @@ let box_label_arrow ?color ?pen ?dashed ?style ?outd ?ind ?pos lab a b =
   let p = Box.cpath ?style ?outd ?ind a b in
   draw_arrow ?color ?pen ?dashed p ++
   label ?pos lab (Path.point 0.5 p)
+
+(* TODO unify all these functions *)
+let box_labelbox_arrow ?color ?pen ?dashed ?style ?outd ?ind ?pos lab a b =
+  box_label_arrow ?color ?pen ?dashed ?style ?outd ?ind ?pos 
+    (Picture.make (Box.draw lab)) a b
 
 (***
 

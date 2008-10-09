@@ -1262,6 +1262,11 @@ module Helpers : sig
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
     ?pos:Command.position -> Picture.t -> 
     Point.t -> Point.t -> Command.t
+  val draw_labelbox_arrow :
+    ?color:Color.t -> ?pen:Pen.t ->
+    ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
+    ?pos:Command.position -> Box.t -> 
+    Point.t -> Point.t -> Command.t
   val box_arrow :
     ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction -> 
@@ -1279,6 +1284,11 @@ module Helpers : sig
     ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
     ?pos:Command.position -> Picture.t -> 
+    Box.t -> Box.t -> Command.t
+  val box_labelbox_arrow :
+    ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
+    ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
+    ?pos:Command.position -> Box.t -> 
     Box.t -> Box.t -> Command.t
 (***
   val hboxjoin : 
