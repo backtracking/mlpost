@@ -50,9 +50,6 @@
 \end{abstract}
 
 %TODO? : expliquer comment fait \metapost pour inclure du \LaTeX
-%TODO? : expliquer le fonctionnement principal de \mlpost : construction d'un
-%         AST \metapost, qui est dumpé dans un fichier .mp => déroulement de
-%         l'algo, pas de compilation
 
 \section{Introduction}
 
@@ -446,8 +443,31 @@ let graph_sqrt =
 
 \section{Architecture logicielle}\label{archi}
 
+\begin{figure}[hptb]
+\begin{center}
+\includegraphics{stages.mps}
+\end{center}
+  \caption{Architecture de \mlpost}\label{fig:etapes}
+\end{figure}
+
+Figure~\ref{fig:etapes} montre le fonctionnement de \mlpost.  Tout d'abord,
+\mlpost\ est un outil de génération de fichier \metapost\ en forme de
+bibliothèque \ocaml. Nous espérons avoir convaincu le lecteur des avantages
+que cela apporte : familiarité avec le langage pour ceux qui connaissent
+\ocaml, typage fort, des construction de programmation de haut-niveau etc.
+Mais ce choix implique également que le fichier \metapost\ de sortie ne sera
+pas obtenu par une {\em compilation} du code source proprement dite, mais par
+une exécution du programme qui construit un arbre de syntaxe abstraite (AST).
+Cet arbre est ensuite imprimé dans un fichier et interprété par \metapost.
+Cela a l'inconvénient qu'une boucle ou itération dans le programme de départ
+sera traduite par une suite de commandes obtenues par le déroulement de la
+boucle, et non par une construction de boucle du langage cible. Ceci étant
+dit, dans notre cas, le coût supplémentaire est faible, puisque \metapost\
+déroule aussi les boucles dans les fichiers \postscript\ de sortie. 
+%TODO est-ce trop détaillé / le bon endroit ?
+
 % schéma de l'architecture
-\begin{figure}[h]
+\begin{figure}[htpb]
   \begin{center}
     \includegraphics{architecture.mps}
   \end{center}
@@ -457,7 +477,7 @@ let graph_sqrt =
 L'architecture générale de \mlpost{} est schématisée en
 figure~\ref{fig:archi}. Au niveau le plus bas se trouvent les
 interfaces correspondant aux types primitifs de \metapost. Ce sont ces
-objets qui sont {\it in fine} compilés en du code \metapost, et nous
+objets qui sont {\it in fine} traduits en du code \metapost, et nous
 les décrivons de manière plus détaillée dans la
 section~\ref{subsec:types}. La couche intermédiaire contient des
 éléments que nous estimons être de bas niveau mais qui ne sont pas

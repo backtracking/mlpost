@@ -314,6 +314,27 @@ let sharing =
     box_arrow (get "g" tree) (get "d" tree);
       ]
 
+let stages = 
+  let dx = bp 5. and dy = bp 5. in
+  let tex = tex ~style:RoundRect ~dx ~dy in
+  let tex' = tex ~stroke:None in
+  let fml = tex ~name:"fml" "figure.ml" in
+  let fmp = tex ~name:"fmp" "figure.mp" in
+  let ps = vbox ~stroke:(Some Color.black) ~style:RoundRect ~name:"ps" ~dx ~dy
+             [tex' "figure.1"; tex' "(\\postscript)"] in
+  let arrowpic = pic ~stroke:None
+       (Picture.make (draw_arrow (path ~scale:cm [0.,0.; 0.,-1.]))) 
+  in
+  let all = hbox ~padding:(cm 3.5) [fml; fmp; ps ] in
+  [ draw all;
+    box_labelbox_arrow ~pos:`Top 
+      (vbox [tex "\\ocaml"; arrowpic; tex' "compiler \\& ex\\'ecuter"])
+      (get "fml" all) (get "fmp" all);
+    box_labelbox_arrow ~pos:`Top 
+      (vbox [tex "\\metapost"; arrowpic; tex' "interpr\\'eter" ] )
+      (get "fmp" all) (get "ps" all);
+  ]
+
 
 
 (* JC *)
@@ -332,3 +353,4 @@ let () = Metapost.emit "tree" sharing
 let () = Metapost.emit "arrow_metapost" arrow_metapost
 let () = Metapost.emit "arrow_simple" arrow_simple
 let () = Metapost.emit "arrow_loop_explain" arrow_loop_explain
+let () = Metapost.emit "stages" stages
