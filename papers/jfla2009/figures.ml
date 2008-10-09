@@ -146,17 +146,15 @@ let loop_explain =
   let construct_pattern = Dash.pattern [Dash.on (bp 0.2); Dash.off (bp 1.)] in
   let special_arrow =
     Arrow.add_belt ~point: 0.9
-      (Arrow.kind_empty
-         (Arrow.add_line ~dashed: Dash.evenly ~to_point: 0.1
-            (Arrow.add_line ~dashed: Dash.evenly ~from_point: 0.9
-               (Arrow.add_line ~from_point: 0.1 ~to_point: 0.9
-                  Arrow.body_empty))))
+      (Arrow.add_line ~dashed: Dash.evenly ~to_point: 0.1
+         (Arrow.add_line ~dashed: Dash.evenly ~from_point: 0.9
+            (Arrow.add_line ~from_point: 0.1 ~to_point: 0.9
+               Arrow.empty)))
   in
   let arc_arrow =
     Arrow.add_head ~head: (Arrow.head_classic ~dashed: construct_pattern)
-      (Arrow.kind_empty
-         (Arrow.add_line ~dashed: construct_pattern
-            Arrow.body_empty))
+      (Arrow.add_line ~dashed: construct_pattern
+         Arrow.empty)
   in
   let s = state "~~~~~~~~~~~" in
   let pt x y = Point.pt (cm x, cm y) in
@@ -243,11 +241,8 @@ let arrow_demo_path = Path.pathp [
   Point.pt (zero, zero);
   (Point.pt (cm 2., zero));
 ]
-let arrow_metapost_emulation =
-  Arrow.add_head ~head: Arrow.head_triangle_full
-    (Arrow.kind_empty (Arrow.add_line Arrow.body_empty))
 let arrow_simple =
-  [Arrow.draw ~kind: arrow_metapost_emulation arrow_demo_path]
+  [Arrow.draw ~kind: Arrow.triangle_full arrow_demo_path]
 
 (* Johannes *)
 open Box

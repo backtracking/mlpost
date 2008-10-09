@@ -1043,40 +1043,39 @@ module ExtArrow : sig
       arrow [kind] does not exist, use the tools from this module to build your
       own! *)
 
-  (** {2 Bodies} *)
+  type kind
+    (** The abstract type for arrow kinds. *)
 
-  type body
-    (** The abstract type for arrow bodies *)
+  (** {2 Drawing Arrows} *)
 
-  (** {3 Building Your Own Body} *)
+  val draw: ?kind: kind -> ?tex: string -> ?pos: Command.position -> Path.t ->
+    Command.t
+    (** Draw an arrow following the given path.
+        @param kind the kind of arrow (default is {!classic})
+        @param tex add a LaTeX label
+        @param pos label position *)
 
-  (** Start from the empty body [body_empty] and add features to it using
-      [add_line]. *)
+  val draw2: ?kind: kind -> ?tex: string -> ?pos: Command.position ->
+    ?outd: Path.direction -> ?ind: Path.direction -> Point.t -> Point.t ->
+    Command.t
+    (** Use [draw2 a b] to draw an arrow from [a] to [b].
+        @param kind the kind of arrow (default is {!classic})
+        @param tex add a LaTeX label
+        @param pos label position
+        @param outd the outgoing direction, at the beginning of the arrow
+        @param ind the ingoing direction, at the end of the arrow *)
 
-  val body_empty: body
-    (** The invisible body. *)
+  (** {2 Built-in Kinds} *)
 
-  val add_line: ?dashed: Dash.t -> ?color: Color.t -> ?pen: Pen.t ->
-    ?from_point: float -> ?to_point: float -> ?dist: Num.t -> body -> body
-    (** Add a line to a body. The line will be parallel to the path used
-        to draw the arrow.
-        @param dashed the dash style used to draw the line (default is plain)
-        @param color the color of the line (default is black)
-        @param pen the pen used to draw the line (default is {!Pen.default})
-        @param from_point from [0.] (foot of the arrow) to [1.] (head of the
-          arrow), the line will start from this point
-        @param to_point from [0.] (foot of the arrow) to [1.] (head of the
-          arrow), the line will end at this point
-        @param dist the distance between the path of the arrow and this line
-          (may be negative) *)
+  val classic: kind
+    (** A simple arrow with one line and two straight lines for the head. *)
 
-  (** {3 Built-in Bodies} *)
+  val triangle: kind
+    (** A simple arrow with a triangular head. Same as [classic] but with an
+        extra line and some clipping. *)
 
-  val body_simple: body
-    (** A simple body with one line. *)
-
-  val body_double: body
-    (** A body with two parallel lines. *)
+  val triangle_full: kind
+    (** A simple arrow with a triangular head filled with black. *)
 
   (** {2 Heads} *)
 
@@ -1105,18 +1104,27 @@ module ExtArrow : sig
   (** Same as [head_triangle] except that the triangle is not drawn (hence the
       absence of pen properties) but is filled with the given [color]. *)
 
-  (** {2 Arrow Kinds} *)
+  (** {2 Building Your Own Kinds} *)
 
-  type kind
-    (** The abstract type for arrow kinds *)
+  (** Start from the empty kind [empty] and add features to it using
+      [add_line], [add_head], ... *)
 
-  (** {3 Buildind Your Own Kind} *)
+  val empty: kind
+    (** The empty kind with no line nor head. *)
 
-  (** Start from your favorite body, build an empty kind from it using
-      [kind_empty], and then add arrow heads to it. *)
-
-  val kind_empty: body -> kind
-    (** Build an arrow kind with no head from a given body. *)
+  val add_line: ?dashed: Dash.t -> ?color: Color.t -> ?pen: Pen.t ->
+    ?from_point: float -> ?to_point: float -> ?dist: Num.t -> kind -> kind
+    (** Add a line to a body. The line will be parallel to the path used
+        to draw the arrow.
+        @param dashed the dash style used to draw the line (default is plain)
+        @param color the color of the line (default is black)
+        @param pen the pen used to draw the line (default is {!Pen.default})
+        @param from_point from [0.] (foot of the arrow) to [1.] (head of the
+          arrow), the line will start from this point
+        @param to_point from [0.] (foot of the arrow) to [1.] (head of the
+          arrow), the line will end at this point
+        @param dist the distance between the path of the arrow and this line
+          (may be negative) *)
 
   val add_head: ?head: head -> kind -> kind
     (** Add a head at the end of the arrow.
@@ -1136,34 +1144,6 @@ module ExtArrow : sig
         @param point the point where to draw the arrow ([0.] for the beginning,
           and [1.] for the end, or any number in-between) (default is [0.5])
         @param head the kind of head to add (default is {!head_classic}) *)
-
-  (** {3 Built-in Kinds} *)
-
-  val simple: kind
-    (** A simple arrow with one line and two straight lines for the head. *)
-
-  val double: kind
-    (** An arrow with two parallel lines and two straight lines for the head.
-        Can be used for logical implications, for instance. *)
-
-  (** {2 Drawing Arrows} *)
-
-  val draw: ?kind: kind -> ?tex: string -> ?pos: Command.position -> Path.t ->
-    Command.t
-    (** Draw an arrow following the given path.
-        @param kind the kind of arrow (default is {!simple})
-        @param tex add a LaTeX label
-        @param pos label position *)
-
-  val draw2: ?kind: kind -> ?tex: string -> ?pos: Command.position ->
-    ?outd: Path.direction -> ?ind: Path.direction -> Point.t -> Point.t ->
-    Command.t
-    (** Use [draw2 a b] to draw an arrow from [a] to [b].
-        @param kind the kind of arrow (default is {!simple})
-        @param tex add a LaTeX label
-        @param pos label position
-        @param outd the outgoing direction, at the beginning of the arrow
-        @param ind the ingoing direction, at the end of the arrow *)
 end
 
 module  Pos : sig

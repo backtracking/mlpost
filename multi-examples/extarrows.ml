@@ -13,7 +13,7 @@ let down = Path.vec Point.down
 let left = Path.vec Point.left
 let right = Path.vec Point.right
 
-let double_headed = ExtArrow.add_foot ExtArrow.simple
+let double_headed = ExtArrow.add_foot ExtArrow.classic
 
 let multiple_headed =
   ExtArrow.add_foot ~head: ExtArrow.head_triangle
@@ -24,18 +24,17 @@ let multiple_headed =
              ~head: (ExtArrow.head_triangle_full ~angle: 140.)
              (ExtArrow.add_head
                 ~head: (ExtArrow.head_triangle ~size: (Num.bp 15.))
-                (ExtArrow.kind_empty ExtArrow.body_simple)))))
+                (ExtArrow.add_line ExtArrow.empty)))))
 
 let serial_lines =
   ExtArrow.add_head
-    (ExtArrow.kind_empty
-       (ExtArrow.add_line ~to_point: 0.10
-          ~pen: (Pen.scale (Num.bp 5.) (Pen.square ()))
-          (ExtArrow.add_line ~from_point: 0.10 ~to_point: 0.33
-             (ExtArrow.add_line ~from_point: 0.33 ~to_point: 0.66
-                ~dashed: Dash.withdots
-                (ExtArrow.add_line ~from_point: 0.66 ~dashed: Dash.evenly
-                   ExtArrow.body_empty)))))
+    (ExtArrow.add_line ~to_point: 0.10
+       ~pen: (Pen.scale (Num.bp 5.) (Pen.square ()))
+       (ExtArrow.add_line ~from_point: 0.10 ~to_point: 0.33
+          (ExtArrow.add_line ~from_point: 0.33 ~to_point: 0.66
+             ~dashed: Dash.withdots
+             (ExtArrow.add_line ~from_point: 0.66 ~dashed: Dash.evenly
+                ExtArrow.empty))))
 
 let () =
   emit [ExtArrow.draw2 a d];
