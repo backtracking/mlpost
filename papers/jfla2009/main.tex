@@ -49,6 +49,11 @@
   
 \end{abstract}
 
+%TODO? : expliquer comment fait \metapost pour inclure du \LaTeX
+%TODO? : expliquer le fonctionnement principal de \mlpost : construction d'un
+%         AST \metapost, qui est dumpé dans un fichier .mp => déroulement de
+%         l'algo, pas de compilation
+
 \section{Introduction}
 
 Lors de la rédaction de documents à nature scientifique (articles,
@@ -703,6 +708,10 @@ résolution d'équations
 perspectives infinies d'extensions : 3D, animations, ...  plus facile
 de le faire en Caml qu'en \metapost\ ou en \LaTeX\ (\nomdetikz,
 \pstricks)
+
+possibilité de changer de langage de sortie (\nomdetikz\ ou \postscript\
+directement, si on implémente une technique similaire à celle de \metapost\
+pour l'inclusion de \LaTeX)
 
 plein de sortes de flèches
 
