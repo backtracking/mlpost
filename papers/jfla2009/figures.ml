@@ -195,36 +195,38 @@ let loop_explain =
 
 let initial states pos name =
   let x = Box.get name states in
-  let w = match pos with
+  let p = match pos with
     | `Left -> Box.west x
     | `Right -> Box.east x
     | `Top -> Box.north x
     | `Bot -> Box.south x
   in
-  Arrow.draw (Path.pathp [ Point.shift w (Point.pt (cm (-0.3), zero)); w ])
+  Arrow.draw (Path.pathp [ Point.shift p (Point.pt (cm (-0.3), zero)); p ])
 
 let automate_1 =
-  let states = Box.vbox ~padding:(cm 0.8) [
-    Box.hbox ~padding:(cm 1.4) [ 
-      state ~name:"alpha" "$\\alpha$"; state "$\\beta$" ];
-    final (state "$\\gamma$"); ]
+  let states = Box.vbox ~padding:(cm 0.8)
+    [ Box.hbox ~padding:(cm 1.4)
+      [ state ~name:"alpha" "$\\alpha$";
+        state "$\\beta$" ];
+      final (state "$\\gamma$") ]
   in
-  [Box.draw states;
-   initial states `Left "alpha"]
+  [ Box.draw states;
+    initial states `Left "alpha" ]
 
 let automate =
-  let states = Box.vbox ~padding:(cm 0.8) [
-    Box.hbox ~padding:(cm 1.4) [ 
-      state ~name:"alpha" "$\\alpha$"; state ~name:"beta" "$\\beta$" ];
-    final ~name:"gamma" (state "$\\gamma$"); ]
+  let states = Box.vbox ~padding: (cm 0.8)
+    [ Box.hbox ~padding: (cm 1.4)
+        [ state ~name: "alpha" "$\\alpha$";
+          state ~name: "beta" "$\\beta$" ];
+      final ~name: "gamma" (state "$\\gamma$") ]
   in
-  [Box.draw states;
-   transition states "a" `Lowleft "alpha" "gamma";
-   transition states "b" `Lowright "gamma" "beta";
-   transition states "c" `Top ~outd:25. ~ind:335. "alpha" "beta";
-   transition states "d" `Bot ~outd:205. ~ind:155. "beta" "alpha";
-   loop states "e" `Bot "gamma";
-   initial states `Left "alpha"]
+  [ Box.draw states;
+    transition states "a" `Lowleft "alpha" "gamma";
+    transition states "b" `Lowright "gamma" "beta";
+    transition states "c" `Top ~outd: 25. ~ind: 335. "alpha" "beta";
+    transition states "d" `Bot ~outd: 205. ~ind: 155. "beta" "alpha";
+    loop states "e" `Bot "gamma";
+    initial states `Left "alpha" ]
 
 let arrow_metapost =
   [Helpers.draw_simple_arrow ~outd:(vec (dir 90.)) ~ind:(vec (dir 90.))
