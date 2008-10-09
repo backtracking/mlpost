@@ -294,8 +294,36 @@ let transition states tex pos ?outd ?ind x_name y_name =
 La    fonction   \texttt{loop}   est    similaire   à    la   fonction
 \texttt{transition},   mais  elle   doit  calculer   un   chemin  plus
 complexe. En  effet, \texttt{cpath} appliqué à  deux boîtes identiques
-renvoie un chemin vide.
-%TODO: code de loop + illustration de son fonctionnement
+renvoie un chemin vide et on  ne peut donc pas l'utiliser. A la place,
+on calcule un point $A$ suffisamment  éloigné de la boîte, et on trace
+un chemin  qui part du centre, qui  passe par $A$ puis  qui revient au
+centre.
+
+\begin{minipage}{0.2\linewidth}
+  \includegraphics{loop_explain.mps}
+\end{minipage}
+\begin{minipage}{0.2\linewidth}
+\small\begin{ocaml}
+let loop states tex pos name =
+  let box = Box.get name states in
+  let fdir, angle, x, y = match pos with
+    | `Top -> Box.north, 0., 0., 0.4
+    | `Left -> Box.west, 90., (-0.4), 0.
+    | `Bot -> Box.south, 180., 0., (-0.4)
+    | `Right -> Box.north, 270., 0.4, 0.
+  in
+  let a = Point.shift (fdir box) (Point.pt (cm x, cm y)) in
+  let c = Box.ctr box in
+  let p = Path.pathk [
+    knotp ~r: (vec (dir (angle +. 45.))) c;
+    knotp a;
+    knotp ~l: (vec (dir (angle -. 45.))) c;
+  ] in
+  let bp = Box.bpath box in
+  Arrow.draw ~tex ~pos: (pos :> Command.position)
+    (cut_after bp (cut_before bp p))
+\end{ocaml}
+\end{minipage}
 
 On  peut maintenant  dessiner  facilement des  automates en  utilisant
 cette librairie.

@@ -101,7 +101,18 @@ let architecture =
 
 (* Romain *)
 module Arrow = ExtArrow
-let loop box =
+
+open Num
+let state = Box.tex ~style:Circle 
+let final = Box.box ~style:Circle ~dx:zero ~dy:zero 
+
+let transition states tex pos ?outd ?ind x_name y_name = 
+  let x = Box.get x_name states and y = Box.get y_name states in
+  let outd = match outd with None -> None | Some a -> Some (vec (dir a)) in
+  let ind = match ind with None -> None | Some a -> Some (vec (dir a)) in
+  Arrow.draw ~tex ~pos (cpath ?outd ?ind x y) 
+
+(*let loop box =
   let c = Box.ctr box in
   let a = Point.shift c (pt (cm 0., cm (-0.8))) in
   let p = Path.pathk [
@@ -110,19 +121,80 @@ let loop box =
     knotp ~l: (vec (dir 135.)) c;
   ] in
   let bp = Box.bpath box in
-  cut_after bp (cut_before bp p)
+  cut_after bp (cut_before bp p)*)
 
-open Num
-let state = Box.tex ~style:Circle 
-let final = Box.box ~style:Circle ~dx:zero ~dy:zero 
-let transition states tex pos ?outd ?ind x_name y_name = 
-  let x = Box.get x_name states and y = Box.get y_name states in
-  let outd = match outd with None -> None | Some a -> Some (vec (dir a)) in
-  let ind = match ind with None -> None | Some a -> Some (vec (dir a)) in
-  Arrow.draw ~tex ~pos (cpath ?outd ?ind x y) 
-let loop b tex pos x = (* TODO : utiliser pos *)
-  let x = Box.get x b in
-  Arrow.draw ~tex ~pos (loop x)
+let loop states tex pos name =
+  let box = Box.get name states in
+  let fdir, angle, x, y = match pos with
+    | `Top -> Box.north, 0., 0., 0.4
+    | `Left -> Box.west, 90., (-0.4), 0.
+    | `Bot -> Box.south, 180., 0., (-0.4)
+    | `Right -> Box.north, 270., 0.4, 0.
+  in
+  let a = Point.shift (fdir box) (Point.pt (cm x, cm y)) in
+  let c = Box.ctr box in
+  let p = Path.pathk [
+    knotp ~r: (vec (dir (angle +. 45.))) c;
+    knotp a;
+    knotp ~l: (vec (dir (angle -. 45.))) c;
+  ] in
+  let bp = Box.bpath box in
+  Arrow.draw ~tex ~pos: (pos :> Command.position)
+    (cut_after bp (cut_before bp p))
+
+let loop_explain =
+  let construct_pattern = Dash.pattern [Dash.on (bp 0.2); Dash.off (bp 1.)] in
+  let special_arrow =
+    Arrow.add_belt ~point: 0.9
+      (Arrow.kind_empty
+         (Arrow.add_line ~dashed: Dash.evenly ~to_point: 0.1
+            (Arrow.add_line ~dashed: Dash.evenly ~from_point: 0.9
+               (Arrow.add_line ~from_point: 0.1 ~to_point: 0.9
+                  Arrow.body_empty))))
+  in
+  let arc_arrow =
+    Arrow.add_head ~head: (Arrow.head_classic ~dashed: construct_pattern)
+      (Arrow.kind_empty
+         (Arrow.add_line ~dashed: construct_pattern
+            Arrow.body_empty))
+  in
+  let s = state "~~~~~~~~~~~" in
+  let pt x y = Point.pt (cm x, cm y) in
+  let p x y = Point.shift (Box.ctr s) (pt x y) in
+  let a_pos = p 0. (-2.) in
+  let angle = 180. in
+  let c = Box.ctr s in
+  let arrow_path = Path.pathk [
+    knotp ~r: (vec (dir (angle +. 45.))) c;
+    knotp a_pos;
+    knotp ~l: (vec (dir (angle -. 45.))) c;
+  ] in
+  let vert = Path.pathk [
+    knotp (p 0. 2.);
+    knotp (p 0. (-3.));
+  ] in
+  let len = 1.2 in
+  let diag1 = Path.pathk [
+    knotp (p len len);
+    knotp (p (-.len) (-.len));
+  ] in
+  let diag2 = Path.pathk [
+    knotp (p len (-.len));
+    knotp (p (-.len) len);
+  ] in
+  let construct = Command.draw ~dashed: construct_pattern in
+  let circle = Path.shift (pt 0.64 0.) (Path.scale (cm 2.) Path.fullcircle) in
+  let arc = cut_before vert (cut_after diag2 (cut_after vert circle)) in
+  [
+    Box.draw s;
+    Command.dotlabel ~pos: `Lowleft (Picture.tex "$A$") a_pos;
+    Arrow.draw ~kind: special_arrow arrow_path;
+    construct vert;
+    construct diag1;
+    construct diag2;
+    Arrow.draw ~tex: "$45°$" ~pos: `Upleft ~kind: arc_arrow arc;
+  ]
+
 let initial states pos name =
   let x = Box.get name states in
   let w = match pos with
@@ -234,6 +306,7 @@ let bresenham =
 
 let () = Metapost.emit "automate_1" automate_1
 let () = Metapost.emit "automate" automate
+let () = Metapost.emit "loop_explain" loop_explain
 let () = Metapost.emit "uml" uml
 let () = Metapost.emit "hierarchy" hierarchy
 let () = Metapost.emit "graph_sqrt" graph_sqrt
