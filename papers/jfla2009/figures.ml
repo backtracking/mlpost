@@ -142,15 +142,15 @@ let loop states tex pos name =
   Arrow.draw ~tex ~pos: (pos :> Command.position)
     (cut_after bp (cut_before bp p))
 
+let arrow_loop_explain_kind =
+  Arrow.add_belt ~point: 0.9
+    (Arrow.add_line ~dashed: Dash.evenly ~to_point: 0.1
+       (Arrow.add_line ~dashed: Dash.evenly ~from_point: 0.9
+          (Arrow.add_line ~from_point: 0.1 ~to_point: 0.9
+             Arrow.empty)))
+
 let loop_explain =
   let construct_pattern = Dash.pattern [Dash.on (bp 0.2); Dash.off (bp 1.)] in
-  let special_arrow =
-    Arrow.add_belt ~point: 0.9
-      (Arrow.add_line ~dashed: Dash.evenly ~to_point: 0.1
-         (Arrow.add_line ~dashed: Dash.evenly ~from_point: 0.9
-            (Arrow.add_line ~from_point: 0.1 ~to_point: 0.9
-               Arrow.empty)))
-  in
   let arc_arrow =
     Arrow.add_head ~head: (Arrow.head_classic ~dashed: construct_pattern)
       (Arrow.add_line ~dashed: construct_pattern
@@ -186,7 +186,7 @@ let loop_explain =
   [
     Box.draw s;
     Command.dotlabel ~pos: `Lowleft (Picture.tex "$A$") a_pos;
-    Arrow.draw ~kind: special_arrow arrow_path;
+    Arrow.draw ~kind: arrow_loop_explain_kind arrow_path;
     construct vert;
     construct diag1;
     construct diag2;
@@ -228,14 +228,14 @@ let automate =
 
 let arrow_metapost =
   [Helpers.draw_simple_arrow ~outd:(vec (dir 90.)) ~ind:(vec (dir 90.))
-     (Point.pt (bp 0., bp 0.)) (Point.pt (cm 2., bp 0.));
+     (Point.pt (cm 0., cm 0.5)) (Point.pt (cm 2., cm 0.5));
    Helpers.draw_simple_arrow
-     (Point.pt (cm 4., bp 0.)) (Point.pt (cm 6., bp 0.));
+     (Point.pt (cm 4., cm 0.5)) (Point.pt (cm 6., cm 0.5));
    Helpers.draw_simple_arrow ~outd:(vec (dir 90.))
-     (Point.pt (cm 8., bp 0.)) (Point.pt (cm 10., bp 0.));
+     (Point.pt (cm 8., cm 0.)) (Point.pt (cm 10., cm 0.));
    Helpers.draw_simple_arrow
      ~pen:(Pen.scale (bp 2.5) (Pen.square ()))
-     (Point.pt (cm 12., bp 0.)) (Point.pt (cm 14., cm 1.))]
+     (Point.pt (cm 12., cm 0.)) (Point.pt (cm 14., cm 1.))]
 
 let arrow_demo_path = Path.pathp [
   Point.pt (zero, zero);
@@ -243,6 +243,15 @@ let arrow_demo_path = Path.pathp [
 ]
 let arrow_simple =
   [Arrow.draw ~kind: Arrow.triangle_full arrow_demo_path]
+
+let arrow_loop_explain =
+  let pt x y = Point.pt (cm x, cm y) in
+  let draw2 = Arrow.draw2 ~kind: arrow_loop_explain_kind in
+  [
+    draw2 ~outd:(vec (dir 45.)) ~ind: (vec (dir 45.)) (pt 0. 0.25) (pt 3. 0.25);
+    draw2 (pt 5. 0.25) (pt 8. 0.25);
+    draw2 ~outd:(vec (dir 45.)) (pt 10. 0.) (pt 13. 0.);
+  ]
 
 (* Johannes *)
 open Box
@@ -320,3 +329,4 @@ let () = Metapost.emit "bresenham" bresenham
 let () = Metapost.emit "tree" sharing
 let () = Metapost.emit "arrow_metapost" arrow_metapost
 let () = Metapost.emit "arrow_simple" arrow_simple
+let () = Metapost.emit "arrow_loop_explain" arrow_loop_explain
