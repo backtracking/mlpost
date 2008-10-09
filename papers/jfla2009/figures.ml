@@ -239,6 +239,16 @@ let arrow_metapost =
      ~pen:(Pen.scale (bp 2.5) (Pen.square ()))
      (Point.pt (cm 12., bp 0.)) (Point.pt (cm 14., cm 1.))]
 
+let arrow_demo_path = Path.pathp [
+  Point.pt (zero, zero);
+  (Point.pt (cm 2., zero));
+]
+let arrow_metapost_emulation =
+  Arrow.add_head ~head: Arrow.head_triangle_full
+    (Arrow.kind_empty (Arrow.add_line Arrow.body_empty))
+let arrow_simple =
+  [Arrow.draw ~kind: arrow_metapost_emulation arrow_demo_path]
+
 (* Johannes *)
 open Box
 let uml = 
@@ -314,3 +324,4 @@ let () = Metapost.emit "architecture" architecture
 let () = Metapost.emit "bresenham" bresenham
 let () = Metapost.emit "tree" sharing
 let () = Metapost.emit "arrow_metapost" arrow_metapost
+let () = Metapost.emit "arrow_simple" arrow_simple

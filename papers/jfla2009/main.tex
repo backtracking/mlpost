@@ -5,7 +5,7 @@
 \usepackage[french]{babel}
 \usepackage{mflogo} 
 \usepackage{tikz}
-%; whizzy -pdf .
+%; whizzy subsection -pdf . 
 
 % macros
 \newcommand{\ocaml}{OCaml}
@@ -199,7 +199,7 @@ modifications de la figure.
 %TODO exemple ici => a développer dans la section Boites de tte façon
 
 % automate -- RB
-\subsection{Automate}
+\subsection{Automates}
 
 L'un des principes de  \mlpost\ est la possibilité d'écrire facilement
 des librairies. Par exemple, si  vous étudiez la théorie des langages,
@@ -638,25 +638,43 @@ code \metapost\ relativement petit, malgré la délégation des calculs à
 Les  flèches peuvent  suivre  n'importe quel  chemin  et peuvent  être
 tracées avec différents styles de  trait, mais il n'y a toujours qu'un
 seul trait  et la tête de  flèche est toujours la même. Avec \mlpost,
-l'utilisateur peut créer ses propres types de flèches.
+l'utilisateur peut créer ses propres catégories de flèches.
 
-Le module \texttt{Arrow} dispose de trois types:
+Le module \texttt{Arrow} dispose de trois types.
 \begin{itemize}
-\item me type abstrait \texttt{body}  décrit le corps des flèches, qui
+\item Le type abstrait \texttt{body}  décrit le corps des flèches, qui
   peuvent être  composées de plusieurs traits parallèles  ou en série,
-  avec chacun leur style propre;
-\item  le  type \texttt{head}  décrit  comment  dessiner  une tête  de
+  avec chacun leur style propre.
+\item  Le  type \texttt{head}  décrit  comment  dessiner  une tête  de
   flèche.   Les  éléments de  type  \texttt{head}  sont des  fonctions
   prenant en argument la position et la direction de la tête de flèche
-  et renvoyant une commande dessinant la flèche ;
-\item le type abstrait \texttt{kind} décrit une  catégorie de flèche.
+  et renvoyant une commande dessinant la flèche.
+\item Le type abstrait \texttt{kind} décrit une  catégorie de flèche.
   Il s'agit de la combinaison d'un  corps et de zéro, une ou plusieurs
   têtes.
 \end{itemize}
 
-Pour  dessiner une flèche,  on utilise  la fonction  \texttt{draw} qui
-permet de  dessiner une  flèche d'une catégorie  donnée en  suivant un
-chemin donné.
+La  fonction  \texttt{draw}  permet   de  dessiner  une  flèche  d'une
+catégorie donnée  en suivant un  chemin donné. Les flèches  sont alors
+dessinées  en   utilisant  les   primitives  de  \metapost.    Ceci  a
+l'inconvénient  d'utiliser   plus  de  ressources   mais  nous  permet
+d'imaginer de nombreuses catégories de flèches.
+
+Voyons d'abord  comment on  peut émuler les  flèches de  \metapost. On
+part d'un  corps vide et  on lui ajoute  un trait normal sur  toute la
+longueur.  On ajoute une tête triangulaire remplie, et on obtient :
+
+\begin{minipage}{0.2\linewidth}
+  \includegraphics{arrow_simple.mps}
+\end{minipage}
+\begin{minipage}{0.2\linewidth}
+\small\begin{ocaml}
+let kind =
+  Arrow.add_head ~head: Arrow.head_triangle_full
+    (Arrow.kind_empty (Arrow.add_line Arrow.body_empty))
+in [Arrow.draw ~kind (Path.pathp ...)]
+\end{ocaml}
+\end{minipage}
 
 \section{Conclusion}\label{conclusion}
 
