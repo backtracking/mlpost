@@ -17,7 +17,6 @@
 open Types
 
 type t = picture
-type repr = t
 
 let tex s = mkPITex s
 let make l = mkPIMake l
@@ -67,5 +66,3 @@ let clip pic pth = mkPIClip pic pth
 let width p = Point.xpart (Point.sub (urcorner p) (ulcorner p))
 
 let height p = Point.ypart (Point.sub (urcorner p) (lrcorner p))
-
-let v x = x

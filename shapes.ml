@@ -182,10 +182,6 @@ let south s = s.b.s
 let west  s = s.b.w
 let east  s = s.b.e
 
-(* POS compliance *)
-type repr = t
-
-let v x = x
 let ctr x = x.b.c
 let height x = x.ht
 let width x = x.wt

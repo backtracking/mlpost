@@ -42,10 +42,6 @@ and desc =
   | Pic of Picture.t
   | Grp of t array * t Smap.t
 
-type repr = t
-
-let v b = b
-
 let width b = b.width
 let height b = b.height
 let ctr b = b.ctr
