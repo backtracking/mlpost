@@ -19,7 +19,6 @@ open Helpers
 open Path
 open Num
 open Num.Infix
-open Pos
 
 type t = Box.t
 
@@ -67,8 +66,6 @@ let arc astyle estyle ?stroke ?pen b1 b2 =
 	    cut_after (Box.bpath b2) (cut_before (Box.bpath b1) p) 
 	  in
 	    linedraw parrow
-
-module T = Pos.Tree(Box)
 
 let is_leaf x = Array.length (Box.elts x ) = 1
 let root x = 

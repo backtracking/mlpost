@@ -20,8 +20,6 @@ open Point
 
 open Num.Infix
 
-open Pos
-
 let margin = Num.bp 2.
 
 module Smap = Map.Make(String)
@@ -173,8 +171,6 @@ let pic ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black) ?pen ?fill pic =
     width = w; height = h; ctr = c; contour = s;
     post_draw = Picture.empty}
 
-module BoxAlign = Pos.List_(B)
-
 let merge_maps =
   let add_one m b =
     let m = match b.desc with
@@ -185,21 +181,58 @@ let merge_maps =
   in
   List.fold_left add_one Smap.empty
 
+let horizontal ?(padding=Num.zero) ?(pos=`Center) pl =
+  let hmax = Num.fold_max B.height Num.zero pl in
+  let hmax_2 = hmax /./ 2. in
+  let rec make_new acc x = function
+    | [] -> List.rev acc, x -/ padding
+    | p :: pl ->
+        let wp,hp = B.width p, B.height p in
+        let y = match pos with
+          | `Center -> hmax_2
+          | `Top -> hmax -/ hp /./ 2.
+          | `Bot -> hp /./ 2.
+        in
+        let c = Point.pt (x +/ wp /./ 2., y) in 
+        let b = B.center c p in
+        make_new (b::acc) (x +/ wp +/ padding) pl
+  in
+  let l,x = make_new [] Num.zero pl in
+  let mycenter = Point.pt (x /./ 2., hmax_2) in     
+  l, x, hmax, mycenter
+
+let vertical ?(padding=Num.zero) ?(pos=`Center) pl =
+  let wmax = Num.fold_max B.width Num.zero pl in
+  let wmax_2 = wmax /./ 2. in
+  let rec make_new acc y = function
+    | [] -> List.rev acc, y +/ padding
+    | p :: pl ->
+        let wp,hp = B.width p, B.height p in
+        let x = 
+          match pos with
+            | `Center -> wmax_2
+            | `Right -> wmax -/ wp /./ 2.
+            | `Left ->  wp /./ 2.
+        in
+        let c = Point.pt (x, y -/ hp /./ 2.) in 
+        let b = B.center c p in
+          make_new (b::acc) (y -/ hp -/ padding) pl
+  in
+  let l,y = make_new [] Num.zero pl in
+  let mycenter = Point.pt (wmax_2, y /./ 2.) in
+  l, wmax, Num.neg y, mycenter
+
 let align_boxes f ?padding ?pos ?(style=Rect) 
   ?(dx=Num.zero) ?(dy=Num.zero) ?name ?(stroke=None) ?pen ?fill bl =
-  let bl = f ?padding ?pos bl in
-  let w = BoxAlign.width bl in
-  let h = BoxAlign.height bl in
-  let c = BoxAlign.ctr bl in
+  let bl, w, h , c = f ?padding ?pos bl in
   let w,h,s = make_contour style ~dx ~dy w h c in
-  let bl = BoxAlign.v bl in
   { desc = Grp (Array.of_list bl, merge_maps bl);
     name = name; stroke = stroke; pen = pen; fill = fill;
     width = w; height = h; ctr = c; contour = s ;
     post_draw = Picture.empty }
 
-let hbox = align_boxes BoxAlign.horizontal
-let vbox = align_boxes BoxAlign.vertical
+let hbox ?padding ?pos = align_boxes horizontal ?padding ?pos
+let vbox ?padding ?pos = align_boxes vertical ?padding ?pos
 
 let box 
   ?(style=Rect) ?(dx=margin) ?(dy=margin) ?name 
@@ -292,36 +325,6 @@ let set_draw c b = {b with post_draw = Picture.make c}
 
 let get_pen b = b.pen
 let set_pen p b = { b with pen = Some p }
-
-(****
-
-(* These functions should rather be called 
- * "align_block" or something like that *)
-let valign ?(dx=Num.zero) ?(dy=Num.zero)  ?pos pl = 
-  let posl = BoxAlign.vertical ~dy  ?pos pl in
-  List.map 
-    (fun p ->
-      let dx = Point.xpart (Picture.ctr p) +/ dx -/
-	Picture.width p /./ 2. 
-      in
-      rect ~dx ~dy:(0.5 *./ dy) p)
-    (PicAlign.v posl)
-
-let halign ?(dx=Num.zero) ?(dy=Num.zero) ?pos pl =
-  let posl = PicAlign.horizontal ~dx ?pos pl in
-    List.map 
-      (fun p ->
-        let dy = Point.ypart (Picture.ctr p) +/ 
-                 dy -/ Picture.height p /./ 2. in
-        base_rect ~dx:(0.5 *./ dx) ~dy p)
-      (PicAlign.v posl)
-
-(* That is the function I would call halign  *)
-let halign_to_box ?(dx=margin) ?(dy=margin) ?(spacing=Num.zero) ?pos pl =
-  let posl = PicAlign.horizontal ~dx:(dx +/ spacing) ?pos pl in
-    List.map (base_rect ~dx:(0.5 *./ dx) ~dy) (PicAlign.v posl)
-
-****)
 
 (* place the box [b] inside the rectangular region defined by upper left
    corner [x,y], width [w] and height [h], according to alignment [pos] *)

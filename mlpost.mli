@@ -536,8 +536,6 @@ and Picture : sig
   type t
     (** The abstract type of pictures *)
 
-  type repr = t
-
   val make : Command.t -> t
     (** Make a picture from a drawing command *)
 
@@ -608,8 +606,6 @@ and Picture : sig
   val yscale : Num.t -> t -> t
   val xscale : Num.t -> t -> t
   val spin : float -> t -> t
-
-  val v : t -> repr
 
 end
 
@@ -762,14 +758,11 @@ module rec Shapes : sig
 	then [close] will be true by default ; otherwise it is false.
     *)
 
-  (* POS compliance *)
-  type repr = t
-  val v : t -> repr
   val ctr : t -> Point.t
   val height : t -> Num.t
   val width : t -> Num.t
-  val shift : Point.t -> repr -> repr
-  val center : Point.t -> t -> repr
+  val shift : Point.t -> t -> t
+  val center : Point.t -> t -> t
 
 end
 
@@ -860,17 +853,15 @@ and Box : sig
 
   (** {2 POS compliance} *)
 
-  type repr = t
-  val v : t -> repr
   val ctr : t -> Point.t
   (** return the center of the object *)
   val height : t -> Num.t
   (** return the height of the object *)
   val width : t -> Num.t
   (** return the width of the object *)
-  val shift : Point.t -> repr -> repr
+  val shift : Point.t -> t -> t
   (** [shift pt x] shifts the object [x] about the point [pt]  *)
-  val center : Point.t -> t -> repr
+  val center : Point.t -> t -> t
   (** [center pt x] centers the object [x] at the point [pt]  *)
 
   val draw : ?debug:bool -> t -> Command.t
@@ -1144,108 +1135,6 @@ module ExtArrow : sig
         @param point the point where to draw the arrow ([0.] for the beginning,
           and [1.] for the end, or any number in-between) (default is [0.5])
         @param head the kind of head to add (default is {!head_classic}) *)
-end
-
-module  Pos : sig
-  (** This module consists of several functors for generic placement of objects.
-    Instantiations with the {!Picture} module exist in other places of Mlpost.
-   *)
-
-  (** {2 Placing requirements } *)
-
-  module type POS =
-  sig
-    type t
-    (** the type of objects that can be positioned. *)
-
-    type repr
-    (** the type of objects once they have been placed. Often this will be the
-      same type as [t]. *)
-
-    val ctr : t -> Point.t
-    (** return the center of the object *)
-
-    val height : t -> Num.t
-    (** return the height of the object *)
-
-    val width : t -> Num.t
-    (** return the width of the object *)
-
-    val shift : Point.t -> repr -> repr
-    (** [shift pt x] shifts the object [x] about the point [pt]  *)
-
-    val center : Point.t -> t -> repr
-    (** [center pt x] centers the object [x] at the point [pt]  *)
-
-    val v : t -> repr
-    (** get the "raw" object back *)
-  end
-  (** The signature [POS] describes the requirements for positionnable objects
-   *)
-
-  (** {2 Alignment of sequences} *)
-
-  module type SEQ =
-  sig
-    module P : POS
-    (** The input module of signature {!POS} *)
-
-    type 'a seq
-    (** The container sequence type *)
-
-    include POS with type repr = P.repr seq
-    (** A sequence can also be positioned. *)
-
-    val horizontal :
-      ?padding:Num.t -> ?pos:Command.vposition -> P.t seq -> t
-    (** Align the input objects horizontally and return the sequence of their
-      representations. *)
-
-    val vertical :
-      ?padding:Num.t -> ?pos:Command.hposition -> P.t seq -> t
-    (** Align the input objects vertically and return the sequence of their
-      representations. *)
-
-    val tabular :
-      ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position -> 
-      P.t seq seq -> t seq
-    (** Align the input objects in a table and return the table of their
-      representations. *)
-
-  end
-  (** This signature describes the output type of the {!List_} and {!Array_}
-   functors.  *)
-
-  module List_ : 
-    functor (P : POS) -> SEQ with type 'a seq = 'a list and module P = P 
-  (** Use this functor to align lists of objects *)
-
-  module Array_ : 
-    functor (P : POS) -> SEQ with type 'a seq = 'a array and module P = P 
-  (** Use this functor to align arrays of objects *)
-
-  (** {2 Tree placement } *)
-
-  (** The type of trees *)
-  type 'a tree = N of 'a * 'a tree list
-
-  module type TREE =
-  sig
-    module P : POS
-    (** The input module of signature {!POS} *)
-
-    include POS with type repr = P.repr tree
-    (** Positioned trees can be repositioned using one of the other functors. *)
-
-    val place : ?dx:Num.t -> ?dy:Num.t -> P.t tree -> t
-    (** Position a tree. *)
-
-  end
-  (** The output signature of the {!Tree} functor.  *)
-
-  module Tree : functor (P : POS) -> TREE with module P = P
-  (** Use this functor to position trees.  *)
-
 end
 
 (** {2 Helpers and Extensions} *)
