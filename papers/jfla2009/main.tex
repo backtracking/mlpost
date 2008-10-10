@@ -184,7 +184,22 @@ Enfin, la section~\ref{conclusion} ...
 
 \section{Principes et exemples}\label{exemples}
 
-choix de la persistance
+Les briques de base de \mlpost\ sont les boîtes : Un objêt de dessin, entouré
+d'un trait, visible ou non. On peut construire la boîte vide, des boîtes avec
+du \LaTeX arbitraire, etc. Ces boîtes peuvent ensuite être manipulées :
+imbrication arbitraire, placement à une position précise, alignement de
+plusieurs boîtes, tabularisation. Des boîtes peuvent aussi être groupées pour
+les déplacer ensemble.
+
+Un premier choix à faire est celui de la persistance : Quand on modifie un
+attribut (positionnement, couleur etc.), on obtient une nouvelle boîte,
+identique à la première sauf en l'attribut changé. L'ancienne boîte est elle
+encore accessible, avec ses attributs inchangés, ou bien a-t-elle été détruite
+? Nous avons fait le choix des structures de données persistantes,
+c'est-à-dire, l'ancienne boîte est préservée. Cela a l'avantage de pouvoir
+réutiliser plus facilement une boîte à plusieurs endroits différents du
+dessin, avec des attributs différents. En déplacant une boîte, on en a créé
+une nouvelle en laissant l'ancienne à sa place.
 
 Un autre principe de Mlpost consiste à placer les objets de façon
 relative plutôt qu'absolue.  Ceci permet d'obtenir des figures plus
@@ -475,17 +490,15 @@ déroule aussi les boucles dans les fichiers \postscript\ de sortie.
 \end{figure}
 
 L'architecture générale de \mlpost{} est schématisée en
-figure~\ref{fig:archi}. Au niveau le plus bas se trouvent les
-interfaces correspondant aux types primitifs de \metapost. Ce sont ces
-objets qui sont {\it in fine} traduits en du code \metapost, et nous
-les décrivons de manière plus détaillée dans la
-section~\ref{subsec:types}. La couche intermédiaire contient des
-éléments que nous estimons être de bas niveau mais qui ne sont pas
-présents dans \metapost: ils sont propres à \mlpost et ont été
-construits à partir de la couche inférieure. Les
-sections~\ref{subsec:boxes} et \ref{subsec:arrows} reviennent plus en
-détail sur deux de ces modules, respectivement \texttt{Box} et
-\texttt{Arrow}.
+figure~\ref{fig:archi}. Au niveau le plus bas se trouvent les interfaces
+correspondant aux types primitifs de \metapost. Ce sont ces objets qui sont
+{\it in fine} traduits en du code \metapost, et nous les décrivons de manière
+plus détaillée dans la section~\ref{subsec:types}. La couche intermédiaire
+contient des éléments que nous estimons être de bas niveau mais qui ne sont
+pas présents dans \metapost : ils sont propres à \mlpost\ et ont été
+construits à partir de la couche inférieure. Les sections~\ref{subsec:boxes}
+et \ref{subsec:arrows} reviennent plus en détail sur deux de ces modules,
+respectivement \texttt{Box} et \texttt{Arrow}.
 
 \subsection{Types primitifs de \metapost}\label{subsec:types}
 
