@@ -637,20 +637,27 @@ donc davantage de temps sur des calculs répétés.
 
 Nous utilisons donc la technique de {\em
 hash-consing}~\cite{ConchonFilliatre06wml} appliquée à l'arbre de syntaxe
-abstraite pour profiter au maximum du partage probable entre les
-différents objets. % TODO expliquer plus
+abstraite. Cette technique permet de partager des valeurs structurellement
+égales. Elle utilise une table de hash globale qui stocke toutes les valeurs
+déjà créées. Avant de créer un nouvel objet, on regarde dans cette table si un
+objet structurellement égal existe déjà. Pour que le calcul de la valeur de
+hash ainsi que la comparaison des objets soit efficace, chaque (sous-)terme
+vient avec sa valeur de hash. Ainsi, on n'obtient pas seulement le partage de
+tous les sous-termes communs, mais également un test d'égalité très efficace,
+utile pour toute structure de données contenant ces valeurs : il suffit de
+comparer physiquement ces objets.
 
-Ceci diminue l'utilisation de la mémoire, mais ne change rien à la
-taille des fichiers générés. La structure hash-consée {\em réalise} le
-partage, mais elle ne sait pas quels sont les n\oe uds en effet utilisés
-au moins deux fois. Pour cela, il suffit de traverser la structure une
-fois en entier, en comptant le nombre de fois qu'on a passé chaque n\oe
-ud (cette information peut-être stockée efficacement dans une table,
-à l'aide de la valeur de hash calculée pour chaque n\oe ud pour le
-hash-consing ainsi que la comparaison efficace fournie par ce dernier).
-Quand on passe un n\oe ud déjà rencontré, on ne considère pas ses
-sous-n\oe uds. Il est néanmoins possible de rencontrer une nouvelle fois
-un sous-n\oe ud d'une structure, comme le montre l'arbe ci-dessous :
+Cett technique diminue l'utilisation de la mémoire, mais ne change rien {\em a
+priori} à la taille des fichiers générés. La structure hash-consée {\em
+réalise} le partage, mais elle ne sait pas quels sont les n\oe uds en effet
+utilisés au moins deux fois. Pour cela, il suffit de traverser la structure
+une fois en entier, en comptant le nombre de fois qu'on a passé chaque n\oe ud
+(cette information peut-être stockée efficacement dans une table, à l'aide de
+la valeur de hash calculée pour chaque n\oe ud pour le hash-consing ainsi que
+la comparaison efficace fournie par ce dernier).  Quand on passe un n\oe ud
+déjà rencontré, on ne considère pas ses sous-n\oe uds. Il est néanmoins
+possible de rencontrer une nouvelle fois un sous-n\oe ud d'une structure,
+comme le montre l'arbe ci-dessous :
 
 \begin{center}
 \includegraphics[scale=1.5]{tree.mps}
@@ -660,16 +667,18 @@ Dans cette configuration, le n\oe ud $f$ est réellement utilisé deux
 fois, alors que le n\oe ud $e$ n'est utilisé qu'un seule fois, par le
 n\oe ud $d$, même si celui-ci est utilisé deux fois à son tour.
 
-Après cette analyse, la génération du fichier \metapost\ devient très
-simple : il suffit de traverser l'AST encore une fois, et quand on passe
-par un n\oe ud qui a été utilisé au moins deux fois, on lui attribue
-une variable et on ajoute une définition correspondante dans le code
-\metapost. Il faut néanmoins prendre en compte les particularités
-syntaxiques de \metapost\ telles que la précédence inhabituelle des
-opérateurs arithmétiques et la restriction de l'application de certaines
-constructions à des variables. De cette façon, on arrive à avoir du
-code \metapost\ relativement petit, malgré la délégation des calculs à
-\metapost.
+Après cette analyse, la génération du fichier \metapost\ devient très simple :
+il suffit de traverser l'AST encore une fois, et quand on passe par un n\oe ud
+qui a été utilisé au moins deux fois, on lui attribue une variable et on
+ajoute une définition correspondante dans le code \metapost. Il faut néanmoins
+prendre en compte les particularités syntaxiques de \metapost\ telles que la
+précédence inhabituelle des opérateurs arithmétiques et la restriction de
+l'application de certaines constructions à des variables. De cette façon, on
+arrive à avoir du code \metapost\ relativement petit\footnote{En l'absence de
+boucles \texttt{for} et de macros dans le code \metapost, nous avons observés,
+sans avoir fait de tests très exhaustifs, une taille du code généré similaire
+ou pas plus de deux fois plus grand que du code \metapost\ écrit à la main.
+}, malgré la délégation des calculs à \metapost.
 
 % TODO : des chiffres pour justifier "relativement petit" ?
 
