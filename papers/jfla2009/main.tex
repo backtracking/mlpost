@@ -374,6 +374,7 @@ let automate =
 Le but de cette section est de montrer qu'il est très facile d'écrire sa
 propre extension fondée sur \mlpost\ afin de réaliser ses figures.
 
+\paragraph{Représantation de la mémoire}
 % blocs mémoire (listes, etc.) -- JCF
 % introduire Box.vblock
 
@@ -467,18 +468,28 @@ let graph_sqrt =
 
 Figure~\ref{fig:etapes} montre le fonctionnement de \mlpost.  Tout d'abord,
 \mlpost\ est un outil de génération de fichier \metapost\ en forme de
-bibliothèque \ocaml. Nous espérons avoir convaincu le lecteur des avantages
-que cela apporte : familiarité avec le langage pour ceux qui connaissent
-\ocaml, typage fort, des construction de programmation de haut-niveau etc.
-Mais ce choix implique également que le fichier \metapost\ de sortie ne sera
-pas obtenu par une {\em compilation} du code source proprement dite, mais par
-une exécution du programme qui construit un arbre de syntaxe abstraite (AST).
-Cet arbre est ensuite imprimé dans un fichier et interprété par \metapost.
-Cela a l'inconvénient qu'une boucle ou itération dans le programme de départ
-sera traduite par une suite de commandes obtenues par le déroulement de la
-boucle, et non par une construction de boucle du langage cible. Ceci étant
-dit, dans notre cas, le coût supplémentaire est faible, puisque \metapost\
-déroule aussi les boucles dans les fichiers \postscript\ de sortie. 
+bibliothèque \ocaml. À l'aide de cette bibliothèque, l'utilisateur écrit, sans
+forcément le savoir, un programme qui, à l'exécution, construit un arbre de
+syntaxe abstraite \metapost. Cet arbre est imprimé dans un fichier
+\verb|figure.mp| qui est lu par \metapost\ pour générer un fichier
+\postscript\ de sortie, \verb|figure.1|\footnote{ce fichier n'a pas le suffix
+.ps puisque ce n'est pas un fichier \postscript proprement dit : il manque
+l'entête.}. Pour inclure cette figure dans un document \LaTeX, il suffit
+d'utiliser la commande \verb|\includegraphics|.
+
+
+Nous espérons avoir convaincu le lecteur des avantages que la présentation
+sous forme de bibliothèque apporte : familiarité avec le langage pour ceux qui
+connaissent \ocaml, typage fort, des construction de programmation de
+haut-niveau etc.  Mais ce choix implique également que le fichier \metapost\
+de sortie ne sera pas obtenu par une {\em compilation} du code source
+proprement dite, mais par une exécution du programme qui construit un arbre de
+syntaxe abstraite (AST). Cette méthode a l'inconvénient qu'une boucle ou
+itération dans le programme de départ sera traduite par une suite de commandes
+obtenues par le déroulement de la boucle, et non par une construction de
+boucle du langage cible. Ceci étant dit, dans notre cas, le coût
+supplémentaire est faible, puisque \metapost\ déroule aussi les boucles dans
+les fichiers \postscript\ de sortie. 
 %TODO est-ce trop détaillé / le bon endroit ?
 
 % schéma de l'architecture
