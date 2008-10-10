@@ -318,10 +318,12 @@ let stages =
   let dx = bp 5. and dy = bp 5. in
   let tex = tex ~style:RoundRect ~dx ~dy in
   let tex' = tex ~stroke:None in
-  let fml = tex ~name:"fml" "figure.ml" in
-  let fmp = tex ~name:"fmp" "figure.mp" in
-  let ps = vbox ~stroke:(Some Color.black) ~style:RoundRect ~name:"ps" ~dx ~dy
-             [tex' "figure.1"; tex' "(\\postscript)"] in
+  let box name = box ~stroke:None ~dx:(mm 2.) ~name in
+  let fml = box "fml" (tex "figure.ml") in
+  let fmp = box "fmp" (tex "figure.mp") in
+  let ps = 
+    box "ps" (vbox ~stroke:(Some Color.black) ~style:RoundRect ~dx ~dy
+             [tex' "figure.1"; tex' "(\\postscript)"]) in
   let arrowpic = pic ~stroke:None
        (Picture.make (draw_arrow (path ~scale:cm [0.,0.; 0.,-1.]))) 
   in

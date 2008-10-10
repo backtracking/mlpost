@@ -3,7 +3,7 @@ all: main-pp.pdf
 
 WWW=/users/demons/filliatr/WWW
 
-%.pdf: %.tex biblio.bib figures.mp figmp.mps
+%.pdf: %.tex biblio.bib figures.mp figmp.mps yannick1.mps 
 	pdflatex $*.tex
 	bibtex $*
 	pdflatex $*.tex
@@ -20,6 +20,9 @@ figures.mp: figures.ml
 figmp.mps: figmp.mp
 	mpost figmp.mp end
 	mv figmp.1 figmp.mps
+
+yannick1.mps: yannick1.1
+	cp $^ $@
 
 main-pp.dvi: main-pp.tex
 	latex $^
