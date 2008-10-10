@@ -565,16 +565,16 @@ and Picture : sig
   val center :  Point.t -> t -> t
     (** Place a picture centered at some point *)
 
-  val place_up_left : t -> Point.t -> t
+  val place_up_left : Point.t -> t -> t
     (** Place a picture with its upper left corner at some point *)
 
-  val place_up_right : t -> Point.t -> t
+  val place_up_right : Point.t -> t -> t
     (** Place a picture with its upper right corner at some point *)
 
-  val place_bot_left : t -> Point.t -> t
+  val place_bot_left : Point.t -> t -> t
     (** Place a picture with its bottom left corner at some point *)
 
-  val place_bot_right : t -> Point.t -> t
+  val place_bot_right : Point.t -> t -> t
     (** Place a picture with its bottom right corner at some point *)
 
   val beside : t -> t -> t

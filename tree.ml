@@ -70,54 +70,26 @@ let arc astyle estyle ?stroke ?pen b1 b2 =
 
 module T = Pos.Tree(Box)
 
-let my_fold_left f x a =
-  (* iterate starting from index 1 *)
-  let r = ref x in
-  for i = 1 to Array.length a - 1 do
-    r := f !r (Array.unsafe_get a i)
-  done;
-  !r
+let is_leaf x = Array.length (Box.elts x ) = 1
+let root x = 
+  (* if this access is invalid, the box has not been created using 
+   * [leaf], [node] or [bin] *)
+  Box.nth 0 x
 
-let arc_wrap ?stroke ?pen arrow_style edge_style b1 b2 =
-  let arc x = arc ?stroke ?pen arrow_style edge_style b1 x in
-  let a = Box.elts b2 in
-  match Array.length a with
-  | 0 -> arc b2
-  | _ -> arc a.(0)
-
-(*
-let draw 
-    ?(arrow_style=Directed) ?(edge_style=Straight)
-    ?stroke ?pen ?debug  t =
-  let rec draw t =
-    let a = Box.elts t in
-    match Array.length a with
-    | 0 -> nop
-    | 1 -> Box.draw ?debug a.(0)
-    | _ -> 
-        seq 
-        [Box.draw ?debug a.(0) ; 
-         seq (my_fold_left (fun acc x -> draw x :: acc) [] a);
-         seq (my_fold_left 
-           (fun acc x -> 
-             (arc_wrap ?stroke ?pen arrow_style edge_style a.(0) x) :: acc) 
-           [] a) 
-        ]
-  in
-  draw t
-
-*)
+let children x = 
+  if is_leaf x then []
+  else Box.elts_list (Box.nth 1 x)
 
 let leaf s = Box.group [s]
 let node ?(ls=Num.bp 12.) ?(cs=Num.bp 5.) ?(arrow_style=Directed)
          ?(edge_style=Straight) ?stroke ?pen s l = 
   let l = Box.hbox ~padding:cs ~pos:`Top l in 
-  let n = Box.vbox ~padding:ls [s;l] in
-  let s = Box.nth 0 n in
-  let l = Box.elts_list (Box.nth 1 n) in
+  let tree = Box.vbox ~padding:ls [s;l] in
   Box.set_draw 
-    (Command.iterl (arc_wrap ?stroke ?pen arrow_style edge_style s) l) 
-    (Box.group (s::l))
+    (Command.iterl 
+      (fun child -> arc ?stroke ?pen arrow_style edge_style 
+                 (root tree) (root child)) (children tree)
+    ) tree
 
 let bin ?ls ?cs ?arrow_style ?edge_style ?stroke ?pen s x y = 
   node ?ls ?cs ?arrow_style ?edge_style ?stroke ?pen s [x;y]
