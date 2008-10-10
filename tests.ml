@@ -93,7 +93,7 @@ let rec random_tree ?arrow_style ?edge_style ?stroke ?pen n =
   | 1 -> leaf (tex "1")
   | 2 -> 
       node ?arrow_style ?edge_style 
-        (Box.tex ~style:Box.Rect ~fill:(Color.rgb 0.5 0.3 0.2) "2") 
+        (Box.tex ~style:Box.rect_ ~fill:(Color.rgb 0.5 0.3 0.2) "2") 
         [leaf (tex "1")]
   | n -> 
       let k = 1 + Random.int (n - 2) in
@@ -119,7 +119,7 @@ let d5 =
   let t2 = rand_tree "2" 6 in
   let bl = Box.hbox ~padding:(Num.cm 2.) [ box t1; box t2] in
   let b1 = nth 0 (get "1" bl) in
-  let b2 = nth 0 (nth 1 (get "2" bl)) in
+  let b2 = nth 0 (nth 0 (nth 1 (get "2" bl))) in
   [ draw bl; box_arrow b1 b2; ]
 
 
@@ -305,23 +305,23 @@ let florence =
   ]
 
 let shapes1 =
+(*
   List.fold_left Picture.below
     (Picture.tex "Shapes 1 !")
-    [Shapes.rectangle (bp 10.) (bp 20.);
-     Shapes.rectangle ~stroke:Color.purple ~thickness:4. (bp 35.) (bp 15.);
-     Shapes.rectangle 
-       ~fill:Color.blue ~stroke:Color.orange ~thickness:4. (bp 15.) (bp 35.);
-     Shapes.rounded_rect (bp 55.) (bp 25.) (bp 10.) (bp 10.);
-     Shapes.rounded_rect ~stroke:Color.green (bp 55.) (bp 25.) (bp 20.) (bp 5.);
-(*      Shapes.rounded_rect ~fill:Color.black ~stroke:Color.red  *)
-(*        ~thickness:2. 70. 25. 12.5 12.5; *)
-     Shapes.rounded_rect ~fill:Color.black ~stroke:Color.red 
-       ~thickness:2. (bp 70.) (bp 25.) (bp 14.) (bp 14.);
+*)
+    [Command.draw (Shapes.rectangle (bp 10.) (bp 20.));
+     Command.draw (Shapes.rectangle (bp 35.) (bp 15.));
+     Command.draw (Shapes.rectangle (bp 15.) (bp 35.));
+     Command.draw (Shapes.round_rect (bp 55.) (bp 25.) (bp 10.) (bp 10.));
+     Command.draw (Shapes.round_rect (bp 55.) (bp 25.) (bp 20.) (bp 5.));
+     Command.draw (Shapes.round_rect (bp 70.) (bp 25.) (bp 14.) (bp 14.));
     ]
   
 let shapes2 =
+(*
   List.fold_left Picture.below
     (Picture.tex "Shapes 2 !")
+*)
     [
 (*
       Shapes.arc_ellipse (f 10.) (f 10.) 0. 1.7;
@@ -330,17 +330,16 @@ let shapes2 =
       Shapes.arc_ellipse 
 	~fill:Color.black ~stroke:Color.red (f 30.) (f 10.) 0. 1.7;
 *)
-      Shapes.ellipse (bp 10.) (bp 10.);
-      Shapes.ellipse ~stroke:Color.red (bp 30.) (bp 10.);
-      Shapes.ellipse ~fill:Color.black ~stroke:Color.red (bp 30.) (bp 10.);
+      Command.draw (Shapes.ellipse (bp 10.) (bp 10.));
+      Command.draw (Shapes.ellipse (bp 30.) (bp 10.));
+      Command.draw 
+        (Shapes.ellipse (bp 30.) (bp 10.));
     ]
 
 let figs = [
-  d6; d5; yannick Box.Rect; yannick Box.Patatoid; d1; d2; proval;
+  d6; d5; yannick Box.rect_; yannick Box.patatoid_; d1; d2; proval;
               d2sq; d2hsq; d2s; d2c; d12; cheno011; d3; d4;
-             d7; d11; florence;
-            [Command.draw_pic shapes1]; [Command.draw_pic shapes2];
-             d14; d13;
+             d7; d11; florence; shapes1;  shapes2; d14; d13;
 ] 
 
 let figs =

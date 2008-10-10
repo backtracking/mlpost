@@ -387,6 +387,7 @@ let escher =
 			 List.map (fun p -> Command.draw ~pen:pen1 (tr p)) 
 			 [line6; line7; line8] ) ) ) ]
 
+(*
 (*parse >> <<lattice *)
 
 (* type of Box lattice *)
@@ -399,8 +400,6 @@ type lattice = node list list (* nodes lines, from top to bottom *)
 let dx = bp 12.
 let dy = bp 12.
 
-module Ab = Pos.List_(Box)
-module Abl = Pos.List_(Ab)
 module H = Hashtbl.Make(struct 
   type t = Box.t let hash b = Hashtbl.hash b let equal = (==) 
 end)
@@ -408,8 +407,8 @@ end)
 let nodes = H.create 97
 
 let draw la =
-  let line l = Ab.horizontal ~padding:dx (List.map (function (N (b,_)) -> b) l) in
-  let la' = Abl.v (Abl.vertical ~padding:dy (List.map line la)) in
+  let line l = Box.hbox ~padding:dx (List.map (function (N (b,_)) -> b) l) in
+  let la' = Box.vbox ~padding:dy (List.map line la) in
   List.iter2
     (List.iter2 (fun (N (b, _)) b' -> H.add nodes b b'))
     la la';
@@ -467,6 +466,7 @@ let subwords s =
 let lattice =
   [draw (subwords "abcd")]
 
+*)
 (*parse >> <<other208 *)
 
 type t = One | Two | Three | Four
@@ -617,7 +617,7 @@ let _ =
     "diag2", diag2;
     "drums", drums;
     "escher", escher;
-    "lattice", lattice;
+(*     "lattice", lattice; *)
     "other208", other208;
     "proval", proval;
     "randtree", randtree;

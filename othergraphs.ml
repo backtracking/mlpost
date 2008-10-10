@@ -174,9 +174,9 @@ let d195 =
 
 let d267 = 
   let rose = Color.rgb 1. 0.5 0.5 in
-  let a = Box.tex ~fill:rose ~style:Box.RoundRect "D\\'ebut" in
+  let a = Box.tex ~fill:rose ~style:round_rect_ "D\\'ebut" in
   let b = Box.shift (cmp (2., 0.)) 
-    (Box.tex ~fill:rose ~style:Box.RoundRect "Fin") in
+    (Box.tex ~fill:rose ~style:round_rect_ "Fin") in
   let path angle a b =
     cut_after (bpath b) 
       (cut_before (bpath a) 

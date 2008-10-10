@@ -11,8 +11,8 @@ let tree1 =
 		   node "3" [leaf "6"; leaf "7"]])]
 (*parse >> <<tree2 *)
 let tree2 =
-  let leaf s = leaf  (tex ~style:Rect s) in
-  let node s = node ~arrow_style:Undirected (tex ~style:Rect s) in
+  let leaf s = leaf  (tex ~style:rect_ s) in
+  let node s = node ~arrow_style:Undirected (tex ~style:rect_ s) in
   [draw 
      (node "1" [node "2" [leaf "4"; leaf "5"]; 
 		node "3" [leaf "6"; leaf "7"]])]

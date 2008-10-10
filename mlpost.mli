@@ -693,42 +693,19 @@ module rec Shapes : sig
 
 (** Various Basic Geometric Shapes *)
 
-  type t
-  val bpath : t -> Path.t
-
-  val rounded_rect_path : Num.t -> Num.t -> Num.t -> Num.t -> t
-
-  val rounded_rect : 
-    ?fill:Color.t -> ?stroke:Color.t -> ?thickness:float ->
-    Num.t -> Num.t -> Num.t -> Num.t -> Picture.t
-    (** [rounded_rect w h rx ry] draws a rectangle of width [w] and
+  val round_rect : Num.t -> Num.t -> Num.t -> Num.t -> Path.t
+    (** [round_rect w h rx ry] returns a rectangle of width [w] and
 	height [h] with rounded corners. The rounded corners are arcs
 	of an ellipse of radii [rx] and [ry]. [rx] (resp. [ry]) should
 	be positive and smaller than [w/2] (resp. [h/2]).
-	@param fill the color with which to fill the rectangle ;
-	  if no color is provided, the rectangle is not filled.
-	@param stroke the color with which the rectangle's outline
-	  shall be drawn ; default is black.
-	@param thickness the thickness of the pen used to draw
-	  the outline ; 1. is default
     *)
       
-  val rectangle :
-    ?fill:Color.t -> ?stroke:Color.t -> ?thickness:float ->
-    Num.t -> Num.t -> Picture.t
-    (** [rectangle w h] draws a rectangle of width [w] and height [h].
-	@param fill the color with which to fill the rectangle ;
-	  if no color is provided, the rectangle is not filled.
-	@param stroke the color with which the rectangle's outline
-	  shall be drawn ; default is black.
-	@param thickness the thickness of the pen used to draw
-	  the outline ; 1. is default
+  val rectangle : Num.t -> Num.t -> Path.t
+    (** [rectangle w h] returns a rectangle of width [w] and height [h].
     *)
 
-  val ellipse :
-    ?fill:Color.t -> ?stroke:Color.t -> ?thickness:float ->
-    Num.t -> Num.t -> Picture.t
-    (** [ellipse rx ry] draws an ellipse of great axis [rx] and small axis [ry].
+  val ellipse : Num.t -> Num.t -> Path.t
+    (** [ellipse rx ry] returns an ellipse of great axis [rx] and small axis [ry].
 	The ellipse is centered on the origin and aligned with the x axis.
 	@param fill the color with which to fill the ellipse ; if no color
 	  is provided, it is not filled.
@@ -738,11 +715,12 @@ module rec Shapes : sig
 	  the outline ; 1. is default
     *)
 
+  val circle : Num.t -> Path.t
+  val patatoid : Num.t -> Num.t -> Path.t
 (*
   val arc_ellipse :
     ?fill:Color.t -> ?stroke:Color.t -> ?thickness:float -> ?close:bool ->
     Num.t -> Num.t -> float -> float -> Picture.t
-*)
     (** [arc_ellipse rx ry th1 th2] draws an arc of the ellipse 
 	of great axis [rx] and small axis [ry] starting at angle [th1] and
 	ending at angle [th2] (in radians).
@@ -758,12 +736,7 @@ module rec Shapes : sig
 	then [close] will be true by default ; otherwise it is false.
     *)
 
-  val ctr : t -> Point.t
-  val height : t -> Num.t
-  val width : t -> Num.t
-  val shift : Point.t -> t -> t
-  val center : Point.t -> t -> t
-
+*)
 end
 
 and Box : sig
@@ -778,7 +751,14 @@ and Box : sig
   val empty : ?width:Num.t -> ?height:Num.t -> unit -> t
     (** the empty box *)
 
-  type style = Rect | Circle | Ellipse | RoundRect | Patatoid
+  (** {2 Styles } *)
+  type style = Num.t -> Num.t -> Path.t
+
+  val rect_ : style
+  val circ_ : style
+  val ellipse_ : style
+  val round_rect_ : style
+  val patatoid_ : style
 
   type 'a box_creator = 
     ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 

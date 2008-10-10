@@ -22,7 +22,7 @@ let f1 =
 
 (*parse >> <<f2 *)
 let f2 =
-  let tex = tex ~style:Circle in
+  let tex = tex ~style:circ_ in
   let b = vbox [tex "a"; hbox [tex ~name:"b" "b"; tex "c"]] in
   let f = hbox ~padding:(bp 20.) [b;b;b] in
   let arrow = box_arrow ~outd:(vec (dir (-60.))) in
@@ -36,9 +36,9 @@ let traffic =
   let two = Num.bp 2. in
   let b = 
     vbox ~fill:black ~padding:(Num.bp 3.) ~dx:two ~dy:two
-      [ tex ~style:Circle ~fill:red "R";
-        tex ~style:Circle ~fill:yellow "Y";
-        tex ~style:Circle ~fill:green "G"; ]
+      [ tex ~style:circ_ ~fill:red "R";
+        tex ~style:circ_ ~fill:yellow "Y";
+        tex ~style:circ_ ~fill:green "G"; ]
   in
   [ draw b]
 
@@ -50,14 +50,14 @@ let hierarchy =
   let tex = tex ~dx:two ~dy:two in
   let tex' s = clear_stroke (tex s) in
   let vbox = vbox ~padding:(Num.bp 3.) ~stroke:(Some black) 
-                  ~style:RoundRect ~dy:five ~dx:five
+                  ~style:round_rect_ ~dy:five ~dx:five
   in
   let b = 
     vbox [ tex' "set of all languages";
       vbox [ tex' "recursively enumerable languages";
         vbox [ tex' "decidable languages";
           vbox [ tex' "context sensitive";
-            vbox [tex' "context free"; tex ~style:RoundRect "regular" ]
+            vbox [tex' "context free"; tex ~style:round_rect_ "regular" ]
     ] ] ] ]
   in
   [ draw b]

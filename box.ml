@@ -20,6 +20,8 @@ open Point
 
 open Num.Infix
 
+type style = Num.t -> Num.t -> Path.t
+
 let margin = Num.bp 2.
 
 module Smap = Map.Make(String)
@@ -32,7 +34,7 @@ type t = {
   stroke : Color.t option;
   pen : Pen.t option;
   fill : Color.t option;
-  contour : Shapes.t; 
+  contour : Path.t; 
   desc : desc;
   post_draw : Picture.t
 }
@@ -49,7 +51,7 @@ let ctr b = b.ctr
 let rec shift pt b = 
   { b with 
     ctr = Point.shift pt b.ctr; 
-    contour = Shapes.shift pt b.contour;
+    contour = Path.shift pt b.contour;
     desc = shift_desc pt b.desc;
     post_draw = Picture.shift pt b.post_draw}
     
@@ -60,13 +62,14 @@ and shift_desc pt = function
 
 let center pt x = shift (Point.sub pt x.ctr) x
 
-let bshape b = b.contour
-let bpath b = Shapes.bpath b.contour
+let bpath b = b.contour
 
-let north x = Shapes.north (bshape x)
-let south x = Shapes.south (bshape x)
-let west  x = Shapes.west (bshape x)
-let east  x = Shapes.east (bshape x)
+let halfheight b = Point.pt (zero, b.height /./ 2.)
+let halfwidth b = Point.pt (b.width /./ 2., zero)
+let north b = Point.add b.ctr (halfheight b)
+let south b = Point.sub b.ctr (halfheight b)
+let east b = Point.add b.ctr (halfwidth b)
+let west b = Point.sub b.ctr (halfwidth b)
 
 let build_point a b = Point.pt (xpart a, ypart b)
 let north_west x = build_point (west x) (north x)
@@ -75,15 +78,14 @@ let south_west x = build_point (west x) (south x)
 let south_east x = build_point (east x) (south x)
 
 let rec draw ?(debug=false) b = 
-  let bpath = Shapes.bpath b.contour in
   let path_cmd = match b.stroke, b.pen with
     | None, _ -> Command.nop
-    | Some color, None -> Command.draw ~color bpath 
-    | Some color, Some pen -> Command.draw ~pen ~color bpath
+    | Some color, None -> Command.draw ~color b.contour
+    | Some color, Some pen -> Command.draw ~pen ~color b.contour
   in
   let fill_cmd = match b.fill with
     | None -> Command.nop
-    | Some color -> Command.fill ~color bpath
+    | Some color -> Command.fill ~color b.contour
   in
   let contents_cmd = match b.desc with
     | Emp ->
@@ -96,7 +98,7 @@ let rec draw ?(debug=false) b =
   let debug_cmd = 
     if debug then 
       Command.seq 
-	[Command.draw ~color:Color.red ~dashed:Dash.evenly bpath;
+	[Command.draw ~color:Color.red ~dashed:Dash.evenly b.contour;
 	 match b.name with
 	   | None -> Command.draw ~color:Color.red (Path.pathp [b.ctr])
 	   | Some n -> 
@@ -108,50 +110,44 @@ let rec draw ?(debug=false) b =
   Command.seq [fill_cmd; contents_cmd; path_cmd; debug_cmd; 
                Command.draw_pic b.post_draw]
 
-type style = 
-  | Rect | Circle | Ellipse | RoundRect | Patatoid
-
-let rect ?(dx=margin) ?(dy=margin) w h c = 
+(*
+let rect ?dx (dy=margin) w h c = 
   let w = w +/ 2. *./ dx in  let h = h +/ 2. *./ dy in
-  let s = Shapes.shift c (Shapes.rectangle_path w h) in
+  let s = Path.shift c (Shapes.rectangle w h) in
   w, h, s
 
 let circle ?(dx=margin) ?(dy=margin) w h c =
   let d = Point.length (add (pt (w, h)) (pt (dx, dy))) in
-  let s = Shapes.shift c (Shapes.circle d) in
+  let s = Path.shift c (Shapes.circle d) in
   d, d, s
 
 let ellipse ?(dx=margin) ?(dy=margin) w h c =
   let rx = w /./ 2. +/ dx in
   let ry = h /./ 2. +/ dy in
-  let s = Shapes.shift c (Shapes.full_ellipse_path rx ry) in
-    s.Shapes.wt, s.Shapes.ht, s
+  let s = Path.shift c (Shapes.ellipse rx ry) in
+    w +/ 2. *./ dx, h +/ 2. *./ dy, s
 
 let round_rect_gen ?(dx=margin) ?(dy=margin) ?(rx=margin) ?(ry=margin) wt ht c =
-  Shapes.shift c (Shapes.rounded_rect_path wt ht rx ry)
+  Path.shift c (Shapes.round_rect wt ht rx ry)
 
 let round_rect ?(dx=margin) ?(dy=margin) w h c =
-  let wt = w +/ 2. *./ dx in
-  let ht = h +/ 2. *./ dy in
+  let wt = w +/ 2. *./ dx and ht = h +/ 2. *./ dy in
   let rx = (minn wt ht) /./ 10. in
     wt, ht, round_rect_gen ~dx ~dy ~rx ~ry:rx wt ht c
 
 let patatoid ?(dx=2. *./ margin) ?(dy=2. *./ margin) w h c =
-  let path = Shapes.patatoid (w +/ 2. *./ dx) (h +/ 2. *./ dy) in
-  let s = Shapes.shift c path in
-  s.Shapes.wt, s.Shapes.ht, s
+  let w = w +/ 2. *./ dx and h = h +/ 2. *./ dy in
+  let path = Shapes.patatoid w h in
+  let s = Path.shift c path in
+  w, h, s
+*)
 
-let make_contour style ?dx ?dy w h c =
-  let f = match style with
-    | Rect -> rect 
-    | Circle -> circle
-    | Ellipse -> ellipse
-    | RoundRect -> round_rect
-    | Patatoid -> patatoid
-  in
-  f ?dx ?dy w h c
+let make_contour f ?(dx=margin) ?(dy=margin) w h c =
+  let w =  w +/ 2. *./ dx and h = h +/ 2. *./ dy in
+  w, h, Path.shift c (f w h)
 
-let pic ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black) ?pen ?fill pic =
+let pic ?(style=Shapes.rectangle) ?dx ?dy ?name ?(stroke=Some Color.black) 
+        ?pen ?fill pic =
   let c = Picture.ctr pic in
   let w,h,s = 
     make_contour style ?dx ?dy (Picture.width pic) (Picture.height pic) c 
@@ -212,7 +208,7 @@ let vertical ?(padding=Num.zero) ?(pos=`Center) pl =
   let mycenter = Point.pt (wmax_2, y /./ 2.) in
   l, wmax, Num.neg y, mycenter
 
-let align_boxes f ?padding ?pos ?(style=Rect) 
+let align_boxes f ?padding ?pos ?(style=Shapes.rectangle) 
   ?(dx=Num.zero) ?(dy=Num.zero) ?name ?(stroke=None) ?pen ?fill bl =
   let bl, w, h , c = f ?padding ?pos bl in
   let w,h,s = make_contour style ~dx ~dy w h c in
@@ -225,13 +221,13 @@ let hbox ?padding ?pos = align_boxes horizontal ?padding ?pos
 let vbox ?padding ?pos = align_boxes vertical ?padding ?pos
 
 let box 
-  ?(style=Rect) ?(dx=margin) ?(dy=margin) ?name 
+  ?(style=Shapes.rectangle) ?(dx=margin) ?(dy=margin) ?name 
   ?(stroke=Some Color.black) ?pen ?fill b =
   hbox ~style ~dx ~dy ?name ~stroke ?pen ?fill [b]
 
 (* groups the given boxes in a new box *)
 let group 
-  ?name ?(stroke=None) ?pen ?fill ?(style=Rect) 
+  ?name ?(stroke=None) ?pen ?fill ?(style=Shapes.rectangle) 
   ?(dx=Num.zero) ?(dy=Num.zero) bl =
   let xmin,xmax,ymin,ymax = 
     List.fold_left 
@@ -263,14 +259,14 @@ let group_rect ?name w h c bl =
   { desc = Grp (Array.of_list bl, merge_maps bl);
     name = name; stroke = None; pen = None; fill = None;
     width = w; height = h; ctr = c; 
-    contour = Shapes.center c (Shapes.rectangle_path w h);
+    contour = Path.shift c (Shapes.rectangle w h);
     post_draw = Picture.empty }
 
 let empty ?(width=Num.zero) ?(height=Num.zero) () =
   { desc = Emp; name = None; 
     stroke = None; pen = None; fill = None;
     width = width; height = height; ctr = Point.origin;
-    contour = Shapes.rectangle_path width height ;
+    contour = Shapes.rectangle width height ;
     post_draw = Picture.empty
   }
 
@@ -278,11 +274,19 @@ type 'a box_creator =
   ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 
   ?stroke:Color.t option -> ?pen:Pen.t -> ?fill:Color.t -> 'a -> t
 
-let rect = pic ~style:Rect
-let circle = pic ~style:Circle
-let ellipse = pic ~style:Ellipse
-let round_rect = pic ~style:RoundRect
-let patatoid = pic ~style:Patatoid
+let rect_ = Shapes.rectangle
+let circ_ w h = Shapes.circle (maxn w h)
+let ellipse_ = Shapes.ellipse
+let round_rect_ w h = 
+  let rx = (minn w h) /./ 10. in
+  Shapes.round_rect w h rx rx
+let patatoid_ = Shapes.patatoid
+
+let rect = pic ~style:rect_
+let circle = pic ~style:circ_
+let ellipse = pic ~style:ellipse_
+let round_rect = pic ~style:round_rect_
+let patatoid = pic ~style:patatoid_
 
 let tex ?style ?dx ?dy ?name ?stroke ?pen ?fill s = 
   pic ?style ?dx ?dy ?name ?stroke ?pen ?fill (Picture.tex s)

@@ -16,6 +16,7 @@
 
 module S = Point
 include PrimPath
+open Types
 
 let knotp ?(l=defaultdir) ?(r=defaultdir) p = Types.mkKnot l p r 
 

@@ -37,9 +37,9 @@ let graph_sqrt =
 
 let architecture =
   let mk_box fill name m = 
-    Box.tex ~style:RoundRect ~dx:(bp 5.) ~dy:(bp 5.) ~name ~fill m in
+    Box.tex ~style:round_rect_ ~dx:(bp 5.) ~dy:(bp 5.) ~name ~fill m in
   let mk_unbox name m = 
-    Box.tex ~style:RoundRect ~stroke:None ~dx:(bp 5.) ~dy:(bp 5.) ~name m in
+    Box.tex ~style:round_rect_ ~stroke:None ~dx:(bp 5.) ~dy:(bp 5.) ~name m in
     (* les types de base *)
   let fill = Color.color "salmon" in 
   let num = mk_box fill "num" "Num" in
@@ -52,13 +52,13 @@ let architecture =
   let compile = mk_unbox "compile" "Compile" in
   let compile_ext = 
     let dx = (Box.width basictypes -/ Box.width compile) /./ 2. in
-    Box.hbox ~style:RoundRect ~dx ~fill ~stroke:(Some Color.black) [compile] in
+    Box.hbox ~style:round_rect_ ~dx ~fill ~stroke:(Some Color.black) [compile] in
     (* metapost *)
   let metapost = mk_unbox "metapost" "\\metapost" in
   let metapost_ext =
     let dx = (Box.width basictypes -/ Box.width metapost) /./ 2. in
       Box.hbox ~name:"mpost_ext" 
-	~style:Rect ~dx ~stroke:(Some Color.black) [metapost] in
+	~style:rect_ ~dx ~stroke:(Some Color.black) [metapost] in
     (* composants avancés *)
   let fill = Color.color "pink" in 
   let box_ = mk_box fill "box" "Box" in
@@ -75,7 +75,7 @@ let architecture =
   let pyramid = 
     let pen = Pen.scale (Num.bp 1.0) (Pen.square ()) in
     Box.vbox ~padding:(mm 2.) ~pen
-      ~dx:(bp 5.) ~dy:(bp 5.) ~style:RoundRect ~stroke:(Some Color.black)
+      ~dx:(bp 5.) ~dy:(bp 5.) ~style:round_rect_ ~stroke:(Some Color.black)
       [extensions; advanced; basictypes; compile_ext; metapost_ext] in
   let mlpost = mk_unbox "mlpost" "Mlpost" in
   let mlpost_ext = 
@@ -103,8 +103,8 @@ let architecture =
 module Arrow = ExtArrow
 
 open Num
-let state = Box.tex ~style:Circle 
-let final = Box.box ~style:Circle ~dx:zero ~dy:zero 
+let state = Box.tex ~style:circ_ 
+let final = Box.box ~style:circ_ ~dx:zero ~dy:zero 
 
 let transition states tex pos ?outd ?ind x_name y_name = 
   let x = Box.get x_name states and y = Box.get y_name states in
@@ -282,14 +282,14 @@ let hierarchy =
   let tex = tex ~dx:two ~dy:two in
   let tex' = tex ~stroke:None in
   let vbox = vbox ~padding:(Num.bp 3.) ~stroke:(Some Color.black) 
-                  ~style:RoundRect ~dy:five ~dx:five
+                  ~style:round_rect_ ~dy:five ~dx:five
   in
   let b = 
     vbox [ tex' "set of all languages";
       vbox [ tex' "recursively enumerable languages";
         vbox [ tex' "decidable languages";
           vbox [ tex' "context sensitive";
-            vbox [tex' "context free"; tex ~style:RoundRect "regular" ]
+            vbox [tex' "context free"; tex ~style:round_rect_ "regular" ]
     ] ] ] ]
   in
   [ draw b]
@@ -297,7 +297,7 @@ let hierarchy =
 
 open Tree
 let sharing = 
-  let tex s = tex ~name:s ~style:Circle ~dx:two ~dy:two s in
+  let tex s = tex ~name:s ~style:circ_ ~dx:two ~dy:two s in
   let tree = 
     bin (tex "a")
       (bin (tex "b")
@@ -316,13 +316,13 @@ let sharing =
 
 let stages = 
   let dx = bp 5. and dy = bp 5. in
-  let tex = tex ~style:RoundRect ~dx ~dy in
+  let tex = tex ~style:round_rect_ ~dx ~dy in
   let tex' = tex ~stroke:None in
   let box name = box ~stroke:None ~dx:(mm 2.) ~name in
   let fml = box "fml" (tex "figure.ml") in
   let fmp = box "fmp" (tex "figure.mp") in
   let ps = 
-    box "ps" (vbox ~stroke:(Some Color.black) ~style:RoundRect ~dx ~dy
+    box "ps" (vbox ~stroke:(Some Color.black) ~style:round_rect_ ~dx ~dy
              [tex' "figure.1"; tex' "(\\postscript)"]) in
   let arrowpic = pic ~stroke:None
        (Picture.make (draw_arrow (path ~scale:cm [0.,0.; 0.,-1.]))) 

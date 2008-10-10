@@ -11,8 +11,8 @@ PATHOUTFILES := $(PATHPNGFILES:.png=.1)
 
 # all files that are generated from misc.ml
 MISCPNGFILES := bresenham.png cfg.png chess.png diag1.png diag2.png\
-		drums.png escher.png lattice.png other208.png proval.png\
-		randtree.png rubik.png test.png
+		drums.png escher.png other208.png proval.png\
+		randtree.png rubik.png test.png #lattice.png
 MISCOUTFILES := $(MISCPNGFILES:.png=.1)
 
 # all files that are generated from tree.ml
@@ -25,7 +25,7 @@ LABELOUTFILES := $(LABELPNGFILES:.png=.1)
 
 HTMLFILES := boxes.ml.html paths.ml.html misc.ml.html tree.ml.html label.ml.html
 
-all: $(BOXPNGFILES) $(PATHPNGFILES) $(MISCPNGFILES) $(TREEPNGFILES) $(LABELPNGFILES) $(HTMLFILES)
+all: $(HTMLFILES) $(BOXPNGFILES) $(PATHPNGFILES) $(MISCPNGFILES) $(TREEPNGFILES) $(LABELPNGFILES) 
 
 %.ml.html : %.ml parse
 	caml2html -hc -ext "parse:./parse" $*.ml
