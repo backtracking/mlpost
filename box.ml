@@ -24,51 +24,45 @@ let margin = Num.bp 2.
 
 module Smap = Map.Make(String)
 
-module B = struct
+type t = {
+  name : string option;
+  width : Num.t;
+  height : Num.t;
+  ctr : Point.t;
+  stroke : Color.t option;
+  pen : Pen.t option;
+  fill : Color.t option;
+  contour : Shapes.t; 
+  desc : desc;
+  post_draw : Picture.t
+}
+    
+and desc = 
+  | Emp
+  | Pic of Picture.t
+  | Grp of t array * t Smap.t
 
-  type t = {
-    name : string option;
-    width : Num.t;
-    height : Num.t;
-    ctr : Point.t;
-    stroke : Color.t option;
-    pen : Pen.t option;
-    fill : Color.t option;
-    contour : Shapes.t; 
-    desc : desc;
-    post_draw : Picture.t
-  }
-      
-  and desc = 
-    | Emp
-    | Pic of Picture.t
-    | Grp of t array * t Smap.t
+type repr = t
 
-  type repr = t
+let v b = b
 
-  let v b = b
+let width b = b.width
+let height b = b.height
+let ctr b = b.ctr
 
-  let width b = b.width
-  let height b = b.height
-  let ctr b = b.ctr
+let rec shift pt b = 
+  { b with 
+    ctr = Point.shift pt b.ctr; 
+    contour = Shapes.shift pt b.contour;
+    desc = shift_desc pt b.desc;
+    post_draw = Picture.shift pt b.post_draw}
+    
+and shift_desc pt = function
+  | Emp -> Emp
+  | Pic pic -> Pic (Picture.shift pt pic)
+  | Grp (a, m) -> Grp (Array.map (shift pt) a, Smap.map (shift pt) m)
 
-  let rec shift pt b = 
-    { b with 
-      ctr = Point.shift pt b.ctr; 
-      contour = Shapes.shift pt b.contour;
-      desc = shift_desc pt b.desc;
-      post_draw = Picture.shift pt b.post_draw}
-      
-  and shift_desc pt = function
-    | Emp -> Emp
-    | Pic pic -> Pic (Picture.shift pt pic)
-    | Grp (a, m) -> Grp (Array.map (shift pt) a, Smap.map (shift pt) m)
-
-  let center pt x = shift (Point.sub pt x.ctr) x
-  
-end
-
-include B
+let center pt x = shift (Point.sub pt x.ctr) x
 
 let bshape b = b.contour
 let bpath b = Shapes.bpath b.contour
@@ -182,19 +176,19 @@ let merge_maps =
   List.fold_left add_one Smap.empty
 
 let horizontal ?(padding=Num.zero) ?(pos=`Center) pl =
-  let hmax = Num.fold_max B.height Num.zero pl in
+  let hmax = Num.fold_max height Num.zero pl in
   let hmax_2 = hmax /./ 2. in
   let rec make_new acc x = function
     | [] -> List.rev acc, x -/ padding
     | p :: pl ->
-        let wp,hp = B.width p, B.height p in
+        let wp,hp = width p, height p in
         let y = match pos with
           | `Center -> hmax_2
           | `Top -> hmax -/ hp /./ 2.
           | `Bot -> hp /./ 2.
         in
         let c = Point.pt (x +/ wp /./ 2., y) in 
-        let b = B.center c p in
+        let b = center c p in
         make_new (b::acc) (x +/ wp +/ padding) pl
   in
   let l,x = make_new [] Num.zero pl in
@@ -202,12 +196,12 @@ let horizontal ?(padding=Num.zero) ?(pos=`Center) pl =
   l, x, hmax, mycenter
 
 let vertical ?(padding=Num.zero) ?(pos=`Center) pl =
-  let wmax = Num.fold_max B.width Num.zero pl in
+  let wmax = Num.fold_max width Num.zero pl in
   let wmax_2 = wmax /./ 2. in
   let rec make_new acc y = function
     | [] -> List.rev acc, y +/ padding
     | p :: pl ->
-        let wp,hp = B.width p, B.height p in
+        let wp,hp = width p, height p in
         let x = 
           match pos with
             | `Center -> wmax_2
@@ -215,7 +209,7 @@ let vertical ?(padding=Num.zero) ?(pos=`Center) pl =
             | `Left ->  wp /./ 2.
         in
         let c = Point.pt (x, y -/ hp /./ 2.) in 
-        let b = B.center c p in
+        let b = center c p in
           make_new (b::acc) (y -/ hp -/ padding) pl
   in
   let l,y = make_new [] Num.zero pl in
