@@ -371,10 +371,11 @@ let automate =
 
 \subsection{Diagrammes}
 
-Le but de cette section est de montrer qu'il est très facile d'écrire sa
-propre extension fondée sur \mlpost\ afin de réaliser ses figures.
+Le but de cette section est de montrer l'importance d'une possibilité de
+placement relatif . Nous décrivons plusieurs exemples de mini-bibliothèques
+qui exploitent cette possibilité.
 
-\paragraph{Représantation de la mémoire}
+\paragraph{Représentation de la mémoire}
 % blocs mémoire (listes, etc.) -- JCF
 % introduire Box.vblock
 
@@ -553,7 +554,7 @@ comporte donc tous les types de base de \metapost :
 
 \end{description}
 Les autres types \metapost\ (chaînes de caractères, booléens, couleurs)
-sont facilement représentés en \ocaml. L'interface de \mlpost contient
+sont facilement représentés en \ocaml. L'interface de \mlpost\ contient
 aussi un module \texttt{Command} qui définit le type des commandes
 \metapost : commandes de dessin, de remplissage, itération et séquences
 etc.
@@ -604,6 +605,7 @@ module rec Num : sig
 end
 and Point : sig
   type t
+  val xpart : t -> Num.t
   ...
 end
 and Path : sig
@@ -634,7 +636,7 @@ d'autant plus gênant que \metapost\ devra lire ce fichier et passera
 donc davantage de temps sur des calculs répétés.
 
 Nous utilisons donc la technique de {\em
-hash-consing}\cite{ConchonFilliatre06wml} appliquée à l'arbre de syntaxe
+hash-consing}~\cite{ConchonFilliatre06wml} appliquée à l'arbre de syntaxe
 abstraite pour profiter au maximum du partage probable entre les
 différents objets. % TODO expliquer plus
 
@@ -679,7 +681,9 @@ code \metapost\ relativement petit, malgré la délégation des calculs à
 - boîtes primitives
 - réunion, alignements
 
-\subsubsection{Application : arbres}
+\paragraph{Application : arbres}
+
+
 
 \subsection{Flèches} \label{subsec:arrows} %% RB
 
@@ -759,8 +763,12 @@ pour l'inclusion de \LaTeX)
 
 plein de sortes de flèches
 
+Toutes les figures de cet article, à l'exception des exemples pour \metapost\
+et \nomdetikz\ ont été faites avec \mlpost.
+
 \paragraph{Remerciements.} Les auteurs tiennent à remercier Florence
-Plateau, Yannick Moy et Claude Marché pour leur contribution à \mlpost.
+Plateau, Yannick Moy et Claude Marché pour leur contribution à \mlpost\ et
+Sylvie Boldo pour la suggestion du titre de l'article.
 
 % La bibliographie
 % N'oubliez pas de l'inclure lors de votre soumission.
