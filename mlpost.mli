@@ -752,13 +752,13 @@ and Box : sig
     (** the empty box *)
 
   (** {2 Styles } *)
-  type style = Num.t -> Num.t -> Num.t * Num.t * Path.t
-
-  val rect_ : style
-  val circ_ : style
-  val ellipse_ : style
-  val round_rect_ : style
-  val patatoid_ : style
+  type style = 
+    | Rect
+    | Circle
+    | RoundRect
+    | Patatoid
+    | Ellipse
+    | Custom of (Num.t -> Num.t -> Num.t * Num.t * Path.t)
 
   type 'a box_creator = 
     ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 

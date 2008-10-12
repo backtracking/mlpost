@@ -173,10 +173,10 @@ let d195 =
     (195, [Command.iter 0 (n-1) row; Command.iter 0 (n) grid])
 
 let d267 = 
+  let tex = tex ~stroke:(Some Color.black) in
   let rose = Color.rgb 1. 0.5 0.5 in
-  let a = Box.tex ~fill:rose ~style:round_rect_ "D\\'ebut" in
-  let b = Box.shift (cmp (2., 0.)) 
-    (Box.tex ~fill:rose ~style:round_rect_ "Fin") in
+  let a = tex ~fill:rose ~style:RoundRect "D\\'ebut" in
+  let b = Box.shift (cmp (2., 0.)) (tex ~fill:rose ~style:RoundRect "Fin") in
   let path angle a b =
     cut_after (bpath b) 
       (cut_before (bpath a) 

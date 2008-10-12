@@ -94,7 +94,7 @@ let rec random_tree ?arrow_style ?edge_style ?stroke ?pen n =
   | 1 -> leaf (tex "1")
   | 2 -> 
       node ?arrow_style ?edge_style 
-        (Box.tex ~style:Box.rect_ ~fill:(Color.rgb 0.5 0.3 0.2) "2") 
+        (Box.tex ~style:Box.Rect ~fill:(Color.rgb 0.5 0.3 0.2) "2") 
         [leaf (tex "1")]
   | n -> 
       let k = 1 + Random.int (n - 2) in
@@ -331,7 +331,7 @@ let shapes2 =
     ]
 
 let figs = [
-  d6; d5; yannick Box.rect_; yannick Box.patatoid_; d1; d2; proval;
+  d6; d5; yannick Box.Rect; yannick Box.Patatoid; d1; d2; proval;
               d2sq; d2hsq; d2s; d2c; d12; cheno011; d3; d4;
               d7; d11; florence; [Box.draw shapes1]; [Box.draw shapes2]; 
               d14; d13;
