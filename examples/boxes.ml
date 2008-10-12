@@ -49,16 +49,16 @@ let hierarchy =
   let two = Num.bp 2. in
   let five = Num.bp 5. in
   let tex = tex ~dx:two ~dy:two in
-  let tex' s = clear_stroke (tex s) in
   let vbox = vbox ~padding:(Num.bp 3.) ~stroke:(Some black) 
                   ~style:RoundRect ~dy:five ~dx:five
   in
   let b = 
-      vbox [ tex' "recursively enumerable languages";
-        vbox [ tex' "decidable languages";
-          vbox [ tex' "context sensitive";
-            vbox [tex' "context free"; tex ~style:Circle "regular" ]
-    ] ] ]
+      vbox [ tex "recursively enumerable languages";
+        vbox [ tex "decidable languages";
+          vbox [ tex "context sensitive";
+            vbox [tex "context free"; 
+                  tex ~style:RoundRect ~stroke:(Some black) "regular" ] 
+      ] ] ]
   in
   [ draw b]
 (*parse >> *)
