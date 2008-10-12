@@ -387,7 +387,6 @@ let escher =
 			 List.map (fun p -> Command.draw ~pen:pen1 (tr p)) 
 			 [line6; line7; line8] ) ) ) ]
 
-(*
 (*parse >> <<lattice *)
 
 (* type of Box lattice *)
@@ -408,10 +407,12 @@ let nodes = H.create 97
 
 let draw la =
   let line l = Box.hbox ~padding:dx (List.map (function (N (b,_)) -> b) l) in
+  let to_list b = Array.to_list (Box.elts b) in
+  let to_list2 b = List.map to_list (to_list b) in
   let la' = Box.vbox ~padding:dy (List.map line la) in
   List.iter2
     (List.iter2 (fun (N (b, _)) b' -> H.add nodes b b'))
-    la la';
+    la (to_list2 la');
   let box b = H.find nodes b in
   let draw_node (N (b,l)) =
     let b = box b in
@@ -466,7 +467,6 @@ let subwords s =
 let lattice =
   [draw (subwords "abcd")]
 
-*)
 (*parse >> <<other208 *)
 
 type t = One | Two | Three | Four
@@ -617,7 +617,7 @@ let _ =
     "diag2", diag2;
     "drums", drums;
     "escher", escher;
-(*     "lattice", lattice; *)
+    "lattice", lattice;
     "other208", other208;
     "proval", proval;
     "randtree", randtree;

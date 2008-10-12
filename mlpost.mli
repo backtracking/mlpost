@@ -777,6 +777,9 @@ and Box : sig
   val pic : ?style:style -> Picture.t box_creator
     (** [pic p] creates a new box containing the picture [p] *)
 
+  val path : ?style:style -> Path.t box_creator
+    (** [path p] creates a new box containing the path [p] *)
+
   val tex : ?style:style -> string box_creator
     (** [tex s] creates a new box containing the LaTeX string [s] *)
 

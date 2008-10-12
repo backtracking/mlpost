@@ -167,6 +167,10 @@ let merge_maps =
   in
   List.fold_left add_one Smap.empty
 
+let path ?style ?dx ?dy ?name ?(stroke=None) ?pen ?fill p = 
+  pic ?style ?dx ?dy ?name ~stroke ?pen ?fill
+    (Picture.make (Command.draw p))
+
 let horizontal ?(padding=Num.zero) ?(pos=`Center) pl =
   let hmax = Num.fold_max height Num.zero pl in
   let hmax_2 = hmax /./ 2. in

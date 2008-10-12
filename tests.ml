@@ -134,7 +134,7 @@ let rec random_tree2 = function
 
 let d6 = [draw  (random_tree2 10)]
 let cheno011 =
-  let p = path ~cycle:jCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)] in
+  let p = Path.path ~cycle:jCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)] in
   let pen = Pen.circle ~tr:[T.scaled (bp 1.5)] () in
   [Command.draw p;
    seq (List.map
@@ -305,23 +305,17 @@ let florence =
   ]
 
 let shapes1 =
-(*
-  List.fold_left Picture.below
-    (Picture.tex "Shapes 1 !")
-*)
-    [Command.draw (Shapes.rectangle (bp 10.) (bp 20.));
-     Command.draw (Shapes.rectangle (bp 35.) (bp 15.));
-     Command.draw (Shapes.rectangle (bp 15.) (bp 35.));
-     Command.draw (Shapes.round_rect (bp 55.) (bp 25.) (bp 10.) (bp 10.));
-     Command.draw (Shapes.round_rect (bp 55.) (bp 25.) (bp 20.) (bp 5.));
-     Command.draw (Shapes.round_rect (bp 70.) (bp 25.) (bp 14.) (bp 14.));
+  Box.vbox
+    [Box.path (Shapes.rectangle (bp 10.) (bp 20.));
+     Box.path (Shapes.rectangle (bp 35.) (bp 15.));
+     Box.path (Shapes.rectangle (bp 15.) (bp 35.));
+     Box.path (Shapes.round_rect (bp 55.) (bp 25.) (bp 10.) (bp 10.));
+     Box.path (Shapes.round_rect (bp 55.) (bp 25.) (bp 20.) (bp 5.));
+     Box.path (Shapes.round_rect (bp 70.) (bp 25.) (bp 14.) (bp 14.));
     ]
   
 let shapes2 =
-(*
-  List.fold_left Picture.below
-    (Picture.tex "Shapes 2 !")
-*)
+  Box.vbox
     [
 (*
       Shapes.arc_ellipse (f 10.) (f 10.) 0. 1.7;
@@ -330,16 +324,16 @@ let shapes2 =
       Shapes.arc_ellipse 
 	~fill:Color.black ~stroke:Color.red (f 30.) (f 10.) 0. 1.7;
 *)
-      Command.draw (Shapes.ellipse (bp 10.) (bp 10.));
-      Command.draw (Shapes.ellipse (bp 30.) (bp 10.));
-      Command.draw 
-        (Shapes.ellipse (bp 30.) (bp 10.));
+      Box.path (Shapes.ellipse (bp 10.) (bp 10.));
+      Box.path (Shapes.ellipse (bp 30.) (bp 10.));
+      Box.path (Shapes.ellipse (bp 30.) (bp 10.));
     ]
 
 let figs = [
   d6; d5; yannick Box.rect_; yannick Box.patatoid_; d1; d2; proval;
               d2sq; d2hsq; d2s; d2c; d12; cheno011; d3; d4;
-             d7; d11; florence; shapes1;  shapes2; d14; d13;
+              d7; d11; florence; [Box.draw shapes1]; [Box.draw shapes2]; 
+              d14; d13;
 ] 
 
 let figs =
