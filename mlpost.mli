@@ -752,7 +752,7 @@ and Box : sig
     (** the empty box *)
 
   (** {2 Styles } *)
-  type style = Num.t -> Num.t -> Path.t
+  type style = Num.t -> Num.t -> Num.t * Num.t * Path.t
 
   val rect_ : style
   val circ_ : style

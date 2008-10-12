@@ -20,7 +20,7 @@ open Point
 
 open Num.Infix
 
-type style = Num.t -> Num.t -> Path.t
+type style = Num.t -> Num.t -> Num.t * Num.t * Path.t
 
 let margin = Num.bp 2.
 
@@ -112,15 +112,40 @@ let rec draw ?(debug=false) b =
 
 let make_contour f ?(dx=margin) ?(dy=margin) w h c =
   let w =  w +/ 2. *./ dx and h = h +/ 2. *./ dy in
-  w, h, Path.shift c (f w h)
+  let w,h, p = f w h in
+  w, h, Path.shift c p
 
-let pic ?(style=Shapes.rectangle) ?dx ?dy ?name ?(stroke=Some Color.black) 
+let rect_ w h = w, h, Shapes.rectangle w h
+let circ_ w h = 
+  let m = maxn w h in
+  m, m, Shapes.circle m
+let ellipse_ w h = w, h, Shapes.ellipse w h
+let round_rect_ w h = 
+  let rx = (minn w h) /./ 10. in
+  w, h, Shapes.round_rect w h rx rx
+let patatoid_ w h = 
+  let p = Shapes.patatoid w h in
+  let pic = Picture.make (Command.draw p) in
+  Picture.width pic, Picture.height pic, p
+
+let pic ?(style=rect_) ?dx ?dy ?name ?(stroke=Some Color.black) 
         ?pen ?fill pic =
   let c = Picture.ctr pic in
   let w,h,s = 
     make_contour style ?dx ?dy (Picture.width pic) (Picture.height pic) c 
   in
   { desc = Pic pic;
+    name = name; stroke = stroke; pen = pen; fill = fill;
+    width = w; height = h; ctr = c; contour = s;
+    post_draw = Picture.empty}
+
+let box ?(style=rect_) ?dx ?dy ?name ?(stroke=Some Color.black) 
+        ?pen ?fill b =
+  let c = ctr b in
+  let w,h,s = 
+    make_contour style ?dx ?dy (width b) (height b) c 
+  in
+  { desc = Grp ([|b|], Smap.empty) ;
     name = name; stroke = stroke; pen = pen; fill = fill;
     width = w; height = h; ctr = c; contour = s;
     post_draw = Picture.empty}
@@ -180,7 +205,7 @@ let vertical ?(padding=Num.zero) ?(pos=`Center) pl =
   let mycenter = Point.pt (wmax_2, y /./ 2.) in
   l, wmax, Num.neg y, mycenter
 
-let align_boxes f ?padding ?pos ?(style=Shapes.rectangle) 
+let align_boxes f ?padding ?pos ?(style=rect_) 
   ?(dx=Num.zero) ?(dy=Num.zero) ?name ?(stroke=None) ?pen ?fill bl =
   let bl, w, h , c = f ?padding ?pos bl in
   let w,h,s = make_contour style ~dx ~dy w h c in
@@ -193,13 +218,13 @@ let hbox ?padding ?pos = align_boxes horizontal ?padding ?pos
 let vbox ?padding ?pos = align_boxes vertical ?padding ?pos
 
 let box 
-  ?(style=Shapes.rectangle) ?(dx=margin) ?(dy=margin) ?name 
+  ?(style=rect_) ?(dx=margin) ?(dy=margin) ?name 
   ?(stroke=Some Color.black) ?pen ?fill b =
   hbox ~style ~dx ~dy ?name ~stroke ?pen ?fill [b]
 
 (* groups the given boxes in a new box *)
 let group 
-  ?name ?(stroke=None) ?pen ?fill ?(style=Shapes.rectangle) 
+  ?name ?(stroke=None) ?pen ?fill ?(style=rect_) 
   ?(dx=Num.zero) ?(dy=Num.zero) bl =
   let xmin,xmax,ymin,ymax = 
     List.fold_left 
@@ -245,14 +270,6 @@ let empty ?(width=Num.zero) ?(height=Num.zero) () =
 type 'a box_creator = 
   ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 
   ?stroke:Color.t option -> ?pen:Pen.t -> ?fill:Color.t -> 'a -> t
-
-let rect_ = Shapes.rectangle
-let circ_ w h = Shapes.circle (maxn w h)
-let ellipse_ = Shapes.ellipse
-let round_rect_ w h = 
-  let rx = (minn w h) /./ 10. in
-  Shapes.round_rect w h rx rx
-let patatoid_ = Shapes.patatoid
 
 let rect = box ~style:rect_
 let circle = box ~style:circ_

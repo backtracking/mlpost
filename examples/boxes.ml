@@ -10,6 +10,7 @@ open Box
 
 (*parse <<f1 *)
 let f1 =
+  let tex = tex ~style:rect_ ~stroke:(Some Color.black) in
   let b = 
     hbox ~padding:(bp 20.)
       [vbox ~padding:(bp 4.) ~pos:`Right 
@@ -22,7 +23,7 @@ let f1 =
 
 (*parse >> <<f2 *)
 let f2 =
-  let tex = tex ~style:circ_ in
+  let tex = tex ~style:circ_ ~stroke:(Some Color.black) in
   let b = vbox [tex "a"; hbox [tex ~name:"b" "b"; tex "c"]] in
   let f = hbox ~padding:(bp 20.) [b;b;b] in
   let arrow = box_arrow ~outd:(vec (dir (-60.))) in
