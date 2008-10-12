@@ -20,7 +20,6 @@
 * -v n'agit pas encore sur tout
 * uniformiser les ulcorners, les "north_west", les `Upleft
 * Box.group, align etc prennent des listes, Box.elts renvoie un tableau ?
-* Les shapes n'ont plus besoin de toutes ces infos
 
 
 3) FEATURES

@@ -19,13 +19,13 @@ open Helpers
 module Node = struct
 
   type t = { 
-    box_style : (Picture.t -> Box.t) option;
+    box_style : (Box.t -> Box.t) option;
     id : int; 
     fill : Color.t option;
     boxed: bool option;
     x : float; 
     y : float; 
-    s : Picture.t; }
+    s : Box.t; }
 
   let create = 
     let c = ref min_int in 
@@ -49,9 +49,7 @@ open Node
 type node = Node.t
 
 let node ?style ?fill ?boxed x y s = 
-  Node.create style fill boxed x y (Picture.tex s)
-let pic_node ?style ?fill ?boxed = 
-  Node.create style fill boxed
+  Node.create style fill boxed x y s
 
 type dir = Up | Down | Left | Right | Angle of float
 
@@ -108,7 +106,7 @@ let indir = function
 let outdir = function None -> None | Some x -> Some (outdir x)
 let indir = function None -> None | Some x -> Some (indir x)
 
-type node_style = Picture.t -> Box.t
+type node_style = Box.t -> Box.t
 
 let make_box ?fill ?boxed ~style ~scale d n = 
   let p = Point.pt (scale n.x, scale n.y) in

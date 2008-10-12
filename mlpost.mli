@@ -786,27 +786,27 @@ and Box : sig
   val box : ?style:style -> t box_creator
     (** [box b] creates a new box containing the box [b] *)
 
-  val circle : Picture.t box_creator
+  val circle : t box_creator
     (** [circle pic] creates a circle box containing the picture
     [pic]. Optional padding is given by arguments [dx] and [dy]; 
     default is 2bp. *)
 
-  val ellipse : Picture.t box_creator
+  val ellipse : t box_creator
     (** [ellipse p pic] creates a elliptic box containing the picture
 	[pic]. Optional padding is given by arguments [dx] and [dy]; 
 	default is 2bp *)
 
-  val rect :  Picture.t box_creator
+  val rect :  t box_creator
     (** [rect p pic] creates a rectangular box containing the picture
 	[pic]. Optional padding is given by arguments [dx] and [dy]; 
 	default is 2bp. *)
 
-  val round_rect : Picture.t box_creator
+  val round_rect : t box_creator
     (** [round_rect p pic] creates a rectangular box containing the picture 
 	[pic], with rounded corners. Optional padding is given by [dx] 
 	and [dy]; default is 2bp *)
 
-  val patatoid : Picture.t box_creator
+  val patatoid : t box_creator
     (** [patatoid p pic] creates an undefined, vaguely rectangular box 
 	containing the picture [pic]. It may happen that the content 
 	overlaps with the box. *)
@@ -1236,18 +1236,14 @@ module Diag : sig
   type node
     (** The abstract type of nodes *)
 
-  type node_style = Picture.t -> Box.t
+  type node_style = Box.t -> Box.t
   (** The type for node styles; It corresponds to the type of the box
     creation functions in the {!Box} module *)
 
   val node : ?style:node_style -> ?fill:Color.t -> ?boxed:bool ->
-                float -> float -> string -> node
+                float -> float -> Box.t -> node
     (** Construct a node at a given position with a given content in Latex
         format and a box style *)
-
-  val pic_node : ?style:node_style -> ?fill:Color.t -> ?boxed:bool ->
-                   float -> float -> Picture.t -> node
-    (** Construct a node at a given position with a given picture in it *)
 
   type t
     (** The abstract type of diagrams *)

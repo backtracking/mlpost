@@ -276,25 +276,6 @@ let uml =
     box_label_arrow ~pos:`Left (Picture.tex "owns") 
       (get "Client" diag) (get "BankAccount" diag) ]
 
-let hierarchy =
-  let two = Num.bp 2. in
-  let five = Num.bp 5. in
-  let tex = tex ~dx:two ~dy:two in
-  let tex' = tex ~stroke:None in
-  let vbox = vbox ~padding:(Num.bp 3.) ~stroke:(Some Color.black) 
-                  ~style:round_rect_ ~dy:five ~dx:five
-  in
-  let b = 
-    vbox [ tex' "set of all languages";
-      vbox [ tex' "recursively enumerable languages";
-        vbox [ tex' "decidable languages";
-          vbox [ tex' "context sensitive";
-            vbox [tex' "context free"; tex ~style:round_rect_ "regular" ]
-    ] ] ] ]
-  in
-  [ draw b]
-
-
 open Tree
 let sharing = 
   let tex s = tex ~name:s ~style:circ_ ~dx:two ~dy:two s in
@@ -325,7 +306,7 @@ let stages =
     box "ps" (vbox ~stroke:(Some Color.black) ~style:round_rect_ ~dx ~dy
              [tex' "figure.1"; tex' "(\\postscript)"]) in
   let arrowpic = pic ~stroke:None
-       (Picture.make (draw_arrow (path ~scale:cm [0.,0.; 0.,-1.]))) 
+       (Picture.make (draw_arrow (Path.path ~scale:cm [0.,0.; 0.,-1.]))) 
   in
   let all = hbox ~padding:(cm 3.5) [fml; fmp; ps ] in
   [ draw all;
@@ -337,6 +318,17 @@ let stages =
       (get "fmp" all) (get "ps" all);
   ]
 
+let simple = 
+  [ draw (tex "\\LaTeX");
+    draw (shift (Point.pt (cm 1., zero)) 
+           (circle (empty ()))) ]
+
+let align = 
+  [ draw
+    (hbox ~padding:(cm 1.) 
+      [tex "\\LaTeX"; 
+       circle (empty ())]) ]
+
 
 
 (* JC *)
@@ -347,7 +339,6 @@ let () = Metapost.emit "automate_1" automate_1
 let () = Metapost.emit "automate" automate
 let () = Metapost.emit "loop_explain" loop_explain
 let () = Metapost.emit "uml" uml
-let () = Metapost.emit "hierarchy" hierarchy
 let () = Metapost.emit "graph_sqrt" graph_sqrt
 let () = Metapost.emit "architecture" architecture
 let () = Metapost.emit "bresenham" bresenham
@@ -356,3 +347,5 @@ let () = Metapost.emit "arrow_metapost" arrow_metapost
 let () = Metapost.emit "arrow_simple" arrow_simple
 let () = Metapost.emit "arrow_loop_explain" arrow_loop_explain
 let () = Metapost.emit "stages" stages
+let () = Metapost.emit "simple" simple
+let () = Metapost.emit "align" align

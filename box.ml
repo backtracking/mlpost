@@ -110,38 +110,6 @@ let rec draw ?(debug=false) b =
   Command.seq [fill_cmd; contents_cmd; path_cmd; debug_cmd; 
                Command.draw_pic b.post_draw]
 
-(*
-let rect ?dx (dy=margin) w h c = 
-  let w = w +/ 2. *./ dx in  let h = h +/ 2. *./ dy in
-  let s = Path.shift c (Shapes.rectangle w h) in
-  w, h, s
-
-let circle ?(dx=margin) ?(dy=margin) w h c =
-  let d = Point.length (add (pt (w, h)) (pt (dx, dy))) in
-  let s = Path.shift c (Shapes.circle d) in
-  d, d, s
-
-let ellipse ?(dx=margin) ?(dy=margin) w h c =
-  let rx = w /./ 2. +/ dx in
-  let ry = h /./ 2. +/ dy in
-  let s = Path.shift c (Shapes.ellipse rx ry) in
-    w +/ 2. *./ dx, h +/ 2. *./ dy, s
-
-let round_rect_gen ?(dx=margin) ?(dy=margin) ?(rx=margin) ?(ry=margin) wt ht c =
-  Path.shift c (Shapes.round_rect wt ht rx ry)
-
-let round_rect ?(dx=margin) ?(dy=margin) w h c =
-  let wt = w +/ 2. *./ dx and ht = h +/ 2. *./ dy in
-  let rx = (minn wt ht) /./ 10. in
-    wt, ht, round_rect_gen ~dx ~dy ~rx ~ry:rx wt ht c
-
-let patatoid ?(dx=2. *./ margin) ?(dy=2. *./ margin) w h c =
-  let w = w +/ 2. *./ dx and h = h +/ 2. *./ dy in
-  let path = Shapes.patatoid w h in
-  let s = Path.shift c path in
-  w, h, s
-*)
-
 let make_contour f ?(dx=margin) ?(dy=margin) w h c =
   let w =  w +/ 2. *./ dx and h = h +/ 2. *./ dy in
   w, h, Path.shift c (f w h)
@@ -286,14 +254,14 @@ let round_rect_ w h =
   Shapes.round_rect w h rx rx
 let patatoid_ = Shapes.patatoid
 
-let rect = pic ~style:rect_
-let circle = pic ~style:circ_
-let ellipse = pic ~style:ellipse_
-let round_rect = pic ~style:round_rect_
-let patatoid = pic ~style:patatoid_
+let rect = box ~style:rect_
+let circle = box ~style:circ_
+let ellipse = box ~style:ellipse_
+let round_rect = box ~style:round_rect_
+let patatoid = box ~style:patatoid_
 
-let tex ?style ?dx ?dy ?name ?stroke ?pen ?fill s = 
-  pic ?style ?dx ?dy ?name ?stroke ?pen ?fill (Picture.tex s)
+let tex ?style ?dx ?dy ?name ?(stroke=None) ?pen ?fill s = 
+  pic ?style ?dx ?dy ?name ~stroke ?pen ?fill (Picture.tex s)
 
 let nth i b = match b.desc with
   | Grp (a, _ ) -> a.(i)

@@ -184,14 +184,56 @@ Enfin, la section~\ref{conclusion} ...
 
 \section{Principes et exemples}\label{exemples}
 
+\subsection{Principes}
 Les briques de base de \mlpost\ sont les boîtes : Un objêt de dessin, entouré
 d'un trait, visible ou non. On peut construire la boîte vide, des boîtes avec
-du \LaTeX arbitraire, etc. Ces boîtes peuvent ensuite être manipulées :
+du \LaTeX\ arbitraire, etc. Ces boîtes peuvent ensuite être manipulées :
 imbrication arbitraire, placement à une position précise, alignement de
 plusieurs boîtes, tabularisation. Des boîtes peuvent aussi être groupées pour
-les déplacer ensemble.
+les déplacer ensemble. L'exemple suivant montre deux boîtes simples, la
+deuxième déplacée un peu à droite, en utilisant la fonction \verb|shift|.
 
-Un premier choix à faire est celui de la persistance : Quand on modifie un
+\begin{minipage}{0.4\linewidth}
+  \includegraphics{simple.mps}
+\end{minipage}
+\begin{minipage}{0.4\linewidth}
+\small\begin{ocaml}
+let simple = 
+  [ draw (tex "\\LaTeX");
+    draw (shift (Point.pt (cm 1., zero)) 
+           (circle (empty ()))) ]
+\end{ocaml}
+\end{minipage}
+
+\paragraph{Placement relatif.}
+Un principe de Mlpost consiste à placer les objets de façon relative plutôt
+qu'absolue.  Ceci permet d'obtenir des figures plus robustes. En effet,
+imaginons que vous vouliez placer une boîte $A$ à \emph{droite} d'une boîte
+$B$.  Une première possibilité serait de spécifier les positions
+approximativement, par exemple en donnant les abscisses $0cm$ pour $A$ et
+$2cm$ pour $B$. Mais si vous changez d'avis sur le contenu de $A$ et que la
+taille de la boîte change, $A$ risque alors de se superposer à $B$. Il faut
+alors replacer toutes les boîtes de votre figure. Pour éviter ça, \mlpost\
+propose diverses méthodes pour placer les boîtes \emph{les unes par rapport
+aux autres}. On gagne alors du temps lors de la création et lors des
+modifications de la figure. L'exemple suivant montre la même figure qu'avant,
+mais en utilisant l'alignement horizontal \verb|hbox|.
+
+\begin{minipage}{0.4\linewidth}
+  \includegraphics{align.mps}
+\end{minipage}
+\begin{minipage}{0.4\linewidth}
+\small\begin{ocaml}
+let align = 
+  [ draw
+    (hbox ~padding:(cm 1.) 
+      [tex "\\LaTeX"; 
+       circle (empty ())]) ]
+\end{ocaml}
+\end{minipage}
+
+\paragraph{Persistance.}
+Un autre choix à faire est celui de la persistance : Quand on modifie un
 attribut (positionnement, couleur etc.), on obtient une nouvelle boîte,
 identique à la première sauf en l'attribut changé. L'ancienne boîte est elle
 encore accessible, avec ses attributs inchangés, ou bien a-t-elle été détruite
@@ -201,22 +243,72 @@ réutiliser plus facilement une boîte à plusieurs endroits différents du
 dessin, avec des attributs différents. En déplacant une boîte, on en a créé
 une nouvelle en laissant l'ancienne à sa place.
 
-Un autre principe de Mlpost consiste à placer les objets de façon
-relative plutôt qu'absolue.  Ceci permet d'obtenir des figures plus
-robustes. En effet, imaginons que vous vouliez placer une boîte $A$ à
-\emph{droite} d'une boîte $B$.  Une première possibilité serait de
-spécifier les positions approximativement, par exemple en donnant les
-abscisses $0cm$ pour $A$ et $2cm$ pour $B$. Mais si vous changez
-d'avis sur le contenu de $A$ et que la taille de la boîte change, $A$
-risque alors de se superposer à $B$. Il faut alors replacer toutes les
-boîtes de votre figure. Pour éviter ça, \mlpost\ propose diverses
-méthodes pour placer les boîtes \emph{les unes par rapport aux
-  autres}. On gagne alors du temps lors de la création et lors des
-modifications de la figure.
-%TODO exemple ici => a développer dans la section Boites de tte façon
+%TODO exemple ici qui introduit les noms des boites et les avantages /
+%inconvénients de la persistance
+
+\subsection{Exemples}
+
+Dans cette section, nous montrons quelques petits exemples de développement de
+dessin en \mlpost. 
+
+\paragraph{Représentation de la mémoire}
+% blocs mémoire (listes, etc.) -- JCF
+% introduire Box.vblock
+
+\paragraph{Diagrammes de classes}
+
+Avec la fonction \texttt{Box.vblock} vue auparavant, il est facile
+d'implémenter une fonction qui dessine un rectangle correspondant à
+une classe :
+\begin{ocaml}
+let classblock name attr_list method_list = 
+  let tex = Box.tex ~stroke:None in
+  let vbox = Box.vbox ~pos:`Left in
+    Box.vblock ~pos:`Left ~name
+    [ tex ("{\\bf " ^ name ^ "}");
+      vbox (List.map tex attr_list); vbox (List.map tex method_list)
+    ]
+\end{ocaml}
+\texttt{classblock} est une fonction qui attend le nom de la classe
+ainsi que la liste des attributs et des méthodes. Ici, le nom
+\texttt{name} de la classe est utilisé à la fois pour désigner le
+schéma dans le diagramme (l'argument labelisé à \texttt{Box.vblock})
+et comme titre du schéma créé. Les attributs et les méthodes sont alignés
+verticalement séparément, et après on aligne le titre et les deux nouvelles
+boîtes obtenues en les encadrant. On obtient avec peu d'effort une fonction
+qui crée un bloc d'une classe.
+
+On peut maintenant s'en servir pour dessiner un petit diagramme de classes :
+
+\begin{minipage}{0.3\linewidth}
+  \includegraphics{uml.mps}
+\end{minipage}
+\begin{minipage}{0.3\linewidth}
+\small\begin{ocaml}
+let uml = 
+  let a = classblock "BankAccount" 
+            [ "balance : Dollars = $0$"] 
+            ["deposit (amount : Dollars)"; 
+             "withdraw (amount : Dollars)" ] 
+  in
+  let b = classblock "Client" ["name : String"; 
+                               "address : String" ] [] in
+  let diag = Box.vbox ~padding:(cm 1.) [a;b] in
+  [ Box.draw diag; 
+    box_label_arrow ~pos:`Left (Picture.tex "owns") 
+      (get "Client" diag) (get "BankAccount" diag) ]
+\end{ocaml}
+\end{minipage}
+\vspace{1em}
+
+Ici, on a d'abord créé deux schémas de classe avec la fonction
+\texttt{classblock}. Ces schémas sont ensuite alignés verticalement, et une
+flèche avec une étiquette est dessinée entre ces deux classes. En tout, le
+code pour cette figure est conceptuellement très simple, contient aucun
+placement absolu et ne dépasse pas les 20 lignes de code.
 
 % automate -- RB
-\subsection{Automates}
+\paragraph{Automates}
 
 \label{sec:automates}
 L'un des principes de  \mlpost\ est la possibilité d'écrire facilement
@@ -368,69 +460,6 @@ let automate =
     initial states `Left "alpha" ]
 \end{ocaml}
 \end{minipage}
-
-\subsection{Diagrammes}
-
-Le but de cette section est de montrer l'importance d'une possibilité de
-placement relatif . Nous décrivons plusieurs exemples de mini-bibliothèques
-qui exploitent cette possibilité.
-
-\paragraph{Représentation de la mémoire}
-% blocs mémoire (listes, etc.) -- JCF
-% introduire Box.vblock
-
-\paragraph{Diagrammes de classes}
-
-Avec la fonction \texttt{Box.vblock} vue auparavant, il est facile
-d'implémenter une fonction qui dessine un rectangle correspondant à
-une classe :
-\begin{ocaml}
-let classblock name attr_list method_list = 
-  let tex = Box.tex ~stroke:None in
-  let vbox = Box.vbox ~pos:`Left in
-    Box.vblock ~pos:`Left ~name
-    [ tex ("{\\bf " ^ name ^ "}");
-      vbox (List.map tex attr_list); vbox (List.map tex method_list)
-    ]
-\end{ocaml}
-\texttt{classblock} est une fonction qui attend le nom de la classe
-ainsi que la liste des attributs et des méthodes. Ici, le nom
-\texttt{name} de la classe est utilisé à la fois pour désigner le
-schéma dans le diagramme (l'argument labelisé à \texttt{Box.vblock})
-et comme titre du schéma créé. Les attributs et les méthodes sont alignés
-verticalement séparément, et après on aligne le titre et les deux nouvelles
-boîtes obtenues en les encadrant. On obtient avec peu d'effort une fonction
-qui crée un bloc d'une classe.
-
-On peut maintenant s'en servir pour dessiner un petit diagramme de classes :
-
-\begin{minipage}{0.3\linewidth}
-  \includegraphics{uml.mps}
-\end{minipage}
-\begin{minipage}{0.3\linewidth}
-\small\begin{ocaml}
-let uml = 
-  let a = classblock "BankAccount" 
-            [ "balance : Dollars = $0$"] 
-            ["deposit (amount : Dollars)"; 
-             "withdraw (amount : Dollars)" ] 
-  in
-  let b = classblock "Client" ["name : String"; 
-                               "address : String" ] [] in
-  let diag = Box.vbox ~padding:(cm 1.) [a;b] in
-  [ Box.draw diag; 
-    box_label_arrow ~pos:`Left (Picture.tex "owns") 
-      (get "Client" diag) (get "BankAccount" diag) ]
-\end{ocaml}
-\end{minipage}
-\vspace{1em}
-
-Ici, on a d'abord créé deux schémas de classe avec la fonction
-\texttt{classblock}. Ces schémas sont ensuite alignés verticalement, et une
-flèche avec une étiquette est dessinée entre ces deux classes. En tout, le
-code pour cette figure est conceptuellement très simple, contient aucun
-placement absolu et ne dépasse pas les 20 lignes de code.
-
 
 \subsection{Autres extensions : arbres et graphes de fonctions}
 

@@ -64,6 +64,7 @@ open Diag
 (*parse <<cfg *)
 let cfg =
   let pen = Pen.circle () in
+  let node x y s = node x y (Box.tex s) in
   let empty_node x y = node x y "\\phantom{M}" in
   let a = empty_node 0. 4. in
   let b = empty_node 0. 3. in
@@ -126,7 +127,7 @@ let foi, iof = float_of_int, int_of_float
 let nodes = 
   Array.init 6
     (fun i -> Array.init 4
-       (fun j -> node (foi i) (foi j) ""))
+       (fun j -> node (foi i) (foi j) (Box.tex "")))
 (* 	  (Printf.sprintf "(%d,%d)" i j))) *)
 
 let nodesl = List.flatten (List.map Array.to_list (Array.to_list nodes))
@@ -153,7 +154,7 @@ let foi, iof = float_of_int, int_of_float
 let nodes = 
   Array.init 6
     (fun i -> Array.init 4
-       (fun j -> (node (foi i) (foi j) "", i, j)))
+       (fun j -> (node (foi i) (foi j) (Box.tex ""), i, j)))
 (*  	  (Printf.sprintf "(%d,%d)" i j), i, j))) *)
 
 let nodesl = 
@@ -425,7 +426,7 @@ let draw la =
 let node s l = 
   let s = if s = "" then "$\\varepsilon$" else s in
   let s = "\\rule[-0.1em]{0in}{0.8em}" ^ s in 
-  N (Box.circle (Picture.tex s), l)
+  N (Box.circle (Box.tex s), l)
 
 (* folds over the bits of an integer (as powers of two) *)
 let fold_bit f =
@@ -594,9 +595,9 @@ let rubik =
 let (++) x y = pt (cm x, cm y)
 
 let test =
-  let a = Box.circle (Picture.tex "$\\sqrt2$") in
+  let a = Box.circle (Box.tex "$\\sqrt2$") in
   let b = 
-    Box.shift (2. ++ 0.) (Box.rect ~fill:Color.purple (Picture.tex "$\\pi$"))
+    Box.shift (2. ++ 0.) (Box.rect ~fill:Color.purple (Box.tex "$\\pi$"))
   in
   let pen = Pen.default ~tr:[Transform.scaled (bp 3.)] () in
   [ Box.draw a;

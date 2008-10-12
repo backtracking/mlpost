@@ -32,24 +32,25 @@ open Tree
 open Box
 
 let d1 = 
-  let a = Box.circle (Picture.tex "$\\sqrt2$") in
+  let a = circle (tex "$\\sqrt2$") in
   let b = 
-    Box.shift (2. ++ 0.) (Box.rect ~fill:Color.purple (Picture.tex "$\\pi$"))
+    shift (2. ++ 0.) (rect ~fill:Color.purple (tex "$\\pi$"))
   in
   let pen = Pen.default ~tr:[Transform.scaled (bp 3.)] () in
-  [ Box.draw a;
-    Box.draw b;
+  [ draw a;
+    draw b;
     Command.draw
       ~color:Color.red
-      (Path.shift (1. ++ 1.) (Box.bpath a));
+      (Path.shift (1. ++ 1.) (bpath a));
     draw_label_arrow ~color:Color.orange ~pen 
-      ~pos:`Upright (Picture.tex "foo") (Box.west a) (Box.south_east b);
+      ~pos:`Upright (Picture.tex "foo") (west a) (south_east b);
     box_arrow ~color:Color.blue a b;
   ]
 
 open Box
 
 let d2 =
+  let tex = tex ~stroke:(Some Color.black) in
   let b = 
     hbox ~padding:(bp 10.) ~pos:`Top ~stroke:(Some Color.red) ~dx:(bp 2.)
       ~dy:(bp 2.)
@@ -88,7 +89,7 @@ let yannick style =
 
 
 let rec random_tree ?arrow_style ?edge_style ?stroke ?pen n = 
-  let tex = tex ~fill:Color.yellow in
+  let tex = tex ~fill:Color.yellow ~stroke:(Some Color.black) in
   match n with
   | 1 -> leaf (tex "1")
   | 2 -> 
