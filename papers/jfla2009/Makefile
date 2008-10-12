@@ -3,13 +3,13 @@ all: main-pp.pdf
 
 WWW=/users/demons/filliatr/WWW
 
-%.pdf: %.tex biblio.bib figures.mp figmp.mps yannick1.mps 
-	pdflatex $*.tex
-	bibtex $*
-	pdflatex $*.tex
-	bibtex $*
-	pdflatex $*.tex
-	pdflatex $*.tex
+main-pp.pdf: main-pp.tex biblio.bib figures.mp figmp.mps yannick1.mps florence.mps
+	pdflatex $<
+	bibtex main-pp
+	pdflatex $<
+	bibtex main-pp
+	pdflatex $<
+	pdflatex $<
 
 %-pp.tex: pp.ml %.tex 
 	ocaml $^ > $@
@@ -22,6 +22,9 @@ figmp.mps: figmp.mp
 	mv figmp.1 figmp.mps
 
 yannick1.mps: yannick1.1
+	cp $^ $@
+
+florence.mps: florence.1
 	cp $^ $@
 
 main-pp.dvi: main-pp.tex
