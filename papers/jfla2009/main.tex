@@ -185,13 +185,18 @@ Enfin, la section~\ref{conclusion} ...
 \section{Principes et exemples}\label{exemples}
 
 \subsection{Principes}
-Les briques de base de \mlpost\ sont les boîtes : Un objêt de dessin, entouré
-d'un trait, visible ou non. On peut construire la boîte vide, des boîtes avec
-du \LaTeX\ arbitraire, etc. Ces boîtes peuvent ensuite être manipulées :
-imbrication arbitraire, placement à une position précise, alignement de
-plusieurs boîtes, tabularisation. Des boîtes peuvent aussi être groupées pour
-les déplacer ensemble. L'exemple suivant montre deux boîtes simples, la
-deuxième déplacée un peu à droite, en utilisant la fonction \verb|shift|.
+\paragraph{Boîtes.}
+Les briques de base de \mlpost\ sont les \textit{boîtes} : une boîte
+est un moyen d'encapsuler n'importe quel élément de dessin au sein
+d'un coutour, qui peut être effectivement tracé ou non. On peut
+construire la boîte vide, des boîtes avec du \LaTeX\ arbitraire, etc.
+Ces boîtes peuvent ensuite être manipulées : imbrication arbitraire,
+placement à une position précise, alignement de plusieurs boîtes,
+flèches reliant plusieurs boîtes entre elles, création de tableaux,
+etc. Plusieurs boîtes peuvent aussi être regroupées au sein d'une
+seule afin de pouvoir les déplacer ensemble.  L'exemple suivant montre
+deux boîtes simples, la deuxième déplacée un peu à droite, en
+utilisant la fonction \verb|shift|.
 
 \begin{minipage}{0.4\linewidth}
   \includegraphics{simple.mps}
@@ -204,20 +209,26 @@ let simple =
            (circle (empty ()))) ]
 \end{ocaml}
 \end{minipage}
+% Notez que par défaut, le contour de la boîte contenant du \LaTeX n'a
+% pas été tracé, alors que celui de la boîte vide a été tracé.
 
 \paragraph{Placement relatif.}
-Un principe de Mlpost consiste à placer les objets de façon relative plutôt
-qu'absolue.  Ceci permet d'obtenir des figures plus robustes. En effet,
-imaginons que vous vouliez placer une boîte $A$ à \emph{droite} d'une boîte
-$B$.  Une première possibilité serait de spécifier les positions
-approximativement, par exemple en donnant les abscisses $0cm$ pour $A$ et
-$2cm$ pour $B$. Mais si vous changez d'avis sur le contenu de $A$ et que la
-taille de la boîte change, $A$ risque alors de se superposer à $B$. Il faut
-alors replacer toutes les boîtes de votre figure. Pour éviter ça, \mlpost\
-propose diverses méthodes pour placer les boîtes \emph{les unes par rapport
-aux autres}. On gagne alors du temps lors de la création et lors des
-modifications de la figure. L'exemple suivant montre la même figure qu'avant,
-mais en utilisant l'alignement horizontal \verb|hbox|.
+Un principe que nous avons suivi lors de la conception de \mlpost{}
+est de favoriser un placement relatif des objets plutôt qu'absolu.
+Ceci permet d'obtenir des figures plus robustes. En effet, imaginons
+que vous vouliez placer une boîte $A$ à \emph{droite} d'une boîte $B$.
+Une première possibilité serait de spécifier les positions
+approximativement, par exemple en donnant les abscisses $0cm$ pour $A$
+et $2cm$ pour $B$. Cependant, si vous changez d'avis sur le contenu de
+$A$ et que la taille de cette boîte change, $A$ risque alors de se
+superposer à $B$. Il faut alors replacer toutes les boîtes de votre
+figure manuellement. Pour éviter ça, \mlpost\ propose diverses
+méthodes pour placer les boîtes \emph{les unes par rapport aux
+  autres}. On gagne alors du temps lors de la création et lors des
+modifications de la figure.  L'exemple suivant montre la même figure
+qu'avant, mais en utilisant l'alignement horizontal \verb|hbox|
+(l'argument optionnel \texttt{padding} permet de spécifier
+l'espacement horizontal entre deux boîtes):
 
 \begin{minipage}{0.4\linewidth}
   \includegraphics{align.mps}
@@ -232,16 +243,20 @@ let align =
 \end{ocaml}
 \end{minipage}
 
+Nous revenons plus en détail sur les boîtes et leur implémentation
+dans la section~\ref{subsec:boxes}.
+
 \paragraph{Persistance.}
-Un autre choix à faire est celui de la persistance : Quand on modifie un
-attribut (positionnement, couleur etc.), on obtient une nouvelle boîte,
-identique à la première sauf en l'attribut changé. L'ancienne boîte est elle
-encore accessible, avec ses attributs inchangés, ou bien a-t-elle été détruite
-? Nous avons fait le choix des structures de données persistantes,
-c'est-à-dire, l'ancienne boîte est préservée. Cela a l'avantage de pouvoir
-réutiliser plus facilement une boîte à plusieurs endroits différents du
-dessin, avec des attributs différents. En déplacant une boîte, on en a créé
-une nouvelle en laissant l'ancienne à sa place.
+Un autre choix que nous avons fait est celui de la persistance :
+lorsqu'un attribut d'une boîte (positionnement, couleur, etc.) est
+modifié, on obtient une nouvelle boîte, identique à la première sauf
+en l'attribut changé. En faisant le choix de structures de données
+persistantes, nous permettons à l'ancienne boîte, avec ses attributs
+inchangés, d'être préservée et encore accessible. Cela a l'avantage de
+pouvoir réutiliser plus facilement une boîte à plusieurs endroits
+différents du dessin, avec des attributs différents. En déplacant une
+boîte, on en a créé une nouvelle et laissé l'ancienne intacte à sa
+place.
 
 %TODO exemple ici qui introduit les noms des boites et les avantages /
 %inconvénients de la persistance

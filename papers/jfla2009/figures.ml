@@ -37,7 +37,8 @@ let graph_sqrt =
 
 let architecture =
   let mk_box fill name m = 
-    Box.tex ~style:round_rect_ ~dx:(bp 5.) ~dy:(bp 5.) ~name ~fill m in
+    Box.tex ~stroke:(Some Color.black) 
+      ~style:round_rect_ ~dx:(bp 5.) ~dy:(bp 5.) ~name ~fill m in
   let mk_unbox name m = 
     Box.tex ~style:round_rect_ ~stroke:None ~dx:(bp 5.) ~dy:(bp 5.) ~name m in
     (* les types de base *)
@@ -61,15 +62,15 @@ let architecture =
 	~style:rect_ ~dx ~stroke:(Some Color.black) [metapost] in
     (* composants avancés *)
   let fill = Color.color "pink" in 
-  let box_ = mk_box fill "box" "Box" in
-  let shapes = mk_box fill "shapes" "Shapes" in
-  let arrows = mk_box fill "arrow" "Arrow" in
+  let box_ = mk_box fill "box" "\\phantom{p}Box\\phantom{p}" in
+  let shapes = mk_box fill "shapes" "\\phantom{p}Shapes\\phantom{p}" in
+  let arrows = mk_box fill "arrow" "\\phantom{p}Arrow\\phantom{p}" in
   let advanced = Box.hbox ~pos:`Bot ~padding:(mm 2.) [box_; shapes; arrows] in
     (* extensions *)
   let fill = Color.color "blanched almond" in 
-  let tree = mk_box fill "tree" "Tree" in
-  let diag = mk_box fill "diag" "Diag" in
-  let plot = mk_box fill "plot" "Plot" in
+  let tree = mk_box fill "tree" "\\phantom{g}Tree\\phantom{g}" in
+  let diag = mk_box fill "diag" "\\phantom{g}Diag\\phantom{g}" in
+  let plot = mk_box fill "plot" "\\phantom{g}Plot\\phantom{g}" in
   let extensions = Box.hbox ~pos:`Bot ~padding:(mm 2.) [tree; diag; plot] in
     (* wrapping *)
   let pyramid = 
