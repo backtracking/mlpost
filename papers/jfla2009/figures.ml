@@ -105,7 +105,7 @@ module Arrow = ExtArrow
 
 open Num
 let state = Box.tex ~style:circ_ ~stroke:(Some Color.black)
-let final = Box.box ~style:circ_ ~dx:zero ~dy:zero 
+let final = Box.box ~style:circ_ 
 
 let transition states tex pos ?outd ?ind x_name y_name = 
   let x = Box.get x_name states and y = Box.get y_name states in

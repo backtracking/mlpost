@@ -347,14 +347,16 @@ boîte circulaire. La fonction \texttt{final} est donc une fonction qui
 prend une boîte et qui renvoie une boîte.
 \begin{ocaml}
 let state = Box.tex ~style:Circle ~stroke:(Some Color.black)
-let final = Box.box ~style:Circle ~dx:zero ~dy:zero 
+let final = Box.box ~style:Circle
 \end{ocaml}
-Les paramètres \texttt{dy} et \texttt{dy} permettent de spécifier une
-marge entre le contenu de la boîte et son contour. Le paramètre
-\texttt{stroke} permet de spécifier si (et dans quelle couleur) le
-contour doit être tracé. Notez que les fonctions \texttt{Box.tex} et
-\texttt{Box.box} prennent un argument \texttt{name} permettant de
-nommer les boîtes pour y accéder plus tard.
+Le paramètre \texttt{stroke} permet de spécifier si (et dans quelle
+couleur) le contour doit être tracé. De manière générale, les
+fonctions \texttt{Box.tex} et \texttt{Box.box}, ainsi que toutes les
+autres fonctions de création de boîtes, disposent d'arguments
+optionnels \texttt{dx} et \texttt{dy} permettant de spécifier les
+marges séparant le contenu du contour de la boîte. Elles prennent
+également un argument \texttt{name} permettant de nommer les boîtes
+pour y accéder plus tard.
 
 La  fonction \texttt{initial} doit  apposer une  flèche entrante  à un
 état.  Il  s'agit donc  d'une fonction  qui prend un  état $q$  et qui
