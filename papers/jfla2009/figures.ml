@@ -253,7 +253,7 @@ let arrow_metapost =
      (Point.pt (cm 0., cm 0.5)) (Point.pt (cm 2., cm 0.5));
    Helpers.draw_simple_arrow
      (Point.pt (cm 4., cm 0.5)) (Point.pt (cm 6., cm 0.5));
-   Helpers.draw_simple_arrow ~outd:(vec (dir 90.))
+   Helpers.draw_simple_arrow ~dashed:Dash.evenly ~outd:(vec (dir 90.))
      (Point.pt (cm 8., cm 0.)) (Point.pt (cm 10., cm 0.));
    Helpers.draw_simple_arrow
      ~pen:(Pen.scale (bp 2.5) (Pen.square ()))
@@ -296,6 +296,7 @@ let uml_client, uml =
       (get "Client" diag) (get "BankAccount" diag) ]
 
 open Tree
+
 let sharing = 
   let tex s = tex ~name:s ~style:Circle ~dx:two ~dy:two s in
   let tree = 

@@ -1126,16 +1126,16 @@ module Helpers : sig
   val dotlabels :
     ?pos:Command.position -> string list -> Point.t list -> Command.t list
   val draw_simple_arrow :
-    ?color:Color.t -> ?pen:Pen.t -> 
+    ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
     Point.t -> Point.t -> Command.t
   val draw_label_arrow :
-    ?color:Color.t -> ?pen:Pen.t ->
+    ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
     ?pos:Command.position -> Picture.t -> 
     Point.t -> Point.t -> Command.t
   val draw_labelbox_arrow :
-    ?color:Color.t -> ?pen:Pen.t ->
+    ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
     ?pos:Command.position -> Box.t -> 
     Point.t -> Point.t -> Command.t

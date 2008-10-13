@@ -486,9 +486,6 @@ let automate =
 \end{ocaml}
 \end{minipage}
 
-% arbre -- JCF
-\paragraph{Arbres.}
-% TODO
 
 \subsection{Exemples utilisant des calculs en \ocaml}
 
@@ -666,7 +663,7 @@ aussi un module \texttt{Command} qui définit le type des commandes
 etc.
 
 \paragraph{Dépendances circulaires.}
-Cette partie de bas niveau de \mlpost\ présente néanmoins quelques
+La réalisation de ces modules de bas niveau présente quelques
 difficultés. Premièrement, la plupart des modules présentés sont {\em
   a priori} mutuellement récursifs : par exemple, les transformations
 s'appliquent à tous les autres objets, donc chaque module contient une
@@ -686,22 +683,27 @@ représentation symbolique des objets (par exemple, les projections
 \texttt{xpart} et \texttt{ypart} du module \texttt{Point} doivent
 retourner des numériques et non des flottants).
 
-Nous voulions présenter les interfaces de \mlpost\ avec des
-dépendances circulaires mais \ocaml\ ne permet pas de dépendances
+Nous souhaitons réaliser ces différents modules dans des fichiers
+différents mais \ocaml\ ne permet pas de dépendances
 circulaires entre des fichiers. Notre solution consiste à définir tous
-les types dans un seul fichier, qu'on appelle \texttt{types.mli}.
+les \emph{types} dans un seul fichier \texttt{types.mli}.
 Chaque module fait maintenant référence à ce fichier. Par exemple,
 dans le fichier \texttt{path.ml}, qui fournit l'implémentation du
 module \texttt{Path}, on trouvera
 \begin{ocaml}
   type t = Types.path
 \end{ocaml}
-Aucun de ces modules ne possède un fichier d'interface \texttt{.mli}. La
-dépendance circulaire entre les modules est alors cassée, de manière très
-classique.
-
-Il nous reste alors à réintroduire la circularité recherchée dans
-l'interface externe. Nous avons pour ce faire écrit un fichier
+La dépendance circulaire entre les modules est ainsi cassée de manière très
+classique. 
+En revanche, on souhaite cacher l'existence du module \texttt{Types} 
+pour les deux raisons suivantes : 
+\begin{itemize}
+\item la clarté des messages d'erreur ;
+\item la clarté de la documentation générée par \texttt{ocamldoc}.
+\end{itemize}
+On souhaite donc rétablir la circularité entre les modules
+au sein de l'interface du module \texttt{Mlpost}.
+Pour cela, on écrit un unique fichier
 \texttt{mlpost.mli} qui contient les définitions des signatures des
 modules à exporter :
 \begin{ocaml}
@@ -720,17 +722,18 @@ and Path : sig
 end
 ...
 \end{ocaml}
-Afin de pouvoir écrire ces signatures, tous ces modules sont en
-particulier déclarés de manière mutuellement récursive. La signature
+Toutes ces signatures sont
+déclarées de manière mutuellement récursive. La signature
 de \texttt{Point} peut ainsi faire référence à \texttt{Path} et
-inversement. Il suffit alors de fournir les implémentations de ces
-modules, à l'aide des fichiers \texttt{num.ml}, \texttt{point.ml} etc,
-qui ont tous été compilés et mis dans un {\em pack}. Cet agencement
-est également très pratique pour la documentation de l'API: c'est
+inversement. En revanche, les implémentations de ces 
+modules sont contenues dans des fichiers indépendants
+\texttt{num.ml}, \texttt{point.ml}, etc., 
+qui sont compilés avec l'option {\tt -for-pack Mlpost}. Cet agencement
+est également très pratique pour la documentation de l'API : c'est
 uniquement le fichier \texttt{mlpost.mli} qui sert d'entrée à
 l'outil \texttt{ocamldoc}.
 
-\paragraph{Hashconsing et traduction vers \metapost}
+\paragraph{Hashconsing et traduction vers \metapost.}
 
 Le choix d'une représentation symbolique de la plupart des objets impose
 des efforts supplémentaires pour minimiser l'utilisation de la mémoire
@@ -741,52 +744,57 @@ place aussi bien en mémoire que dans le fichier \metapost\ généré. C'est
 d'autant plus gênant que \metapost\ devra lire ce fichier et passera
 donc davantage de temps sur des calculs répétés.
 
-Nous utilisons donc la technique de {\em
+Pour y remédier, nous utilisons la technique du {\em
 hash-consing}~\cite{ConchonFilliatre06wml} appliquée à l'arbre de syntaxe
 abstraite. Cette technique permet de partager des valeurs structurellement
-égales. Elle utilise une table de hash globale qui stocke toutes les valeurs
+égales. Elle utilise une table de hachage globale qui stocke toutes les valeurs
 déjà créées. Avant de créer un nouvel objet, on regarde dans cette table si un
 objet structurellement égal existe déjà. Pour que le calcul de la valeur de
-hash ainsi que la comparaison des objets soit efficace, chaque (sous-)terme
-vient avec sa valeur de hash. Ainsi, on n'obtient pas seulement le partage de
+hachage ainsi que la comparaison des objets soit efficace, chaque (sous-)terme
+vient avec sa valeur de hachage. Ainsi, on n'obtient pas seulement le
+partage de 
 tous les sous-termes communs, mais également un test d'égalité très efficace,
 utile pour toute structure de données contenant ces valeurs : il suffit de
 comparer physiquement ces objets.
 
-Cett technique diminue l'utilisation de la mémoire, mais ne change rien {\em a
+Cette technique diminue l'utilisation de la mémoire, mais ne change rien {\em a
 priori} à la taille des fichiers générés. La structure hash-consée {\em
-réalise} le partage, mais elle ne sait pas quels sont les n\oe uds en effet
-utilisés au moins deux fois. Pour cela, il suffit de traverser la structure
-une fois en entier, en comptant le nombre de fois qu'on a passé chaque n\oe ud
-(cette information peut-être stockée efficacement dans une table, à l'aide de
-la valeur de hash calculée pour chaque n\oe ud pour le hash-consing ainsi que
-la comparaison efficace fournie par ce dernier).  Quand on passe un n\oe ud
+réalise} le partage, mais elle ne sait pas quels sont les n\oe uds
+effectivement 
+utilisés au moins deux fois. Pour cela, il suffit de traverser la
+structure, en comptant les occurrences de chaque n\oe ud.  Quand on
+visite un n\oe ud 
 déjà rencontré, on ne considère pas ses sous-n\oe uds. Il est néanmoins
 possible de rencontrer une nouvelle fois un sous-n\oe ud d'une structure,
-comme le montre l'arbe ci-dessous :
+comme le montre l'exemple ci-dessous :
 
 \begin{center}
 \includegraphics[scale=1.5]{tree.mps}
 \end{center}
 
-Dans cette configuration, le n\oe ud $f$ est réellement utilisé deux
+\noindent Dans cette configuration, le n\oe ud $f$ est réellement utilisé deux
 fois, alors que le n\oe ud $e$ n'est utilisé qu'un seule fois, par le
 n\oe ud $d$, même si celui-ci est utilisé deux fois à son tour.
+Autrement dit, on comptabilise pour chaque n\oe ud le nombre de
+flèches incidentes.
 
 Après cette analyse, la génération du fichier \metapost\ devient très simple :
-il suffit de traverser l'AST encore une fois, et quand on passe par un n\oe ud
-qui a été utilisé au moins deux fois, on lui attribue une variable et on
-ajoute une définition correspondante dans le code \metapost. Il faut néanmoins
+il suffit de traverser de nouveau l'arbre de syntaxe abstraite et,
+quand on visite un n\oe ud 
+qui est utilisé au moins deux fois,  on construit une définition
+\metapost\ pour cet objet. Il faut néanmoins
 prendre en compte les particularités syntaxiques de \metapost\ telles que la
 précédence inhabituelle des opérateurs arithmétiques et la restriction de
 l'application de certaines constructions à des variables. De cette façon, on
 arrive à avoir du code \metapost\ relativement petit\footnote{En l'absence de
-boucles \texttt{for} et de macros dans le code \metapost, nous avons observés,
-sans avoir fait de tests très exhaustifs, une taille du code généré similaire
-ou pas plus de deux fois plus grand que du code \metapost\ écrit à la main.
-}, malgré la délégation des calculs à \metapost.
+boucles \texttt{for} et de macros dans le code \metapost, nous avons observé,
+sans avoir fait de tests très exhaustifs, une taille du code généré du
+même ordre de grandeur que du code \metapost\ écrit à la main.},
+malgré la délégation des calculs à \metapost. 
 
 \subsection{Boîtes}\label{subsec:boxes}
+
+% TODO implémentation des boites
 
 - principe récursif : boîte = picture ou ensemble de boîtes + contour
 + fond
@@ -794,44 +802,47 @@ ou pas plus de deux fois plus grand que du code \metapost\ écrit à la main.
 - boîtes primitives
 - réunion, alignements
 
-\paragraph{Application : arbres}
+\paragraph{Application : arbres.}
 
-
+% TODO expliquer le code de Tree -- JCF
 
 
 
 \subsection{Flèches} \label{subsec:arrows} %% RB
 
-\metapost\ ne propose qu'un seul type de flèche :
+\metapost\ ne propose qu'un seul type de flèche.
+Une flèche \metapost\ suit  un chemin arbitraire   mais son tracé est
+limité aux différents styles de trait (plume et pointillés) et la tête
+de flèche est toujours la même : 
 \begin{center}
 \includegraphics{arrow_metapost.mps}
 \end{center}
-Les  flèches peuvent  suivre  n'importe quel  chemin  et peuvent  être
-tracées avec différents styles de  trait, mais il n'y a toujours qu'un
-seul trait  et la tête de  flèche est toujours la même. Avec \mlpost,
-l'utilisateur peut créer ses propres catégories de flèches.
-
-Le module \texttt{Arrow} dispose de deux types.
+Avec \mlpost, l'utilisateur peut créer ses propres catégories de
+flèches à l'aide du module \texttt{Arrow}. Celui-ci propose deux types :
 \begin{itemize}
 \item  Le  type \texttt{head}  décrit  comment  dessiner  une tête  de
   flèche.   Les  éléments de  type  \texttt{head}  sont des  fonctions
   prenant en argument la position et la direction de la tête de flèche
-  et renvoyant une commande dessinant la flèche.
+  et renvoyant une commande dessinant la tête de flèche.
 \item Le  type abstrait \texttt{kind} décrit une  catégorie de flèche.
-  On  part de  la catégorie  vide \texttt{empty},  puis on  ajoute des
-  traits et des têtes.
+  Une catégorie décrit les différents éléments dans le dessin d'une
+  flèche, les têtes de flèche pouvant en réalité être placées
+  n'importe où le long de la flèche.
+  Pour construire une nouvelle catégorie, on  part de  la catégorie
+  vide et on  ajoute des traits et des têtes.
 \end{itemize}
-
 La  fonction  \texttt{draw}  permet   de  dessiner  une  flèche  d'une
 catégorie donnée  en suivant un  chemin donné. Les flèches  sont alors
 dessinées  en   utilisant  les   primitives  de  \metapost.    Ceci  a
-l'inconvénient  d'utiliser   plus  de  ressources   mais  nous  permet
+l'inconvénient  d'utiliser   plus  de  ressources   mais   permet
 d'imaginer de nombreuses catégories de flèches.
 
-On peut émuler les flèches de \metapost. On part d'un corps vide et on
-lui ajoute un trait normal sur  toute la longueur.  On ajoute une tête
+On peut en particulier retrouver les flèches de \metapost. On part d'un
+corps vide et on 
+lui ajoute un trait normal sur  toute la longueur.  On ajoute enfin une tête
 triangulaire remplie, et on obtient :
 
+\medskip
 \begin{minipage}{0.2\linewidth}
   \includegraphics{arrow_simple.mps}
 \end{minipage}
@@ -839,11 +850,12 @@ triangulaire remplie, et on obtient :
 \begin{ocaml}
 let kind =
   Arrow.add_head ~head: Arrow.head_triangle_full
-    (Arrow.add_line Arrow.empty)
-in [ Arrow.draw ~kind (Path.pathp ...) ]
+    (Arrow.add_line Arrow.empty) in 
+[ Arrow.draw ~kind (...path...) ]
 \end{ocaml}
 \end{minipage}
 
+\medskip
 La  section~\ref{sec:automates}  contient   une  figure  décrivant  le
 fonctionnement de la fonction \texttt{loop}. Pour les besoins de cette
 figure, on  a créé un  type de flèche  spécial, composé d'un  début et
