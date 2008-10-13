@@ -176,7 +176,11 @@ peut citer au moins deux exemples de telle intégration :
 \end{itemize}
 C'est cette dernière approche qu'adopte \mlpost.
 
-% TODO dispo à \url{http://mlpost.lri.fr}
+\mlpost\ est librement distribué à l'adresse
+\url{http://mlpost.lri.fr}. 
+Toutes les figures de cet article ont été faites avec \mlpost, à
+l'exception des exemples pour \metapost\ et \nomdetikz.
+
 
 \medskip
 
@@ -849,7 +853,7 @@ triangulaire remplie, et on obtient :
 \begin{minipage}{0.2\linewidth}
 \begin{ocaml}
 let kind =
-  Arrow.add_head ~head: Arrow.head_triangle_full
+  Arrow.add_head ~head:Arrow.head_triangle_full
     (Arrow.add_line Arrow.empty) in 
 [ Arrow.draw ~kind (...path...) ]
 \end{ocaml}
@@ -867,50 +871,74 @@ Le code permettant d'obtenir cette  catégorie de flèche est le suivant
 :
 \begin{ocaml}
 let kind =
-  Arrow.add_belt ~point: 0.9
-    (Arrow.add_line ~dashed: Dash.evenly ~to_point: 0.1
-       (Arrow.add_line ~dashed: Dash.evenly ~from_point: 0.9
-          (Arrow.add_line ~from_point: 0.1 ~to_point: 0.9
+  Arrow.add_belt ~point:0.9
+    (Arrow.add_line ~dashed:Dash.evenly ~to_point:0.1
+       (Arrow.add_line ~dashed:Dash.evenly ~from_point:0.9
+          (Arrow.add_line ~from_point:0.1 ~to_point:0.9
              Arrow.empty)))
 \end{ocaml}
 
 \section{Conclusion}\label{conclusion}
 
-% contribution scientifique : qu'est-ce que garantie le typage d'ocaml
-% par rapport à une utilisation directe de metapost ? absence d'erreur
-% à l'exécution, par exemple ?
-
-% mlpost = langage déclaratif au dessus de metapost = langage
-% impératif / déclaratif
-
-% TODO : séparer points / vecteurs
-
-% pas fait / à faire
-
-Nous espérons avoir convaincu le lecteur des avantages que la
+Nous avons présenté \mlpost, une bibliothèque \ocaml\ au dessus de
+\metapost. Nous espérons avoir convaincu le lecteur des avantages que la
 présentation sous forme de bibliothèque apporte : familiarité avec le
 langage pour les programmeurs \ocaml, typage fort, des
-construction de programmation de haut-niveau etc.  
+construction de programmation de haut niveau, des dessins résultants
+de calculs arbitraires, etc.  
+\mlpost\ fournit volontairement un nombre de primitives restreint, car
+l'utilisateur peut aisément construire des
+extensions au dessus de \mlpost. En cela, \mlpost\ diffère de
+bibliothèques \LaTeX\ telles que \nomdetikz\ ou \pstricks, où de très
+nombreuses fonctionnalités sont fournies mais où il est très difficile
+d'en ajouter pour qui ne maîtrise pas \TeX.
 
-résolution d'équations
+L'une des forces de \mlpost\ est de proposer un style déclaratif, là
+où la majorité des bibliothèques graphiques propose un style
+impératif. Ceci permet en particulier un \emph{partage} immédiat de
+sous-éléments à travers une ou plusieurs figures.
+Une autre force de \mlpost\ est le typage statique directement hérité
+d'\ocaml. On évite ainsi l'immense majorité des erreurs à l'exécution
+de \metapost, souvent cryptiques. Il reste néanmoins les erreurs
+éventuellement contenues dans les extraits de \LaTeX\ ou les erreurs
+de nature géométrique telles que le remplissage d'un chemin en forme
+de 8. Nous pourrions envisager d'utiliser des types \ocaml\ plus
+précis, par exemple pour distinguer les chemins clos et non clos ou
+encore les points et les vecteurs.
 
-perspectives infinies d'extensions : 3D, animations, ...  plus facile
-de le faire en Caml qu'en \metapost\ ou en \LaTeX\ (\nomdetikz,
-\pstricks)
+Il reste une fonctionnalité intéressante de \metapost\ qui n'est
+pas interfacée dans \mlpost~: la résolution d'équations linéaires. 
+Il y a deux raisons à cela. D'une part, les équations servent souvent
+au placement implicite, et \mlpost\ fournit une alternative sous la
+forme de fonctions d'alignement de boîtes. D'autre part, la résolution
+d'équations de \metapost\ procède de manière impérative et il n'est
+pas simple de l'intégrer dans le contexte déclaratif qui est le nôtre.
 
-possibilité de changer de langage de sortie (\nomdetikz\ ou \postscript\
-directement, si on implémente une technique similaire à celle de \metapost\
-pour l'inclusion de \LaTeX)
+Enfin, il est important de noter que \mlpost\ n'est pas lié à
+\metapost\ de manière intrinsèque. On pourrait facilement ajouter une
+sortie \nomdetikz, ou même directement une sortie \postscript\ à
+condition d'utiliser une technique similaire à celle de \metapost\
+pour l'inclusion de \LaTeX.
 
-plein de sortes de flèches
+\medskip
+\noindent
+\begin{center}
+  \includegraphics[width=0.3\textwidth]{ford.mps}
 
-Toutes les figures de cet article, à l'exception des exemples pour \metapost\
-et \nomdetikz\ ont été faites avec \mlpost.
+\medskip
+\begin{minipage}{0.7\textwidth}
+  \begin{center}
+    \bf Remerciements
+  \end{center}
+  \centering
+  Les auteurs tiennent à remercier Florence Plateau, Yannick Moy et
+  Claude Marché pour leur contribution à \mlpost\ et Sylvie Boldo pour
+  la suggestion du titre de l'article.
+\end{minipage}
 
-\paragraph{Remerciements.} Les auteurs tiennent à remercier Florence
-Plateau, Yannick Moy et Claude Marché pour leur contribution à \mlpost\ et
-Sylvie Boldo pour la suggestion du titre de l'article.
-
+\medskip
+  \includegraphics[angle=180,width=0.3\textwidth]{ford.mps}
+\end{center}
 
 % La bibliographie
 % N'oubliez pas de l'inclure lors de votre soumission.

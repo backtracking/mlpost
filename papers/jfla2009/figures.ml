@@ -355,6 +355,28 @@ let persistance =
 let bresenham =
   [nop]
 
+let ford n =
+  let u x = Num.bp (200.0 *. x) in
+  let circle x y r =
+    Command.draw ~color:Color.black
+      (Path.shift (Point.pt (u x, u y))
+	 (Path.scale (u (2.*.r)) fullcircle)) 
+  in    
+  let rec aux acc p1 q1 p2 q2 =
+    let p = p1 + p2 in
+    let q = q1 + q2 in
+    if q>n then acc else
+      let fq = float q in
+      let fr = 0.5 /. fq /. fq in
+      let acc = circle (float p /. fq) fr fr :: acc in
+      let acc = aux acc p1 q1 p q in
+      aux acc p q p2 q2
+  in
+  let l = aux [] 0 1 1 1 in
+  let pic = Picture.make (Command.seq l) in
+  Picture.scale (Num.bp 30.0) pic
+     
+
 let () = Metapost.emit "automate_1" automate_1
 let () = Metapost.emit "automate" automate
 let () = Metapost.emit "loop_explain" loop_explain
@@ -371,4 +393,6 @@ let () = Metapost.emit "stages" stages
 let () = Metapost.emit "simple" simple
 let () = Metapost.emit "align" align
 let () = Metapost.emit "persistance" persistance
+let () = Metapost.emit "ford" [Command.draw_pic (ford 17)]
+
 
