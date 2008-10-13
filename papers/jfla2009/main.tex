@@ -89,11 +89,12 @@ forme de macros \nomdetikz\ et d'éditer le résultat.
 Les bibliothèques \LaTeX\ telles que \pstricks\ ou \nomdetikz\ offrent
 l'intégration la plus naturelle avec \LaTeX. En particulier, elles
 permettent de combiner arbitrairement éléments graphiques et textes
-\LaTeX\ \begin{tikzpicture}[baseline=(a.base)]
-\path[use as bounding box] 
-  (0,0) node[draw,style=dashed] (a) {comme ceci};
-\draw[->] (a) .. controls +(-2cm,1cm) and +(-2cm,-0cm) .. (a);
-\end{tikzpicture}.
+\LaTeX\ 
+% \begin{tikzpicture}[baseline=(a.base)]
+% \path[use as bounding box] 
+%   (0,0) node[draw,style=dashed] (a) {comme ceci};
+% \draw[->] (a) .. controls +(-2cm,1cm) and +(-2cm,-0cm) .. (a);
+% \end{tikzpicture}.
 En revanche, elles demandent d'apprendre un certain nombre de
 macros et de notations et souffrent surtout des défauts inhérents à
 \LaTeX~:
@@ -116,7 +117,8 @@ des équations. En revanche, le langage de \metapost\ s'inspire de
 celui de \metafont~\cite{metafont} et présente, à l'exception de la
 syntaxe, les défauts soulevés ci-dessus. La figure~\ref{fig:metapost}
 donne un exemple de programme/figure réalisé avec \metapost.
-\begin{figure}[h]
+\begin{figure}[t]
+\vspace*{1em}
 \begin{minipage}{.3\linewidth}
   \includegraphics{figmp.mps}
 \end{minipage}
@@ -143,7 +145,7 @@ donne un exemple de programme/figure réalisé avec \metapost.
 Dans un souci d'exhaustivité, nous devons aussi mentionner
 \asymptote\cite{asymptote}, également un langage dédié à la création
 de figures. Nous n'allons pas rentrer dans les détails de cet outil
-car nous ne considéront plus les langages dédiés par la suite.
+car nous ne considérons plus les langages dédiés par la suite.
 
 Une alternative séduisante aux solutions précédentes consiste à
 utiliser un langage de programmation existant. Ainsi l'utilisateur n'a
@@ -188,7 +190,7 @@ Enfin, la section~\ref{conclusion} ...
 \paragraph{Boîtes.}
 Les briques de base de \mlpost\ sont les \textit{boîtes} : une boîte
 est un moyen d'encapsuler n'importe quel élément de dessin au sein
-d'un coutour, qui peut être effectivement tracé ou non. On peut
+d'un contour, qui peut être effectivement tracé ou non. On peut
 construire la boîte vide, des boîtes avec du \LaTeX\ arbitraire, etc.
 Ces boîtes peuvent ensuite être manipulées : imbrication arbitraire,
 placement à une position précise, alignement de plusieurs boîtes,
@@ -198,15 +200,13 @@ seule afin de pouvoir les déplacer ensemble.  L'exemple suivant montre
 deux boîtes simples, la deuxième déplacée un peu à droite, en
 utilisant la fonction \verb|shift|.
 
-\begin{minipage}{0.4\linewidth}
+\begin{minipage}{0.2\linewidth}
   \includegraphics{simple.mps}
 \end{minipage}
-\begin{minipage}{0.4\linewidth}
+\begin{minipage}{0.8\linewidth}
 \small\begin{ocaml}
-let simple = 
-  [ draw (tex "\\LaTeX");
-    draw (shift (Point.pt (cm 1., zero)) 
-           (circle (empty ()))) ]
+[ draw (tex "\\LaTeX");
+  draw (shift (Point.pt (cm 1., zero)) (circle (empty ()))) ]
 \end{ocaml}
 \end{minipage}
 % Notez que par défaut, le contour de la boîte contenant du \LaTeX n'a
@@ -225,111 +225,126 @@ superposer à $B$. Il faut alors replacer toutes les boîtes de votre
 figure manuellement. Pour éviter ça, \mlpost\ propose diverses
 méthodes pour placer les boîtes \emph{les unes par rapport aux
   autres}. On gagne alors du temps lors de la création et lors des
-modifications de la figure.  L'exemple suivant montre la même figure
-qu'avant, mais en utilisant l'alignement horizontal \verb|hbox|
-(l'argument optionnel \texttt{padding} permet de spécifier
-l'espacement horizontal entre deux boîtes):
+modifications de la figure.  L'exemple suivant utilise l'alignement
+horizontal \verb|hbox|, où l'argument optionnel \texttt{padding}
+permet de spécifier l'espacement horizontal entre deux boîtes :
 
-\begin{minipage}{0.4\linewidth}
+\medskip
+\begin{minipage}{0.2\linewidth}
   \includegraphics{align.mps}
 \end{minipage}
-\begin{minipage}{0.4\linewidth}
+\begin{minipage}{0.8\linewidth}
 \small\begin{ocaml}
-let align = 
-  [ draw
-    (hbox ~padding:(cm 1.) 
-      [tex "\\LaTeX"; 
-       circle (empty ())]) ]
+[ draw (hbox ~padding:(cm 1.) [tex "\\LaTeX"; circle (empty ())]) ]
 \end{ocaml}
 \end{minipage}
 
-\noindent Nous revenons plus en détail sur les boîtes et leur
+\medskip\noindent Nous revenons plus en détail sur les boîtes et leur
 implémentation dans la section~\ref{subsec:boxes}.
 
 \paragraph{Persistance.}
-Un autre choix que nous avons fait est celui de la persistance :
+Un autre choix que nous avons fait est celui de la
+persistance~\cite{persistance} : 
 lorsqu'un attribut d'une boîte (positionnement, couleur, etc.) est
 modifié, on obtient une nouvelle boîte, identique à la première sauf
 en l'attribut changé. En faisant le choix de structures de données
 persistantes, nous permettons à l'ancienne boîte, avec ses attributs
-inchangés, d'être préservée et encore accessible. Cela a l'avantage de
-pouvoir réutiliser plus facilement une boîte à plusieurs endroits
-différents du dessin, avec des attributs différents. En déplacant une
-boîte, on en a créé une nouvelle et laissé l'ancienne intacte à sa
-place.
+inchangés, d'être préservée et encore accessible. Ainsi, on peut
+réutiliser plus facilement une boîte à plusieurs endroits
+du dessin, avec des attributs différents. Dans l'exemple suivant, on a
+utilisé trois instances de la même boîte \texttt{b}, dont le contour
+est tracé pour la deuxième.
+
+\medskip
+\begin{minipage}{0.2\linewidth}
+  \includegraphics{persistance.mps}
+\end{minipage}
+\begin{minipage}{0.8\linewidth}
+\small\begin{ocaml}
+let b = hbox ~padding:(cm 1.) [tex "\\LaTeX"; circle (empty ())] in
+[draw (vbox [b; set_stroke Color.black b; b])]
+\end{ocaml}
+\end{minipage}
 
 %TODO exemple ici qui introduit les noms des boites et les avantages /
 %inconvénients de la persistance
 
 \subsection{Exemples}
 
-Dans cette section, nous montrons quelques petits exemples de développement de
-dessin en \mlpost. 
+Dans cette section, nous montrons quelques applications immédiates des
+boîtes de \mlpost. 
 
-\paragraph{Représentation de la mémoire}
+\paragraph{Représentation de la mémoire.}
 % blocs mémoire (listes, etc.) -- JCF
 % introduire Box.vblock
+% introduire les noms de boites
 
-\paragraph{Diagrammes de classes}
+De manière générale, les
+fonctions \texttt{Box.tex} et \texttt{Box.box}, ainsi que toutes les
+autres fonctions de création de boîtes, disposent d'arguments
+optionnels \texttt{dx} et \texttt{dy} permettant de spécifier les
+marges séparant le contenu du contour de la boîte. Elles prennent
+également un argument \texttt{name} permettant de nommer les boîtes
+pour y accéder plus tard.
 
-Avec la fonction \texttt{Box.vblock} vue auparavant, il est facile
-d'implémenter une fonction qui dessine un rectangle correspondant à
-une classe :
+\paragraph{Diagrammes de classes.}
+Avec la fonction \texttt{Box.vblock} introduite ci-dessus, il est facile
+de dessiner des diagrammes UML. Supposons que l'on veuille dessiner
+des schémas de classes tels que :
+\begin{center}
+  \includegraphics{uml_client.mps}
+\end{center}
+Pour cela, introduisons une fonction \texttt{classblock} qui attend le
+nom de la classe ainsi que la liste des attributs et des méthodes. 
 \begin{ocaml}
 let classblock name attr_list method_list = 
-  let tex = Box.tex ~stroke:None in
   let vbox = Box.vbox ~pos:`Left in
-    Box.vblock ~pos:`Left ~name
-    [ tex ("{\\bf " ^ name ^ "}");
-      vbox (List.map tex attr_list); vbox (List.map tex method_list)
-    ]
+  Box.vblock ~pos:`Left ~name
+  [ tex ("{\\bf " ^ name ^ "}");
+    vbox (List.map tex attr_list); vbox (List.map tex method_list) ]
 \end{ocaml}
-\texttt{classblock} est une fonction qui attend le nom de la classe
-ainsi que la liste des attributs et des méthodes. Ici, le nom
+Ici, le nom
 \texttt{name} de la classe est utilisé à la fois pour désigner le
-schéma dans le diagramme (l'argument labelisé à \texttt{Box.vblock})
+schéma dans le diagramme (l'argument labelisé \url{~name} de
+\texttt{Box.vblock}) 
 et comme titre du schéma créé. Les attributs et les méthodes sont alignés
-verticalement séparément, et après on aligne le titre et les deux nouvelles
-boîtes obtenues en les encadrant. On obtient avec peu d'effort une fonction
-qui crée un bloc d'une classe.
-
+verticalement indépendamment, puis on aligne le titre et les deux nouvelles
+boîtes obtenues en les encadrant. 
 On peut maintenant s'en servir pour dessiner un petit diagramme de classes :
 
-\begin{minipage}{0.3\linewidth}
+\medskip
+\begin{minipage}{0.35\linewidth}
   \includegraphics{uml.mps}
 \end{minipage}
-\begin{minipage}{0.3\linewidth}
+\begin{minipage}{0.6\linewidth}
 \small\begin{ocaml}
-let uml = 
-  let a = classblock "BankAccount" 
-            [ "balance : Dollars = $0$"] 
-            ["deposit (amount : Dollars)"; 
-             "withdraw (amount : Dollars)" ] 
-  in
-  let b = classblock "Client" ["name : String"; 
-                               "address : String" ] [] in
-  let diag = Box.vbox ~padding:(cm 1.) [a;b] in
-  [ Box.draw diag; 
-    box_label_arrow ~pos:`Left (Picture.tex "owns") 
-      (get "Client" diag) (get "BankAccount" diag) ]
+let a = classblock "BankAccount" 
+          [ "balance : Dollars = $0$"] 
+          [ "deposit (amount : Dollars)"; 
+            "withdraw (amount : Dollars)" ] in
+let b = classblock "Client" 
+          ["name : String"; "address : String" ] [] in
+let diag = Box.vbox ~padding:(cm 1.) [a;b] in
+[ Box.draw diag; 
+  box_label_arrow ~pos:`Left (Picture.tex "owns") 
+    (get "Client" diag) (get "BankAccount" diag) ]
 \end{ocaml}
 \end{minipage}
 \vspace{1em}
 
 Ici, on a d'abord créé deux schémas de classe avec la fonction
-\texttt{classblock}. Ces schémas sont ensuite alignés verticalement, et une
-flèche avec une étiquette est dessinée entre ces deux classes. En tout, le
-code pour cette figure est conceptuellement très simple, contient aucun
-placement absolu et ne dépasse pas les 20 lignes de code.
+\texttt{classblock}. Ces schémas sont ensuite alignés verticalement,
+et une flèche avec une étiquette est dessinée entre ces deux classes
+avec \texttt{box\_label\_arrow}. Le code pour cette figure est
+conceptuellement très simple, ne contient aucun placement absolu et ne
+dépasse pas les 15 lignes de code.
 
 % automate -- RB
-\paragraph{Automates}
-
-\label{sec:automates}
+\paragraph{Automates.}\label{sec:automates}
 L'un des principes de  \mlpost\ est la possibilité d'écrire facilement
-des librairies. Par exemple, si  vous étudiez la théorie des langages,
-vous  pouvez   écrire  une   librairie  spécialisée  dans   le  dessin
-d'automates.   Une façon  de  faire consiste  à  écrire les  fonctions
+des bibliothèques. Si on étudie la théorie des langages,
+on est rapidement amené à dessiner des automates. Illustrons une façon
+d'utiliser \mlpost\ dans ce but. On va définir les fonctions 
 suivantes :
 \begin{itemize}
 \item \texttt{state} pour créer un état ;
@@ -338,50 +353,22 @@ suivantes :
 \item \texttt{transition} pour dessiner une transition d'un état à un autre ;
 \item \texttt{loop} pour dessiner une transition d'un état vers lui-même.
 \end{itemize}
-
+On choisit de représenter les états par des boîtes \mlpost.
 La  fonction \texttt{state}  renvoie simplement  une boîte  au contour
-circulaire, à placer où  on veut. La fonction \texttt{final} consiste
-à  rajouter  un  deuxième   cercle  autour  d'un  état.   En  première
-approximation, il  suffit donc  de placer cet  état dans  une deuxième
-boîte circulaire. La fonction \texttt{final} est donc une fonction qui
-prend une boîte et qui renvoie une boîte.
+circulaire.
 \begin{ocaml}
 let state = Box.tex ~style:Circle ~stroke:(Some Color.black)
+\end{ocaml}
+Le paramètre \texttt{stroke} permet de spécifier si le contour doit
+être tracé et, le cas échéant, dans quelle
+couleur. La fonction \texttt{final} consiste 
+à  rajouter  un  deuxième   cercle  autour  d'un  état. C'est une
+fonction qui prend une boîte et qui renvoie une boîte.
+\begin{ocaml}
 let final = Box.box ~style:Circle
 \end{ocaml}
-Le paramètre \texttt{stroke} permet de spécifier si (et dans quelle
-couleur) le contour doit être tracé. De manière générale, les
-fonctions \texttt{Box.tex} et \texttt{Box.box}, ainsi que toutes les
-autres fonctions de création de boîtes, disposent d'arguments
-optionnels \texttt{dx} et \texttt{dy} permettant de spécifier les
-marges séparant le contenu du contour de la boîte. Elles prennent
-également un argument \texttt{name} permettant de nommer les boîtes
-pour y accéder plus tard.
 
-La  fonction \texttt{initial} doit  apposer une  flèche entrante  à un
-état.  Il  s'agit donc  d'une fonction  qui prend un  état $q$  et qui
-renvoie une commande dessinant une  flèche vers $q$. On pourrait aussi
-renvoyer une  boîte sans  contour contenant $q$  et la flèche,  ce qui
-permettrait   d'utiliser  \texttt{initial}  de   la  même   façon  que
-\texttt{final}.   Cependant, la  boîte  obtenue n'aurait  pas la  même
-taille et  la même forme que  $q$, ce qui poserait  des problèmes pour
-placer $q$ ou pour dessiner des transitions vers ou à partir de $q$.
-\begin{ocaml}
-let initial states pos name =
-  let x = Box.get name states in
-  let p = match pos with
-    | `Left -> Box.west x
-    | `Right -> Box.east x
-    | `Top -> Box.north x
-    | `Bot -> Box.south x
-  in
-  Arrow.draw (Path.pathp [ Point.shift p (Point.pt (cm (-0.3), zero)); p ])
-\end{ocaml}
-La fonction  accède à  la boîte \texttt{x}  par son  nom \texttt{name}
-dans la  boîte \texttt{states}, qui  doit être une boîte  englobant en
-particulier l'état désigné par \texttt{name}.
-
-On peut maintenant  placer des états, initiaux ou  non, finaux ou non,
+On peut déjà placer des états, finaux ou non,
 et  les  dessiner.   Pour  le  placement,  on  utilise  les  fonctions
 d'alignement    horizontal    et    vertical   \texttt{Box.hbox}    et
 \texttt{Box.vbox}. On  suit donc le  principe consistant à  placer les
@@ -390,21 +377,40 @@ objets de façon relative, les uns par rapport aux autres.
 \begin{minipage}{0.2\linewidth}
   \includegraphics{automate_1.mps}
 \end{minipage}
-\begin{minipage}{0.2\linewidth}
+\begin{minipage}{0.7\linewidth}
 \begin{ocaml}
-let automate =
-  let states = Box.vbox ~padding: (cm 0.8)
-    [ Box.hbox ~padding: (cm 1.4)
-      [ state ~name: "alpha" "$\\alpha$";
-        state "$\\beta$" ];
-      final (state "$\\gamma$") ]
-  in
-  [ Box.draw states;
-    initial states `Left "alpha" ]
+let states = Box.vbox ~padding:(cm 0.8)
+  [ Box.hbox ~padding:(cm 1.4)
+    [ state ~name:"alpha" "$\\alpha$"; state "$\\beta$" ];
+    final (state "$\\gamma$") ]
+in
+[ Box.draw states ]
 \end{ocaml}
 \end{minipage}
 
-La fonction  \texttt{transition} doit dessiner une flèche  d'un état à
+\medskip\noindent On note que l'ensemble des états est lui-même une boîte,
+\texttt{states}, contenant les états comme autant de sous-boîtes nommées.
+
+La  fonction \texttt{initial} appose une  flèche entrante  à un
+état.  Il  s'agit donc  d'une fonction  qui prend un  état $q$  et qui
+renvoie une commande dessinant une  flèche vers $q$. On pourrait aussi
+renvoyer une  boîte sans  contour contenant $q$  et la flèche,  ce qui
+permettrait   d'utiliser  \texttt{initial}  de   la  même   façon  que
+\texttt{final}.   Cependant, la  boîte  obtenue n'aurait  pas la  même
+taille et  la même forme que  $q$, ce qui poserait  des problèmes pour
+placer $q$ ou pour dessiner des transitions vers ou à partir de $q$.
+\begin{ocaml}
+let initial states name =
+  let b = Box.get name states in
+  let p = Box.west b in
+  Arrow.draw (Path.pathp [ Point.shift p (Point.pt (cm (-0.3), zero)); p ])
+\end{ocaml}
+La fonction  accède à  la boîte \texttt{b}  par son  nom \texttt{name}
+dans la  boîte \texttt{states} et détermine le point d'arrivée de la
+flèche avec \texttt{Box.west}. On pourrait généraliser cette fonction
+pour spécifier la position de la flèche.
+
+La fonction \texttt{transition} dessine une flèche  d'un état à
 un autre. Cette fonction prend deux arguments optionnels \texttt{outd}
 et \texttt{ind} pour spécifier, en degrés, la direction sortante et la
 direction entrante  de la  flèche. On doit  les convertir  en vecteurs
@@ -423,8 +429,8 @@ let transition states tex pos ?outd ?ind x_name y_name =
 La    fonction   \texttt{loop}   est    similaire   à    la   fonction
 \texttt{transition},   mais  elle   doit  calculer   un   chemin  plus
 complexe. En  effet, \texttt{cpath} appliqué à  deux boîtes identiques
-renvoie un chemin vide et on  ne peut donc pas l'utiliser. A la place,
-on calcule un point $A$ suffisamment  éloigné de la boîte, et on trace
+renvoie un chemin vide et on  ne peut donc pas l'utiliser. À la place,
+on calcule un point $A$ suffisamment  éloigné de la boîte et on trace
 un chemin  qui part du centre, qui  passe par $A$ puis  qui revient au
 centre.
 
@@ -433,29 +439,22 @@ centre.
 \end{minipage}
 \begin{minipage}{0.2\linewidth}
 \small\begin{ocaml}
-let loop states tex pos name =
+let loop states tex name =
   let box = Box.get name states in
-  let fdir, angle, x, y = match pos with
-    | `Top -> Box.north, 0., 0., 0.4
-    | `Left -> Box.west, 90., (-0.4), 0.
-    | `Bot -> Box.south, 180., 0., (-0.4)
-    | `Right -> Box.north, 270., 0.4, 0.
-  in
-  let a = Point.shift (fdir box) (Point.pt (cm x, cm y)) in
+  let a = Point.shift (Box.south box) (Point.pt (cm 0., cm (-0.4))) in
   let c = Box.ctr box in
   let p = Path.pathk [
-    knotp ~r: (vec (dir (angle +. 45.))) c;
+    knotp ~r:(vec (dir 225.)) c;
     knotp a;
-    knotp ~l: (vec (dir (angle -. 45.))) c;
+    knotp ~l:(vec (dir 135.)) c;
   ] in
   let bp = Box.bpath box in
-  Arrow.draw ~tex ~pos: (pos :> Command.position)
-    (cut_after bp (cut_before bp p))
+  Arrow.draw ~tex ~pos:`Bot (cut_after bp (cut_before bp p))
 \end{ocaml}
 \end{minipage}
 
 On  peut maintenant  dessiner  facilement des  automates en  utilisant
-cette librairie.
+cette bibliothèque.
 
 \begin{minipage}{0.2\linewidth}
   \includegraphics{automate.mps}
@@ -463,28 +462,28 @@ cette librairie.
 \begin{minipage}{0.2\linewidth}
 \small\begin{ocaml}
 let automate =
-  let states = Box.vbox ~padding: (cm 0.8)
-    [ Box.hbox ~padding: (cm 1.4)
-        [ state ~name: "alpha" "$\\alpha$";
-          state ~name: "beta" "$\\beta$" ];
-      final ~name: "gamma" (state "$\\gamma$") ]
+  let states = Box.vbox ~padding:(cm 0.8)
+    [ Box.hbox ~padding:(cm 1.4)
+        [ state ~name:"alpha" "$\\alpha$";
+          state ~name:"beta" "$\\beta$" ];
+      final ~name:"gamma" (state "$\\gamma$") ]
   in
   [ Box.draw states;
     transition states "a" `Lowleft "alpha" "gamma";
     transition states "b" `Lowright "gamma" "beta";
-    transition states "c" `Top ~outd: 25. ~ind: 335. "alpha" "beta";
-    transition states "d" `Bot ~outd: 205. ~ind: 155. "beta" "alpha";
-    loop states "e" `Bot "gamma";
-    initial states `Left "alpha" ]
+    transition states "c" `Top ~outd:25. ~ind:335. "alpha" "beta";
+    transition states "d" `Bot ~outd:205. ~ind:155. "beta" "alpha";
+    loop states "e" "gamma";
+    initial states "alpha" ]
 \end{ocaml}
 \end{minipage}
 
-\subsection{Autres extensions : arbres et graphes de fonctions}
+\subsection{Autres applications : arbres et graphes de fonctions}
 
 % arbre -- JCF
 
 % plot -- SL
-Un autre exemple d'extension que nous avons développée au sein
+Un autre exemple d'application que nous avons développée au sein
 d'\mlpost{} est \texttt{Plot}, qui permet de tracer des graphes de
 fonction. La figure suivante montre un exemple très simple
 d'utilisation de cette extension:
@@ -499,7 +498,7 @@ let graph_sqrt =
   let sk = Plot.mk_skeleton 4 2 u u in
   let label = Picture.tex "$\\sqrt x$", `Top, 3 in
   let graph = Plot.draw_func ~label (fun x -> sqrt (float x)) sk in
-    [graph; Plot.draw_simple_axes "$x$" "$y$" sk]
+  [graph; Plot.draw_simple_axes "$x$" "$y$" sk]
 \end{ocaml}
 \end{minipage}
 
@@ -509,7 +508,7 @@ cannevas de 4 unités sur 2, qui est l'objet de base de l'extension
 et des axes au sein de ce cannevas, comme illustré ci-dessus.
 L'extension dispose de beaucoup d'options (tracé de la grille,
 affichage des abscisses et ordonnées, différents types de graphes de
-fonctions) qui permettent de réaliser des figures plus compliquées.
+fonctions) qui permettent de réaliser des figures plus complexes.
 L'exemple suivant, réalisé par Florence Plateau,
 provient d'un problème réel~\cite{MandelPlateau08} et illustre un
 certain nombre des possibilités de l'extension \texttt{Plot}.
@@ -867,6 +866,7 @@ et \nomdetikz\ ont été faites avec \mlpost.
 \paragraph{Remerciements.} Les auteurs tiennent à remercier Florence
 Plateau, Yannick Moy et Claude Marché pour leur contribution à \mlpost\ et
 Sylvie Boldo pour la suggestion du titre de l'article.
+
 
 % La bibliographie
 % N'oubliez pas de l'inclure lors de votre soumission.

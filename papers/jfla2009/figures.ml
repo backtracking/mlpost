@@ -124,6 +124,7 @@ let transition states tex pos ?outd ?ind x_name y_name =
   let bp = Box.bpath box in
   cut_after bp (cut_before bp p)*)
 
+(*
 let loop states tex pos name =
   let box = Box.get name states in
   let fdir, angle, x, y = match pos with
@@ -142,6 +143,18 @@ let loop states tex pos name =
   let bp = Box.bpath box in
   Arrow.draw ~tex ~pos: (pos :> Command.position)
     (cut_after bp (cut_before bp p))
+*)
+let loop states tex name =
+  let box = Box.get name states in
+  let a = Point.shift (Box.south box) (Point.pt (cm 0., cm (-0.4))) in
+  let c = Box.ctr box in
+  let p = Path.pathk [
+    knotp ~r: (vec (dir 225.)) c;
+    knotp a;
+    knotp ~l: (vec (dir 135.)) c;
+  ] in
+  let bp = Box.bpath box in
+  Arrow.draw ~tex ~pos:`Bot (cut_after bp (cut_before bp p))
 
 let arrow_loop_explain_kind =
   Arrow.add_belt ~point: 0.9
@@ -194,6 +207,7 @@ let loop_explain =
     Arrow.draw ~tex: "$45°$" ~pos: `Upleft ~kind: arc_arrow arc;
   ]
 
+(*
 let initial states pos name =
   let x = Box.get name states in
   let p = match pos with
@@ -203,6 +217,11 @@ let initial states pos name =
     | `Bot -> Box.south x
   in
   Arrow.draw (Path.pathp [ Point.shift p (Point.pt (cm (-0.3), zero)); p ])
+*)
+let initial states name =
+  let b = Box.get name states in
+  let p = Box.west b in
+  Arrow.draw (Path.pathp [ Point.shift p (Point.pt (cm (-0.3), zero)); p ])
 
 let automate_1 =
   let states = Box.vbox ~padding:(cm 0.8)
@@ -211,8 +230,7 @@ let automate_1 =
         state "$\\beta$" ];
       final (state "$\\gamma$") ]
   in
-  [ Box.draw states;
-    initial states `Left "alpha" ]
+  [ Box.draw states ]
 
 let automate =
   let states = Box.vbox ~padding: (cm 0.8)
@@ -226,8 +244,8 @@ let automate =
     transition states "b" `Lowright "gamma" "beta";
     transition states "c" `Top ~outd: 25. ~ind: 335. "alpha" "beta";
     transition states "d" `Bot ~outd: 205. ~ind: 155. "beta" "alpha";
-    loop states "e" `Bot "gamma";
-    initial states `Left "alpha" ]
+    loop states "e" "gamma";
+    initial states "alpha" ]
 
 let arrow_metapost =
   [Helpers.draw_simple_arrow ~outd:(vec (dir 90.)) ~ind:(vec (dir 90.))
@@ -258,14 +276,12 @@ let arrow_loop_explain =
 
 (* Johannes *)
 open Box
-let uml = 
+let uml_client, uml = 
   let classblock name attr_list method_list = 
-    let tex = Box.tex ~stroke:None in
     let vbox = Box.vbox ~pos:`Left in
-      Box.vblock ~pos:`Left ~name
+    Box.vblock ~pos:`Left ~name
       [ tex ("{\\bf " ^ name ^ "}");
-        vbox (List.map tex attr_list); vbox (List.map tex method_list)
-      ]
+        vbox (List.map tex attr_list); vbox (List.map tex method_list) ]
   in
   let a = classblock "BankAccount" 
             [ "balance : Dollars = $0$"] 
@@ -273,6 +289,7 @@ let uml =
   in
   let b = classblock "Client" ["name : String"; "address : String" ] [] in
   let diag = Box.vbox ~padding:(cm 1.) [a;b] in
+  [Box.draw b],
   [ Box.draw diag; 
     box_label_arrow ~pos:`Left (Picture.tex "owns") 
       (get "Client" diag) (get "BankAccount" diag) ]
@@ -321,15 +338,15 @@ let stages =
 
 let simple = 
   [ draw (tex "\\LaTeX");
-    draw (shift (Point.pt (cm 1., zero)) 
-           (circle (empty ()))) ]
+    draw (shift (Point.pt (cm 1., zero)) (circle (empty ()))) ]
 
 let align = 
   [ draw
-    (hbox ~padding:(cm 1.) 
-      [tex "\\LaTeX"; 
-       circle (empty ())]) ]
+    (hbox ~padding:(cm 1.) [tex "\\LaTeX"; circle (empty ())]) ]
 
+let persistance = 
+  let b = hbox ~padding:(cm 1.) [tex "\\LaTeX"; circle (empty ())] in
+  [draw (vbox [b; set_stroke Color.black b; b])]
 
 
 (* JC *)
@@ -339,6 +356,7 @@ let bresenham =
 let () = Metapost.emit "automate_1" automate_1
 let () = Metapost.emit "automate" automate
 let () = Metapost.emit "loop_explain" loop_explain
+let () = Metapost.emit "uml_client" uml_client
 let () = Metapost.emit "uml" uml
 let () = Metapost.emit "graph_sqrt" graph_sqrt
 let () = Metapost.emit "architecture" architecture
@@ -350,3 +368,5 @@ let () = Metapost.emit "arrow_loop_explain" arrow_loop_explain
 let () = Metapost.emit "stages" stages
 let () = Metapost.emit "simple" simple
 let () = Metapost.emit "align" align
+let () = Metapost.emit "persistance" persistance
+
