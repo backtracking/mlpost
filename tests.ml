@@ -331,11 +331,16 @@ let shapes2 =
     ]
 
 let farey n =
+  let u x = Num.bp (200.0 *. x) in
   let circle x y r =
-    Command.draw ~color:Color.black
-      ~pen:(Pen.scale (Num.bp 0.001) (Pen.circle ()))
-      (Path.shift (Point.pt (Num.bp x, Num.bp y))
-	 (Path.scale (Num.bp (2.*.r)) fullcircle)) 
+    Command.fill ~color:Color.lightgray 
+      (Path.shift (Point.pt (u y, u x))
+	 (Path.scale (u (2.*.r)) fullcircle)) 
+  in    
+  let quartercircle x y r theta =
+    Command.draw 
+      (Path.shift (Point.pt (u y, u x))
+	 (Path.scale (u (2.*.r)) (Path.rotate theta quartercircle))) 
   in    
   let rec aux acc p1 q1 p2 q2 =
     let p = p1 + p2 in
@@ -347,7 +352,10 @@ let farey n =
       let acc = aux acc p1 q1 p q in
       aux acc p q p2 q2
   in
-  let l = aux [circle 0.0 0.5 0.5; circle 1.0 0.5 0.5] 0 1 1 1 in
+  let l = 
+    aux [ quartercircle 0.0 0.5 0.5 90.0; 
+	  quartercircle 1.0 0.5 0.5 180.0] 
+      0 1 1 1 in
   let pic = Picture.make (Command.seq l) in
   Picture.scale (Num.bp 30.0) pic
       
@@ -358,7 +366,7 @@ let figs = [
   d7; 
   (* recursion *)
   d11; d12 ; 
-  [Command.draw_pic (farey 11)];
+  [Command.draw_pic (farey 17)];
   (* other *)
   florence; [Box.draw shapes1]; [Box.draw shapes2]; 
   d14; d13;
@@ -383,12 +391,13 @@ let () =
       fprintf fmt "\\documentclass[a4paper]{article}@.";
       fprintf fmt "\\usepackage[T1]{fontenc}@.";
       fprintf fmt "\\usepackage{times}@.";
+      fprintf fmt "\\usepackage{fullpage}@.";
       fprintf fmt "\\usepackage[]{graphicx}@.";
       fprintf fmt "@[<hov 2>\\begin{document}@.";
       List.iter
         (fun (i,_) ->
           fprintf fmt "@\n %i\\quad" i;
-	  fprintf fmt "\\includegraphics[width=\\textwidth,height=\\textwidth,keepaspectratio]{tests.%d}" i;
+	  fprintf fmt "\\includegraphics[width=\\textwidth,height=\\textheight,keepaspectratio]{tests.%d}" i;
           fprintf fmt "@\n \\vspace{3cm}@\n"
         ) figs;
       fprintf fmt "@]@\n\\end{document}@.")
