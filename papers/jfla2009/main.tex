@@ -49,9 +49,15 @@
   
 \end{abstract}
 
-%TODO? : expliquer comment fait \metapost pour inclure du \LaTeX
+% TODO ? : expliquer comment fait \metapost pour inclure du \LaTeX
+
+% TODO : expliquer les labels
 
 \section{Introduction}
+
+\begin{center}
+  \includegraphics{yannick1.mps}
+\end{center}
 
 Lors de la rédaction de documents à nature scientifique (articles,
 cours, livres, etc), il est très souvent nécessaire de réaliser des
@@ -169,6 +175,8 @@ peut citer au moins deux exemples de telle intégration :
   de programmation.
 \end{itemize}
 C'est cette dernière approche qu'adopte \mlpost.
+
+% TODO dispo à \url{http://mlpost.lri.fr}
 
 \medskip
 
@@ -478,76 +486,81 @@ let automate =
 \end{ocaml}
 \end{minipage}
 
-\subsection{Autres applications : arbres et graphes de fonctions}
-
 % arbre -- JCF
+\paragraph{Arbres.}
+% TODO
+
+\subsection{Exemples utilisant des calculs en \ocaml}
+
+Cette section illustre l'un des avantages de \mlpost: la capacité de
+dessiner directement un objet que l'on a calculé/programmé en \ocaml.
 
 % plot -- SL
-Un autre exemple d'application que nous avons développée au sein
-d'\mlpost{} est \texttt{Plot}, qui permet de tracer des graphes de
-fonction. La figure suivante montre un exemple très simple
+\paragraph{Graphe de fonction.}
+Un exemple simple de dessin résultant d'un calcul est celui du graphe
+d'une fonction.  \mlpost\ fournit un module \texttt{Plot} à cet effet.
+La figure suivante montre un exemple basique
 d'utilisation de cette extension:
 
-\begin{minipage}{0.3\linewidth}
+\medskip
+\begin{minipage}{0.35\linewidth}
   \includegraphics{graph_sqrt.mps}
 \end{minipage}
-\begin{minipage}{0.3\linewidth}
+\begin{minipage}{0.65\linewidth}
 \small\begin{ocaml}
-let graph_sqrt =
-  let u = cm 1. in
-  let sk = Plot.mk_skeleton 4 2 u u in
-  let label = Picture.tex "$\\sqrt x$", `Top, 3 in
-  let graph = Plot.draw_func ~label (fun x -> sqrt (float x)) sk in
-  [graph; Plot.draw_simple_axes "$x$" "$y$" sk]
+let u = cm 1. in
+let sk = Plot.mk_skeleton 4 3 u u in
+let label = Picture.tex "$y=\\sqrt{x+\\frac{1}{2}}$", 
+            `Upleft, 3 in
+let f x = sqrt (float x +. 0.5) in
+let graph = Plot.draw_func ~label f sk in
+[graph; Plot.draw_simple_axes "$x$" "$y$" sk]
 \end{ocaml}
 \end{minipage}
 
-\noindent La fonction \texttt{mk\_skeleton} permet de construire un
-cannevas de 4 unités sur 2, qui est l'objet de base de l'extension
+\medskip\noindent La fonction \texttt{mk\_skeleton} permet de construire un
+cannevas de 4 unités sur 3, qui est l'objet de base de l'extension
 \texttt{Plot}. Il est alors possible de dessiner un graphe de fonction
 et des axes au sein de ce cannevas, comme illustré ci-dessus.
 L'extension dispose de beaucoup d'options (tracé de la grille,
 affichage des abscisses et ordonnées, différents types de graphes de
-fonctions) qui permettent de réaliser des figures plus complexes.
-L'exemple suivant, réalisé par Florence Plateau,
+fonctions) qui permettent de réaliser des figures plus complexes,
+telle que celle décrite dans le paragraphe suivant.
+
+\paragraph{Abstractions d'horloges dans un système synchrone flot-de-données.}
+L'exemple en haut de la page~\pageref{fig:florence}, réalisé par
+Florence Plateau, 
 provient d'un problème réel~\cite{MandelPlateau08} et illustre un
 certain nombre des possibilités de l'extension \texttt{Plot}.
-
-\begin{center}
-  \includegraphics{florence.mps}
-\end{center}
-
-\paragraph{Exemples utilisant des calculs en \ocaml} % a dire mieux
-% exemples utilisant des calculs en Caml
-L'exemple qui conclut le paragraphe précédent est en fait intéressant
-à plus d'un titre. Il nous permet en effet d'illustrer un des
-avantages de \mlpost: la capacité de dessiner directement un objet que
-l'on a calculé/programmé en \ocaml.  
-
-Ainsi les fonctions dans l'exemple ci-dessus ont été codées comme des
+%
+\begin{figure}[t]
+  \centering
+  \begin{center}
+    \medskip
+    \includegraphics{florence.mps}
+  \end{center}
+  %\caption{expliquer de quoi ça parle}
+  \label{fig:florence}
+\end{figure}
+%
+Ainsi les fonctions illustrées sur cette figure ont été codées comme des
 fonctions \ocaml{} standard. De plus, la ligne intermédiaire dans la
-partie située sous le graphe principal (et dénotée par $\omega_2$)
+partie située sous le graphe principal, et dénotée par $\omega_2$,
 représente les discontinuités de la fonction $f_{\omega_2}$ du graphe
 principal. Cette ligne est calculée \textit{directement} à partir de
 la fonction $f_{\omega_2}$ ; si l'on décide de changer la fonction
-$f_{\omega_2}$, la ligne marquera alors toujours les discontinuités
-correctement sans avoir à la mettre à jour manuellement. Cela est
-également vrai pour certains labels de la figure, comme l'abscisse
+$f_{\omega_2}$, la ligne $\omega_2$ sera mise à jour automatiquement. Cela est
+également vrai pour certaines étiquettes de la figure, comme l'abscisse
 $[\omega_2]_5$. Ceci offre une flexiblité très intéressante lors de la
 phase de développement d'une telle figure.
 
-Un autre exemple c'est Bresenham...
+\paragraph{Bresenham.}
 % bresenham -- JCF
 
-% \paragraph{Exemples du monde réel}
-% je sais tjs pas quoi faire de cette figure de yannick
-\begin{center}
-  \includegraphics{yannick1.mps}
-\end{center}
 
 \section{Architecture logicielle}\label{archi}
 
-\begin{figure}[hptb]
+\begin{figure}[ht]
 \begin{center}
 \includegraphics{stages.mps}
 \end{center}
@@ -560,29 +573,24 @@ sous forme de bibliothèque \ocaml. À l'aide de cette bibliothèque,
 l'utilisateur écrit un programme qui, à l'exécution, construit un
 arbre de syntaxe abstraite \metapost. Cet arbre est imprimé dans un
 fichier \verb|figure.mp| qui est lu par \metapost\ pour générer un
-fichier \postscript\ de sortie, \verb|figure.1|\footnote{ce fichier
-  n'a pas le suffixe .ps puisque ce n'est pas un fichier \postscript
-  proprement dit : il manque l'en-tête.}. Pour inclure cette figure
+ou plusieurs fichiers \postscript\footnote{Ces fichiers
+  n'ont pas le suffixe \texttt{.ps} car il leur manque
+  l'en-tête.}. Pour inclure ces figures
 dans un document \LaTeX, il suffit d'utiliser la commande
 \verb|\includegraphics| du package \textsf{graphicx}.
 
-Nous espérons avoir convaincu le lecteur des avantages que la
-présentation sous forme de bibliothèque apporte : familiarité avec le
-langage pour les programmeurs \ocaml, typage fort, des
-construction de programmation de haut-niveau etc.  Mais ce choix
-implique également que le fichier \metapost\ de sortie ne sera pas
-obtenu par une {\em compilation} du code source proprement dite, mais
-par une exécution du programme qui construit un arbre de syntaxe
-abstraite (AST). Cette méthode a l'inconvénient qu'une boucle ou
+Il est important de noter que le fichier \metapost\ de sortie n'est
+pas obtenu par {\em compilation} du code source \ocaml, mais
+par une \emph{exécution} du programme qui construit un arbre de syntaxe
+abstraite \metapost. Cette méthode a l'inconvénient qu'une boucle ou
 itération dans le programme de départ sera traduite par une suite de
 commandes obtenues par le déroulement de la boucle, et non par une
 construction de boucle du langage cible. Ceci étant dit, dans notre
 cas, le coût supplémentaire est faible, puisque \metapost\ déroule
-aussi les boucles dans les fichiers \postscript\ de sortie.
-%TODO est-ce trop détaillé / le bon endroit ?
+également les boucles dans les fichiers \postscript\ de sortie.
 
 % schéma de l'architecture
-\begin{figure}[htpb]
+\begin{figure}[ht]
   \begin{center}
     \includegraphics{architecture.mps}
   \end{center}
@@ -599,55 +607,65 @@ pas présents dans \metapost : ils sont propres à \mlpost\ et ont été
 construits à partir de la couche inférieure. Les sections~\ref{subsec:boxes}
 et \ref{subsec:arrows} reviennent plus en détail sur deux de ces modules,
 respectivement \texttt{Box} et \texttt{Arrow}.
+Enfin, on trouve au plus haut niveau des modules tels que
+\texttt{Tree} ou \texttt{Plot} présentés dans la section précédente.
+L'intégralité des modules de \mlpost\ est empaquetée dans un module
+\texttt{Mlpost}, afin de ne pas polluer l'espace de noms d'\ocaml.
 
 \subsection{Types primitifs de \metapost}\label{subsec:types}
 
-La couche de bas niveau de \mlpost est une interface fidèle à \metapost. Elle
-comporte donc tous les types de base de \metapost :
+La couche de bas niveau de \mlpost\ est une interface fidèle à \metapost. Elle
+comporte tous les types de base de \metapost~:
 
 \begin{description}
 
   \item[Le type numérique (module \texttt{Num})] représente des longueurs.
-    Moralement, ce type peut être assimilé au type \texttt{float} en \ocaml,
-    mais certaines valeurs (par exemple la taille d'un élément \LaTeX) ne sont
-    pas connues à l'exécution.  La plupart des calculs sont donc effectués de
-    manière symbolique et le type \texttt{Num.t} doit être abstrait.
+    En première approximation, ce type pourrait être assimilé au type
+    \texttt{float} d'\ocaml, 
+    mais certaines valeurs, telle que  la taille d'un élément \LaTeX, ne sont
+    connues qu'à l'interprétation du fichier \metapost.  La plupart des
+    calculs sont donc effectués de 
+    manière symbolique et le type \texttt{Num.t} doit donc être abstrait.
 
-  \item[Le type couple ou pair (module \texttt{Point})] représente des points
+  \item[Le type point (module \texttt{Point})] représente des points
     dans l'espace à deux dimensions. Pour les mêmes raisons que les
-    numériques, les points ne sont pas simplement des pairs de flottants, mais
-    doivent être représentés de manière symbolique. 
+    numériques, les points ne sont pas simplement des paires de flottants, mais
+    doivent être représentés de manière symbolique. Le type
+    \texttt{Point.t} est également utilisé pour représenter les vecteurs.
 
-  \item[Les chemins (module \texttt{Path})] sont des lignes représentés par
+  \item[Les chemins (module \texttt{Path})] sont des lignes représentées par
     des courbes de Bézier. Ils sont à la base de tout dessin \metapost. Toutes
     les possibilités de construction de chemin dans \metapost\ ont été
     interfacées. On peut dessiner des lignes droites ou des lignes courbes en
-    précisant les angles de départ et arrivée, la tension de la courbe, etc.
+    précisant les points de contrôle, la tension de la courbe, etc.
     
   \item[Les transformations (module \texttt{Transform})] permettent
     d'appliquer une transformation linéaire à un objet quelconque. Il est
-    ainsi possible de déplacer des objets, de les agrandir ou étirer, les
-    faire tourner ou encore combiner toutes ces transformations.
+    ainsi possible de déplacer des objets, les redimensionner,
+    les faire pivoter ou encore combiner toutes ces transformations.
 
-  \item[Les plumes (module \texttt{Pen})] permettent de choisir une autre
-    épaisseur ou une autre forme de stylo, par exemple pour dessiner des
+  \item[Les plumes (module \texttt{Pen})] permettent de choisir 
+    l'épaisseur et la forme du stylo utilisé pour dessiner les
     chemins.
 
-  \item[Les figures (module \texttt{Picture})] permettent de regrouper une
-    partie du dessin. Celle-ci peut être un élément \LaTeX, une suite de
-    commandes de dessin ou encore un dessin découpé à l'aide d'une surface
-    décrite par un chemin clos. Ceci permet de traiter une figure
-    arbitrairement complexe comme un objet de base que l'on peut copier,
-    transformer, \ldots.
+  \item[Les figures (module \texttt{Picture})] permettent de
+    rassembler plusieurs éléments graphiques en un seul, qu'il
+    s'agisse d'éléments \LaTeX\ ou de commandes de dessin arbitraires.
+    Le type \texttt{Picture.t} permet de traiter
+    une figure arbitrairement complexe comme un objet de base que l'on
+    peut copier, transformer, etc.
+    Le module \texttt{Picture} permet également de découper une figure
+    à l'aide d'une surface décrite par un chemin clos
+    (\textit{clipping}). 
 
 \end{description}
 Les autres types \metapost\ (chaînes de caractères, booléens, couleurs)
 sont facilement représentés en \ocaml. L'interface de \mlpost\ contient
 aussi un module \texttt{Command} qui définit le type des commandes
-\metapost : commandes de dessin, de remplissage, itération et séquences
+\metapost : commandes de dessin, de remplissage, itérations,  séquences,
 etc.
 
-\paragraph{Dépendances circulaires}
+\paragraph{Dépendances circulaires.}
 Cette partie de bas niveau de \mlpost\ présente néanmoins quelques
 difficultés. Premièrement, la plupart des modules présentés sont {\em
   a priori} mutuellement récursifs : par exemple, les transformations
@@ -846,7 +864,21 @@ let kind =
 
 \section{Conclusion}\label{conclusion}
 
+% contribution scientifique : qu'est-ce que garantie le typage d'ocaml
+% par rapport à une utilisation directe de metapost ? absence d'erreur
+% à l'exécution, par exemple ?
+
+% mlpost = langage déclaratif au dessus de metapost = langage
+% impératif / déclaratif
+
+% TODO : séparer points / vecteurs
+
 % pas fait / à faire
+
+Nous espérons avoir convaincu le lecteur des avantages que la
+présentation sous forme de bibliothèque apporte : familiarité avec le
+langage pour les programmeurs \ocaml, typage fort, des
+construction de programmation de haut-niveau etc.  
 
 résolution d'équations
 

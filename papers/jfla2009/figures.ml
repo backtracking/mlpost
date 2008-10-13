@@ -30,13 +30,14 @@ open Box
 (** the new short one :) *)
 let graph_sqrt =
   let u = cm 1. in
-  let sk = Plot.mk_skeleton 4 2 u u in
-  let label = Picture.tex "$\\sqrt x$", `Top, 3 in
-  let graph = Plot.draw_func ~label (fun x -> sqrt (float x)) sk in
-    [graph; Plot.draw_simple_axes "$x$" "$y$" sk]
+  let sk = Plot.mk_skeleton 4 3 u u in
+  let label = Picture.tex "$y=\\sqrt{x+\\frac{1}{2}}$", `Upleft, 3 in
+  let graph = Plot.draw_func ~label (fun x -> sqrt (float x +. 0.5)) sk in
+  [graph; Plot.draw_simple_axes "$x$" "$y$" sk]
 
 let architecture =
   let mk_box fill name m = 
+    let m = "{\\tt " ^ m ^ "}" in
     Box.tex ~stroke:(Some Color.black) 
       ~style:RoundRect ~dx:(bp 5.) ~dy:(bp 5.) ~name ~fill m in
   let mk_unbox name m = 
@@ -50,7 +51,7 @@ let architecture =
   let cmd = mk_box fill "cmd" "Command" in
   let basictypes = Box.hbox ~padding:(mm 2.) [num; point; path; dots; cmd] in
     (* compile *)
-  let compile = mk_unbox "compile" "Compile" in
+  let compile = mk_unbox "compile" "\\tt Compile" in
   let compile_ext = 
     let dx = (Box.width basictypes -/ Box.width compile) /./ 2. in
     Box.hbox ~style:RoundRect ~dx ~fill ~stroke:(Some Color.black) [compile] in
@@ -78,7 +79,7 @@ let architecture =
     Box.vbox ~padding:(mm 2.) ~pen
       ~dx:(bp 5.) ~dy:(bp 5.) ~style:RoundRect ~stroke:(Some Color.black)
       [extensions; advanced; basictypes; compile_ext; metapost_ext] in
-  let mlpost = mk_unbox "mlpost" "Mlpost" in
+  let mlpost = mk_unbox "mlpost" "\\tt Mlpost" in
   let mlpost_ext = 
     let dx = (Box.width pyramid -/ Box.width mlpost) /./ 2. in 
       Box.hbox ~dx [mlpost] in
@@ -315,8 +316,8 @@ let sharing =
 
 let stages = 
   let dx = bp 5. and dy = bp 5. in
-  let tex = tex ~style:RoundRect ~dx ~dy in
-  let tex' = tex ~stroke:None in
+  let tex' = tex ~style:RoundRect ~dx ~dy in
+  let tex = tex' ~stroke:(Some Color.black) in
   let box name = box ~stroke:None ~dx:(mm 2.) ~name in
   let fml = box "fml" (tex "figure.ml") in
   let fmp = box "fmp" (tex "figure.mp") in
