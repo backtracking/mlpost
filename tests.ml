@@ -330,11 +330,38 @@ let shapes2 =
       Box.path (Shapes.ellipse (bp 30.) (bp 10.));
     ]
 
+let farey n =
+  let circle x y r =
+    Command.draw ~color:Color.black
+      ~pen:(Pen.scale (Num.bp 0.001) (Pen.circle ()))
+      (Path.shift (Point.pt (Num.bp x, Num.bp y))
+	 (Path.scale (Num.bp (2.*.r)) fullcircle)) 
+  in    
+  let rec aux acc p1 q1 p2 q2 =
+    let p = p1 + p2 in
+    let q = q1 + q2 in
+    if q>n then acc else
+      let fq = float q in
+      let fr = 0.5 /. fq /. fq in
+      let acc = circle (float p /. fq) fr fr :: acc in
+      let acc = aux acc p1 q1 p q in
+      aux acc p q p2 q2
+  in
+  let l = aux [circle 0.0 0.5 0.5; circle 1.0 0.5 0.5] 0 1 1 1 in
+  let pic = Picture.make (Command.seq l) in
+  Picture.scale (Num.bp 30.0) pic
+      
+  
 let figs = [
   d6; d5; yannick Box.Rect; yannick Box.Patatoid; d1; d2; proval;
-              d2sq; d2hsq; d2s; d2c; d12; cheno011; d3; d4;
-              d7; d11; florence; [Box.draw shapes1]; [Box.draw shapes2]; 
-              d14; d13;
+  d2sq; d2hsq; d2s; d2c; cheno011; d3; d4;
+  d7; 
+  (* recursion *)
+  d11; d12 ; 
+  [Command.draw_pic (farey 11)];
+  (* other *)
+  florence; [Box.draw shapes1]; [Box.draw shapes2]; 
+  d14; d13;
 ] 
 
 let figs =
