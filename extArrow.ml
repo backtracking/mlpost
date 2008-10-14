@@ -154,3 +154,75 @@ let triangle_full = add_head ~head: head_triangle_full (add_line empty)
 let draw2 ?kind ?tex ?pos ?outd ?ind a b =
   let r, l = outd, ind in
   draw ?kind ?tex ?pos (Path.pathk [Path.knotp ?r a; Path.knotp ?l b])
+
+(*******************************************************************************)
+(*                                 To be sorted                                *)
+(*******************************************************************************)
+
+let simple ?style ?outd ?ind a b =
+  let r,l = outd, ind in
+  Path.pathk ?style [Path.knotp ?r a; Path.knotp ?l b]
+
+let normalize p =
+  Point.scale (Num.divn (Num.bp 1.) (Point.length p)) p
+
+let neg = Point.scale (Num.bp (-1.))
+
+let thick_path ?style ?outd ?ind ?(width = Num.bp 10.)
+    ?(head_length = Num.multf 2. width)
+    ?(head_width = head_length)
+    a b =
+  let path = simple ?style ?outd ?ind a b in
+  let a_dir = normalize (Path.direction 0. path) in
+  let a_normal = Point.rotate 90. a_dir in
+  let a1 = Point.add (Point.scale (Num.divf width 2.) a_normal) a in
+  let a2 = Point.add (Point.scale (Num.divf width (-2.)) a_normal) a in
+  let b_dir = normalize (Path.direction 1. path) in
+  let b_normal = Point.rotate 90. b_dir in
+  let c = Point.add (Point.scale (Num.neg head_length) b_dir) b in
+  let c1 = Point.add (Point.scale (Num.divf width 2.) b_normal) c in
+  let c2 = Point.add (Point.scale (Num.divf width (-2.)) b_normal) c in
+  let c1' = Point.add (Point.scale (Num.divf head_width 2.) b_normal) c in
+  let c2' = Point.add (Point.scale (Num.divf head_width (-2.)) b_normal) c in
+(*  let path_ac = simple ?style ?outd ?ind a c in
+  let m = Path.point 0.5 path_ac in
+  let m_dir = normalize (Path.direction 0.5 path_ac) in
+  let m_dir2 = Point.scale (Num.bp 0.) m_dir in
+  let m_normal = Point.rotate 90. m_dir in
+  let m1 = Point.add (Point.scale (Num.divf width 2.) m_normal) m in
+  let m2 = Point.add (Point.scale (Num.divf width (-2.)) m_normal) m in*)
+  let path1 =
+    pathk ~style:jCurve [
+      knotp ~r: (vec a_dir) a1;
+(*      knotp m1;*)
+      knotp ~l: (vec b_dir) c1;
+    ]
+  in
+  let path2 =
+    pathk ~style:jCurve [
+      knotp ~r: (vec (neg b_dir)) c2;
+(*      knotp m2;*)
+      knotp ~l: (vec (neg a_dir)) a2;
+    ]
+  in
+  let path_head =
+    pathk ~style:jLine [
+      knotp c1';
+      knotp b;
+      knotp c2';
+    ]
+  in
+  cycle ~style:jLine
+    (append ~style:jLine (append ~style:jLine path1 path_head) path2)
+
+let draw_thick ?style ?(boxed=true) ?line_color ?fill_color ?outd ?ind ?width ?head_length ?head_width a b =
+  let p = thick_path ?style ?outd ?ind ?width ?head_length ?head_width a b in
+  let draw_cmd =
+    if boxed then Command.draw ?color:line_color p else Command.nop
+  in
+  let fill_cmd =
+    match fill_color with
+      | None -> Command.nop
+      | Some c -> Command.fill ~color:c p
+  in
+  Command.append fill_cmd draw_cmd

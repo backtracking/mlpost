@@ -60,7 +60,7 @@ CMO := misc.cmo name.cmo compiled_types.cmo print.cmo hashcons.cmo types.cmo \
 	num.cmo point.cmo duplicate.cmo compile.cmo \
        transform.cmo color.cmo primPath.cmo path.cmo picture.cmo \
        dash.cmo pen.cmo command.cmo shapes.cmo arrow.cmo \
-	extArrow.cmo box.cmo helpers.cmo diag.cmo tree.cmo\
+	box.cmo helpers.cmo diag.cmo tree.cmo\
        metapost.cmo plot.cmo generate.cmo
 CMX := $(CMO:.cmo=.cmx)
 

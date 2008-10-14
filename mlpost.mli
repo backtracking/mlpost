@@ -952,6 +952,7 @@ and Box : sig
     (** the path that connects 2 boxes and stops at the box boundaries *) 
 end
 
+(*
 module Arrow : sig
   (** The Beginning of a module for building arrows. Actually, an arrow is just
     a path. Use {!Command.draw_arrow} to draw arrows. *)
@@ -1007,8 +1008,9 @@ module Arrow : sig
     ?head_length:Num.t ->
     ?head_width:Num.t -> Point.t -> Point.t -> Command.t
 end
+*)
 
-module ExtArrow : sig
+module Arrow : sig
   (** Draw simple or complex arrows. *)
 
   (** To draw an arrow, choose your arrow [kind], then call the [draw] function
@@ -1118,6 +1120,24 @@ module ExtArrow : sig
         @param point the point where to draw the arrow ([0.] for the beginning,
           and [1.] for the end, or any number in-between) (default is [0.5])
         @param head the kind of head to add (default is {!head_classic}) *)
+
+  (** {2 Miscellaneous} *)
+
+  (** Warning: the following functions might be either deleted, modified
+      and / or moved somewhere else. Don't use them if you need some backward
+      compatibility. *)
+
+  val draw_thick :
+    ?style:Path.joint ->
+    ?boxed:bool ->
+    ?line_color:Color.t ->
+    ?fill_color:Color.t ->
+    ?outd:Path.direction ->
+    ?ind:Path.direction ->
+    ?width:Num.t ->
+    ?head_length:Num.t ->
+    ?head_width:Num.t -> Point.t -> Point.t -> Command.t
+    (** Draw a thick arrow. *)
 end
 
 (** {2 Helpers and Extensions} *)
