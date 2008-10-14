@@ -423,7 +423,7 @@ let eq_picture_node p1 p2 =
   match p1,p2 with
     | PITex s1, PITex s2 -> 
         (* it actually happens that the same text appears twice *)
-        s1=s2 
+        s1<>"" && s1=s2 
     | PIMake c1, PIMake c2 -> eq_hashcons c1 c2
     | PITransformed(p1,tr1), PITransformed(p2,tr2) ->
 	eq_hashcons p1 p2 && eq_hashcons tr1 tr2

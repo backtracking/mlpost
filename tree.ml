@@ -82,11 +82,12 @@ let node ?(ls=Num.bp 12.) ?(cs=Num.bp 5.) ?(arrow_style=Directed)
          ?(edge_style=Straight) ?stroke ?pen s l = 
   let l = Box.hbox ~padding:cs ~pos:`Top l in 
   let tree = Box.vbox ~padding:ls [s;l] in
-  Box.set_draw 
-    (Command.iterl 
-      (fun child -> arc ?stroke ?pen arrow_style edge_style 
-                 (root tree) (root child)) (children tree)
-    ) tree
+  Box.set_post_draw 
+    (fun tree -> 
+      (Command.iterl 
+	  (fun child -> arc ?stroke ?pen arrow_style edge_style 
+            (root tree) (root child)) (children tree)))
+    tree
 
 let bin ?ls ?cs ?arrow_style ?edge_style ?stroke ?pen s x y = 
   node ?ls ?cs ?arrow_style ?edge_style ?stroke ?pen s [x;y]

@@ -42,7 +42,7 @@ type t = {
   fill : Color.t option;
   contour : Path.t; 
   desc : desc;
-  post_draw : Picture.t
+  post_draw : t -> Command.t
 }
     
 and desc = 
@@ -58,8 +58,7 @@ let rec shift pt b =
   { b with 
     ctr = Point.shift pt b.ctr; 
     contour = Path.shift pt b.contour;
-    desc = shift_desc pt b.desc;
-    post_draw = Picture.shift pt b.post_draw}
+    desc = shift_desc pt b.desc }
     
 and shift_desc pt = function
   | Emp -> Emp
@@ -114,7 +113,7 @@ let rec draw ?(debug=false) b =
       Command.nop
   in
   Command.seq [fill_cmd; contents_cmd; path_cmd; debug_cmd; 
-               Command.draw_pic b.post_draw]
+               b.post_draw b]
 
 let rect_ w h = w, h, Shapes.rectangle w h
 let circ_ w h = 
@@ -142,6 +141,7 @@ let make_contour s ?(dx=margin) ?(dy=margin) w h c =
   let w,h, p = (from_style s) w h in
   w, h, Path.shift c p
 
+let no_drawing _ = Command.nop
 
 let pic ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black) 
         ?pen ?fill pic =
@@ -152,7 +152,7 @@ let pic ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black)
   { desc = Pic pic;
     name = name; stroke = stroke; pen = pen; fill = fill;
     width = w; height = h; ctr = c; contour = s;
-    post_draw = Picture.empty}
+    post_draw = no_drawing }
 
 let box ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black) 
         ?pen ?fill b =
@@ -163,7 +163,7 @@ let box ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black)
   { desc = Grp ([|b|], Smap.empty) ;
     name = name; stroke = stroke; pen = pen; fill = fill;
     width = w; height = h; ctr = c; contour = s;
-    post_draw = Picture.empty}
+    post_draw = no_drawing }
 
 let merge_maps =
   let add_one m b =
@@ -227,7 +227,7 @@ let align_boxes f ?padding ?pos ?(style=Rect)
   { desc = Grp (Array.of_list bl, merge_maps bl);
     name = name; stroke = stroke; pen = pen; fill = fill;
     width = w; height = h; ctr = c; contour = s ;
-    post_draw = Picture.empty }
+    post_draw = no_drawing }
 
 let hbox ?padding ?pos = align_boxes horizontal ?padding ?pos
 let vbox ?padding ?pos = align_boxes vertical ?padding ?pos
@@ -260,7 +260,7 @@ let group
   { desc = Grp (Array.of_list bl, merge_maps bl);
     name = name; stroke = stroke; pen = pen; fill = fill;
     width = w; height = h; ctr = c; contour = s ;
-    post_draw = Picture.empty}
+    post_draw = no_drawing }
 
 let group_array ?name ?stroke ?fill ?dx ?dy ba =
   group ?name ?stroke ?fill ?dx ?dy (Array.to_list ba)
@@ -272,14 +272,14 @@ let group_rect ?name w h c bl =
     name = name; stroke = None; pen = None; fill = None;
     width = w; height = h; ctr = c; 
     contour = Path.shift c (Shapes.rectangle w h);
-    post_draw = Picture.empty }
+    post_draw = no_drawing }
 
 let empty ?(width=Num.zero) ?(height=Num.zero) () =
   { desc = Emp; name = None; 
     stroke = None; pen = None; fill = None;
     width = width; height = height; ctr = Point.origin;
     contour = Shapes.rectangle width height ;
-    post_draw = Picture.empty
+    post_draw = no_drawing
   }
 
 type 'a box_creator = 
@@ -319,7 +319,7 @@ let clear_stroke b = { b with stroke = None }
 let get_name b = b.name
 let set_name name b = {b with name = Some name}
 
-let set_draw c b = {b with post_draw = Picture.make c}
+let set_post_draw f b = {b with post_draw = f}
 
 let get_pen b = b.pen
 let set_pen p b = { b with pen = Some p }

@@ -349,7 +349,7 @@ let persistance =
   [draw (vbox [b; set_stroke Color.black b; b])]
 
 
-(* JC *)
+(* Bresenham (JCF) *)
 (* the data to plot are computed here *)
 
 let x2 = 9
@@ -395,6 +395,8 @@ let bresenham =
    label `Left "0" Box.west 0 0;
    label `Left "$y_2$" Box.west 0 y2]
 
+(* cercles de Ford (merci Claude) *)
+
 let ford n =
   let u x = Num.bp (200.0 *. x) in
   let circle x y r =
@@ -415,7 +417,67 @@ let ford n =
   let l = aux [] 0 1 1 1 in
   let pic = Picture.make (Command.seq l) in
   Picture.scale (Num.bp 30.0) pic
-     
+
+(* blocks mémoire *)     
+
+let simple_block =
+  let b = Box.hblock ~pos:`Bot [Box.tex "a"; Box.tex "b"; Box.tex "C"] in
+  [Box.draw b]
+
+let pointer_arrow a b =
+  let p = pathk [knotp (Box.ctr a); knotp (Box.ctr b)] in
+  let p = Path.cut_after (Box.bpath b) p in
+  let pen = Pen.circle ~tr:[Transform.scaled (Num.bp 4.)] () in
+  Command.draw ~pen (pathp [Box.ctr a]) ++ draw_arrow p
+
+let block_arrow =
+  let a = Box.rect (Box.empty ~width:(bp 6.) ~height:(bp 6.) ()) in
+  let g = Box.hbox ~padding:(cm 1.) [a;a] in
+  [Box.draw g; pointer_arrow (Box.nth 0 g) (Box.nth 1 g)]
+
+let cons hd tl =
+  let p1 = tex ~name:"hd" hd in
+  let p2 = tex ~name:"tl" (if tl then "" else "\\ensuremath{\\bot}") in
+  hblock [p1; p2]
+
+let draw_list l =
+  let rec make = function
+    | [] -> assert false
+    | [x] -> [cons x false]
+    | x :: l -> cons x true :: make l
+  in
+  let l = hbox ~padding:(Num.bp 30.) (make l) in
+  let rec arrows = function
+    | [] | [_] -> nop
+    | b1 :: (b2 :: _ as l) -> 
+	pointer_arrow (Box.get "tl" b1) (Box.get "hd" b2) ++ arrows l
+  in
+  [Box.draw l; arrows (Array.to_list (Box.elts l))]
+
+let list123 =
+  draw_list ["1";"2";"3"]
+
+let another_list =
+  draw_list (List.map (fun n -> Printf.sprintf "$\\sqrt{%d}$" n) [1;2;3;4])
+
+let deps = 
+  let node s = 
+    Box.round_rect ~name:s ~dx:zero 
+      (Box.tex ("{\\tt\\phantom{p}" ^ s ^ "\\phantom{p}}")) 
+  in
+  let ellipsis = Box.tex ~name:"..." "\\phantom{p}\\dots\\phantom{lp}" in
+  let b =
+    vbox ~padding:(bp 30.)
+      [node "mlpost.mli";
+       hbox~padding:(bp 25.)
+	 [node "num.ml"; node "point.ml"; ellipsis; node "path.ml"];
+       node "types.mli"]
+  in
+  let arrow b1 b2 = box_arrow (Box.get b1 b) (Box.get b2 b) in
+  [Box.draw b;
+   iterl 
+     (fun s -> arrow "mlpost.mli" s ++ arrow s "types.mli")
+     ["num.ml"; "point.ml"; "path.ml"; "..."]]
 
 let () = Metapost.emit "automate_1" automate_1
 let () = Metapost.emit "automate" automate
@@ -435,5 +497,11 @@ let () = Metapost.emit "simple" simple
 let () = Metapost.emit "align" align
 let () = Metapost.emit "persistance" persistance
 let () = Metapost.emit "ford" [Command.draw_pic (ford 17)]
+let () = Metapost.emit "simple_block" simple_block
+let () = Metapost.emit "block_arrow" block_arrow
+let () = Metapost.emit "list123" list123
+let () = Metapost.emit "another_list" another_list
+let () = Metapost.emit "deps" deps
+
 
 

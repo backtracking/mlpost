@@ -46,7 +46,14 @@
 \maketitle
 
 \begin{abstract}
-  
+  Cet article présente \mlpost, une bibliothèque \ocaml\ de dessin
+  scientifique. Elle s'appuie sur \metapost, qui permet notamment
+  d'inclure des fragments \LaTeX\ dans les figures. \ocaml\ offre une
+  alternative séduisante aux langages de macros \LaTeX, aux langages
+  spécialisés ou même aux outils graphiques. En particulier,
+  l'utilisateur de \mlpost\ bénéficie de toute l'expressivité
+  d'\ocaml\ et de son typage statique. Enfin \mlpost\ propose un style
+  déclaratif qui diffère de celui, souvent impératif, des outils existants.
 \end{abstract}
 
 % TODO ? : expliquer comment fait \metapost pour inclure du \LaTeX
@@ -54,10 +61,6 @@
 % TODO : expliquer les labels
 
 \section{Introduction}
-
-\begin{center}
-  \includegraphics{yannick1.mps}
-\end{center}
 
 Lors de la rédaction de documents à nature scientifique (articles,
 cours, livres, etc), il est très souvent nécessaire de réaliser des
@@ -67,11 +70,14 @@ liens qui existent entre eux et facilitent ainsi leur compréhension.
 Elles sont donc un composant fondamental au caractère didactique de
 tels documents, mais leur réalisation est souvent fastidieuse. En
 particulier, il est souvent nécessaire d'y inclure des éléments mis en
-forme par \LaTeX (formules, etc), ce que bon nombre de logiciels de
-dessin ne permettent pas.
-% Il faudrait d'ailleurs déjà que ces logiciels de dessin soient vectoriels
-% ce qui n'est pas forcément le cas.
-
+forme par \LaTeX\ (formules, etc.), ce que bon nombre de logiciels de
+dessin ne permettent pas. Ainsi, on peut souhaiter réaliser un schéma
+tel que celui-ci
+\begin{center}
+  \includegraphics{yannick1.mps}
+\end{center}
+en attachant de l'importance au fait que des expressions comme
+$a_1+s_1-1$ apparaissent exactement comme dans le corps du document.
 Il existe plusieurs familles d'outils pour réaliser des figures à
 intégrer dans un document \LaTeX~:
 \begin{itemize}
@@ -82,6 +88,9 @@ intégrer dans un document \LaTeX~:
 \item des outils externes en ligne de commande, tel 
   \metapost~\cite{metapost}.
 \end{itemize}
+
+% Il faudrait d'ailleurs déjà que ces logiciels de dessin soient vectoriels
+% ce qui n'est pas forcément le cas.
 
 Chaque famille a ses avantages et ses inconvénients. Les interfaces
 graphiques sont les plus accessibles, notamment pour un placement
@@ -174,19 +183,16 @@ peut citer au moins deux exemples de telle intégration :
   capacités graphiques de \metapost\ et ne fait que changer le langage
   de programmation.
 \end{itemize}
-C'est cette dernière approche qu'adopte \mlpost.
 
+Cet article présente \mlpost, un outil qui adopte l'approche de
+\fmpost\ en utilisant \ocaml\ comme langage hôte. La première partie
+de l'article présente les choix de conception de \mlpost\ à travers un
+certain nombre d'exemples. La seconde partie détaille ensuite
+l'architecture logicielle de \mlpost.
 \mlpost\ est librement distribué à l'adresse
 \url{http://mlpost.lri.fr}. 
 Toutes les figures de cet article ont été faites avec \mlpost, à
 l'exception des exemples pour \metapost\ et \nomdetikz.
-
-\medskip
-
-Cet article est organisé de la manière suivante. 
-La section~\ref{exemples} ...
-La section~\ref{archi} ...
-Enfin, la section~\ref{conclusion} ...
 
 %%% CONS
 
@@ -194,10 +200,10 @@ Enfin, la section~\ref{conclusion} ...
 
 % pas de mélange entre LaTeX et les graphiques
 
-
 \section{Principes et exemples}\label{exemples}
 
 \subsection{Principes}
+
 \paragraph{Boîtes.}
 Les briques de base de \mlpost\ sont les \textit{boîtes} : une boîte
 est un moyen d'encapsuler n'importe quel élément de dessin au sein
@@ -285,21 +291,125 @@ let b = hbox ~padding:(cm 1.) [tex "\\LaTeX"; circle (empty ())] in
 Dans cette section, nous montrons quelques applications immédiates des
 boîtes de \mlpost. 
 
-\paragraph{Représentation de la mémoire.}
 % blocs mémoire (listes, etc.) -- JCF
 % introduire Box.vblock
 % introduire les noms de boites
+\paragraph{Représentation de la mémoire.}
+Un besoin récurrent lorsque l'on enseigne l'algorithmique ou les
+concepts liés à un langage de programmation consiste à illustrer
+la structure des données en mémoire par des schémas de la forme
+\begin{center}
+  \includegraphics{list123.mps}
+\end{center}
+Deux éléments sont nécessaires : le dessin des blocs d'une part et le
+dessin des pointeurs d'autre part. Pour réaliser les blocs, on
+utilise la fonction \texttt{Box.hblock} qui aligne des boîtes
+horizontalement et leur donne une hauteur commune. Voici un exemple :
 
-De manière générale, les
-fonctions \texttt{Box.tex} et \texttt{Box.box}, ainsi que toutes les
-autres fonctions de création de boîtes, disposent d'arguments
-optionnels \texttt{dx} et \texttt{dy} permettant de spécifier les
-marges séparant le contenu du contour de la boîte. Elles prennent
-également un argument \texttt{name} permettant de nommer les boîtes
-pour y accéder plus tard.
+\medskip
+\begin{minipage}{0.15\linewidth}
+  \includegraphics{simple_block.mps}
+\end{minipage}
+\begin{minipage}{0.8\linewidth}
+\small\begin{ocaml}
+let b = Box.hblock ~pos:`Bot [Box.tex "a"; Box.tex "b"; Box.tex "C"] in
+[Box.draw b]
+\end{ocaml}
+\end{minipage}
+
+\medskip\noindent À l'aide de \texttt{Box.hblock}, on peut facilement
+écrire une fonction \texttt{cons} qui construit un bloc de taille 2,
+dont le premier élément contient un texte \LaTeX\ arbitraire
+\texttt{hd} et le second est soit vide, soit le symbole $\bot$, selon
+la valeur du booléen \texttt{tl} :
+\begin{ocaml}
+let cons hd tl =
+  let p1 = Box.tex ~name:"hd" hd in
+  let p2 = Box.tex ~name:"tl" (if tl then "" else "\\ensuremath{\\bot}") in
+  Box.hblock [p1; p2]
+\end{ocaml}
+L'argument optionnel \texttt{\~{}name} permet de nommer les
+sous-boîtes, de manière à pouvoir y accéder facilement par la suite.
+
+Écrivons maintenant une fonction \texttt{pointer\_arrow} pour
+matérialiser les pointeurs. Il s'agit de tracer une flèche entre deux
+boîtes données \texttt{a} et \texttt{b}. Pour cela, on commence par
+construire un chemin \texttt{p} reliant les centres de \texttt{a} et
+\texttt{b}, que l'on tronque à l'endroit où il intersecte le bord de la boîte
+\texttt{b} (avec la fonction \texttt{Path.cut\_after}). Puis on trace
+l'origine de la flèche à l'aide d'un chemin réduit à un point (le
+centre de \texttt{a}) et la flèche proprement dite à l'aide du chemin
+\texttt{p}.
+
+\medskip
+\begin{minipage}{0.2\linewidth}
+  \includegraphics{block_arrow.mps}
+\end{minipage}
+\begin{minipage}{0.8\linewidth}
+\small\begin{ocaml}
+let pointer_arrow a b =
+  let p = pathk [knotp (Box.ctr a); knotp (Box.ctr b)] in
+  let p = Path.cut_after (Box.bpath b) p in
+  let pen = Pen.circle ~tr:[Transform.scaled (Num.bp 4.)] () in
+  Command.draw ~pen (pathp [Box.ctr a]) ++ draw_arrow p
+\end{ocaml}
+\end{minipage}
+
+Nous avons maintenant tous les éléments nécessaires pour écrire une
+fonction \texttt{draw\_list} qui prend en argument une liste \ocaml\
+de fragments \LaTeX\ et réaliste l'illustration correspondante. On
+commence par construire les différents blocs constituant la liste :
+\begin{ocaml}
+let draw_list l =
+  let rec make = function
+    | [] -> []
+    | [x] -> [cons x false]
+    | x :: l -> cons x true :: make l in
+\end{ocaml}
+Puis on aligne ces blocs avec \texttt{Box.hbox}, en insérant de
+l'espace horizontal avec l'option \texttt{padding} :
+\begin{ocaml}
+  let l = hbox ~padding:(Num.bp 30.) (make l) in
+\end{ocaml}
+Pour dessiner les pointeurs, il suffit de parcourir la liste des
+boîtes (qui ont été placées) et d'utiliser la fonction
+\texttt{pointer\_arrow} précédente sur chaque paire de boîtes
+consécutives :
+\begin{ocaml}
+  let rec arrows = function
+    | [] | [_] -> nop
+    | b1 :: (b2 :: _ as l) -> 
+        pointer_arrow (Box.get "tl" b1) (Box.get "hd" b2) ++ arrows l in
+\end{ocaml}
+On utilise ici la fonction \texttt{Box.get} qui permet de récupérer
+une sous-boîte par son nom. On accède ainsi aux boîtes nommées
+respectivement \verb!"hd"! et \verb!"tl"! qui ont été créées par la
+fonction \texttt{cons} puis encapsulées dans d'autres boîtes par les
+fonctions d'alignement.
+Enfin, on dessine les boîtes avec \texttt{Box.draw}, puis les flèches
+avec la fonction \texttt{arrows} :
+\begin{ocaml}
+  [Box.draw l; arrows (Array.to_list (Box.elts l))]
+\end{ocaml}
+On peut tester avec
+\begin{ocaml}
+  draw_list (List.map (fun n -> Printf.sprintf "$\\sqrt{%d}$" n) [1;2;3;4])
+\end{ocaml}
+qui donne bien le résultat attendu :
+\begin{center}
+  \includegraphics{another_list.mps}
+\end{center}
+
+% De manière générale, les
+% fonctions \texttt{Box.tex} et \texttt{Box.box}, ainsi que toutes les
+% autres fonctions de création de boîtes, disposent d'arguments
+% optionnels \texttt{dx} et \texttt{dy} permettant de spécifier les
+% marges séparant le contenu du contour de la boîte. 
 
 \paragraph{Diagrammes de classes.}
-Avec la fonction \texttt{Box.vblock} introduite ci-dessus, il est facile
+Avec la fonction \texttt{Box.vblock}, analogue pour l'alignement
+vertical de la fonction
+\texttt{Box.hblock} introduite ci-dessus, il est facile
 de dessiner des diagrammes UML. Supposons que l'on veuille dessiner
 des schémas de classes tels que :
 \begin{center}
@@ -621,13 +731,6 @@ let bresenham =
 
 \section{Architecture logicielle}\label{archi}
 
-\begin{figure}[ht]
-\begin{center}
-\includegraphics{stages.mps}
-\end{center}
-  \caption{Architecture de \mlpost}\label{fig:etapes}
-\end{figure}
-
 La figure~\ref{fig:etapes} montre le fonctionnement de \mlpost.  Tout
 d'abord, \mlpost\ est un outil de génération de fichier \metapost\
 sous forme de bibliothèque \ocaml. À l'aide de cette bibliothèque,
@@ -639,6 +742,13 @@ ou plusieurs fichiers \postscript\footnote{Ces fichiers
   l'en-tête.}. Pour inclure ces figures
 dans un document \LaTeX, il suffit d'utiliser la commande
 \verb|\includegraphics| du package \textsf{graphicx}.
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics{stages.mps}
+\end{center}
+  \caption{Architecture de \mlpost}\label{fig:etapes}
+\end{figure}
 
 Il est important de noter que le fichier \metapost\ de sortie n'est
 pas obtenu par {\em compilation} du code source \ocaml, mais
@@ -770,6 +880,9 @@ au sein de l'interface du module \texttt{Mlpost}.
 Pour cela, on écrit un unique fichier
 \texttt{mlpost.mli} qui contient les définitions des signatures des
 modules à exporter :
+
+\medskip
+\begin{minipage}{0.33\textwidth}
 \begin{ocaml}
 module rec Num : sig
   type t
@@ -786,6 +899,11 @@ and Path : sig
 end
 ...
 \end{ocaml}
+\end{minipage}
+\begin{minipage}{0.65\textwidth}
+  \includegraphics{deps.mps}
+\end{minipage}
+
 Toutes ces signatures sont
 déclarées de manière mutuellement récursive. La signature
 de \texttt{Point} peut ainsi faire référence à \texttt{Path} et
@@ -858,19 +976,46 @@ malgré la délégation des calculs à \metapost.
 
 \subsection{Boîtes}\label{subsec:boxes}
 
-% TODO implémentation des boites
+Comme nous l'avons illustré déjà maintes fois, les boîtes de \mlpost\
+peuvent être réduites à de simples objets \LaTeX\ ou bien être
+constituées d'un ensemble d'autres boîtes. Le type des boîtes est donc
+un type récursif de la forme suivante :
+\begin{ocaml}
+type t =
+  { name : string option;
+    width : Num.t;  height : Num.t; pen : Pen.t option; ...
+    desc : desc; }
+    
+and desc = 
+  | Emp
+  | Pic of Picture.t
+  | Grp of t array * t Smap.t
+\end{ocaml}
+Chaque boîte est éventuellement nommée (champ \texttt{name}), possède
+un certain nombre d'attributs (position, taille, couleur, bordure,
+remplissage, etc.) et sa nature est donnée par le champ \texttt{desc}.
+Ce dernier indique s'il s'agit d'une boîte vide, d'une image ou bien
+d'une boîte composite. Dans ce dernier cas, les sous-boîtes sont
+contenues dans un tableau, qui est accompagné d'une table (réalisée
+par le module \texttt{Smap}) permettant un accès plus rapide à une 
+sous-boîte par son nom.
 
-- principe récursif : boîte = picture ou ensemble de boîtes + contour
-+ fond
+Le dessin d'une boîte est immédiat. On trace d'une part son contour et
+d'autre part son contenu. Ce dernier est soit
+une boîte atomique directement dessinée à l'aide de
+\texttt{Command.draw\_pic}, soit une boîte composite dont le dessin
+est tout simplement obtenu en dessinant chaque sous-boîte.
 
-- boîtes primitives
-- réunion, alignements
-
-\paragraph{Application : arbres.}
-
-% TODO expliquer le code de Tree -- JCF
-
-
+Pour réaliser les diverses fonctions de placement, on commence par
+écrire une fonction de translation d'une boîte par un vecteur donné :
+\begin{ocaml}
+  Box.shift : Point.t -> Box.t -> Box.t
+\end{ocaml}
+Cette fonction est naturellement récursive sur la structure de la
+boîte. Il est important de noter que cette fonction renvoie une
+\emph{nouvelle} boîte, sans altérer son argument (les boîtes sont
+persistantes). Une fois cette fonction donnée, il est aisé de réaliser
+les fonctions \texttt{Box.hbox}, \texttt{Box.hblock}, etc.
 
 \subsection{Flèches} \label{subsec:arrows} %% RB
 
