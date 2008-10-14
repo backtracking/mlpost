@@ -89,7 +89,7 @@ let yannick style =
 
 
 let rec random_tree ?arrow_style ?edge_style ?stroke ?pen n = 
-  let tex = tex ~fill:Color.yellow ~stroke:(Some Color.black) in
+  let tex s = shadow (tex ~fill:Color.yellow ~stroke:(Some Color.black) s) in
   match n with
   | 1 -> leaf (tex "1")
   | 2 -> 

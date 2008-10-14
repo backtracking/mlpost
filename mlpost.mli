@@ -853,6 +853,8 @@ and Box : sig
 	path and the center of the box are drawn as well, default is false
     *)
 
+
+
   (** {2 Boxes alignment} *)
 
   val hbox : ?padding:Num.t -> ?pos:Command.vposition -> ?style:style -> 
@@ -943,6 +945,7 @@ and Box : sig
   val get_pen : t -> Pen.t option
   val set_pen : Pen.t -> t -> t
 
+  val shadow : t -> t
   (** {2 Misc.} *)
 
   val cpath :

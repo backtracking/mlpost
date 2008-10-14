@@ -42,7 +42,8 @@ type t = {
   fill : Color.t option;
   contour : Path.t; 
   desc : desc;
-  post_draw : t -> Command.t
+  post_draw : t -> Command.t ;
+  pre_draw : t -> Command.t
 }
     
 and desc = 
@@ -112,7 +113,7 @@ let rec draw ?(debug=false) b =
     else 
       Command.nop
   in
-  Command.seq [fill_cmd; contents_cmd; path_cmd; debug_cmd; 
+  Command.seq [b.pre_draw b; fill_cmd; contents_cmd; path_cmd; debug_cmd; 
                b.post_draw b]
 
 let rect_ w h = w, h, Shapes.rectangle w h
@@ -152,7 +153,7 @@ let pic ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black)
   { desc = Pic pic;
     name = name; stroke = stroke; pen = pen; fill = fill;
     width = w; height = h; ctr = c; contour = s;
-    post_draw = no_drawing }
+    post_draw = no_drawing; pre_draw = no_drawing }
 
 let box ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black) 
         ?pen ?fill b =
@@ -163,7 +164,7 @@ let box ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black)
   { desc = Grp ([|b|], Smap.empty) ;
     name = name; stroke = stroke; pen = pen; fill = fill;
     width = w; height = h; ctr = c; contour = s;
-    post_draw = no_drawing }
+    post_draw = no_drawing; pre_draw = no_drawing }
 
 let merge_maps =
   let add_one m b =
@@ -227,7 +228,7 @@ let align_boxes f ?padding ?pos ?(style=Rect)
   { desc = Grp (Array.of_list bl, merge_maps bl);
     name = name; stroke = stroke; pen = pen; fill = fill;
     width = w; height = h; ctr = c; contour = s ;
-    post_draw = no_drawing }
+    post_draw = no_drawing; pre_draw = no_drawing }
 
 let hbox ?padding ?pos = align_boxes horizontal ?padding ?pos
 let vbox ?padding ?pos = align_boxes vertical ?padding ?pos
@@ -260,7 +261,7 @@ let group
   { desc = Grp (Array.of_list bl, merge_maps bl);
     name = name; stroke = stroke; pen = pen; fill = fill;
     width = w; height = h; ctr = c; contour = s ;
-    post_draw = no_drawing }
+    post_draw = no_drawing; pre_draw = no_drawing }
 
 let group_array ?name ?stroke ?fill ?dx ?dy ba =
   group ?name ?stroke ?fill ?dx ?dy (Array.to_list ba)
@@ -272,14 +273,14 @@ let group_rect ?name w h c bl =
     name = name; stroke = None; pen = None; fill = None;
     width = w; height = h; ctr = c; 
     contour = Path.shift c (Shapes.rectangle w h);
-    post_draw = no_drawing }
+    post_draw = no_drawing; pre_draw = no_drawing }
 
 let empty ?(width=Num.zero) ?(height=Num.zero) () =
   { desc = Emp; name = None; 
     stroke = None; pen = None; fill = None;
     width = width; height = height; ctr = Point.origin;
     contour = Shapes.rectangle width height ;
-    post_draw = no_drawing
+    post_draw = no_drawing; pre_draw = no_drawing
   }
 
 type 'a box_creator = 
@@ -320,6 +321,17 @@ let get_name b = b.name
 let set_name name b = {b with name = Some name}
 
 let set_post_draw f b = {b with post_draw = f}
+let set_pre_draw f b = {b with pre_draw = f}
+
+let shadow b = 
+  let shadow b = 
+    let shad i =
+      let d = bp (i /. 2.) in
+      Command.fill ~color:(Color.gray (0.2 +. i *. 0.2))
+        (Path.shift (Point.pt (d, d)) (bpath b)) in
+    Command.seq (List.rev_map shad [1. ; 2. ; 3.])
+  in
+  { b with pre_draw = shadow }
 
 let get_pen b = b.pen
 let set_pen p b = { b with pen = Some p }
