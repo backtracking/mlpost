@@ -105,11 +105,11 @@ Les bibliothèques \LaTeX\ telles que \pstricks\ ou \nomdetikz\ offrent
 l'intégration la plus naturelle avec \LaTeX. En particulier, elles
 permettent de combiner arbitrairement éléments graphiques et textes
 \LaTeX\ 
-% \begin{tikzpicture}[baseline=(a.base)]
-% \path[use as bounding box] 
-%   (0,0) node[draw,style=dashed] (a) {comme ceci};
-% \draw[->] (a) .. controls +(-2cm,1cm) and +(-2cm,-0cm) .. (a);
-% \end{tikzpicture}.
+\begin{tikzpicture}[baseline=(a.base)]
+\path[use as bounding box] 
+  (0,0) node[draw,style=dashed] (a) {comme ceci};
+\draw[->] (a) .. controls +(-2cm,1cm) and +(-2cm,-0cm) .. (a);
+\end{tikzpicture}.
 En revanche, elles demandent d'apprendre un certain nombre de
 macros et de notations et souffrent surtout des défauts inhérents à
 \LaTeX~:
