@@ -159,9 +159,11 @@ let draw2 ?kind ?tex ?pos ?outd ?ind a b =
 (*                                 To be sorted                                *)
 (*******************************************************************************)
 
+open Path
+
 let simple ?style ?outd ?ind a b =
   let r,l = outd, ind in
-  Path.pathk ?style [Path.knotp ?r a; Path.knotp ?l b]
+  pathk ?style [knotp ?r a; knotp ?l b]
 
 let normalize p =
   Point.scale (Num.divn (Num.bp 1.) (Point.length p)) p
