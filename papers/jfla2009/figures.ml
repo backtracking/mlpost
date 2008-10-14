@@ -352,8 +352,50 @@ let persistance =
 
 
 (* JC *)
-let bresenham =
-  [nop]
+(* the data to plot are computed here *)
+
+let x2 = 9
+let y2 = 6
+let bresenham_data =
+  let a = Array.create (x2+1) 0 in
+  let y = ref 0 in
+  let e = ref (2 * y2 - x2) in
+  for x = 0 to x2 do
+    a.(x) <- !y;
+    if !e < 0 then
+      e := !e + 2 * y2
+    else begin
+      y := !y + 1;
+      e := !e + 2 * (y2 - x2)
+    end
+  done;
+  a
+
+(* drawing *)
+
+let bresenham0 = 
+  let width = bp 6. and height = bp 6. in
+  let g = Box.gridi (x2+1) (y2+1) 
+    (fun i j -> 
+      let fill = if bresenham_data.(i) = y2-j then Some Color.red else None in
+      Box.rect ?fill (Box.empty ~width ~height ())) in
+  [Box.draw g]
+
+let bresenham = 
+  let width = bp 6. and height = bp 6. in
+  let g = Box.gridi (x2+1) (y2+1) 
+    (fun i j -> 
+      let fill = if bresenham_data.(i) = y2-j then Some Color.red else None in
+      Box.rect ?fill (Box.empty ~width ~height ())) in
+  let get i j = Box.nth i (Box.nth (y2-j) g) in
+  let label pos s point i j =
+    Command.label ~pos (Picture.tex s) (point (get i j)) 
+  in
+  [Box.draw g;
+   label `Bot "0" Box.south 0 0;
+   label `Bot "$x_2$" Box.south x2 0;
+   label `Left "0" Box.west 0 0;
+   label `Left "$y_2$" Box.west 0 y2]
 
 let ford n =
   let u x = Num.bp (200.0 *. x) in
@@ -384,6 +426,7 @@ let () = Metapost.emit "uml_client" uml_client
 let () = Metapost.emit "uml" uml
 let () = Metapost.emit "graph_sqrt" graph_sqrt
 let () = Metapost.emit "architecture" architecture
+let () = Metapost.emit "bresenham0" bresenham0
 let () = Metapost.emit "bresenham" bresenham
 let () = Metapost.emit "tree" sharing
 let () = Metapost.emit "arrow_metapost" arrow_metapost
