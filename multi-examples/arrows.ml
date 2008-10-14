@@ -13,25 +13,48 @@ let down = Path.vec Point.down
 let left = Path.vec Point.left
 let right = Path.vec Point.right
 
+let double_headed = Arrow.add_foot Arrow.classic
+
+let multiple_headed =
+  Arrow.add_foot ~head: Arrow.head_triangle
+    (Arrow.add_belt ~point: 0.25
+       ~head: (Arrow.head_triangle ~size: (Num.bp 10.))
+       (Arrow.add_belt ~point: 0.5 ~head: Arrow.head_triangle_full
+          (Arrow.add_belt ~point: 0.75
+             ~head: (Arrow.head_triangle_full ~angle: 140.)
+             (Arrow.add_head
+                ~head: (Arrow.head_triangle ~size: (Num.bp 15.))
+                (Arrow.add_line Arrow.empty)))))
+
+let serial_lines =
+  Arrow.add_head
+    (Arrow.add_line ~to_point: 0.10
+       ~pen: (Pen.scale (Num.bp 5.) (Pen.square ()))
+       (Arrow.add_line ~from_point: 0.10 ~to_point: 0.33
+          (Arrow.add_line ~from_point: 0.33 ~to_point: 0.66
+             ~dashed: Dash.withdots
+             (Arrow.add_line ~from_point: 0.66 ~dashed: Dash.evenly
+                Arrow.empty))))
+
 let () =
-  emit [Arrow.draw a d];
-  emit [Arrow.draw b c];
-  emit [Arrow.draw c b];
-  emit [Arrow.draw a b];
+  emit [Arrow.draw2 a d];
+  emit [Arrow.draw2 b c];
+  emit [Arrow.draw2 c b];
+  emit [Arrow.draw2 a b];
   (* Some curved arrows *)
-  emit [Arrow.draw ~outd: up a d];
-  emit [Arrow.draw ~outd: up b c];
-  emit [Arrow.draw ~outd: right c b];
-  emit [Arrow.draw ~outd: up a b];
+  emit [Arrow.draw2 ~outd: up a d];
+  emit [Arrow.draw2 ~outd: up b c];
+  emit [Arrow.draw2 ~outd: right c b];
+  emit [Arrow.draw2 ~outd: up a b];
   (* Some double-headed arrows *)
-  emit [Arrow.draw ~foot: Arrow.simple_head a d];
-  emit [Arrow.draw ~foot: (Arrow.simple_head ~angle: 300.) b c];
-  emit [Arrow.draw ~foot: Arrow.simple_head ~outd: right c b];
-  emit [Arrow.draw ~foot: (Arrow.simple_head ~angle: 180.) ~outd: up a b];
-  (* A snake arrow *)
-  emit [Arrow.draw
-            ~foot: (Arrow.simple_head ~angle: 300.)
-            ~outd: up ~ind: up a b];
+  emit [Arrow.draw2 ~kind: double_headed a d];
+  emit [Arrow.draw2 ~kind: double_headed ~outd: right c b];
+  (* Some multiple-headed arrows *)
+  emit [Arrow.draw2 ~kind: multiple_headed a d];
+  emit [Arrow.draw2 ~kind: multiple_headed ~outd: right c b];
+  (* Some arrows with multiple serial lines *)
+  emit [Arrow.draw2 ~kind: serial_lines a d];
+  emit [Arrow.draw2 ~kind: serial_lines ~outd: right c b];
   (* A straight thick arrow *)
   emit [Arrow.draw_thick a d];
   emit [Arrow.draw_thick b c];
