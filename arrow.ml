@@ -130,8 +130,10 @@ let draw_line (line, line_path) =
   Command.draw ?color: line.color ?pen: line.pen ?dashed: line.dashed line_path
 
 let classic = add_head (add_line empty)
+let triangle = add_head ~head: head_triangle (add_line empty)
+let triangle_full = add_head ~head: head_triangle_full (add_line empty)
 
-let draw ?(kind = classic) ?tex ?pos path =
+let draw ?(kind = triangle_full) ?tex ?pos path =
   let lines, belts = kind.lines, kind.belts in
   let lines = List.map (make_arrow_line path) lines in
   let belts = List.map (make_arrow_belt path) belts in
@@ -146,10 +148,6 @@ let draw ?(kind = classic) ?tex ?pos path =
   Command.seq (lines @ belts @ labels)
 
 (* Instances *)
-
-let triangle = add_head ~head: head_triangle (add_line empty)
-
-let triangle_full = add_head ~head: head_triangle_full (add_line empty)
 
 let draw2 ?kind ?tex ?pos ?outd ?ind a b =
   let r, l = outd, ind in
@@ -217,7 +215,8 @@ let thick_path ?style ?outd ?ind ?(width = Num.bp 10.)
   cycle ~style:jLine
     (append ~style:jLine (append ~style:jLine path1 path_head) path2)
 
-let draw_thick ?style ?(boxed=true) ?line_color ?fill_color ?outd ?ind ?width ?head_length ?head_width a b =
+let draw_thick ?style ?(boxed=true) ?line_color ?fill_color ?outd ?ind ?width
+    ?head_length ?head_width a b =
   let p = thick_path ?style ?outd ?ind ?width ?head_length ?head_width a b in
   let draw_cmd =
     if boxed then Command.draw ?color:line_color p else Command.nop

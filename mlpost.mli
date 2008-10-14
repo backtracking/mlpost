@@ -1027,7 +1027,7 @@ module Arrow : sig
   val draw: ?kind: kind -> ?tex: string -> ?pos: Command.position -> Path.t ->
     Command.t
     (** Draw an arrow following the given path.
-        @param kind the kind of arrow (default is {!classic})
+        @param kind the kind of arrow (default is {!triangle_full})
         @param tex add a LaTeX label
         @param pos label position *)
 
@@ -1035,7 +1035,7 @@ module Arrow : sig
     ?outd: Path.direction -> ?ind: Path.direction -> Point.t -> Point.t ->
     Command.t
     (** Use [draw2 a b] to draw an arrow from [a] to [b].
-        @param kind the kind of arrow (default is {!classic})
+        @param kind the kind of arrow (default is {!triangle_full})
         @param tex add a LaTeX label
         @param pos label position
         @param outd the outgoing direction, at the beginning of the arrow
