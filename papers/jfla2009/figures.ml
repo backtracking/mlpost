@@ -102,8 +102,6 @@ let architecture =
     arrows@[Box.draw full]
 
 (* Romain *)
-module Arrow = ExtArrow
-
 open Num
 let state = Box.tex ~style:Circle ~stroke:(Some Color.black)
 let final = Box.box ~style:Circle 
