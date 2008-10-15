@@ -36,7 +36,7 @@ let d1 =
   let b = 
     shift (2. ++ 0.) (rect ~fill:Color.purple (tex "$\\pi$"))
   in
-  let pen = Pen.default ~tr:[Transform.scaled (bp 3.)] () in
+  let pen = Pen.scale (bp 3.) Pen.default in
   [ draw a;
     draw b;
     Command.draw
@@ -62,7 +62,7 @@ let d2 =
 
 let proval =
   let f = 7. in
-  let pen = Pen.square ~tr:[T.yscaled (bp 0.5); T.rotated 40.] () in
+  let pen = Pen.rotate 40. (Pen.yscale (bp 0.5) Pen.square) in
   let check = jointpath [-1.2,1.2; 0., -2. ; 2., 2. ; 5., 5.] [jLine ; jCurve; jCurve] in
     [ fill ~color:(Color.gray 0.2) (Path.scale (Num.bp f) fullcircle) ;
       label ~pos:`Left (Picture.tex "Pr") (Point.p (f /. (-4.),0.)) ;
@@ -104,7 +104,7 @@ let rec random_tree ?arrow_style ?edge_style ?stroke ?pen n =
 
 let d2c, d2s, d2sq, d2hsq = 
 (*   let ls = bp (-1.0) in *)
-  let stroke = Color.blue and pen = Pen.circle () and arrow_style = Directed in
+  let stroke = Color.blue and pen = Pen.circle and arrow_style = Directed in
   [draw 
     (random_tree ~edge_style:Curve ~arrow_style ~stroke ~pen 17)],
   [draw 
@@ -135,8 +135,9 @@ let rec random_tree2 = function
 
 let d6 = [draw  (random_tree2 10)]
 let cheno011 =
-  let p = Path.path ~cycle:jCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)] in
-  let pen = Pen.circle ~tr:[T.scaled (bp 1.5)] () in
+  let p = Path.path ~cycle:jCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)] 
+  in
+  let pen = Pen.scale (bp 1.5) Pen.circle in
   [Command.draw p;
    seq (List.map
 	   (fun (pos, l, i) -> 
@@ -215,10 +216,8 @@ let d14 =
   let hdash _ = Dash.scaled 0.5 Dash.withdots in
   let vdash _ = Dash.scaled 2. Dash.evenly in
   let hvpen i = 
-    if i mod 5 = 0 then
-      Pen.default ~tr:([Transform.scaled (Num.bp 2.5)]) ()
-    else Pen.default () in
-  let pen = Pen.default ~tr:[Transform.scaled (Num.bp 4.)] () in
+    if i mod 5 = 0 then Pen.scale (bp 2.5) Pen.default else Pen.default in
+  let pen = Pen.scale (bp 4.) Pen.default in
      [draw_grid ~hdash ~vdash ~hpen:hvpen ~vpen:hvpen sk;
       draw_func ~pen f2 sk;
       draw_func ~pen f3 sk
@@ -271,7 +270,7 @@ let flab i = (Picture.transform
 	      `Top, 19)
 	
 let instants = 
-  let pen = Pen.default ~tr:[Transform.scaled (bp 2.5)] () in
+  let pen = Pen.scale (bp 2.5) Pen.default in
   let base = 
     Command.draw ~pen (Path.path ~style:jLine [(0.,-65.); (280.,-65.)]) in
   let tick i = 
@@ -287,8 +286,8 @@ let instants =
 
 let florence =
   let sk = mk_skeleton 20 14 (bp 14.) (bp 20.) in
-  let pen = Pen.default ~tr:[Transform.scaled (bp 4.)] () in
-  let pen2 = Pen.default ~tr:[Transform.scaled (bp 3.)] () in
+  let pen = Pen.scale (bp 4.) Pen.default in
+  let pen2 = Pen.scale (bp 3.) Pen.default in
   let dash _ = Dash.scaled 0.5 Dash.withdots in
   let dash2 = Dash.scaled 0.66 Dash.withdots in
   let dash3 = Dash.scaled 0.9 Dash.evenly in

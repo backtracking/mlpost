@@ -377,12 +377,12 @@ and Pen : sig
 
   val transform : Transform.t -> t -> t
     (** Apply a transformation to pens *)
-  val default : ?tr:Transform.t -> unit -> t
+  val default : t
     (** The default pen; it corresponds to 
       [Pen.scale (Num.bp 0.5) (Pen.circle ())] *)
-  val circle : ?tr:Transform.t -> unit -> t
+  val circle : t
     (** A circular pen of diameter 1 bp *)
-  val square : ?tr:Transform.t -> unit -> t
+  val square : t
     (** A pen in form of a square, of length 1 bp *)
   val from_path : Path.t -> t
     (** Construct a pen from a closed path *)

@@ -75,7 +75,7 @@ let architecture =
   let extensions = Box.hbox ~pos:`Bot ~padding:(mm 2.) [tree; diag; plot] in
     (* wrapping *)
   let pyramid = 
-    let pen = Pen.scale (Num.bp 1.0) (Pen.square ()) in
+    let pen = Pen.scale (Num.bp 1.0) Pen.square in
     Box.vbox ~padding:(mm 2.) ~pen
       ~dx:(bp 5.) ~dy:(bp 5.) ~style:RoundRect ~stroke:(Some Color.black)
       [extensions; advanced; basictypes; compile_ext; metapost_ext] in
@@ -254,7 +254,7 @@ let arrow_metapost =
    Helpers.draw_simple_arrow ~dashed:Dash.evenly ~outd:(vec (dir 90.))
      (Point.pt (cm 8., cm 0.)) (Point.pt (cm 10., cm 0.));
    Helpers.draw_simple_arrow
-     ~pen:(Pen.scale (bp 2.5) (Pen.square ()))
+     ~pen:(Pen.scale (bp 2.5) Pen.square)
      (Point.pt (cm 12., cm 0.)) (Point.pt (cm 14., cm 1.))]
 
 let arrow_demo_path = Path.pathp [
@@ -427,7 +427,7 @@ let simple_block =
 let pointer_arrow a b =
   let p = pathp [Box.ctr a; Box.ctr b] in
   let p = Path.cut_after (Box.bpath b) p in
-  let pen = Pen.scale (Num.bp 4.) (Pen.circle ()) in
+  let pen = Pen.scale (Num.bp 4.) Pen.circle in
   Command.draw ~pen (pathp [Box.ctr a]) ++ draw_arrow p
 
 let block_arrow =

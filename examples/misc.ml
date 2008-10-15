@@ -29,7 +29,7 @@ let bresenham_data =
 
 (* drawing *)
 
-let pen = Pen.default ~tr:([Transform.scaled (bp 1.5)]) ()
+let pen = Pen.scale (bp 1.5) Pen.default
 
 let grid w h d f =
   let p i j = bp (float i *. d), bp (float j *. d) in
@@ -63,7 +63,7 @@ open Diag
 
 (*parse <<cfg *)
 let cfg =
-  let pen = Pen.circle () in
+  let pen = Pen.circle in
   let node x y s = node x y (Box.tex s) in
   let empty_node x y = node x y "\\phantom{M}" in
   let a = empty_node 0. 4. in
@@ -85,7 +85,7 @@ let cfg =
 
 
 (*parse >> <<chess *)
-let pen = Pen.default ~tr:([Transform.scaled (bp 1.5)]) ()
+let pen = Pen.scale (bp 1.5) Pen.default
 
 let grid w h d f =
   let p i j = bp (float i *. d), bp (float j *. d) in
@@ -257,7 +257,7 @@ let mult f (a1,a2) = (f *. a1, f *. a2)
 let myscale = List.map (mult s)
 
 let escher =
-  let pen1 = Pen.circle () in
+  let pen1 = Pen.circle in
   let mygreen = Color.rgb 0.8 0.9 0.8 in
   let p1  = ( 750.,8000. -. 4950. ) in
   let p2  = (1050.,8000. -. 4950. ) in
@@ -500,7 +500,7 @@ let rec pave t a b c n =
 	    (pave Two d e b (n-1))@
 	      (pave Three d a e (n-1))@pave Four c d b (n-1)
   else  
-    let pen = Pen.circle () in
+    let pen = Pen.circle in
     let gb = Color.rgb 0. 1. 1. in
     let gr = Color.rgb 1. 1. 0. in
     let path = pathp ~style:jLine ~cycle:jLine [a;b;c] in
@@ -525,7 +525,7 @@ let other208 =
 
 let proval =
   let k = 7. in
-  let pen = Pen.rotate 40. (Pen.scale (bp 0.5) (Pen.square ())) in
+  let pen = Pen.rotate 40. (Pen.scale (bp 0.5) Pen.square) in
   let check = 
     jointpath [-1.2,1.2; 0., -2. ; 2., 2. ; 5., 5.] [jLine ; jCurve; jCurve]
   in
@@ -544,7 +544,7 @@ let randtree =
   let thinning =  0.7 in
   let shortening = 0.8 in
   let drawit a b thickness =
-    let pen = Pen.circle ~tr:[Transform.scaled (bp thickness)] () in
+    let pen = Pen.scale (bp thickness) Pen.circle in
     Command.draw ~pen (pathp [a ; b])
   in
   let randrotate a b neg =
@@ -573,7 +573,7 @@ let proj x y z =
   mag *. float (x - y) *. cos alpha, 
   mag *. (float (x + y) *. sin alpha *. sin beta +. float z *. cos beta)
 
-let pen = Pen.default ~tr:([Transform.scaled (bp 2.5)]) ()
+let pen = Pen.scale (bp 2.5) Pen.default
 
 let square color p i j =
   let pt i j = let x,y = p i j in Point.pt (bp x, bp y) in
@@ -599,7 +599,7 @@ let test =
   let b = 
     Box.shift (2. ++ 0.) (Box.rect ~fill:Color.purple (Box.tex "$\\pi$"))
   in
-  let pen = Pen.default ~tr:[Transform.scaled (bp 3.)] () in
+  let pen = Pen.scale (bp 3.) Pen.default in
   [ Box.draw a;
     Box.draw b;
     Command.draw ~color:Color.red (Path.shift (1. ++ 1.) (Box.bpath a));

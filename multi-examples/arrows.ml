@@ -29,7 +29,7 @@ let multiple_headed =
 let serial_lines =
   Arrow.add_head
     (Arrow.add_line ~to_point: 0.10
-       ~pen: (Pen.scale (Num.bp 5.) (Pen.square ()))
+       ~pen: (Pen.scale (Num.bp 5.) Pen.square)
        (Arrow.add_line ~from_point: 0.10 ~to_point: 0.33
           (Arrow.add_line ~from_point: 0.33 ~to_point: 0.66
              ~dashed: Dash.withdots

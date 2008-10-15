@@ -9,7 +9,7 @@ module H = Helpers
 (*parse <<other27 *)
 
 let a = Point.pt (Num.bp 0., Num.bp 0.)
-let pen = Pen.circle ~tr:[Transform.scaled (Num.bp 4.)] () 
+let pen = Pen.scale (Num.bp 4.) Pen.circle
 let other27 = [
   draw (Path.pathp [a]) ~pen;
   label ~pos:`Top (Picture.tex "Au dessus") a;

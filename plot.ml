@@ -36,11 +36,11 @@ type labels = int -> Num.t ->  Picture.t option
 type ticks = (Num.t * Pen.t) option
 
 let get_style = function
-  | None -> fun i -> Dash.evenly, Pen.default ()
+  | None -> fun i -> Dash.evenly, Pen.default
   | Some f -> f
 
 let off_pattern = fun i -> Dash.pattern [Dash.on (bp 5.)]
-let defpen = fun i -> Pen.default ()
+let defpen = fun i -> Pen.default
 
 let get_borders sx sy h w = zero, sx */ (num_of_int w), 
                             sy */ (num_of_int h), zero
@@ -78,12 +78,12 @@ let deflabel x w =
          [Transform.scaled (label_scale w)]
           (Picture.tex (Printf.sprintf "$%d$" x)))
 
-let defticks = Some ((bp 0.25), Pen.default ())
+let defticks = Some ((bp 0.25), Pen.default)
 
 let get_corners maxu maxr = 
   (bp 0., maxu), (maxr, maxu), (bp 0., bp 0.), (maxr, bp 0.)
 
-let draw_axes ?(hpen=Pen.default ()) ?(vpen=Pen.default ()) 
+let draw_axes ?(hpen=Pen.default) ?(vpen=Pen.default) 
          ?(hlabel= deflabel) ?(vlabel=deflabel)
          ?(ticks=defticks) ?(closed=false) ?hcaption ?vcaption
          {width=w; height=h; stepx=sx; stepy=sy} =

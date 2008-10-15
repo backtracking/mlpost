@@ -157,7 +157,7 @@ let draw17 =
 
 let draw18 =
   let u = Num.cm in
-  let pen = Pen.circle ~tr:[Transform.scaled one] () in 
+  let pen = Pen.scale one Pen.circle in
   let rec pg = function
     | 0 -> start (knot ~r:(vec up) ~scale:u (0.,0.))
     | n -> let f = (float_of_int n /. 2.) in 
@@ -171,7 +171,7 @@ let draw18 =
 let draw19 =
   let ux, uy = Num.inch 0.01, Num.inch 0.6 in
   let dux, duy = 120. *./ ux, 4. *./ uy in
-  let pen = Pen.circle ~tr:[Transform.scaled one] () in 
+  let pen = Pen.scale one Pen.circle in 
   let axey = Picture.transform [Transform.rotated 90.] (tex "axe $y$") in
   let rec pg = function
     | 0 -> start (knotn ~r:(vec right) (zero,uy))

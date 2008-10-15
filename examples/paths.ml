@@ -27,15 +27,14 @@ let path3 =
 
 (*parse >> <<path4 *)
 let path4 =
-  [ draw ~pen:(Pen.circle ~tr:[Transform.scaled (Num.bp 4.)] ()) 
-      (path [(0.,0.)])]
+  [ draw ~pen:(Pen.scale (Num.bp 4.) Pen.circle) (path [(0.,0.)])]
 
 (*parse >> <<path5 *)
 let path5 =
   let a = 0., 0. in
   let b = 1., 0. in
   let c = 0., 1. in
-  let pen = (Pen.circle ~tr:[Transform.scaled (Num.bp 4.)] ()) in
+  let pen = Pen.scale (Num.bp 4.) Pen.circle in
   [ draw (path ~style:jLine ~scale:Num.cm ~cycle:jLine [a;b;c]) ] @
     List.map (fun a -> draw ~pen (path ~scale:Num.cm [a])) [a;b;c]
 (*parse >> *)
@@ -66,7 +65,7 @@ let path8 =
 
 (*parse >> <<path9 *)
 let path9 = 
-  let pen = Pen.circle ~tr:[Transform.scaled (Num.bp 2.)] () in
+  let pen = Pen.scale (Num.bp 2.) Pen.circle in
   let cl = List.map Color.gray [0.8;0.6;0.4] in
     List.map2
       (fun (a,b) color ->
@@ -97,7 +96,7 @@ let path13 =
       draw triangle]
 
 (*parse >> *)
-let pen = Pen.circle ~tr:[Transform.scaled (Num.bp 2.)] ()
+let pen = Pen.scale (Num.bp 2.) Pen.circle
 (*html <hr/> *)
 (*parse <<path14 *)
 let path14 =
@@ -112,7 +111,7 @@ let path15 =
 (*parse >> <<cheno11 *)
 let cheno11 =
   let p = path ~cycle:jCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)] in
-  let pen = Pen.scale (Num.bp 1.5) (Pen.circle ()) in
+  let pen = Pen.scale (Num.bp 1.5) Pen.circle in
   [draw p;
    seq 
      (List.map

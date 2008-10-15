@@ -22,10 +22,10 @@ type t = Types.pen
 let transform tr p = 
   List.fold_left mkPenTransformed p tr
 
-let default ?(tr=id) () = 
-  transform tr (mkPenTransformed mkPenCircle (scaled (mkF 0.5)))
-let circle ?(tr=id) () = transform tr mkPenCircle
-let square ?(tr=id) () = transform tr mkPenSquare
+let default = 
+  mkPenTransformed mkPenCircle (scaled (mkF 0.5))
+let circle = mkPenCircle
+let square = mkPenSquare
 let from_path p = mkPenFromPath p
 
 let scale f p = transform [Transform.scaled f] p

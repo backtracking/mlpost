@@ -350,7 +350,7 @@ centre de \texttt{a}) et la flèche proprement dite à l'aide du chemin
 let pointer_arrow a b =
   let p = pathp [Box.ctr a; Box.ctr b] in
   let p = Path.cut_after (Box.bpath b) p in
-  let pen = Pen.scale (Num.bp 4.) (Pen.circle ()) in
+  let pen = Pen.scale (Num.bp 4.) Pen.circle in
   Command.draw ~pen (pathp [Box.ctr a]) ++ draw_arrow p
 \end{ocaml}
 \end{minipage}
