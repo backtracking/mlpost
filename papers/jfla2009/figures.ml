@@ -425,9 +425,9 @@ let simple_block =
   [Box.draw b]
 
 let pointer_arrow a b =
-  let p = pathk [knotp (Box.ctr a); knotp (Box.ctr b)] in
+  let p = pathp [Box.ctr a; Box.ctr b] in
   let p = Path.cut_after (Box.bpath b) p in
-  let pen = Pen.circle ~tr:[Transform.scaled (Num.bp 4.)] () in
+  let pen = Pen.scale (Num.bp 4.) (Pen.circle ()) in
   Command.draw ~pen (pathp [Box.ctr a]) ++ draw_arrow p
 
 let block_arrow =
