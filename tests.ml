@@ -359,7 +359,61 @@ let farey n =
   Picture.scale (Num.bp 30.0) pic
       
   
+let why_platform =
+  let tabular l =
+    "{\\begin{tabular}{l}" ^ String.concat " \\\\ " l ^ "\\end{tabular}}" in
+  let dx = bp 5. and dy = bp 5. in
+  let space ~name b = rect ~stroke:None ~name ~dx ~dy b in
+  let green s = 
+    space ~name:s 
+      (round_rect ~dx ~dy ~stroke:None ~fill:Color.lightgreen (tex s)) in
+  let pink s = 
+    space ~name:s (shadow (rect  ~dx ~dy ~fill:(Color.color "light pink")
+			      (tex ("\\large\\sf " ^ s)))) in
+  let interactive = tex ~name:"interactive"
+    (tabular ["Interactive provers"; "(Coq, PVS,"; "Isabelle/HOL, etc.)"]) in
+  let automatic = tex ~name:"automatic"
+    (tabular ["Automatic provers";
+	      "(Alt-Ergo, Simplify,"; "Yices, Z3, CVC3, etc.)"]) in
+  let b = 
+    tabularl ~hpadding:(bp 20.) ~vpadding:(bp 30.)
+      [[green "Annotated C programs"; empty (); 
+	green "JML-annotated Java programs"];
+       [pink "Caduceus"; green "Why program"; pink "Krakatoa";];
+       [empty (); pink "Why"; empty ()];
+       [interactive; green "verification conditions"; automatic]]
+  in
+  let arrow x y = 
+    let p = Box.cpath (get x b) (get y b) in
+    Arrow.draw_thick ~line_color:Color.red ~width:(bp 4.) ~head_width:(bp 10.)
+      ~fill_color:Color.red (Path.point 0. p) (Path.point 1. p)
+    in
+  [Box.draw b;
+   arrow "Annotated C programs" "Caduceus";
+   arrow "Caduceus" "Why program";
+   arrow "JML-annotated Java programs" "Krakatoa";
+   arrow "Krakatoa" "Why program";
+   arrow "Why program" "Why";
+   arrow "Why" "verification conditions";
+   arrow "verification conditions" "interactive";
+   arrow "verification conditions" "automatic";
+  ]
+
+(***
+let alt_ergo =
+  let b = 
+    tabularl ~hpadding:(bp 20.) ~vpadding:(bp 30.)
+      [[green "Annotated C programs"; empty (); 
+	green "JML-annotated Java programs"];
+       [pink "Caduceus"; green "Why program"; pink "Krakatoa";];
+       [empty (); pink "Why"; empty ()];
+       [interactive; green "verification conditions"; automatic]]
+  in
+  [Box.draw b]
+***)
+
 let figs = [
+  why_platform;
   d6; d5; yannick Box.Rect; yannick Box.Patatoid; d1; d2; proval;
   d2sq; d2hsq; d2s; d2c; cheno011; d3; d4;
   d7; 

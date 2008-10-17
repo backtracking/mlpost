@@ -500,3 +500,12 @@ let cpath ?style ?outd ?ind a b =
   let r,l = outd, ind in
   let p = pathk ?style [knotp ?r (ctr a); knotp ?l (ctr b)] in
   cut_after (bpath b) (cut_before (bpath a) p)
+
+let thick_arrow ?style ?(boxed=true) ?line_color ?fill_color ?outd ?ind ?width
+    ?head_length ?head_width a b =
+  let p = cpath a b in
+  let pa = Path.point 0. p in
+  let pb = Path.point 1. p in
+  Arrow.draw_thick ?style ~boxed ?line_color ?fill_color ?outd ?ind ?width
+    ?head_length ?head_width pa pb
+
