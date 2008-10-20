@@ -748,7 +748,7 @@ and Box : sig
 
   (** {2 Creating boxes} *)
 
-  val empty : ?width:Num.t -> ?height:Num.t -> unit -> t
+  val empty : ?name:string -> ?width:Num.t -> ?height:Num.t -> unit -> t
     (** the empty box *)
 
   (** {2 Styles } *)
@@ -852,6 +852,8 @@ and Box : sig
 	@param debug if set to to true, the bounding
 	path and the center of the box are drawn as well, default is false
     *)
+
+  val group : ?style:style -> t list box_creator
 
   (** {2 Boxes alignment} *)
 

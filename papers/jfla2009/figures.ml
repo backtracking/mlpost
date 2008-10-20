@@ -437,7 +437,9 @@ let block_arrow =
 
 let cons hd tl =
   let p1 = tex ~name:"hd" hd in
-  let p2 = tex ~name:"tl" (if tl then "" else "\\ensuremath{\\bot}") in
+  let p2 = 
+    if tl then empty ~name:"tl" ~width:(bp 10.) () 
+    else tex ~name:"tl" "\\ensuremath{\\bot}" in
   hblock [p1; p2]
 
 let draw_list l =
@@ -502,6 +504,5 @@ let () = Metapost.emit "block_arrow" block_arrow
 let () = Metapost.emit "list123" list123
 let () = Metapost.emit "another_list" another_list
 let () = Metapost.emit "deps" deps
-
 
 

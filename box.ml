@@ -239,9 +239,9 @@ let box
   hbox ~style ~dx ~dy ?name ~stroke ?pen ?fill [b]
 
 (* groups the given boxes in a new box *)
-let group 
-  ?name ?(stroke=None) ?pen ?fill ?(style=Rect) 
-  ?(dx=Num.zero) ?(dy=Num.zero) bl =
+let group ?(style=Rect) ?(dx=Num.zero) ?(dy=Num.zero) 
+  ?name ?(stroke=None) ?pen ?fill 
+  bl =
   let xmin,xmax,ymin,ymax = 
     List.fold_left 
       (fun (xmin,xmax,ymin,ymax) b ->
@@ -275,8 +275,8 @@ let group_rect ?name w h c bl =
     contour = Path.shift c (Shapes.rectangle w h);
     post_draw = no_drawing; pre_draw = no_drawing }
 
-let empty ?(width=Num.zero) ?(height=Num.zero) () =
-  { desc = Emp; name = None; 
+let empty ?name ?(width=Num.zero) ?(height=Num.zero) () =
+  { desc = Emp; name = name; 
     stroke = None; pen = None; fill = None;
     width = width; height = height; ctr = Point.origin;
     contour = Shapes.rectangle width height ;

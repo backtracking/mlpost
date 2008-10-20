@@ -10,15 +10,15 @@
 % macros
 \newcommand{\ocaml}{OCaml}
 \newcommand{\camllight}{Caml Light}
-\newcommand{\asymptote}{Asymptote}
+\newcommand{\asymptote}{\textsf{Asymptote}}
 \newcommand{\mlpost}{\textsc{Mlpost}}
 \newcommand{\metapost}{\MP}
 \newcommand{\fmpost}{\textit{functional} \metapost}
 \newcommand{\metafont}{\MF}
-\newcommand{\nomdetikz}{Tikz}
-\newcommand{\pstricks}{\textsc{Pstricks}}
-\newcommand{\dia}{Dia}
-\newcommand{\xfig}{\textsc{Xfig}}
+\newcommand{\nomdetikz}{\textsf{TikZ}}
+\newcommand{\pstricks}{\textsf{PSTricks}}
+\newcommand{\dia}{\textsf{Dia}}
+\newcommand{\xfig}{\textsf{Xfig}}
 \newcommand{\postscript}{PostScript}
 \newcommand{\mlpictex}{mlP\hspace{-0.2em}\raisebox{-0.2em}{i}\hspace{-0.1em}c\hspace{-0.1em}\TeX}
 
@@ -63,7 +63,7 @@
 \section{Introduction}
 
 Lors de la rédaction de documents à nature scientifique (articles,
-cours, livres, etc), il est très souvent nécessaire de réaliser des
+cours, livres, etc.), il est très souvent nécessaire de réaliser des
 figures. Ces figures permettent d'agrémenter le texte en illustrant
 aussi bien les objets dont il est question dans le document que les
 liens qui existent entre eux et facilitent ainsi leur compréhension.
@@ -105,11 +105,11 @@ Les bibliothèques \LaTeX\ telles que \pstricks\ ou \nomdetikz\ offrent
 l'intégration la plus naturelle avec \LaTeX. En particulier, elles
 permettent de combiner arbitrairement éléments graphiques et textes
 \LaTeX\ 
-\begin{tikzpicture}[baseline=(a.base)]
-\path[use as bounding box] 
-  (0,0) node[draw,style=dashed] (a) {comme ceci};
-\draw[->] (a) .. controls +(-2cm,1cm) and +(-2cm,-0cm) .. (a);
-\end{tikzpicture}.
+% \begin{tikzpicture}[baseline=(a.base)]
+% \path[use as bounding box] 
+%   (0,0) node[draw,style=dashed] (a) {comme ceci};
+% \draw[->] (a) .. controls +(-2cm,1cm) and +(-2cm,-0cm) .. (a);
+% \end{tikzpicture}.
 En revanche, elles demandent d'apprendre un certain nombre de
 macros et de notations et souffrent surtout des défauts inhérents à
 \LaTeX~:
@@ -157,10 +157,10 @@ donne un exemple de programme/figure réalisé avec \metapost.
 \end{minipage}
 \caption{Exemple de figure \metapost}\label{fig:metapost}
 \end{figure}
-Dans un souci d'exhaustivité, nous devons aussi mentionner
-\asymptote\cite{asymptote}, également un langage dédié à la création
-de figures. Nous n'allons pas rentrer dans les détails de cet outil
-car nous ne considérons plus les langages dédiés par la suite.
+% Dans un souci d'exhaustivité, nous devons aussi mentionner
+% \asymptote~\cite{asymptote}, également un langage dédié à la création
+% de figures. Nous n'allons pas rentrer dans les détails de cet outil
+% car nous ne considérons plus les langages dédiés par la suite.
 
 Une alternative séduisante aux solutions précédentes consiste à
 utiliser un langage de programmation existant. Ainsi l'utilisateur n'a
@@ -175,17 +175,20 @@ peut citer au moins deux exemples de telle intégration :
 \item \mlpictex~\cite{mlpictex} est\footnote{À notre connaissance,
     \mlpictex\ n'est plus distribué.} un ensemble de macros \LaTeX\ permettant
   d'inclure du code \camllight\ arbitraire dans un document \LaTeX.
-  Ce code s'appuie sur une bibliothèque de dessin \postscript\ et peut
+  Ce code s'appuie sur une bibliothèque de dessin
+  \postscript~\cite{postscript} et peut 
   faire référence à des éléments \LaTeX, ainsi qu'à leur taille.
 
-\item \fmpost~\cite{fmpost} est une bibliothèque Haskell produisant du
+\item \fmpost~\cite{fmpost} est une bibliothèque
+  Haskell~\cite{haskell} produisant du 
   code \metapost. C'est une approche légère qui réutilise les
-  capacités graphiques de \metapost\ et ne fait que changer le langage
-  de programmation.
+  capacités graphiques de \metapost\ et substitue Haskell au langage
+  de programmation de \metapost.
 \end{itemize}
 
 Cet article présente \mlpost, un outil qui adopte l'approche de
-\fmpost\ en utilisant \ocaml\ comme langage hôte. La première partie
+\fmpost\ en utilisant \ocaml~\cite{ocaml} comme langage hôte. La
+première partie 
 de l'article présente les choix de conception de \mlpost\ à travers un
 certain nombre d'exemples. La seconde partie détaille ensuite
 l'architecture logicielle de \mlpost.
@@ -214,9 +217,10 @@ placement à une position précise, alignement de plusieurs boîtes,
 flèches reliant plusieurs boîtes entre elles, création de tableaux,
 etc. Plusieurs boîtes peuvent aussi être regroupées au sein d'une
 seule afin de pouvoir les déplacer ensemble.  L'exemple suivant montre
-deux boîtes simples, la deuxième déplacée un peu à droite, en
-utilisant la fonction \verb|shift|.
+deux boîtes simples, la deuxième étant déplacée un centimètre vers la
+droite en utilisant la fonction \verb|shift|.
 
+\medskip
 \begin{minipage}{0.2\linewidth}
   \includegraphics{simple.mps}
 \end{minipage}
@@ -226,6 +230,11 @@ utilisant la fonction \verb|shift|.
   draw (shift (Point.pt (cm 1., zero)) (circle (empty ()))) ]
 \end{ocaml}
 \end{minipage}
+
+\medskip\noindent
+Une figure \mlpost\ est simplement une liste de commandes de
+dessin. Ci-dessus, elle est réduite à deux occurrences de
+\texttt{Box.draw}, la commande qui dessine une boîte.
 % Notez que par défaut, le contour de la boîte contenant du \LaTeX n'a
 % pas été tracé, alors que celui de la boîte vide a été tracé.
 
@@ -235,8 +244,8 @@ est de favoriser un placement relatif des objets plutôt qu'absolu.
 Ceci permet d'obtenir des figures plus robustes. En effet, imaginons
 que vous vouliez placer une boîte $A$ à \emph{droite} d'une boîte $B$.
 Une première possibilité serait de spécifier les positions
-approximativement, par exemple en donnant les abscisses $0cm$ pour $A$
-et $2cm$ pour $B$. Cependant, si vous changez d'avis sur le contenu de
+approximativement, par exemple en donnant les abscisses 0 cm pour $A$
+et 2 cm pour $B$. Cependant, si vous changez d'avis sur le contenu de
 $A$ et que la taille de cette boîte change, $A$ risque alors de se
 superposer à $B$. Il faut alors replacer toutes les boîtes de votre
 figure manuellement. Pour éviter ça, \mlpost\ propose diverses
@@ -350,10 +359,17 @@ centre de \texttt{a}) et la flèche proprement dite à l'aide du chemin
 let pointer_arrow a b =
   let p = pathp [Box.ctr a; Box.ctr b] in
   let p = Path.cut_after (Box.bpath b) p in
-  let pen = Pen.scale (Num.bp 4.) Pen.circle in
+  let pen = Pen.scale (bp 4.) Pen.circle in
   Command.draw ~pen (pathp [Box.ctr a]) ++ draw_arrow p
 \end{ocaml}
 \end{minipage}
+
+\medskip\noindent
+On utilise ici le symbole infixe \texttt{++} qui permet de concaténer
+des commandes de dessin plus efficacement qu'en utilisant l'opérateur
+\texttt{@} de \ocaml.
+On utilise d'autre part \texttt{bp}, qui est une unité propre à
+\metapost, proche du point \postscript.
 
 Nous avons maintenant tous les éléments nécessaires pour écrire une
 fonction \texttt{draw\_list} qui prend en argument une liste \ocaml\
@@ -369,7 +385,7 @@ let draw_list l =
 Puis on aligne ces blocs avec \texttt{Box.hbox}, en insérant de
 l'espace horizontal avec l'option \texttt{padding} :
 \begin{ocaml}
-  let l = hbox ~padding:(Num.bp 30.) (make l) in
+  let l = hbox ~padding:(bp 30.) (make l) in
 \end{ocaml}
 Pour dessiner les pointeurs, il suffit de parcourir la liste des
 boîtes (qui ont été placées) et d'utiliser la fonction
@@ -462,10 +478,9 @@ dépasse pas les 15 lignes de code.
 
 % automate -- RB
 \paragraph{Automates.}\label{sec:automates}
-L'un des principes de  \mlpost\ est la possibilité d'écrire facilement
-des bibliothèques. Si on étudie la théorie des langages,
-on est rapidement amené à dessiner des automates. Illustrons une façon
-d'utiliser \mlpost\ dans ce but. On va définir les fonctions 
+La théorie des langages est un domaine où l'on a  rapidement besoin de
+dessiner des automates. Illustrons une façon 
+d'utiliser \mlpost\ dans ce but. Nous allons définir les fonctions 
 suivantes :
 \begin{itemize}
 \item \texttt{state} pour créer un état ;
@@ -502,9 +517,9 @@ objets de façon relative, les uns par rapport aux autres.
 \begin{ocaml}
 let states = Box.vbox ~padding:(cm 0.8)
   [ Box.hbox ~padding:(cm 1.4)
-    [ state ~name:"alpha" "$\\alpha$"; state "$\\beta$" ];
-    final (state "$\\gamma$") ]
-in
+      [ state ~name:"alpha" "$\\alpha$";
+        state ~name:"beta" "$\\beta$" ];
+    final ~name:"gamma" (state "$\\gamma$") ] in
 [ Box.draw states ]
 \end{ocaml}
 \end{minipage}
@@ -513,20 +528,22 @@ in
 \texttt{states}, contenant les états comme autant de sous-boîtes nommées.
 
 La  fonction \texttt{initial} appose une  flèche entrante  à un
-état.  Il  s'agit donc  d'une fonction  qui prend un  état $q$  et qui
-renvoie une commande dessinant une  flèche vers $q$. On pourrait aussi
-renvoyer une  boîte sans  contour contenant $q$  et la flèche,  ce qui
+état.  Il  s'agit donc  d'une fonction  qui prend le nom d'un état
+\texttt{q}  et qui 
+renvoie une commande dessinant une  flèche vers \texttt{q}. On pourrait aussi
+renvoyer une  boîte sans  contour contenant \texttt{q}  et la flèche,  ce qui
 permettrait   d'utiliser  \texttt{initial}  de   la  même   façon  que
 \texttt{final}.   Cependant, la  boîte  obtenue n'aurait  pas la  même
-taille et  la même forme que  $q$, ce qui poserait  des problèmes pour
-placer $q$ ou pour dessiner des transitions vers ou à partir de $q$.
+taille et  la même forme que  \texttt{q}, ce qui poserait  des problèmes pour
+placer \texttt{q} ou pour dessiner des transitions vers ou à partir de
+\texttt{q}. 
 \begin{ocaml}
 let initial states name =
-  let b = Box.get name states in
-  let p = Box.west b in
+  let q = Box.get name states in
+  let p = Box.west q in
   Arrow.draw (Path.pathp [ Point.shift p (Point.pt (cm (-0.3), zero)); p ])
 \end{ocaml}
-La fonction  accède à  la boîte \texttt{b}  par son  nom \texttt{name}
+La fonction  accède à  la boîte \texttt{q}  par son  nom \texttt{name}
 dans la  boîte \texttt{states} et détermine le point d'arrivée de la
 flèche avec \texttt{Box.west}. On pourrait généraliser cette fonction
 pour spécifier la position de la flèche.
@@ -536,7 +553,7 @@ un autre. Cette fonction prend deux arguments optionnels \texttt{outd}
 et \texttt{ind} pour spécifier, en degrés, la direction sortante et la
 direction entrante  de la  flèche. On doit  les convertir  en vecteurs
 directeurs  pour les passer  à \texttt{cpath},  qui calcule  un chemin
-allant d'un bord d'une boîte au  bord d'une autre boîte. Ce chemin est
+allant du bord d'une boîte au  bord d'une autre boîte. Ce chemin est
 ensuite donné à la fonction \texttt{Arrow.draw} qui trace la flèche en
 plaçant une étiquette \texttt{tex} à la position \texttt{pos}.
 \begin{ocaml}
@@ -574,21 +591,19 @@ let loop states tex name =
 \end{ocaml}
 \end{minipage}
 
+Ici encore, on pourrait généraliser cette fonction
+pour spécifier la position de la flèche.
 On  peut maintenant  dessiner  facilement des  automates en  utilisant
 cette bibliothèque.
 
+\medskip
 \begin{minipage}{0.2\linewidth}
   \includegraphics{automate.mps}
 \end{minipage}
 \begin{minipage}{0.2\linewidth}
 \small\begin{ocaml}
 let automate =
-  let states = Box.vbox ~padding:(cm 0.8)
-    [ Box.hbox ~padding:(cm 1.4)
-        [ state ~name:"alpha" "$\\alpha$";
-          state ~name:"beta" "$\\beta$" ];
-      final ~name:"gamma" (state "$\\gamma$") ]
-  in
+  let states = ... in
   [ Box.draw states;
     transition states "a" `Lowleft "alpha" "gamma";
     transition states "b" `Lowright "gamma" "beta";
@@ -655,13 +670,13 @@ certain nombre des possibilités de l'extension \texttt{Plot}.
 %
 Ainsi les fonctions illustrées sur cette figure ont été codées comme des
 fonctions \ocaml{} standard. De plus, la ligne intermédiaire dans la
-partie située sous le graphe principal, et dénotée par $\omega_2$,
-représente les discontinuités de la fonction $f_{\omega_2}$ du graphe
+partie située sous le graphe principal, et dénotée par $w_2$,
+représente les discontinuités de la fonction $f_{w_2}$ du graphe
 principal. Cette ligne est calculée \textit{directement} à partir de
-la fonction $f_{\omega_2}$ ; si l'on décide de changer la fonction
-$f_{\omega_2}$, la ligne $\omega_2$ sera mise à jour automatiquement. Cela est
+la fonction $f_{w_2}$ ; si l'on décide de changer la fonction
+$f_{w_2}$, la ligne $w_2$ sera mise à jour automatiquement. Cela est
 également vrai pour certaines étiquettes de la figure, comme l'abscisse
-$[\omega_2]_5$. Ceci offre une flexiblité très intéressante lors de la
+$[w_2]_5$. Ceci offre une flexiblité très intéressante lors de la
 phase de développement d'une telle figure.
 
 \paragraph{Bresenham.}
@@ -701,7 +716,8 @@ let g = Box.gridi (x2+1) (y2+1)
 \medskip\noindent Les boîtes sont des boîtes vides de 6 points de
 côté, créées avec \texttt{Box.empty}. Pour les boîtes correspondant à
 des points dessinés par l'algorithme de Bresenham, on indique que la
-boîte doit être remplie en rouge, à l'aide l'argument optionnel \texttt{fill}.
+boîte doit être remplie en rouge, à l'aide de l'argument optionnel
+\texttt{fill}. 
 
 Pour parachever la figure, on va ajouter des étiquettes indiquant les
 coordonnées des deux extrémités du segment. Pour placer une étiquette
@@ -763,8 +779,10 @@ cas, le coût supplémentaire est faible, puisque \metapost\ déroule
 % schéma de l'architecture
 \begin{figure}[ht]
   \begin{center}
-    \includegraphics{architecture.mps}
+    ~\\[0.5em]
+    \includegraphics{architecture.mps} 
   \end{center}
+  \vspace*{-1em}
   \caption{Architecture de \mlpost}\label{fig:archi}
 \end{figure}
 
@@ -779,7 +797,7 @@ construits à partir de la couche inférieure. Les sections~\ref{subsec:boxes}
 et \ref{subsec:arrows} reviennent plus en détail sur deux de ces modules,
 respectivement \texttt{Box} et \texttt{Arrow}.
 Enfin, on trouve au plus haut niveau des modules tels que
-\texttt{Tree} ou \texttt{Plot} présentés dans la section précédente.
+le module \texttt{Plot} présenté dans la section précédente.
 L'intégralité des modules de \mlpost\ est empaquetée dans un module
 \texttt{Mlpost}, afin de ne pas polluer l'espace de noms d'\ocaml.
 
@@ -831,7 +849,7 @@ comporte tous les types de base de \metapost~:
 
 \end{description}
 Les autres types \metapost\ (chaînes de caractères, booléens, couleurs)
-sont facilement représentés en \ocaml. L'interface de \mlpost\ contient
+sont directement représentés en \ocaml. L'interface de \mlpost\ contient
 aussi un module \texttt{Command} qui définit le type des commandes
 \metapost : commandes de dessin, de remplissage, itérations,  séquences,
 etc.
@@ -904,18 +922,19 @@ end
   \includegraphics{deps.mps}
 \end{minipage}
 
-Toutes ces signatures sont
-déclarées de manière mutuellement récursive. La signature
-de \texttt{Point} peut ainsi faire référence à \texttt{Path} et
-inversement. En revanche, les implémentations de ces 
-modules sont contenues dans des fichiers indépendants
-\texttt{num.ml}, \texttt{point.ml}, etc., 
-qui sont compilés avec l'option {\tt -for-pack Mlpost}. Cet agencement
-est également très pratique pour la documentation de l'API : c'est
-uniquement le fichier \texttt{mlpost.mli} qui sert d'entrée à
-l'outil \texttt{ocamldoc}.
+Toutes ces signatures sont déclarées de manière mutuellement
+récursive. La signature de \texttt{Point} peut ainsi faire référence à
+\texttt{Path} et inversement.  On notera que les types tels que
+\texttt{Point.t} sont maintenant abstraits dans l'interface, rendant
+invisible l'existence du module \texttt{Types}.  Par ailleurs, les
+implémentations de ces modules sont contenues dans des fichiers
+indépendants \texttt{num.ml}, \texttt{point.ml}, etc., qui sont
+compilés avec l'option {\tt -for-pack Mlpost}.  Cet agencement est en
+outre très pratique pour la documentation de l'API : c'est uniquement
+le fichier \texttt{mlpost.mli} qui sert d'entrée à l'outil
+\texttt{ocamldoc}.
 
-\paragraph{Hashconsing et traduction vers \metapost.}
+\paragraph{Hash-consing et traduction vers \metapost.}
 
 Le choix d'une représentation symbolique de la plupart des objets impose
 des efforts supplémentaires pour minimiser l'utilisation de la mémoire
@@ -932,21 +951,18 @@ abstraite. Cette technique permet de partager des valeurs structurellement
 égales. Elle utilise une table de hachage globale qui stocke toutes les valeurs
 déjà créées. Avant de créer un nouvel objet, on regarde dans cette table si un
 objet structurellement égal existe déjà. Pour que le calcul de la valeur de
-hachage ainsi que la comparaison des objets soit efficace, chaque (sous-)terme
-vient avec sa valeur de hachage. Ainsi, on n'obtient pas seulement le
-partage de 
-tous les sous-termes communs, mais également un test d'égalité très efficace,
-utile pour toute structure de données contenant ces valeurs : il suffit de
-comparer physiquement ces objets.
+hachage soit efficace, chaque (sous-)terme
+vient avec sa valeur de hachage. Le partage réalisé est maximal, ce
+qui permet de substituer l'égalité physique (\texttt{==}) à l'égalité
+structurelle (\texttt{=}). 
 
 Cette technique diminue l'utilisation de la mémoire, mais ne change rien {\em a
 priori} à la taille des fichiers générés. La structure hash-consée {\em
 réalise} le partage, mais elle ne sait pas quels sont les n\oe uds
 effectivement 
-utilisés au moins deux fois. Pour cela, il suffit de traverser la
-structure, en comptant les occurrences de chaque n\oe ud.  Quand on
-visite un n\oe ud 
-déjà rencontré, on ne considère pas ses sous-n\oe uds. Il est néanmoins
+utilisés au moins deux fois. Pour cela, on réalise un simple parcours
+en profondeur de la structure, en comptant les occurrences de chaque
+n\oe ud.  Il est néanmoins
 possible de rencontrer une nouvelle fois un sous-n\oe ud d'une structure,
 comme le montre l'exemple ci-dessous :
 
@@ -1004,7 +1020,7 @@ Le dessin d'une boîte est immédiat. On trace d'une part son contour et
 d'autre part son contenu. Ce dernier est soit
 une boîte atomique directement dessinée à l'aide de
 \texttt{Command.draw\_pic}, soit une boîte composite dont le dessin
-est tout simplement obtenu en dessinant chaque sous-boîte.
+est tout simplement obtenu en dessinant récursivement chaque sous-boîte.
 
 Pour réaliser les diverses fonctions de placement, on commence par
 écrire une fonction de translation d'une boîte par un vecteur donné :
@@ -1089,9 +1105,9 @@ Nous avons présenté \mlpost, une bibliothèque \ocaml\ au dessus de
 \metapost. Nous espérons avoir convaincu le lecteur des avantages que la
 présentation sous forme de bibliothèque apporte : familiarité avec le
 langage pour les programmeurs \ocaml, typage fort, des
-construction de programmation de haut niveau, des dessins résultants
+constructions de programmation de haut niveau, des dessins résultants
 de calculs arbitraires, etc.  
-\mlpost\ fournit volontairement un nombre de primitives restreint, car
+\mlpost\ fournit volontairement un nombre restreint de primitives, car
 l'utilisateur peut aisément construire des
 extensions au dessus de \mlpost. En cela, \mlpost\ diffère de
 bibliothèques \LaTeX\ telles que \nomdetikz\ ou \pstricks, où de très
