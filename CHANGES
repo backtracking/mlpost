@@ -1,9 +1,9 @@
+o - changes in behaviour, new features
+* - incompatible changes in the interface
 
 version 0.5, Octobre 20, 2008 (first public release)
 ----------------------------------------------------
-* new option -native to use native compilation, useful for complicated pictures
-o - changes in behaviour, new features
-* - incompatible changes in the interface
+o new option -native to use native compilation, useful for complicated pictures
 
 version 0.3, current
 --------------------
