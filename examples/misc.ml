@@ -127,7 +127,7 @@ let foi, iof = float_of_int, int_of_float
 let nodes = 
   Array.init 6
     (fun i -> Array.init 4
-       (fun j -> node (foi i) (foi j) (Box.tex "")))
+       (fun j -> node (foi i) (foi j) (Box.empty ~width:(bp 4.) ())))
 (* 	  (Printf.sprintf "(%d,%d)" i j))) *)
 
 let nodesl = List.flatten (List.map Array.to_list (Array.to_list nodes))
@@ -147,14 +147,14 @@ let graph = draw ~fill:(Color.gray 0.8)
                  ~style:(Box.circle ~dx:(Num.bp 6.) ~dy:(Num.bp 6.)) diag
 let diag1 = [draw_pic (Picture.scale (bp 0.5) (Picture.make graph))]
 
-(*parse >> <<diag1 *)
+(*parse >> <<diag2 *)
 
 let foi, iof = float_of_int, int_of_float
 
 let nodes = 
   Array.init 6
     (fun i -> Array.init 4
-       (fun j -> (node (foi i) (foi j) (Box.tex ""), i, j)))
+       (fun j -> (node (foi i) (foi j) (Box.empty ~width:(bp 4.) ()), i, j)))
 (*  	  (Printf.sprintf "(%d,%d)" i j), i, j))) *)
 
 let nodesl = 

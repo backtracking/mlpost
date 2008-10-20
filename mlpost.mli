@@ -834,7 +834,7 @@ and Box : sig
   val north_east : t -> Point.t
   val south_east : t -> Point.t
 
-  (** {2 POS compliance} *)
+  (** {2 Operators} *)
 
   val ctr : t -> Point.t
   (** return the center of the object *)
@@ -854,6 +854,8 @@ and Box : sig
     *)
 
   val group : ?style:style -> t list box_creator
+    (** [group bl] groups a list of boxes [bl] into a single box *)
+	
 
   (** {2 Boxes alignment} *)
 
