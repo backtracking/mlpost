@@ -85,7 +85,7 @@ intégrer dans un document \LaTeX~:
   que \dia~\cite{dia} ou \xfig~\cite{xfig} ;
 \item des bibliothèques \LaTeX, telles que \pstricks~\cite{pstricks}
   ou encore \nomdetikz~\cite{tikz} ; 
-\item des outils externes en ligne de commande, tel 
+\item des outils externes en ligne de commande, tel que
   \metapost~\cite{metapost}.
 \end{itemize}
 
@@ -242,10 +242,10 @@ dessin. Ci-dessus, elle est réduite à deux occurrences de
 Un principe que nous avons suivi lors de la conception de \mlpost{}
 est de favoriser un placement relatif des objets plutôt qu'absolu.
 Ceci permet d'obtenir des figures plus robustes. En effet, imaginons
-que vous vouliez placer une boîte $A$ à \emph{droite} d'une boîte $B$.
+que l'on veuille placer une boîte $A$ à \emph{droite} d'une boîte $B$.
 Une première possibilité serait de spécifier les positions
 approximativement, par exemple en donnant les abscisses 0 cm pour $A$
-et 2 cm pour $B$. Cependant, si vous changez d'avis sur le contenu de
+et 2 cm pour $B$. Cependant, si on change d'avis sur le contenu de
 $A$ et que la taille de cette boîte change, $A$ risque alors de se
 superposer à $B$. Il faut alors replacer toutes les boîtes de votre
 figure manuellement. Pour éviter ça, \mlpost\ propose diverses
@@ -288,7 +288,7 @@ est tracé pour la deuxième.
 \begin{minipage}{0.8\linewidth}
 \small\begin{ocaml}
 let b = hbox ~padding:(cm 1.) [tex "\\LaTeX"; circle (empty ())] in
-[draw (vbox [b; set_stroke Color.black b; b])]
+[ draw (vbox [b; set_stroke Color.black b; b]) ]
 \end{ocaml}
 \end{minipage}
 
@@ -322,7 +322,7 @@ horizontalement et leur donne une hauteur commune. Voici un exemple :
 \begin{minipage}{0.8\linewidth}
 \small\begin{ocaml}
 let b = Box.hblock ~pos:`Bot [Box.tex "a"; Box.tex "b"; Box.tex "C"] in
-[Box.draw b]
+[ Box.draw b ]
 \end{ocaml}
 \end{minipage}
 
@@ -405,7 +405,7 @@ fonctions d'alignement.
 Enfin, on dessine les boîtes avec \texttt{Box.draw}, puis les flèches
 avec la fonction \texttt{arrows} :
 \begin{ocaml}
-  [Box.draw l; arrows (Array.to_list (Box.elts l))]
+  [ Box.draw l; arrows (Array.to_list (Box.elts l)) ]
 \end{ocaml}
 On peut tester avec
 \begin{ocaml}
@@ -460,7 +460,7 @@ let a = classblock "BankAccount"
           [ "deposit (amount : Dollars)"; 
             "withdraw (amount : Dollars)" ] in
 let b = classblock "Client" 
-          ["name : String"; "address : String" ] [] in
+          [ "name : String"; "address : String" ] [] in
 let diag = Box.vbox ~padding:(cm 1.) [a;b] in
 [ Box.draw diag; 
   box_label_arrow ~pos:`Left (Picture.tex "owns") 
@@ -484,8 +484,8 @@ d'utiliser \mlpost\ dans ce but. Nous allons définir les fonctions
 suivantes :
 \begin{itemize}
 \item \texttt{state} pour créer un état ;
-\item \texttt{initial} pour transformer un état en un état initial ;
 \item \texttt{final} pour transformer un état en un état final ;
+\item \texttt{initial} pour dessiner une flèche entrante sur un état initial ;
 \item \texttt{transition} pour dessiner une transition d'un état à un autre ;
 \item \texttt{loop} pour dessiner une transition d'un état vers lui-même.
 \end{itemize}
@@ -541,7 +541,7 @@ placer \texttt{q} ou pour dessiner des transitions vers ou à partir de
 let initial states name =
   let q = Box.get name states in
   let p = Box.west q in
-  Arrow.draw (Path.pathp [ Point.shift p (Point.pt (cm (-0.3), zero)); p ])
+  Arrow.draw (Path.pathp [Point.shift p (Point.pt (cm (-0.3), zero)); p])
 \end{ocaml}
 La fonction  accède à  la boîte \texttt{q}  par son  nom \texttt{name}
 dans la  boîte \texttt{states} et détermine le point d'arrivée de la
@@ -625,7 +625,7 @@ dessiner directement un objet que l'on a calculé/programmé en \ocaml.
 Un exemple simple de dessin résultant d'un calcul est celui du graphe
 d'une fonction.  \mlpost\ fournit un module \texttt{Plot} à cet effet.
 La figure suivante montre un exemple basique
-d'utilisation de cette extension:
+d'utilisation de cette extension :
 
 \medskip
 \begin{minipage}{0.35\linewidth}
@@ -639,7 +639,7 @@ let label = Picture.tex "$y=\\sqrt{x+\\frac{1}{2}}$",
             `Upleft, 3 in
 let f x = sqrt (float x +. 0.5) in
 let graph = Plot.draw_func ~label f sk in
-[graph; Plot.draw_simple_axes "$x$" "$y$" sk]
+[ graph; Plot.draw_simple_axes "$x$" "$y$" sk ]
 \end{ocaml}
 \end{minipage}
 
@@ -653,20 +653,10 @@ fonctions) qui permettent de réaliser des figures plus complexes,
 telle que celle décrite dans le paragraphe suivant.
 
 \paragraph{Abstractions d'horloges dans un système synchrone flot-de-données.}
-L'exemple en haut de la page~\pageref{fig:florence}, réalisé par
-Florence Plateau, 
+L'exemple ci-dessous, réalisé par Florence Plateau, 
 provient d'un problème réel~\cite{MandelPlateau08} et illustre un
 certain nombre des possibilités de l'extension \texttt{Plot}.
 %
-\begin{figure}[t]
-  \centering
-  \begin{center}
-    \medskip
-    \includegraphics{florence.mps}
-  \end{center}
-  %\caption{expliquer de quoi ça parle}
-  \label{fig:florence}
-\end{figure}
 %
 Ainsi les fonctions illustrées sur cette figure ont été codées comme des
 fonctions \ocaml{} standard. De plus, la ligne intermédiaire dans la
@@ -679,13 +669,24 @@ $f_{w_2}$, la ligne $w_2$ sera mise à jour automatiquement. Cela est
 $[w_2]_5$. Ceci offre une flexiblité très intéressante lors de la
 phase de développement d'une telle figure.
 
+\begin{figure}[h]
+  \centering
+  \begin{center}
+    \medskip
+    \includegraphics{florence.mps}
+  \end{center}
+  %\caption{expliquer de quoi ça parle}
+  \label{fig:florence}
+\end{figure}
+
 \paragraph{Bresenham.}
 À titre de dernier exemple, supposons que l'on veuille illustrer
 l'algorithme de tracé de segment de Bresenham~\cite{bresenham}, par
 exemple sur le segment reliant le point $(x_1,y_1)=(0,0)$ au point
 $(x_2,y_2)=(9,6)$. Pour cela, on commence par stocker le résultat de
 l'algorithme dans un tableau \texttt{bresenham\_data}, tel que
-$\mathtt{bresenham\_data}.(x)$ donne l'ordonnée du point d'abscisse $x$.
+$\texttt{bresenham\_data.(}x\texttt{)}$ donne l'ordonnée du point
+d'abscisse $x$. 
 \begin{ocaml}
 let x2 = 9 and y2 = 6
 let bresenham_data = Array.create (x2+1) 0 
@@ -702,6 +703,7 @@ d'une manière analogue à \texttt{Array.create\_matrix}.
   \includegraphics{bresenham0.mps}
 \end{minipage}
 \begin{minipage}{0.7\linewidth}
+\vspace*{0.8em}
 \begin{ocaml}
 let width = bp 6. and height = bp 6. in
 let g = Box.gridi (x2+1) (y2+1) 
@@ -709,7 +711,7 @@ let g = Box.gridi (x2+1) (y2+1)
     let fill = if bresenham_data.(i) = y2 - j 
                then Some Color.red else None in
     Box.rect ?fill (Box.empty ~width ~height ())) in
-[Box.draw g]
+[ Box.draw g ]
 \end{ocaml}
 \end{minipage}
 
@@ -728,8 +730,9 @@ cette boîte (par exemple le point au milieu en bas avec
 \texttt{Command.label}.
 
 \medskip
-\begin{minipage}{0.25\linewidth}
-\hspace*{-1.3em}\includegraphics{bresenham.mps}
+\begin{minipage}{0.22\linewidth}
+\vspace*{0.8em}
+\hspace*{-1.4em}\includegraphics{bresenham.mps}
 \end{minipage}
 \begin{minipage}{0.7\linewidth}\small
 \begin{ocaml}
@@ -739,9 +742,9 @@ let bresenham =
   let get i j = Box.nth i (Box.nth (y2-j) g) in
   let label pos s point i j =
     Command.label ~pos (Picture.tex s) (point (get i j)) in
-  [Box.draw g;
-   label `Bot "0" Box.south 0 0; label `Bot "$x_2$" Box.south x2 0;
-   label `Left "0" Box.west 0 0; label `Left "$y_2$" Box.west 0 y2]
+  [ Box.draw g;
+    label `Bot "0" Box.south 0 0; label `Bot "$x_2$" Box.south x2 0;
+    label `Left "0" Box.west 0 0; label `Left "$y_2$" Box.west 0 y2 ]
 \end{ocaml}
 \end{minipage}
 
@@ -971,7 +974,7 @@ comme le montre l'exemple ci-dessous :
 \end{center}
 
 \noindent Dans cette configuration, le n\oe ud $f$ est réellement utilisé deux
-fois, alors que le n\oe ud $e$ n'est utilisé qu'un seule fois, par le
+fois, alors que le n\oe ud $e$ n'est utilisé qu'une seule fois, par le
 n\oe ud $d$, même si celui-ci est utilisé deux fois à son tour.
 Autrement dit, on comptabilise pour chaque n\oe ud le nombre de
 flèches incidentes.
@@ -987,7 +990,7 @@ l'application de certaines constructions à des variables. De cette façon, on
 arrive à avoir du code \metapost\ relativement petit\footnote{En l'absence de
 boucles \texttt{for} et de macros dans le code \metapost, nous avons observé,
 sans avoir fait de tests très exhaustifs, une taille du code généré du
-même ordre de grandeur que du code \metapost\ écrit à la main.},
+même ordre de grandeur que celle du code \metapost\ écrit à la main.},
 malgré la délégation des calculs à \metapost. 
 
 \subsection{Boîtes}\label{subsec:boxes}
