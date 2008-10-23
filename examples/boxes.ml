@@ -8,7 +8,18 @@ open Box
 
 (*parse <<togglescript>> *)
 
-(*parse <<f1 *)
+(*parse <<simple *)
+
+let simple =
+  let node s =
+    rect ~name:s ~stroke:None (round_rect ~stroke:None ~fill:lightblue (tex s))
+  in
+  let b = hbox ~padding:(bp 20.) [node "A"; node "B"] in
+  let arrow x y = box_arrow ~pen:Pen.circle ~color:red (get x b) (get y b) in
+  [draw b;
+   arrow "A" "B"]
+
+(*parse >> <<f1 *)
 let f1 =
   let tex = tex ~style:Rect ~stroke:(Some Color.black) in
   let b = 
@@ -64,6 +75,7 @@ let hierarchy =
 (*parse >> *)
 
 
+let () = Metapost.emit "simple" simple
 let () = Metapost.emit "f1" f1
 let () = Metapost.emit "f2" f2
 let () = Metapost.emit "traffic" traffic

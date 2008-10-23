@@ -36,10 +36,8 @@ pp.ml: pp.mll
 print: main-pp.ps
 	lpr $^
 
-export: main-pp.ps 
-	cp -f main-pp.ps mlpost.ps
-	ps2pdf mlpost.ps
-	cp -f mlpost.pdf $(WWW)/publis/
+export: main-pp.pdf
+	cp -f main-pp.pdf $(WWW)/publis/mlpost-fra.pdf
 
 clean:
 	rm -f *~ *.aux *.log *.bbl *.blg *.mps
