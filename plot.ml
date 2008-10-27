@@ -169,7 +169,7 @@ let draw_simple_axes ?hpen ?vpen hcaption vcaption sk =
 
 type drawing = | Stepwise | Normal
 
-let draw_func ?(pen) ?(drawing=Normal) ?(style) ?(dashed) ?(label)
+let draw_func ?(pen) ?(drawing=Normal) ?style ?dashed ?color ?label
     f {width=w; height=h; stepx=sx; stepy=sy} =
   let maxl, maxr, maxu, maxd = get_borders sx sy h w in
   let ul, ur, ll, lr = get_corners maxu maxr in
@@ -190,7 +190,7 @@ let draw_func ?(pen) ?(drawing=Normal) ?(style) ?(dashed) ?(label)
         let p, _,_ = Misc.fold_from_to stepwise ([],Num.bp 0.,Num.bp 0.) 0 w in p
   in
   let pic = Picture.clip 
-    (Picture.make (Command.draw ?pen ?dashed (pathn ?style graph))) box in 
+    (Picture.make (Command.draw ?pen ?dashed ?color (pathn ?style graph))) box in 
     match label with 
       | None -> draw_pic pic 
       | Some (lab, pos, i) -> 

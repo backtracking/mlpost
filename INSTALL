@@ -13,6 +13,10 @@ You need Objective Caml 3.08.0 or higher to compile Mlpost.
 
 	make install
 
+4 (optional). Create the documentation in doc/ with
+        
+        make doc
+
 It installs the library in Ocaml's standard library and the tool "mlpost"
 in /usr/local/bin (or any other directory specified with ./configure --bindir).
 
