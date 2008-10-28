@@ -23,9 +23,15 @@ TREEOUTFILES := $(TREEPNGFILES:.png=.1)
 LABELPNGFILES := handbook3.png other27.png
 LABELOUTFILES := $(LABELPNGFILES:.png=.1)
 
-HTMLFILES := boxes.ml.html paths.ml.html misc.ml.html tree.ml.html label.ml.html
+# all files that are generated from automata.ml
+AUTOMPNGFILES := automaton1.png automaton2.png automaton3.png automaton4.png 
+AUTOMOUTFILES := $(AUTOMPNGFILES:.png=.1)
 
-all: $(HTMLFILES) $(BOXPNGFILES) $(PATHPNGFILES) $(MISCPNGFILES) $(TREEPNGFILES) $(LABELPNGFILES) 
+HTMLFILES := boxes.ml.html paths.ml.html misc.ml.html tree.ml.html \
+             label.ml.html automata.ml.html
+
+all: $(HTMLFILES) $(BOXPNGFILES) $(PATHPNGFILES) $(MISCPNGFILES) \
+     $(TREEPNGFILES) $(LABELPNGFILES) $(AUTOMPNGFILES)
 
 %.ml.html : %.ml parse
 	caml2html -hc -ext "parse:./parse" $*.ml
@@ -39,12 +45,17 @@ all: $(HTMLFILES) $(BOXPNGFILES) $(PATHPNGFILES) $(MISCPNGFILES) $(TREEPNGFILES)
 	latex $*
 	dvips -E $*.dvi -o
 
+automaton4.ps: automaton4.1 
+	latex automaton4.tex
+	dvips -E automaton4.dvi -o
+
 # dangerous - might be called more than once or even at the same time
 $(BOXOUTFILES): boxes.dummy
 $(PATHOUTFILES): paths.dummy
 $(MISCOUTFILES): misc.dummy
 $(TREEOUTFILES): tree.dummy
 $(LABELOUTFILES): label.dummy
+$(AUTOMOUTFILES): automata.dummy
 
 
 %.dummy: %.ml
