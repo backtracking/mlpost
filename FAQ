@@ -1,3 +1,7 @@
+Frequently Asked Questions about Mlpost
+
+------------------------------------------------------------------------------
+
 1) When I include an MlPost Figure using \includegraphics in a PDF document,
    I get the following error: "File not found : supp-pdf.tex".
 
@@ -10,6 +14,7 @@ apt-get install context
 
 should do.
    
+------------------------------------------------------------------------------
 
 2) When I run the mlpost tool on my figure, I get the error "! Unable to make
 mpx file.".
@@ -23,6 +28,7 @@ yourself, or by looking at the "mpxerr.tex" file that has been generated. You
 can also try to pass the "mpxerr.tex" file to latex to see which is the exact
 latex error message.
 
+------------------------------------------------------------------------------
 
 3) When I look at generated "foo.1" or "foo.mps" file, gv/evince does
 not display the figure correctly / gives some error.
@@ -34,6 +40,7 @@ included in a Latex file using \includegraphics. If you pass the -eps option
 to mlpost, it generates encapsulated PostScript files that can be viewed with
 a PostScript viewer like gv. However, font rendering may be quite different.
 
+------------------------------------------------------------------------------
 
 4) In my Latex prelude I include other Latex files using "\input{foo.tex}".
     When I compile my figure with mlpost, these files are not found.
@@ -43,4 +50,5 @@ directories. You can make the file "foo.tex" visible to Latex changing the
 environment variable $TEXINPUTS to contain the directory where "foo.tex"
 lives.
 
+------------------------------------------------------------------------------
 

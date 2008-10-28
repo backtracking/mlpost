@@ -45,7 +45,7 @@ Mlpost ist ein <#ocaml> Interface für <#metapost>.
 <#de>Es gibt ebenfalls eine <a href="download/FAQ">FAQ</a>.</#de>
 <p>
 
-<#fr>Parcourir l'<a href="doc/">API</a>.Note : Tous les modules sont
+<#fr>Parcourir l'<a href="doc/">API</a>. Note : Tous les modules sont
 regroupés à l'intérieur d'un unique module Mlpost.</#fr>
 <#en>Browse the <a href="doc/">API</a>. Note that all modules are
 packaged into a single module Mlpost.</#en>
@@ -75,6 +75,7 @@ Es gibt auch ein <a href="download/CHANGES">Changelog</a>.
 <#en>Mlpost is developed by</#en>
 <#de>Mlpost wird entwickelt von</#de>
 <ul>
+<li><a href="http://www.lri.fr/~bardou/">Romain Bardou</a>
 <li><a href="http://www.lri.fr/~kanig/">Johannes Kanig</a>
 <li><a href="http://www.lri.fr/~lescuyer/">Stéphane Lescuyer</a>
 <li><a href="http://www.lri.fr/~filliatr/">Jean-Christophe Filliâtre</a>
