@@ -85,50 +85,62 @@ let automaton2 =
 
 (*parse >> *)
 
-(*parse <<automaton3 *)
+(****
 
 let state name s = rect ~name  ~stroke:None (rect (tex ("$" ^ s ^ "$")))
 
 let automaton3 =
   let states = tabularl ~hpadding:(cm 1.) ~vpadding:(cm 1.)
-    [[state "1" "E\\rightarrow\\bullet E\\texttt{+}E";
-      state "11" "S\\rightarrow E\\bullet";
-      state "3" "E\\rightarrow\\bullet\\texttt{(}E\\texttt{)}"
+    [[state "11" "S\\rightarrow E\\bullet";
+      state "0" "S\\rightarrow\\bullet E"; 
+      state "5" "E\\rightarrow\\texttt{int}\\bullet";
+      ];
+     [state "1" "E\\rightarrow\\bullet E\\texttt{+}E";
+      state "3" "E\\rightarrow\\bullet\\texttt{(}E\\texttt{)}";
+      state "2" "E\\rightarrow\\bullet\\texttt{int}";
      ];
      [state "4" "E\\rightarrow E\\bullet\\texttt{+}E";
-      state "0" "S\\rightarrow\\bullet E"; 
-      state "6" "E\\rightarrow\\texttt{(}\\bullet E\\texttt{)}"
-     ];
-     [state "7" "E\\rightarrow E\\texttt{+}\\bullet E";
-      state "2" "E\\rightarrow\\bullet\\texttt{int}";
-      state "8" "E\\rightarrow\\texttt{(}E \\bullet\\texttt{)}"
+      state "7" "E\\rightarrow E\\texttt{+}\\bullet E";
+      state "6" "E\\rightarrow\\texttt{(}\\bullet E\\texttt{)}";
      ];
      [state "9" "E\\rightarrow E\\texttt{+}E\\bullet";
-      state "5" "E\\rightarrow\\texttt{int}\\bullet";
-      state "10" "E\\rightarrow\\texttt{(}E\\texttt{)}\\bullet"
+      state "10" "E\\rightarrow\\texttt{(}E\\texttt{)}\\bullet";
+      state "8" "E\\rightarrow\\texttt{(}E \\bullet\\texttt{)}";
      ]
     ]
   in
   let eps = "$\\epsilon$" in
   let tt s = "\\texttt{" ^ s ^ "}" in
   [draw states;
-   transition states "$E$" `Left "0" "11";
-   transition states eps `Lowleft "0" "1";
-   transition states eps `Left "0" "2";
-   transition states eps `Upleft "0" "3";
+   transition states "$E$" `Top "0" "11";
+   transition states eps `Upleft "0" "1";
+   transition states eps `Upright "0" "2";
+   transition states eps `Left "0" "3";
+
+   loop states eps "1";
    transition states "$E$" `Left "1" "4";
-   transition states (tt "+") `Left "4" "7";
-   transition states "$E$" `Left "7" "9";
+   transition states eps `Top "1" "3";
+   transition states eps `Upright ~outd:20. "1" "2";
+
+   transition states (tt "+") `Top "4" "7";
+
+   transition states eps `Lowleft "7" "1";
+   transition states eps `Right "7" "2";
+   transition states eps `Right "7" "3";
+   transition states "$E$" `Upleft "7" "9";
+
    transition states (tt "int") `Left "2" "5";
-   transition states (tt "(") `Left "3" "6";
-   transition states "$E$" `Left "6" "8"; 
-   transition states (tt ")") `Left "8" "10";
-   transition states eps `Upright ~outd:0. "1" "0";
-   transition states eps `Upleft "7" "0";
-   transition states eps `Top  "6" "0";
+
+   transition states (tt "(") ~outd:(-0.) `Top "3" "6";
+   transition states "$E$" `Left "6" "8";
+   transition states (tt ")") `Top "8" "10";
+
+   transition states eps ~outd:170. `Lowleft  "6" "1";
+   transition states eps `Right  "6" "2";
+   transition states eps ~outd:160. `Top  "6" "3";
   ]
 
-(*parse >> *)
+****)
 
 (*parse <<automaton4 *)
 
@@ -190,5 +202,4 @@ let automaton4 =
 
 let () = Metapost.emit "automaton1" automaton1
 let () = Metapost.emit "automaton2" automaton2
-let () = Metapost.emit "automaton3" automaton3
 let () = Metapost.emit "automaton4" automaton4

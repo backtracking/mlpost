@@ -24,7 +24,7 @@ LABELPNGFILES := handbook3.png other27.png
 LABELOUTFILES := $(LABELPNGFILES:.png=.1)
 
 # all files that are generated from automata.ml
-AUTOMPNGFILES := automaton1.png automaton2.png automaton3.png automaton4.png 
+AUTOMPNGFILES := automaton1.png automaton2.png automaton4.png 
 AUTOMOUTFILES := $(AUTOMPNGFILES:.png=.1)
 
 HTMLFILES := boxes.ml.html paths.ml.html misc.ml.html tree.ml.html \
