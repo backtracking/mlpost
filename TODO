@@ -18,7 +18,8 @@
       (draw_pic (make_pic cmd)) -> cmd ...
 
 * -v n'agit pas encore sur tout
-* uniformiser les ulcorners, les "north_west", les `Upleft
+* uniformiser les ulcorners, les "north_west", les `Upleft, les points qui
+        indiquent une direction
 * Box.group, align etc prennent des listes, Box.elts renvoie un tableau ?
 
 

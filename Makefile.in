@@ -37,8 +37,8 @@ EXE = @EXE@
 LIBEXT = @LIBEXT@
 OBJEXT = @OBJEXT@
 
-BFLAGS = -dtypes -g $(INCLUDES) 
-OFLAGS = -g -dtypes $(INCLUDES) @FORPACK@
+BFLAGS = -dtypes $(INCLUDES) 
+OFLAGS = @BASICOFLAGS@ -dtypes $(INCLUDES) @FORPACK@
 
 # main target
 #############
