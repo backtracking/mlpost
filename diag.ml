@@ -135,12 +135,15 @@ let draw_arrow ?stroke ?pen ?dashed d a =
 	let ba, bla = 
 	  if a.head then box_arrow, box_label_arrow
 	  else box_line, box_label_line in
+	let color = match a.line_color with
+	  | None -> stroke
+	  | Some _ as c -> c in
 	if a.lab = "" then 
-	  ba ?color:stroke ?pen ?dashed:a.dashed 
+	  ba ?color ?pen ?dashed:a.dashed 
 	    ?outd:(outdir a.outd) ?ind:(indir a.ind) src dst
 	else
 	  bla 
-	    ?color:stroke ?pen ?dashed:a.dashed 
+	    ?color ?pen ?dashed:a.dashed 
 	    ?outd:(outdir a.outd) ?ind:(indir a.ind) 
 	    ?pos:a.pos (Picture.tex a.lab) src dst
     | Some width ->
