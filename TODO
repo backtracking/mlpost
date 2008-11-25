@@ -21,6 +21,8 @@
 * uniformiser les ulcorners, les "north_west", les `Upleft, les points qui
         indiquent une direction
 * Box.group, align etc prennent des listes, Box.elts renvoie un tableau ?
+* enlever le type Command.figure = Command.t list
+  toutes les fonctions sur les commandes devraient attendre un Command.t
 
 
 3) FEATURES
@@ -32,6 +34,8 @@
     - pouvoir mettre n'importe quelle boîte
     - pouvoir choisir les flêches
     - interface fonctionelle
+* support pour exteps : 
+    http://pallej.dk/exteps/index.html
 
 
 * de la transparence
