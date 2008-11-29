@@ -235,6 +235,12 @@ let emit s f =
   incr figuren;
   Queue.add (!figuren, s, f) figures
 
+let read_prelude_from_tex_file file = 
+  let c = open_in file in
+  let s = Scan_prelude.scan (Lexing.from_channel c) in
+  close_in c;
+  s
+
 let dump_tex ?prelude f =
   let c = open_out (f ^ ".tex") in
   let fmt = formatter_of_out_channel c in

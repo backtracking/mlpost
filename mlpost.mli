@@ -1389,6 +1389,10 @@ module Metapost : sig
 	names specified to [emit]. The file suffix is [.mps] if [pdf] is
 	set, and [.1] otherwise. *)
 
+  val read_prelude_from_tex_file : string -> string
+    (** read the prelude from a tex file, until the end of file or the text
+     * "\begin{document}" if it is outside a comment *)
+
   val dump_tex : ?prelude:string -> string -> unit
     (** [dump_tex ?prelude f] builds a LaTeX file [f.tex] for all the figures,
 	using LaTeX prelude [prelude] if given. *)

@@ -68,8 +68,17 @@ parse.ml: parse.mll
 parse: parse.ml
 	ocamlopt.opt -o parse parse.ml
 
+BOXTEXFILES:=$(BOXPNGFILES:.png=.tex)
+PATHTEXFILES:=$(PATHPNGFILES:.png=.tex)
+MISCTEXFILES:=$(MISCPNGFILES:.png=.tex)
+TREETEXFILES:=$(TREEPNGFILES:.png=.tex)
+LABELTEXFILES:=$(LABELPNGFILES:.png=.tex)
 clean:
-	rm -f *.aux *.dvi *.ps *.1 *.log $(PNGFILES) *.mp *.mpx *.tex
+	rm -f *.aux *.dvi *.ps *.1 *.log $(PNGFILES) *.mp *.mpx
+	rm -f $(BOXTEXFILES) $(PATHTEXFILES) $(MISCTEXFILES) $(TREETEXFILES)
+	rm -f $(LABELTEXFILES)
+	rm -f automaton1.tex automaton2.tex
+	# do not remove automaton4.tex - it's handmade
 	rm -f boxes.ml.html paths.ml.html misc.ml.html tree.ml.html label.ml.html
 	rm -f parse.ml *.cmx *.cmo *.cmi parse *.o
 	rm -f *.png *.dummy

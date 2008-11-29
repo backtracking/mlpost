@@ -9,23 +9,43 @@ Mlpost manual</title>
 
 <body>
 
-<h1>Mlpost manual</h1>
+<h1>
+  <#en>Mlpost manual</#en>
+  <#fr>Manuel Mlpost</#fr>
+  <#de>Mlpost Handbuch</#de>
+</h1>
+
+<p>
+<#en>There are really two ways of using Mlpost. The first one uses the command
+line tool <tt>mlpost<tt> and is more convenient. The second one uses only the
+API of Mlpost and can be used in situations where the mlpost command does not
+apply.</#en>
+</p>
 
 
-<h2>Usage</h2>
+<h2>
+  <#en>Using the Mlpost Tool</#en>
+  <#fr>Utilisation</#fr>
+  <#de>Mlpost Schnittstelle</#de>
+</h2>
 
-<#en>To make PostScript figures with Mlpost, follow these steps:</#en>
+<!-- <#en>To make PostScript figures with Mlpost, follow these steps:</#en>
 <#fr>Pour construire des figures PostScript avec Mlpost, il faut
 procéder ainsi :</#fr>
-<#de>Um mit Mlpost Postcript-Abbildungen zu zeichnen, folgen Sie diese Schritten:</#de>
+<#de>Um mit Mlpost Postcript-Abbildungen zu zeichnen, folgen Sie diese
+Schritten:</#de> -->
 
 <ol>
 <li>
-<#en>Define your figures in an Ocaml file <tt>fig.ml</tt></#en>
+<#en>Define your figures in an Ocaml file <tt>fig.ml</tt>. The Mlpost modules are
+packed in the top module <tt> Mlpost</tt>, so you probably want to open it
+right away.</#en>
 <#fr>Définir ses figures dans un fichier Ocaml <tt>fig.ml</tt></#fr>
 <#de>Definieren Sie Ihre Zeichnungen in einem Ocaml Programm <tt>fig.ml</tt></#de>
 
 <pre>
+         open Mlpost
+         ...
 	 let fig_a = ...
 	 let fig_b = ...
 </pre>
@@ -60,7 +80,7 @@ file_a.1, file_b.1, etc.</#fr>
 </ol>
 
 
-<h2>Options</h2>
+<h3>Options</h3>
 
 <#en><tt>mlpost</tt> supports the following options:</#en>
 <#fr><tt>mlpost</tt> accepte les options suivantes :</#fr>
@@ -101,6 +121,38 @@ file_a.1, file_b.1, etc.</#fr>
         werden. Die Datei main.tex muss mindestens den <em>documentclass</em>
         Befehl und die Zeile "\begin{document}" enthalten.</#de>
 </dl>
+
+<h2>
+  <#en>Using only the API </#en>
+</h2>
+
+<#en> The <tt>mlpost</tt> tool works on a modified version of your file, and
+this can be a problem sometimes. The following method is a way out, but you
+need to do a bit more things by hand.
+</#en>
+
+<ol>
+<li>
+<#en> Follow steps 1 and 2 above. </#en>
+<li>
+<#en> Instead of running <tt>mlpost</tt> on your file, add the following
+additional lines to your program:
+</#en>
+<pre>
+let () = Metapost.dump 
+           ~prelude:(Metapost.read_prelude_from_tex_file "document.tex") "somefile"
+</pre>
+<#en> Now you can compile your program using the <tt>ocaml</tt> compiler. The
+obtained executable will compute your figure, dump the metapost code in
+<tt>somefile.mp</tt> and produce the postscript figures, using the specified
+file <tt>document.tex</tt> to extract a prelude. The <tt>Metapost.dump</tt>
+function has the additional optional arguments <tt>pdf</tt> and <tt>eps</tt>,
+with the same meaning as the options on the command line.
+</#en>
+</ol>
+
+
+
 
 <hr>
 <a href="manual.fr.html">Français</a> /
