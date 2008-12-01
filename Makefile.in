@@ -104,51 +104,51 @@ tool.opt: $(TOOLCMX)
 	$(OCAMLOPT) -o $@ unix.cmxa $^
 
 tests: $(CMXA) tests.ml
-	$(OCAMLOPT) -o tests.exe $(CMXA) tests.ml
+	$(OCAMLOPT) -o tests.exe unix.cmxa $(CMXA) tests.ml
 	./tests.exe
 	make -C test tests
 	gv test/tests.ps
 
 testbox: $(CMXA) testbox.ml
-	$(OCAMLOPT) -o testbox.exe $(CMXA) testbox.ml
+	$(OCAMLOPT) -o testbox.exe unix.cmxa $(CMXA) testbox.ml
 	./testbox.exe
 	make -C test testbox
 	gv test/testbox.ps
 
 tests.pdf: $(CMXA) tests.ml
-	$(OCAMLOPT) -o tests.exe $(CMXA) tests.ml
+	$(OCAMLOPT) -o tests.exe unix.cmxa $(CMXA) tests.ml
 	./tests.exe
 	make -C test tests.pdf
 	xpdf test/tests.pdf
 
 
 tests.byte: $(CMA) tests.ml
-	ocaml $(CMA) tests.ml
+	ocaml unix.cma $(CMA) tests.ml
 	make -C test tests
 	gv test/tests.ps
 
 handbook: $(CMXA) handbookgraphs.ml
-	$(OCAMLOPT) -o handbook.exe $(CMXA) handbookgraphs.ml
+	$(OCAMLOPT) -o handbook.exe unix.cmxa $(CMXA) handbookgraphs.ml
 	./handbook.exe
 	make -C test manual
 	make -C test/manual mpost
 	gv test/testmanual.ps
 
 handbook.byte: $(CMA) handbookgraphs.ml
-	ocaml $(CMA) handbookgraphs.ml
+	ocaml unix.cma $(CMA) handbookgraphs.ml
 	make -C test manual
 	make -C test/manual mpost
 	gv test/testmanual.ps
 
 other: $(CMXA) othergraphs.ml
-	$(OCAMLOPT) -o othergraphs.exe $(CMXA) othergraphs.ml
+	$(OCAMLOPT) -o othergraphs.exe unix.cmxa $(CMXA) othergraphs.ml
 	./othergraphs.exe
 	make -C test other
 	make -C test/othergraphs mpost
 	gv test/othergraphs.ps
 
 other.byte: $(CMA) othergraphs.ml
-	ocaml $(CMA) othergraphs.ml
+	ocaml unix.cma $(CMA) othergraphs.ml
 	make -C test other
 	make -C test/othergraphs mpost
 	gv test/othergraphs.ps

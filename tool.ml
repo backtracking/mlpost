@@ -108,6 +108,7 @@ let temp_file_name prefix suffix =
 let compile f =
   let bn = Filename.chop_extension f in
   let mlf, cout = Filename.open_temp_file "mlpost" ".ml" in
+  Printf.fprintf cout "# 1 \"%s\"\n" f;
   begin 
     let cin = open_in f in
     try while true do output_char cout (input_char cin) done
