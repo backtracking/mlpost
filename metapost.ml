@@ -19,6 +19,11 @@ open Misc
 open Types
 module C = Compiled_types
 
+let externalimage_dimension filename : float * float = 
+  let inch = Unix.open_process_in ("identify -format \"%h\\n%w\" "^filename) in
+    try (float_of_string (input_line inch),float_of_string (input_line inch))
+    with End_of_file | Failure "float_of_string" -> invalid_arg "Unknown external image"
+
 let name = pp_print_string
 
 let corner fmt = function
@@ -197,6 +202,18 @@ and command fmt  = function
       fprintf fmt "%s = currentpicture;@\n" pic;
       fprintf fmt "currentpicture := %s;@\n" savepic
   | C.CClip (pic,pth) -> fprintf fmt "clip %s to %a;@\n" pic path pth
+  | C.CExternalImage (filename, spec) ->
+      match spec with
+        | `Exact (h,w) -> fprintf fmt "externalfigure \"%s\" xyscaled (%a,%a);@\n" filename num w num h
+        | ((`None as spec)| (`Height _ as spec)| (`Width _ as spec)|(`Inside _ as spec)) -> 
+            let fh,fw = externalimage_dimension filename in
+              match spec with
+                | `None -> fprintf fmt "externalfigure \"%s\" xyscaled (%a,%a);@\n" filename num (C.F fw) num (C.F fh)
+                | `Height h -> fprintf fmt "externalfigure \"%s\" xyscaled (%a,%a);@\n" filename num (C.NMult (C.F (fw/.fh),h)) num h
+                | `Width w -> fprintf fmt "externalfigure \"%s\" xyscaled (%a,%a);@\n" filename num w num (C.NMult (C.F (fh/.fw),w))
+                | `Inside (h,w) -> 
+                    let w = C.NMin (C.NMult (h,C.F (fw/.fh)),w) in
+                      fprintf fmt "externalfigure \"%s\" xyscaled (%a,%a);@\n" filename num w num (C.NMult (C.F (fh/.fw),w))
 
 let print i fmt l =
   (* resetting is actually not needed; variables other than 
@@ -211,6 +228,22 @@ let print i fmt l =
 let print_prelude ?(eps=false) s fmt () =
   if eps then 
     fprintf fmt "prologues := 2;@\n";
+    fprintf fmt "input mp-tool ; %% some initializations and auxiliary macros
+input mp-spec ; %% macros that support special features
+
+%%redefinition
+def doexternalfigure (expr filename) text transformation =
+  begingroup ; save p, t ; picture p ; transform t ;
+  p := nullpicture ; t := identity transformation ;
+  flush_special(10, 9,
+    dddecimal (xxpart t, yxpart t, xypart t) & \" \" &
+    dddecimal (yypart t,  xpart t,  ypart t) & \" \" & filename) ;
+  addto p contour unitsquare transformed t ;
+  setbounds p to unitsquare transformed t ;
+  _color_counter_ := _color_counter_ + 1 ;
+  draw p withcolor (_special_signal_/_special_div_,_color_counter_/_special_div_,_special_counter_/_special_div_) ;
+  endgroup ;
+enddef ;\n";
   fprintf fmt "verbatimtex@\n";
   fprintf fmt "%%&latex@\n";
   fprintf fmt "%s" s;

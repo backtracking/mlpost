@@ -351,6 +351,26 @@ and command c =
       let pic, c1 = picture pic in
       let pt, c2 = point pt in
       c1 ++ c2 ++ C.CLabel (pic,pos,pt)
+  | CExternalImage (filename,spec) -> 
+      let spec,code = match spec with
+        | `Exact (h,w) -> 
+            let hn,hc = num h in
+            let wn,wc = num w in
+              `Exact (hn,wn),hc ++ wc
+        | `Inside (h,w) -> 
+            let hn,hc = num h in
+            let wn,wc = num w in
+              `Inside (hn,wn),hc++wc
+        | `Height h -> 
+            let hn,hc = num h in
+              `Height hn,hc
+        | `Width w -> 
+            let wn,wc = num w in
+              `Width wn,wc
+        | `None -> `None,C.CSeq []
+      in code++C.CExternalImage (filename,spec)
+
+
 
 let reset () =
   D.NM.clear D.num_map;

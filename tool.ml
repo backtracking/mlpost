@@ -137,9 +137,9 @@ let compile f =
     Sys.remove mlf2
   end else
     if !native then
-      ocamlopt [|"mlpost.cmxa"; !ccopt; mlf; !execopt|]
+      ocamlopt [|"unix.cmxa";"mlpost.cmxa"; !ccopt; mlf; !execopt|]
     else
-    ocaml [|"mlpost.cma"; !ccopt; mlf; !execopt|];
+    ocaml [|"unix.cma";"mlpost.cma"; !ccopt; mlf; !execopt|];
 
   Sys.remove mlf;
   if !xpdf then begin

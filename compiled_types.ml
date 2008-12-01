@@ -115,6 +115,14 @@ and command =
   | CDefPic of name * command
   | CSimplePic of name * picture
   | CClip of name * path
+  | CExternalImage of string * spec_image
+
+and spec_image =
+  [ `None
+  | `Width of num (* keep the proportion of the image *)
+  | `Height of num
+  | `Inside of num * num (* must be inside a box of this height and width *)
+  | `Exact of num * num]
 
 and color = Types.color
 and position = Types.position

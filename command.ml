@@ -51,6 +51,8 @@ let draw_pic p = mkCDrawPic p
 let append c1 c2 = mkCSeq [c1; c2]
 let (++) = append
 
+let externalimage filename spec = mkCExternalImage filename spec
+
 (* syntactic sugar *)
 
 let iterl f l = seq (List.map f l)

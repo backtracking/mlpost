@@ -643,6 +643,15 @@ and Command : sig
   val draw_pic : Picture.t -> t
     (** draws a picture *) 
 
+  val externalimage : string ->       
+    [ `None
+    | `Width of Num.t (** keep the proportion of the image *)
+    | `Height of Num.t
+    | `Inside of Num.t * Num.t (** must be inside a box of this height and width *)
+    | `Exact of Num.t * Num.t]
+    -> t
+    (** insert an image given its filename *)
+
   (** {2 Manipulating Commands} *)
 
   val nop : t

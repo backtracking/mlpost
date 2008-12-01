@@ -106,6 +106,7 @@ let rec command fmt c =
   | CDotLabel (pic,pos,pt) ->
       fprintf fmt "dotlabel%a(%a,%a)" position pos picture pic point pt
   | CSeq l -> Misc.print_list Misc.space command fmt l
+  | CExternalImage (f,spec) -> fprintf fmt "externalimage %s@ " f
 and color fmt = function
   | RGB (r,g,b) -> 
       fprintf fmt "(%f, %f , %f)" r g b

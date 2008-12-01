@@ -59,7 +59,7 @@ $(AUTOMOUTFILES): automata.dummy
 
 
 %.dummy: %.ml
-	../tool.opt -ccopt "-I ../ unix.cma" -v $^
+	../tool.opt -ccopt "-I ../ " -v $^
 	touch $@
 
 parse.ml: parse.mll

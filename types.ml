@@ -158,6 +158,14 @@ and command_node =
   | CLabel of picture * position * point
   | CDotLabel of picture * position * point
   | CSeq of command list
+  | CExternalImage of string * spec_image
+
+and spec_image =
+  [ `None
+  | `Width of num (* keep the proportion of the image *)
+  | `Height of num
+  | `Inside of num * num (* must be inside a box of this height and width *)
+  | `Exact of num * num]
 
 and command = command_node hash_consed
 
@@ -281,6 +289,8 @@ let hash_color = Hashtbl.hash
 
 let hash_position = Hashtbl.hash
 
+let hash_spec_image = Hashtbl.hash
+
 let command = function
   | CDraw(pa,c,p,d) ->
       combine4 43 pa.hkey (hash_opt hash_color c) (hash_opt hash_color p) (hash_opt hash_key d)
@@ -293,6 +303,7 @@ let command = function
       combine3 48 pic.hkey (hash_position pos) poi.hkey
   | CSeq l ->
       List.fold_left (fun acc t -> combine2 50 acc t.hkey) 51 l
+  | CExternalImage (filename,spec) -> combine2 52 (hash_string filename) (hash_spec_image spec)
 
 (** equality *)
 
@@ -722,6 +733,8 @@ let mkCLabel x y z = hashcommand (CLabel(x,y,z))
 let mkCDotLabel x y z = hashcommand (CDotLabel(x,y,z))
 
 let mkCSeq l = hashcommand (CSeq l)
+
+let mkCExternalImage f s = hashcommand (CExternalImage (f,s))
 
 (* dash *)
 

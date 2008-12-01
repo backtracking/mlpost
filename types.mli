@@ -157,6 +157,15 @@ and command_node = private
   | CLabel of picture * position * point
   | CDotLabel of picture * position * point
   | CSeq of command list
+  | CExternalImage of string * spec_image
+
+and spec_image =
+  [ `None
+  | `Width of num (* keep the proportion of the image *)
+  | `Height of num
+  | `Inside of num * num (* must be inside a box of this height and width *)
+  | `Exact of num * num]
+
 
 and command = command_node hash_consed
 
@@ -276,6 +285,7 @@ val mkCFill: path -> color option -> command
 val mkCLabel: picture -> position -> point -> command
 val mkCDotLabel: picture -> position -> point -> command
 val mkCSeq: command list -> command
+val mkCExternalImage : string -> spec_image -> command
 
 (* dash *)
 
@@ -296,3 +306,4 @@ val mkPenTransformed: pen -> transform -> pen
 
 val mkOn : num -> on_off
 val mkOff : num -> on_off
+

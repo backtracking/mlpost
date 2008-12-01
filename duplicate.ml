@@ -147,6 +147,7 @@ and command c =
   | CSeq l -> List.iter command l
   | CDotLabel (pic, pos, pt) -> picture pic; point pt
   | CLabel (pic, pos ,pt) -> picture pic; point pt
+  | CExternalImage _ -> ()
 and pen p = 
   match p.Hashcons.node with
   | PenCircle | PenSquare -> ()
