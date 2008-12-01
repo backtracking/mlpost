@@ -73,11 +73,16 @@ let rec num fmt = function
 
 and float fmt f = num fmt (C.F f)
 
-and color fmt = function
+and scolor fmt = function
   | RGB (r,g,b) -> fprintf fmt "(%a, %a , %a)" float r float g float b
   | CMYK (c,m,y,k) ->
       fprintf fmt "(%a, %a, %a, %a)" float c float m float y float k
   | Gray f -> fprintf fmt "%a * white" float f
+
+and color fmt = function
+  | OPAQUE c -> scolor fmt c
+  | TRANSPARENT (f,c) -> fprintf fmt "transparent (1,%a,%a)" float f scolor c
+      (* 1 is the "normal" mode *)
 
 and point fmt = function
   | C.PTPair (m,n) -> fprintf fmt "(%a,%a)" num m num n
@@ -226,9 +231,7 @@ let print i fmt l =
     l
 
 let print_prelude ?(eps=false) s fmt () =
-  if eps then 
-    fprintf fmt "prologues := 2;@\n";
-    fprintf fmt "input mp-tool ; %% some initializations and auxiliary macros
+  fprintf fmt "input mp-tool ; %% some initializations and auxiliary macros
 input mp-spec ; %% macros that support special features
 
 %%redefinition
@@ -243,13 +246,18 @@ def doexternalfigure (expr filename) text transformation =
   _color_counter_ := _color_counter_ + 1 ;
   draw p withcolor (_special_signal_/_special_div_,_color_counter_/_special_div_,_special_counter_/_special_div_) ;
   endgroup ;
-enddef ;\n";
-  fprintf fmt "verbatimtex@\n";
-  fprintf fmt "%%&latex@\n";
-  fprintf fmt "%s" s;
-  fprintf fmt "\\begin{document}@\n";
-  fprintf fmt "etex@\n"
-  (* fprintf fmt "input boxes;@\n" *)
+enddef ;@\n";
+  if eps then 
+    fprintf fmt "prologues := 2;@\n"
+  else
+    (fprintf fmt "prologues := 0;@\n";
+     fprintf fmt "mpprocset := 0;@\n");
+ fprintf fmt "verbatimtex@\n";
+ fprintf fmt "%%&latex@\n";
+ fprintf fmt "%s" s;
+ fprintf fmt "\\begin{document}@\n";
+ fprintf fmt "etex@\n"
+   (* fprintf fmt "input boxes;@\n" *)
 
 let defaultprelude = "\\documentclass{article}\n\\usepackage[T1]{fontenc}\n"
 

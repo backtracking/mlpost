@@ -107,12 +107,19 @@ let rec command fmt c =
       fprintf fmt "dotlabel%a(%a,%a)" position pos picture pic point pt
   | CSeq l -> Misc.print_list Misc.space command fmt l
   | CExternalImage (f,spec) -> fprintf fmt "externalimage %s@ " f
-and color fmt = function
+and color fmt (c:Types.color) = 
+  let mode,color = match c with
+    | OPAQUE c -> (None, c)
+    | TRANSPARENT (f,c) -> (Some f, c) in
+  let pmode fmt = function
+    | None -> fprintf fmt "O"
+    | Some f -> fprintf fmt "%f" f in
+  match color with
   | RGB (r,g,b) -> 
-      fprintf fmt "(%f, %f , %f)" r g b
+      fprintf fmt "(%f, %f , %f, %a)" r g b pmode mode
   | CMYK (c,m,y,k) ->
-      fprintf fmt "(%f, %f, %f, %f)" c m y k
-  | Gray f -> fprintf fmt "%f * white" f
+      fprintf fmt "(%f, %f, %f, %f, %a)" c m y k pmode mode
+  | Gray f -> fprintf fmt "(%f * white, %a)" f pmode mode
 and pen fmt x =
   match x.Hashcons.node with
   | PenCircle -> assert false

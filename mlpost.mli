@@ -444,6 +444,23 @@ and Color : sig
     (** [cmyk c m y k] constructs the color that corresponds to the color code 
 	CMYK(c,m,y,k)  *)
 
+  val rgba : float -> float -> float -> float -> t
+    (** similar to [rgb], but takes the factor of transparency *)
+  val rgb8a : int -> int -> int -> int -> t
+    (** similar to [rgb8], but takes the factor of transparency *)
+
+  val cmyka : float -> float -> float -> float -> float -> t
+    (** similar to [cmyk], but takes the factor of transparency *)
+
+  val is_opaque : t -> bool
+    (** test if the color is opaque *)
+   
+  val opaque : t -> t
+    (** make a color opaque *)
+    
+  val transparent : float -> t -> t
+    (** [transparent f c] multiplies by f the factor of transparency of c *)
+
   (** {2 Predefined Colors} *)
 
   (** {3 base colors} *)
