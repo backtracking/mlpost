@@ -246,7 +246,11 @@ def doexternalfigure (expr filename) text transformation =
   _color_counter_ := _color_counter_ + 1 ;
   draw p withcolor (_special_signal_/_special_div_,_color_counter_/_special_div_,_special_counter_/_special_div_) ;
   endgroup ;
-enddef ;@\n";
+enddef ;
+
+vardef reset_extra_specials =
+  enddef ;
+@\n";
   if eps then 
     fprintf fmt "prologues := 2;@\n"
   else

@@ -29,9 +29,13 @@
 {\catcode`t=12\catcode`p=12\gdef\noPT#1pt{#1}}
 \def\Specialsrempt#1{\expandafter\noPT\the#1\space}
 
+
+
 % Extract from the path of the square the correct information, ie the
 % corner of the square
 % Twice the same function because I 'm not a good tex programmer.
+\newdimen{\specialstmp}
+\newdimen{\specialsdumb}
 \def\SpecialsgetnormalMPsegmenta
  {
    \ifcase\getMPkeyword\relax
@@ -51,18 +55,16 @@
      %\edef\lastMPmoveY{\gMPs2}%
      %\PDFcode{\!MP\lastMPmoveX\space \!MP\lastMPmoveY\space m}%
    \fi
-   \newdimen{\tmp}
-   \newdimen{\dumb}
-   \tmp=\Specialsmatac pt
-   \multiply\tmp by -1
-   \dumb=\myx pt
-   \advance\tmp by \dumb
-   \global\edef\Specialsmataa{\Specialsrempt\tmp}
-   \tmp=\Specialsmatbc pt
-   \multiply\tmp by -1
-   \dumb=\myy pt
-   \advance\tmp by \dumb
-   \global\edef\Specialsmatba{\Specialsrempt\tmp}
+   \specialstmp=\Specialsmatac pt
+   \multiply\specialstmp by -1
+   \specialsdumb=\myx pt
+   \advance\specialstmp by \specialsdumb
+   \global\edef\Specialsmataa{\Specialsrempt\specialstmp}
+   \specialstmp=\Specialsmatbc pt
+   \multiply\specialstmp by -1
+   \specialsdumb=\myy pt
+   \advance\specialstmp by \specialsdumb
+   \global\edef\Specialsmatba{\Specialsrempt\specialstmp}
 }
 
 \def\SpecialsgetnormalMPsegmentb
@@ -84,18 +86,16 @@
      %\edef\lastMPmoveY{\gMPs2}%
      %\PDFcode{\!MP\lastMPmoveX\space \!MP\lastMPmoveY\space m}%
    \fi
-   \newdimen{\tmp}
-   \newdimen{\dumb}
-   \tmp=\Specialsmatac pt
-   \multiply\tmp by -1
-   \dumb=\myx pt
-   \advance\tmp by \dumb
-   \global\edef\Specialsmatab{\Specialsrempt\tmp}
-   \tmp=\Specialsmatbc pt
-   \multiply\tmp by -1
-   \dumb=\myy pt
-   \advance\tmp by \dumb
-   \global\edef\Specialsmatbb{\Specialsrempt\tmp}
+   \specialstmp=\Specialsmatac pt
+   \multiply\specialstmp by -1
+   \specialsdumb=\myx pt
+   \advance\specialstmp by \specialsdumb
+   \global\edef\Specialsmatab{\Specialsrempt\specialstmp}
+   \specialstmp=\Specialsmatbc pt
+   \multiply\specialstmp by -1
+   \specialsdumb=\myy pt
+   \advance\specialstmp by \specialsdumb
+   \global\edef\Specialsmatbb{\Specialsrempt\specialstmp}
 }
 
 % Replace the true output function by a filter. It replace the square

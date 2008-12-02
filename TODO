@@ -6,11 +6,11 @@
   la sortie standard metapost "written output.1" a l'air de venir de mlpost
   solution: supprimer la sortie standard pour mpost
 
-* les images ne devraient pas être partagées par plusieurs figures
-  (ou post-traitement des fichiers postscript)
 * installation des fichiers Latex pour inclusion d'images
 * images et sortie postscript ?
 
+* Probleme d'alignement avec slideshow + externalimage
+ 
 2) TODO
 (améliorer du comportement interne, doc, des bugs pas très importants)
 ============
@@ -39,12 +39,7 @@
     - pouvoir mettre n'importe quelle boîte
     - pouvoir choisir les flêches
     - interface fonctionelle
-* support pour exteps : 
-    http://pallej.dk/exteps/index.html
 
-
-* de la transparence
-  http://wwwmathlabo.univ-poitiers.fr/~phan/metalpha.html
     
 
 -------------------------------------------------------------------------------
