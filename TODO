@@ -40,7 +40,15 @@
     - pouvoir choisir les flêches
     - interface fonctionelle
 
-    
+* Box : 
+  - vblock : des options
+      same_height - pour imposer une hauteur commune
+      min_height - pour imposer une hauteur minimale
+  - même chose pour hblock
+  - flêches rectangulaires entre les boîtes, de manière symbolique ?
+  - fonctions d'alignement laisseraient au moins une boite à leur place
+  - "weak_halign" qui ne touche pas le placement horizontal des boîtes
+  - foncteur WithBox pour faciliter l'accès aux boîtes nommées
 
 -------------------------------------------------------------------------------
 des liens avec des exemples :
