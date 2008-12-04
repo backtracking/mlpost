@@ -45,6 +45,8 @@
       same_height - pour imposer une hauteur commune
       min_height - pour imposer une hauteur minimale
   - même chose pour hblock
+  - vblock / hblock ne devraient pas créer de nouvelles boîtes pour contenir
+    leurs arguments, plutôt se servir des boîtes à aligner directement 
   - flêches rectangulaires entre les boîtes, de manière symbolique ?
   - fonctions d'alignement laisseraient au moins une boite à leur place
   - "weak_halign" qui ne touche pas le placement horizontal des boîtes
