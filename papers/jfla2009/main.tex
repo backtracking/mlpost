@@ -289,7 +289,7 @@ est tracé pour la deuxième.
 \begin{minipage}{0.8\linewidth}
 \small\begin{ocaml}
 let b = 
-  box.hbox ~padding:(cm 1.) [Box.tex "\\LaTeX"; circle (empty ())] in
+  Box.hbox ~padding:(cm 1.) [Box.tex "\\LaTeX"; circle (empty ())] in
 [ Box.draw (Box.vbox [b; set_stroke Color.black b; b]) ]
 \end{ocaml}
 \end{minipage}
@@ -366,6 +366,7 @@ let pointer_arrow a b =
   Command.draw ~pen (pathp [Box.ctr a]) ++ draw_arrow p
 \end{ocaml}
 \end{minipage}
+%XXX virer ++ ?
 
 \medskip\noindent On utilise ici le symbole infixe \texttt{++} qui
 permet de concaténer des commandes de dessin. On utilise d'autre
@@ -502,7 +503,7 @@ Le paramètre \texttt{stroke} permet de spécifier si le contour doit
 être tracé et, le cas échéant, dans quelle couleur. De manière
 similaire, la fonction \texttt{final} est une spécialisation de la
 fonction {\tt Box.box} dont le rôle consiste à rajouter un cercle
-autour d'une boîte:
+autour d'une boîte :
 \begin{ocaml}
 let final = Box.box ~style:Circle
 \end{ocaml}
@@ -767,8 +768,8 @@ l'utilisateur écrit un programme qui, à l'exécution, construit un
 arbre de syntaxe abstraite \metapost. Cet arbre est imprimé dans un
 fichier \verb|figure.mp| qui est lu par \metapost\ pour générer un ou
 plusieurs fichiers \postscript\footnote{Ces fichiers n'ont pas le
-  suffixe \texttt{.ps} car il leur manque l'en-tête.}. Pour inclure
-ces figures dans un document \LaTeX, il suffit d'utiliser la commande
+  suffixe \texttt{.ps} car il leur manque l'en-tête.}. L'inclusion de ces 
+ces figures dans un document \LaTeX se fait simplement en utilisant la commande
 \verb|\includegraphics| du package \textsf{graphicx}. Pour compiler le
 document \LaTeX{} avec {\tt pdflatex}, il suffit de changer
 l'extension des figures générées, ce qu'une option de l'outil
