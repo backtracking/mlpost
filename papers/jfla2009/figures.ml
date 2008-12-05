@@ -217,7 +217,7 @@ let initial states pos name =
   in
   Arrow.draw (Path.pathp [ Point.shift p (Point.pt (cm (-0.3), zero)); p ])
 *)
-let initial states name =
+let initial (states : Box.t) (name : string) : Command.t =
   let b = Box.get name states in
   let p = Box.west b in
   Arrow.draw (Path.pathp [ Point.shift p (Point.pt (cm (-0.3), zero)); p ])
@@ -504,5 +504,3 @@ let () = Metapost.emit "block_arrow" block_arrow
 let () = Metapost.emit "list123" list123
 let () = Metapost.emit "another_list" another_list
 let () = Metapost.emit "deps" deps
-
-
