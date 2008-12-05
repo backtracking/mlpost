@@ -31,6 +31,12 @@ let () = Random.init 1234
 open Tree
 open Box
 
+let block1 = 
+  [ draw (vblock [tex "A"; tex "B"; tex "c"; tex "toto"])]
+
+let block2 = 
+  [ draw (hblock [tex "A"; tex "B"; tex "c"; tex "toto"])]
+
 let d1 = 
   let a = circle (tex "$\\sqrt2$") in
   let b = 
@@ -414,6 +420,8 @@ let alt_ergo =
 
 let figs = [
   why_platform;
+  block1;
+  block2;
   d6; d5; yannick Box.Rect; yannick Box.Patatoid; d1; d2; proval;
   d2sq; d2hsq; d2s; d2c; cheno011; d3; d4;
   d7; 

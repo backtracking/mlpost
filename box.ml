@@ -460,8 +460,12 @@ let hblock ?(pos=`Center) ?name pl =
 	let xc = x +/ wp /./ 2. in
         let c = Point.pt (xc, y) in 
         let b = center c p in
-	let b = group_rect wp hmax (Point.pt (xc, hmax_2)) [b] in
-	let b = set_stroke Color.black b in
+        let nc = Point.pt (xc, hmax_2) in
+        let b = 
+          { b with stroke = Some Color.black; width = wp; height = hmax;
+                   ctr = nc; 
+                   contour = Path.shift nc (Shapes.rectangle wp hmax)
+          } in
         make_new (b::acc) (x +/ wp) pl
   in
   let l,x = make_new [] Num.zero pl in
@@ -484,15 +488,17 @@ let vblock ?(pos=`Center) ?name pl =
 	let yc = y -/ hp /./ 2. in
         let c = Point.pt (x, yc) in 
         let b = center c p in
-	let b = group_rect wmax hp (Point.pt (wmax_2, yc)) [b] in
-	let b = set_stroke Color.black b in
+        let nc = Point.pt (wmax_2, yc) in
+        let b = 
+          { b with stroke = Some Color.black; width = wmax; height = hp;
+                   ctr = nc; 
+                   contour = Path.shift nc (Shapes.rectangle wmax hp)
+          } in
         make_new (b::acc) (y -/ hp) pl
   in
   let l,y = make_new [] Num.zero pl in
   let mycenter = Point.pt (wmax_2, y /./ 2.) in
   group_rect ?name wmax (Num.neg y) mycenter l
-
-
 
 open Path
 
