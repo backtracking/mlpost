@@ -118,7 +118,7 @@ let compile f =
   let eps = if !eps then "~eps:true" else "" in
   let prelude = match !latex_file with
     | None -> ""
-    | Some f -> Metapost.read_prelude_from_tex_file f
+    | Some f -> sprintf "~prelude:%S" (Metapost.read_prelude_from_tex_file f)
   in
   Printf.fprintf cout 
     "\nlet () = Mlpost.Metapost.dump %s %s %s \"%s\"\n" prelude pdf eps bn;
