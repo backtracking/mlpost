@@ -180,45 +180,74 @@ let path ?style ?dx ?dy ?name ?(stroke=None) ?pen ?fill p =
   pic ?style ?dx ?dy ?name ~stroke ?pen ?fill
     (Picture.make (Command.draw p))
 
+let border pos b = 
+  match pos with
+  | `Top -> ypart (ctr b) +/ height b /./ 2.
+  | `Bot -> ypart (ctr b) -/ height b /./ 2.
+  | `Left -> xpart (ctr b) -/ width b /./ 2.
+  | `Right -> xpart (ctr b) +/ width b /./ 2.
+
+let diffy pos a b =
+  (* calculate the vertical difference between two boxes, taking either the
+   * center, the top or the bottom as reference  *)
+  let diffc = ypart (Point.sub (ctr a) (ctr b)) in
+  match pos with
+  | `Center -> diffc 
+  | (`Top | `Bot) as x -> border x a -/ border x b
+
+let diffx pos a b =
+  (* calculate the horizontal difference between two boxes, taking either the
+   * center, the top or the bottom as reference  *)
+  let diffc = xpart (Point.sub (ctr a) (ctr b)) in
+  match pos with
+  | `Center -> diffc 
+  | (`Left | `Right) as x -> border x a -/ border x b
+
+
 let horizontal ?(padding=Num.zero) ?(pos=`Center) pl =
-  let hmax = Num.fold_max height Num.zero pl in
-  let hmax_2 = hmax /./ 2. in
+  let refb = List.hd pl in
+  let refc = ctr refb and refw = width refb in
   let rec make_new acc x = function
     | [] -> List.rev acc, x -/ padding
     | p :: pl ->
-        let wp,hp = width p, height p in
-        let y = match pos with
-          | `Center -> hmax_2
-          | `Top -> hmax -/ hp /./ 2.
-          | `Bot -> hp /./ 2.
-        in
-        let c = Point.pt (x +/ wp /./ 2., y) in 
-        let b = center c p in
-        make_new (b::acc) (x +/ wp +/ padding) pl
+        let diffy = diffy pos refb p in
+        let offsetx = x +/ width p /./ 2. in
+        let b = shift (Point.pt (offsetx -/ xpart (ctr p), diffy)) p in
+        make_new (b::acc) (x +/ width p +/ padding) pl
   in
-  let l,x = make_new [] Num.zero pl in
-  let mycenter = Point.pt (x /./ 2., hmax_2) in     
+  let l, x = make_new [] (xpart refc -/ refw /./ 2.) pl in
+  let x = x  -/ xpart refc +/ refw /./ 2. in
+  let hmax = Num.fold_max height Num.zero pl in
+  let cy = 
+    match pos with
+    | `Center -> ypart refc
+    | `Top -> border `Top  refb -/ hmax /./ 2.
+    | `Bot -> border `Bot  refb +/ hmax /./ 2.
+  in
+  let mycenter = Point.pt (border `Left refb +/ x /./ 2.,  cy) in     
   l, x, hmax, mycenter
 
 let vertical ?(padding=Num.zero) ?(pos=`Center) pl =
-  let wmax = Num.fold_max width Num.zero pl in
-  let wmax_2 = wmax /./ 2. in
+  let refb = List.hd pl in
+  let refc = ctr refb and refh = height refb in
   let rec make_new acc y = function
     | [] -> List.rev acc, y +/ padding
     | p :: pl ->
-        let wp,hp = width p, height p in
-        let x = 
-          match pos with
-            | `Center -> wmax_2
-            | `Right -> wmax -/ wp /./ 2.
-            | `Left ->  wp /./ 2.
-        in
-        let c = Point.pt (x, y -/ hp /./ 2.) in 
-        let b = center c p in
-          make_new (b::acc) (y -/ hp -/ padding) pl
+        let diffx = diffx pos refb p in
+        let offsety = y -/ height p /./ 2. in
+        let b = shift (Point.pt (diffx, offsety -/ ypart (ctr p))) p in
+        make_new (b::acc) (y -/ height p -/ padding) pl 
   in
-  let l,y = make_new [] Num.zero pl in
-  let mycenter = Point.pt (wmax_2, y /./ 2.) in
+  let wmax = Num.fold_max width Num.zero pl in
+  let l,y = make_new [] (ypart refc +/ refh /./ 2.) pl in
+  let y = y -/ ypart refc -/ refh /./ 2. in
+  let cx = 
+    match pos with
+    | `Center -> xpart refc
+    | `Left -> border `Left refb +/ wmax /./ 2.
+    | `Right -> border `Right refb -/ wmax /./ 2.
+  in
+  let mycenter = Point.pt (cx, border `Top refb +/ y /./ 2.) in
   l, wmax, Num.neg y, mycenter
 
 let align_boxes f ?padding ?pos ?(style=Rect) 

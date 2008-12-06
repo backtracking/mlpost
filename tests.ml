@@ -37,6 +37,21 @@ let block1 =
 let block2 = 
   [ draw (hblock [tex "A"; tex "B"; tex "c"; tex "toto"])]
 
+let hbox1 = 
+  [ draw (hbox [tex "A"; tex "B"; tex "c"; tex "toto"])]
+
+let hbox2 = 
+  let s b = Box.shift (Point.p (100.,100.)) b in
+  let stroke = Some Color.red in
+  let b = vbox ~stroke ~pos:`Left [tex "A"; s (tex "Bx") ; tex "c"; tex "toto"] in
+  let t = hbox ~stroke [b;b;b] in
+  [ draw (vbox [t;s t;t]) ]
+
+let hvbox =
+  let row = vbox [tex "A"; tex "B"; tex "C" ] in
+  let col = hbox [nth 0 row ; tex "D" ; tex "E"] in
+  [ draw row; draw col ]
+
 let d1 = 
   let a = circle (tex "$\\sqrt2$") in
   let b = 
@@ -419,10 +434,13 @@ let alt_ergo =
 ***)
 
 let figs = [
-  why_platform;
+  hvbox;
+  hbox2;
+  why_platform;d2;
+  hbox1;
   block1;
   block2;
-  d6; d5; yannick Box.Rect; yannick Box.Patatoid; d1; d2; proval;
+  d6; d5; yannick Box.Rect; yannick Box.Patatoid; d1;  proval;
   d2sq; d2hsq; d2s; d2c; cheno011; d3; d4;
   d7; 
   (* recursion *)

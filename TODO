@@ -46,8 +46,9 @@
       min_height - pour imposer une hauteur minimale
   - même chose pour hblock
   - flêches rectangulaires entre les boîtes, de manière symbolique ?
-  - fonctions d'alignement laisseraient au moins une boite à leur place
-  - "weak_halign" qui ne touche pas le placement horizontal des boîtes
+  - on devrait pouvoir choisir quelle boite hbox / vbox laissent à leur
+    place
+  - "weak_hbox" qui ne touche pas le placement horizontal des boîtes
   - foncteur WithBox pour faciliter l'accès aux boîtes nommées
 
 -------------------------------------------------------------------------------

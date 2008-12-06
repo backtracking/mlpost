@@ -888,7 +888,7 @@ and Box : sig
   val hbox : ?padding:Num.t -> ?pos:Command.vposition -> ?style:style -> 
     t list box_creator
       (** aligns the given boxes horizontally and returns a box containing
-	  these boxes as sub-components. 
+	  these boxes as sub-components. Leave the first box at its place.
 	  @param padding horizontal padding used to separate the boxes; 
 	  defaults to 0
 	  @param pos used to determine the way boxes are aligned; defaults to
@@ -898,7 +898,7 @@ and Box : sig
   val vbox : ?padding:Num.t -> ?pos:Command.hposition -> ?style:style -> 
     t list box_creator
       (** aligns the given boxes vertically and returns a box containing
-	  these boxes as sub-components. 
+	  these boxes as sub-components. Leave the first box at its place.
 	  @param padding vertical padding used to separate the boxes
 	  @param pos used to determine the way boxes are aligned
       *)

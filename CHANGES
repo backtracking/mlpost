@@ -1,11 +1,17 @@
 o - changes in behaviour, new features
 * - incompatible changes in the interface
 
+Changes since version 0.5
+-------------------------
+* "open Mlpost" is not added to input files any more -
+  users have to add by themselves
+o A function in the API to scan a TeX file for the prelude
+
 version 0.5, Octobre 20, 2008 (first public release)
 ----------------------------------------------------
 o new option -native to use native compilation, useful for complicated pictures
 
-version 0.3, current
+version 0.3
 --------------------
 o new module Pos to place lists, arrays, trees
 * Num.f function removed
