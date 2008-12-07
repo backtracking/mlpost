@@ -17,8 +17,7 @@ let simple =
   in
   let b = hbox ~padding:(bp 20.) [node "A"; node "B"] in
   let arrow x y = box_arrow ~pen:Pen.circle ~color:red (get x b) (get y b) in
-  [draw b;
-   arrow "A" "B"]
+  seq [draw b; arrow "A" "B"]
 
 (*parse >> <<f1 *)
 let f1 =
@@ -30,8 +29,8 @@ let f1 =
        vbox ~padding:(bp 4.) ~pos:`Left  
 	 [tex ~name:"e" "E"; tex "FGH"]]
   in
-  [draw ~debug:false b;
-   box_arrow (get "bc" b) (get "e" b)]
+  seq [draw b;
+       box_arrow (get "bc" b) (get "e" b)]
 
 (*parse >> <<f2 *)
 let f2 =
@@ -40,8 +39,8 @@ let f2 =
   let f = hbox ~padding:(bp 20.) [b;b;b] in
   let arrow = box_arrow ~outd:(vec (dir (-60.))) in
   let node i = get "b" (nth i f) in
-  [draw ~debug:false f;
-   arrow (node 0) (node 1); arrow (node 1) (node 2)]
+  seq [draw f;
+       arrow (node 0) (node 1); arrow (node 1) (node 2)]
 
 (*parse >> <<traffic *)
 (* inspired by functional metapost *)
@@ -53,7 +52,7 @@ let traffic =
         tex ~style:Circle ~fill:yellow "Y";
         tex ~style:Circle ~fill:green "G"; ]
   in
-  [ draw b]
+  draw b
 
 (*parse >> <<hierarchy *)
 (* inspired by functional metapost *)
@@ -72,7 +71,7 @@ let hierarchy =
                   tex ~style:RoundRect ~stroke:(Some black) "regular" ] 
       ] ] ]
   in
-  [ draw b]
+  draw b
 (*parse >> *)
 
 

@@ -5,6 +5,7 @@ open Mlpost
 open Path
 open Point
 open Num
+open Command
 open Box
 (*parse <<togglescript>> *)
 (* Nodes are boxes (type Box.t), created using functions such as "state" and
@@ -58,10 +59,10 @@ let automaton1 =
   let states = Box.hbox ~padding: (cm 1.4)
     [ state ~name:"0" "0"; final ~name:"1" (state "1") ]
   in
-  [ Box.draw states;
-    transition states "0..9" `Top "0" "1";
-    loop states "0..9" "1";
-    initial states "0" ]
+  seq [ Box.draw states;
+        transition states "0..9" `Top "0" "1";
+        loop states "0..9" "1";
+        initial states "0" ]
 
 (*parse >> *)
 
@@ -73,15 +74,15 @@ let automaton2 =
       state ~name:"2" "2"; state ~name:"3" "3"; 
       final ~name:"4" (state "4") ]
   in
-  [ Box.draw states; initial states "0";
-    transition states "\\texttt{(}" `Top "0" "1"; 
-    transition states "\\texttt{*}" `Top "1" "2";
-    transition states "\\texttt{*}" `Top ~outd: 25. ~ind: 335. "2" "3";
-    transition states "$a$" `Bot ~outd: 205. ~ind: 155. "3" "2";
-    transition states "\\texttt{)}" `Top "3" "4";
-    loop states "$b$" "2";
-    loop states "*" "3";
- ]
+  seq [ Box.draw states; initial states "0";
+        transition states "\\texttt{(}" `Top "0" "1"; 
+        transition states "\\texttt{*}" `Top "1" "2";
+        transition states "\\texttt{*}" `Top ~outd: 25. ~ind: 335. "2" "3";
+        transition states "$a$" `Bot ~outd: 205. ~ind: 155. "3" "2";
+        transition states "\\texttt{)}" `Top "3" "4";
+        loop states "$b$" "2";
+        loop states "*" "3";
+     ]
 
 (*parse >> *)
 
@@ -181,22 +182,22 @@ let automaton4 =
     ]
   in
   let tt s = "\\texttt{" ^ s ^ "}" in
-  [draw states;
-   initial states "1";
-   transition states "$E$" `Top ~outd:30. "1" "3";
-   transition states (tt "(") `Left "1" "4";
-   transition states (tt "(") `Top ~outd:150. "6" "4";
-   transition states (tt "int") `Bot "1" "2";
-   transition states (tt "int") `Lowright "4" "2";
-   transition states (tt "int") `Lowleft "6" "2";
-   transition states (tt "+") `Right "3" "6";
-   transition states (tt "+") `Top "5" "6";
-   transition states "$E$" `Left ~outd:(-110.) "6" "8";
-   transition states (tt "+") `Right ~outd:70. "8" "6";
-   transition states "$E$" `Top  "4" "5";
-   transition states (tt ")") `Left "5" "7";
-   loop states (tt "(") "4";
-  ]
+  seq [draw states;
+       initial states "1";
+       transition states "$E$" `Top ~outd:30. "1" "3";
+       transition states (tt "(") `Left "1" "4";
+       transition states (tt "(") `Top ~outd:150. "6" "4";
+       transition states (tt "int") `Bot "1" "2";
+       transition states (tt "int") `Lowright "4" "2";
+       transition states (tt "int") `Lowleft "6" "2";
+       transition states (tt "+") `Right "3" "6";
+       transition states (tt "+") `Top "5" "6";
+       transition states "$E$" `Left ~outd:(-110.) "6" "8";
+       transition states (tt "+") `Right ~outd:70. "8" "6";
+       transition states "$E$" `Top  "4" "5";
+       transition states (tt ")") `Left "5" "7";
+       loop states (tt "(") "4";
+      ]
 
 (*parse >> *)
 

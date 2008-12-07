@@ -34,9 +34,9 @@ let pen = Pen.scale (bp 1.5) Pen.default
 
 let grid w h d f =
   let p i j = bp (float i *. d), bp (float j *. d) in
-  [iter 0 (w-1) (fun i -> iter 0 (h-1) (f i));
-   iter 0 w (fun i -> draw ~pen (pathn [p i 0; p i h]));
-   iter 0 h (fun j -> draw ~pen (pathn [p 0 j; p w j]))]
+  seq [iter 0 (w-1) (fun i -> iter 0 (h-1) (f i));
+       iter 0 w (fun i -> draw ~pen (pathn [p i 0; p i h]));
+       iter 0 h (fun j -> draw ~pen (pathn [p 0 j; p w j]))]
 
 let bresenham = 
   let d = 10. in
@@ -51,12 +51,12 @@ let bresenham =
     else
       seq [] 
   in
-  [seq (grid (x2+1) (y2+1) d cell);
-   pic (tex "0") 0 (-1);
-   pic (tex "0") (-1) 0;
-   pic (tex "$x_2$") x2 (-1);
-   pic (tex "$y_2$") (-1) y2;
-  ]
+  seq [grid (x2+1) (y2+1) d cell;
+       pic (tex "0") 0 (-1);
+       pic (tex "0") (-1) 0;
+       pic (tex "$x_2$") x2 (-1);
+       pic (tex "$y_2$") (-1) y2;
+      ]
 
 (*parse >> *)
 
@@ -82,7 +82,7 @@ let cfg =
   arrow inv c ~lab:"$i\\leftarrow i+1$" ~pos:`Right;
   arrow do_ inv ~lab:"$m\\ge t[i]$" ~pos:`Top;
   arrow do_ b ~outd:Up ~ind:Left ~lab:"$m<t[i]$" ~pos:`Upleft;
-  [draw ~fill:Color.yellow ~stroke:Color.blue ~pen diag]
+  draw ~fill:Color.yellow ~stroke:Color.blue ~pen diag
 
 
 (*parse >> <<chess *)
@@ -90,9 +90,9 @@ let pen = Pen.scale (bp 1.5) Pen.default
 
 let grid w h d f =
   let p i j = bp (float i *. d), bp (float j *. d) in
-  [iter 0 (w-1) (fun i -> iter 0 (h-1) (f i));
-   iter 0 w (fun i -> Command.draw ~pen (pathn [p i 0; p i h]));
-   iter 0 h (fun j -> Command.draw ~pen (pathn [p 0 j; p w j]))]
+  seq [iter 0 (w-1) (fun i -> iter 0 (h-1) (f i));
+       iter 0 w (fun i -> Command.draw ~pen (pathn [p i 0; p i h]));
+       iter 0 h (fun j -> Command.draw ~pen (pathn [p 0 j; p w j]))]
 
 let bq = tex "\\font\\Chess=chess10 {\\Chess q}"
 let question = tex "?"
@@ -146,7 +146,7 @@ let edges =
 
 let graph = draw ~fill:(Color.gray 0.8) 
                  ~style:(Box.circle ~dx:(Num.bp 6.) ~dy:(Num.bp 6.)) diag
-let diag1 = [draw_pic (Picture.scale (bp 0.5) (Picture.make graph))]
+let diag1 = draw_pic (Picture.scale (bp 0.5) (Picture.make graph))
 
 (*parse >> <<diag2 *)
 
@@ -180,7 +180,7 @@ let edges =
 
 let graph = draw ~fill:(Color.gray 0.8) 
             ~style:(Box.circle ~dx:(Num.bp 6.) ~dy:(Num.bp 6.)) diag
-let diag2 = [draw_pic (Picture.scale (bp 0.5) (Picture.make graph))]
+let diag2 = draw_pic (Picture.scale (bp 0.5) (Picture.make graph))
 
 (*parse >> <<drums *)
 
@@ -237,7 +237,7 @@ let snarepic b pos =
     draw_pic tpic
 
 let drums = 
-  [hihat true; snarepic true (-5.3,-3.8)]
+  seq [hihat true; snarepic true (-5.3,-3.8)]
 
 (*parse >> <<escher *)
 
@@ -368,26 +368,26 @@ let escher =
                (fold_append ~style:jLine 
                   [line1 ; line6; line2; line8; line4; line7])
   in
-    [ Command.iter (-1) 1
-        (fun x ->
-           Command.iter (-1) 1
-             (fun y ->
-                let xf, yf = float_of_int x, float_of_int y in
-                let offset = (xf *. xs1 +. yf *. xs2, yf *. ys) in
-                let offset2 = ( (xf +. 1.) *. xs1 +. (yf -. 1.) *. xs2, 
-                                (yf -. 1.) *. ys  ) in
-                let tr p = Path.shift (bpp offset) p in
-                let mypath po = 
-                  let offset = add offset2 po in
-                    Path.shift (bpp offset) Path.fullcircle
-                in
-                  seq ([ fill ~color:Color.red (mypath (-12.,27.));
-			 Command.draw ~color:Color.blue (mypath (-12.,27.))] @
-			 [ fill ~color:mygreen (tr bird)] @
-			 List.map (fun p -> Command.draw ~pen:pen1 (tr p)) 
-			 [line1;line2;line3;line4;line5] @
-			 List.map (fun p -> Command.draw ~pen:pen1 (tr p)) 
-			 [line6; line7; line8] ) ) ) ]
+    Command.iter (-1) 1
+      (fun x ->
+         Command.iter (-1) 1
+           (fun y ->
+              let xf, yf = float_of_int x, float_of_int y in
+              let offset = (xf *. xs1 +. yf *. xs2, yf *. ys) in
+              let offset2 = ( (xf +. 1.) *. xs1 +. (yf -. 1.) *. xs2, 
+                              (yf -. 1.) *. ys  ) in
+              let tr p = Path.shift (bpp offset) p in
+              let mypath po = 
+                let offset = add offset2 po in
+                  Path.shift (bpp offset) Path.fullcircle
+              in
+                seq ([ fill ~color:Color.red (mypath (-12.,27.));
+                       Command.draw ~color:Color.blue (mypath (-12.,27.))] @
+                       [ fill ~color:mygreen (tr bird)] @
+                       List.map (fun p -> Command.draw ~pen:pen1 (tr p)) 
+                       [line1;line2;line3;line4;line5] @
+                       List.map (fun p -> Command.draw ~pen:pen1 (tr p)) 
+                       [line6; line7; line8] ) ) )
 
 (*parse >> <<lattice *)
 
@@ -467,7 +467,7 @@ let subwords s =
   Array.to_list levels 
 
 let lattice =
-  [draw (subwords "abcd")]
+  draw (subwords "abcd")
 
 (*parse >> <<other208 *)
 
@@ -484,22 +484,20 @@ let rec pave t a b c n =
     match t with 
       | One -> 
 	  let d = Point.segment r0 a c in
-	    (pave One b c d (n-1))@
-	      (pave Four b d a (n-1))
+          seq [pave One b c d (n-1); pave Four b d a (n-1) ]
       | Two ->
 	  let d = Point.segment r0 a b in
-	    (pave Two c d b (n-1))@
-	      (pave Three c a d (n-1))	    
+          seq [ pave Two c d b (n-1) ; pave Three c a d (n-1) ]	    
       | Three ->
 	  let d = Point.segment r1 a b in
 	  let e = Point.segment r0 a c in
-	    (pave One d c e (n-1))@
-	      (pave Three b c d (n-1))@pave Four d e a (n-1)
+          seq [ pave One d c e (n-1) ; pave Three b c d (n-1);
+                pave Four d e a (n-1)]
       | Four -> 
 	  let d = Point.segment r1 a c in
 	  let e = Point.segment r0 a b in
-	    (pave Two d e b (n-1))@
-	      (pave Three d a e (n-1))@pave Four c d b (n-1)
+          seq [ pave Two d e b (n-1) ; pave Three d a e (n-1); 
+                pave Four c d b (n-1)]
   else  
     let pen = Pen.circle in
     let gb = Color.rgb 0. 1. 1. in
@@ -512,15 +510,16 @@ let rec pave t a b c n =
       | Three -> gr, [a;c]::[c;b]::[]
       | Four -> gr, [b;c]::[a;b]::[]
     in
-      [Command.draw path; fill path ~color]@
-	(List.map (fun l -> Command.draw ~pen (pathp ~style:jLine l)) segs)
+    seq [Command.draw path; fill path ~color;
+         seq (List.map (fun l -> Command.draw ~pen (pathp ~style:jLine l)) segs)
+    ]
 
 let other208 = 
   let a = cmp (0., 0.) in
   let b = cmp (3., 0.) in
   let d = Point.rotate 72. b in
   let c = Point.add d (cmp (3.,0.)) in
-    (pave Three a c d 6)@(pave Four a b c 6)
+  seq [pave Three a c d 6; pave Four a b c 6]
 
 (*parse >> <<proval *)
 
@@ -530,11 +529,10 @@ let proval =
   let check = 
     jointpath [-1.2,1.2; 0., -2. ; 2., 2. ; 5., 5.] [jLine ; jCurve; jCurve]
   in
-  [fill ~color:Color.black 
-      (Path.scale (bp k) Path.fullcircle) ;
-   label ~pos:`Left (Picture.tex "Pr") (Point.p (k /. (-4.),0.)) ;
-   label ~pos:`Right (Picture.tex "al") (Point.p (k /. 4.,0.)) ;
-   Command.draw ~color:Color.green ~pen check;]
+  seq [fill ~color:Color.black (Path.scale (bp k) Path.fullcircle) ;
+       label ~pos:`Left (Picture.tex "Pr") (Point.p (k /. (-4.),0.)) ;
+       label ~pos:`Right (Picture.tex "al") (Point.p (k /. 4.,0.)) ;
+       Command.draw ~color:Color.green ~pen check;]
 
 (*parse >> <<randtree *)
 
@@ -563,7 +561,7 @@ let randtree =
       let acc = tree b c (n-1) newsize acc in
           tree b d (n-1) newsize acc
   in
-    tree (p (0.,0.)) (pt (bp 0., Num.cm 1.)) 10  2. []
+    seq (tree (p (0.,0.)) (pt (bp 0., Num.cm 1.)) 10  2. [])
 
 (*parse >> <<rubik *)
 let alpha = atan 1.
@@ -587,9 +585,9 @@ let up = square Color.yellow (fun i j -> proj i j 3)
 let left = square Color.green (fun i j -> proj 0 (3 - i) j)
 
 let rubik = 
-  [iter 0 2 (fun i -> iter 0 2 (right i));
-   iter 0 2 (fun i -> iter 0 2 (up i));
-   iter 0 2 (fun i -> iter 0 2 (left i));]
+  seq [iter 0 2 (fun i -> iter 0 2 (right i));
+       iter 0 2 (fun i -> iter 0 2 (up i));
+       iter 0 2 (fun i -> iter 0 2 (left i));]
 
 (*parse >> <<test *)
 
@@ -601,13 +599,13 @@ let test =
     Box.shift (2. ++ 0.) (Box.rect ~fill:Color.purple (Box.tex "$\\pi$"))
   in
   let pen = Pen.scale (bp 3.) Pen.default in
-  [ Box.draw a;
-    Box.draw b;
-    Command.draw ~color:Color.red (Path.shift (1. ++ 1.) (Box.bpath a));
-    draw_label_arrow ~color:Color.orange ~pen 
-    ~pos:`Upright (Picture.tex "foo") (Box.west a) (Box.south_east b);
-    box_arrow ~color:Color.blue a b;
-]
+  seq [ Box.draw a;
+        Box.draw b;
+        Command.draw ~color:Color.red (Path.shift (1. ++ 1.) (Box.bpath a));
+        draw_label_arrow ~color:Color.orange ~pen 
+        ~pos:`Upright (Picture.tex "foo") (Box.west a) (Box.south_east b);
+        box_arrow ~color:Color.blue a b;
+    ]
 (*parse >> *)
 
 let _ = 
