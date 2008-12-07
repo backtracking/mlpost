@@ -473,8 +473,14 @@ let gridi ?pos w h f =
   let m = Array.init h (fun j -> Array.init w (fun i -> f i j)) in
     grid ?pos m
 
-let hblock ?(pos=`Center) ?name ?(min_width=Num.zero) pl =
+let hblock ?(pos=`Center) ?name ?(min_width=Num.zero) ?(same_width=false) pl =
   let hmax = Num.fold_max height Num.zero pl in
+  let min_width = 
+    if same_width then
+      let wmax = Num.fold_max width Num.zero pl in
+      Num.maxn wmax min_width
+    else min_width
+  in
   let hmax_2 = hmax /./ 2. in
   let rec make_new acc x = function
     | [] -> 
@@ -502,8 +508,14 @@ let hblock ?(pos=`Center) ?name ?(min_width=Num.zero) pl =
   let mycenter = Point.pt (x /./ 2., hmax_2) in     
   group_rect ?name x hmax mycenter l
 
-let vblock ?(pos=`Center) ?name ?(min_height=Num.zero) pl =
+let vblock ?(pos=`Center) ?name ?(min_height=Num.zero) ?(same_height=false) pl =
   let wmax = Num.fold_max width Num.zero pl in
+  let min_height =
+    if same_height then
+      let hmax = Num.fold_max height Num.zero pl in
+      Num.maxn hmax min_height
+    else min_height
+  in
   let wmax_2 = wmax /./ 2. in
   let rec make_new acc y = function
     | [] -> 

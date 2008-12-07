@@ -925,14 +925,20 @@ and Box : sig
     (** similar to [tabular], but using a matrix defined with a function *)
 
   val hblock : ?pos:Command.vposition -> ?name:string -> 
-               ?min_width:Num.t -> t list -> t
+               ?min_width:Num.t -> ?same_width:bool -> t list -> t
     (** [hblock bl] aligns the boxes of [bl] horizontally and surround
 	them with new rectangular boxes of the same height; all these new
-	boxes are packed together into the returned box. *)
+	boxes are packed together into the returned box.
+        @param min_width minimum width of all boxes; default is zero
+        @param same_width if [true], all boxes are of same width, and at least of
+        [min_width]; default is false*)
 
   val vblock : ?pos:Command.hposition -> ?name:string -> 
-               ?min_height:Num.t -> t list -> t
-    (** similar to [hblock], with vertical alignment *)
+               ?min_height:Num.t -> ?same_height:bool -> t list -> t
+    (** similar to [hblock], with vertical alignment.
+        @param min_height minimum height of all boxes; default is zero
+        @param same_height if [true], all boxes are of same height, and at least
+        of [min_height]; default is false*)
 
   val grid : ?pos:Command.position -> t array array -> t
     (** Aligns the given boxes in a way that is similar to [hblock] and [vblock]:
@@ -1419,7 +1425,7 @@ module Metapost : sig
 
   val read_prelude_from_tex_file : string -> string
     (** read the prelude from a tex file, until the end of file or the text
-     * "\begin{document}" if it is outside a comment *)
+       "\begin\{document\}" if it is outside a comment *)
 
   val dump_tex : ?prelude:string -> string -> unit
     (** [dump_tex ?prelude f] builds a LaTeX file [f.tex] for all the figures,
