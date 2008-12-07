@@ -32,7 +32,11 @@ open Tree
 open Box
 
 let block1 = 
-  [ draw (vblock [tex "A"; tex "B"; tex "c"; tex "toto"])]
+  let b1 = hblock [tex "A"; tex "B"; tex "c"; tex "toto"] in
+  let b2 = hblock ~min_width:(width (tex "toto"))
+             [tex "A"; tex "B"; tex "c"; tex "toto"] in
+  
+  [ draw (vbox [b1;b2])]
 
 let block2 = 
   [ draw (hblock [tex "A"; tex "B"; tex "c"; tex "toto"])]
@@ -434,11 +438,11 @@ let alt_ergo =
 ***)
 
 let figs = [
+  block1;
   hvbox;
   hbox2;
   why_platform;d2;
   hbox1;
-  block1;
   block2;
   d6; d5; yannick Box.Rect; yannick Box.Patatoid; d1;  proval;
   d2sq; d2hsq; d2s; d2c; cheno011; d3; d4;

@@ -924,12 +924,14 @@ and Box : sig
     int -> int -> (int -> int -> t) -> t 
     (** similar to [tabular], but using a matrix defined with a function *)
 
-  val hblock : ?pos:Command.vposition -> ?name:string -> t list -> t
+  val hblock : ?pos:Command.vposition -> ?name:string -> 
+               ?min_width:Num.t -> t list -> t
     (** [hblock bl] aligns the boxes of [bl] horizontally and surround
 	them with new rectangular boxes of the same height; all these new
 	boxes are packed together into the returned box. *)
 
-  val vblock : ?pos:Command.hposition -> ?name:string -> t list -> t
+  val vblock : ?pos:Command.hposition -> ?name:string -> 
+               ?min_height:Num.t -> t list -> t
     (** similar to [hblock], with vertical alignment *)
 
   val grid : ?pos:Command.position -> t array array -> t

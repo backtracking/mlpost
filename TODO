@@ -41,12 +41,10 @@
     - interface fonctionelle
 
 * Box : 
-  - vblock : des options
-      same_height - pour imposer une hauteur commune
-      min_height - pour imposer une hauteur minimale
+  - vblock : une option same_height pour imposer une hauteur commune
   - même chose pour hblock
   - flêches rectangulaires entre les boîtes, de manière symbolique ?
-  - on devrait pouvoir choisir quelle boite hbox / vbox laissent à leur
+  - on devrait pouvoir choisir quelle boite hbox / vbox laissent à sa
     place
   - "weak_hbox" qui ne touche pas le placement horizontal des boîtes
   - foncteur WithBox pour faciliter l'accès aux boîtes nommées
