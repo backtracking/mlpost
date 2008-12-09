@@ -32,9 +32,10 @@ open Tree
 open Box
 
 let block1 = 
-  let b1 = hblock [tex "A"; tex "B"; tex "c"; tex "toto"] in
+  let b1 = hblock ~min_width:(width (tex "c")) 
+    [empty (); tex "A"; tex "B"; tex "c"; tex "toto"] in
   let b2 = hblock ~same_width:true
-             [tex "A"; tex "B"; tex "c"; tex "toto"] in
+             [tex "A"; tex "B"; tex ~fill:Color.red "c"; tex "toto"] in
   
   [ draw (vbox [b1;b2])]
 
