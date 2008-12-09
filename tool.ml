@@ -133,7 +133,7 @@ let compile f =
     command ("cp " ^ mlf ^ " " ^ mlf2);
     let ext = if !native then ".native" else ".byte" in
     ocamlbuild
-      ["-lib mlpost"; Filename.chop_extension mlf2 ^ ext; !ccopt; "--";
+      ["-lib unix"; "-lib mlpost"; Filename.chop_extension mlf2 ^ ext; !ccopt; "--";
        !execopt];
     Sys.remove mlf2
   end else
