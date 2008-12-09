@@ -205,7 +205,10 @@ let diffx pos a b =
 
 
 let horizontal ?(padding=Num.zero) ?(pos=`Center) pl =
-  let refb = List.hd pl in
+  let refb = 
+    try List.hd pl 
+    with Failure "hd" -> raise (invalid_arg "hbox - empty list") 
+  in
   let refc = ctr refb and refw = width refb in
   let rec make_new acc x = function
     | [] -> List.rev acc, x -/ padding
@@ -228,7 +231,10 @@ let horizontal ?(padding=Num.zero) ?(pos=`Center) pl =
   l, x, hmax, mycenter
 
 let vertical ?(padding=Num.zero) ?(pos=`Center) pl =
-  let refb = List.hd pl in
+  let refb = 
+    try List.hd pl 
+    with Failure "hd" -> raise (invalid_arg "vbox - empty list") 
+  in
   let refc = ctr refb and refh = height refb in
   let rec make_new acc y = function
     | [] -> List.rev acc, y +/ padding
