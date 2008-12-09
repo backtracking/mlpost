@@ -24,20 +24,20 @@
 \title{Faire bonne figure avec \mlpost}
 
 \author{R. Bardou$^1$
-        \& J. Kanig$^1$
         \& J.-C. Filliâtre$^1$
+        \& J. Kanig$^1$
         \& S. Lescuyer$^1$}
 
 \titlehead{Faire bonne figure avec \mlpost}%  a droite (page impaire)
 
-\authorhead{Bardou \& Kanig \& Filliâtre \& Lescuyer}% a gauche (page paire)
+\authorhead{Bardou \& Filliâtre \& Kanig \& Lescuyer}% a gauche (page paire)
 
 \affiliation{\begin{tabular}{rr} 
 \\ 1:  ProVal / INRIA Saclay -- Île-de-France
 \\     91893 Orsay Cedex, France
 \\     LRI / CNRS -- Université Paris Sud
 \\     91405 Orsay Cedex, France
-\\     {\tt \{bardou,kanig,filliatr,lescuyer\}@lri.fr} 
+\\     {\tt \{bardou,filliatr,kanig,lescuyer\}@lri.fr} 
 \end{tabular}}
 
 \begin{document}
@@ -247,7 +247,7 @@ Une première possibilité serait de spécifier les positions
 approximativement, par exemple en donnant les abscisses 0 cm pour $A$
 et 2 cm pour $B$. Cependant, si on change d'avis sur le contenu de
 $A$ et que la taille de cette boîte change, $A$ risque alors de se
-superposer à $B$. Il faut alors replacer toutes les boîtes de votre
+superposer à $B$. Il faut alors replacer toutes les boîtes de la
 figure manuellement. Pour éviter ça, \mlpost\ propose diverses
 méthodes pour placer les boîtes \emph{les unes par rapport aux
   autres}. On gagne alors du temps lors de la création et lors des
@@ -768,11 +768,11 @@ l'utilisateur écrit un programme qui, à l'exécution, construit un
 arbre de syntaxe abstraite \metapost. Cet arbre est imprimé dans un
 fichier \verb|figure.mp| qui est lu par \metapost\ pour générer un ou
 plusieurs fichiers \postscript\footnote{Ces fichiers n'ont pas le
-  suffixe \texttt{.ps} car il leur manque l'en-tête.}. L'inclusion de ces 
-ces figures dans un document \LaTeX se fait simplement en utilisant la commande
-\verb|\includegraphics| du package \textsf{graphicx}. Pour compiler le
-document \LaTeX{} avec {\tt pdflatex}, il suffit de changer
-l'extension des figures générées, ce qu'une option de l'outil
+  suffixe \texttt{.ps} car il leur manque l'en-tête.}. L'inclusion de
+ces figures dans un document \LaTeX{} se fait simplement en utilisant
+la commande \verb|\includegraphics| du package \textsf{graphicx}. Pour
+compiler le document \LaTeX{} avec {\tt pdflatex}, il suffit de
+changer l'extension des figures générées, ce qu'une option de l'outil
 \mlpost{} permet de faire facilement.
 
 \begin{figure}[h]
@@ -1171,10 +1171,10 @@ pour l'inclusion de \LaTeX.
   \begin{center}
     \bf Remerciements
   \end{center}
-  \centering
-  Les auteurs tiennent à remercier Florence Plateau, Yannick Moy et
-  Claude Marché pour leur contribution à \mlpost\ et Sylvie Boldo pour
-  la suggestion du titre de l'article.
+  \centering Les auteurs tiennent à remercier Florence Plateau,
+  Yannick Moy et Claude Marché pour leur contribution à \mlpost,
+  Sylvie Boldo pour la suggestion du titre de l'article et les
+  relecteurs pour leurs remarques.
 \end{minipage}
 
 \medskip
