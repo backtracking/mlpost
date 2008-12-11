@@ -24,8 +24,6 @@ type position = Types.position
 
 type t = command
 
-type figure = t list
-
 let label ?(pos=`Center) pic point = mkCLabel pic pos point
 (* replace later *)
 let dotlabel ?(pos=`Center) pic point = mkCDotLabel pic pos point

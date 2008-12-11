@@ -633,9 +633,6 @@ and Command : sig
   type t
       (** The abstract commands type *)
 
-  type figure = t list
-      (** A figure is a list of commands *)
-
 (*
   val logo : figure
     (** The Mlpost logo. *)
@@ -1184,7 +1181,7 @@ end
 
 module Helpers : sig
   val dotlabels :
-    ?pos:Command.position -> string list -> Point.t list -> Command.t list
+    ?pos:Command.position -> string list -> Point.t list -> Command.t
   val draw_simple_arrow :
     ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
@@ -1414,9 +1411,9 @@ module Metapost : sig
     string ->
     ?prelude:string ->
     ?eps:bool ->
-    (int * Command.t list) list -> unit
+    (int * Command.t) list -> unit
 
-  val emit : string -> Command.t list -> unit
+  val emit : string -> Command.t -> unit
   val dump : ?prelude:string -> ?pdf:bool -> ?eps:bool -> string -> unit
     (** [dump ?prelude ?pdf f] builds a Metapost file [f.mp] for all figures,
 	then runs Metapost on it, and renames figure files according to the
@@ -1431,7 +1428,7 @@ module Metapost : sig
     (** [dump_tex ?prelude f] builds a LaTeX file [f.tex] for all the figures,
 	using LaTeX prelude [prelude] if given. *)
 
-  val slideshow : Command.figure list -> int -> (int * Command.figure) list
+  val slideshow : Command.t list -> int -> (int * Command.t) list
     (** takes a list of figures and returns a list of figures of exactly the
         same size (the size of the biggest figure). Shared objects are 
         hopefully placed at the same absolute location across figures. The 

@@ -23,7 +23,7 @@ open Num
 open Num.Infix
 open Point
 
-let draw1 = 1, [ draw 
+let draw1 = 1, seq [ draw 
                    (path ~style:jLine [20.,20.; 0.,0.; 0.,30.; 30.,0.; 0.,0.])]
 
 let z0 = 0.,0.
@@ -34,23 +34,25 @@ let z4 = 30.,50.
 let l1 = z0::z1::z2::z3::z4::[]
 
 let labels1 =
-   (H.dotlabels ~pos:`Top ["0";"2";"4"] (map_bp [z0;z2;z4])) @
-   [dotlabel ~pos:`Left (tex "3") (bpp z3);
-    dotlabel ~pos:`Right (tex "1") (bpp z1) ]
+  seq [H.dotlabels ~pos:`Top ["0";"2";"4"] (map_bp [z0;z2;z4]);
+       dotlabel ~pos:`Left (tex "3") (bpp z3);
+       dotlabel ~pos:`Right (tex "1") (bpp z1) ]
 
-let draw3 = 3, [ draw (path ~style:jCurve  l1) ] @ labels1
+let draw3 = 3, seq [ draw (path ~style:jCurve  l1); labels1 ]
 
 let draw4a, draw4b = 
-  let labels = H.dotlabels ~pos:`Top ["2";"4"] (map_bp [z2;z4]) @
-               H.dotlabels ~pos:`Left ["0";"3"] (map_bp [z0;z3]) @
-               [dotlabel ~pos:`Lowright (tex "1") (bpp z1)]
+  let labels = 
+    seq [ H.dotlabels ~pos:`Top ["2";"4"] (map_bp [z2;z4]);
+          H.dotlabels ~pos:`Left ["0";"3"] (map_bp [z0;z3]);
+          dotlabel ~pos:`Lowright (tex "1") (bpp z1) ]
   in
-    (104, [ draw (path ~cycle:jCurve l1)] @ labels) ,
+  (104, seq [ draw (path ~cycle:jCurve l1); labels]) ,
     (204, 
-     [ draw 
+     seq [ draw 
          (Path.append ~style:jLine (path [z0;z1;z2;z3]) 
-            (path ~style:jLine [z4;z0]) )
-     ] @ labels)
+         (path ~style:jLine [z4;z0]) );
+       labels
+     ])
 
 (* no easy alternative way to draw this one, and that's fine *)
 let l1dirs = List.map (knot) l1
@@ -62,31 +64,32 @@ let lcontrols =
 let lcontrolsbp = List.map (fun (a,b) -> jControls (bpp a) (bpp b)) lcontrols
 
 let draw5 = 5,
-  [ draw (jointpath l1 lcontrolsbp) ;
-    let hull = 
+  seq [ draw (jointpath l1 lcontrolsbp) ;
+    (let hull = 
       List.fold_left2 (fun acc (c1, c2) f -> f::c2::c1::acc) 
 	[0.,0.] lcontrols (List.tl l1)
     in
       (* As long as we dont have the dashed lines : gray *)
       draw ~dashed:(Dash.scaled 0.5 Dash.evenly) 
-        (path ~style:jLine (List.rev hull)) ] @ labels1
+        (path ~style:jLine (List.rev hull))) ; labels1 ] 
 
 let draw6 = 6, 
-  [ draw (pathk
+  seq [ draw (pathk
            [ knot z0; knot ~r:(vec up) z1; 
-             knot ~r:(vec left) z2; knot z3; knot z4] ) ] @ labels1
+           knot ~r:(vec left) z2; knot z3; knot z4] );
+   labels1 ]
 
 
 let lex = knot ~r:(vec (dir 45.)) (0.,0.)
 let rex a = knot ~l:(vec (dir (10.*.a))) ~scale:cm (6., 0.)
 let draw7 = 7, 
-            [Command.iter 0 9
+            seq [Command.iter 0 9
                (fun a ->
                   draw (concat (start lex) ~style:jCurve 
                           (rex (float_of_int (-a))))) ]
 
 let draw8 = 8,
-            [Command.iter 0 7
+            seq [Command.iter 0 7
                (fun a ->
                   draw (concat (start lex) ~style:jCurve 
                           (rex (float_of_int a)))) ]
@@ -99,8 +102,8 @@ let z0 = knot ~r:(vec up) ~scale:inch z0
 let z1 = knot ~r:(vec right) ~scale:inch z1
 let z2 = knot ~r:(vec down) ~scale:inch z2
 
-let draw9a = 109, [draw (pathk [z0;z1;z2])] @ labels9
-let draw9b = 209, [draw (pathk ~style:jCurveNoInflex [z0;z1;z2])] @labels9
+let draw9a = 109, seq [draw (pathk [z0;z1;z2]); labels9 ]
+let draw9b = 209, seq [draw (pathk ~style:jCurveNoInflex [z0;z1;z2]); labels9 ]
 
 let u l = 1.5 /. 10. *. l
 let z0 = (u (-5.)), 0.
@@ -110,14 +113,15 @@ let z3 = (u 5.),u 0.
 let l1 = [z0;z1;z2;z3]
 let labels10 = H.dotlabels ~pos:`Bot ["0";"1";"2";"3"] (map_in l1)
 
-let draw10a = 110, [draw (path ~scale:inch l1) ] @ labels10
+let draw10a = 110, seq [draw (path ~scale:inch l1); labels10 ] 
 
 let draw10b = 210, 
-  [ draw (jointpath ~scale:inch l1 [jCurve; jTension 1.3 1.3; jCurve] ) ] 
-  @ labels10
+seq [ draw (jointpath ~scale:inch l1 [jCurve; jTension 1.3 1.3; jCurve] );
+  labels10 ] 
+
 let draw10c = 310, 
-  [ draw (jointpath ~scale:inch l1 [jCurve; jTension 1.5 1.0; jCurve] ) ]
-  @ labels10
+  seq [ draw (jointpath ~scale:inch l1 [jCurve; jTension 1.5 1.0; jCurve] );
+    labels10 ]
 
 let u l = 1.4 /. 10. *. l
 let z0 = u (2.), u (-5.)
@@ -139,8 +143,7 @@ let draw11 =
   let labels11 = H.dotlabels ~pos:`Right ["0";"1";"2"] (map_in [z0;z1;z2]) in
     List.map2
       (fun c n -> n,
-         [draw
-           (pathk (pat c) ) ] @ labels11 )
+         seq [draw (pathk (pat c) ); labels11  ] )
       cl numbers
 
 let draw17 =
@@ -148,7 +151,7 @@ let draw17 =
   let z0 = p (0.,0.) in
   let z1 = pt (a, zero) and z3 = pt (neg a, zero) in
   let z2 = pt (zero, b) and z4 = pt (zero, neg a) in
-    17, [draw (pathp ~cycle:jCurve [z1;z2;z3;z4]);
+    17, seq [draw (pathp ~cycle:jCurve [z1;z2;z3;z4]);
 	 draw (pathp ~style:jLine [z1; z0; z2]);
 	 label ~pos:`Top (tex "a") (segment 0.5 z0 z1);
 	 label ~pos:`Left (tex "b") (segment 0.5 z0 z2);
@@ -162,7 +165,7 @@ let draw18 =
     | 0 -> start (knot ~r:(vec up) ~scale:u (0.,0.))
     | n -> let f = (float_of_int n /. 2.) in 
 	concat ~style:jCurve (pg (n-1)) (knot ~scale:u (f, sqrt f)) in
-    18, [draw (pathn ~style:jLine [(zero,u 2.); (zero,zero); (u 4.,zero)]);
+    18, seq [draw (pathn ~style:jLine [(zero,u 2.); (zero,zero); (u 4.,zero)]);
 	 draw ~pen (pg 8);
 	 label ~pos:`Lowright (tex "$ \\sqrt x$") (pt (u 3., u (sqrt 3.)));
 	 label ~pos:`Bot (tex "$x$") (pt (u 2., zero));
@@ -201,7 +204,7 @@ let draw21 =
   let fillp = cycle ~dir:(vec up)
       (concat path (knot ~r ~scale:cm (0.,0.))) in
   let fullp = cycle (concat path (mp left (0.,1.))) in
-    21, [fill fillp; draw fullp]
+    21, seq [fill fillp; draw fullp]
 
 let draw22 =
   let a = Path.scale (cm 2.) fullcircle in
@@ -218,7 +221,7 @@ let draw22 =
           fill ~color:Color.white (bbox pb); draw_pic pb;
           label ~pos:`Left (tex "$U$") (p ~scale:Num.cm (-1.,0.5)); ])
   in
-    22, [draw_pic pic; draw (bbox pic)]
+    22, seq [draw_pic pic; draw (bbox pic)]
 
 let draw40 =
   let k1 = knot ~r:(curl 0.) ~scale:Num.pt (0.,0.) in
@@ -241,7 +244,7 @@ let draw40 =
   let pth = 
     Path.scale (Num.pt 72.) (Path.shift (p (0.5, 0.5)) fullcircle) in
   let pic' = Picture.clip pic pth in
-    40, [ draw_pic pic'; draw pth]
+    40, seq [ draw_pic pic'; draw pth]
 
 let figs = 
   [ draw1; draw3; draw4a; draw4b;draw5; 
@@ -253,7 +256,7 @@ let mpostfile = "test/testmanual.mp"
 let texfile = "test/testmanual.tex"
 
 let _ =
-    Metapost.generate_mp mpostfile figs;
-    Generate.generate_tex texfile "manual/manual" "testmanual" figs
+  Metapost.generate_mp mpostfile figs;
+  Generate.generate_tex texfile "manual/manual" "testmanual" figs
 
 

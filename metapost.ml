@@ -220,15 +220,13 @@ and command fmt  = function
                     let w = C.NMin (C.NMult (h,C.F (fw/.fh)),w) in
                       fprintf fmt "externalfigure \"%s\" xyscaled (%a,%a);@\n" filename num w num (C.NMult (C.F (fh/.fw),w))
 
-let print i fmt l =
+let print i fmt c =
   (* resetting is actually not needed; variables other than 
      x,y are not local to figures *)
 (*   Compile.reset (); *)
-  let () = List.iter (Duplicate.command) l in
-  let l = List.map Compile.command l in
-  fprintf fmt "@[beginfig(%d)@\n  @[%a@] endfig;@]@." i 
-    (fun fmt l -> List.iter (command fmt) l)
-    l
+  let () = Duplicate.command c in
+  let c = Compile.command c in
+  fprintf fmt "@[beginfig(%d)@\n  @[%a@] endfig;@]@." i command c
 
 let print_prelude ?(eps=false) s fmt () =
   fprintf fmt "input mp-tool ; %% some initializations and auxiliary macros
@@ -322,7 +320,7 @@ let dump ?prelude ?(pdf=false) ?eps bn =
     figures
 
 let slideshow l k = 
-  let l = List.map (fun f -> Picture.make (Command.seq f)) l in
+  let l = List.map Picture.make l in
   let l' = Command.seq (List.map 
                   (fun p -> Command.draw 
                               ~color:Color.white 
@@ -331,6 +329,6 @@ let slideshow l k =
   let x = ref (k-1) in
     List.map (fun p -> 
                   incr x;
-                  !x, [Command.append l' (Command.draw_pic p)]) l
+                  !x, Command.seq [l'; Command.draw_pic p]) l
 
 

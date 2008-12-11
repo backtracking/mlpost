@@ -36,26 +36,25 @@ let block1 =
     [empty (); tex "A"; tex "B"; tex "c"; tex "toto"] in
   let b2 = hblock ~same_width:true
              [tex "A"; tex "B"; tex ~fill:Color.red "c"; tex "toto"] in
-  
-  [ draw (vbox [b1;b2])]
+  draw (vbox [b1;b2])
 
 let block2 = 
-  [ draw (hblock [tex "A"; tex "B"; tex "c"; tex "toto"])]
+  draw (hblock [tex "A"; tex "B"; tex "c"; tex "toto"])
 
 let hbox1 = 
-  [ draw (hbox [tex "A"; tex "B"; tex "c"; tex "toto"])]
+  draw (hbox [tex "A"; tex "B"; tex "c"; tex "toto"])
 
 let hbox2 = 
   let s b = Box.shift (Point.p (100.,100.)) b in
   let stroke = Some Color.red in
   let b = vbox ~stroke ~pos:`Left [tex "A"; s (tex "Bx") ; tex "c"; tex "toto"] in
   let t = hbox ~stroke [b;b;b] in
-  [ draw (vbox [t;s t;t]) ]
+  draw (vbox [t;s t;t])
 
 let hvbox =
   let row = vbox [tex "A"; tex "B"; tex "C" ] in
   let col = hbox [nth 0 row ; tex "D" ; tex "E"] in
-  [ draw row; draw col ]
+  seq [ draw row; draw col ]
 
 let d1 = 
   let a = circle (tex "$\\sqrt2$") in
@@ -63,7 +62,7 @@ let d1 =
     shift (2. ++ 0.) (rect ~fill:Color.purple (tex "$\\pi$"))
   in
   let pen = Pen.scale (bp 3.) Pen.default in
-  [ draw a;
+  seq [ draw a;
     draw b;
     Command.draw
       ~color:Color.red
@@ -83,14 +82,14 @@ let d2 =
       [vbox ~padding:(bp 4.) ~pos:`Right [tex "A"; tex "BC"; tex "D"];
        vbox ~padding:(bp 4.) ~pos:`Left [tex "E"; tex "FGH"]]
   in
-  [draw ~debug:false b;
+  seq [draw ~debug:false b;
    box_arrow (nth 1 (nth 0 b)) (nth 0 (nth 1 b))]
 
 let proval =
   let f = 7. in
   let pen = Pen.rotate 40. (Pen.yscale (bp 0.5) Pen.square) in
   let check = jointpath [-1.2,1.2; 0., -2. ; 2., 2. ; 5., 5.] [jLine ; jCurve; jCurve] in
-    [ fill ~color:(Color.gray 0.2) (Path.scale (Num.bp f) fullcircle) ;
+    seq [ fill ~color:(Color.gray 0.2) (Path.scale (Num.bp f) fullcircle) ;
       label ~pos:`Left (Picture.tex "Pr") (Point.p (f /. (-4.),0.)) ;
       label ~pos:`Right (Picture.tex "al") (Point.p (f /. 4.,0.)) ;
       Command.draw ~color:Color.green ~pen check;]
@@ -111,7 +110,7 @@ let yannick style =
       ]
       ]
   in
-  [draw tree]
+  draw tree
 
 
 let rec random_tree ?arrow_style ?edge_style ?stroke ?pen n = 
@@ -131,14 +130,10 @@ let rec random_tree ?arrow_style ?edge_style ?stroke ?pen n =
 let d2c, d2s, d2sq, d2hsq = 
 (*   let ls = bp (-1.0) in *)
   let stroke = Color.blue and pen = Pen.circle and arrow_style = Directed in
-  [draw 
-    (random_tree ~edge_style:Curve ~arrow_style ~stroke ~pen 17)],
-  [draw 
-    (random_tree ~edge_style:Straight ~arrow_style ~stroke ~pen 17)],
-  [draw 
-    (random_tree ~edge_style:Square ~arrow_style ~stroke ~pen 17)],
-  [draw 
-    (random_tree ~edge_style:HalfSquare ~arrow_style ~stroke ~pen 17)]
+  draw (random_tree ~edge_style:Curve ~arrow_style ~stroke ~pen 17),
+  draw (random_tree ~edge_style:Straight ~arrow_style ~stroke ~pen 17),
+  draw (random_tree ~edge_style:Square ~arrow_style ~stroke ~pen 17),
+  draw (random_tree ~edge_style:HalfSquare ~arrow_style ~stroke ~pen 17)
 
 let d5 = 
   let rand_tree name i = set_name name (set_stroke Color.black (random_tree i)) in
@@ -147,7 +142,7 @@ let d5 =
   let bl = Box.hbox ~padding:(Num.cm 2.) [ box t1; box t2] in
   let b1 = nth 0 (get "1" bl) in
   let b2 = nth 0 (nth 0 (nth 1 (get "2" bl))) in
-  [ draw bl; box_arrow b1 b2; ]
+  seq [ draw bl; box_arrow b1 b2; ]
 
 
 let tree1 () = pic (Picture.make (draw (random_tree (1 + Random.int 5))))
@@ -159,12 +154,12 @@ let rec random_tree2 = function
       let k = 1 + Random.int (n - 2) in
       node ~cs:(mm 0.2) (tree1 ()) [random_tree2 k; random_tree2 (n - 1 - k)]
 
-let d6 = [draw  (random_tree2 10)]
+let d6 = draw  (random_tree2 10)
 let cheno011 =
   let p = Path.path ~cycle:jCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)] 
   in
   let pen = Pen.scale (bp 1.5) Pen.circle in
-  [Command.draw p;
+  seq [Command.draw p;
    seq (List.map
 	   (fun (pos, l, i) -> 
 	     Command.dotlabel ~pos (Picture.tex l) (point i p))
@@ -177,13 +172,13 @@ open Dash
 let d3 =
   let p = pathp [cmp (0., 0.); cmp (5., 0.)] in
   let pat = pattern [on (bp 6.); off (bp 12.); on (bp 6.)] in
-  [Command.draw p ~dashed:pat]
+  Command.draw p ~dashed:pat
 
 
-let pic = Picture.make (seq cheno011)
+let pic = Picture.make cheno011
 
 let d4 = 
-  [draw_pic pic;
+  seq [draw_pic pic;
    iter 1 5 
      (fun i -> 
 	draw_pic (Picture.transform [T.rotated (10. *. float i)] pic))
@@ -195,7 +190,7 @@ let d7 =
   let pbox = pathp ~style:jLine ~cycle:jLine
     [Picture.ulcorner pic; Picture.urcorner pic; 
      Picture.lrcorner pic; Picture.llcorner pic] in
-    [Command.draw_pic pic;
+    seq [Command.draw_pic pic;
      Command.draw (Picture.bbox pic);
      Command.draw pbox;
      Command.dotlabel ~pos:`Left (Picture.tex "ulcorner") (Picture.ulcorner pic);
@@ -214,7 +209,7 @@ let rec right_split n pic =
 
 let d11 =
   let p1 = Picture.transform [Transform.rotated 90.] (Picture.tex "recursion") in
-    [Command.draw_pic (right_split 4 p1)]
+    Command.draw_pic (right_split 4 p1)
 
 let rec sierpinski p n =
   if n = 0 then p else
@@ -225,14 +220,14 @@ let rec sierpinski p n =
 
 let d12 = 
   let p1 = Picture.tex "A" in
-    [Command.draw_pic (sierpinski p1 7)]
+    Command.draw_pic (sierpinski p1 7)
 
 
 (** plots *)
 open Plot
 let sk = mk_skeleton 20 14 (Num.bp 20.) (Num.bp 20.)
 
-let d13 =  [ (draw_grid sk)]
+let d13 =  draw_grid sk
 
 let squaref x = x *. x
 let f2 i = sqrt (float_of_int i)
@@ -244,10 +239,10 @@ let d14 =
   let hvpen i = 
     if i mod 5 = 0 then Pen.scale (bp 2.5) Pen.default else Pen.default in
   let pen = Pen.scale (bp 4.) Pen.default in
-     [draw_grid ~hdash ~vdash ~hpen:hvpen ~vpen:hvpen sk;
-      draw_func ~pen f2 sk;
-      draw_func ~pen f3 sk
-     ]
+     seq [draw_grid ~hdash ~vdash ~hpen:hvpen ~vpen:hvpen sk;
+          draw_func ~pen f2 sk;
+          draw_func ~pen f3 sk
+         ]
 
 let f1 i =
   let aux = function
@@ -322,7 +317,7 @@ let florence =
       Picture.transform tr (Picture.tex "\\textsf{Number of ones}"),
     Picture.transform tr (Picture.tex "\\textsf{Instants}") in
   let plot = draw_func ~drawing:Stepwise ~style:jLine in
-  [ draw_grid ~hdash:dash ~vdash:dash ~color:(Color.gray 0.5) sk;
+  seq [ draw_grid ~hdash:dash ~vdash:dash ~color:(Color.gray 0.5) sk;
     draw_axes ~closed:true ~hcaption ~vcaption sk;
     plot ~pen ~label:(flab 1) f1 sk;
     plot ~pen:pen2 ~dashed:dash2 ~label:(flab 2) f2 sk;
@@ -414,7 +409,7 @@ let why_platform =
     Arrow.draw_thick ~line_color:Color.red ~width:(bp 4.) ~head_width:(bp 10.)
       ~fill_color:Color.red (Path.point 0. p) (Path.point 1. p)
     in
-  [Box.draw b;
+  seq [Box.draw b;
    arrow "Annotated C programs" "Caduceus";
    arrow "Caduceus" "Why program";
    arrow "JML-annotated Java programs" "Krakatoa";
@@ -450,9 +445,9 @@ let figs = [
   d7; 
   (* recursion *)
   d11; d12 ; 
-  [Command.draw_pic (farey 17)];
+  Command.draw_pic (farey 17);
   (* other *)
-  florence; [Box.draw shapes1]; [Box.draw shapes2]; 
+  florence; Box.draw shapes1; Box.draw shapes2; 
   d14; d13;
 ] 
 
