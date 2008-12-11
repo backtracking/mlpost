@@ -83,6 +83,29 @@ let north_east x = build_point (east x) (north x)
 let south_west x = build_point (west x) (south x)
 let south_east x = build_point (east x) (south x)
 
+let border pos b = 
+  match pos with
+  | `Top -> ypart (ctr b) +/ height b /./ 2.
+  | `Bot -> ypart (ctr b) -/ height b /./ 2.
+  | `Left -> xpart (ctr b) -/ width b /./ 2.
+  | `Right -> xpart (ctr b) +/ width b /./ 2.
+
+let diffy pos a b =
+  (* calculate the vertical difference between two boxes, taking either the
+   * center, the top or the bottom as reference  *)
+  let diffc = ypart (Point.sub (ctr a) (ctr b)) in
+  match pos with
+  | `Center -> diffc 
+  | (`Top | `Bot) as x -> border x a -/ border x b
+
+let diffx pos a b =
+  (* calculate the horizontal difference between two boxes, taking either the
+   * center, the top or the bottom as reference  *)
+  let diffc = xpart (Point.sub (ctr a) (ctr b)) in
+  match pos with
+  | `Center -> diffc 
+  | (`Left | `Right) as x -> border x a -/ border x b
+
 let rec draw ?(debug=false) b = 
   let path_cmd = match b.stroke, b.pen with
     | None, _ -> Command.nop
@@ -144,27 +167,19 @@ let make_contour s ?(dx=margin) ?(dy=margin) w h c =
 
 let no_drawing _ = Command.nop
 
-let pic ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black) 
-        ?pen ?fill pic =
-  let c = Picture.ctr pic in
-  let w,h,s = 
-    make_contour style ?dx ?dy (Picture.width pic) (Picture.height pic) c 
-  in
-  { desc = Pic pic;
+let mkbox ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black) 
+          ?pen ?fill ?(pre_draw=no_drawing) ?(post_draw=no_drawing)
+          w h c desc =
+  let w,h,s = make_contour style ?dx ?dy w h c in
+  { desc = desc;
     name = name; stroke = stroke; pen = pen; fill = fill;
     width = w; height = h; ctr = c; contour = s;
-    post_draw = no_drawing; pre_draw = no_drawing }
+    post_draw = post_draw; pre_draw = pre_draw }
 
-let box ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black) 
-        ?pen ?fill b =
-  let c = ctr b in
-  let w,h,s = 
-    make_contour style ?dx ?dy (width b) (height b) c 
-  in
-  { desc = Grp ([|b|], Smap.empty) ;
-    name = name; stroke = stroke; pen = pen; fill = fill;
-    width = w; height = h; ctr = c; contour = s;
-    post_draw = no_drawing; pre_draw = no_drawing }
+let pic ?style ?dx ?dy ?name ?stroke ?pen ?fill pic =
+  let c = Picture.ctr pic in
+  mkbox ?style ?dx ?dy ?name ?stroke ?pen ?fill 
+        (Picture.width pic) (Picture.height pic) c (Pic pic)
 
 let merge_maps =
   let add_one m b =
@@ -176,33 +191,12 @@ let merge_maps =
   in
   List.fold_left add_one Smap.empty
 
+let box ?style ?dx ?dy ?name ?stroke ?pen ?fill b =
+  mkbox ?style ?dx ?dy ?name ?stroke ?pen ?fill 
+  (width b) (height b) (ctr b) (Grp ([|b|], merge_maps [b] ))
+
 let path ?style ?dx ?dy ?name ?(stroke=None) ?pen ?fill p = 
-  pic ?style ?dx ?dy ?name ~stroke ?pen ?fill
-    (Picture.make (Command.draw p))
-
-let border pos b = 
-  match pos with
-  | `Top -> ypart (ctr b) +/ height b /./ 2.
-  | `Bot -> ypart (ctr b) -/ height b /./ 2.
-  | `Left -> xpart (ctr b) -/ width b /./ 2.
-  | `Right -> xpart (ctr b) +/ width b /./ 2.
-
-let diffy pos a b =
-  (* calculate the vertical difference between two boxes, taking either the
-   * center, the top or the bottom as reference  *)
-  let diffc = ypart (Point.sub (ctr a) (ctr b)) in
-  match pos with
-  | `Center -> diffc 
-  | (`Top | `Bot) as x -> border x a -/ border x b
-
-let diffx pos a b =
-  (* calculate the horizontal difference between two boxes, taking either the
-   * center, the top or the bottom as reference  *)
-  let diffc = xpart (Point.sub (ctr a) (ctr b)) in
-  match pos with
-  | `Center -> diffc 
-  | (`Left | `Right) as x -> border x a -/ border x b
-
+  pic ?style ?dx ?dy ?name ~stroke ?pen ?fill (Picture.make (Command.draw p))
 
 let horizontal ?(padding=Num.zero) ?(pos=`Center) pl =
   let refb = 
@@ -256,27 +250,18 @@ let vertical ?(padding=Num.zero) ?(pos=`Center) pl =
   let mycenter = Point.pt (cx, border `Top refb +/ y /./ 2.) in
   l, wmax, Num.neg y, mycenter
 
-let align_boxes f ?padding ?pos ?(style=Rect) 
+let align_boxes f ?padding ?pos ?style 
   ?(dx=Num.zero) ?(dy=Num.zero) ?name ?(stroke=None) ?pen ?fill bl =
   let bl, w, h , c = f ?padding ?pos bl in
-  let w,h,s = make_contour style ~dx ~dy w h c in
-  { desc = Grp (Array.of_list bl, merge_maps bl);
-    name = name; stroke = stroke; pen = pen; fill = fill;
-    width = w; height = h; ctr = c; contour = s ;
-    post_draw = no_drawing; pre_draw = no_drawing }
+  mkbox ?style ~dx ~dy ?name ~stroke ?pen ?fill w h c 
+    (Grp (Array.of_list bl, merge_maps bl))
 
 let hbox ?padding ?pos = align_boxes horizontal ?padding ?pos
 let vbox ?padding ?pos = align_boxes vertical ?padding ?pos
 
-let box 
-  ?(style=Rect) ?(dx=margin) ?(dy=margin) ?name 
-  ?(stroke=Some Color.black) ?pen ?fill b =
-  hbox ~style ~dx ~dy ?name ~stroke ?pen ?fill [b]
-
 (* groups the given boxes in a new box *)
-let group ?(style=Rect) ?(dx=Num.zero) ?(dy=Num.zero) 
-  ?name ?(stroke=None) ?pen ?fill 
-  bl =
+let group ?style ?(dx=Num.zero) ?(dy=Num.zero) 
+  ?name ?(stroke=None) ?pen ?fill bl =
   let xmin,xmax,ymin,ymax = 
     List.fold_left 
       (fun (xmin,xmax,ymin,ymax) b ->
@@ -292,11 +277,8 @@ let group ?(style=Rect) ?(dx=Num.zero) ?(dy=Num.zero)
   let w = xmax -/ xmin in
   let h = ymax -/ ymin in
   let c = Point.pt (xmin +/ w /./ 2., ymin +/ h /./ 2.) in
-  let w,h,s = make_contour style ~dx ~dy w h c in
-  { desc = Grp (Array.of_list bl, merge_maps bl);
-    name = name; stroke = stroke; pen = pen; fill = fill;
-    width = w; height = h; ctr = c; contour = s ;
-    post_draw = no_drawing; pre_draw = no_drawing }
+  mkbox ?style ~dx ~dy ?name ~stroke ?pen ?fill w h c 
+    (Grp (Array.of_list bl, merge_maps bl))
 
 let group_array ?name ?stroke ?fill ?dx ?dy ba =
   group ?name ?stroke ?fill ?dx ?dy (Array.to_list ba)
@@ -304,19 +286,10 @@ let group_array ?name ?stroke ?fill ?dx ?dy ba =
 (* groups the given boxes in a rectangular shape of size [w,h]
    and center [c] *)
 let group_rect ?name w h c bl =
-  { desc = Grp (Array.of_list bl, merge_maps bl);
-    name = name; stroke = None; pen = None; fill = None;
-    width = w; height = h; ctr = c; 
-    contour = Path.shift c (Shapes.rectangle w h);
-    post_draw = no_drawing; pre_draw = no_drawing }
+  mkbox ?name ~stroke:None w h c (Grp (Array.of_list bl, merge_maps bl))
 
 let empty ?name ?(width=Num.zero) ?(height=Num.zero) () =
-  { desc = Emp; name = name; 
-    stroke = None; pen = None; fill = None;
-    width = width; height = height; ctr = Point.origin;
-    contour = Shapes.rectangle width height ;
-    post_draw = no_drawing; pre_draw = no_drawing
-  }
+  mkbox ?name ~stroke:None width height Point.origin Emp
 
 type 'a box_creator = 
   ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 
