@@ -140,22 +140,21 @@ let compile f =
     if !native then
       ocamlopt [|"unix.cmxa";"mlpost.cmxa"; !ccopt; mlf; !execopt|]
     else
-    ocaml [|"unix.cma";"mlpost.cma"; !ccopt; mlf; !execopt|];
+      ocaml [|"unix.cma";"mlpost.cma"; !ccopt; mlf; !execopt|];
 
   Sys.remove mlf;
   if !xpdf then begin
     ignore (Sys.command "pdflatex _mlpost.tex");
-    ignore (Sys.command "xpdf -remote mlpost -reload")
-(***	
-    match Unix.fork () with
-      | 0 -> 
-          begin match Unix.fork () with
-            | 0 -> eprintf "ICI@."; Unix.execvp "xpdf" [|"xpdf";"-remote"; "mlpost"; "_mlpost.pdf"|]
-            | _ -> exit 0
-          end
-      | id -> 
-          ignore (Unix.waitpid [] id); exit 0
-***)
+    ignore (Sys.command "xpdf -remote mlpost _mlpost.pdf")
+(*     match Unix.fork () with *)
+(*       | 0 -> *)
+(*           begin match Unix.fork () with *)
+(*             | 0 ->  *)
+(* 		Unix.execvp "xpdf" [|"xpdf";"-remote"; "mlpost"; "_mlpost.pdf"|] *)
+(*             | _ -> exit 0 *)
+(*           end *)
+(*       | id -> *)
+(*           ignore (Unix.waitpid [] id); exit 0 *)
   end
 
 let () = Queue.iter compile files
