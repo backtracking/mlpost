@@ -289,7 +289,7 @@ let group_rect ?name w h c bl =
   mkbox ?name ~stroke:None w h c (Grp (Array.of_list bl, merge_maps bl))
 
 let empty ?(width=Num.zero) ?(height=Num.zero) ?name ?(stroke=None) ?pen ?fill () =
-  mkbox ?name ~stroke ?pen ?fill width height Point.origin Emp
+  mkbox ?name ~dx:zero ~dy:zero ~stroke ?pen ?fill width height Point.origin Emp
 
 type 'a box_creator = 
   ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 
