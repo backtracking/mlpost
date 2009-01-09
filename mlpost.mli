@@ -771,9 +771,6 @@ and Box : sig
 
   (** {2 Creating boxes} *)
 
-  val empty : ?name:string -> ?width:Num.t -> ?height:Num.t -> unit -> t
-    (** the empty box *)
-
   (** {2 Styles } *)
   type style = 
     | Rect
@@ -796,6 +793,10 @@ and Box : sig
 	the box's outline, if absent [Pen.default] is used ; 
 	[fill], if present, is the color used to fill the box.  
     *)
+
+  val empty : ?width:Num.t -> ?height:Num.t -> ?name:string -> 
+              ?stroke:Color.t option -> ?pen:Pen.t -> ?fill:Color.t -> unit -> t
+                  (** the empty box *)
 
   val pic : ?style:style -> Picture.t box_creator
     (** [pic p] creates a new box containing the picture [p] *)
