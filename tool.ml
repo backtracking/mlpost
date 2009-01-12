@@ -67,13 +67,21 @@ let spec = Arg.align
 let () = 
   Arg.parse spec add_file "Usage: mlpost [options] files..."
 
-let command s =
+
+exception Command_failed of int
+
+let command' s =
   let () = if !verbose then Format.eprintf "%s@." s in
   let out = Sys.command s in
   if out <> 0 then begin
     eprintf "mlpost: the following command failed:@\n%s@." s;
-    exit out
+    raise (Command_failed out)
   end
+
+let command s = 
+  try
+    command' s
+  with Command_failed out -> exit out
 
 let ocaml args =
   let cmd = "ocaml " ^ String.concat " " (Array.to_list args) in
@@ -91,7 +99,7 @@ let ocamlopt args =
   if out <> 0 then exit 1
 
 let ocamlbuild args =
-  command ("ocamlbuild " ^ String.concat " " args)
+  command' ("ocamlbuild " ^ String.concat " " args)
 
 (** Return an unused file name which in the same directory as the prefix. *)
 let temp_file_name prefix suffix =
@@ -132,10 +140,14 @@ let compile f =
     let mlf2 = temp_file_name bn ".ml" in
     command ("cp " ^ mlf ^ " " ^ mlf2);
     let ext = if !native then ".native" else ".byte" in
-    ocamlbuild
-      ["-lib unix"; "-lib mlpost"; Filename.chop_extension mlf2 ^ ext; !ccopt; "--";
-       !execopt];
-    Sys.remove mlf2
+    try
+      ocamlbuild
+        ["-lib unix"; "-lib mlpost"; Filename.chop_extension mlf2 ^ ext; !ccopt; "--";
+        !execopt];
+      Sys.remove mlf2
+    with Command_failed out -> 
+      Sys.remove mlf2;
+      exit out
   end else
     if !native then
       ocamlopt [|"unix.cmxa";"mlpost.cmxa"; !ccopt; mlf; !execopt|]
