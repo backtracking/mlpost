@@ -199,56 +199,54 @@ let path ?style ?dx ?dy ?name ?(stroke=None) ?pen ?fill p =
   pic ?style ?dx ?dy ?name ~stroke ?pen ?fill (Picture.make (Command.draw p))
 
 let horizontal ?(padding=Num.zero) ?(pos=`Center) pl =
-  let refb = 
-    try List.hd pl 
-    with Failure "hd" -> raise (invalid_arg "hbox - empty list") 
-  in
-  let refc = ctr refb and refw = width refb in
-  let rec make_new acc x = function
-    | [] -> List.rev acc, x -/ padding
-    | p :: pl ->
-        let diffy = diffy pos refb p in
-        let offsetx = x +/ width p /./ 2. in
-        let b = shift (Point.pt (offsetx -/ xpart (ctr p), diffy)) p in
-        make_new (b::acc) (x +/ width p +/ padding) pl
-  in
-  let l, x = make_new [] (xpart refc -/ refw /./ 2.) pl in
-  let x = x  -/ xpart refc +/ refw /./ 2. in
-  let hmax = Num.fold_max height Num.zero pl in
-  let cy = 
-    match pos with
-    | `Center -> ypart refc
-    | `Top -> border `Top  refb -/ hmax /./ 2.
-    | `Bot -> border `Bot  refb +/ hmax /./ 2.
-  in
-  let mycenter = Point.pt (border `Left refb +/ x /./ 2.,  cy) in     
-  l, x, hmax, mycenter
+  try
+    let refb = List.hd pl in
+    let refc = ctr refb and refw = width refb in
+    let rec make_new acc x = function
+      | [] -> List.rev acc, x -/ padding
+      | p :: pl ->
+          let diffy = diffy pos refb p in
+          let offsetx = x +/ width p /./ 2. in
+          let b = shift (Point.pt (offsetx -/ xpart (ctr p), diffy)) p in
+          make_new (b::acc) (x +/ width p +/ padding) pl
+    in
+    let l, x = make_new [] (xpart refc -/ refw /./ 2.) pl in
+    let x = x  -/ xpart refc +/ refw /./ 2. in
+    let hmax = Num.fold_max height Num.zero pl in
+    let cy = 
+      match pos with
+      | `Center -> ypart refc
+      | `Top -> border `Top  refb -/ hmax /./ 2.
+      | `Bot -> border `Bot  refb +/ hmax /./ 2.
+    in
+    let mycenter = Point.pt (border `Left refb +/ x /./ 2.,  cy) in     
+    l, x, hmax, mycenter
+  with Failure "hd" -> [], Num.zero, Num.zero, Point.origin
 
 let vertical ?(padding=Num.zero) ?(pos=`Center) pl =
-  let refb = 
-    try List.hd pl 
-    with Failure "hd" -> raise (invalid_arg "vbox - empty list") 
-  in
-  let refc = ctr refb and refh = height refb in
-  let rec make_new acc y = function
-    | [] -> List.rev acc, y +/ padding
-    | p :: pl ->
-        let diffx = diffx pos refb p in
-        let offsety = y -/ height p /./ 2. in
-        let b = shift (Point.pt (diffx, offsety -/ ypart (ctr p))) p in
-        make_new (b::acc) (y -/ height p -/ padding) pl 
-  in
-  let wmax = Num.fold_max width Num.zero pl in
-  let l,y = make_new [] (ypart refc +/ refh /./ 2.) pl in
-  let y = y -/ ypart refc -/ refh /./ 2. in
-  let cx = 
-    match pos with
-    | `Center -> xpart refc
-    | `Left -> border `Left refb +/ wmax /./ 2.
-    | `Right -> border `Right refb -/ wmax /./ 2.
-  in
-  let mycenter = Point.pt (cx, border `Top refb +/ y /./ 2.) in
-  l, wmax, Num.neg y, mycenter
+  try
+    let refb = List.hd pl in
+    let refc = ctr refb and refh = height refb in
+    let rec make_new acc y = function
+      | [] -> List.rev acc, y +/ padding
+      | p :: pl ->
+          let diffx = diffx pos refb p in
+          let offsety = y -/ height p /./ 2. in
+          let b = shift (Point.pt (diffx, offsety -/ ypart (ctr p))) p in
+          make_new (b::acc) (y -/ height p -/ padding) pl 
+    in
+    let wmax = Num.fold_max width Num.zero pl in
+    let l,y = make_new [] (ypart refc +/ refh /./ 2.) pl in
+    let y = y -/ ypart refc -/ refh /./ 2. in
+    let cx = 
+      match pos with
+      | `Center -> xpart refc
+      | `Left -> border `Left refb +/ wmax /./ 2.
+      | `Right -> border `Right refb -/ wmax /./ 2.
+    in
+    let mycenter = Point.pt (cx, border `Top refb +/ y /./ 2.) in
+    l, wmax, Num.neg y, mycenter
+  with Failure "hd" -> [],Num.zero, Num.zero, Point.origin
 
 let align_boxes f ?padding ?pos ?style 
   ?(dx=Num.zero) ?(dy=Num.zero) ?name ?(stroke=None) ?pen ?fill bl =
@@ -288,8 +286,8 @@ let group_array ?name ?stroke ?fill ?dx ?dy ba =
 let group_rect ?name w h c bl =
   mkbox ?name ~stroke:None w h c (Grp (Array.of_list bl, merge_maps bl))
 
-let empty ?(width=Num.zero) ?(height=Num.zero) ?name ?(stroke=None) ?pen ?fill () =
-  mkbox ?name ~dx:zero ~dy:zero ~stroke ?pen ?fill width height Point.origin Emp
+let empty ?(width=Num.zero) ?(height=Num.zero) ?name ?stroke ?pen ?fill () =
+  mkbox ?name ~dx:zero ~dy:zero ?stroke ?pen ?fill width height Point.origin Emp
 
 type 'a box_creator = 
   ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 

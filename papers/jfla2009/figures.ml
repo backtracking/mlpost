@@ -33,7 +33,7 @@ let graph_sqrt =
   let sk = Plot.mk_skeleton 4 3 u u in
   let label = Picture.tex "$y=\\sqrt{x+\\frac{1}{2}}$", `Upleft, 3 in
   let graph = Plot.draw_func ~label (fun x -> sqrt (float x +. 0.5)) sk in
-  [graph; Plot.draw_simple_axes "$x$" "$y$" sk]
+  seq [graph; Plot.draw_simple_axes "$x$" "$y$" sk]
 
 let architecture =
   let mk_box fill name m = 
@@ -99,7 +99,7 @@ let architecture =
 (* 	   (Box.get n full) mp) *)
 	["num"; "point"; "path"; "dots"; "cmd"]
   in
-    arrows@[Box.draw full]
+  seq [seq arrows; Box.draw full]
 
 (* Romain *)
 open Num
@@ -196,7 +196,7 @@ let loop_explain =
   let construct = Command.draw ~dashed: construct_pattern in
   let circle = Path.shift (pt 0.64 0.) (Path.scale (cm 2.) Path.fullcircle) in
   let arc = cut_before vert (cut_after diag2 (cut_after vert circle)) in
-  [
+  seq [
     Box.draw s;
     Command.dotlabel ~pos: `Lowleft (Picture.tex "$A$") a_pos;
     Arrow.draw ~kind: arrow_loop_explain_kind arrow_path;
@@ -229,7 +229,7 @@ let automate_1 =
         state "$\\beta$" ];
       final (state "$\\gamma$") ]
   in
-  [ Box.draw states ]
+  Box.draw states
 
 let automate =
   let states = Box.vbox ~padding: (cm 0.8)
@@ -238,7 +238,7 @@ let automate =
           state ~name: "beta" "$\\beta$" ];
       final ~name: "gamma" (state "$\\gamma$") ]
   in
-  [ Box.draw states;
+  seq [ Box.draw states;
     transition states "a" `Lowleft "alpha" "gamma";
     transition states "b" `Lowright "gamma" "beta";
     transition states "c" `Top ~outd: 25. ~ind: 335. "alpha" "beta";
@@ -247,7 +247,7 @@ let automate =
     initial states "alpha" ]
 
 let arrow_metapost =
-  [Helpers.draw_simple_arrow ~outd:(vec (dir 90.)) ~ind:(vec (dir 90.))
+  seq [Helpers.draw_simple_arrow ~outd:(vec (dir 90.)) ~ind:(vec (dir 90.))
      (Point.pt (cm 0., cm 0.5)) (Point.pt (cm 2., cm 0.5));
    Helpers.draw_simple_arrow
      (Point.pt (cm 4., cm 0.5)) (Point.pt (cm 6., cm 0.5));
@@ -262,12 +262,12 @@ let arrow_demo_path = Path.pathp [
   (Point.pt (cm 2., zero));
 ]
 let arrow_simple =
-  [Arrow.draw ~kind: Arrow.triangle_full arrow_demo_path]
+  Arrow.draw ~kind: Arrow.triangle_full arrow_demo_path
 
 let arrow_loop_explain =
   let pt x y = Point.pt (cm x, cm y) in
   let draw2 = Arrow.draw2 ~kind: arrow_loop_explain_kind in
-  [
+  seq [
     draw2 ~outd:(vec (dir 45.)) ~ind: (vec (dir 45.)) (pt 0. 0.25) (pt 3. 0.25);
     draw2 (pt 5. 0.25) (pt 8. 0.25);
     draw2 ~outd:(vec (dir 45.)) (pt 10. 0.) (pt 13. 0.);
@@ -288,8 +288,8 @@ let uml_client, uml =
   in
   let b = classblock "Client" ["name : String"; "address : String" ] [] in
   let diag = Box.vbox ~padding:(cm 1.) [a;b] in
-  [Box.draw b],
-  [ Box.draw diag; 
+  Box.draw b,
+  seq [ Box.draw diag; 
     box_label_arrow ~pos:`Left (Picture.tex "owns") 
       (get "Client" diag) (get "BankAccount" diag) ]
 
@@ -308,7 +308,7 @@ let sharing =
       )
       (node (tex "g") [leaf (tex "h")])
   in
-  [ draw tree;
+  seq [ draw tree;
     box_arrow (get "h" tree) (get "f" tree);
     box_arrow (get "g" tree) (get "d" tree);
       ]
@@ -327,7 +327,7 @@ let stages =
        (Picture.make (draw_arrow (Path.path ~scale:cm [0.,0.; 0.,-1.]))) 
   in
   let all = hbox ~padding:(cm 3.5) [fml; fmp; ps ] in
-  [ draw all;
+  seq [ draw all;
     box_labelbox_arrow ~pos:`Top 
       (vbox [tex "\\ocaml"; arrowpic; tex' "compiler \\& ex\\'ecuter"])
       (get "fml" all) (get "fmp" all);
@@ -337,16 +337,16 @@ let stages =
   ]
 
 let simple = 
-  [ draw (tex "\\LaTeX");
+  seq [ draw (tex "\\LaTeX");
     draw (shift (Point.pt (cm 1., zero)) (circle (empty ()))) ]
 
 let align = 
-  [ draw
+  seq [ draw
     (hbox ~padding:(cm 1.) [tex "\\LaTeX"; circle (empty ())]) ]
 
 let persistance = 
   let b = hbox ~padding:(cm 1.) [tex "\\LaTeX"; circle (empty ())] in
-  [draw (vbox [b; set_stroke Color.black b; b])]
+  draw (vbox [b; set_stroke Color.black b; b])
 
 
 (* Bresenham (JCF) *)
@@ -376,20 +376,20 @@ let bresenham0 =
   let g = Box.gridi (x2+1) (y2+1) 
     (fun i j -> 
       let fill = if bresenham_data.(i) = y2-j then Some Color.red else None in
-      Box.rect ?fill (Box.empty ~width ~height ())) in
-  [Box.draw g]
+      Box.empty ~width ~height ?fill ()) in
+  Box.draw g
 
 let bresenham = 
   let width = bp 6. and height = bp 6. in
   let g = Box.gridi (x2+1) (y2+1) 
     (fun i j -> 
       let fill = if bresenham_data.(i) = y2-j then Some Color.red else None in
-      Box.rect ?fill (Box.empty ~width ~height ())) in
+      Box.empty ~width ~height ?fill ()) in
   let get i j = Box.nth i (Box.nth (y2-j) g) in
   let label pos s point i j =
     Command.label ~pos (Picture.tex s) (point (get i j)) 
   in
-  [Box.draw g;
+  seq [Box.draw g;
    label `Bot "0" Box.south 0 0;
    label `Bot "$x_2$" Box.south x2 0;
    label `Left "0" Box.west 0 0;
@@ -422,7 +422,7 @@ let ford n =
 
 let simple_block =
   let b = Box.hblock ~pos:`Bot [Box.tex "a"; Box.tex "b"; Box.tex "C"] in
-  [Box.draw b]
+  Box.draw b
 
 let pointer_arrow a b =
   let p = pathp [Box.ctr a; Box.ctr b] in
@@ -431,9 +431,9 @@ let pointer_arrow a b =
   Command.draw ~pen (pathp [Box.ctr a]) ++ draw_arrow p
 
 let block_arrow =
-  let a = Box.rect (Box.empty ~width:(bp 6.) ~height:(bp 6.) ()) in
+  let a = Box.empty ~width:(bp 10.) ~height:(bp 10.) ~stroke:(Some Color.black) () in
   let g = Box.hbox ~padding:(cm 1.) [a;a] in
-  [Box.draw g; pointer_arrow (Box.nth 0 g) (Box.nth 1 g)]
+  seq [Box.draw g; pointer_arrow (Box.nth 0 g) (Box.nth 1 g)]
 
 let cons hd tl =
   let p1 = tex ~name:"hd" hd in
@@ -454,7 +454,7 @@ let draw_list l =
     | b1 :: (b2 :: _ as l) -> 
 	pointer_arrow (Box.get "tl" b1) (Box.get "hd" b2) ++ arrows l
   in
-  [Box.draw l; arrows (Array.to_list (Box.elts l))]
+  seq [Box.draw l; arrows (Array.to_list (Box.elts l))]
 
 let list123 =
   draw_list ["1";"2";"3"]
@@ -476,7 +476,7 @@ let deps =
        node "types.mli"]
   in
   let arrow b1 b2 = box_arrow (Box.get b1 b) (Box.get b2 b) in
-  [Box.draw b;
+  seq [Box.draw b;
    iterl 
      (fun s -> arrow "mlpost.mli" s ++ arrow s "types.mli")
      ["num.ml"; "point.ml"; "path.ml"; "..."]]
@@ -498,7 +498,7 @@ let () = Metapost.emit "stages" stages
 let () = Metapost.emit "simple" simple
 let () = Metapost.emit "align" align
 let () = Metapost.emit "persistance" persistance
-let () = Metapost.emit "ford" [Command.draw_pic (ford 17)]
+let () = Metapost.emit "ford" (Command.draw_pic (ford 17))
 let () = Metapost.emit "simple_block" simple_block
 let () = Metapost.emit "block_arrow" block_arrow
 let () = Metapost.emit "list123" list123
