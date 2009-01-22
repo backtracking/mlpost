@@ -1,0 +1,116 @@
+\documentclass{beamer}
+
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{mflogo} 
+
+\newcommand{\mlpost}{\textsc{Mlpost}}
+\newcommand{\metapost}{\MP}
+
+\begin{document}
+
+\begin{frame}
+  TITRE
+\end{frame}
+
+\begin{frame}\frametitle{}
+ motivations
+
+  - FIGURES + LATEX
+
+  - pas de nouveau langage à apprendre
+
+\end{frame}
+
+\begin{frame}\frametitle{}
+  quelles solutions
+\end{frame}
+
+\begin{frame}\frametitle{}
+  notre solution
+\end{frame}
+
+\begin{frame}\frametitle{}
+\begin{center}
+\includegraphics[width=\textwidth]{stages.mps}
+\end{center}
+\end{frame}
+
+\begin{frame}\frametitle{}
+  démo
+\end{frame}
+
+\begin{frame}\frametitle{}
+
+CHOIX DE CONCEPTION / API
+
+- persistance
+
+- arguments optionnels / étiquetés 
+
+- variants polymorphes
+
+- minimalité de l'API
+
+\end{frame}
+
+\begin{frame}\frametitle{}
+  \begin{center}
+    \includegraphics{architecture.mps}
+  \end{center}
+\end{frame}
+
+\begin{frame}\frametitle{}
+  problèmes techniques et solutions
+
+  - dépendances circulaires
+
+  - limitations de \metapost\ $Rightarrow$ compilation
+
+  - taille 
+\end{frame}
+
+
+\begin{frame}\frametitle{}
+utilisations de \mlpost
+
+- Florence, Louis
+
+- thèse Yannick
+
+- 2 posters ProVal
+
+- présentations, y compris celle-ci
+
+- cours : Sylvain, JC
+\end{frame}
+
+\begin{frame}\frametitle{}
+limitations / problèmes / etc.
+
+- limitations de \metapost\ : nombre de n\oe uds dans un chemin, etc.
+
+- limitations de l'interprétation par pdflatex
+
+- limitations de l'approche $\rightarrow$ calculs symboliques
+
+une solution : reprogrammer l'équivalent de \metapost
+
+\bigskip
+
+perte des fonctionnalités de résolution d'équations linéaires de
+\metapost
+
+en partie remplacé par le placement relatif des boîtes
+\end{frame}
+
+
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% ispell-local-dictionary: "francais"
+%%% TeX-master: t
+%%% End: 
