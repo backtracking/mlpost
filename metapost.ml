@@ -21,8 +21,9 @@ module C = Compiled_types
 
 let externalimage_dimension filename : float * float = 
   let inch = Unix.open_process_in ("identify -format \"%h\\n%w\" "^filename) in
-    try (float_of_string (input_line inch),float_of_string (input_line inch))
-    with End_of_file | Failure "float_of_string" -> invalid_arg "Unknown external image"
+  try let h = float_of_string (input_line inch) in
+  let w = float_of_string (input_line inch) in (h,w)
+  with End_of_file | Failure "float_of_string" -> invalid_arg "Unknown external image"
 
 let name = pp_print_string
 
@@ -212,13 +213,13 @@ and command fmt  = function
         | `Exact (h,w) -> fprintf fmt "externalfigure \"%s\" xyscaled (%a,%a);@\n" filename num w num h
         | ((`None as spec)| (`Height _ as spec)| (`Width _ as spec)|(`Inside _ as spec)) -> 
             let fh,fw = externalimage_dimension filename in
+            let printext h w = fprintf fmt "externalfigure \"%s\" xyscaled (%a,%a);@\n" filename num w num h in
               match spec with
-                | `None -> fprintf fmt "externalfigure \"%s\" xyscaled (%a,%a);@\n" filename num (C.F fw) num (C.F fh)
-                | `Height h -> fprintf fmt "externalfigure \"%s\" xyscaled (%a,%a);@\n" filename num (C.NMult (C.F (fw/.fh),h)) num h
-                | `Width w -> fprintf fmt "externalfigure \"%s\" xyscaled (%a,%a);@\n" filename num w num (C.NMult (C.F (fh/.fw),w))
-                | `Inside (h,w) -> 
-                    let w = C.NMin (C.NMult (h,C.F (fw/.fh)),w) in
-                      fprintf fmt "externalfigure \"%s\" xyscaled (%a,%a);@\n" filename num w num (C.NMult (C.F (fh/.fw),w))
+                | `None -> printext (C.F fh) (C.F fw)
+                | `Height h -> printext h (C.NMult (C.F (fw/.fh),h))
+                | `Width w -> printext (C.NMult (C.F (fh/.fw),w)) w
+                | `Inside (h,w) -> let w = C.NMin (C.NMult (h,C.F (fw/.fh)),w) in
+                      printext (C.NMult (C.F (fh/.fw),w)) w
 
 let print i fmt c =
   (* resetting is actually not needed; variables other than 
