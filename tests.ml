@@ -31,6 +31,38 @@ let () = Random.init 1234
 open Tree
 open Box
 
+
+(* Bresenham (JCF) *)
+(* the data to plot are computed here *)
+
+let x2 = 9
+let y2 = 6
+let bresenham_data =
+  let a = Array.create (x2+1) 0 in
+  let y = ref 0 in
+  let e = ref (2 * y2 - x2) in
+  for x = 0 to x2 do
+    a.(x) <- !y;
+    if !e < 0 then
+      e := !e + 2 * y2
+    else begin
+      y := !y + 1;
+      e := !e + 2 * (y2 - x2)
+    end
+  done;
+  a
+
+(* drawing *)
+
+let bresenham0 = 
+  let width = bp 6. and height = bp 6. in
+  let g = Box.gridi (x2+1) (y2+1) 
+    (fun i j -> 
+      let fill = if bresenham_data.(i) = y2-j then Some Color.red else None in
+      Box.empty ~width ~height ?fill ~stroke:(Some Color.black) ()) in
+  Box.draw g
+
+
 let block1 = 
   let b1 = hblock ~min_width:(width (tex "c")) 
     [empty (); tex "A"; tex "B"; tex "c"; tex "toto"] in
@@ -50,6 +82,9 @@ let hbox2 =
   let b = vbox ~stroke ~pos:`Left [tex "A"; s (tex "Bx") ; tex "c"; tex "toto"] in
   let t = hbox ~stroke [b;b;b] in
   draw (vbox [t;s t;t])
+
+let simple_box = 
+  Box.draw (Box.rect ~stroke:(Some Color.black) (Box.empty ~width:(bp 50.) ~height:(bp 50.) ()))
 
 let hvbox =
   let row = vbox [tex "A"; tex "B"; tex "C" ] in
@@ -434,6 +469,8 @@ let alt_ergo =
 ***)
 
 let figs = [
+  bresenham0;
+  simple_box;
   block1;
   hvbox;
   hbox2;

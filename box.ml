@@ -176,6 +176,12 @@ let mkbox ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black)
     width = w; height = h; ctr = c; contour = s;
     post_draw = post_draw; pre_draw = pre_draw }
 
+let modify_box w h c b = 
+  { b with stroke = Some Color.black; width = w; height = h;
+           ctr = c; 
+           contour = Path.shift c (Shapes.rectangle w h)
+  }
+
 let pic ?style ?dx ?dy ?name ?stroke ?pen ?fill pic =
   let c = Picture.ctr pic in
   mkbox ?style ?dx ?dy ?name ?stroke ?pen ?fill 
@@ -283,11 +289,11 @@ let group_array ?name ?stroke ?fill ?dx ?dy ba =
 
 (* groups the given boxes in a rectangular shape of size [w,h]
    and center [c] *)
-let group_rect ?name w h c bl =
-  mkbox ?name ~stroke:None w h c (Grp (Array.of_list bl, merge_maps bl))
+let group_rect ?name ?(stroke=None) w h c bl =
+  mkbox ?name ~stroke w h c (Grp (Array.of_list bl, merge_maps bl))
 
-let empty ?(width=Num.zero) ?(height=Num.zero) ?name ?stroke ?pen ?fill () =
-  mkbox ?name ~dx:zero ~dy:zero ?stroke ?pen ?fill width height Point.origin Emp
+let empty ?(width=Num.zero) ?(height=Num.zero) ?name ?(stroke=None) ?pen ?fill () =
+  mkbox ?name ~dx:zero ~dy:zero ~stroke ?pen ?fill width height Point.origin Emp
 
 type 'a box_creator = 
   ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 
@@ -426,7 +432,7 @@ let gridl ?(pos=`Center) pll =
     | [] -> []
     | p :: ql -> 
 	let b = place_box pos x y wmax hmax p in
-	let b' = set_stroke Color.black (group_rect wmax hmax b.ctr [b]) in
+	let b' = modify_box wmax hmax b.ctr b in
 	  b' :: make_row (x +/ wmax) y ql
   in
     (* make all rows, with upper left corner [0,y] *)
@@ -449,6 +455,7 @@ let grid ?pos m =
 let gridi ?pos w h f =
   let m = Array.init h (fun j -> Array.init w (fun i -> f i j)) in
     grid ?pos m
+
 
 let hblock ?(pos=`Center) ?name ?(min_width=Num.zero) ?(same_width=false) pl =
   let hmax = Num.fold_max height Num.zero pl in
@@ -474,11 +481,7 @@ let hblock ?(pos=`Center) ?name ?(min_width=Num.zero) ?(same_width=false) pl =
         let c = Point.pt (xc, y) in 
         let b = center c p in
         let nc = Point.pt (xc, hmax_2) in
-        let b = 
-          { b with stroke = Some Color.black; width = wp; height = hmax;
-                   ctr = nc; 
-                   contour = Path.shift nc (Shapes.rectangle wp hmax)
-          } in
+        let b = modify_box wp hmax nc b in
         make_new (b::acc) (x +/ wp) pl
   in
   let l,x = make_new [] Num.zero pl in
@@ -509,11 +512,7 @@ let vblock ?(pos=`Center) ?name ?(min_height=Num.zero) ?(same_height=false) pl =
         let c = Point.pt (x, yc) in 
         let b = center c p in
         let nc = Point.pt (wmax_2, yc) in
-        let b = 
-          { b with stroke = Some Color.black; width = wmax; height = hp;
-                   ctr = nc; 
-                   contour = Path.shift nc (Shapes.rectangle wmax hp)
-          } in
+        let b = modify_box wmax hp nc b in
         make_new (b::acc) (y -/ hp) pl
   in
   let l,y = make_new [] Num.zero pl in

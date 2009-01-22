@@ -371,20 +371,21 @@ let bresenham_data =
 
 (* drawing *)
 
+let stroke = Some Color.black
+let width = bp 10. and height = bp 10.
+
 let bresenham0 = 
-  let width = bp 6. and height = bp 6. in
   let g = Box.gridi (x2+1) (y2+1) 
     (fun i j -> 
       let fill = if bresenham_data.(i) = y2-j then Some Color.red else None in
-      Box.empty ~width ~height ?fill ()) in
+      Box.empty ~width ~height ?fill ~stroke ()) in
   Box.draw g
 
 let bresenham = 
-  let width = bp 6. and height = bp 6. in
   let g = Box.gridi (x2+1) (y2+1) 
     (fun i j -> 
       let fill = if bresenham_data.(i) = y2-j then Some Color.red else None in
-      Box.empty ~width ~height ?fill ()) in
+      Box.empty ~width ~height ?fill ~stroke ()) in
   let get i j = Box.nth i (Box.nth (y2-j) g) in
   let label pos s point i j =
     Command.label ~pos (Picture.tex s) (point (get i j)) 
