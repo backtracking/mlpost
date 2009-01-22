@@ -1,30 +1,99 @@
-\documentclass{beamer}
+\documentclass[nodefaultblocks]{beamer}
 
 \usepackage[latin1]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[french]{babel}
-\usepackage{mflogo} 
+\usepackage{mflogo,beamerthemesplit} 
+
+\beamertemplatenavigationsymbolsempty
+%\usecolortheme{crane}
+\usetheme{Madrid}
 
 \newcommand{\mlpost}{\textsc{Mlpost}}
 \newcommand{\metapost}{\MP}
+\newcommand{\nomdetikz}{\textsf{TikZ}}
+\newcommand{\pstricks}{\textsf{PSTricks}}
+\newcommand{\dia}{\textsf{Dia}}
+\newcommand{\xfig}{\textsf{Xfig}}
+\newcommand{\postscript}{PostScript}
+\newcommand{\mlpictex}{mlP\hspace{-0.2em}\raisebox{-0.2em}{i}\hspace{-0.1em}c\hspace{-0.1em}\TeX}
+\newcommand{\Item}{\bigskip\item}
+\newcommand{\bred}[1]{\alert{\textbf{#1}}}
+\let\emph\bred
+
+\title[Faire bonne figure avec \mlpost]{\LARGE Faire bonne figure avec \mlpost}
+\author[Bardou/Filliâtre/Kanig/Lescuyer]{R. Bardou
+        \& J.-C. Filliâtre
+        \& J. Kanig
+        \& S. Lescuyer \\[1em]
+      Équipe ProVal \\[0.5em]
+      INRIA Saclay -- Île-de-France \\
+      CNRS / LRI Université Paris-Sud }
+%\institute[proval]{ProVal}
+\date{JFLA  --- 3 février 2009}
 
 \begin{document}
 
 \begin{frame}
-  TITRE
+  \maketitle
+  \begin{center}
+    \includegraphics[width=0.3\textwidth]{ford.mps}
+  \end{center}
 \end{frame}
 
-\begin{frame}\frametitle{}
- motivations
+\begin{frame}\frametitle{Motivations 1/2}
+comment réaliser de belles figures contenant des éléments \LaTeX\ ?
 
-  - FIGURES + LATEX
+\vfill
 
-  - pas de nouveau langage à apprendre
+\begin{center}
+  \includegraphics[width=\textwidth]{yannick1.mps}
+\end{center}
 
+\vfill
+
+\begin{center}
+  \includegraphics{another_list.mps}
+\end{center}
 \end{frame}
 
-\begin{frame}\frametitle{}
-  quelles solutions
+\begin{frame}\frametitle{Motivations 2/2}
+comment réaliser des figures utilisant des calculs ?
+
+\vfill
+
+\begin{columns}
+\column{0.4\textwidth}  
+\begin{center}
+  \includegraphics{bresenham.mps}
+\end{center}
+\column{0.6\textwidth}  
+\begin{center}
+  \includegraphics[width=0.8\textwidth]{florence.mps}
+\end{center}
+\end{columns}
+\end{frame}
+
+\begin{frame}\frametitle{Solutions existantes}
+  \begin{itemize}
+  \item interfaces graphiques : \dia, \xfig
+    \begin{itemize}
+    \item[$+$] simple à utiliser (CQVVECQVO)
+    \item[$-$] intégration d'éléments \LaTeX\ difficile
+    \end{itemize}
+  \Item bibliothèques \LaTeX\ : \pstricks, \nomdetikz/PGF
+    \begin{itemize}
+    \item[$+$] intégration avec \LaTeX\ optimale
+      % TODO S figure pstricks
+    \item[$-$] programmation difficile
+    \end{itemize}
+  \Item outils externes : \metapost
+    \begin{itemize}
+    \item[$+$] très bonne intégration avec \LaTeX
+    \item[$+$] langage spécifique
+    \item[$-$] langage spécifique, avec de nombreux défauts
+    \end{itemize}
+  \end{itemize}
 \end{frame}
 
 \begin{frame}\frametitle{}
