@@ -14,8 +14,11 @@ main-pp.pdf: main-pp.tex biblio.bib figures.mp figmp.mps yannick1.mps florence.m
 %-pp.tex: pp.ml %.tex 
 	ocaml $^ > $@
 
+wc:
+	grep -iw frametitle slides.tex | wc -l
+
 figures.mp: figures.ml
-	../../tool.opt -ccopt "-I ../../" -pdf -latex main.tex $^
+	../../tool.opt -ccopt "-I ../../" -pdf -latex slides.tex $^
 
 figmp.mps: figmp.mp
 	mpost figmp.mp end

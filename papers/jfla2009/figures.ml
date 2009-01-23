@@ -482,6 +482,25 @@ let deps =
      (fun s -> arrow "mlpost.mli" s ++ arrow s "types.mli")
      ["num.ml"; "point.ml"; "path.ml"; "..."]]
 
+let sous_typage =
+  let tt s = Box.tex ~name:s ("\\tt `" ^ s) in
+  let b = 
+    tabularl ~hpadding:(bp 10.) ~vpadding:(bp 10.)
+      [[tt "Upleft"; tt "Top";    tt "Upright"]; 
+       [tt "Left";   tt "Center"; tt "Right" ]; 
+       [tt "Lowleft";tt "Bot";    tt "Lowright" ]]
+  in
+  let group l color =
+    let bl = Box.group ~style:RoundRect (List.map (fun s -> Box.get s b) l) in
+    Command.draw ~color (bpath bl)
+  in
+  seq [group ["Left"; "Center"; "Right"] Color.red;
+       group ["Top"; "Center"; "Bot"] Color.blue;
+       draw b;
+       
+  ]
+
+let () = Metapost.emit "sous_typage" sous_typage
 let () = Metapost.emit "automate_1" automate_1
 let () = Metapost.emit "automate" automate
 let () = Metapost.emit "loop_explain" loop_explain

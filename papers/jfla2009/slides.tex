@@ -109,13 +109,22 @@ comment réaliser des figures utilisant des calculs ?
   \end{block}
   \begin{itemize}
     \item programmer sa figure en \ocaml{}
-    \item bonne intégration avec \LaTeX{} grâce à \MP
-    \item se prémunir contre un certain nombre d'erreurs grâce au typage
+      \begin{itemize}
+        \smallskip
     \item possibilité de développer des extensions de haut niveau
-    \item avoir l'occasion de venir aux JFLA !
+
+        \smallskip
+    \item se prémunir contre un certain nombre d'erreurs grâce au typage
+      \end{itemize}
+
+      \medskip
+    \item bonne intégration avec \LaTeX{} grâce à \MP
+%    \item avoir l'occasion de venir aux JFLA !
   \end{itemize}
-  TODO CHANGER L'IMAGE
-  \includegraphics[width=.3\textwidth]{figmp.mps}
+%  TODO CHANGER L'IMAGE
+  \begin{center}
+    \includegraphics[width=.2\textwidth]{figmp.mps}
+  \end{center}
 \end{frame}
 
 \begin{frame}\frametitle{Utilisation de \mlpost}
@@ -145,37 +154,74 @@ endfig;
 \end{frame}
 
 \begin{frame}\frametitle{}
-  démo
+  \begin{center}
+    \Large\emph{démo !}
+  \end{center}
 \end{frame}
 
-\begin{frame}\frametitle{}
+\begin{frame}\frametitle{Choix de conception}
 
-CHOIX DE CONCEPTION / API
-
-- persistance
-
-- arguments optionnels / étiquetés 
-
-- variants polymorphes
-
-- minimalité de l'API
-
+  \begin{itemize}
+  \item \emph{persistance} \par
+    \quad permet de réutiliser les éléments d'une figure
+  \Item \emph{arguments optionnels} \par
+    \quad évite la pollution de l'espace de noms \par
+    \quad exemple : \texttt{Box.empty}
+  \Item une utilisation de \emph{variants polymorphes} \par
+    \begin{center}
+      \includegraphics{sous_typage.mps}
+    \end{center}
+  \Item \emph{minimalité de l'API} \par
+    \quad effort limité de notre part / API cependant complète
+  \end{itemize}
 \end{frame}
 
-\begin{frame}\frametitle{Architecture de l'IPA}
+\begin{frame}\frametitle{Architecture de l'API}
   \begin{center}
     \includegraphics[width=.8\textwidth]{architecture.mps}
   \end{center}
 \end{frame}
 
+\begin{frame}\frametitle{Problèmes techniques}
+  idéalement, on souhaite interfacer les 7 types de \metapost\
+  dans 7 modules \ocaml\ différents 
+
+\bigskip
+problème : il y a \emph{circularité }
+
+\begin{alltt}
+~~Transform.shifted: Point.t -> Transform.t \\
+~~Point.transform: Transform.t -> Point.t -> Point.t \\
+~~... \\
+~~Picture.make : Command.t -> Picture.t \\
+~~Command.draw\_pic : Picture.t -> Command.t \\
+~~...
+\end{alltt}
+\end{frame}
+
+\begin{frame}\frametitle{Solution}
+  \begin{itemize}
+  \item solution classique : tous les types dans un même module
+    (\texttt{types.mli})
+  \item tous les modules regroupés dans un module \texttt{Mlpost} avec
+    \texttt{-pack} 
+  \item une interface \texttt{mlpost.mli} réalisée avec \texttt{module
+    rec}
+  \end{itemize}
+
+  \vfill
+  % TODO refaire la figure pour illustrer les fichiers ?
+  \begin{center}
+    \includegraphics{deps.mps}
+  \end{center}
+
+\end{frame}
+
 \begin{frame}\frametitle{}
-  problèmes techniques et solutions
-
-  - dépendances circulaires
-
   - limitations de \metapost\ $\Rightarrow$ compilation
 
   - taille 
+
 \end{frame}
 
 
