@@ -3,12 +3,15 @@
 \usepackage[latin1]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[french]{babel}
-\usepackage{mflogo,beamerthemesplit} 
+\usepackage{mflogo,beamerthemesplit,alltt} 
+\usepackage{tikz}
 
 \beamertemplatenavigationsymbolsempty
 %\usecolortheme{crane}
 \usetheme{Madrid}
 
+\newcommand{\ocaml}{OCaml}
+\newcommand{\camllight}{Caml Light}
 \newcommand{\mlpost}{\textsc{Mlpost}}
 \newcommand{\metapost}{\MP}
 \newcommand{\nomdetikz}{\textsf{TikZ}}
@@ -83,8 +86,12 @@ comment réaliser des figures utilisant des calculs ?
     \end{itemize}
   \Item bibliothèques \LaTeX\ : \pstricks, \nomdetikz/PGF
     \begin{itemize}
-    \item[$+$] intégration avec \LaTeX\ optimale
-      % TODO S figure pstricks
+    \item[$+$] intégration avec \LaTeX\
+      \begin{tikzpicture}[baseline=(a.base)]
+        \path[use as bounding box] 
+        (0,0) node[draw,style=dashed] (a) {optimale};
+        \draw[->] (a) .. controls +(+2cm,-1cm) and +(+2cm,0cm) .. (a);
+      \end{tikzpicture}
     \item[$-$] programmation difficile
     \end{itemize}
   \Item outils externes : \metapost
@@ -96,13 +103,44 @@ comment réaliser des figures utilisant des calculs ?
   \end{itemize}
 \end{frame}
 
-\begin{frame}\frametitle{}
-  notre solution
+\begin{frame}\frametitle{Notre solution : \mlpost}
+  \begin{block}{}
+    Une bibliothèque \ocaml{} fondée sur \MP
+  \end{block}
+  \begin{itemize}
+    \item programmer sa figure en \ocaml{}
+    \item bonne intégration avec \LaTeX{} grâce à \MP
+    \item se prémunir contre un certain nombre d'erreurs grâce au typage
+    \item possibilité de développer des extensions de haut niveau
+    \item avoir l'occasion de venir aux JFLA !
+  \end{itemize}
+  TODO CHANGER L'IMAGE
+  \includegraphics[width=.3\textwidth]{figmp.mps}
 \end{frame}
 
-\begin{frame}\frametitle{}
+\begin{frame}\frametitle{Utilisation de \mlpost}
 \begin{center}
 \includegraphics[width=\textwidth]{stages.mps}
+\bigskip
+
+\begin{minipage}{.35\textwidth}
+\begin{alltt}\small
+open Mlpost\\
+let figure = ...\\
+emit (draw figure)
+\end{alltt}
+\end{minipage}
+\begin{minipage}{.33\textwidth}
+\begin{alltt}
+beginfig(7)\\
+~~draw fullcircle;\\
+~~...\\
+endfig;
+\end{alltt}
+\end{minipage}
+\begin{minipage}{.30\textwidth}
+\hfill\includegraphics[width=.9\textwidth]{rondscolores.mps}
+\end{minipage}
 \end{center}
 \end{frame}
 
@@ -135,7 +173,7 @@ CHOIX DE CONCEPTION / API
 
   - dépendances circulaires
 
-  - limitations de \metapost\ $Rightarrow$ compilation
+  - limitations de \metapost\ $\Rightarrow$ compilation
 
   - taille 
 \end{frame}
