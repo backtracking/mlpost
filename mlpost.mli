@@ -794,7 +794,7 @@ and Box : sig
 	[fill], if present, is the color used to fill the box.  
     *)
 
-  val empty : ?width:Num.t -> ?height:Num.t -> ?name:string -> 
+  val empty : ?width:Num.t -> ?height:Num.t -> ?style:style -> ?name:string -> 
               ?stroke:Color.t option -> ?pen:Pen.t -> ?fill:Color.t -> unit -> t
                   (** the empty box *)
 

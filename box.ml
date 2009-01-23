@@ -263,26 +263,36 @@ let align_boxes f ?padding ?pos ?style
 let hbox ?padding ?pos = align_boxes horizontal ?padding ?pos
 let vbox ?padding ?pos = align_boxes vertical ?padding ?pos
 
+let empty ?(width=Num.zero) ?(height=Num.zero) ?style ?name ?(stroke=None) 
+          ?pen ?fill () =
+  mkbox ?style ?name ~dx:zero ~dy:zero ~stroke ?pen ?fill 
+    width height Point.origin Emp
+
 (* groups the given boxes in a new box *)
 let group ?style ?(dx=Num.zero) ?(dy=Num.zero) 
   ?name ?(stroke=None) ?pen ?fill bl =
-  let xmin,xmax,ymin,ymax = 
-    List.fold_left 
-      (fun (xmin,xmax,ymin,ymax) b ->
-	 let sw = south_west b in
-	 let ne = north_east b in
-	 (Num.minn xmin (xpart sw),
-	  Num.maxn xmax (xpart ne),
-	  Num.minn ymin (ypart sw),
-	  Num.maxn ymax (ypart ne)))
-      (Num.zero, Num.zero, Num.zero, Num.zero) 
-      bl
-  in
-  let w = xmax -/ xmin in
-  let h = ymax -/ ymin in
-  let c = Point.pt (xmin +/ w /./ 2., ymin +/ h /./ 2.) in
-  mkbox ?style ~dx ~dy ?name ~stroke ?pen ?fill w h c 
-    (Grp (Array.of_list bl, merge_maps bl))
+    let xmin b = xpart (south_west b) in
+    let xmax b = xpart (north_east b) in
+    let ymin b = ypart (south_west b) in
+    let ymax b = ypart (north_east b) in
+    match bl with
+    | [] -> empty ~width:dx ~height:dy ?style ?name ~stroke ?pen ?fill ()
+    | [b] -> box ?style ~dx ~dy ?name ~stroke ?pen ?fill b
+    | b::r ->
+        let xmin,xmax,ymin,ymax = 
+          List.fold_left 
+            (fun (xmin',xmax',ymin',ymax') b ->
+              (Num.minn xmin' (xmin b),
+              Num.maxn xmax' (xmax b),
+              Num.minn ymin' (ymin b),
+              Num.maxn ymax' (ymax b)))
+            (xmin b, xmax b, ymin b, ymax b) r
+        in
+        let w = xmax -/ xmin in
+        let h = ymax -/ ymin in
+        let c = Point.pt (xmin +/ w /./ 2., ymin +/ h /./ 2.) in
+        mkbox ?style ~dx ~dy ?name ~stroke ?pen ?fill w h c 
+          (Grp (Array.of_list bl, merge_maps bl))
 
 let group_array ?name ?stroke ?fill ?dx ?dy ba =
   group ?name ?stroke ?fill ?dx ?dy (Array.to_list ba)
@@ -292,8 +302,6 @@ let group_array ?name ?stroke ?fill ?dx ?dy ba =
 let group_rect ?name ?(stroke=None) w h c bl =
   mkbox ?name ~stroke w h c (Grp (Array.of_list bl, merge_maps bl))
 
-let empty ?(width=Num.zero) ?(height=Num.zero) ?name ?(stroke=None) ?pen ?fill () =
-  mkbox ?name ~dx:zero ~dy:zero ~stroke ?pen ?fill width height Point.origin Emp
 
 type 'a box_creator = 
   ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 
