@@ -36,6 +36,7 @@
     - pouvoir mettre n'importe quelle boîte
     - pouvoir choisir les flêches
     - interface fonctionelle
+    - le supprimer en fait ? indiquer "deprecated" au dessus ?
 
 * Box : 
   - flêches rectangulaires entre les boîtes, de manière symbolique ?
@@ -43,6 +44,9 @@
     place
   - "weak_hbox" qui ne touche pas le placement horizontal des boîtes
   - foncteur WithBox pour faciliter l'accès aux boîtes nommées
+
+* Arrow :
+  - rajouter draw_box_box, draw_point_box, draw_box_point ou d'autres noms
 
 -------------------------------------------------------------------------------
 des liens avec des exemples :
