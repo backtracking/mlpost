@@ -519,6 +519,8 @@ let sous_typage =
        
   ]
 
+let texttt x = "\\texttt{"^x^"}"
+
 let circularity =
   let box x =
     Box.tex
@@ -543,14 +545,14 @@ let circularity =
   let arrow_down x y tex =
     let x = Box.get x hbox in
     let y = Box.get y hbox in
-    let tex = "\\texttt{"^tex^"}" in
+    let tex = texttt tex in
     Arrow.draw ~tex ~pos: `Left
       (Box.cpath ~outd: (dir 225.) x y)
   in
   let arrow_up x y tex =
     let x = Box.get x hbox in
     let y = Box.get y hbox in
-    let tex = "\\texttt{"^tex^"}" in
+    let tex = texttt tex in
     Arrow.draw ~tex ~pos: `Right
       (Box.cpath ~outd: (dir 45.) y x)
   in
@@ -560,6 +562,64 @@ let circularity =
     arrow_up "Transform" "Point" "transform";
     arrow_down "Picture" "Command" "make";
     arrow_up "Picture" "Command" "draw\\_pic";
+  ]
+
+let circularity_solution =
+  let box title contents =
+    Box.vbox ~pos: `Left [
+      Box.tex (texttt title);
+      contents;
+    ]
+  in
+  let box_tex title contents =
+    let contents = List.map (fun line -> Box.tex (texttt line)) contents in
+    box
+      title
+      (Box.vbox
+         ~name: title
+         ~pos: `Left
+         ~style: RoundRect
+         ~stroke: (Some Color.orange)
+         ~fill: Color.yellow
+         contents)
+  in
+  let box_hbox title contents =
+    box
+      title
+      (Box.hbox
+         ~pos: `Top
+         ~padding: (Num.cm 0.1)
+         ~dx: (Num.cm 0.1)
+         ~dy: (Num.cm 0.1)
+         ~style: RoundRect
+         ~stroke: (Some Color.red)
+         ~fill: (Color.rgb8 255 255 200)
+         contents)
+  in
+  let mlpost_mli =
+    box_tex "mlpost.mli"
+      ["module Num: sig ... end~~~~~~~~~~~~~~~"; "and Point: ..."] in
+  let num_ml =
+    box_tex "num.ml" ["type t = ..."; "let cm = ..."] in
+  let color_ml =
+    box_tex "color.ml" ["type t = ..."] in
+  let box_ml =
+    box_tex "box.ml" ["type t = ..."] in
+  let types_mli =
+    box_tex "types.mli" ["type num = ..."; "and point = ..."; "and box = ..."] in
+  let mlpost =
+    box_hbox "Mlpost" [num_ml; color_ml; box_ml] in
+  let all = Box.vbox ~padding: (Num.cm 0.2) [mlpost_mli; mlpost; types_mli] in
+  let arrow dir x y =
+    let x = Box.get x all in
+    let y = Box.get y all in
+    Arrow.draw (Box.cpath ~outd: (Path.vec (Point.dir dir)) x y)
+  in
+  seq [
+    Box.draw all;
+    arrow 270. "num.ml" "types.mli";
+    arrow 320. "color.ml" "types.mli";
+    arrow 270. "box.ml" "types.mli";
   ]
 
 let () = Metapost.emit "sous_typage" sous_typage
@@ -588,6 +648,7 @@ let () = Metapost.emit "list123" list123
 let () = Metapost.emit "another_list" another_list
 let () = Metapost.emit "deps" deps
 let () = Metapost.emit "circularity" circularity
+let () = Metapost.emit "circularity_solution" circularity_solution
 
 open Box
 
