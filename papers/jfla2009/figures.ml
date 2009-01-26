@@ -500,6 +500,49 @@ let sous_typage =
        
   ]
 
+let circularity =
+  let box x =
+    Box.tex
+      ~name: x
+      ~style: Box.RoundRect
+      ~stroke: (Some Color.orange)
+      ~fill: Color.yellow
+      ~dx: (Num.cm 0.1)
+      ~dy: (Num.cm 0.1)
+      x
+  in
+  let dir x = Path.vec (Point.dir x) in
+  let transform = box "Transform" in
+  let point = box "Point" in
+  let picture = box "Picture" in
+  let command = box "Command" in
+  let circ x y = Box.vbox ~padding: (Num.cm 0.75) [x; y] in
+  let hbox =
+    Box.hbox ~padding: (Num.cm 2.5)
+      [circ transform point; circ picture command]
+  in
+  let arrow_down x y tex =
+    let x = Box.get x hbox in
+    let y = Box.get y hbox in
+    let tex = "\\texttt{"^tex^"}" in
+    Arrow.draw ~tex ~pos: `Left
+      (Box.cpath ~outd: (dir 225.) x y)
+  in
+  let arrow_up x y tex =
+    let x = Box.get x hbox in
+    let y = Box.get y hbox in
+    let tex = "\\texttt{"^tex^"}" in
+    Arrow.draw ~tex ~pos: `Right
+      (Box.cpath ~outd: (dir 45.) y x)
+  in
+  seq [
+    Box.draw hbox;
+    arrow_down "Transform" "Point" "shifted";
+    arrow_up "Transform" "Point" "transform";
+    arrow_down "Picture" "Command" "make";
+    arrow_up "Picture" "Command" "draw\\_pic";
+  ]
+
 let () = Metapost.emit "sous_typage" sous_typage
 let () = Metapost.emit "automate_1" automate_1
 let () = Metapost.emit "automate" automate
@@ -524,6 +567,7 @@ let () = Metapost.emit "block_arrow" block_arrow
 let () = Metapost.emit "list123" list123
 let () = Metapost.emit "another_list" another_list
 let () = Metapost.emit "deps" deps
+let () = Metapost.emit "circularity" circularity
 
 open Box
 
