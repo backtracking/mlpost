@@ -313,6 +313,28 @@ let sharing =
     box_arrow (get "g" tree) (get "d" tree);
       ]
 
+let arrowpic = pic ~stroke:None
+     (Picture.make (draw_arrow (Path.path ~scale:cm [0.,0.; 0.,-1.]))) 
+
+let harrowpic = pic ~stroke:None ~name:"harrow"
+     (Picture.make (draw_arrow (Path.path ~scale:cm [0.,0.; 1.,0.]))) 
+
+let texttt s = tex ("{\\tt "^s^"}")
+
+let sharingcompile = 
+  let code = Box.vbox ~pos:`Left
+    (List.map texttt ["path f = ...;"; "path d = ...e...;"; "..."]) in
+  let b = 
+    Box.hbox ~padding:(cm 2.) 
+    (List.map (fun (b,name) -> Box.box ~dx:(cm 0.5) ~name ~stroke:None b)
+      [ Box.pic ~stroke:None (Picture.make sharing), "tree";
+        code, "code";
+     ])
+  in
+  let arrow x y = box_arrow (get x b) (get y b) in
+  seq [draw b; arrow "tree" "code" ]
+            
+
 let stages = 
   let dx = bp 5. and dy = bp 5. in
   let tex' = tex ~style:RoundRect ~dx ~dy in
@@ -323,9 +345,6 @@ let stages =
   let ps = 
     box "ps" (vbox ~stroke:(Some Color.black) ~style:RoundRect ~dx ~dy
              [tex' "figure.1"; tex' "(\\postscript)"]) in
-  let arrowpic = pic ~stroke:None
-       (Picture.make (draw_arrow (Path.path ~scale:cm [0.,0.; 0.,-1.]))) 
-  in
   let all = hbox ~padding:(cm 3.5) [fml; fmp; ps ] in
   seq [ draw all;
     box_labelbox_arrow ~pos:`Top 
@@ -554,6 +573,7 @@ let () = Metapost.emit "architecture" architecture
 let () = Metapost.emit "bresenham0" bresenham0
 let () = Metapost.emit "bresenham" bresenham
 let () = Metapost.emit "tree" sharing
+let () = Metapost.emit "tree_compile" sharingcompile
 let () = Metapost.emit "arrow_metapost" arrow_metapost
 let () = Metapost.emit "arrow_simple" arrow_simple
 let () = Metapost.emit "arrow_loop_explain" arrow_loop_explain
