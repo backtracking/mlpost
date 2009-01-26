@@ -580,7 +580,7 @@ let circularity_solution =
          ~pos: `Left
          ~style: RoundRect
          ~stroke: (Some Color.orange)
-         ~fill: Color.yellow
+         ~fill: (Color.rgb8 255 255 150)
          contents)
   in
   let box_hbox title contents =
@@ -593,7 +593,7 @@ let circularity_solution =
          ~dy: (Num.cm 0.1)
          ~style: RoundRect
          ~stroke: (Some Color.red)
-         ~fill: (Color.rgb8 255 255 200)
+         ~fill: (Color.rgb8 255 255 210)
          contents)
   in
   let mlpost_mli =
