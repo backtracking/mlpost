@@ -794,9 +794,10 @@ and Box : sig
 	[fill], if present, is the color used to fill the box.  
     *)
 
-  val empty : ?width:Num.t -> ?height:Num.t -> ?style:style -> ?name:string -> 
-              ?stroke:Color.t option -> ?pen:Pen.t -> ?fill:Color.t -> unit -> t
-                  (** the empty box *)
+  val empty : 
+    ?width:Num.t -> ?height:Num.t -> ?style:style -> ?name:string -> 
+    ?stroke:Color.t option -> ?pen:Pen.t -> ?fill:Color.t -> unit -> t
+    (** the empty box *)
 
   val pic : ?style:style -> Picture.t box_creator
     (** [pic p] creates a new box containing the picture [p] *)
