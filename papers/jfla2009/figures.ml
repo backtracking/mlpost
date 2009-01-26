@@ -524,3 +524,76 @@ let () = Metapost.emit "block_arrow" block_arrow
 let () = Metapost.emit "list123" list123
 let () = Metapost.emit "another_list" another_list
 let () = Metapost.emit "deps" deps
+
+open Box
+
+let pen = Pen.scale (Num.bp 4.) Pen.circle 
+let text = tex ~stroke:None ~dx:zero
+let texttt ?fill ?name s = text ?fill ?name ("\\texttt{" ^ s ^ "}")
+
+let pointer_arrow ?outd ?ind a b =
+  let r = outd and l = ind in
+  let p = pathk [knotp ?r (Box.ctr a); knotp ?l (Box.ctr b)] in
+  let p = cut_after (Box.bpath b) p in
+  Command.draw ~pen (pathp [Box.ctr a]) ++ draw_arrow p
+
+let self_arrow a b =
+  let b = nth 0 b in
+  let ya = ypart (ctr a) in
+  let xb = xpart (ctr b) in
+  let xright = xpart (ctr a) +/ multf 0.7 (width a) in
+  let ytop = ypart (ctr b) +/ multf 1.1 (height b) in
+  let p = pathk ~style:jLine 
+    [knotp (ctr a); 
+     knotp (Point.pt (xright, ya));
+     knotp (Point.pt (xright, ytop));
+     knotp (Point.pt (xb, ytop));
+     knotp (north b)] 
+  in
+  let p = cut_after (Box.bpath b) p in
+  Command.draw ~pen (pathp [Box.ctr a]) ++ draw_arrow p
+
+let closure1 =
+  let height = bp 10. in
+  let pointer ?name () = empty ?name ~width:(bp 15.) ~height () in
+  let b = 
+    hbox ~padding:(bp 50.) ~pos:`Top
+      [
+	vbox ~padding:(bp 30.) 
+	  [hbox ~padding:(bp 20.) ~pos:`Top
+	      [texttt ~name:"pow" "pow";
+	       vblock ~name:"closure pow" [tex "code"; pointer ()]];
+	   hbox ~padding:(bp 20.) ~pos:`Top 
+	     [texttt ~name:"sum" "sum";
+	      vblock ~name:"closure sum" 
+		[tex "code"; tex "\\small 0.001"; pointer (); pointer ()]];
+	  ];
+	vbox ~padding:(bp 15.)  
+	  [
+	   texttt ~name:"f" "f";
+	   vblock ~name:"closure f" [tex "code"; texttt "n"; pointer ()];
+	  ]
+      ]
+  in
+  let arrow ?outd ?ind (x,i) (y,j) = 
+    pointer_arrow ?outd ?ind (nth i (get x b)) (nth j (get y b))
+  in
+  let self_arrow x i = self_arrow (nth i (get x b)) (get x b) in
+  let label s x i = Command.label ~pos:`Left 
+    (Picture.tex ("\\tt\\tiny " ^ s)) (Box.west (nth i (get x b))) in
+  [Box.draw b;
+   Helpers.box_arrow (get "pow" b) (nth 0 (get "closure pow" b));
+   self_arrow "closure pow" 1; label "pow" "closure pow" 1;
+
+   Helpers.box_arrow (get "f" b) (nth 0 (get "closure f" b));
+   arrow ~outd:(vec left) ~ind:(vec left) ("closure f",2) ("closure pow",0);
+   label "i" "closure f" 1; label "pow" "closure f" 2;
+
+   Helpers.box_arrow (get "sum" b) (nth 0 (get "closure sum" b));
+   self_arrow "closure sum" 3; label "sum" "closure sum" 3;
+   label "eps" "closure sum" 1; label "f" "closure sum" 2;
+   arrow ~outd:(vec right) ~ind:(vec right) ("closure sum",2) 
+     ("closure f",0);
+  ]
+
+let () = Metapost.emit "closure1" (seq closure1)

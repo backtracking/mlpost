@@ -12,7 +12,7 @@
 
 \newcommand{\ocaml}{OCaml}
 \newcommand{\camllight}{Caml Light}
-\newcommand{\mlpost}{\textsc{Mlpost}}
+\newcommand{\mlpost}{\textrm{\textsc{Mlpost}}}
 \newcommand{\metapost}{\MP}
 \newcommand{\nomdetikz}{\textsf{TikZ}}
 \newcommand{\pstricks}{\textsf{PSTricks}}
@@ -217,48 +217,89 @@ problème : il y a \emph{circularité }
 
 \end{frame}
 
-\begin{frame}\frametitle{}
-  - limitations de \metapost\ $\Rightarrow$ compilation
+\begin{frame}\frametitle{Traduction vers \metapost}
+  %TODO figure Johannes ?
 
-  - taille 
+  limitations de \metapost\ 
+  \begin{itemize}
+  \item profondeur de l'arbre de syntaxe
+  \item longueur des lignes
+  \item nombre d'éléments d'un même type
+  \end{itemize}
 
+  \bigskip
+  imposent une \emph{compilation} des expressions \metapost
+  \begin{itemize}
+  \item \textit{hash-consing} pour factoriser les sous-expressions communes
+  \item introduction de variables intermédiaires
+  \end{itemize}
 \end{frame}
 
+% TODO un slide par application
+\begin{frame}\frametitle{Applications d'\mlpost}
 
-\begin{frame}\frametitle{Figures réalisées en \mlpost}
-\mlpost{} a déjà été utilisé en de nombreuses occasions:
+  \begin{columns}
+  \column{0.65\textwidth}  
 
-- Florence, Louis
+\mlpost{} est déjà utilisé 
+\begin{itemize}
+\item articles et présentations  (hier ici-même)
+\item thèses (une soutenue, une en cours)
+\item plusieurs posters ProVal
+\item deux cours (U Paris Sud, ENS)
+\item page web \texttt{alt-ergo.lri.fr}
+\end{itemize}
 
-- thèse Yannick
+  \column{0.35\textwidth}  
 
-- 2 posters ProVal
-
-- présentations, y compris celle-ci
-
-- cours : Sylvain, JC
+%  \vspace*{3cm}
+  \includegraphics[width=1\textwidth]{closure1.mps}
+  \end{columns}
+  \begin{center}
+    \includegraphics[height=0.4\textheight]{alt_ergo.mps}
+  \end{center}
 \end{frame}
 
-\begin{frame}\frametitle{}
-limitations / problèmes / etc.
+\begin{frame}\frametitle{Limitations de cette approche}
 
-- limitations de \metapost\ : nombre de n\oe uds dans un chemin, etc.
-
-- limitations de l'interprétation par pdflatex
-
-- limitations de l'approche $\rightarrow$ calculs symboliques
-
-une solution : reprogrammer l'équivalent de \metapost
+  \begin{itemize}
+  \item limitations héritées de \metapost
+    \begin{itemize}
+    \item exemple : nombre de n\oe uds par chemin limité
+    \end{itemize}
+  \item limitations de l'interprétation par \texttt{latex}
+  \item calculs symboliques 
+    \begin{itemize}
+    \item difficulté pour écrire des branchements, des boucles, etc.
+    \end{itemize}
+  \item résolution d'équations linéaires de
+    \metapost\ non interfacée
+    \begin{itemize}
+    \item en partie remplacé par le placement relatif des boîtes
+    \end{itemize}
+  \end{itemize}
 
 \bigskip
-
-perte des fonctionnalités de résolution d'équations linéaires de
-\metapost
-
-en partie remplacé par le placement relatif des boîtes
+\emph{une solution} : reprogrammer l'équivalent de \metapost
+\begin{itemize}
+\item interface avec \LaTeX
+\item calcul des courbes de Bézier
+\end{itemize}
 \end{frame}
 
+% TODO figure
+\begin{frame}\frametitle{À votre tour de faire bonne figure}
+  \begin{center}
+    \Large \url{http://mlpost.lri.fr/}
 
+    \bigskip\bigskip
+    utilisez-le ! 
+
+    \bigskip
+    contribuez !
+
+  \end{center}
+\end{frame}
 
 \end{document}
 
