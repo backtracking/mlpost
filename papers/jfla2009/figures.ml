@@ -598,7 +598,7 @@ let circularity_solution =
   in
   let mlpost_mli =
     box_tex "mlpost.mli"
-      ["module Num: sig ... end~~~~~~~~~~~~~~~"; "and Point: ..."] in
+      ["module rec Num: sig ... end~~~~~~~~~~~"; "and Point: ..."] in
   let num_ml =
     box_tex "num.ml" ["type t = ..."; "let cm = ..."] in
   let color_ml =
@@ -722,3 +722,9 @@ let closure1 =
   ]
 
 let () = Metapost.emit "closure1" (seq closure1)
+
+(*
+Local Variables: 
+compile-command: "mlpost -latex slides.tex -xpdf figures.ml"
+End: 
+*)
