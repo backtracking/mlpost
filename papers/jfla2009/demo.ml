@@ -5,9 +5,10 @@ open Box
 let fig =
   let b = 
     hbox ~padding:(bp 20.) ~pos:`Bot
-      [rect (tex "A");
-       vbox [rect (tex "B"); tex "C"]]
+      [circle (tex "A");
+       vbox [round_rect (tex "B"); tex "\\LaTeX"]]
   in
+  let b = round_rect ~stroke:(Some Color.red) b in
   draw (vbox [b;b;b])
 
 let () = Metapost.emit "fig" fig
