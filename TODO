@@ -10,6 +10,9 @@
 * images et sortie postscript ?
 
 * Probleme d'alignement avec slideshow + externalimage
+
+* lors de l'installation, créer un sous-répertoire mlpost dans le répertoire
+* des libs de caml, plutôt que de copier les fichiers directement dédans
  
 2) TODO
 (améliorer du comportement interne, doc, des bugs pas très importants)

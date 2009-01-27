@@ -1437,6 +1437,9 @@ module Metapost : sig
         resulting figures are numbered with consecutive increasing integers, 
         starting with the given value. *)
 
+  val emit_slideshow : string -> Command.t list -> unit
+  (** emit the list of figures as a slideshow, using the [slideshow] function.*)
+
 end
 
 module Generate : sig

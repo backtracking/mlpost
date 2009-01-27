@@ -333,3 +333,6 @@ let slideshow l k =
                   !x, Command.seq [l'; Command.draw_pic p]) l
 
 
+let emit_slideshow s l = 
+  let l = slideshow l 0 in
+  List.iter (fun (i,fig) -> emit (s^(string_of_int i)) fig) l
