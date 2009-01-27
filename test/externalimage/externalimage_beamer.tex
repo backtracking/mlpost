@@ -1,0 +1,42 @@
+% -*- coding : utf8 -*-
+\documentclass{beamer}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+
+\usepackage{graphicx}
+
+%%%%
+%  For externalimage :
+% specials.sty and supp-mpe_mod.tex 
+% must be in the path
+\usepackage{specials}
+\LoadMetaPostSpecialExtensions
+%%%%
+
+%%%%
+% For \includesomegraphics< > :
+% beamer_mlpost.sty must be in the path
+\usepackage{beamer_mlpost}
+%%%%
+
+\begin{document}
+
+\begin{frame}
+  \includesomegraphics<1-4>[width=3cm]{image}
+\end{frame}
+
+\begin{frame}
+  \includesomegraphics<1-4>{image}
+\end{frame}
+
+\begin{frame}
+  \includesomegraphics<1-4>[width=3cm]{image_ro}
+\end{frame}
+
+\begin{frame}
+  \includesomegraphics<1-4>{image_ro}
+\end{frame}
+
+\end{document}

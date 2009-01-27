@@ -18,10 +18,10 @@ let image4 = Command.seq [square;extim (`Width width)]
 
 
 let _ = 
-  List.iter (fun (name,fig) -> Metapost.emit name fig;Metapost.emit (name^"_ro") (Command.draw_pic (Picture.rotate 128. (Picture.make fig))))
-  [ "image1", image1;
-    "image2", image2;
-    "image3", image3;
-    "image4", image4;
+  List.iter (fun (id,name,fig) -> Metapost.emit (name^id) fig;Metapost.emit (name^"_ro"^id) (Command.draw_pic (Picture.rotate 128. (Picture.make fig))))
+  [ "1","image", image1;
+    "2","image", image2;
+    "3","image", image3;
+    "4","image", image4;
   ]
 
