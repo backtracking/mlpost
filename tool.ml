@@ -157,8 +157,8 @@ let compile f =
   Sys.remove mlf;
   if !xpdf then begin
     ignore (Sys.command "pdflatex _mlpost.tex");
-    ignore (Sys.command "setsid xpdf -remote mlpost _mlpost.pdf &")
-(*     ignore (Sys.command "xpdf -remote mlpost -reload") *)
+(*     ignore (Sys.command "setsid xpdf -remote mlpost _mlpost.pdf &") *)
+    ignore (Sys.command "xpdf -remote mlpost -reload")
 (*     match Unix.fork () with *)
 (*       | 0 -> *)
 (*           begin match Unix.fork () with *)

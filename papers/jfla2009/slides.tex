@@ -12,6 +12,7 @@
 
 \newcommand{\ocaml}{OCaml}
 \newcommand{\camllight}{Caml Light}
+\newcommand{\fmpost}{\textit{functional} \metapost}
 \newcommand{\mlpost}{\textrm{\textsc{Mlpost}}}
 \newcommand{\metapost}{\MP}
 \newcommand{\nomdetikz}{\textsf{TikZ}}
@@ -121,10 +122,10 @@ comment réaliser des figures utilisant des calculs ?
     \item bonne intégration avec \LaTeX{} grâce à \MP
 %    \item avoir l'occasion de venir aux JFLA !
   \end{itemize}
-%  TODO CHANGER L'IMAGE
   \begin{center}
-    \includegraphics[width=.2\textwidth]{figmp.mps}
+    \includegraphics{tree.mps}
   \end{center}
+  un projet similaire utilisant Haskell : \fmpost
 \end{frame}
 
 \begin{frame}\frametitle{Utilisation de \mlpost}
@@ -141,8 +142,8 @@ emit (draw figure)
 \end{minipage}
 \begin{minipage}{.33\textwidth}
 \begin{alltt}
-beginfig(7)\\
-~~draw fullcircle;\\
+beginfig(1)\\
+~~draw ...;\\
 ~~...\\
 endfig;
 \end{alltt}
@@ -221,8 +222,6 @@ problème : il y a \emph{circularité }
 \end{frame}
 
 \begin{frame}\frametitle{Traduction vers \metapost}
-  %TODO figure Johannes ?
-
   limitations de \metapost\ 
   \begin{itemize}
   \item profondeur de l'arbre de syntaxe

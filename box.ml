@@ -300,7 +300,8 @@ let group_array ?name ?stroke ?fill ?dx ?dy ba =
 (* groups the given boxes in a rectangular shape of size [w,h]
    and center [c] *)
 let group_rect ?name ?(stroke=None) w h c bl =
-  mkbox ?name ~stroke w h c (Grp (Array.of_list bl, merge_maps bl))
+  mkbox ~dx:zero ~dy:zero
+    ?name ~stroke w h c (Grp (Array.of_list bl, merge_maps bl))
 
 
 type 'a box_creator = 

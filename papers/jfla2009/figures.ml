@@ -323,7 +323,7 @@ let texttt s = tex ("{\\tt "^s^"}")
 
 let sharingcompile = 
   let code = Box.vbox ~pos:`Left
-    (List.map texttt ["path f = ...;"; "path d = ...e...;"; "..."]) in
+    (List.map texttt ["path f = ...;"; "path d = ...e...f...;"; "..."]) in
   let b = 
     Box.hbox ~padding:(cm 2.) 
     (List.map (fun (b,name) -> Box.box ~dx:(cm 0.5) ~name ~stroke:None b)
@@ -723,8 +723,19 @@ let closure1 =
 
 let () = Metapost.emit "closure1" (seq closure1)
 
+open Tree
+
+let tree =
+  let tex = tex ~stroke:(Some Color.black) ~style:Rect in
+  let leaf s = leaf (tex s) in
+  let node s = node ~arrow_style:Undirected (tex s) in
+  [draw (node "1" [node "2" [leaf "4"; leaf "5"]; 
+		   node "3" [leaf "6"; leaf "7"]])]
+
+let () = Metapost.emit "tree" (seq tree)
+
 (*
 Local Variables: 
-compile-command: "mlpost -latex slides.tex -xpdf figures.ml"
+compile-command: "make figures.mp"
 End: 
 *)

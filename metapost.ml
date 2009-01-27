@@ -300,8 +300,9 @@ let dump_tex ?prelude f =
   Queue.iter
     (fun (_,s,_) ->
        fprintf fmt "\\hrulefill\\verb!%s!\\hrulefill\\\\[1em]@\n" s;
-       fprintf fmt "\\framebox{\\includegraphics[width=\\textwidth]{%s.mps}}\\\\[1em]@\n" s;
-       fprintf fmt "\\framebox{\\includegraphics{%s.mps}}\\\\@\n" s;
+(*        fprintf fmt "\\framebox{\\includegraphics[width=\\textwidth]{%s.mps}}\\\\[1em]@\n" s; *)
+(*        fprintf fmt "\\framebox{\\includegraphics{%s.mps}}\\\\@\n" s; *)
+       fprintf fmt "\\includegraphics{%s.mps}\\\\@\n" s;
        fprintf fmt "\\hrulefill\\\\@\n@\n\\medskip@\n";)
     figures;
   fprintf fmt "\\end{center}@\n";
