@@ -40,3 +40,11 @@ let comma fmt () = Format.fprintf fmt ",@ "
 let rec fold_from_to f acc a b =
   if a <= b then fold_from_to f (f acc a) (a+1) b else acc
 
+let sprintf s =
+  let buf = Buffer.create 1024 in
+  let fmt = Format.formatter_of_buffer buf in
+  Format.kfprintf 
+    (fun _ -> Format.pp_print_flush fmt (); Buffer.contents buf) fmt s
+
+  
+

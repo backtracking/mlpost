@@ -32,6 +32,11 @@ let margin = Num.bp 2.
 
 module Smap = Map.Make(String)
 
+let print_dom fmt m =
+  Format.fprintf fmt "@[{";
+  Smap.iter (fun k _ -> Format.fprintf fmt "%s;@ " k) m;
+  Format.fprintf fmt "}@]"
+
 type t = {
   name : string option;
   width : Num.t;
@@ -318,8 +323,13 @@ let tex ?style ?dx ?dy ?name ?(stroke=None) ?pen ?fill s =
   pic ?style ?dx ?dy ?name ~stroke ?pen ?fill (Picture.tex s)
 
 let nth i b = match b.desc with
-  | Grp (a, _ ) -> a.(i)
-  | Emp | Pic _ -> invalid_arg "Box.nth"
+  | Grp (a, _ ) -> 
+      let n = Array.length a - 1 in
+      if i < 0 || i > n then 
+	invalid_arg (Format.sprintf "Box.nth: index %d out of 0..%d" i n);
+      a.(i)
+  | Emp -> invalid_arg "Box.nth: empty box"
+  | Pic _ -> invalid_arg "Box.nth: picture box"
 
 let elts b = match b.desc with
   | Emp | Pic _ -> [||]
@@ -329,8 +339,14 @@ let elts_list b = Array.to_list (elts b)
 
 let get n b = 
   if b.name = Some n then b else match b.desc with
-    | Emp | Pic _ -> invalid_arg "Box.get"
-    | Grp (_, m) -> try Smap.find n m with Not_found -> invalid_arg "Box.get"
+    | Emp -> invalid_arg "Box.get: empty box"
+    | Pic _ -> invalid_arg "Box.get: picture box"
+    | Grp (_, m) -> 
+	try 
+	  Smap.find n m 
+	with Not_found -> 
+	  invalid_arg 
+	    (Misc.sprintf "Box.get: no sub-box %s out of %a" n print_dom m)
 
 let get_fill b = b.fill
 let set_fill c b = { b with fill = Some c } 
