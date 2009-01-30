@@ -25,4 +25,3 @@ let sudoku =
   draw (tabularl (nine b))
 
 let () = Metapost.emit "sudoku" sudoku
-
