@@ -47,6 +47,11 @@ let eps = ref false
 let verbose = ref false
 let native = ref false
 
+let version () =
+  print_string Version.version;
+  print_newline ();
+  exit 0
+
 let add_ccopt x = ccopt := !ccopt ^ " " ^ x
 let add_execopt x = execopt := !execopt ^ " " ^ x
 
@@ -62,6 +67,7 @@ let spec = Arg.align
     "\"<options>\" Pass <options> to the Ocaml compiler";
     "-execopt", String add_execopt,
     "\"<options>\" Pass <options> to the compiled program";
+    "-version", Unit version, " Print Mlpost version and exit";
   ]
 
 let () = 
