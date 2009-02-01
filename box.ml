@@ -60,19 +60,6 @@ let width b = b.width
 let height b = b.height
 let ctr b = b.ctr
 
-let rec shift pt b = 
-  { b with 
-    ctr = Point.shift pt b.ctr; 
-    contour = Path.shift pt b.contour;
-    desc = shift_desc pt b.desc }
-    
-and shift_desc pt = function
-  | Emp -> Emp
-  | Pic pic -> Pic (Picture.shift pt pic)
-  | Grp (a, m) -> Grp (Array.map (shift pt) a, Smap.map (shift pt) m)
-
-let center pt x = shift (Point.sub pt x.ctr) x
-
 let bpath b = b.contour
 
 let halfheight b = Point.pt (zero, b.height /./ 2.)
@@ -87,6 +74,53 @@ let north_west x = build_point (west x) (north x)
 let north_east x = build_point (east x) (north x)
 let south_west x = build_point (west x) (south x)
 let south_east x = build_point (east x) (south x)
+
+let rec transform t b = 
+  (* TODO calcul de largeur et hauteur est faux *)
+  (* prendre en compte les vecteurs largeur + hauteur indépendemment *)
+  let hvec = Point.sub (north_west b) (south_west b) in
+  let wvec = Point.sub (south_east b) (south_west b) in
+  let hvec' = Point.transform t hvec and wvec' =  Point.transform t wvec in
+(*   let p = Point.add hvec' wvec' in *)
+  { b with
+    ctr = Point.transform t b.ctr;
+    height = Num.abs (ypart hvec') +/ Num.abs (ypart wvec');
+    width = Num.abs (xpart hvec') +/ Num.abs (xpart wvec');
+    contour = Path.transform t b.contour;
+    desc = transform_desc t b.desc;
+(*
+    post_draw = 
+      (fun _ -> 
+        Command.draw ~color:Color.red (Path.pathp [Point.origin; hvec']))
+*)
+}
+
+and transform_desc t = function
+  | Emp -> Emp
+  | Pic p -> Pic (Picture.transform t p)
+  | Grp (a , m ) ->
+      Grp (Array.map (transform t) a, Smap.map (transform t) m)
+
+let scale f p = transform [Transform.scaled f] p
+let rotate f p = transform [Transform.rotated f] p
+let shift pt p = transform [Transform.shifted pt] p
+let yscale n p = transform [Transform.yscaled n] p
+let xscale n p = transform [Transform.xscaled n] p
+(*
+let rec shift pt b = 
+  { b with 
+    ctr = Point.shift pt b.ctr; 
+    contour = Path.shift pt b.contour;
+    desc = shift_desc pt b.desc }
+    
+and shift_desc pt = function
+  | Emp -> Emp
+  | Pic pic -> Pic (Picture.shift pt pic)
+  | Grp (a, m) -> Grp (Array.map (shift pt) a, Smap.map (shift pt) m)
+*)
+
+let center pt x = shift (Point.sub pt x.ctr) x
+
 
 let border pos b = 
   match pos with
@@ -558,4 +592,5 @@ let thick_arrow ?style ?(boxed=true) ?line_color ?fill_color ?outd ?ind ?width
   let pb = Path.point 1. p in
   Arrow.draw_thick ?style ~boxed ?line_color ?fill_color ?outd ?ind ?width
     ?head_length ?head_width pa pb
+
 

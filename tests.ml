@@ -73,8 +73,11 @@ let block1 =
 let block2 = 
   draw (hblock [tex "A"; tex "B"; tex "c"; tex "toto"])
 
+let vblock1 = 
+  draw (vblock [tex "A"; tex "B"; tex "c"; tex "toto"])
+
 let hbox1 = 
-  draw (hbox [tex "A"; tex "B"; tex "c"; tex "toto"])
+  draw (hbox ~pos:`Top [tex "."; tex "B"; tex "c"; tex "toto"])
 
 let hbox2 = 
   let s b = Box.shift (Point.p (100.,100.)) b in
@@ -468,15 +471,57 @@ let alt_ergo =
   [Box.draw b]
 ***)
 
+let rotatedbox = 
+  let t = tex  "$A^{-1}$" in
+  let b1 = Box.rotate 90. t in
+  Box.draw (Box.hblock [b1;t])
+
+let style = RoundRect
+let stroke = Some Color.black
+
+let pen = Pen.scale (bp 2.) Pen.circle
+
+let dx = bp 5.
+let dy = dx
+let tex = Box.tex ~style ~pen ~dx ~dy
+let tex' = Box.tex ~style ~pen ~dx ~dy:(bp 10.)
+
+
+let assia_schema =
+  let tabular l =
+    "{\\begin{tabular}{l}" ^ String.concat " \\\\ " l ^ "\\end{tabular}}" in
+  let lang = tex ~stroke:(Some Color.red) "langage de developpement de preuves" in
+  let genie = Box.tex "Genie logiciel formel" in
+  let moteur = 
+    tex' ~stroke:(Some Color.purple) 
+    (tabular ["moteur de"; "dev de preuves"]) in
+  let verif = 
+    tex' ~stroke:(Some Color.purple) 
+    (tabular ["verificateur";" de preuves"]) in
+  let langf = 
+    Box.round_rect 
+      ~stroke:(Some Color.blue) ~pen
+      ~dx:(bp 50.) ~dy:(bp 10.) (Box.tex "langage formel") in
+  let h = Box.hbox ~padding:(bp 20.) [moteur;verif] in
+  let v = 
+    Box.vbox 
+      ~dx ~dy:(bp 10.) ~pen
+      ~padding:(bp 5.) ~style ~stroke:(Some Color.orange) [lang; genie]
+  in
+  Box.draw (Box.vbox ~padding:(bp (-5.)) [langf; h;v])
+
 let figs = [
+  rotatedbox;
+  assia_schema;
+  hbox1;
+  hbox2;
   bresenham0;
   simple_box;
   block1;
   hvbox;
-  hbox2;
   why_platform;d2;
-  hbox1;
   block2;
+  vblock1;
   d6; d5; yannick Box.Rect; yannick Box.Patatoid; d1;  proval;
   d2sq; d2hsq; d2s; d2c; cheno011; d3; d4;
   d7; 

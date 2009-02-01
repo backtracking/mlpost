@@ -989,6 +989,14 @@ and Box : sig
     ?outd:Path.direction ->
     ?ind:Path.direction -> t -> t -> Path.t
     (** the path that connects 2 boxes and stops at the box boundaries *) 
+
+  val transform : Transform.t -> t -> t
+
+  val scale : Num.t -> t -> t
+  val rotate : float -> t -> t
+  val shift : Point.t -> t -> t
+  val yscale : Num.t -> t -> t
+  val xscale : Num.t -> t -> t
 end
 
 (*

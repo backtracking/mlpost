@@ -119,3 +119,7 @@ end
 open Infix
 
 let neg x = zero -/ x
+
+(* TODO replace by METAPOST primitive *)
+let abs x = 
+  maxn x (neg x)
