@@ -313,7 +313,7 @@ let dump ?prelude ?(pdf=false) ?eps bn =
   let f = bn ^ ".mp" in
   let figl = Queue.fold (fun l (i,_,f) -> (i,f) :: l) [] figures in
   generate_mp f ?prelude ?eps figl;
-  let out = Sys.command (sprintf "mpost -interaction=\"errorstopmode\" %s end" f) in
+  let out = Sys.command (sprintf "mpost -interaction=\"nonstopmode\" %s end" f) in
   if out <> 0 then exit 1;
   let suf = if pdf then ".mps" else ".1" in
   Queue.iter 
