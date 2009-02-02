@@ -632,7 +632,7 @@ let () = Metapost.emit "graph_sqrt" graph_sqrt
 let () = Metapost.emit "architecture" architecture
 let () = Metapost.emit "bresenham0" bresenham0
 let () = Metapost.emit "bresenham" bresenham
-let () = Metapost.emit "tree" sharing
+let () = Metapost.emit "sharing" sharing
 let () = Metapost.emit "tree_compile" sharingcompile
 let () = Metapost.emit "arrow_metapost" arrow_metapost
 let () = Metapost.emit "arrow_simple" arrow_simple
@@ -731,6 +731,14 @@ let tree =
   let node s = node ~arrow_style:Undirected (tex s) in
   [draw (node "1" [node "2" [leaf "4"; leaf "5"]; 
 		   node "3" [leaf "6"; leaf "7"]])]
+
+let tree =
+  let tex = tex ~stroke:(Some Color.black) ~style:RoundRect in
+  let leaf s = leaf (Box.tex s) in
+  let node s = node ~arrow_style:Undirected (tex s) in
+  [draw (node "\\mlpost" 
+	   [node "\\ocaml" [leaf "\\dots"; leaf "\\dots"]; 
+	    node "\\metapost" [node "\\LaTeX" []; leaf "\\dots"]])]
 
 let () = Metapost.emit "tree" (seq tree)
 
