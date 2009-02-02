@@ -76,23 +76,16 @@ let south_west x = build_point (west x) (south x)
 let south_east x = build_point (east x) (south x)
 
 let rec transform t b = 
-  (* TODO calcul de largeur et hauteur est faux *)
-  (* prendre en compte les vecteurs largeur + hauteur indépendemment *)
-  let hvec = Point.sub (north_west b) (south_west b) in
-  let wvec = Point.sub (south_east b) (south_west b) in
-  let hvec' = Point.transform t hvec and wvec' =  Point.transform t wvec in
-(*   let p = Point.add hvec' wvec' in *)
+  let tr = Point.transform t in
+  let nw = tr (north_west b) and sw = tr (south_west b)
+  and se = tr (south_east b) in
+  let hvec = Point.sub nw sw and wvec = Point.sub se sw in
   { b with
     ctr = Point.transform t b.ctr;
-    height = Num.abs (ypart hvec') +/ Num.abs (ypart wvec');
-    width = Num.abs (xpart hvec') +/ Num.abs (xpart wvec');
+    height = Num.abs (ypart hvec) +/ Num.abs (ypart wvec);
+    width = Num.abs (xpart hvec) +/ Num.abs (xpart wvec);
     contour = Path.transform t b.contour;
     desc = transform_desc t b.desc;
-(*
-    post_draw = 
-      (fun _ -> 
-        Command.draw ~color:Color.red (Path.pathp [Point.origin; hvec']))
-*)
 }
 
 and transform_desc t = function
@@ -106,6 +99,7 @@ let rotate f p = transform [Transform.rotated f] p
 let shift pt p = transform [Transform.shifted pt] p
 let yscale n p = transform [Transform.yscaled n] p
 let xscale n p = transform [Transform.xscaled n] p
+
 (*
 let rec shift pt b = 
   { b with 
