@@ -37,8 +37,6 @@
 (choses qui n'existent pas encore dans mlpost)
 ===========================
 
-* Box.grid : ajouter ~hpadding ~vpadding ~stroke
-
 * intersection entre deux segments, chemins, ...
 
 * refaire Diag : 
