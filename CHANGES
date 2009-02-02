@@ -2,6 +2,8 @@
 o - changes in behaviour, new features
 * - incompatible changes in the interface
 
+o Box.{grid,gridl,gridi}: new options hpadding, vpadding, stroke, pen
+
 Changes since version 0.5
 -------------------------
 * "open Mlpost" is not added to input files any more -

@@ -510,7 +510,31 @@ let assia_schema =
   in
   Box.draw (Box.vbox ~padding:(bp (-5.)) [langf; h;v])
 
+let grid_with_padding = 
+  let red s = rect ~stroke:None ~fill:Color.lightred (tex s) in
+  let blue s = rect ~stroke:None ~fill:Color.lightblue (tex s) in
+  let b = gridl ~stroke:None ~hpadding:(bp 5.) ~vpadding:(bp 5.) 
+    [[empty (); red "abc"; red "def"];
+     [blue "titre 1"; red ""; red ""];
+     [blue "titre 2"; red ""; red ""]]
+  in
+  draw b
+
+let grid_with_padding_2 = 
+  let red s = rect ~stroke:None ~fill:Color.lightred (tex s) in
+  let blue s = rect ~stroke:None ~fill:Color.lightblue (tex s) in
+  let pen = Pen.scale (Num.pt 1.5) Pen.circle in
+  let b = 
+    gridl ~stroke:(Some Color.white) ~pen ~hpadding:(bp 5.) ~vpadding:(bp 5.) 
+    [[empty (); red "abc"; red "def"];
+     [blue "titre 1"; red ""; red ""];
+     [blue "titre 2"; red ""; red ""]]
+  in
+  seq [draw b; draw (shift (Point.pt (bp 5., bp 5.)) b)]
+
 let figs = [
+  grid_with_padding;
+  grid_with_padding_2;
   rotatedbox;
   assia_schema;
   hbox1;

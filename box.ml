@@ -472,7 +472,8 @@ let tabulari ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?pos w h f =
   tabular ~hpadding ~vpadding ?pos m
 
 (* blocks *)
-let gridl ?(pos=`Center) pll =
+let gridl ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?(pos=`Center) 
+    ?stroke ?pen pll =
   let hmax = Num.fold_max (Num.fold_max height Num.zero) Num.zero pll in
   let wmax = Num.fold_max (Num.fold_max width Num.zero) Num.zero pll in
   let tw = 
@@ -480,34 +481,43 @@ let gridl ?(pos=`Center) pll =
   let tw_2 = tw /./ 2. in
   let th = (float (List.length pll)) *./ hmax in
   let c = Point.pt (tw_2, Num.neg (th /./ 2.)) in
-    (* make a single row with upper left corner [x,y] *)
+  (* make a single row with upper left corner [x,y] *)
   let rec make_row x y = function
     | [] -> []
     | p :: ql -> 
 	let b = place_box pos x y wmax hmax p in
 	let b' = modify_box wmax hmax b.ctr b in
-	  b' :: make_row (x +/ wmax) y ql
+	let b' = match stroke with
+	  | None -> b'
+	  | Some None -> clear_stroke b'
+	  | Some (Some s) -> set_stroke s b'
+	in
+	let b' = match pen with
+	  | None -> b'
+	  | Some p -> set_pen p b'
+	in
+	b' :: make_row (x +/ wmax +/ hpadding) y ql
   in
-    (* make all rows, with upper left corner [0,y] *)
+  (* make all rows, with upper left corner [0,y] *)
   let rec make_array y pll =
     match pll with
       | [] -> []
       | row :: qll -> 
 	  let brow = 
 	    let c = Point.pt (tw_2, y -/ hmax /./ 2.) in
-	      group_rect tw hmax c (make_row Num.zero y row)
+	    group_rect tw hmax c (make_row Num.zero y row)
 	  in
-	    brow :: make_array (y -/ hmax) qll
+	  brow :: make_array (y -/ hmax -/ vpadding) qll
   in
   group_rect tw th c (make_array Num.zero pll)
 
-let grid ?pos m =
+let grid ?hpadding ?vpadding ?pos ?stroke ?pen m =
   let pll = Array.to_list (Array.map Array.to_list m) in 
-    gridl ?pos pll
+  gridl ?hpadding ?vpadding ?pos ?stroke ?pen pll
 
-let gridi ?pos w h f =
+let gridi ?hpadding ?vpadding ?pos ?stroke ?pen w h f =
   let m = Array.init h (fun j -> Array.init w (fun i -> f i j)) in
-    grid ?pos m
+  grid ?hpadding ?vpadding ?pos ?stroke ?pen m
 
 
 let hblock ?(pos=`Center) ?name ?(min_width=Num.zero) ?(same_width=false) pl =

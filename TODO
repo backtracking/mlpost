@@ -2,6 +2,9 @@
 1) BUGS
 (des erreurs ou des TODOs très importantes)
 ==========
+* configure/Makefile : permettre l'installation de la partie Ocaml
+  dans un emplacement spécifié par --prefix ou --libdir
+
 * un "faux bug" : 
   la sortie standard metapost "written output.1" a l'air de venir de mlpost
   solution: supprimer la sortie standard pour mpost
@@ -34,7 +37,10 @@
 (choses qui n'existent pas encore dans mlpost)
 ===========================
 
+* Box.grid : ajouter ~hpadding ~vpadding ~stroke
+
 * intersection entre deux segments, chemins, ...
+
 * refaire Diag : 
     - pouvoir mettre n'importe quelle boîte
     - pouvoir choisir les flêches

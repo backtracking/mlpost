@@ -914,7 +914,8 @@ and Box : sig
 	The arrays for rows must have the same lengths; otherwise
 	[Invalid_argument] is raised. *)
 
-  val tabularl : ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
+  val tabularl : 
+    ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
     t list list -> t
     (** similar to [tabular], but using lists instead of arrays *)
 
@@ -939,15 +940,24 @@ and Box : sig
         @param same_height if [true], all boxes are of same height, and at least
         of [min_height]; default is false*)
 
-  val grid : ?pos:Command.position -> t array array -> t
+  val grid : 
+    ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position -> 
+    ?stroke:Color.t option -> ?pen:Pen.t ->
+    t array array -> t
     (** Aligns the given boxes in a way that is similar to [hblock] and [vblock]:
 	boxes are aligned in a grid where all cells have the same size. Each one 
 	of these cells is a box containing the original corresponding box. *)
 	
-  val gridl : ?pos:Command.position -> t list list -> t
+  val gridl : 
+    ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position -> 
+    ?stroke:Color.t option -> ?pen:Pen.t ->
+    t list list -> t
     (** similar to [grid], but using lists instead of arrays *)
     
-  val gridi : ?pos:Command.position -> int -> int -> (int -> int -> t) -> t
+  val gridi : 
+    ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position -> 
+    ?stroke:Color.t option -> ?pen:Pen.t ->
+    int -> int -> (int -> int -> t) -> t
     (** similar to [gridi], but using a matrix defined with a function *)
 
   (** {2 Sub-boxes accessors} *)
