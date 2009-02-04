@@ -1,0 +1,55 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.TH MLPOST 1 "February 2009"
+.\" Please adjust this date whenever revising the manpage.
+.SH NAME
+mlpost \- wrapper around OCaml and Metapost for the Mlpost library
+.SH SYNOPSIS
+.B mlpost
+.RI [options] " files"...
+.SH DESCRIPTION
+.PP
+\fBmlpost\fP is a program that compiles OCaml files to PostScript or PDF files using the Mlpost library.
+.SH OPTIONS
+.TP
+.B \-pdf
+Generate .mps files
+.TP
+.B \-latex <main.tex>
+Scan the LaTeX prelude
+.TP
+.B \-eps
+Generate encapsulated postscript files
+.TP
+.B \-xpdf
+WYSIWYG mode using xpdf
+.TP
+.B \-v
+Be a bit more verbose
+.TP
+.B \-ocamlbuild
+Use ocamlbuild to compile
+.TP
+.B \-native
+Compile to native code
+.TP
+.B \-ccopt "<options>"
+Pass <options> to the Ocaml compiler
+.TP
+.B \-execopt "<options>"
+Pass <options> to the compiled program
+.TP
+.B \-help, \-\-help
+Display the list of options
+.SH SEE ALSO
+.BR mpost (1),
+.BR ocamlc (1),
+.BR xpdf (1).
+.br
+.SH AUTHOR
+Mlpost was written by Romain Bardou,
+Johannes Kanig, StÃ©phane Lescuyer and
+Jean-Christophe FilliÃ¢tre.
+.PP
+This manual page was written by StÃ©phane Glondu <steph@glondu.net>
+for the Debian project (but may be used by others).
+
