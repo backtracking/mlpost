@@ -54,6 +54,11 @@ echo "ocaml version is $OCAMLVERSION"
 OCAMLLIB=`$OCAMLC -v | tail -1 | cut -f 4 -d " "`
 echo "ocaml library path is $OCAMLLIB"
 
+if test "$LIBDIR" = ""; then
+        LIBDIR=$OCAMLLIB/mlpost
+fi
+echo "Mlpost library will be installed in: $LIBDIR"
+
 #Set FORPACK and abort if ocaml version is < 3.08
 case $OCAMLVERSION in
   0.*|1.*|2.*|3.00*|3.01*|3.02*|3.03*|3.04*|3.05*|3.06*|3.07*)
@@ -166,13 +171,14 @@ AC_SUBST(OCAMLBEST)
 AC_SUBST(OCAMLVERSION)
 AC_SUBST(FORPACK)
 AC_SUBST(BASICOFLAGS)
-AC_SUBST(OCAMLLIB)
+#(not used) AC_SUBST(OCAMLLIB)
 AC_SUBST(OCAMLWEB)
 AC_SUBST(LABLGTK2)
 AC_SUBST(OCAMLWIN32)
 AC_SUBST(EXE)
 AC_SUBST(LIBEXT)
 AC_SUBST(OBJEXT)
+AC_SUBST(LIBDIR)
 AC_SUBST(MLPOSTVERSION)
 AC_SUBST(TODAY)
 

@@ -18,6 +18,7 @@
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 BINDIR=@bindir@
+LIBDIR=@LIBDIR@
 
 # where to install the man page
 MANDIR=@mandir@
@@ -28,7 +29,7 @@ OCAMLOPT = @OCAMLOPT@
 OCAMLDEP = @OCAMLDEP@
 OCAMLLEX = @OCAMLLEX@
 OCAMLYACC= @OCAMLYACC@
-OCAMLLIB = @OCAMLLIB@
+#(not used) OCAMLLIB = @OCAMLLIB@
 OCAMLBEST= @OCAMLBEST@
 OCAMLVERSION = @OCAMLVERSION@
 OCAMLWEB = @OCAMLWEB@
@@ -185,13 +186,15 @@ headers:
 install: install-$(OCAMLBEST) 
 
 install-byte: $(CMA) tool.byte
-	cp -f mlpost.cmo mlpost.cmi $(CMA) "$(OCAMLLIB)"
+	mkdir -p $(LIBDIR)
+	cp -f mlpost.cmo mlpost.cmi $(CMA) "$(LIBDIR)"
 	mkdir -p $(BINDIR)
 	cp -f tool.byte $(BINDIR)/mlpost
 
 install-opt: $(CMXA) tool.opt
-	cp -f mlpost.cmo mlpost.cmi $(CMA) "$(OCAMLLIB)"
-	cp -f mlpost$(LIBEXT) mlpost.cmx $(CMXA) "$(OCAMLLIB)"
+	mkdir -p $(LIBDIR)
+	cp -f mlpost.cmo mlpost.cmi $(CMA) "$(LIBDIR)"
+	cp -f mlpost$(LIBEXT) mlpost.cmx $(CMXA) "$(LIBDIR)"
 	mkdir -p $(BINDIR)
 	cp -f tool.opt $(BINDIR)/mlpost
 

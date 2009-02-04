@@ -1,3 +1,4 @@
 let version = "@MLPOSTVERSION@"
 let date = "@TODAY@"
 let ocamlopt = "ocamlopt.opt "
+let libdir = "@LIBDIR@"

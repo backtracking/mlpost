@@ -9,6 +9,15 @@ Dependencies:
 
 	./configure
 
+If you want to specify the directory where libraries (cmi, cma, ...) will be
+installed:
+
+        ./configure LIBDIR=/your/libdir
+
+If you want to specify the directory where the binary (mlpost) will be installed:
+
+        ./configure --bindir=/your/bindir
+
 2. Compile with 
 
 	make
