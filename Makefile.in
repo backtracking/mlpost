@@ -163,7 +163,7 @@ check-examples: mlpost.cma tool.opt
 	make -C multi-examples
 
 #version.ml: Makefile
-#	echo "let version = \""$(VERSION)"\"" > version.ml
+#	echo "let version = \""$(MLPOSTVERSION)"\"" > version.ml
 #	echo "let date = \""`date`"\"" >> version.ml
 #	echo "let ocamlopt = \""$(OCAMLOPT)"\"" >> version.ml
 
@@ -201,7 +201,7 @@ install-opt: $(CMXA) tool.opt
 # export
 ########
 
-EXPORTDIR=$(NAME)-$(VERSION)
+EXPORTDIR=$(NAME)-$(MLPOSTVERSION)
 TAR=$(EXPORTDIR).tar
 
 WWW = /users/www-perso/projets/mlpost
@@ -209,20 +209,23 @@ FTP = $(WWW)/download
 
 FILES = *.ml *.mli *.mll \
 	Makefile.in configure configure.in .depend \
-	.depend README.txt INSTALL LICENSE CHANGES FAQ META.in
+	.depend README.txt INSTALL LICENSE CHANGES FAQ META.in version.ml.in
 EXFILES = examples/Makefile examples/*.ml examples/all.template\
 	  examples/index.html examples/parse.mll examples/README
+LATEXFILES = latex/*sty latex/*tex latex/README
 
 export: source export-www export-examples export-doc
 	cp README.txt INSTALL LICENSE CHANGES FAQ $(FTP)
+	cp export/$(TAR).gz $(FTP)
 
 source: 
 	mkdir -p export/$(EXPORTDIR)
 	cp $(FILES) export/$(EXPORTDIR)
 	mkdir -p export/$(EXPORTDIR)/examples
 	cp $(EXFILES) export/$(EXPORTDIR)/examples
+	mkdir -p export/$(EXPORTDIR)/latex
+	cp $(LATEXFILES) export/$(EXPORTDIR)/latex
 	cd export ; tar cf $(TAR) $(EXPORTDIR) ; gzip -f --best $(TAR)
-	cp export/$(TAR).gz $(FTP)
 
 DOCFILES:=$(shell echo *.mli)
 DOCFILES:=$(filter-out types.mli, $(DOCFILES))
@@ -232,14 +235,14 @@ doc: mlpost.mli
 	mkdir -p doc
 	ocamldoc -html -hide Mlpost -d doc mlpost.mli
 
-export-doc:
-	ocamldoc -html -hide Mlpost -d $(WWW)/doc mlpost.mli
+export-doc: doc
+	cp -r doc $(WWW)/doc
 
 export-www: www/version.prehtml
 	make -C www
 
 www/version.prehtml: Makefile
-	echo "<#def version>$(VERSION)</#def>" > www/version.prehtml
+	echo "<#def version>$(MLPOSTVERSION)</#def>" > www/version.prehtml
 
 export-examples: 
 	make -C examples
