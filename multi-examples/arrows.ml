@@ -37,34 +37,34 @@ let serial_lines =
                 Arrow.empty))))
 
 let () =
-  emit [Arrow.draw2 a d];
-  emit [Arrow.draw2 b c];
-  emit [Arrow.draw2 c b];
-  emit [Arrow.draw2 a b];
+  emit (Arrow.draw2 a d);
+  emit (Arrow.draw2 b c);
+  emit (Arrow.draw2 c b);
+  emit (Arrow.draw2 a b);
   (* Some curved arrows *)
-  emit [Arrow.draw2 ~outd: up a d];
-  emit [Arrow.draw2 ~outd: up b c];
-  emit [Arrow.draw2 ~outd: right c b];
-  emit [Arrow.draw2 ~outd: up a b];
+  emit (Arrow.draw2 ~outd: up a d);
+  emit (Arrow.draw2 ~outd: up b c);
+  emit (Arrow.draw2 ~outd: right c b);
+  emit (Arrow.draw2 ~outd: up a b);
   (* Some double-headed arrows *)
-  emit [Arrow.draw2 ~kind: double_headed a d];
-  emit [Arrow.draw2 ~kind: double_headed ~outd: right c b];
+  emit (Arrow.draw2 ~kind: double_headed a d);
+  emit (Arrow.draw2 ~kind: double_headed ~outd: right c b);
   (* Some multiple-headed arrows *)
-  emit [Arrow.draw2 ~kind: multiple_headed a d];
-  emit [Arrow.draw2 ~kind: multiple_headed ~outd: right c b];
+  emit (Arrow.draw2 ~kind: multiple_headed a d);
+  emit (Arrow.draw2 ~kind: multiple_headed ~outd: right c b);
   (* Some arrows with multiple serial lines *)
-  emit [Arrow.draw2 ~kind: serial_lines a d];
-  emit [Arrow.draw2 ~kind: serial_lines ~outd: right c b];
+  emit (Arrow.draw2 ~kind: serial_lines a d);
+  emit (Arrow.draw2 ~kind: serial_lines ~outd: right c b);
   (* A straight thick arrow *)
-  emit [Arrow.draw_thick a d];
-  emit [Arrow.draw_thick b c];
-  emit [Arrow.draw_thick c b];
-  emit [Arrow.draw_thick a b];
+  emit (Arrow.draw_thick a d);
+  emit (Arrow.draw_thick b c);
+  emit (Arrow.draw_thick c b);
+  emit (Arrow.draw_thick a b);
   (* Some curved thick arrows *)
-  emit [Arrow.draw_thick ~outd: up a d];
-  emit [Arrow.draw_thick ~outd: up b c];
-  emit [Arrow.draw_thick ~outd: right c b];
-  emit [Arrow.draw_thick ~outd: up a b];
+  emit (Arrow.draw_thick ~outd: up a d);
+  emit (Arrow.draw_thick ~outd: up b c);
+  emit (Arrow.draw_thick ~outd: right c b);
+  emit (Arrow.draw_thick ~outd: up a b);
   (* A snake thick arrow *)
-  emit [Arrow.draw_thick ~outd: up ~ind: up a b];
+  emit (Arrow.draw_thick ~outd: up ~ind: up a b);
   dump ()
