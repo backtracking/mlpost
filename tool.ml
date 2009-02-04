@@ -89,19 +89,19 @@ let command s =
     command' s
   with Command_failed out -> exit out
 
-let ocaml args =
-  let cmd = "ocaml " ^ String.concat " " (Array.to_list args) in
+let ocaml args execopt =
+  let cmd = "ocaml " ^ String.concat " " (Array.to_list args) ^ " " ^ execopt in
   let () = if !verbose then Format.eprintf "%s@." cmd in
   let out = Sys.command cmd in
   if out <> 0 then exit 1
 
-let ocamlopt args =
+let ocamlopt args execopt =
   let exe = Filename.temp_file "mlpost" ".exe" in
   let cmd = "ocamlopt.opt -o " ^ exe ^ " " ^ String.concat " " (Array.to_list args) in
   let () = if !verbose then Format.eprintf "%s@." cmd in
   let out = Sys.command cmd in
   if out <> 0 then exit 2;
-  let out = Sys.command exe in
+  let out = Sys.command (exe ^ " " ^ execopt) in
   if out <> 0 then exit 1
 
 let ocamlbuild args =
@@ -147,9 +147,18 @@ let compile f =
     command ("cp " ^ mlf ^ " " ^ mlf2);
     let ext = if !native then ".native" else ".byte" in
     try
-      ocamlbuild
-        ["-lib unix"; "-lib mlpost"; Filename.chop_extension mlf2 ^ ext; !ccopt; "--";
-        !execopt];
+      let args =
+        [ "-lib unix"; "-lib mlpost";
+          Filename.chop_extension mlf2 ^ ext; !ccopt;
+          "--"; !execopt ]
+      in
+      let args =
+        if Version.libdir = "" then args else
+          sprintf "-cflags -I,%s -lflags -I,%s"
+            Version.libdir Version.libdir
+          :: args
+      in
+      ocamlbuild args;
       Sys.remove mlf2
     with Command_failed out -> 
       Sys.remove mlf2;
@@ -157,10 +166,10 @@ let compile f =
   end else
     if !native then
       ocamlopt [|"-I"; Version.libdir;
-                 "unix.cmxa";"mlpost.cmxa"; !ccopt; mlf; !execopt|]
+                 "unix.cmxa";"mlpost.cmxa"; !ccopt; mlf|] !execopt
     else
       ocaml [|"-I"; Version.libdir;
-              "unix.cma";"mlpost.cma"; !ccopt; mlf; !execopt|];
+              "unix.cma";"mlpost.cma"; !ccopt; mlf|] !execopt;
 
   Sys.remove mlf;
   if !xpdf then begin
