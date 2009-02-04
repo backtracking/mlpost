@@ -34,6 +34,12 @@
 # ADAPT THE FOLLOWING LINE TO YOUR SOURCES!
 AC_INIT(mlpost.mli)
 
+# The Version of Mlpost
+MLPOSTVERSION="0.6"
+
+# The compilation date
+TODAY=`date`
+
 # Check for Ocaml compilers
 
 # we first look for ocamlc in the path; if not present, we fail
@@ -167,7 +173,11 @@ AC_SUBST(OCAMLWIN32)
 AC_SUBST(EXE)
 AC_SUBST(LIBEXT)
 AC_SUBST(OBJEXT)
+AC_SUBST(MLPOSTVERSION)
+AC_SUBST(TODAY)
 
 # Finally create the Makefile from Makefile.in
-AC_OUTPUT(Makefile)
+AC_OUTPUT(Makefile META version.ml)
 chmod a-w Makefile
+chmod a-w META
+chmod a-w version.ml

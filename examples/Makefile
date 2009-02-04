@@ -30,9 +30,9 @@ AUTOMOUTFILES := $(AUTOMPNGFILES:.png=.1)
 HTMLFILES := boxes.ml.html paths.ml.html misc.ml.html tree.ml.html \
              label.ml.html automata.ml.html
 
-all: $(HTMLFILES) $(BOXPNGFILES) $(PATHPNGFILES) $(MISCPNGFILES) \
+all: $(BOXPNGFILES) $(PATHPNGFILES) $(MISCPNGFILES) \
      $(TREEPNGFILES) $(LABELPNGFILES) $(AUTOMPNGFILES)
-
+html: $(HTMLFILES)
 %.ml.html : %.ml parse
 	caml2html -hc -ext "parse:./parse" $*.ml
 

@@ -1,0 +1,3 @@
+let version = "@MLPOSTVERSION@"
+let date = "@TODAY@"
+let ocamlopt = "ocamlopt.opt "

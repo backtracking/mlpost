@@ -44,7 +44,7 @@ OFLAGS = @BASICOFLAGS@ -dtypes $(INCLUDES) @FORPACK@
 #############
 
 NAME = mlpost
-VERSION=0.6
+MLPOSTVERSION=@MLPOSTVERSION@
 
 TESTS = handbookgraphs.cmx othergraphs.cmx tests.cmx
 TOOL = tool.$(OCAMLBEST)
@@ -159,11 +159,12 @@ check-examples: mlpost.cma tool.opt
 	make -C examples paths.dummy
 	make -C examples tree.dummy
 	make -C examples label.dummy
+	make -C multi-examples
 
-version.ml: Makefile
-	echo "let version = \""$(VERSION)"\"" > version.ml
-	echo "let date = \""`date`"\"" >> version.ml
-	echo "let ocamlopt = \""$(OCAMLOPT)"\"" >> version.ml
+#version.ml: Makefile
+#	echo "let version = \""$(VERSION)"\"" > version.ml
+#	echo "let date = \""`date`"\"" >> version.ml
+#	echo "let ocamlopt = \""$(OCAMLOPT)"\"" >> version.ml
 
 dep:
 	$(OCAMLDEP) *.mli *.ml | ocamldot | dot -Tps | gv -
@@ -305,7 +306,7 @@ ocamlwizard:
 # Makefile is rebuilt whenever Makefile.in or configure.in is modified
 ######################################################################
 
-Makefile: Makefile.in config.status
+Makefile META version.ml: Makefile.in META.in version.ml.in config.status
 	./config.status
 
 config.status: configure
@@ -322,9 +323,11 @@ clean::
 	rm -f $(GENERATED) parser.output
 	rm -f $(NAME).cma $(NAME).cmxa $(NAME).a
 	rm -f *.aux *.log $(NAME).tex $(NAME).dvi $(NAME).ps
+	rm -f *.opt test.dvi test.ps *.exe
+
+cleaner:: clean
 	make -C test clean
 	make -C www clean
-	rm -f *.opt test.dvi test.ps *.exe
 
 dist-clean distclean:: clean
 	rm -f Makefile config.cache config.log config.status

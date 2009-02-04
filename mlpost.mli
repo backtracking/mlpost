@@ -500,7 +500,9 @@ and Color : sig
   val color : string -> t
     (** [color n] returns the RGB color associated to name [n]
 	(as defined in /etc/X11/rgb.txt). Raises [Not_found] if [n] does not
-	correspond to a color *)
+	correspond to a color.
+        See {{:http://en.wikipedia.org/wiki/X11_color_names} this list} for an
+        overview.*)
 end
 
 and Transform : sig

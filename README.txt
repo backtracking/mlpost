@@ -24,7 +24,7 @@ Usage:
 	 let fig_a = ...
 	 let fig_b = ...
 
-  Each figure has type Command.figure.
+  Each figure has type Command.t.
 
 * Add some code to emit Metapost code, as follows
 
@@ -56,4 +56,22 @@ mlpost supports the following options:
         macros, fonts and packages from your LaTeX document in your
         figures). 
 
-	
+-xpdf
+        opens an xpdf viewer with the generated figure. Subsequent calls with
+        the option -xpdf will refresh the viewer, if it is still open.
+
+-native
+        compile to native code. This is usually faster.
+
+-eps    
+        produce standalone postscript files
+
+-ocamlbuild
+        use ocamlbuild to compile the source; this may be useful it there are
+        a lot of dependencies
+
+-ccopt <options>
+        pass options to the ocaml compiler
+
+-execopt <options>
+        pass options to the compiled program

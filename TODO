@@ -51,9 +51,16 @@
     place
   - "weak_hbox" qui ne touche pas le placement horizontal des boîtes
   - foncteur WithBox pour faciliter l'accès aux boîtes nommées
+  - clipping
 
 * Arrow :
   - rajouter draw_box_box, draw_point_box, draw_box_point ou d'autres noms
+
+* Picture et Command pourraient fusionner
+
+* des Box pourraient avoir des noms par defaut -> Box.get : box -> box -> box
+
+* fusionner Picture et Box ??
 
 -------------------------------------------------------------------------------
 des liens avec des exemples :
