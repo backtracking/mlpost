@@ -24,7 +24,7 @@ Mlpost ist ein <#ocaml> Interface für <#metapost>.
 <p>
 
 <center>
-<a href="examples/tree1.ml.html"><img src="examples/tree1.png" alt="no image"></a>
+<a href="examples/tree.ml.html"><img src="examples/tree1.png" alt="no image"></a>
 </center>
 
 
@@ -51,6 +51,13 @@ regroupés à l'intérieur d'un unique module Mlpost.</#fr>
 packaged into a single module Mlpost.</#en>
 <#de>Werfen Sie einen Blick auf die <a href="doc/">API</a>. Alle Module
 befinden sich in einem Hauptmodul Mlpost.  </#de>
+
+<p>
+<#fr>Notre <a href="mlpost-jfla.pdf">article</a> est nos 
+<a href="slides-jfla.pdf">slides</a> des 
+<a href="http://jfla.inria.fr/2009/"> JFLA</a> sont disponibles.
+</#fr>
+</p>
 
 <h3>Download</h3>
 

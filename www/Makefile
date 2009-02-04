@@ -2,7 +2,8 @@
 WWW = /users/www-perso/projets/mlpost/
 
 ALL =  	index.fr.html  index.en.html index.de.html \
-         manual.fr.html manual.en.html manual.de.html
+         manual.fr.html manual.en.html manual.de.html\
+	 slides-jfla.pdf mlpost-jfla.pdf
 
 install: all
 	cp -f --parents $(ALL) $(WWW)

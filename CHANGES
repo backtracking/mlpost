@@ -1,13 +1,16 @@
-
 o - changes in behaviour, new features
 * - incompatible changes in the interface
 
-o Box.{grid,gridl,gridi}: new options hpadding, vpadding, stroke, pen
-
-Changes since version 0.5
+version 0.6, February 4th, 2009
 -------------------------
 * "open Mlpost" is not added to input files any more -
   users have to add by themselves
+* the type Command.figure becomes Command.t
+o inclusion of external images (png, jpg etc)
+o transformations on boxes
+o Box.{grid,gridl,gridi}: new options hpadding, vpadding, stroke, pen
+o additional options for many functions
+o corrections of some small bugs in box calculations
 o A function in the API to scan a TeX file for the prelude
 
 version 0.5, Octobre 20, 2008 (first public release)

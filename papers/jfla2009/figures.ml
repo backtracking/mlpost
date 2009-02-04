@@ -725,14 +725,7 @@ let () = Metapost.emit "closure1" (seq closure1)
 
 open Tree
 
-let tree =
-  let tex = tex ~stroke:(Some Color.black) ~style:Rect in
-  let leaf s = leaf (tex s) in
-  let node s = node ~arrow_style:Undirected (tex s) in
-  [draw (node "1" [node "2" [leaf "4"; leaf "5"]; 
-		   node "3" [leaf "6"; leaf "7"]])]
-
-let tree =
+let mlposttree =
   let tex = tex ~stroke:(Some Color.black) ~style:RoundRect in
   let leaf s = leaf (Box.tex s) in
   let node s = node ~arrow_style:Undirected (tex s) in
@@ -740,7 +733,7 @@ let tree =
 	   [node "\\ocaml" [leaf "\\dots"; leaf "\\dots"]; 
 	    node "\\metapost" [node "\\LaTeX" []; leaf "\\dots"]])]
 
-let () = Metapost.emit "tree" (seq tree)
+let () = Metapost.emit "mlposttree" (seq mlposttree)
 
 let why_platform =
   let tabular l =
