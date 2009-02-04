@@ -209,7 +209,7 @@ FTP = $(WWW)/download
 
 FILES = *.ml *.mli *.mll \
 	Makefile.in configure configure.in .depend \
-	.depend README.txt INSTALL LICENSE CHANGES FAQ
+	.depend README.txt INSTALL LICENSE CHANGES FAQ META.in
 EXFILES = examples/Makefile examples/*.ml examples/all.template\
 	  examples/index.html examples/parse.mll examples/README
 
@@ -333,7 +333,7 @@ cleaner:: clean
 	make -C www clean
 
 dist-clean distclean:: clean
-	rm -f Makefile config.cache config.log config.status
+	rm -f Makefile config.cache config.log config.status META version.ml
 
 # depend
 ########

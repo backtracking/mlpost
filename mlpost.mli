@@ -666,7 +666,7 @@ and Command : sig
     | `Inside of Num.t * Num.t (** must be inside a box of this height and width *)
     | `Exact of Num.t * Num.t]
     -> t
-    (** insert an image given its filename *)
+    (** insert an image given its filename - *EXPERIMENTAL* *)
 
   (** {2 Manipulating Commands} *)
 
