@@ -190,6 +190,7 @@ install-byte: $(CMA) tool.byte
 	cp -f mlpost.cmo mlpost.cmi $(CMA) "$(LIBDIR)"
 	mkdir -p $(BINDIR)
 	cp -f tool.byte $(BINDIR)/mlpost
+	cp -f mlpost.1 $(MANDIR)/man1
 
 install-opt: $(CMXA) tool.opt
 	mkdir -p $(LIBDIR)
@@ -197,6 +198,7 @@ install-opt: $(CMXA) tool.opt
 	cp -f mlpost$(LIBEXT) mlpost.cmx $(CMXA) "$(LIBDIR)"
 	mkdir -p $(BINDIR)
 	cp -f tool.opt $(BINDIR)/mlpost
+	cp -f mlpost.1 $(MANDIR)/man1
 
 # export
 ########
@@ -209,13 +211,15 @@ FTP = $(WWW)/download
 
 FILES = *.ml *.mli *.mll \
 	Makefile.in configure configure.in .depend \
-	.depend README.txt INSTALL LICENSE CHANGES FAQ META.in version.ml.in
+	.depend README.txt INSTALL LICENSE CHANGES FAQ META.in version.ml.in mlpost.1
 EXFILES = examples/Makefile examples/*.ml examples/all.template\
-	  examples/index.html examples/parse.mll examples/README
+	  examples/index.html examples/parse.mll examples/README examples/automaton4.tex
 LATEXFILES = latex/*sty latex/*tex latex/README
 
-export: source export-www export-examples export-doc
+export: export-source export-www export-examples export-doc
 	cp README.txt INSTALL LICENSE CHANGES FAQ $(FTP)
+
+export-source: source
 	cp export/$(TAR).gz $(FTP)
 
 source: 
@@ -226,6 +230,7 @@ source:
 	mkdir -p export/$(EXPORTDIR)/latex
 	cp $(LATEXFILES) export/$(EXPORTDIR)/latex
 	cd export ; tar cf $(TAR) $(EXPORTDIR) ; gzip -f --best $(TAR)
+
 
 DOCFILES:=$(shell echo *.mli)
 DOCFILES:=$(filter-out types.mli, $(DOCFILES))

@@ -30,6 +30,8 @@ AUTOMOUTFILES := $(AUTOMPNGFILES:.png=.1)
 HTMLFILES := boxes.ml.html paths.ml.html misc.ml.html tree.ml.html \
              label.ml.html automata.ml.html
 
+MLPOST:=../tool.opt -ccopt "-I ../ " -v 
+
 all: $(BOXPNGFILES) $(PATHPNGFILES) $(MISCPNGFILES) \
      $(TREEPNGFILES) $(LABELPNGFILES) $(AUTOMPNGFILES)
 html: $(HTMLFILES)
@@ -59,7 +61,7 @@ $(AUTOMOUTFILES): automata.dummy
 
 
 %.dummy: %.ml
-	../tool.opt -ccopt "-I ../ " -v $^
+	$(MLPOST) $^
 	touch $@
 
 parse.ml: parse.mll
