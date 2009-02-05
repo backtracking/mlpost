@@ -69,6 +69,64 @@ type t = {
   font_map : font_def Int32Map.t
 }
 
+module Print = struct
+  let print_preamble fmt p =
+    fprintf fmt "* Preamble :\n";
+    fprintf fmt "\tversion number = %d\n" p.pre_version;
+    fprintf fmt "\tnumerator/denominator = %ld/%ld\n" 
+      p.pre_num p.pre_den;
+    fprintf fmt "\tmagnification = %ld\n" p.pre_mag;
+    fprintf fmt "\tcomment : %s\n" p.pre_text
+
+  let print_font k fmt f =
+    fprintf fmt "\tFont number %ld (%s in directory [%s]) :\n"
+      k f.name f.area;
+    fprintf fmt "\t Checksum = %lx\n" f.checksum;
+    fprintf fmt "\t Scale factor / Design size : %ld / %ld\n" 
+      f.scale_factor f.design_size
+
+  let print_page fmt 
+      {counters = c; previous = prev; commands = cmds} =
+    fprintf fmt "* Page number :";
+    Array.iter (fun c -> fprintf fmt "%ld;" c) c; fprintf fmt "\n";
+    fprintf fmt "\tPrevious page can be found at %ld\n" prev;
+    fprintf fmt "\t<list of commands skipped ...>"
+      
+  let print_pages fmt =
+    List.iter (fun p -> fprintf fmt "%a\n" print_page p)
+
+  let print_fonts fmt fonts =
+    fprintf fmt "* Fonts defined in this file :\n";
+    Int32Map.iter (fun k f -> print_font k fmt f) fonts
+
+  let print_postamble fmt p =
+    fprintf fmt "* Postamble :\n";
+    fprintf fmt "\tlast page = %ld\n" p.last_page;
+    fprintf fmt "\tnumerator/denominator = %ld/%ld\n" 
+      p.post_num p.post_den;
+    fprintf fmt "\tmagnification = %ld\n" p.post_mag;
+    fprintf fmt "\theight - width = %ld - %ld\n" 
+      p.post_height p.post_width;
+    fprintf fmt "\tmaximum stack depth = %d\n"  p.post_stack;
+    fprintf fmt "\ttotal # of pages = %d\n"  p.post_pages  
+
+  let print_postpostamble fmt p =
+    fprintf fmt "* Postpostamble :\n";
+    fprintf fmt "\tPostamble can be found at %ld.\n" p.postamble_pointer;
+    fprintf fmt "\tDVI version : %d\n" p.post_post_version
+      
+  let print_doc name fmt doc =
+    fprintf fmt "***********************\n";
+    fprintf fmt "Reading DVI file : %s\n" name;
+    fprintf fmt "%a%a%a%a%a"
+      print_preamble doc.preamble
+      print_pages doc.pages
+      print_fonts doc.font_map
+      print_postamble doc.postamble
+      print_postpostamble doc.postpostamble
+
+end
+
 exception DviError of string ;;
 let dvi_error s = raise (DviError s)
 
@@ -106,7 +164,7 @@ let font_def bits =
 	name : (a+l)*8 : string;   (* the full name w/ area *)
 	bits : -1 : bitstring
       } ->
-(* 	printf " on est passé dans une déf de fonte %s\n" name; *)
+(* 	fprintf fmt " on est passé dans une déf de fonte %s\n" name; *)
 	{ checksum = checksum;
 	  scale_factor = scale;
 	  design_size = design;
@@ -370,60 +428,6 @@ let postpostamble bits =
       | { _ : -1 : bitstring } ->
 	  dvi_error "ill-formed postpostamble"
 
-
-let print_preamble p =
-  printf "* Preamble :\n";
-  printf "\tversion number = %d\n" p.pre_version;
-  printf "\tnumerator/denominator = %ld/%ld\n" 
-    p.pre_num p.pre_den;
-  printf "\tmagnification = %ld\n" p.pre_mag;
-  printf "\tcomment : %s\n" p.pre_text
-
-let print_font k f =
-  printf "\tFont number %ld (%s in directory [%s]) :\n"
-    k f.name f.area;
-  printf "\t Checksum = %lx\n" f.checksum;
-  printf "\t Scale factor / Design size : %ld / %ld\n" 
-    f.scale_factor f.design_size
-
-let print_page {counters = c; previous = prev; commands = cmds} =
-  printf "* Page number :";
-  Array.iter (fun c -> printf "%ld;" c) c; printf "\n";
-  printf "\tPrevious page can be found at %ld\n" prev;
-  printf "\t<list of commands skipped ...>"
-
-let print_pages =
-  List.iter (fun p -> print_page p; printf "\n")
-
-let print_fonts fonts =
-  printf "* Fonts defined in this file :\n";
-  Int32Map.iter print_font fonts
-
-let print_postamble p =
-  printf "* Postamble :\n";
-  printf "\tlast page = %ld\n" p.last_page;
-  printf "\tnumerator/denominator = %ld/%ld\n" 
-    p.post_num p.post_den;
-  printf "\tmagnification = %ld\n" p.post_mag;
-  printf "\theight - width = %ld - %ld\n" 
-    p.post_height p.post_width;
-  printf "\tmaximum stack depth = %d\n"  p.post_stack;
-  printf "\ttotal # of pages = %d\n"  p.post_pages  
-
-let print_postpostamble p =
-  printf "* Postpostamble :\n";
-  printf "\tPostamble can be found at %ld.\n" p.postamble_pointer;
-  printf "\tDVI version : %d\n" p.post_post_version
-
-let print_doc name doc =
-  printf "***********************\n";
-  printf "Reading DVI file : %s\n" name;
-  print_preamble doc.preamble;
-  print_pages doc.pages;
-  print_fonts doc.font_map;
-  print_postamble doc.postamble;
-  print_postpostamble doc.postpostamble
-
 let read_file file =
   let bits = Bitstring.bitstring_of_file file in
   let preamble, bits = preamble bits in
@@ -444,5 +448,5 @@ let _ =
     | n ->
 	for i = 1 to n-1 do
 	  let s = Sys.argv.(i) in
-	    print_doc s (read_file s)
+	    Print.print_doc s std_formatter (read_file s)
 	done
