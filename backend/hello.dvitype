@@ -1,0 +1,56 @@
+This is DVItype, Version 3.6 (Web2C 7.5.6)
+Options selected:
+  Starting page = * 
+  Maximum number of pages = 1000000
+  Output level = 4 (the works)
+  Resolution = 300.00000000 pixels per inch
+numerator/denominator=25400000/473628672
+magnification=1000;       0.00006334 pixels per DVI unit
+' TeX output 2009.02.04:2018'
+Postamble starts at byte 165.
+maxv=43725786, maxh=30785863, maxstackdepth=2, totalpages=1
+Font 0: cmr10---loaded at size 655360 DVI units 
+ 
+42: beginning of page 1 
+87: push {141} 
+level 0:(h=0,v=0,w=0,x=0,y=0,z=0,hh=0,vv=0) 
+88: down3 -917504 {159} v:=0-917504=-917504, vv:=-58 
+92: pop {142} 
+level 0:(h=0,v=0,w=0,x=0,y=0,z=0,hh=0,vv=0) 
+93: down4 42152922 {160} v:=0+42152922=42152922, vv:=2670 
+98: push {141} 
+level 0:(h=0,v=42152922,w=0,x=0,y=0,z=0,hh=0,vv=2670) 
+99: down4 -41497562 {160} v:=42152922-41497562=655360, vv:=42 
+104: push {141} 
+level 1:(h=0,v=655360,w=0,x=0,y=0,z=0,hh=0,vv=42) 
+105: right3 1310720 {145} h:=0+1310720=1310720, hh:=83 
+[ ]
+109: fntdef1 0 {243}: cmr10 
+130: fntnum0 {171} current font is cmr10 
+131: setchar72 h:=1310720+491521=1802241, hh:=114 
+132: setchar101 h:=1802241+291271=2093512, hh:=132 
+133: setchar108 h:=2093512+182045=2275557, hh:=144 
+134: setchar108 h:=2275557+182045=2457602, hh:=156 
+135: setchar111 h:=2457602+327681=2785283, hh:=177 
+136: setchar44 h:=2785283+182045=2967328, hh:=189 
+137: right3 218453 {145} h:=2967328+218453=3185781, hh:=202 
+141: setchar87 h:=3185781+673566=3859347, hh:=245 
+142: right3 -54614 {145} h:=3859347-54614=3804733, hh:=242 
+146: setchar111 h:=3804733+327681=4132414, hh:=263 
+147: setchar114 h:=4132414+256683=4389097, hh:=279 
+148: setchar108 h:=4389097+182045=4571142, hh:=291 
+149: setchar100 h:=4571142+364090=4935232, hh:=314 
+[Hello, World]
+150: pop {142} 
+level 1:(h=0,v=655360,w=0,x=0,y=0,z=0,hh=0,vv=42) 
+151: pop {142} 
+level 0:(h=0,v=42152922,w=0,x=0,y=0,z=0,hh=0,vv=2670) 
+152: down3 1572864 {159} v:=42152922+1572864=43725786, vv:=2770 
+156: push {141} 
+level 0:(h=0,v=43725786,w=0,x=0,y=0,z=0,hh=0,vv=2770) 
+157: right4 15229091 {146} h:=0+15229091=15229091, hh:=965 
+162: setchar49 h:=15229091+327681=15556772, hh:=986 
+[ 1]
+163: pop {142} 
+level 0:(h=0,v=43725786,w=0,x=0,y=0,z=0,hh=0,vv=2770) 
+164: eop {140} 
