@@ -1,6 +1,8 @@
 o - changes in behaviour, new features
 * - incompatible changes in the interface
 
+* mlpost tool: -pdf now the default; use -ps to produce .1 files
+
 version 0.6, February 4th, 2009
 -------------------------
 * "open Mlpost" is not added to input files any more -

@@ -31,7 +31,7 @@ let add_file f =
   end;
   Queue.add f files
 
-let pdf = ref false
+let pdf = ref true
 let latex_file = ref None
 let set_latex_file f =
   if not (Sys.file_exists f) then begin
@@ -56,10 +56,11 @@ let add_ccopt x = ccopt := !ccopt ^ " " ^ x
 let add_execopt x = execopt := !execopt ^ " " ^ x
 
 let spec = Arg.align
-  [ "-pdf", Set pdf, " Generate .mps files";
+  [ "-pdf", Set pdf, " Generate .mps files (default)";
+    "-ps", Clear pdf, " Generate .1 files";
     "-latex", String set_latex_file, "<main.tex> Scan the LaTeX prelude";
     "-eps", Set eps, " Generate encapsulated postscript files";
-    "-xpdf", Set xpdf, " wysiwyg mode using xpdf";
+    "-xpdf", Set xpdf, " wysiwyg mode using xpdf remote server";
     "-v", Set verbose, " be a bit more verbose";
     "-ocamlbuild", Set use_ocamlbuild, " Use ocamlbuild to compile";
     "-native", Set native, " Compile to native code";
