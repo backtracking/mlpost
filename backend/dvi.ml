@@ -87,7 +87,7 @@ let preamble bits =
 	  pre_num = num; pre_den = den; pre_mag = mag;
 	  pre_text = x
 	}, bits
-    | { _ } ->
+    | { _ : -1 : bitstring } ->
 	dvi_error "Ill-formed preamble"
 
 let add_font k font map = 
@@ -113,7 +113,7 @@ let font_def bits =
 	  area = String.sub name 0 a;
 	  name = String.sub name a l;
 	}, bits
-    | { _ } ->
+    | { _ : -1 : bitstring } ->
 	dvi_error "Ill_formed font definition"
 
 let page_counters bits =
@@ -132,7 +132,7 @@ let page_counters bits =
 	bits : -1 : bitstring
       } ->
 	[| c0; c1; c2; c3; c4; c5; c6; c7; c8; c9 |], prev, bits
-    | { _ } ->
+    | { _ : -1 : bitstring } ->
 	dvi_error "Ill-formed counters after bop"
 	
 let command bits = 
@@ -251,7 +251,7 @@ let command bits =
     | { 242 : 8; k : 32; x : (Int32.to_int k) * 8 : string; 
 	bits : -1 : bitstring } ->
 	Special x, bits
-    | { _ } ->
+    | { _ : -1 : bitstring } ->
 	dvi_error "bad command !"
 
 let rec page commands fonts bits =
@@ -275,7 +275,7 @@ let rec page commands fonts bits =
 	let font, bits = font_def bits in
 	  page commands (add_font k font fonts) bits
       (* normal command *)
-    | { _ } as bits ->
+    | { bits : -1 : bitstring } ->
 	let cmd, bits = command bits in
 	  page (cmd::commands) fonts bits
 
@@ -304,7 +304,7 @@ let rec pages p fonts bits =
 	let newp = 
 	  {counters = counters; previous = previous; commands = cmds} in
 	  pages (newp::p) fonts bits
-    | { _ } as bits->
+    | { bits : -1 : bitstring } ->
 	p, fonts, bits
 	(* dvi_error "Expected : nop, font_definition, or new page" *)
 
@@ -323,7 +323,7 @@ let postamble bits =
 	  let _, bits = font_def bits in skip_font_defs bits
       | { 246 : 8; k : 32 : bigendian; bits : -1 : bitstring } ->
 	  let _, bits = font_def bits in skip_font_defs bits
-      | { _ } as bits ->
+      | { bits : -1 : bitstring } ->
 	  bits
   in
   bitmatch bits with
@@ -343,7 +343,7 @@ let postamble bits =
 	  post_height = height; post_width = width;
 	  post_stack = stack; post_pages = pages 
 	}, skip_font_defs bits
-    | { _ } ->
+    | { _ : -1 : bitstring } ->
 	dvi_error "Ill-formed postamble"
 
 let postpostamble bits =
@@ -353,7 +353,7 @@ let postpostamble bits =
 	  rest : -1 : bitstring
 	} ->
 	  read_223 rest
-      | { _ } as rest ->
+      | { rest : -1 : bitstring } ->
 	  if Bitstring.bitstring_length rest = 0 then ()
 	  else dvi_error "Ill-formed suffix : only 223 expected."
   in
@@ -367,7 +367,7 @@ let postpostamble bits =
 	  { postamble_pointer = postamble_pointer;
 	    post_post_version = version
 	  }
-      | { _ } ->
+      | { _ : -1 : bitstring } ->
 	  dvi_error "ill-formed postpostamble"
 
 
