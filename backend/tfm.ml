@@ -262,14 +262,14 @@ let body fh bits =
   let kern, bits = read_n_fixwds fh.nk bits in
   let exten, bits = read_recipes fh.ne bits in
   let param, bits = read_n_fixwds fh.np bits in
-    if Bitstring.bitstring_length bits = 0 then
-      { header = hdr; 
-	char_info = infos;
-	width = width; height = height; depth = depth; italic = italic;
-	lig_kern = lig_kern; kern = kern;
-	exten = exten; param = param;
-      }
-    else tfm_error "Expected end of file after params"
+    if Bitstring.bitstring_length bits <> 0 then
+      printf "Warning : ignored extra data after parameters.\n";
+    { header = hdr; 
+      char_info = infos;
+      width = width; height = height; depth = depth; italic = italic;
+      lig_kern = lig_kern; kern = kern;
+      exten = exten; param = param;
+    }
 
 let read_file file =
   let bits = Bitstring.bitstring_of_file file in
@@ -277,13 +277,3 @@ let read_file file =
     Print.print_file_hdr std_formatter fh;
     let body = body fh bits in
     { file_hdr = fh; body = body }
-
-(* let _ = *)
-(*   match Array.length Sys.argv with *)
-(*     | 1 -> *)
-(* 	printf "Usage : tfm <file1.tfm> <file2.tfm> ...\n" *)
-(*     | n -> *)
-(* 	for i = 1 to n-1 do *)
-(* 	  let s = Sys.argv.(i) in *)
-(* 	    Print.print_tfm s std_formatter (read_file s) *)
-(* 	done *)

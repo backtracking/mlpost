@@ -1,5 +1,6 @@
 open Format
 open Dvi
+open Tfm
 
 type state = {
   h : int32;
@@ -30,13 +31,15 @@ let print_state fmt s =
 let interp_command fm s = function  
   | SetChar c -> 
       if !debug then printf "Setting character %ld.@." c;
-      let tmf = Int32Map.find !current_font fm in
-      let idx = (Int32.to_int c) - tmf.Tfm.file_hdr.Tfm.bc in
-      let info = tmf.Tfm.body.Tfm.char_info.(idx) in
-      let width = tmf.Tfm.body.Tfm.width.(info.Tfm.width_index) in
+      let (tmf, ratio) = Int32Map.find !current_font fm in
+      let idx = (Int32.to_int c) - tmf.file_hdr.bc in
+      let body = tmf.body in
+      let info = body.char_info.(idx) in
+      let width = body.width.(info.width_index) *. body.header.design_size in
+      let realwidth = Int32.mul ratio (Int32.of_float width) in 
 	if !debug then printf "Character found in font %ld. Width = %f@." 
 	  !current_font width;
-	{s with h = Int32.add s.h (Int32.of_float width)}
+	{s with h = Int32.add s.h realwidth}
   | SetRule(a, b) ->
       if !debug then printf "Setting rule (w=%ld, h=%ld).@." a b;
       {s with h = Int32.add s.h b}
@@ -130,7 +133,7 @@ let load_font fd =
     if !debug then
       printf "Trying to find metrics at %s...@." filename;
     let tfm = Tfm.read_file filename in
-      if (Int32.compare tfm.Tfm.body.Tfm.header.Tfm.checksum 
+      if (Int32.compare tfm.body.header.checksum 
 	    fd.Dvi.checksum <> 0) then
 	dvi_error "Metrics checksum do not match !.@.";
       if !debug then
@@ -138,17 +141,23 @@ let load_font fd =
 	  fd.name filename;
       tfm
 
-let load_fonts font_map =
-  Int32Map.fold (fun k fdef -> Int32Map.add k (load_font fdef)) 
+let load_fonts mag font_map =
+  let ratio fdef = 
+    Int32.div 
+      (Int32.mul (Int32.of_int 1000) fdef.Dvi.design_size)
+      (Int32.mul mag fdef.Dvi.scale_factor)
+  in
+  Int32Map.fold (fun k fdef -> 
+		   Int32Map.add k (load_font fdef, ratio fdef))
     font_map Int32Map.empty
 
 let load_file file =
   let doc = Dvi.read_file file in
     printf "Dvi file parsed successfully.@.";
-    let fonts = load_fonts doc.font_map in
+    let fonts = load_fonts doc.preamble.pre_mag doc.font_map in
       List.iter (fun p -> 
 		   printf "#### Starting New Page ####@.";
-		   ignore (interp_page fonts p)) 
+		   ignore (interp_page fonts p))
 	doc.pages
 
 let _ =
