@@ -290,7 +290,7 @@ let command bits =
 	Z a, bits
       (* Setting Fonts *)
     | { k : 8 ; bits : -1 : bitstring } when 171 <= k && k <= 234 ->
-	FontNum (Int32.of_int k), bits
+	FontNum (Int32.of_int (k-171)), bits
     | { 235 : 8; k : 8; bits : -1 : bitstring } ->
 	FontNum (Int32.of_int k), bits
     | { 236 : 8; k : 16; bits : -1 : bitstring } ->
@@ -441,12 +441,12 @@ let read_file file =
       font_map = fonts
     }
 
-let _ =
-  match Array.length Sys.argv with
-    | 1 -> 
-	printf "Usage : dvi <file1.dvi> <file2.dvi> ...\n"
-    | n ->
-	for i = 1 to n-1 do
-	  let s = Sys.argv.(i) in
-	    Print.print_doc s std_formatter (read_file s)
-	done
+(* let _ = *)
+(*   match Array.length Sys.argv with *)
+(*     | 1 ->  *)
+(* 	printf "Usage : dvi <file1.dvi> <file2.dvi> ...\n" *)
+(*     | n -> *)
+(* 	for i = 1 to n-1 do *)
+(* 	  let s = Sys.argv.(i) in *)
+(* 	    Print.print_doc s std_formatter (read_file s) *)
+(* 	done *)

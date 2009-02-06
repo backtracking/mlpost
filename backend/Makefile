@@ -1,4 +1,9 @@
-all: dvi tfm
+all: dviinterp
+
+dviinterp: dviinterp.ml dvi tfm
+	ocamlfind ocamlc dvi.cmo tfm.cmo \
+	-package bitstring,bitstring.syntax -syntax bitstring.syntax \
+	-linkpkg dviinterp.ml -dtypes -o dviinterp
 
 dvi: dvi.ml
 	ocamlfind ocamlc \
