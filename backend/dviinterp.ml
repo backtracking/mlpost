@@ -35,11 +35,11 @@ let interp_command fm s = function
       let idx = (Int32.to_int c) - tmf.file_hdr.bc in
       let body = tmf.body in
       let info = body.char_info.(idx) in
-      let width = body.width.(info.width_index) *. body.header.design_size in
-      let realwidth = Int32.mul ratio (Int32.of_float width) in 
-	if !debug then printf "Character found in font %ld. Width = %f@." 
+      let fwidth = body.width.(info.width_index) *. ratio in
+      let width = Int32.of_float fwidth in
+	if !debug then printf "Character found in font %ld. Width = %ld@." 
 	  !current_font width;
-	{s with h = Int32.add s.h realwidth}
+	{s with h = Int32.add s.h width}
   | SetRule(a, b) ->
       if !debug then printf "Setting rule (w=%ld, h=%ld).@." a b;
       {s with h = Int32.add s.h b}
@@ -143,9 +143,8 @@ let load_font fd =
 
 let load_fonts mag font_map =
   let ratio fdef = 
-    Int32.div 
-      (Int32.mul (Int32.of_int 1000) fdef.Dvi.design_size)
-      (Int32.mul mag fdef.Dvi.scale_factor)
+    (Int32.to_float (Int32.mul mag fdef.Dvi.scale_factor)) 
+      /. 1000. (* fdef.Dvi.design_size *)
   in
   Int32Map.fold (fun k fdef -> 
 		   Int32Map.add k (load_font fdef, ratio fdef))
