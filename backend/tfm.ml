@@ -175,7 +175,7 @@ let file_hdr bits =
 	  nw = nw; nh = nh; nd = nd; ni = ni; 
 	  nl = nl; nk = nk; ne = ne; np = np 
 	}, bits
-    | { _ } ->
+    | { _ : -1 : bitstring } ->
 	tfm_error "ill formed header"
 
 let header sz bits =
