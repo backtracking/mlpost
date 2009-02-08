@@ -155,11 +155,14 @@ other.byte: $(CMA) othergraphs.ml
 	gv test/othergraphs.ps
 
 .PHONY: check-examples
+MLPOST:=../tool.opt -ccopt "-I ../ " -v 
+MAKEEXAMPLES=make -C examples MLPOST='$(MLPOST)'
+
 check-examples: mlpost.cma tool.opt
-	make -C examples boxes.dummy
-	make -C examples paths.dummy
-	make -C examples tree.dummy
-	make -C examples label.dummy
+	$(MAKEEXAMPLES) boxes.dummy
+	$(MAKEEXAMPLES) paths.dummy
+	$(MAKEEXAMPLES) tree.dummy
+	$(MAKEEXAMPLES) label.dummy
 	make -C multi-examples
 
 #version.ml: Makefile
@@ -187,14 +190,14 @@ install: install-$(OCAMLBEST)
 
 install-byte: $(CMA) tool.byte
 	mkdir -p $(LIBDIR)
-	cp -f mlpost.cmo mlpost.cmi $(CMA) "$(LIBDIR)"
+	cp -f mlpost.cmo mlpost.cmi META $(CMA) "$(LIBDIR)"
 	mkdir -p $(BINDIR)
 	cp -f tool.byte $(BINDIR)/mlpost
 	cp -f mlpost.1 $(MANDIR)/man1
 
 install-opt: $(CMXA) tool.opt
 	mkdir -p $(LIBDIR)
-	cp -f mlpost.cmo mlpost.cmi $(CMA) "$(LIBDIR)"
+	cp -f mlpost.cmo mlpost.cmi META $(CMA) "$(LIBDIR)"
 	cp -f mlpost$(LIBEXT) mlpost.cmx $(CMXA) "$(LIBDIR)"
 	mkdir -p $(BINDIR)
 	cp -f tool.opt $(BINDIR)/mlpost
@@ -250,7 +253,7 @@ www/version.prehtml: Makefile
 	echo "<#def version>$(MLPOSTVERSION)</#def>" > www/version.prehtml
 
 export-examples: 
-	make -C examples
+	$(MAKEEXAMPLES)
 	cp -f --parents examples/*.png examples/*.html $(WWW)
 
 # literate programming
@@ -334,7 +337,7 @@ clean::
 	rm -f $(GENERATED) parser.output
 	rm -f $(NAME).cma $(NAME).cmxa $(NAME).a
 	rm -f *.aux *.log $(NAME).tex $(NAME).dvi $(NAME).ps
-	rm -f *.opt test.dvi test.ps *.exe
+	rm -f *.opt *.byte test.dvi test.ps *.exe
 
 cleaner:: clean
 	make -C test clean
