@@ -213,7 +213,7 @@ FTP = $(WWW)/download
 
 FILES = *.ml *.mli *.mll \
 	Makefile.in configure configure.in .depend \
-	.depend README.txt INSTALL LICENSE CHANGES FAQ META.in version.ml.in mlpost.1
+	README.txt INSTALL LICENSE CHANGES FAQ META.in version.ml.in mlpost.1
 EXFILES = examples/Makefile examples/*.ml examples/all.template\
 	  examples/index.html examples/parse.mll examples/README examples/automaton4.tex
 LATEXFILES = latex/*sty latex/*tex latex/README
