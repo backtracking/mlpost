@@ -589,6 +589,53 @@ let rubik =
        iter 0 2 (fun i -> iter 0 2 (up i));
        iter 0 2 (fun i -> iter 0 2 (left i));]
 
+(*parse >> <<football *)
+
+(* football field of length 2w and width 2h *)
+let football_field w h =
+  let green = Color.rgb 0.1 0.8 0.1 in
+  let white = Color.white in
+  (* scale : one meter = 2 bp *)
+  let u x = Num.bp (2. *. x) in
+  let pt x y = Point.pt (u x, u y) in
+  (* shapes *)
+  let rect x1 y1 x2 y2 =
+    pathp ~style:jLine ~cycle:jLine [pt x1 y1; pt x1 y2; pt x2 y2; pt x2 y1]
+  in
+  let circle x y r =
+    Path.shift (pt x y) (Path.scale (u (2. *. r)) Path.fullcircle)
+  in
+  (* line width = 0.1 +- 0.02 meters *)
+  let pen = Pen.scale (u 0.24) Pen.circle in
+  let plot x y = 
+    Command.draw 
+      ~color:white ~pen:(Pen.scale (u 0.3) Pen.circle) (pathp [pt x y])
+  in
+  let line = Command.draw ~pen ~color:white in
+  let half =
+    fill ~color:green (rect 0. (-.h -. 2.) (w+.2.) (h+.2.)) ++
+    let field = rect 0. (-.h) w h in
+    line field ++
+    (* corners *)
+    line (cut_after field (cut_before field (circle w h 1.))) ++
+    line (cut_after field (cut_before field (circle w (-.h) 1.))) ++
+    plot (w -. 11.) 0. ++
+    let penalty_area = 
+      let hr = 7.32 /. 2. +. 16.5 in
+      rect w hr (w -. 16.5) (-. hr)
+    in
+    line penalty_area ++
+    line (cut_after penalty_area 
+	    (cut_before penalty_area (circle (w -. 11.) 0. 9.15))) ++
+    line (let hr = 7.32 /. 2. +. 5.5 in rect w hr (w -. 5.5) (-. hr)) 
+  in
+  half ++ 
+  draw_pic (Picture.rotate 180. (Picture.make half)) ++
+  line (circle 0. 0. 9.15) ++
+  plot 0. 0.
+
+let football = football_field 50. 35.
+
 (*parse >> <<test *)
 
 let (++) x y = pt (cm x, cm y)
@@ -606,6 +653,7 @@ let test =
         ~pos:`Upright (Picture.tex "foo") (Box.west a) (Box.south_east b);
         box_arrow ~color:Color.blue a b;
     ]
+
 (*parse >> *)
 
 let _ = 
@@ -622,5 +670,6 @@ let _ =
     "proval", proval;
     "randtree", randtree;
     "rubik", rubik;
+    "football", football;
     "test", test;
   ]

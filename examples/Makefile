@@ -12,7 +12,7 @@ PATHOUTFILES := $(PATHPNGFILES:.png=.1)
 # all files that are generated from misc.ml
 MISCPNGFILES := bresenham.png cfg.png chess.png diag1.png diag2.png\
 		drums.png escher.png other208.png proval.png\
-		randtree.png rubik.png test.png lattice.png
+		randtree.png rubik.png test.png lattice.png football.png
 MISCOUTFILES := $(MISCPNGFILES:.png=.1)
 
 # all files that are generated from tree.ml
