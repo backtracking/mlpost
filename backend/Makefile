@@ -1,32 +1,42 @@
 all: dviinterp
 
 dviinterp: dviinterp.ml dvi tfm
-	ocamlfind ocamlc dvi.cmo tfm.cmo \
+	ocamlfind ocamlopt dvi.cmx tfm.cmx \
 	-package bitstring,bitstring.syntax -syntax bitstring.syntax \
 	-linkpkg dviinterp.ml -dtypes -o dviinterp
+	ocamlfind ocamlopt dvi.cmx tfm.cmx dviinterp.cmx \
+	-package bitstring,bitstring.syntax -syntax bitstring.syntax \
+	-linkpkg testdviinterp.ml -dtypes -o testdviinterp
 
 dvi: dvi.ml
-	ocamlfind ocamlc -c -dtypes \
+	ocamlfind ocamlopt -c -dtypes \
 	-package bitstring,bitstring.syntax -syntax bitstring.syntax \
 	-linkpkg dvi.ml
-	ocamlfind ocamlc dvi.cmo \
+	ocamlfind ocamlopt dvi.cmx \
 	-package bitstring,bitstring.syntax -syntax bitstring.syntax \
-	-linkpkg testdvi.ml -dtypes -o dvi
+	-linkpkg testdvi.ml -dtypes -o testdvi
+
+dvicairo : dviinterp dvicairo.ml
+	ocamlfind ocamlopt \
+	-package bitstring,bitstring.syntax,lablgtk2,cairo,cairo.lablgtk2 \
+	-linkpkg \
+	gtkInit.cmx dvi.cmx tfm.cmx dviinterp.cmx \
+	dvicairo.ml -dtypes -o dvicairo
 
 tfm: tfm.ml
-	ocamlfind ocamlc -c -dtypes \
+	ocamlfind ocamlopt -c -dtypes \
 	-package bitstring,bitstring.syntax -syntax bitstring.syntax \
 	-linkpkg tfm.ml -dtypes
-	ocamlfind ocamlc tfm.cmo \
+	ocamlfind ocamlopt tfm.cmx \
 	-package bitstring,bitstring.syntax -syntax bitstring.syntax \
 	-linkpkg testtfm.ml -dtypes -o tfm
 
 
-testdvi:
-	./dvi hello.dvi math.dvi jfla.dvi
+test: testdvi
+	./testdvi hello.dvi math.dvi jfla.dvi
 
 testtfm:
 	./tfm cmr10.tfm cmmi10.tfm cmsy10.tfm
 
 clean:
-	rm -f dviinterp dvi tfm *.cmi *.cmo *.annot *~
+	rm -f dvicairo testdviinterp dvi tfm *.cmi *.cmo *.annot *~
