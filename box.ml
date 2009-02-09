@@ -401,20 +401,36 @@ let shadow b =
 let get_pen b = b.pen
 let set_pen p b = { b with pen = Some p }
 
-(* place the box [b] inside the rectangular region defined by upper left
-   corner [x,y], width [w] and height [h], according to alignment [pos] *)
-let place_box pos x y w h b =
-  let xb = match pos with
-    | `Center | `Top | `Bot -> x +/ w /./ 2.
-    | `Left | `Upleft | `Lowleft -> x +/ width b /./ 2.
-    | `Right | `Upright | `Lowright -> x +/ w -/ width b /./ 2.
+(* place the box [b] inside the rectangular region defined by the corner
+   corner [corner,x,y], width [w] and height [h], 
+   according to alignment [pos] *)
+let place_box corner pos x y w h b =
+  let xl = (* x-coordinate of the left border *)
+    match corner with
+    | `Upleft | `Lowleft | `Left -> x
+    | `Center | `Top | `Bot -> x -/ w /./ 2.
+    | `Right | `Upright | `Lowright -> x -/ w
+  in
+  let xb = 
+    match pos with
+    | `Upleft | `Lowleft | `Left -> xl +/ width b /./ 2.
+    | `Center | `Top | `Bot -> xl +/ w /./ 2.
+    | `Right | `Upright | `Lowright -> xl +/ w -/ width b /./ 2.
+  in
+  let yu = (* coordinate of the upper border *)
+    match corner with
+    | `Center | `Left | `Right -> y -/ h /./ 2.
+    | `Top | `Upright | `Upleft -> y 
+    | `Bot | `Lowleft | `Lowright -> y -/ h
   in
   let yb = match pos with
-    | `Center | `Left | `Right -> y -/ h /./ 2.
     | `Top | `Upright | `Upleft -> y -/ height b /./ 2.
+    | `Center | `Left | `Right -> yu -/ h /./ 2.
     | `Bot | `Lowleft | `Lowright -> y -/ h +/ height b /./ 2.
   in
     center (Point.pt (xb, yb)) b
+
+let place_box pos x y w h b = place_box `Upleft pos x y w h b
 
 let tabularl ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?(pos=`Center) pll =
   if pll = [] then invalid_arg "Box.tabular: empty list";
