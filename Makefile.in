@@ -155,8 +155,8 @@ other.byte: $(CMA) othergraphs.ml
 	gv test/othergraphs.ps
 
 .PHONY: check-examples
-MLPOST:=../tool.opt -ccopt "-I ../ " -v 
-MAKEEXAMPLES=make -C examples MLPOST='$(MLPOST)'
+SUBDIRMLPOST:=../tool.opt -ccopt "-I ../ " -v -ps
+MAKEEXAMPLES=make -C examples MLPOST='$(SUBDIRMLPOST)'
 
 check-examples: mlpost.cma tool.opt
 	$(MAKEEXAMPLES) boxes.dummy
@@ -217,6 +217,7 @@ FILES = *.ml *.mli *.mll \
 	README.txt INSTALL LICENSE CHANGES FAQ META.in version.ml.in mlpost.1
 EXFILES = examples/Makefile examples/*.ml examples/all.template\
 	  examples/index.html examples/parse.mll examples/README examples/automaton4.tex
+DOCFILES = doc/Makefile doc/*.ml doc/all.template\ doc/
 LATEXFILES = latex/*sty latex/*tex latex/README
 
 export: export-source export-www export-examples export-doc
@@ -230,6 +231,8 @@ source:
 	cp $(FILES) export/$(EXPORTDIR)
 	mkdir -p export/$(EXPORTDIR)/examples
 	cp $(EXFILES) export/$(EXPORTDIR)/examples
+	mkdir -p export/$(EXPORTDIR)/doc
+	cp $(DOCFILES) export/$(EXPORTDIR)/doc
 	mkdir -p export/$(EXPORTDIR)/latex
 	cp $(LATEXFILES) export/$(EXPORTDIR)/latex
 	cd export ; tar cf $(TAR) $(EXPORTDIR) ; gzip -f --best $(TAR)
@@ -239,12 +242,17 @@ DOCFILES:=$(shell echo *.mli)
 DOCFILES:=$(filter-out types.mli, $(DOCFILES))
 
 .PHONY: doc
-doc: mlpost.mli
-	mkdir -p doc
-	ocamldoc -html -hide Mlpost -d doc mlpost.mli
+doc: doc/index.html
+	make -C doc MLPOST='$(SUBDIRMLPOST)'
+
+doc/index.html: mlpost.mli customdoc/img.cmo
+	ocamldoc -hide Mlpost -g customdoc/img.cmo -d doc mlpost.mli
+
+customdoc/img.cmo: customdoc/img.ml
+	make -C customdoc
 
 export-doc: doc
-	cp -r doc $(WWW)/doc
+	cp -r doc/*.html doc/*.png doc/style.css $(WWW)/doc
 
 export-www: www/version.prehtml
 	make -C www

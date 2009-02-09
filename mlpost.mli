@@ -808,7 +808,8 @@ and Box : sig
     (** [path p] creates a new box containing the path [p] *)
 
   val tex : ?style:style -> string box_creator
-    (** [tex s] creates a new box containing the LaTeX string [s] *)
+    (** [tex s] creates a new box containing the LaTeX string [s]
+     @img tex.png *)
 
   val box : ?style:style -> t box_creator
     (** [box b] creates a new box containing the box [b] *)
@@ -816,27 +817,32 @@ and Box : sig
   val circle : t box_creator
     (** [circle pic] creates a circle box containing the picture
     [pic]. Optional padding is given by arguments [dx] and [dy]; 
-    default is 2bp. *)
+    default is 2bp.
+    @img circle.png *)
 
   val ellipse : t box_creator
     (** [ellipse p pic] creates a elliptic box containing the picture
 	[pic]. Optional padding is given by arguments [dx] and [dy]; 
-	default is 2bp *)
+	default is 2bp
+    @img ellipse.png *)
 
   val rect :  t box_creator
     (** [rect p pic] creates a rectangular box containing the picture
 	[pic]. Optional padding is given by arguments [dx] and [dy]; 
-	default is 2bp. *)
+	default is 2bp.
+    @img rect.png *)
 
   val round_rect : t box_creator
     (** [round_rect p pic] creates a rectangular box containing the picture 
 	[pic], with rounded corners. Optional padding is given by [dx] 
-	and [dy]; default is 2bp *)
+	and [dy]; default is 2bp
+    @img round_rect.png *)
 
   val patatoid : t box_creator
     (** [patatoid p pic] creates an undefined, vaguely rectangular box 
 	containing the picture [pic]. It may happen that the content 
-	overlaps with the box. *)
+	overlaps with the box.
+    @img patatoid.png *)
 
 (***
   val round_rect_gen : ?dx:Num.t -> ?dy:Num.t -> ?rx:Num.t -> ?ry:Num.t -> 
@@ -852,14 +858,23 @@ and Box : sig
   (** {2 Special points on a box} *)
 
   val ctr : t -> Point.t
+  (** @img ctr.png *)
   val north : t -> Point.t
+  (** @img north.png *)
   val south : t -> Point.t
+  (** @img south.png *)
   val west  : t -> Point.t
+  (** @img west.png *)
   val east  : t -> Point.t 
+  (** @img east.png *)
   val north_west : t -> Point.t
+  (** @img north_west.png *)
   val south_west : t -> Point.t
+  (** @img south_west.png *)
   val north_east : t -> Point.t
+  (** @img north_east.png *)
   val south_east : t -> Point.t
+  (** @img south_east.png *)
 
   (** {2 Operators} *)
 
