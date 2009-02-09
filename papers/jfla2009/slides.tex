@@ -69,7 +69,9 @@ comment réaliser des figures utilisant des calculs ?
 \begin{columns}
 \column{0.4\textwidth}  
 \begin{center}
-  \includegraphics{bresenham.mps}
+  \includegraphics{bresenham.mps}\\
+  \medskip
+  l'algorithme de Bresenham
 \end{center}
 \column{0.6\textwidth}  
 \begin{center}
@@ -129,7 +131,7 @@ comment réaliser des figures utilisant des calculs ?
   un projet similaire utilisant Haskell : \fmpost
 \end{frame}
 
-\begin{frame}\frametitle{Utilisation de \mlpost}
+\begin{frame}\frametitle{Fonctionnement de \mlpost}
 \begin{center}
 \includegraphics[width=\textwidth]{stages.mps}
 \bigskip
@@ -137,12 +139,11 @@ comment réaliser des figures utilisant des calculs ?
 \begin{minipage}{.35\textwidth}
 \begin{alltt}\small
 open Mlpost\\
-let figure = ...\\
-emit (draw figure)
+let figure = draw ...
 \end{alltt}
 \end{minipage}
 \begin{minipage}{.33\textwidth}
-\begin{alltt}
+\begin{alltt}\small
 beginfig(1)\\
 ~~draw ...;\\
 ~~...\\
