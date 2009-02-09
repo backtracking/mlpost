@@ -1,14 +1,14 @@
-all: dviinterp
+all: testdviinterp
 
-dviinterp: dviinterp.ml dvi tfm
+testdviinterp: dviinterp.ml testdvi tfm
 	ocamlfind ocamlopt dvi.cmx tfm.cmx \
 	-package bitstring,bitstring.syntax -syntax bitstring.syntax \
-	-linkpkg dviinterp.ml -dtypes -o dviinterp
+	-linkpkg dviinterp.ml -dtypes
 	ocamlfind ocamlopt dvi.cmx tfm.cmx dviinterp.cmx \
 	-package bitstring,bitstring.syntax -syntax bitstring.syntax \
 	-linkpkg testdviinterp.ml -dtypes -o testdviinterp
 
-dvi: dvi.ml
+testdvi: dvi.ml
 	ocamlfind ocamlopt -c -dtypes \
 	-package bitstring,bitstring.syntax -syntax bitstring.syntax \
 	-linkpkg dvi.ml
@@ -16,7 +16,7 @@ dvi: dvi.ml
 	-package bitstring,bitstring.syntax -syntax bitstring.syntax \
 	-linkpkg testdvi.ml -dtypes -o testdvi
 
-dvicairo : dviinterp dvicairo.ml
+dvicairo : testdviinterp dvicairo.ml
 	ocamlfind ocamlopt \
 	-package bitstring,bitstring.syntax,lablgtk2,cairo,cairo.lablgtk2 \
 	-linkpkg \
@@ -39,4 +39,4 @@ testtfm:
 	./tfm cmr10.tfm cmmi10.tfm cmsy10.tfm
 
 clean:
-	rm -f dvicairo testdviinterp dvi tfm *.cmi *.cmo *.annot *~
+	rm -f dvicairo testdviinterp testdvi tfm *.cmi *.cmo *.cmx *.annot *~

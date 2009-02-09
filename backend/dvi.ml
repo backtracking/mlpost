@@ -192,6 +192,16 @@ let page_counters bits =
 	[| c0; c1; c2; c3; c4; c5; c6; c7; c8; c9 |], prev, bits
     | { _ : -1 : bitstring } ->
 	dvi_error "Ill-formed counters after bop"
+
+let signed i j unsigned =
+  if Int32.zero = Int32.logand unsigned i then
+    unsigned
+  else
+    Int32.logor unsigned j
+
+let signed_8 = signed (Int32.shift_left Int32.one 23) (Int32.logxor Int32.minus_one (Int32.of_int 0xff))
+let signed_16 = signed (Int32.shift_left Int32.one 15) (Int32.logxor Int32.minus_one (Int32.of_int 0xffff))
+let signed_24 = signed (Int32.shift_left Int32.one 23) (Int32.logxor Int32.minus_one (Int32.of_int 0xffffff))
 	
 let command bits = 
   bitmatch bits with
@@ -227,65 +237,66 @@ let command bits =
     | { 142 : 8; bits : -1 : bitstring } ->
 	Pop, bits
       (* Moving to the right *)
-    | { 143 : 8; b : 8; bits : -1 : bitstring } ->
-	Right (Int32.of_int b), bits
-    | { 144 : 8; b : 16; bits : -1 : bitstring } ->
-	Right (Int32.of_int b), bits
-    | { 145 : 8; b : 24; bits : -1 : bitstring } ->
-	Right (Int32.of_int b), bits
-    | { 146 : 8; b : 32; bits : -1 : bitstring } ->
+          (* Must be signed but bitstring 2.0.0 fails*)
+    | { 143 : 8; b : 8 ; bits : -1 : bitstring } ->
+	Right (signed_8 (Int32.of_int b)), bits
+    | { 144 : 8; b : 16 ; bits : -1 : bitstring } ->
+	Right (signed_16 (Int32.of_int b)), bits
+    | { 145 : 8; b : 24 ; bits : -1 : bitstring } ->
+	Right (signed_24 (Int32.of_int b)), bits
+    | { 146 : 8; b : 32 ; bits : -1 : bitstring } ->
 	Right b, bits
       (* Moving/spacing to the right w *)
     | { 147 : 8; bits : -1 : bitstring } ->
 	Wdefault, bits
     | { 148 : 8; b : 8; bits : -1 : bitstring } ->
-	W (Int32.of_int b), bits
+	W (signed_8 (Int32.of_int b)), bits
     | { 149 : 8; b : 16; bits : -1 : bitstring } ->
-	W (Int32.of_int b), bits
+	W (signed_16 (Int32.of_int b)), bits
     | { 150 : 8; b : 24; bits : -1 : bitstring } ->
-	W (Int32.of_int b), bits
+	W (signed_24 (Int32.of_int b)), bits
     | { 151 : 8; b : 32; bits : -1 : bitstring } ->
 	W b, bits
       (* Moving/spacing to the right x *)
     | { 152 : 8; bits : -1 : bitstring } ->
 	Xdefault, bits
     | { 153 : 8; b : 8; bits : -1 : bitstring } ->
-	X (Int32.of_int b), bits
+	X (signed_8 (Int32.of_int b)), bits
     | { 154 : 8; b : 16; bits : -1 : bitstring } ->
-	X (Int32.of_int b), bits
+	X (signed_16 (Int32.of_int b)), bits
     | { 155 : 8; b : 24; bits : -1 : bitstring } ->
-	X (Int32.of_int b), bits
+	X (signed_24 (Int32.of_int b)), bits
     | { 156 : 8; b : 32; bits : -1 : bitstring } ->
 	X b, bits
       (* Moving down *)
     | { 157 : 8; a : 8; bits : -1 : bitstring } ->
-	Down (Int32.of_int a), bits
+	Down (signed_8 (Int32.of_int a)), bits
     | { 158 : 8; a : 16; bits : -1 : bitstring } ->
-	Down (Int32.of_int a), bits
+	Down (signed_16 (Int32.of_int a)), bits
     | { 159 : 8; a : 24; bits : -1 : bitstring } ->
-	Down (Int32.of_int a), bits
+	Down (signed_24 (Int32.of_int a)), bits
     | { 160 : 8; a : 32; bits : -1 : bitstring } ->
 	Down a, bits
       (* Moving/spacing down y *)
     | { 161 : 8; bits : -1 : bitstring } ->
 	Ydefault, bits
     | { 162 : 8; a : 8; bits : -1 : bitstring } ->
-	Y (Int32.of_int a), bits
+	Y (signed_8 (Int32.of_int a)), bits
     | { 163 : 8; a : 16; bits : -1 : bitstring } ->
-	Y (Int32.of_int a), bits
+	Y (signed_16 (Int32.of_int a)), bits
     | { 164 : 8; a : 24; bits : -1 : bitstring } ->
-	Y (Int32.of_int a), bits
+	Y (signed_24 (Int32.of_int a)), bits
     | { 165 : 8; a : 32; bits : -1 : bitstring } ->
 	Y a, bits
       (* Moving/spacing down z *)
     | { 166 : 8; bits : -1 : bitstring } ->
 	Zdefault, bits
     | { 167 : 8; a : 8; bits : -1 : bitstring } ->
-	Z (Int32.of_int a), bits
+	Z (signed_8 (Int32.of_int a)), bits
     | { 168 : 8; a : 16; bits : -1 : bitstring } ->
-	Z (Int32.of_int a), bits
+	Z (signed_16 (Int32.of_int a)), bits
     | { 169 : 8; a : 24; bits : -1 : bitstring } ->
-	Z (Int32.of_int a), bits
+	Z (signed_24 (Int32.of_int a)), bits
     | { 170 : 8; a : 32; bits : -1 : bitstring } ->
 	Z a, bits
       (* Setting Fonts *)

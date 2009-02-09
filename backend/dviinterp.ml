@@ -33,8 +33,8 @@ module Interp
      sig
        type t
        val reset : unit -> t
-       val fill_rect : t -> Int32.t -> Int32.t -> Int32.t -> Int32.t -> unit
-       val draw_char : t -> string -> Int32.t -> Int32.t -> Int32.t -> unit
+       val fill_rect : t -> float -> float -> float -> float -> unit
+       val draw_char : t -> string -> Int32.t -> float -> float -> unit
      end) =
 struct
   let debug = ref true
@@ -42,6 +42,7 @@ struct
   let current_font = ref Int32.zero
   let stack : state Stack.t = Stack.create ()
   let dev = ref (Dev.reset ())
+  let conv = ref 1.
   let set_debug = (:=) debug
 
   let reset () = 
@@ -58,16 +59,16 @@ struct
       s.h s.v s.w s.x s.y s.z
 
   let put_char s font code =
-      let x = s.h
-      and y = s.v in
+      let x = !conv *. (Int32.to_float s.h)
+      and y = !conv *. (Int32.to_float s.v) in
       Dev.draw_char !dev font code x y
 
   let put_rule s a b =
-    let x = s.h
-    and y = s.v
-    and w = b
-    and h = a in
-    Dev.fill_rect !dev x (Int32.sub y h) w h
+    let x = !conv *. (Int32.to_float s.h)
+    and y = !conv *. (Int32.to_float s.v)
+    and w = !conv *. (Int32.to_float b)
+    and h = !conv *. (Int32.to_float a) in
+    Dev.fill_rect !dev x (y -. h) w h
 
   let interp_command (fm,fn) s = function  
     | SetChar c -> 
@@ -186,6 +187,10 @@ struct
 
   let load_doc doc =
     let fonts = load_fonts doc.preamble.pre_mag doc.font_map in
+    conv := (((Int32.to_float doc.preamble.pre_mag) *.
+                (Int32.to_float doc.preamble.pre_num)) /.
+               (1000. *. 
+                  (Int32.to_float doc.preamble.pre_den)));
     List.map (fun p -> 
 		 printf "#### Starting New Page ####@.";
 		 interp_page fonts p)
