@@ -589,6 +589,18 @@ let cpath ?style ?outd ?ind a b =
   let p = pathk ?style [knotp ?r (ctr a); knotp ?l (ctr b)] in
   cut_after (bpath b) (cut_before (bpath a) p)
 
+let cpath_left ?style ?outd ?ind a b =
+  let r,l = outd, ind in
+  let p = pathk ?style [knotp ?r (ctr a); knotp ?l b] in
+  cut_before (bpath a) p
+
+let cpath_right ?style ?outd ?ind a b =
+  let r,l = outd, ind in
+  let p = pathk ?style [knotp ?r a; knotp ?l (ctr b)] in
+  cut_after (bpath b) p
+
+(* (* Deleted because of circular dependency with the Arrow module.
+It did not seem to be used anyway. *)
 let thick_arrow ?style ?(boxed=true) ?line_color ?fill_color ?outd ?ind ?width
     ?head_length ?head_width a b =
   let p = cpath a b in
@@ -596,5 +608,4 @@ let thick_arrow ?style ?(boxed=true) ?line_color ?fill_color ?outd ?ind ?width
   let pb = Path.point 1. p in
   Arrow.draw_thick ?style ~boxed ?line_color ?fill_color ?outd ?ind ?width
     ?head_length ?head_width pa pb
-
-
+*)

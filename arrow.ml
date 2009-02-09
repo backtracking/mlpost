@@ -149,7 +149,7 @@ let classic = add_head (add_line empty)
 let triangle = add_head ~head: head_triangle (add_line empty)
 let triangle_full = add_head ~head: head_triangle_full (add_line empty)
 
-let draw ?(kind = triangle_full) ?tex ?pos path =
+let draw ?(kind = triangle_full) ?tex ?(pos = 0.5) ?anchor path =
   let lines, belts = kind.lines, kind.belts in
   let lines = List.map (make_arrow_line path) lines in
   let belts = List.map (make_arrow_belt path) belts in
@@ -159,15 +159,25 @@ let draw ?(kind = triangle_full) ?tex ?pos path =
   let belts = List.map (fun (_, x, _) -> x) belts in
   let labels = match tex with
     | None -> []
-    | Some tex -> [Command.label ?pos (Picture.tex tex) (point_on_path 0.5 path)]
+    | Some tex ->
+        [Command.label ?pos: anchor (Picture.tex tex) (point_on_path pos path)]
   in
   Command.seq (lines @ belts @ labels)
 
 (* Instances *)
 
-let draw2 ?kind ?tex ?pos ?outd ?ind a b =
+let point_to_point ?kind ?tex ?pos ?anchor ?outd ?ind a b =
   let r, l = outd, ind in
-  draw ?kind ?tex ?pos (Path.pathk [Path.knotp ?r a; Path.knotp ?l b])
+  draw ?kind ?tex ?pos ?anchor (Path.pathk [Path.knotp ?r a; Path.knotp ?l b])
+
+let box_to_box ?kind ?tex ?pos ?anchor ?outd ?ind a b =
+  draw ?kind ?tex ?pos ?anchor (Box.cpath ?outd ?ind a b)
+
+let box_to_point ?kind ?tex ?pos ?anchor ?outd ?ind a b =
+  draw ?kind ?tex ?pos ?anchor (Box.cpath_left ?outd ?ind a b)
+
+let point_to_box ?kind ?tex ?pos ?anchor ?outd ?ind a b =
+  draw ?kind ?tex ?pos ?anchor (Box.cpath_right ?outd ?ind a b)
 
 (*******************************************************************************)
 (*                                 To be sorted                                *)

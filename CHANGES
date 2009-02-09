@@ -2,6 +2,8 @@ o - changes in behaviour, new features
 * - incompatible changes in the interface
 
 * mlpost tool: -pdf now the default; use -ps to produce .1 files
+* Arrow.draw: ~pos becomes ~anchor, new ~pos is point on path
+* Arrow.draw2 becomes Arrow.point_to_point
 
 version 0.6, February 4th, 2009
 -------------------------

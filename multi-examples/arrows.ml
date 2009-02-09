@@ -37,24 +37,24 @@ let serial_lines =
                 Arrow.empty))))
 
 let () =
-  emit (Arrow.draw2 a d);
-  emit (Arrow.draw2 b c);
-  emit (Arrow.draw2 c b);
-  emit (Arrow.draw2 a b);
+  emit (Arrow.point_to_point a d);
+  emit (Arrow.point_to_point b c);
+  emit (Arrow.point_to_point c b);
+  emit (Arrow.point_to_point a b);
   (* Some curved arrows *)
-  emit (Arrow.draw2 ~outd: up a d);
-  emit (Arrow.draw2 ~outd: up b c);
-  emit (Arrow.draw2 ~outd: right c b);
-  emit (Arrow.draw2 ~outd: up a b);
+  emit (Arrow.point_to_point ~outd: up a d);
+  emit (Arrow.point_to_point ~outd: up b c);
+  emit (Arrow.point_to_point ~outd: right c b);
+  emit (Arrow.point_to_point ~outd: up a b);
   (* Some double-headed arrows *)
-  emit (Arrow.draw2 ~kind: double_headed a d);
-  emit (Arrow.draw2 ~kind: double_headed ~outd: right c b);
+  emit (Arrow.point_to_point ~kind: double_headed a d);
+  emit (Arrow.point_to_point ~kind: double_headed ~outd: right c b);
   (* Some multiple-headed arrows *)
-  emit (Arrow.draw2 ~kind: multiple_headed a d);
-  emit (Arrow.draw2 ~kind: multiple_headed ~outd: right c b);
+  emit (Arrow.point_to_point ~kind: multiple_headed a d);
+  emit (Arrow.point_to_point ~kind: multiple_headed ~outd: right c b);
   (* Some arrows with multiple serial lines *)
-  emit (Arrow.draw2 ~kind: serial_lines a d);
-  emit (Arrow.draw2 ~kind: serial_lines ~outd: right c b);
+  emit (Arrow.point_to_point ~kind: serial_lines a d);
+  emit (Arrow.point_to_point ~kind: serial_lines ~outd: right c b);
   (* A straight thick arrow *)
   emit (Arrow.draw_thick a d);
   emit (Arrow.draw_thick b c);

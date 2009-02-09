@@ -1002,6 +1002,20 @@ and Box : sig
     ?ind:Path.direction -> t -> t -> Path.t
     (** the path that connects 2 boxes and stops at the box boundaries *) 
 
+  val cpath_left :
+    ?style:Path.joint ->
+    ?outd:Path.direction ->
+    ?ind:Path.direction -> t -> Point.t -> Path.t
+    (** the path that connects a box and a point and stops at the box
+        boundaries *) 
+
+  val cpath_right :
+    ?style:Path.joint ->
+    ?outd:Path.direction ->
+    ?ind:Path.direction -> Point.t -> t -> Path.t
+    (** the path that connects a box and a point and stops at the box
+        boundaries *) 
+
   val transform : Transform.t -> t -> t
 
   val scale : Num.t -> t -> t
@@ -1083,22 +1097,56 @@ module Arrow : sig
 
   (** {2 Drawing Arrows} *)
 
-  val draw: ?kind: kind -> ?tex: string -> ?pos: Command.position -> Path.t ->
+  (** If you need to place a label which is not TeX but any picture, if 
+      you need to place it at a symbolic position on the path,
+      or if you need to place more than one label, you cannot do it directly
+      using the [draw] commands. First draw the arrow, then use functions such
+      as {!Command.label}. *)
+
+  val draw: ?kind: kind -> ?tex: string -> ?pos: float ->
+    ?anchor: Command.position -> Path.t ->
     Command.t
     (** Draw an arrow following the given path.
         @param kind the kind of arrow (default is {!triangle_full})
         @param tex add a LaTeX label
-        @param pos label position *)
+        @param pos label position on the path
+        @param anchor label anchor *)
 
-  val draw2: ?kind: kind -> ?tex: string -> ?pos: Command.position ->
+  val point_to_point: ?kind: kind -> ?tex: string -> ?pos: float ->
+    ?anchor: Command.position ->
     ?outd: Path.direction -> ?ind: Path.direction -> Point.t -> Point.t ->
     Command.t
-    (** Use [draw2 a b] to draw an arrow from [a] to [b].
+    (** Use [point_to_point a b] to draw an arrow from [a] to [b].
         @param kind the kind of arrow (default is {!triangle_full})
         @param tex add a LaTeX label
-        @param pos label position
+        @param pos label position on the path
+        @param anchor label anchor
         @param outd the outgoing direction, at the beginning of the arrow
         @param ind the ingoing direction, at the end of the arrow *)
+
+  val box_to_box: ?kind: kind -> ?tex: string -> ?pos: float ->
+    ?anchor: Command.position ->
+    ?outd: Path.direction -> ?ind: Path.direction -> Box.t -> Box.t ->
+    Command.t
+    (** Use [box_to_box] to draw an arrow from [a] to [b], stopping at the
+        box boundaries. The arguments are the same as those of
+        [point_to_point]. *)
+
+  val point_to_box: ?kind: kind -> ?tex: string -> ?pos: float ->
+    ?anchor: Command.position ->
+    ?outd: Path.direction -> ?ind: Path.direction -> Point.t -> Box.t ->
+    Command.t
+    (** Use [point_to_box] to draw an arrow from [a] to [b], stopping at the
+        box boundaries. The arguments are the same as those of
+        [point_to_point]. *)
+
+  val box_to_point: ?kind: kind -> ?tex: string -> ?pos: float ->
+    ?anchor: Command.position ->
+    ?outd: Path.direction -> ?ind: Path.direction -> Box.t -> Point.t ->
+    Command.t
+    (** Use [box_to_point] to draw an arrow from [a] to [b], stopping at the
+        box boundaries. The arguments are the same as those of
+        [point_to_point]. *)
 
   (** {2 Built-in Kinds} *)
 
