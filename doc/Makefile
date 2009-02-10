@@ -1,7 +1,8 @@
 MLPOST:=mlpost -v
 TARGETS:= circle.png rect.png ellipse.png round_rect.png patatoid.png tex.png\
           ctr.png north.png south.png west.png east.png north_west.png \
-	  south_west.png north_east.png south_east.png
+	  south_west.png north_east.png south_east.png width.png height.png\
+	  shift.png center.png
 
 targets: $(TARGETS)
          

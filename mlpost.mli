@@ -878,16 +878,18 @@ and Box : sig
 
   (** {2 Operators} *)
 
-  val ctr : t -> Point.t
-  (** return the center of the object *)
   val height : t -> Num.t
-  (** return the height of the object *)
+  (** return the height of the box 
+   @img height.png *)
   val width : t -> Num.t
-  (** return the width of the object *)
+  (** return the width of the box 
+   @img width.png *)
   val shift : Point.t -> t -> t
-  (** [shift pt x] shifts the object [x] about the point [pt]  *)
+  (** [shift pt x] shifts the box [x] about the point [pt] 
+   @img shift.png *)
   val center : Point.t -> t -> t
-  (** [center pt x] centers the object [x] at the point [pt]  *)
+  (** [center pt x] centers the box [x] at the point [pt]
+   @img center.png *)
 
   val draw : ?debug:bool -> t -> Command.t
     (** Draws a box 

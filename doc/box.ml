@@ -23,6 +23,48 @@ let south_west = seq [ draw brect; dot (south_west brect) ]
 let north_east = seq [ draw brect; dot (north_east brect) ]
 let south_east = seq [ draw brect; dot (south_east brect) ]
 
+open Arrow
+let kind = add_foot (add_head (add_line empty))
+
+let cpic c = Box.pic ~stroke:None (Picture.make c)
+
+let dbl_arrow = 
+  let ar = 
+    Arrow.point_to_point ~kind Point.origin (Point.pt (bp 10.,Num.zero))
+  in
+  cpic ar
+let width = Box.draw (Box.vbox [ brect; dbl_arrow; ])
+let height = Box.draw (Box.hbox [ Box.rotate 90. dbl_arrow;  brect ])
+
+let fnstex s = Picture.tex (Format.sprintf "{\\footnotesize %s}" s)
+
+let shift = 
+  let pt = Point.pt (bp 40., bp 25.) in
+  let vec = 
+    cpic (
+      seq [Arrow.point_to_point Point.origin pt; 
+          Command.dotlabel ~pos:`Top (fnstex "pt") pt;
+          Command.dotlabel ~pos:`Bot (fnstex "(0,0)") Point.origin;
+]) in
+  let b = brect in
+  let b' = Box.shift pt b in
+  let shift = 
+    cpic ( seq [Box.draw b; Box.draw b';
+             Arrow.point_to_point (Box.ctr b) (Box.ctr b')])
+  in
+  Box.draw (Box.hbox [vec; shift])
+
+let center = 
+  let pt = Point.pt (bp 40., bp 25.) in
+  let vec = 
+      seq [Arrow.point_to_point Point.origin pt; 
+          Command.dotlabel ~pos:`Top (fnstex "pt") pt; ] in
+  let b = brect in
+  let b' = Box.center pt b in
+  seq [vec; Box.draw b; Box.draw b']
+
+
+
 
 let _ = Metapost.emit "circle" circle
 let _ = Metapost.emit "rect" rect
@@ -39,3 +81,7 @@ let _ = Metapost.emit "north_west" north_west
 let _ = Metapost.emit "south_west" south_west
 let _ = Metapost.emit "north_east" north_east
 let _ = Metapost.emit "south_east" south_east
+let _ = Metapost.emit "width" width
+let _ = Metapost.emit "height" height
+let _ = Metapost.emit "shift" shift
+let _ = Metapost.emit "center" center
