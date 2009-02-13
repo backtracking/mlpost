@@ -125,8 +125,8 @@ and path fmt = function
   | C.PACycle (d,j,p) -> fprintf fmt "%a %a %acycle" path p joint j direction d
   | C.PAConcat (k,j,p) -> fprintf fmt "%a %a@ %a" path p joint j knot k
   | C.PAKnot k -> knot fmt k
-  | C.PACutAfter (p1, p2) -> fprintf fmt "%a cutafter %a@ " path p2 path p1
-  | C.PACutBefore (p1, p2) -> fprintf fmt "%a cutbefore %a@ " path p2 path p1
+  | C.PACutAfter (p1, p2) -> fprintf fmt "%a cutafter (%a)@ " path p2 path p1
+  | C.PACutBefore (p1, p2) -> fprintf fmt "%a cutbefore (%a)@ " path p2 path p1
   | C.PABuildCycle l ->
       fprintf fmt "buildcycle(%a)" (Misc.print_list comma path) l
   | C.PASub (f1, f2, p) ->

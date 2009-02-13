@@ -24,7 +24,8 @@ let north_east = seq [ draw brect; dot (north_east brect) ]
 let south_east = seq [ draw brect; dot (south_east brect) ]
 
 open Arrow
-let kind = add_foot (add_head (add_line empty))
+let head = head_triangle_full
+let kind = add_foot ~head (add_head ~head (add_line empty))
 
 let cpic c = Box.pic ~stroke:None (Picture.make c)
 

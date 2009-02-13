@@ -242,7 +242,7 @@ DOCFILES:=$(shell echo *.mli)
 DOCFILES:=$(filter-out types.mli, $(DOCFILES))
 
 .PHONY: doc
-doc: doc/index.html
+doc: doc/index.html tool.opt
 	make -C doc MLPOST='$(SUBDIRMLPOST)'
 
 doc/index.html: mlpost.mli customdoc/img.cmo
@@ -351,6 +351,8 @@ cleaner:: clean
 	make -C test clean
 	make -C multi-examples clean
 	make -C www clean
+	make -C doc clean
+	make -C examples clean
 
 dist-clean distclean:: clean
 	rm -f Makefile config.cache config.log config.status META version.ml
