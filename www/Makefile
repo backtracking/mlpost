@@ -1,16 +1,17 @@
 
 WWW = /users/www-perso/projets/mlpost/
 
-ALL =  	index.fr.html  index.en.html index.de.html \
-         manual.fr.html manual.en.html manual.de.html\
-	 slides-jfla.pdf mlpost-jfla.pdf
+GENERATED := index.fr.html  index.en.html index.de.html \
+	   manual.fr.html manual.en.html manual.de.html
+
+ALL:= $(GENERATED) slides-jfla.pdf mlpost-jfla.pdf
 
 install: all
 	cp -f --parents $(ALL) $(WWW)
 
 all: $(ALL) 
 
-$(ALL): macros.prehtml version.prehtml
+$(GENERATED): macros.prehtml version.prehtml
 
 # RULES
 
@@ -28,4 +29,4 @@ YAMLPP=yamlpp macros.prehtml version.prehtml
 	$(YAMLPP) -l de $< -o $@
 
 clean:
-	rm -f $(ALL)
+	rm -f $(GENERATED)
