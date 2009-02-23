@@ -187,10 +187,10 @@ struct
 
   let load_doc doc =
     let fonts = load_fonts doc.preamble.pre_mag doc.font_map in
-    conv := (((Int32.to_float doc.preamble.pre_mag) *.
-                (Int32.to_float doc.preamble.pre_num)) /.
-               (1000. *. 
-                  (Int32.to_float doc.preamble.pre_den)));
+    let formule_magique_cm mag num den =
+      ((Int32.to_float mag) *. ((Int32.to_float num) /. (Int32.to_float den))) /. (10.**8.) in
+    conv := formule_magique_cm doc.preamble.pre_mag 
+      doc.preamble.pre_num doc.preamble.pre_den;
     List.map (fun p -> 
 		 printf "#### Starting New Page ####@.";
 		 interp_page fonts p)

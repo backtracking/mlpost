@@ -10,16 +10,18 @@ struct
              pic : Cairo.t;
              fonts :(string,Cairo_ft.font_face * Cairo_ft.ft_face) Hashtbl.t}
              
-      
-  let width = 450
+  let point_from_cm cm = (0.3937 *. 72.) *. cm
+  let width = int_of_float (point_from_cm 21.)
   let height = int_of_float ((float_of_int width) *. (sqrt 2.))
-  let factor = ((float_of_int width) /. 21.)*.(10.**(-.5.))
 
   let debug = ref true
   let output = `PDF
   let ft = Cairo_ft.init_freetype ()
 
   let find_font font_name = 
+    (*let prefix = (String.sub font_name 0 3) in*)
+    let font_name = (*if String.compare prefix "ec-" = 0 || String.compare prefix "rm-" = 0 then String.sub font_name 3 ((String.length font_name) - 3) 
+    else*) font_name in
     if !debug then
       printf "Cairo : Loading font %s@." font_name;
     let filename = Dviinterp.find_file (font_name^".pfb") in
@@ -68,16 +70,16 @@ struct
           fonts = Hashtbl.create 10}
 
   let fill_rect s x1 y1 x2 y2 = 
-    let x1 = factor *. x1 
-    and y1 = factor *. y1
-    and x2 = factor *. x2
-    and y2 = factor *. y2 in
+    let x1 = point_from_cm x1 
+    and y1 = point_from_cm y1
+    and x2 = point_from_cm x2
+    and y2 = point_from_cm y2 in
     if !debug then
       printf "Draw a rectangle in (%f,%f,%f,%f)@." x1 y1 x2 y2;
     Cairo.save s.pic;
     Cairo.set_source_rgb s.pic 0. 1. 0. ;
     Cairo.rectangle s.pic x1 y1 x2 y2;
-    Cairo.stroke s.pic;
+    Cairo.fill s.pic;
     Cairo.restore s.pic
 
   let draw_char s font char x y = 
@@ -88,8 +90,8 @@ struct
       Hashtbl.add s.fonts font f;
       fst f in
     let char = Int32.to_int char 
-    and x = factor *. x
-    and y = factor *. y in
+    and x = point_from_cm x
+    and y = point_from_cm y in
     if !debug then
       begin
         try
