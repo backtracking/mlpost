@@ -41,6 +41,7 @@ let set_latex_file f =
   latex_file := Some f
 let xpdf = ref false
 let use_ocamlbuild = ref false
+let classic_display = ref false
 let ccopt = ref ""
 let execopt = ref ""
 let eps = ref false
@@ -63,6 +64,8 @@ let spec = Arg.align
     "-xpdf", Set xpdf, " wysiwyg mode using xpdf remote server";
     "-v", Set verbose, " be a bit more verbose";
     "-ocamlbuild", Set use_ocamlbuild, " Use ocamlbuild to compile";
+    "-classic-display", Set classic_display,
+    " Call Ocamlbuild with -classic-display";
     "-native", Set native, " Compile to native code";
     "-ccopt", String add_ccopt, 
     "\"<options>\" Pass <options> to the Ocaml compiler";
@@ -106,6 +109,7 @@ let ocamlopt args execopt =
   if out <> 0 then exit 1
 
 let ocamlbuild args =
+  let args = if !classic_display then "-classic-display" :: args else args in
   command' ("ocamlbuild " ^ String.concat " " args)
 
 (** Return an unused file name which in the same directory as the prefix. *)
