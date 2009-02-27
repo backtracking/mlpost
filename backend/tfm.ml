@@ -1,5 +1,7 @@
 open Format
 
+let debug = ref false
+
 type file_hdr = {
   lf : int;
   lh : int;
@@ -274,6 +276,7 @@ let body fh bits =
 let read_file file =
   let bits = Bitstring.bitstring_of_file file in
   let fh, bits = file_hdr bits in
+  if !debug then
     Print.print_file_hdr std_formatter fh;
-    let body = body fh bits in
-    { file_hdr = fh; body = body }
+  let body = body fh bits in
+  { file_hdr = fh; body = body }

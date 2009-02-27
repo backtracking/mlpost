@@ -1,0 +1,7 @@
+<*.ml> or <*.native>: pkg_bitstring, pkg_bitstring.syntax
+
+"dvi.ml" or "tfm.ml" : syntax_bitstring.syntax
+
+<dvicairo.*> : pkg_lablgtk2, pkg_cairo, pkg_cairo.lablgtk2
+
+

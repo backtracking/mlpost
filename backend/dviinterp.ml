@@ -1,5 +1,6 @@
 open Format
 open Dvi
+open Fonts
 open Tfm
 
 type state = {
@@ -11,42 +12,25 @@ type state = {
   z : int32;
 }
 
-let kwhich = "kpsewhich"
-
-let find_file file =
-  let temp_fn = Filename.temp_file "font_path" "" in
-  let exit_status =
-    Sys.command
-      (Printf.sprintf "%s %s > %s" kwhich file temp_fn) in
-  if exit_status <> 0 then dvi_error "kwhich failed"
-  else
-    let cin = open_in temp_fn in
-    let n =
-      try input_line cin
-      with _ ->
-	close_in cin; Sys.remove temp_fn; dvi_error "Cannot find font"
-    in
-    close_in cin; Sys.remove temp_fn; n
-
 module Interp
   (Dev : 
      sig
        type t
        val reset : unit -> t
        val fill_rect : t -> float -> float -> float -> float -> unit
-       val draw_char : t -> string -> Int32.t -> float -> float -> unit
+       val draw_char : t -> Fonts.t -> Int32.t -> float -> float -> unit
      end) =
 struct
   let debug = ref true
-
+  let unsome = function None -> assert false | Some x -> x
   let current_font = ref Int32.zero
   let stack : state Stack.t = Stack.create ()
-  let dev = ref (Dev.reset ())
+  let dev = ref None
   let conv = ref 1.
   let set_debug = (:=) debug
 
   let reset () = 
-    dev := Dev.reset ();
+    dev := Some (Dev.reset ());
     current_font := Int32.zero;
     Stack.clear stack;
     {h=Int32.zero; v=Int32.zero; 
@@ -61,27 +45,27 @@ struct
   let put_char s font code =
       let x = !conv *. (Int32.to_float s.h)
       and y = !conv *. (Int32.to_float s.v) in
-      Dev.draw_char !dev font code x y
+      Dev.draw_char (unsome !dev) font code x y
 
   let put_rule s a b =
     let x = !conv *. (Int32.to_float s.h)
     and y = !conv *. (Int32.to_float s.v)
     and w = !conv *. (Int32.to_float b)
     and h = !conv *. (Int32.to_float a) in
-    Dev.fill_rect !dev x (y -. h) w h
+    Dev.fill_rect (unsome !dev) x (y -. h) w h
 
-  let interp_command (fm,fn) s = function  
+  let interp_command fm s = function  
     | SetChar c -> 
         if !debug then printf "Setting character %ld.@." c;
-        let (tmf, ratio) = Int32Map.find !current_font fm in
-        let idx = (Int32.to_int c) - tmf.file_hdr.bc in
-        let body = tmf.body in
+        let (font, ratio) = Int32Map.find !current_font fm in
+        let idx = (Int32.to_int c) - font.metric.file_hdr.bc in
+        let body = font.metric.body in
         let info = body.char_info.(idx) in
         let fwidth = body.width.(info.width_index) *. ratio in
         let width = Int32.of_float fwidth in
 	if !debug then printf "Character found in font %ld. Width = %ld@." 
 	  !current_font width;
-        put_char s (Int32Map.find !current_font fn) c;
+        put_char s font c;
 	{s with h = Int32.add s.h width}
     | SetRule(a, b) ->
         if !debug then printf "Setting rule (w=%ld, h=%ld).@." a b;
@@ -89,7 +73,7 @@ struct
         {s with h = Int32.add s.h b}
     | PutChar c -> 
         if !debug then printf "Putting character %ld.@." c;
-        put_char s (Int32Map.find !current_font fn) c;
+        put_char s (fst (Int32Map.find !current_font fm)) c;
         s
     | PutRule(a, b) ->
         if !debug then printf "Putting rule (w=%ld, h=%ld).@." a b;
@@ -143,7 +127,7 @@ struct
 	  
   let interp_page fm {commands = cmds} =
     ignore (List.fold_left (interp_command fm) (reset ()) (List.rev cmds));
-    !dev
+    (unsome !dev)
       
   (* type font_def = { *)
   (*   checksum : int32; *)
@@ -154,36 +138,15 @@ struct
   (* } *)
 
 
-  let load_font fd =
-    if !debug then
-      printf "Loading font %s at [%ld/%ld]...@." 
-        fd.name fd.Dvi.scale_factor fd.Dvi.design_size;
-    let filename =   
-      if fd.area <> "" then 
-        Filename.concat fd.area fd.name
-      else
-        find_file (fd.name^".tfm") in
-    if !debug then
-      printf "Trying to find metrics at %s...@." filename;
-    let tfm = Tfm.read_file filename in
-    if (Int32.compare tfm.body.header.checksum 
-	  fd.Dvi.checksum <> 0) then
-      dvi_error "Metrics checksum do not match !.@.";
-    if !debug then
-      printf "Metrics successfully loaded for font %s from %s.@." 
-	fd.name filename;
-    tfm
-
   let load_fonts mag font_map =
     let ratio fdef = 
       (Int32.to_float (Int32.mul mag fdef.Dvi.scale_factor)) 
       /. 1000. (* fdef.Dvi.design_size *)
     in
-    Int32Map.fold (fun k fdef (map1,map2) -> 
-		     Int32Map.add k (load_font fdef, ratio fdef) map1,
-                     Int32Map.add k fdef.name map2
+    Int32Map.fold (fun k fdef -> 
+		     Int32Map.add k (load_font fdef, ratio fdef)
                   )
-      font_map (Int32Map.empty,Int32Map.empty)
+      font_map Int32Map.empty
 
   let load_doc doc =
     let fonts = load_fonts doc.preamble.pre_mag doc.font_map in

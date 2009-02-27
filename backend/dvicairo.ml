@@ -1,6 +1,10 @@
 open Format
 open Dviinterp
 
+let unique =
+  let count = ref (-1) in
+  (fun x -> incr count;sprintf "%s%03i.pdf" x (!count))
+
 module Cairo_device =
 struct
   type output = [`GTK | `PDF]
@@ -14,21 +18,24 @@ struct
   let width = int_of_float (point_from_cm 21.)
   let height = int_of_float ((float_of_int width) *. (sqrt 2.))
 
-  let debug = ref true
+  let debug = ref false
   let output = `PDF
   let ft = Cairo_ft.init_freetype ()
 
-  let find_font font_name = 
-    (*let prefix = (String.sub font_name 0 3) in*)
-    let font_name = (*if String.compare prefix "ec-" = 0 || String.compare prefix "rm-" = 0 then String.sub font_name 3 ((String.length font_name) - 3) 
-    else*) font_name in
+  let find_font fonts font = 
+    try
+      Hashtbl.find fonts font.Fonts.tex_name
+    with Not_found ->
+    (let font_name = font.Fonts.tex_name in
     if !debug then
       printf "Cairo : Loading font %s@." font_name;
-    let filename = Dviinterp.find_file (font_name^".pfb") in
+    let filename = font.Fonts.glyphs_filename in
     if !debug then
       printf "Trying to find font at %s...@." filename;
     let face = Cairo_ft.new_face ft filename in
-    Cairo_ft.font_face_create_for_ft_face face 0,face
+    let f =Cairo_ft.font_face_create_for_ft_face face 0,face in
+    Hashtbl.add fonts font.Fonts.tex_name f;f)
+
 
   let clean_up s = 
     Hashtbl.iter (fun _ (_,x) -> Cairo_ft.done_face x) s.fonts
@@ -58,7 +65,7 @@ struct
            pic = cr;
            fonts = Hashtbl.create 10}
       |`PDF ->
-         let oc = open_out "dvicairo.pdf" in
+         let oc = open_out (try unique Sys.argv.(2) with _ -> "dvicairo.pdf") in
          let s = Cairo_pdf.surface_create_for_channel oc ~width_in_points:(float_of_int width) ~height_in_points:(float_of_int height) in
          let cr = Cairo.create s in
          {output = output;
@@ -83,21 +90,16 @@ struct
     Cairo.restore s.pic
 
   let draw_char s font char x y = 
-    let f = 
-      try
-        fst (Hashtbl.find s.fonts font)
-      with Not_found -> let f = find_font font in
-      Hashtbl.add s.fonts font f;
-      fst f in
-    let char = Int32.to_int char 
+    let f = fst (find_font s.fonts font) in
+    let char = font.Fonts.glyphs_enc (Int32.to_int char)
     and x = point_from_cm x
     and y = point_from_cm y in
     if !debug then
       begin
         try
-          printf "Draw the char %i(%c) of %s  in (%f,%f)@." char (Char.chr char) font x y ;
+          printf "Draw the char %i(%c) of %s  in (%f,%f)@." char (Char.chr char) font.Fonts.tex_name x y ;
         with _ ->           
-          printf "Draw the char %i of %s  in (%f,%f)@." char  font x y ;
+          printf "Draw the char %i of %s  in (%f,%f)@." char  font.Fonts.tex_name x y ;
       end;
         
     Cairo.save s.pic;
@@ -122,7 +124,6 @@ let _ =
     | 1 ->
 	printf "Usage : dviinterp <file1.dvi> <file2.dvi> ...\n"
     | n ->
-	for i = 1 to n-1 do
-	  let s = Sys.argv.(i) in
+	  let s = Sys.argv.(1) in
           List.iter Cairo_device.display (Cairo_interp.load_file s);
-	done
+          Cairo_ft.done_freetype Cairo_device.ft

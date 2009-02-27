@@ -12,7 +12,7 @@ end
 module Dumb_interp = Interp(Dumb_device)
   
 let _ =
-  Dumb_interp.set_debug true
+  Dumb_interp.set_debug true;
   match Array.length Sys.argv with
     | 1 ->
 	printf "Usage : dviinterp <file1.dvi> <file2.dvi> ...\n"
