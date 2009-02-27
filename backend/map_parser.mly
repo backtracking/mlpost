@@ -46,6 +46,7 @@ dvipdfm_line:
 
 pdftex_main :
   | pdftex_line EOL pdftex_main {$1::$3}
+  | EOL pdftex_main {$2}
   | pdftex_line EOF {[$1]}
   | EOF              {[]}
 
