@@ -16,9 +16,12 @@ module Interp
   (Dev : 
      sig
        type t
-       val reset : unit -> t
+       type cooked
+       val new_document : Dvi.t -> t
+       val new_page : t -> unit
        val fill_rect : t -> float -> float -> float -> float -> unit
        val draw_char : t -> Fonts.t -> Int32.t -> float -> float -> unit
+       val end_document : t -> cooked
      end) =
 struct
   let debug = ref true
@@ -30,7 +33,7 @@ struct
   let set_debug = (:=) debug
 
   let reset () = 
-    dev := Some (Dev.reset ());
+    Dev.new_page (unsome !dev);
     current_font := Int32.zero;
     Stack.clear stack;
     {h=Int32.zero; v=Int32.zero; 
@@ -126,8 +129,7 @@ struct
         s
 	  
   let interp_page fm {commands = cmds} =
-    ignore (List.fold_left (interp_command fm) (reset ()) (List.rev cmds));
-    (unsome !dev)
+    ignore (List.fold_left (interp_command fm) (reset ()) (List.rev cmds))
       
   (* type font_def = { *)
   (*   checksum : int32; *)
@@ -154,10 +156,12 @@ struct
       ((Int32.to_float mag) *. ((Int32.to_float num) /. (Int32.to_float den))) /. (10.**8.) in
     conv := formule_magique_cm doc.preamble.pre_mag 
       doc.preamble.pre_num doc.preamble.pre_den;
-    List.map (fun p -> 
-		 printf "#### Starting New Page ####@.";
-		 interp_page fonts p)
-      doc.pages
+    dev := Some (Dev.new_document doc);
+    List.iter (fun p -> 
+		printf "#### Starting New Page ####@.";
+		interp_page fonts p)
+      doc.pages;
+    Dev.end_document (unsome !dev)
 
 
   let load_file file =

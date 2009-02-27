@@ -4,9 +4,12 @@ open Dviinterp
 module Dumb_device =
 struct
   type t = unit
-  let reset () = ()
+  type cooked = unit
+  let new_document _ = ()
+  let new_page () = ()
   let fill_rect () _ _ _ _ = ()
   let draw_char () _ _ _ _ = ()
+  let end_document () = ()
 end
 
 module Dumb_interp = Interp(Dumb_device)

@@ -9,7 +9,7 @@ let pfab = ref None
 
 let compose tex human =
   match !pfab with
-    |None -> (Parsing.parse_error "No pfab");assert false
+    |None -> (Parsing.parse_error "No pfab for this font ttf");None
     |Some v_pfab ->
        let font = {tex_name = tex;
                    human_name = human;
@@ -21,11 +21,11 @@ let compose tex human =
   (slant := None;
   extend := None;
   enc := None;
-  pfab := None;font)
+  pfab := None;Some font)
 
 %}
 %token <float> FLOAT
-%token <string> ID IDENC IDPFAB
+%token <string> ID IDENC IDPFAB IDTTF
 %token EOL EOF
 %token REMAP SLANT EXTEND
 %token DQUOTE LESS
@@ -45,11 +45,15 @@ dvipdfm_line:
 
 
 pdftex_main :
-  | pdftex_line EOL pdftex_main {$1::$3}
+  | pdftex_line EOL pdftex_main {match $1 with
+                                   | None -> $3
+                                   | Some a -> a::$3}
+  | pdftex_line EOF {match $1 with
+                       | None -> []
+                       | Some a -> [a]}
   | EOL pdftex_main {$2}
   | pdftex_line EOF {[$1]}
   | EOF              {[]}
-
 ;
 
 pdftex_line:
@@ -61,6 +65,7 @@ pdftex_options:
   | DQUOTE pdftex_options_aux DQUOTE pdftex_options {$2}
   | IDENC pdftex_options                {enc:=Some $1}
   | IDPFAB pdftex_options              {pfab:=Some $1}
+  | IDTTF pdftex_options              {pfab:=None}
 
 pdftex_options_aux:
   |                    {}
