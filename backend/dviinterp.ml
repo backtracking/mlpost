@@ -60,11 +60,11 @@ struct
   let interp_command fm s = function  
     | SetChar c -> 
         if !debug then printf "Setting character %ld.@." c;
-        let (font, ratio) = Int32Map.find !current_font fm in
+        let font = Int32Map.find !current_font fm in
         let idx = (Int32.to_int c) - font.metric.file_hdr.bc in
         let body = font.metric.body in
         let info = body.char_info.(idx) in
-        let fwidth = body.width.(info.width_index) *. ratio in
+        let fwidth = body.width.(info.width_index) *. font.ratio in
         let width = Int32.of_float fwidth in
 	if !debug then printf "Character found in font %ld. Width = %ld@." 
 	  !current_font width;
@@ -76,7 +76,7 @@ struct
         {s with h = Int32.add s.h b}
     | PutChar c -> 
         if !debug then printf "Putting character %ld.@." c;
-        put_char s (fst (Int32Map.find !current_font fm)) c;
+        put_char s (Int32Map.find !current_font fm) c;
         s
     | PutRule(a, b) ->
         if !debug then printf "Putting rule (w=%ld, h=%ld).@." a b;
@@ -141,21 +141,17 @@ struct
 
 
   let load_fonts mag font_map =
-    let ratio fdef = 
-      (Int32.to_float (Int32.mul mag fdef.Dvi.scale_factor)) 
-      /. 1000. (* fdef.Dvi.design_size *)
-    in
     Int32Map.fold (fun k fdef -> 
-		     Int32Map.add k (load_font fdef, ratio fdef)
+		     Int32Map.add k (Fonts.load_font mag (!conv) fdef)
                   )
       font_map Int32Map.empty
 
   let load_doc doc =
-    let fonts = load_fonts doc.preamble.pre_mag doc.font_map in
     let formule_magique_cm mag num den =
       ((Int32.to_float mag) *. ((Int32.to_float num) /. (Int32.to_float den))) /. (10.**8.) in
     conv := formule_magique_cm doc.preamble.pre_mag 
       doc.preamble.pre_num doc.preamble.pre_den;
+    let fonts = load_fonts doc.preamble.pre_mag doc.font_map in
     dev := Some (Dev.new_document doc);
     List.iter (fun p -> 
 		printf "#### Starting New Page ####@.";

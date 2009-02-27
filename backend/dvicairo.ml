@@ -1,3 +1,4 @@
+open GtkInit
 open Format
 open Dviinterp
 
@@ -108,18 +109,20 @@ struct
     let f = fst (find_font font) in
     let char = font.Fonts.glyphs_enc (Int32.to_int char)
     and x = point_from_cm x
-    and y = point_from_cm y in
+    and y = point_from_cm y 
+    and ratio = point_from_cm font.Fonts.ratio_cm in
     if !debug then
       begin
         try
-          printf "Draw the char %i(%c) of %s  in (%f,%f)@." char (Char.chr char) font.Fonts.tex_name x y ;
+          printf "Draw the char %i(%c) of %s in (%f,%f) x%f@." char (Char.chr char) font.Fonts.tex_name x y ratio;
         with _ ->           
-          printf "Draw the char %i of %s  in (%f,%f)@." char  font.Fonts.tex_name x y ;
+          printf "Draw the char %i of %s  in (%f,%f) x%f@." char  font.Fonts.tex_name x y ratio;
       end;
         
     Cairo.save s.pic;
     Cairo.set_source_rgb s.pic 0. 0. 0. ;
     Cairo.set_font_face s.pic f ;
+    Cairo.set_font_size s.pic ratio;
     (* slant and extend *)
     (match font.Fonts.slant with
       | None -> ()
