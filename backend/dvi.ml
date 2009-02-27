@@ -372,6 +372,7 @@ let rec pages p fonts bits =
 	let cmds, fonts, bits = page [] fonts bits in
 	let newp = 
 	  {counters = counters; previous = previous; commands = cmds} in
+        (* Pages in reverse order *)
 	  pages (newp::p) fonts bits
     | { bits : -1 : bitstring } ->
 	p, fonts, bits
@@ -446,7 +447,7 @@ let read_file file =
   let postamble, bits = postamble bits in
   let postpostamble = postpostamble bits in
     { preamble = preamble;
-      pages = pages;
+      pages = List.rev pages;
       postamble = postamble;
       postpostamble = postpostamble;
       font_map = fonts

@@ -69,9 +69,12 @@ struct
          let oc = open_out (try Sys.argv.(2) with _ -> "dvicairo.pdf") in
          let s = Cairo_pdf.surface_create_for_channel oc ~width_in_points:(float_of_int width) ~height_in_points:(float_of_int height) in
          let cr = Cairo.create s in
+         let first_page = ref true in
          {output = output;
-          new_page = (fun () -> if !info then printf "Show_page ...@?";
-                        Cairo.show_page cr;
+          new_page = (fun () -> 
+                        if !info then printf "Show_page ...@?";
+                        if !first_page then first_page:=false
+                        else Cairo.show_page cr;
                         if !info then printf "done@.";
                      );
           clean_up = (fun () -> 
@@ -96,7 +99,7 @@ struct
     if !debug then
       printf "Draw a rectangle in (%f,%f,%f,%f)@." x1 y1 x2 y2;
     Cairo.save s.pic;
-    Cairo.set_source_rgb s.pic 1. 1. 1. ;
+    Cairo.set_source_rgb s.pic 0. 0. 0. ;
     Cairo.rectangle s.pic x1 y1 x2 y2;
     Cairo.fill s.pic;
     Cairo.restore s.pic
@@ -115,7 +118,7 @@ struct
       end;
         
     Cairo.save s.pic;
-    Cairo.set_source_rgb s.pic 1. 0. 0. ;
+    Cairo.set_source_rgb s.pic 0. 0. 0. ;
     Cairo.set_font_face s.pic f ;
     (* slant and extend *)
     (match font.Fonts.slant with

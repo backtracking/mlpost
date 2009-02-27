@@ -23,6 +23,11 @@ let compose tex human =
   enc := None;
   pfab := None;Some font)
 
+let add_some l = function
+  | None -> l
+  | Some a -> a::l
+  
+
 %}
 %token <float> FLOAT
 %token <string> ID IDENC IDPFAB IDTTF
@@ -45,14 +50,9 @@ dvipdfm_line:
 
 
 pdftex_main :
-  | pdftex_line EOL pdftex_main {match $1 with
-                                   | None -> $3
-                                   | Some a -> a::$3}
-  | pdftex_line EOF {match $1 with
-                       | None -> []
-                       | Some a -> [a]}
+  | pdftex_line EOL pdftex_main {add_some $3 $1}
+  | pdftex_line EOF {add_some [] $1}
   | EOL pdftex_main {$2}
-  | pdftex_line EOF {[$1]}
   | EOF              {[]}
 ;
 

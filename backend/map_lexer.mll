@@ -22,9 +22,9 @@ rule pdftex_token = parse
   | "ExtendFont"   { EXTEND }
   | "SlantFont"    { SLANT }
   | "ReEncodeFont" { REENCODEFONT }
-  | '<' (ident ".enc"  as a) { IDENC a }
-  | '<' (ident ".pf" ['a''b'] as a) { IDPFAB a}
-  | '<' (ident ".ttf" as a) { IDTTF a}
+  | '<' ' '* (ident ".enc"  as a) { IDENC a }
+  | '<' ' '* (ident ".pf" ['a''b'] as a) { IDPFAB a}
+  | '<' ' '* (ident ".ttf" as a) { IDTTF a}
   | ident  as a { ID a }
   | float as a { FLOAT (float_of_string a) }
   | eof            { EOF }
