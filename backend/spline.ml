@@ -6,13 +6,20 @@
 (*  GNU Lesser General Public License version 2.1 (the "LGPL").           *)
 (**************************************************************************)
 
+open GtkInit
+
 type point = Cairo.point = 
     { x : float ; 
       y : float }
 
+type one_spl = {
+  pt : point array;
+  mutable active : int;
+}
+
 type spl = {
     mutable pm           : GDraw.pixmap ;
-            pt         	 : point array ;
+    mutable spls      	 : one_spl list;
     mutable tolerance  	 : float ;
     mutable line_width 	 : float ;
             line_cap   	 : Cairo.line_cap ;
@@ -21,10 +28,11 @@ type spl = {
     mutable ytrans     	 : float ;
     mutable click      	 : bool ;
     mutable drag_pt    	 : point ;
-    mutable active       : int ;
     mutable width        : int ;
     mutable height       : int ;
     mutable need_update  : bool ;
+    mutable myfun_active : bool ;
+            myfun        : point array list -> point list ;
   }
 
 
@@ -33,9 +41,13 @@ let ribbon =
      10. , 310. ; 210., 20.  |]
 
 let spline_copy arr =
-  Array.map
+  {pt = Array.map
     (fun (x, y) -> { x = x ; y = y })
-    arr
+    arr;
+   active = 0}
+
+let exec_on_spls f spls =
+  f (List.map (fun {pt = pt} -> pt) spls) 
 
 let new_pixmap width height =
   let drawable = GDraw.pixmap ~width ~height () in
@@ -44,12 +56,12 @@ let new_pixmap width height =
     ~x:0 ~y:0 ~width ~height ~filled:true () ;
   drawable
 
-let init_spl () = 
+let init_spl myfun = 
   let width = 400 in
   let height = 400 in
   {
    pm = new_pixmap width height ;
-   pt = spline_copy ribbon ;
+   spls = [spline_copy ribbon] ;
    tolerance = 0.1 ;
    line_width = 10. ; 
    line_cap = Cairo.LINE_CAP_ROUND ;
@@ -58,10 +70,11 @@ let init_spl () =
    ytrans = 0. ;
    click = false ;
    drag_pt = { x = 0. ; y = 0. } ;
-   active = 0 ;
    width = width ;
    height = height ;
    need_update = true ;
+   myfun_active = true;
+   myfun = myfun;
  }
 
 
@@ -77,42 +90,51 @@ let draw_control_line cr a b w =
 
 let two_pi = 8. *. atan 1.
 
-let draw_spline cr spl =
+let draw_spline cr spl one_spl =
   let drag_pt = { x = spl.drag_pt.x ; y = spl.drag_pt.y } in
   let drag_pt = Cairo.device_to_user cr drag_pt in
   Cairo.save cr ; begin
-    Cairo.move_to cr  spl.pt.(0).x spl.pt.(0).y ;
+    Cairo.move_to cr  one_spl.pt.(0).x one_spl.pt.(0).y ;
     Cairo.curve_to cr 
-      spl.pt.(1).x spl.pt.(1).y 
-      spl.pt.(2).x spl.pt.(2).y 
-      spl.pt.(3).x spl.pt.(3).y ;
+      one_spl.pt.(1).x one_spl.pt.(1).y 
+      one_spl.pt.(2).x one_spl.pt.(2).y 
+      one_spl.pt.(3).x one_spl.pt.(3).y ;
     
     if spl.click && Cairo.in_stroke cr drag_pt
-    then spl.active <- 0xf ;
+    then one_spl.active <- 0xf ;
 
     Cairo.stroke cr ;
 
-    draw_control_line cr spl.pt.(0) spl.pt.(1) (2. /. spl.zoom) ;
-    draw_control_line cr spl.pt.(3) spl.pt.(2) (2. /. spl.zoom) ;
+    draw_control_line cr one_spl.pt.(0) one_spl.pt.(1) (2. /. spl.zoom) ;
+    draw_control_line cr one_spl.pt.(3) one_spl.pt.(2) (2. /. spl.zoom) ;
 
     for i=0 to 3 do
       Cairo.save cr ; begin
 	Cairo.set_source_rgba cr 1. 0. 0. 0.5 ;
 	Cairo.new_path cr ;
 	Cairo.arc cr 
-	  spl.pt.(i).x spl.pt.(i).y
+	  one_spl.pt.(i).x one_spl.pt.(i).y
 	  (spl.line_width /. 1.25)
 	  0. two_pi ;
 	if spl.click && Cairo.in_fill cr drag_pt
 	then begin
-	  spl.active <- 1 lsl i ;
-	  spl.click <- false
+	  one_spl.active <- 1 lsl i ;
 	end ;
 	Cairo.fill cr end ;
       Cairo.restore cr
     done end ;
   Cairo.restore cr
 	  
+let draw_point spl cr pt =
+  Cairo.save cr ;
+  Cairo.set_source_rgba cr 0. 1. 0. 0.5 ;
+  Cairo.new_path cr ;
+  Cairo.arc cr 
+    pt.x pt.y
+    (spl.line_width /. 1.25)
+    0. two_pi ;
+  Cairo.fill cr;
+  Cairo.restore cr
 
 let paint spl =
   let cr = Cairo_lablgtk.create spl.pm#pixmap in
@@ -125,9 +147,14 @@ let paint spl =
   Cairo.scale cr spl.zoom spl.zoom ;
   Cairo.set_tolerance cr spl.tolerance ;
 
-  try draw_spline cr spl ; spl.need_update <- false
+  (try 
+    List.iter (draw_spline cr spl) spl.spls ; 
+    spl.need_update <- false
   with Cairo.Error _ ->
-    prerr_endline "Cairo is unhappy"
+    prerr_endline "Cairo is unhappy");
+  if spl.click then spl.click <- false;
+  if spl.myfun_active then
+    List.iter (draw_point spl cr) (exec_on_spls spl.myfun spl.spls)
 
 let trans_horiz_cb dir spl =
   let delta = float spl.width /. 16. in
@@ -166,11 +193,21 @@ let line_width_cb dir spl =
   end ; 
   true
 
-let print_spline_cb { pt = pt } =
+let gest_spline action spl =
+  begin match action with
+    | `ADD -> spl.spls <- (spline_copy ribbon)::spl.spls
+    | `REMOVE -> spl.spls <- (match spl.spls with [] -> [] | _::l -> l)
+  end;
+  true
+
+let print_spline_cb { spls = spls; myfun = myfun } =
   let pt_f fmt p =
     Format.fprintf fmt "{@[ %.20g,@ %.20g @]}" p.x p.y in
-  Format.printf "@[{ %a,@ %a,@ %a,@ %a }@]@." 
-    pt_f pt.(0) pt_f pt.(1) pt_f pt.(2) pt_f pt.(3) ;
+  List.iter (fun {pt = pt} ->
+               Format.printf "@[{ %a,@ %a,@ %a,@ %a }@]@." 
+                 pt_f pt.(0) pt_f pt.(1) pt_f pt.(2) pt_f pt.(3))
+    spls;
+  List.iter (Format.printf "@[%a@]@." pt_f) (exec_on_spls myfun spls);
   false
 
 module K = GdkKeysyms
@@ -200,6 +237,12 @@ let keybindings = [
 		  "Widen line width") ;
   K._n,          ("N",       line_width_cb `N,
 		  "Narrow line width") ;
+  K._a,          ("A",       gest_spline `ADD,
+		  "Add a spline") ;
+  K._r,          ("R",       gest_spline `REMOVE,
+		  "Remove a spline") ;
+  K._f,          ("F",  (fun spl -> spl.myfun_active<-not spl.myfun_active;true),
+		  "Switch the fun fun") ;
 ]
 
 let refresh da spl =
@@ -253,21 +296,23 @@ let button_ev da spl ev =
       true
   | `BUTTON_RELEASE -> 
       spl.click  <- false ;
-      spl.active <- 0 ;
+      List.iter (fun one_spl -> one_spl.active <- 0)  spl.spls;
       true
   | _ -> false
 
 let motion_notify_cb da spl ev =
   let x = GdkEvent.Motion.x ev in
   let y = GdkEvent.Motion.y ev in
+  List.iter
+  (fun one_spl ->
   for i=0 to 3 do
-    if (1 lsl i) land spl.active != 0
+    if (1 lsl i) land one_spl.active != 0
     then begin
-      let x = spl.pt.(i).x +. (x -. spl.drag_pt.x) /. spl.zoom in
-      let y = spl.pt.(i).y +. (y -. spl.drag_pt.y) /. spl.zoom in
-      spl.pt.(i) <- { x = x ; y = y }
+      let x = one_spl.pt.(i).x +. (x -. spl.drag_pt.x) /. spl.zoom in
+      let y = one_spl.pt.(i).y +. (y -. spl.drag_pt.y) /. spl.zoom in
+      one_spl.pt.(i) <- { x = x ; y = y }
     end
-  done ;
+  done ;) spl.spls;
   spl.drag_pt <- { x = x ; y = y } ;
   refresh da spl ;
   true
@@ -279,12 +324,12 @@ let init spl packing =
   da#event#add [ `KEY_PRESS ;
 		 `BUTTON_MOTION ;
 		 `BUTTON_PRESS ; `BUTTON_RELEASE ] ;
-  da#event#connect#expose         (expose_cb da spl) ;
-  da#event#connect#configure      (config_cb spl) ;
-  da#event#connect#button_press   (button_ev da spl) ;
-  da#event#connect#button_release (button_ev da spl) ;
-  da#event#connect#motion_notify  (motion_notify_cb da spl) ; 
-  da#event#connect#key_press      (key_press_cb da spl)
+  ignore (da#event#connect#expose         (expose_cb da spl)) ;
+  ignore (da#event#connect#configure      (config_cb spl));
+  ignore (da#event#connect#button_press   (button_ev da spl)) ;
+  ignore (da#event#connect#button_release (button_ev da spl)) ;
+  ignore (da#event#connect#motion_notify  (motion_notify_cb da spl)) ; 
+  ignore (da#event#connect#key_press      (key_press_cb da spl))
 
 let show_help kb =
   Format.printf "@[<v>" ;
@@ -293,14 +338,21 @@ let show_help kb =
     kb ;
   Format.printf "@."
 
+(* Prend une liste de splines en argument et renvoit une liste de points à afficher *)
+(*[start;start_control;end_control;end]*)
+let myfun (spls:point array list) : point list =
+  List.map (function [|pstart;_;_;pend|] -> {x = (pstart.x+.pend.x)/.2.; y = (pstart.y+.pend.y)/.2.} 
+              | _ -> assert false) spls
+
+
 let main = 
   let w = GWindow.window 
       ~title:"Cairo spline demo" 
       ~allow_grow:true
       ~allow_shrink:true
       () in
-  w#connect#destroy GMain.quit ;
-  init (init_spl ()) w#add ;
+  ignore (w#connect#destroy GMain.quit) ;
+  init (init_spl myfun) w#add ;
   show_help keybindings ;
   w#show () ;
   GMain.main ()
