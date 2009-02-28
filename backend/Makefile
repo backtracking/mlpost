@@ -1,4 +1,4 @@
-all: testdviinterp testdvi dvicairo tfm
+all: testdviinterp testdvi dvicairo tfm spline
 
 testdviinterp:
 	ocamlbuild -no-links testdviinterp.native
@@ -16,13 +16,17 @@ tfm:
 	ocamlbuild -no-links testtfm.native
 	ln -sf _build/testtfm.native tfm
 
+spline:
+	ocamlbuild -lflag "gtkInit.cmx" -no-links spline.native
+	ln -sf _build/spline.native spline
+
 test: testdvi
 	./testdvi hello.dvi math.dvi jfla.dvi
 
 testtfm:
 	./tfm cmr10.tfm cmmi10.tfm cmsy10.tfm
 
-.PHONY : tfm dvicairo testdvi testdviinterp
+.PHONY : tfm dvicairo testdvi testdviinterp spline
 
 .SUFFIXES : .dvi .pdf
 .dvi.pdf: dvicairo
