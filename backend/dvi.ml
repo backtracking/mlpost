@@ -452,3 +452,15 @@ let read_file file =
       postpostamble = postpostamble;
       font_map = fonts
     }
+
+let get_conv doc = 
+    let formule_magique_cm mag num den =
+      ((Int32.to_float mag) *. ((Int32.to_float num) /. (Int32.to_float den))) /. (10.**8.) in
+    formule_magique_cm doc.preamble.pre_mag 
+      doc.preamble.pre_num doc.preamble.pre_den
+
+let get_height_cm doc =
+  (get_conv doc) *. (Int32.to_float doc.postamble.post_height)
+
+let get_width_cm doc =
+  (get_conv doc) *. (Int32.to_float doc.postamble.post_width)

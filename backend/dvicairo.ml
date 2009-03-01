@@ -2,23 +2,25 @@ open GtkInit
 open Format
 open Dviinterp
 
-module Cairo_device =
+type multi_page_pic = {pic :Cairo.t;
+            new_page : unit -> unit;
+             x_origin : float;
+             y_origin : float
+           }
+
+let point_of_cm cm = (0.3937 *. 72.) *. cm
+
+let debug = ref false
+let info = ref false
+
+module Cairo_device (*: dev with type arg = multi_page_pic with type cooked = unit*) =
 struct
-  type output = [`GTK | `PDF]
-
-  type t = { output : output;
-             new_page : unit ->  unit;
-             clean_up : unit -> unit;
-             pic : Cairo.t;
-             (*fonts :(string,Cairo_ft.font_face * Cairo_ft.ft_face) Hashtbl.t*)}
+  type arg = multi_page_pic
+  type t = { arg : arg;
+             doc : Dvi.t}
+             (*fonts :(string,Cairo_ft.font_face * Cairo_ft.ft_face) Hashtbl.t*)
   type cooked = unit
-  let point_from_cm cm = (0.3937 *. 72.) *. cm
-  let width = int_of_float (point_from_cm 21.)
-  let height = int_of_float ((float_of_int width) *. (sqrt 2.))
 
-  let debug = ref false
-  let info = ref true
-  let output = `PDF
   let ft = Cairo_ft.init_freetype ()
 
   let fonts_known = Hashtbl.create 30
@@ -42,75 +44,35 @@ struct
     Hashtbl.iter (fun _ (_,x) -> Cairo_ft.done_face x) fonts_known;
     Cairo_ft.done_freetype ft
 
-  let new_document _ = 
-    match output with
-      |`GTK ->
-         if !debug then
-           printf "Create the window@.";
-          let w = GWindow.window ~title:"Cairo Text API" () in
-          ignore (w#connect#destroy GMain.quit);
-          if !debug then
-            printf "Create the picture@.";
-          let p = GDraw.pixmap ~width ~height ~window:w () in
-          let cr = Cairo_lablgtk.create p#pixmap in
-          Cairo.set_source_rgb cr 1. 1. 1. ;
-          Cairo.set_line_width cr 1. ;
-          Cairo.show_page cr ;
-          Cairo.fill cr;
-          {output = output;
-           new_page =  (fun () -> 
-                         if !debug then
-                           printf "Display@.";
-                         ignore (GMisc.pixmap p ~packing:w#add ());
-                         w#show () ;
-                         GMain.main ());
-           clean_up = (fun () -> ());
-           pic = cr}
-      |`PDF ->
-         let oc = open_out (try Sys.argv.(2) with _ -> "dvicairo.pdf") in
-         let s = Cairo_pdf.surface_create_for_channel oc ~width_in_points:(float_of_int width) ~height_in_points:(float_of_int height) in
-         let cr = Cairo.create s in
-         let first_page = ref true in
-         {output = output;
-          new_page = (fun () -> 
-                        if !info then printf "Show_page ...@?";
-                        if !first_page then first_page:=false
-                        else Cairo.show_page cr;
-                        if !info then printf "done@.";
-                     );
-          clean_up = (fun () -> 
-                        if !info then printf "Clean up surface_finish ...@?";
-                        Cairo.surface_finish s;
-                        if !info then printf "done@.";
-                        if !info then printf "Clean up close file ...@?";
-                        close_out oc;
-                        if !info then printf "done@."
-                     );
-          pic = cr;
-          (*fonts = Hashtbl.create 10*)}
+  let new_document arg doc = 
+    let first_page = ref true in
+    {arg = {arg with new_page = (fun () -> if !first_page then first_page := false else arg.new_page ());
+         x_origin = point_of_cm arg.x_origin;
+         y_origin = point_of_cm arg.y_origin};
+     doc = doc}
 
   let new_page s = 
-    s.new_page ()
+    s.arg.new_page ()
 
-  let fill_rect s x1 y1 x2 y2 = 
-    let x1 = point_from_cm x1 
-    and y1 = point_from_cm y1
-    and x2 = point_from_cm x2
-    and y2 = point_from_cm y2 in
+  let fill_rect s x1 y1 w h = 
+    let x1 = point_of_cm x1 +. s.arg.x_origin
+    and y1 = point_of_cm y1 +. s.arg.y_origin
+    and w = point_of_cm w
+    and h = point_of_cm h in
     if !debug then
-      printf "Draw a rectangle in (%f,%f,%f,%f)@." x1 y1 x2 y2;
-    Cairo.save s.pic;
-    Cairo.set_source_rgb s.pic 0. 0. 0. ;
-    Cairo.rectangle s.pic x1 y1 x2 y2;
-    Cairo.fill s.pic;
-    Cairo.restore s.pic
+      printf "Draw a rectangle in (%f,%f) with w=%f h=%f@." x1 y1 w h;
+    Cairo.save s.arg.pic;
+    Cairo.set_source_rgb s.arg.pic 0. 0. 0. ;
+    Cairo.rectangle s.arg.pic x1 y1 w h;
+    Cairo.fill s.arg.pic;
+    Cairo.restore s.arg.pic
 
   let draw_char s font char x y = 
     let f = fst (find_font font) in
     let char = font.Fonts.glyphs_enc (Int32.to_int char)
-    and x = point_from_cm x
-    and y = point_from_cm y 
-    and ratio = point_from_cm font.Fonts.ratio_cm in
+    and x = point_of_cm x +. s.arg.x_origin
+    and y = point_of_cm y +. s.arg.y_origin
+    and ratio = point_of_cm font.Fonts.ratio_cm in
     if !debug then
       begin
         try
@@ -119,10 +81,10 @@ struct
           printf "Draw the char %i of %s  in (%f,%f) x%f@." char  font.Fonts.tex_name x y ratio;
       end;
         
-    Cairo.save s.pic;
-    Cairo.set_source_rgb s.pic 0. 0. 0. ;
-    Cairo.set_font_face s.pic f ;
-    Cairo.set_font_size s.pic ratio;
+    Cairo.save s.arg.pic;
+    Cairo.set_source_rgb s.arg.pic 0. 0. 0. ;
+    Cairo.set_font_face s.arg.pic f ;
+    Cairo.set_font_size s.arg.pic ratio;
     (* slant and extend *)
     (match font.Fonts.slant with
       | None -> ()
@@ -130,25 +92,75 @@ struct
     (match font.Fonts.extend with
       | None -> ()
       | Some a -> if !info then printf "extend of %f not used for %s@." a font.Fonts.tex_name);
-    Cairo.show_glyphs s.pic 
+    Cairo.show_glyphs s.arg.pic 
       [|{Cairo.index = char;
          Cairo.glyph_x = x;
          Cairo.glyph_y = y}|];
-    Cairo.stroke s.pic;
-    Cairo.restore s.pic
+    Cairo.stroke s.arg.pic;
+    Cairo.restore s.arg.pic
 
   let end_document s = 
-    s.clean_up ();
+    ()
 end
 
-module Cairo_interp = Interp(Cairo_device)
-  
-let _ =
-  Cairo_interp.set_debug false;
-  match Array.length Sys.argv with
-    | 1 ->
-	printf "Usage : dviinterp <file1.dvi> <file2.dvi> ...\n"
-    | n ->
-	  let s = Sys.argv.(1) in
-          Cairo_interp.load_file s;
-          Cairo_device.clean_up ()
+
+(*
+let create_window () = 
+    let w = GWindow.window ~title:"Cairo Text API" () in
+    ignore (w#connect#destroy GMain.quit);
+    if !debug then
+      printf "Create the picture@.";
+    let pixmap = GDraw.pixmap ~width:(int_of_float width) ~height:(int_of_float height) ~window:w () in
+    pixmap
+
+let show_gtk doc pixmap window = 
+    let height = point_of_cm (Dvi.get_height_cm doc) +. 2. *. !margin in
+    let width = point_of_cm (Dvi.get_width_cm doc) +. 2. *. !margin in
+    if !info then printf "height = %f, width = %f@." height width;
+    if !debug then
+      printf "Create the window@.";
+
+    let cr = Cairo_lablgtk.create pixmap#pixmap in
+    Cairo.set_source_rgb cr 1. 1. 1. ;
+    Cairo.set_line_width cr 1. ;
+    Cairo.show_page cr ;
+    Cairo.fill cr;
+    {output = arg;
+     new_page =  (fun () -> 
+                    if !debug then
+                      printf "Display@.";
+                    ignore (GMisc.pixmap pixmap ~packing:window#add ());
+                    window#show () ;
+                    GMain.main ());
+     clean_up = (fun () -> ());
+     pic = cr;
+     doc = doc}
+    *)
+
+let create_png _ _ _ _ _ _ = ()
+let create_gtk _ _ _ _ _ _ = ()
+
+let create create_surface height width x_origin y_origin (interp_doc: multi_page_pic -> unit) out_file =
+  let height = point_of_cm height and width = point_of_cm width in
+  if !info then printf "height = %f, width = %f@." height width;
+  let oc = open_out out_file in
+  let s = create_surface oc ~width_in_points:width ~height_in_points:height in
+  let cr = Cairo.create s in
+  interp_doc {pic = cr;
+   new_page = (fun () -> 
+                 if !info then printf "Show_page ...@.";
+                 Cairo.show_page cr;
+              );
+   x_origin = x_origin;
+   y_origin = y_origin
+   (*fonts = Hashtbl.create 10*)};
+    if !info then printf "Clean up surface_finish ...@.";
+  Cairo.surface_finish s;
+  if !info then printf "Clean up close file ...@.";
+  close_out oc
+
+let create_ps = create Cairo_ps.surface_create_for_channel
+
+let create_pdf = create Cairo_pdf.surface_create_for_channel
+
+let create_svg = create Cairo_svg.surface_create_for_channel

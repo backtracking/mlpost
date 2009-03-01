@@ -5,7 +5,8 @@ module Dumb_device =
 struct
   type t = unit
   type cooked = unit
-  let new_document _ = ()
+  type arg = unit
+  let new_document _ _ = ()
   let new_page () = ()
   let fill_rect () _ _ _ _ = ()
   let draw_char () _ _ _ _ = ()
@@ -22,5 +23,5 @@ let _ =
     | n ->
 	for i = 1 to n-1 do
 	  let s = Sys.argv.(i) in
-          ignore (Dumb_interp.load_file s)
+          ignore (Dumb_interp.load_file () s)
 	done

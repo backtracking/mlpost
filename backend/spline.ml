@@ -6,8 +6,6 @@
 (*  GNU Lesser General Public License version 2.1 (the "LGPL").           *)
 (**************************************************************************)
 
-open GtkInit
-
 type point = Cairo.point = 
     { x : float ; 
       y : float }

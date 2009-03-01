@@ -1,23 +1,25 @@
-all: testdviinterp testdvi dvicairo tfm spline
+GENOPTIONS=-cflag -dtypes
+
+all: testdviinterp testdvi testdvicairo tfm spline
 
 testdviinterp:
-	ocamlbuild -no-links testdviinterp.native
+	ocamlbuild $(GENOPTIONS) -no-links testdviinterp.native
 	ln -sf _build/testdviinterp.native testdviinterp
 
 testdvi:
-	ocamlbuild -no-links testdvi.native
+	ocamlbuild $(GENOPTIONS) -no-links testdvi.native
 	ln -sf _build/testdvi.native testdvi
 
-dvicairo :
-	ocamlbuild -no-links dvicairo.native
-	ln -sf _build/dvicairo.native dvicairo
+testdvicairo :
+	ocamlbuild $(GENOPTIONS) -lflag "gtkInit.cmx" -no-links testdvicairo.native
+	ln -sf _build/testdvicairo.native dvicairo
 
 tfm:
-	ocamlbuild -no-links testtfm.native
+	ocamlbuild $(GENOPTIONS) -no-links testtfm.native
 	ln -sf _build/testtfm.native tfm
 
 spline:
-	ocamlbuild -lflag "gtkInit.cmx" -no-links spline.native
+	ocamlbuild $(GENOPTIONS) -lflag "gtkInit.cmx" -no-links spline.native
 	ln -sf _build/spline.native spline
 
 test: testdvi
@@ -30,7 +32,7 @@ testtfm:
 
 .SUFFIXES : .dvi .pdf
 .dvi.pdf: dvicairo
-	./dvicairo $< $@
+	./dvicairo --pdf $< $@
 
 clean:
 	ocamlbuild -clean

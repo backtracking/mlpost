@@ -165,7 +165,7 @@ let compute_trans_enc encoding_table charset_table char =
 
 
 
-let load_font mag conv fdef =
+let load_font doc fdef =
   let tex_name = fdef.Dvi.name in
   let font_map = try HString.find fonts_map_table tex_name
   with Not_found -> invalid_arg ("Unknown font : "^tex_name) in
@@ -176,11 +176,11 @@ let load_font mag conv fdef =
     | None -> pfab_enc
     | Some x -> load_enc (find_file x) in
   let glyphs_enc = compute_trans_enc enc pfab_charset in
-  let ratio = 
-    (Int32.to_float (Int32.mul mag fdef.Dvi.scale_factor)) 
-    /. 1000. (* fdef.Dvi.design_size *)
+  let ratio = Int32.to_float fdef.Dvi.scale_factor
+    (*(Int32.to_float (Int32.mul mag fdef.Dvi.scale_factor)) 
+    /. 1000. (* fdef.Dvi.design_size *)*)
   and ratio_cm = 
-    (Int32.to_float fdef.Dvi.scale_factor) *. conv
+    (Int32.to_float fdef.Dvi.scale_factor) *. (Dvi.get_conv doc)
     in
   { tex_name = tex_name;
     metric = tfm;

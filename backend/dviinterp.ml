@@ -12,19 +12,22 @@ type state = {
   z : int32;
 }
 
-module Interp
-  (Dev : 
+module type dev =
      sig
        type t
+       type arg
        type cooked
-       val new_document : Dvi.t -> t
+       val new_document : arg -> Dvi.t -> t
        val new_page : t -> unit
        val fill_rect : t -> float -> float -> float -> float -> unit
        val draw_char : t -> Fonts.t -> Int32.t -> float -> float -> unit
        val end_document : t -> cooked
-     end) =
+     end
+
+
+module Interp (Dev : dev) =
 struct
-  let debug = ref true
+  let debug = ref false
   let unsome = function None -> assert false | Some x -> x
   let current_font = ref Int32.zero
   let stack : state Stack.t = Stack.create ()
@@ -140,19 +143,16 @@ struct
   (* } *)
 
 
-  let load_fonts mag font_map =
+  let load_fonts doc font_map =
     Int32Map.fold (fun k fdef -> 
-		     Int32Map.add k (Fonts.load_font mag (!conv) fdef)
+		     Int32Map.add k (Fonts.load_font doc fdef)
                   )
       font_map Int32Map.empty
 
-  let load_doc doc =
-    let formule_magique_cm mag num den =
-      ((Int32.to_float mag) *. ((Int32.to_float num) /. (Int32.to_float den))) /. (10.**8.) in
-    conv := formule_magique_cm doc.preamble.pre_mag 
-      doc.preamble.pre_num doc.preamble.pre_den;
-    let fonts = load_fonts doc.preamble.pre_mag doc.font_map in
-    dev := Some (Dev.new_document doc);
+  let load_doc arg doc =
+    conv := Dvi.get_conv doc;
+    let fonts = load_fonts doc doc.font_map in
+    dev := Some (Dev.new_document arg doc);
     List.iter (fun p -> 
 		printf "#### Starting New Page ####@.";
 		interp_page fonts p)
@@ -160,8 +160,8 @@ struct
     Dev.end_document (unsome !dev)
 
 
-  let load_file file =
+  let load_file arg file =
     let doc = Dvi.read_file file in
     printf "Dvi file parsed successfully.@.";
-    load_doc doc
+    load_doc arg doc
 end
