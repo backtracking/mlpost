@@ -38,6 +38,11 @@ let ribbon =
   [| 110., 20.  ; 310., 300. ;
      10. , 310. ; 210., 20.  |]
 
+let nb_feature = 5
+let select_feature = ref 0
+let inter_depth = ref 11
+
+
 let spline_copy arr =
   {pt = Array.map
     (fun (x, y) -> { x = x ; y = y })
@@ -198,14 +203,20 @@ let gest_spline action spl =
   end;
   true
 
+let pt_f fmt p =
+  Format.fprintf fmt "{@[ %.20g,@ %.20g @]}" p.x p.y
+
+let print_spline =
+  fun pt ->
+    Format.printf "@[{ %a,@ %a,@ %a,@ %a }@]@." 
+      pt_f pt.(0) pt_f pt.(1) pt_f pt.(2) pt_f pt.(3)
+
+let print_one_spl {pt = pt} = print_spline pt
+
 let print_spline_cb { spls = spls; myfun = myfun } =
-  let pt_f fmt p =
-    Format.fprintf fmt "{@[ %.20g,@ %.20g @]}" p.x p.y in
-  List.iter (fun {pt = pt} ->
-               Format.printf "@[{ %a,@ %a,@ %a,@ %a }@]@." 
-                 pt_f pt.(0) pt_f pt.(1) pt_f pt.(2) pt_f pt.(3))
-    spls;
+  List.iter print_one_spl spls;
   List.iter (Format.printf "@[%a@]@." pt_f) (exec_on_spls myfun spls);
+  Format.printf "depth : %i@." !inter_depth;
   false
 
 module K = GdkKeysyms
@@ -241,6 +252,12 @@ let keybindings = [
 		  "Remove a spline") ;
   K._f,          ("F",  (fun spl -> spl.myfun_active<-not spl.myfun_active;true),
 		  "Switch the fun fun") ;
+  K._c,          ("C",  (fun _ -> select_feature := (!select_feature + 1) mod nb_feature;true),
+		  "Change the green points which appear") ;
+  K._d,          ("d",  (fun _ -> inter_depth := max 0 (!inter_depth-1);true),
+		  "Change the depth of the intersection") ;
+  K._D,          ("D",  (fun _ -> incr(inter_depth);true),
+		  "Change the depth of the intersection") ;
 ]
 
 let refresh da spl =
@@ -336,11 +353,215 @@ let show_help kb =
     kb ;
   Format.printf "@."
 
+
+let f4 f a b c d = f (f a b) (f c d)
+
+let cubic a b c d t =
+  d*.(t**3.)+.3.*.c*.(t**2.)*.(1.-.t)+.3.*.b*.(t**1.)*.(1.-.t)**2.+.a*.(1.-.t)**3.
+
+let cubic_point a t =
+  {x=cubic a.(0).x a.(1).x a.(2).x a.(3).x t;
+   y=cubic a.(0).y a.(1).y a.(2).y a.(3).y t;}
+
+let extremum a b c d =
+  let sol delta = (delta -. (2.*.b) +. a +. c)/.(a -. d +. (3.*.(c -. b))) in
+  let delta = ((b*.b) -. (c*.(b +. a -. c)) +. (d*.(a -. b))) in
+  match compare delta 0. with
+    | x when x<0 -> []
+    | 0 -> [sol 0.]
+    | _ -> [sol (delta**0.5);sol (-.(delta**0.5))]
+
+let remarquable a b c d = (0.::(1.::(List.filter (fun x -> x>=0. && x<=1.) (extremum a b c d))))
+
+(** simple intersection *)
+let give_bound a =
+  let x_max = f4 max a.(0).x a.(1).x a.(2).x a.(3).x in
+  let y_max = f4 max a.(0).y a.(1).y a.(2).y a.(3).y in
+  let x_min = f4 min a.(0).x a.(1).x a.(2).x a.(3).x in
+  let y_min = f4 min a.(0).y a.(1).y a.(2).y a.(3).y in
+  (x_min,y_min,x_max,y_max)
+
+let give_bound_precise a =
+  let x_remarq = List.map (cubic a.(0).x a.(1).x a.(2).x a.(3).x) (remarquable a.(0).x a.(1).x a.(2).x a.(3).x) in
+  let y_remarq = List.map (cubic a.(0).y a.(1).y a.(2).y a.(3).y) (remarquable a.(0).y a.(1).y a.(2).y a.(3).y) in
+  let x_max = List.fold_left max neg_infinity x_remarq in
+  let y_max = List.fold_left max neg_infinity y_remarq in
+  let x_min = List.fold_left min infinity x_remarq in
+  let y_min = List.fold_left min infinity y_remarq in
+  (x_min,y_min,x_max,y_max)
+
+let test_in amin amax bmin bmax =
+  (amin <= bmax && bmin <= amax)
+
+let is_intersect a b =
+  let (ax_min,ay_min,ax_max,ay_max) = give_bound a in
+  let (bx_min,by_min,bx_max,by_max) = give_bound b in
+  test_in ax_min ax_max bx_min bx_max &&
+  test_in ay_min ay_max by_min by_max
+
+let is_intersect_precise a b =
+  let (ax_min,ay_min,ax_max,ay_max) = give_bound_precise a in
+  let (bx_min,by_min,bx_max,by_max) = give_bound_precise b in
+  test_in ax_min ax_max bx_min bx_max &&
+  test_in ay_min ay_max by_min by_max
+
+let add a b = {x = a.x+.b.x; y = a.y+.b.y}
+let minus a b = {x = a.x-.b.x; y = a.y-.b.y}
+let half a = {x = a.x/.2.; y = a.y/.2.}
+let double a = {x = a.x*.2.; y = a.y*.2.}
+let add_half a b = half (add a b)
+
+let bisect a =
+  let add_half b i = b.(i) <- half (add b.(i) b.(i-1)) in
+  let add_halfr b i = b.(i) <- half (add b.(i) b.(i+1)) in
+  let b = Array.copy a in
+  add_half b 3;(*D\leftarrow (C+D)/2*)
+  add_half b 2;add_half b 3;(*C\leftarrow (B+C)/2, D\leftarrow (C+D)/2*)
+  add_half b 1;add_half b 2;add_half b 3;
+ (*B\leftarrow (A+B)/2, C\leftarrow (B+C)/2, D\leftarrow(C+D)/2*)
+  let c = Array.copy a in
+  add_halfr c 0;
+  add_halfr c 1;add_halfr c 0;
+  add_halfr c 2;add_halfr c 1;add_halfr c 0;
+  (b,c)
+
+
+let give_intersect a b =
+  let rec aux a b l t1 t2 dt= function
+      | 0 -> if is_intersect a b then (t1+.(dt/.2.),t2+.(dt/.2.))::l else l
+      | n -> let n = n-1 in
+	let dt = dt/.2. in
+(*	print_spline a;
+	print_spline b;*)
+    if is_intersect a b then
+      let (af,al) = bisect a in
+      let (bf,bl) = bisect b in
+      let l = aux af bf l t1 t2 dt n in
+      let l = aux af bl l t1 (t2+.dt) dt n in
+      let l = aux al bf l (t1+.dt) t2 dt n in
+      let l = aux al bl l (t1+.dt) (t2+.dt) dt n in
+      l
+    else l in
+  let rem_noise delta (which:float*float -> float) noisy =
+    let sort = List.fast_sort (fun x y -> compare (which x) (which y)) noisy in
+    let rec group (s1,s2) a n = function
+      | [] -> [s1/.n,s2/.n]
+      | ((e1,e2) as e)::l when (which e)-.a<=delta -> group (s1+.e1,s2+.e2) (which e) (n+.1.) l
+      | e::l -> (s1/.n,s2/.n)::(group e (which e) 1. l) in
+    match sort with
+      |[] -> []
+      |a::l -> group a (which a) 1. l in
+  let l = aux a b [] 0. 0. 1. !inter_depth in
+  let delta = 0.5**(float_of_int (!inter_depth -1)) in
+  rem_noise delta snd (rem_noise delta fst l)
+
+let rec keep f a = function
+    | [] -> a
+    | b::l -> if f a b then keep f a l else keep f b l
+
+(** Knuth solution (with some simplifications) *)
+type red_bez = { u1 : point;
+		 u2 : point;
+		 u3 : point;
+		 umax : point;
+		 umin : point;
+		 ut : float}
+let min_max v1 v2 v3 =
+  let aux u1 u2 u3 =
+    if u1<0. then
+      if u3>=0. then
+	(if u2 < 0. then u1+.u2 else u1),max 0. (u1+.u2+.u3)
+      else
+	(min u1 (u1+.u2+.u3),max 0. u1+.u2)
+    else
+      if u3<=0. then
+	(min 0. (u1+.u2+.u3),if u2>0. then u1+.u2 else u1)
+      else
+	(min 0. (u1+.u2),max u1 (u1+.u2+.u3)) in
+  let (xmin,xmax) = aux v1.x v2.x v3.x in
+  let (ymin,ymax) = aux v1.y v2.y v3.y in
+  ({x=xmin;y=ymin},{x=xmax;y=ymax})
+
+
+let leq {x=xa;y=ya} {x=xb;y=yb} = xa <= xb && ya <= yb
+
+let leqleq a b c = leq a b && leq b c
+
+let bisect2 w dt = (* 559 *)
+  let w1l = w.u1 in
+  let w3r = w.u3 in
+  let w2l = add_half w1l w.u2 in
+  let w2r = add_half w3r w.u2 in
+  let w3l = add_half w2l w2r in
+  let w1r = w3l in
+  let (wminl,wmaxl) = min_max w1l w2l w3l in
+  let (wminr,wmaxr) = min_max w1r w2r w3r in
+  ({u1 = w1l;u2 = w2l; u3 = w3l; umax = wmaxl;umin=wminl; ut = w.ut},
+   {u1 = w1r;u2 = w2r; u3 = w3r; umax = wmaxr;umin=wminr; ut = w.ut +. dt})
+
+let cubic_intersection p pp =(*550*)
+  let rec aux w z d l n dt =(*556*)
+    if not (leqleq (minus z.umin w.umax) d (minus z.umax w.umin))
+    then l
+    else if n=0 then
+      (w.ut,z.ut)::l
+      else
+      (* 559 *)
+      let n = n-1 in
+      let dt = dt/.2. in
+      let (wl,wr) = bisect2 w dt in
+      let (zl,zr) = bisect2 z dt in
+      let dll = double d in
+      let l = aux wl zl dll l n dt in
+      let drl = add (add (add dll wl.u1) wl.u2) wl.u3 in
+      let l = aux wr zl drl l n dt in
+      let drr = minus (minus (minus dll zl.u1) zl.u2) zl.u3 in
+      let l = aux wr zr drr l n dt in
+      let dlr = minus (minus (minus d zl.u1) zl.u2) zl.u3 in
+      let l = aux wl zr dlr l n dt in
+      l
+  in
+  (*558*)
+  let w1 = minus p.(1) p.(0) in
+  let w2 = minus p.(2) p.(1) in
+  let w3 = minus p.(3) p.(2) in
+  let (wmin,wmax) = min_max w1 w2 w3 in
+  let w = {u1=w1;u2=w2;u3=w3;umin=wmin;umax=wmax;ut=0.} in
+  let z1 = minus p.(1) p.(0) in
+  let z2 = minus p.(2) p.(1) in
+  let z3 = minus p.(3) p.(2) in
+  let (zmin,zmax) = min_max z1 z2 z3 in
+  let z = {u1=z1;u2=z2;u3=z3;umin=zmin;umax=zmax;ut=0.} in
+  let d = minus p.(0) pp.(0) in
+  aux w z d [] (!inter_depth) 1.
+
+(** *)
+
 (* Prend une liste de splines en argument et renvoit une liste de points à afficher *)
 (*[start;start_control;end_control;end]*)
 let myfun (spls:point array list) : point list =
-  List.map (function [|pstart;_;_;pend|] -> {x = (pstart.x+.pend.x)/.2.; y = (pstart.y+.pend.y)/.2.} 
-              | _ -> assert false) spls
+  let map f = List.map (function [|a;b;c;d|] -> f a b c d | _ -> assert false) in
+  match !select_feature with
+    | 0 ->  map (fun pstart _ _ pend -> 
+                   {x = (pstart.x+.pend.x)/.2.; y = (pstart.y+.pend.y)/.2.}) spls
+    | 1|2 -> List.concat (map (fun a b c d -> 
+                               let f az bz cz dz = List.map (cubic_point [|a;b;c;d|]) (remarquable az bz cz dz) in 
+                let xextr = (f a.x b.x c.x d.x) in
+                let xmax = keep (fun a b -> a.x > b.x) {x=neg_infinity;y=0.} xextr in
+                let xmin = keep (fun a b -> a.x < b.x) {x=infinity;y=0.} xextr in
+                let yextr = (f a.y b.y c.y d.y) in
+                let ymax = keep (fun a b -> a.y > b.y) {x=0.;y=neg_infinity} yextr in
+                let ymin =keep (fun a b -> a.y < b.y) {x=0.;y=infinity} yextr in
+                  if !select_feature=2 then 
+                    xextr@yextr else [xmax;xmin;ymax;ymin]) spls)
+    | 3 -> (match spls with
+	| [a;b] -> List.map (fun (tp,_) -> cubic_point a tp) (give_intersect a b)
+	| _ -> [])
+    | 4 -> (match spls with
+	      | [a;b] -> List.map (fun (tp,_) -> cubic_point a tp) (cubic_intersection a b)
+	      | _ -> [])
+    | _ -> assert false
+
 
 
 let main = 
