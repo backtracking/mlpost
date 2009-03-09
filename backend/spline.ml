@@ -40,8 +40,8 @@ let ribbon =
 
 let nb_feature = 5
 let select_feature = ref 0
-let inter_depth = ref 11
-
+let inter_depth = ref 15
+let debug = ref false
 
 let spline_copy arr =
   {pt = Array.map
@@ -222,7 +222,7 @@ let print_spline_cb { spls = spls; myfun = myfun } =
 module K = GdkKeysyms
 
 let keybindings = [
-  K._q,          ("Q",       (fun _ -> GMain.quit () ; false),
+  K._q,          ("q",       (fun _ -> GMain.quit () ; false),
 		  "Exit the program") ;
   K._Left,  	 ("Left",    trans_horiz_cb `LEFT,
 		  "Translate left") ;
@@ -242,22 +242,24 @@ let keybindings = [
 		  "Increase rendering accuracy, (tolerance /= 10)") ;
   K._less,       ("less",    smooth_cb `INC,
 		  "Decrease rendering accuracy, (tolerance *= 10)") ;
-  K._w,          ("W",       line_width_cb `W,
+  K._w,          ("w",       line_width_cb `W,
 		  "Widen line width") ;
-  K._n,          ("N",       line_width_cb `N,
+  K._n,          ("n",       line_width_cb `N,
 		  "Narrow line width") ;
-  K._a,          ("A",       gest_spline `ADD,
+  K._a,          ("a",       gest_spline `ADD,
 		  "Add a spline") ;
-  K._r,          ("R",       gest_spline `REMOVE,
+  K._r,          ("r",       gest_spline `REMOVE,
 		  "Remove a spline") ;
-  K._f,          ("F",  (fun spl -> spl.myfun_active<-not spl.myfun_active;true),
+  K._f,          ("f",  (fun spl -> spl.myfun_active<-not spl.myfun_active;true),
 		  "Switch the fun fun") ;
-  K._c,          ("C",  (fun _ -> select_feature := (!select_feature + 1) mod nb_feature;true),
+  K._c,          ("c",  (fun _ -> select_feature := (!select_feature + 1) mod nb_feature;true),
 		  "Change the green points which appear") ;
   K._d,          ("d",  (fun _ -> inter_depth := max 0 (!inter_depth-1);true),
-		  "Change the depth of the intersection") ;
+		  "Change the depth for the intersection") ;
   K._D,          ("D",  (fun _ -> incr(inter_depth);true),
-		  "Change the depth of the intersection") ;
+		  "Change the depth for the intersection") ;
+  K._e,          ("e",  (fun _ -> debug:= not !debug;!debug),
+		  "Print debug information") ;
 ]
 
 let refresh da spl =
@@ -357,7 +359,9 @@ let show_help kb =
 let f4 f a b c d = f (f a b) (f c d)
 
 let cubic a b c d t =
-  d*.(t**3.)+.3.*.c*.(t**2.)*.(1.-.t)+.3.*.b*.(t**1.)*.(1.-.t)**2.+.a*.(1.-.t)**3.
+t*.(t*.(t*.(d +. 3.*.(b-.c) -. a)+.3.*.(c -. (2.*.b) +. a))+.3.*.(b -. a))+.a
+(*  ((t^3)*(d - (3*c) + (3*b) - a)) + (3*(t^2)*(c - (2*b) + a)) + (3*t*(b - a)) + a*)
+(*  d*.(t**3.)+.3.*.c*.(t**2.)*.(1.-.t)+.3.*.b*.(t**1.)*.(1.-.t)**2.+.a*.(1.-.t)**3.*)
 
 let cubic_point a t =
   {x=cubic a.(0).x a.(1).x a.(2).x a.(3).x t;
@@ -425,35 +429,63 @@ let bisect a =
   add_halfr c 2;add_halfr c 1;add_halfr c 0;
   (b,c)
 
+type graph = {gt1 : int;
+              gt2 : int;
+              mutable gedge : graph list;
+              mutable taken : bool}
 
 let give_intersect a b =
+  if a=b then [] else
   let rec aux a b l t1 t2 dt= function
-      | 0 -> if is_intersect a b then (t1+.(dt/.2.),t2+.(dt/.2.))::l else l
+      | 0 -> if is_intersect a b then (t1+(dt/2),t2+(dt/2))::l else l
       | n -> let n = n-1 in
-	let dt = dt/.2. in
+	let dt = dt/2 in
 (*	print_spline a;
 	print_spline b;*)
     if is_intersect a b then
       let (af,al) = bisect a in
       let (bf,bl) = bisect b in
       let l = aux af bf l t1 t2 dt n in
-      let l = aux af bl l t1 (t2+.dt) dt n in
-      let l = aux al bf l (t1+.dt) t2 dt n in
-      let l = aux al bl l (t1+.dt) (t2+.dt) dt n in
+      let l = aux af bl l t1 (t2+dt) dt n in
+      let l = aux al bf l (t1+dt) t2 dt n in
+      let l = aux al bl l (t1+dt) (t2+dt) dt n in
       l
     else l in
-  let rem_noise delta (which:float*float -> float) noisy =
-    let sort = List.fast_sort (fun x y -> compare (which x) (which y)) noisy in
-    let rec group (s1,s2) a n = function
-      | [] -> [s1/.n,s2/.n]
-      | ((e1,e2) as e)::l when (which e)-.a<=delta -> group (s1+.e1,s2+.e2) (which e) (n+.1.) l
-      | e::l -> (s1/.n,s2/.n)::(group e (which e) 1. l) in
-    match sort with
-      |[] -> []
-      |a::l -> group a (which a) 1. l in
-  let l = aux a b [] 0. 0. 1. !inter_depth in
-  let delta = 0.5**(float_of_int (!inter_depth -1)) in
-  rem_noise delta snd (rem_noise delta fst l)
+  let rem_noise delta = function | [] -> [] | noisy ->
+    let graph = List.map (fun (t1,t2) -> {gt1= t1;gt2=t2;gedge = [];taken = false}) noisy in
+    let link sel = 
+      let sorted = List.fast_sort (fun x y -> compare (sel x) (sel y)) graph in
+      ignore (List.fold_left (fun bef e -> 
+                                (if (sel e) - (sel bef) <= delta 
+                                 then (bef.gedge<-e::bef.gedge;
+                                      e.gedge<-bef::e.gedge));e)
+                (List.hd sorted) (List.tl sorted)) in
+    link (fun x -> x.gt1);
+    link (fun x -> x.gt2);
+    let rec connexe (((t1,t2),n) as t12n) e = 
+      if e.taken then t12n
+      else (e.taken <- true;
+            let np = n+.1. in
+            let t12n = ((t1*.(n/.np)+.(float_of_int e.gt1)/.np,
+                        t2*.(n/.np)+.(float_of_int e.gt2)/.np),np) in
+            List.fold_left connexe t12n e.gedge) in
+    List.fold_left (fun l e -> if e.taken then l 
+                    else (fst (connexe ((0.,0.),0.) e))::l) [] graph in
+  let nmax = 2.**(float_of_int (!inter_depth+1)) in
+  let l = aux a b [] 0 0 (int_of_float nmax) !inter_depth in
+  (*if !debug then(
+  Format.printf "@[";
+  List.iter (fun (x,y) -> Format.printf "@[(%i,%i)@]" x y) l;
+  Format.printf "@]@.");*)
+  let delta = 4 in
+  let l = rem_noise delta l in
+  let f_from_i x = x*.(1./.nmax) in
+  let res = List.map (fun (x,y) -> (f_from_i x,f_from_i y)) l in
+  if !debug then
+    Format.printf "@[%a@]@." (fun fmt -> List.iter (pt_f fmt))
+      (List.map (fun (t1,t2) -> minus (cubic_point a t1) (cubic_point b t2)) res);
+  res
+
 
 let rec keep f a = function
     | [] -> a
@@ -515,9 +547,9 @@ let cubic_intersection p pp =(*550*)
       let l = aux wl zl dll l n dt in
       let drl = add (add (add dll wl.u1) wl.u2) wl.u3 in
       let l = aux wr zl drl l n dt in
-      let drr = minus (minus (minus dll zl.u1) zl.u2) zl.u3 in
+      let drr = minus (minus (minus drl zl.u1) zl.u2) zl.u3 in
       let l = aux wr zr drr l n dt in
-      let dlr = minus (minus (minus d zl.u1) zl.u2) zl.u3 in
+      let dlr = minus (minus (minus dll zl.u1) zl.u2) zl.u3 in
       let l = aux wl zr dlr l n dt in
       l
   in
@@ -537,6 +569,10 @@ let cubic_intersection p pp =(*550*)
 
 (** *)
 
+let rec one_to_one f a = function
+  | [] -> a
+  | e::l -> one_to_one f (List.fold_left (f e) a l) l
+
 (* Prend une liste de splines en argument et renvoit une liste de points à afficher *)
 (*[start;start_control;end_control;end]*)
 let myfun (spls:point array list) : point list =
@@ -554,9 +590,8 @@ let myfun (spls:point array list) : point list =
                 let ymin =keep (fun a b -> a.y < b.y) {x=0.;y=infinity} yextr in
                   if !select_feature=2 then 
                     xextr@yextr else [xmax;xmin;ymax;ymin]) spls)
-    | 3 -> (match spls with
-	| [a;b] -> List.map (fun (tp,_) -> cubic_point a tp) (give_intersect a b)
-	| _ -> [])
+    | 3 -> one_to_one (fun a lpt b -> (List.map (fun (tp,_) -> cubic_point a tp) 
+                                         (give_intersect a b))@lpt) [] spls
     | 4 -> (match spls with
 	      | [a;b] -> List.map (fun (tp,_) -> cubic_point a tp) (cubic_intersection a b)
 	      | _ -> [])
