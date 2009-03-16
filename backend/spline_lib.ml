@@ -188,7 +188,7 @@ let one_intersection_aux () a b =
         if is_intersect a b then
           let (af,al) = bisect a in
           let (bf,bl) = bisect b in
-          (* begin with the first part of a *)
+          (* As Knuth said that doesn't find the first in the lexicographic order see §550 of metafont comment *)
           aux af bf t1 t2 dt n;
           aux af bl t1 (t2+dt) dt n;
           aux al bf (t1+dt) t2 dt n;
