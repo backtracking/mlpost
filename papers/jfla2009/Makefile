@@ -1,5 +1,5 @@
 
-all: main-pp.pdf
+all: hermann-pp.pdf
 
 WWW=/users/demons/filliatr/WWW
 
@@ -8,6 +8,14 @@ main-pp.pdf: main-pp.tex biblio.bib figures.mp figmp.mps yannick1.mps florence.m
 	bibtex main-pp
 	pdflatex $<
 	bibtex main-pp
+	pdflatex $<
+	pdflatex $<
+
+hermann-pp.pdf: hermann-pp.tex biblio.bib figures.mp figmp.mps yannick1.mps florence.mps
+	pdflatex $<
+	bibtex hermann-pp
+	pdflatex $<
+	bibtex hermann-pp
 	pdflatex $<
 	pdflatex $<
 
