@@ -106,11 +106,11 @@ open Num
 let state = Box.tex ~style:Circle ~stroke:(Some Color.black)
 let final = Box.box ~style:Circle 
 
-let transition states tex pos ?outd ?ind x_name y_name = 
+let transition states tex anchor ?outd ?ind x_name y_name = 
   let x = Box.get x_name states and y = Box.get y_name states in
   let outd = match outd with None -> None | Some a -> Some (vec (dir a)) in
   let ind = match ind with None -> None | Some a -> Some (vec (dir a)) in
-  Arrow.draw ~tex ~pos (cpath ?outd ?ind x y) 
+  Arrow.draw ~tex ~anchor (cpath ?outd ?ind x y) 
 
 (*let loop box =
   let c = Box.ctr box in
@@ -153,7 +153,7 @@ let loop states tex name =
     knotp ~l: (vec (dir 135.)) c;
   ] in
   let bp = Box.bpath box in
-  Arrow.draw ~tex ~pos:`Bot (cut_after bp (cut_before bp p))
+  Arrow.draw ~tex ~anchor:`Bot (cut_after bp (cut_before bp p))
 
 let arrow_loop_explain_kind =
   Arrow.add_belt ~point: 0.9
@@ -203,7 +203,7 @@ let loop_explain =
     construct vert;
     construct diag1;
     construct diag2;
-    Arrow.draw ~tex: "$45°$" ~pos: `Upleft ~kind: arc_arrow arc;
+    Arrow.draw ~tex: "$45°$" ~anchor: `Upleft ~kind: arc_arrow arc;
   ]
 
 (*
@@ -266,7 +266,7 @@ let arrow_simple =
 
 let arrow_loop_explain =
   let pt x y = Point.pt (cm x, cm y) in
-  let draw2 = Arrow.draw2 ~kind: arrow_loop_explain_kind in
+  let draw2 = Arrow.point_to_point ~kind: arrow_loop_explain_kind in
   seq [
     draw2 ~outd:(vec (dir 45.)) ~ind: (vec (dir 45.)) (pt 0. 0.25) (pt 3. 0.25);
     draw2 (pt 5. 0.25) (pt 8. 0.25);
@@ -546,14 +546,14 @@ let circularity =
     let x = Box.get x hbox in
     let y = Box.get y hbox in
     let tex = texttt tex in
-    Arrow.draw ~tex ~pos: `Left
+    Arrow.draw ~tex ~anchor: `Left
       (Box.cpath ~outd: (dir 225.) x y)
   in
   let arrow_up x y tex =
     let x = Box.get x hbox in
     let y = Box.get y hbox in
     let tex = texttt tex in
-    Arrow.draw ~tex ~pos: `Right
+    Arrow.draw ~tex ~anchor: `Right
       (Box.cpath ~outd: (dir 45.) y x)
   in
   seq [
