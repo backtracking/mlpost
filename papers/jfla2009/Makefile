@@ -29,7 +29,7 @@ wc:
 	grep -iw frametitle slides.tex | wc -l
 
 %.mp: %.ml
-	../../tool.opt -ccopt "-I ../../" -pdf -latex slides.tex $^
+	../../tool.opt -ccopt "-I ../../" -pdf -latex hermann.tex $^
 
 figmp.mps: figmp.mp
 	mpost figmp.mp end
