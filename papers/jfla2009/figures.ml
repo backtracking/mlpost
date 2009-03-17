@@ -203,7 +203,7 @@ let loop_explain =
     construct vert;
     construct diag1;
     construct diag2;
-    Arrow.draw ~tex: "$45°$" ~anchor: `Upleft ~kind: arc_arrow arc;
+    Arrow.draw ~tex: "$45^{\\circ}$" ~anchor: `Upleft ~kind: arc_arrow arc;
   ]
 
 (*
