@@ -1366,7 +1366,7 @@ module Tree : sig
 
   val to_box : t -> Box.t
 
-  val draw : t -> Command.t
+  val draw : ?debug:bool -> t -> Command.t
 
   module Simple : sig
     type t = Box.t
@@ -1377,6 +1377,8 @@ module Tree : sig
     val bin  : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
       ?edge_style:edge_style -> ?stroke:Color.t -> ?pen:Pen.t ->
       Box.t -> t -> t -> t
+    val to_box : t -> Box.t
+    val draw : ?debug:bool -> t -> Command.t
   end
 
 end

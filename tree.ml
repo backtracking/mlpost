@@ -216,7 +216,7 @@ let to_box t : Box.t =
 
 
 
-let draw t = Box.draw (to_box t)
+let draw ?debug t = Box.draw ?debug (to_box t)
 
 module Simple = struct
   type t = Box.t
@@ -236,5 +236,9 @@ module Simple = struct
       
   let bin ?ls ?cs ?arrow_style ?edge_style ?stroke ?pen s x y = 
     node ?ls ?cs ?arrow_style ?edge_style ?stroke ?pen s [x;y]
+
+  let to_box b = b
+
+  let draw = Box.draw
 
 end
