@@ -103,7 +103,7 @@ forme par \LaTeX\ (formules, etc.), ce que bon nombre de logiciels de
 dessin ne permettent pas. Ainsi, on peut souhaiter réaliser un schéma
 tel que celui-ci
 \begin{center}
-  \includegraphics{yannick1.mps}
+  \includegraphics[width=\textwidth]{yannick1.mps}
 \end{center}
 en attachant de l'importance au fait que des expressions comme
 $a_1+s_1-1$ apparaissent exactement comme dans le corps du document.
@@ -135,11 +135,11 @@ Les bibliothèques \LaTeX\ telles que \pstricks\ ou \nomdetikz\ offrent
 l'intégration la plus naturelle avec \LaTeX. En particulier, elles
 permettent de combiner arbitrairement éléments graphiques et textes
 \LaTeX\ 
-%\begin{tikzpicture}[baseline=(a.base)]
-%\path[use as bounding box] 
-%  (0,0) node[draw,style=dashed] (a) {comme ceci};
-%\draw[->] (a) .. controls +(-2cm,1cm) and +(-2cm,-0cm) .. (a);
-%\end{tikzpicture}.
+\begin{tikzpicture}[baseline=(a.base)]
+\path[use as bounding box] 
+  (0,0) node[draw,style=dashed] (a) {comme ceci};
+\draw[->] (a) .. controls +(-2cm,1cm) and +(-2cm,-0cm) .. (a);
+\end{tikzpicture}.
 En revanche, elles demandent d'apprendre un certain nombre de
 macros et de notations et souffrent surtout des défauts inhérents à
 \LaTeX~:
@@ -171,7 +171,8 @@ donne un exemple de programme/figure réalisé avec \metapost.
 \small
 \begin{alltt}
   vardef koch(expr A,B,n) =
-    save C; pair C; C = A rotatedaround(1/3[A,B], 120);
+    save C; pair C; 
+    C = A rotatedaround(1/3[A,B], 120);
     if n>0:
       koch( A,        1/3[A,B], n-1);
       koch( 1/3[A,B], C,        n-1);
@@ -181,8 +182,10 @@ donne un exemple de programme/figure réalisé avec \metapost.
       draw A--1/3[A,B]--C--2/3[A,B]--B;
     fi;
   enddef;
-  z0=(4cm,0); z1=z0 rotated 120; z2=z1 rotated 120;
-  koch( z0, z1, 4 ); koch( z1, z2, 4 ); koch( z2, z0, 4 );
+  z0=(4cm,0); z1=z0 rotated 120; 
+  z2=z1 rotated 120;
+  koch( z0, z1, 4 ); koch( z1, z2, 4 ); 
+  koch( z2, z0, 4 );
 \end{alltt}
 \end{minipage}
 \caption{Exemple de figure \metapost}\label{fig:metapost}
@@ -251,13 +254,14 @@ deux boîtes simples, la deuxième étant déplacée un centimètre vers la
 droite en utilisant la fonction \verb|shift|.
 
 \medskip
-\begin{minipage}{0.2\linewidth}
+\begin{minipage}{0.18\linewidth}
   \includegraphics{simple.mps}
 \end{minipage}
 \begin{minipage}{0.8\linewidth}
 \small\begin{ocaml}
 [ Box.draw (Box.tex "\\LaTeX");
-  Box.draw (Box.shift (Point.pt (cm 1., zero)) (circle (empty ()))) ]
+  Box.draw (Box.shift (Point.pt (cm 1., zero)) 
+	     (circle (empty ()))) ]
 \end{ocaml}
 \end{minipage}
 
@@ -292,7 +296,8 @@ permet de spécifier l'espacement horizontal entre deux boîtes :
 \begin{minipage}{0.8\linewidth}
 \small\begin{ocaml}
 [ Box.draw (Box.hbox ~padding:(cm 1.) 
-                     [Box.tex "\\LaTeX"; circle (empty ())]) ]
+              [Box.tex "\\LaTeX"; 
+               circle (empty ())]) ]
 \end{ocaml}
 \end{minipage}
 
@@ -313,14 +318,17 @@ utilisé trois instances de la même boîte \texttt{b}, dont le contour
 est tracé pour la deuxième.
 
 \medskip
-\begin{minipage}{0.2\linewidth}
+\begin{minipage}{0.22\linewidth}
   \includegraphics{persistance.mps}
 \end{minipage}
-\begin{minipage}{0.8\linewidth}
+\begin{minipage}{0.78\linewidth}
 \small\begin{ocaml}
 let b = 
-  Box.hbox ~padding:(cm 1.) [Box.tex "\\LaTeX"; circle (empty ())] in
-[ Box.draw (Box.vbox [b; set_stroke Color.black b; b]) ]
+  Box.hbox ~padding:(cm 1.) 
+    [Box.tex "\\LaTeX"; circle (empty ())] 
+in
+[ Box.draw (Box.vbox 
+    [b; set_stroke Color.black b; b]) ]
 \end{ocaml}
 \end{minipage}
 
@@ -354,7 +362,8 @@ leur donne une hauteur commune et trace leur contour. Voici un exemple
 \end{minipage}
 \begin{minipage}{0.8\linewidth}
 \small\begin{ocaml}
-let b = Box.hblock ~pos:`Bot [Box.tex "a"; Box.tex "b"; Box.tex "C"] in
+let b = Box.hblock ~pos:`Bot 
+  [Box.tex "a"; Box.tex "b"; Box.tex "C"] in
 [ Box.draw b ]
 \end{ocaml}
 \end{minipage}
@@ -367,7 +376,8 @@ la valeur du booléen \texttt{tl} :
 \begin{ocaml}
 let cons hd tl =
   let p1 = Box.tex ~name:"hd" hd in
-  let p2 = Box.tex ~name:"tl" (if tl then "" else "\\ensuremath{\\bot}") in
+  let p2 = Box.tex ~name:"tl" 
+     (if tl then "" else "\\ensuremath{\\bot}") in
   Box.hblock [p1; p2]
 \end{ocaml}
 L'argument optionnel \texttt{\~{}name} permet de nommer les
@@ -393,7 +403,8 @@ let pointer_arrow a b =
   let p = pathp [Box.ctr a; Box.ctr b] in
   let p = Path.cut_after (Box.bpath b) p in
   let pen = Pen.scale (bp 4.) Pen.circle in
-  Command.draw ~pen (pathp [Box.ctr a]) ++ draw_arrow p
+  Command.draw ~pen (pathp [Box.ctr a]) ++ 
+  draw_arrow p
 \end{ocaml}
 \end{minipage}
 %XXX virer ++ ?
@@ -427,7 +438,9 @@ consécutives :
   let rec arrows = function
     | [] | [_] -> nop
     | b1 :: (b2 :: _ as l) -> 
-        pointer_arrow (Box.get "tl" b1) (Box.get "hd" b2) ++ arrows l in
+       pointer_arrow (Box.get "tl" b1) (Box.get "hd" b2) 
+       ++ arrows l 
+  in
 \end{ocaml}
 On utilise ici la fonction \texttt{Box.get} qui permet de récupérer
 une sous-boîte par son nom. On accède ainsi aux boîtes nommées
@@ -441,7 +454,9 @@ avec la fonction \texttt{arrows} :
 \end{ocaml}
 On peut tester avec
 \begin{ocaml}
-  draw_list (List.map (fun n -> Printf.sprintf "$\\sqrt{%d}$" n) [1;2;3;4])
+  draw_list 
+    (List.map (fun n -> Printf.sprintf "$\\sqrt{%d}$" n) 
+    [1;2;3;4])
 \end{ocaml}
 qui donne bien le résultat attendu :
 \begin{center}
@@ -470,7 +485,8 @@ let classblock name attr_list method_list =
   let vbox = Box.vbox ~pos:`Left in
   Box.vblock ~pos:`Left ~name
   [ tex ("{\\bf " ^ name ^ "}");
-    vbox (List.map tex attr_list); vbox (List.map tex method_list) ]
+    vbox (List.map tex attr_list); 
+    vbox (List.map tex method_list) ]
 \end{ocaml}
 Ici, le nom \texttt{name} de la classe est utilisé à la fois pour
 désigner le schéma dans le diagramme (l'argument labelisé \url{~name}
@@ -483,21 +499,24 @@ de leurs sous-boîtes.}.  On peut maintenant s'en servir pour dessiner un
 petit diagramme de classes :
 
 \medskip
-\begin{minipage}{0.35\linewidth}
-  \includegraphics{uml.mps}
+\begin{minipage}{0.38\linewidth}
+  \includegraphics[width=0.9\linewidth]{uml.mps}
 \end{minipage}
 \begin{minipage}{0.6\linewidth}
 \small\begin{ocaml}
 let a = classblock "BankAccount" 
-          [ "balance : Dollars = $0$"] 
-          [ "deposit (amount : Dollars)"; 
-            "withdraw (amount : Dollars)" ] in
+  [ "balance : Dollars = $0$"] 
+  [ "deposit ..."; ... ] in
 let b = classblock "Client" 
-          [ "name : String"; "address : String" ] [] in
-let diag = Box.vbox ~padding:(cm 1.) [a;b] in
+  [ "name : String"; ...] [] in
+let diag = 
+  Box.vbox ~padding:(cm 1.) [a;b] 
+in
 [ Box.draw diag; 
-  box_label_arrow ~pos:`Left (Picture.tex "owns") 
-    (get "Client" diag) (get "BankAccount" diag) ]
+  box_label_arrow ~pos:`Left 
+    (Picture.tex "owns") 
+    (get "Client" diag) 
+    (get "BankAccount" diag) ]
 \end{ocaml}
 \end{minipage}
 \vspace{1em}
@@ -553,7 +572,8 @@ let states = Box.vbox ~padding:(cm 0.8)
   [ Box.hbox ~padding:(cm 1.4)
       [ state ~name:"alpha" "$\\alpha$";
         state ~name:"beta" "$\\beta$" ];
-    final ~name:"gamma" (state "$\\gamma$") ] in
+    final ~name:"gamma" 
+      (state "$\\gamma$") ] in
 [ Box.draw states ]
 \end{ocaml}
 \end{minipage}
@@ -572,10 +592,11 @@ taille et  la même forme que  \texttt{q}, ce qui poserait  des problèmes pour
 placer \texttt{q} ou pour dessiner des transitions vers ou à partir de
 \texttt{q}. 
 \begin{ocaml}
-let initial (states : Box.t) (name : string) : Command.t =
+let initial (states : Box.t) name : Command.t =
   let q = Box.get name states in
   let p = Box.west q in
-  Arrow.draw (Path.pathp [Point.shift p (Point.pt (cm (-0.3), zero)); p])
+  Arrow.draw (Path.pathp 
+    [Point.shift p (Point.pt (cm (-0.3), zero)); p])
 \end{ocaml}
 La fonction  accède à  la boîte \texttt{q}  par son  nom \texttt{name}
 dans la  boîte \texttt{states} et détermine le point d'arrivée de la
@@ -598,9 +619,12 @@ qui trace la flèche en plaçant une étiquette \texttt{tex} à la
 position \texttt{pos}.
 \begin{ocaml}
 let transition states tex pos ?outd ?ind x_name y_name = 
-  let x = Box.get x_name states and y = Box.get y_name states in
-  let outd = match outd with None -> None | Some a -> Some (vec (dir a)) in
-  let ind = match ind with None -> None | Some a -> Some (vec (dir a)) in
+  let x = Box.get x_name states 
+  and y = Box.get y_name states in
+  let outd = match outd with 
+    | None -> None | Some a -> Some (vec (dir a)) in
+  let ind = match ind with 
+    | None -> None | Some a -> Some (vec (dir a)) in
   Arrow.draw ~tex ~pos (cpath ?outd ?ind x y) 
 \end{ocaml}
 
@@ -614,14 +638,15 @@ utilise au passage la fonction \texttt{knotp} qui permet de spécifier
 un point avec une tangente, et \texttt{pathk} qui transforme une liste 
 de tels points en un chemin.
 
-\begin{minipage}{0.2\linewidth}
+\begin{minipage}{0.3\linewidth}
   \includegraphics{loop_explain.mps}
 \end{minipage}
 \begin{minipage}{0.2\linewidth}
 \small\begin{ocaml}
 let loop states tex name =
   let box = Box.get name states in
-  let a = Point.shift (Box.south box) (Point.pt (cm 0., cm (-0.4))) in
+  let a = Point.shift (Box.south box) 
+    (Point.pt (cm 0., cm (-0.4))) in
   let c = Box.ctr box in
   let p = Path.pathk [
     knotp ~r:(vec (dir 225.)) c;
@@ -629,7 +654,8 @@ let loop states tex name =
     knotp ~l:(vec (dir 135.)) c;
   ] in
   let bp = Box.bpath box in
-  Arrow.draw ~tex ~pos:`Bot (cut_after bp (cut_before bp p))
+  Arrow.draw ~tex ~pos:`Bot 
+    (cut_after bp (cut_before bp p))
 \end{ocaml}
 \end{minipage}
 
@@ -647,11 +673,16 @@ cette bibliothèque.
 let automate =
   let states = ... in
   [ Box.draw states;
-    transition states "a" `Lowleft "alpha" "gamma";
-    transition states "b" `Lowright "gamma" "beta";
-    transition states "c" `Top ~outd:25. ~ind:335. "alpha" "beta";
-    transition states "d" `Bot ~outd:205. ~ind:155. "beta" "alpha";
-    loop states "e" "gamma"; initial states "alpha" ]
+    transition states "a" `Lowleft 
+      "alpha" "gamma";
+    transition states "b" `Lowright 
+      "gamma" "beta";
+    transition states "c" `Top ~outd:25. 
+      ~ind:335. "alpha" "beta";
+    transition states "d" `Bot ~outd:205. 
+      ~ind:155. "beta" "alpha";
+    loop states "e" "gamma"; 
+    initial states "alpha" ]
 \end{ocaml}
 \end{minipage}
 
@@ -669,18 +700,18 @@ La figure suivante montre un exemple basique
 d'utilisation de cette extension :
 
 \medskip
-\begin{minipage}{0.35\linewidth}
-  \includegraphics{graph_sqrt.mps}
+\begin{minipage}{0.28\linewidth}
+  \includegraphics[width=0.9\linewidth]{graph_sqrt.mps}
 \end{minipage}
 \begin{minipage}{0.65\linewidth}
 \small\begin{ocaml}
 let u = cm 1. in
 let sk = Plot.mk_skeleton 4 3 u u in
-let label = Picture.tex "$y=\\sqrt{x+\\frac{1}{2}}$", 
+let label = Picture.tex "$y=...$", 
             `Upleft, 3 in
 let f x = sqrt (float x +. 0.5) in
-let graph = Plot.draw_func ~label f sk in
-[ graph; Plot.draw_simple_axes "$x$" "$y$" sk ]
+[ Plot.draw_func ~label f sk; 
+  Plot.draw_simple_axes "$x$" "$y$" sk ]
 \end{ocaml}
 \end{minipage}
 
@@ -731,7 +762,8 @@ d'abscisse $x$.
 \begin{ocaml}
 let x2 = 9 and y2 = 6
 let bresenham_data = Array.create (x2+1) 0 
-let () = (* remplissage du tableau a avec l'algorithme de Bresenham *) ...
+let () = (* remplissage du tableau a *)
+         (* avec l'algorithme de Bresenham *) ...
 \end{ocaml}
 On peut alors réaliser la figure très facilement, à l'aide de la
 fonction \texttt{Box.gridi} fournie par \mlpost, qui construit une
@@ -740,18 +772,22 @@ d'une fonction construisant la boîte $(i,j)$,
 d'une manière analogue à \texttt{Array.create\_matrix}.
 
 \medskip
-\begin{minipage}{0.3\linewidth}
+\begin{minipage}{0.32\linewidth}
   \includegraphics{bresenham0.mps}
 \end{minipage}
 \begin{minipage}{0.7\linewidth}
 \vspace*{0.8em}
-\begin{ocaml}
-let width = bp 6. and height = bp 6. in
+\small\begin{ocaml}
+let width = bp 6. 
+and height = bp 6. in
 let g = Box.gridi (x2+1) (y2+1) 
   (fun i j -> 
-    let fill = if bresenham_data.(i) = y2 - j 
-               then Some Color.red else None in
-    Box.rect ?fill (Box.empty ~width ~height ())) in
+    let fill = 
+      if bresenham_data.(i) = y2 - j 
+      then Some Color.red else None in
+    Box.rect ?fill 
+      (Box.empty ~width ~height ())) 
+in
 [ Box.draw g ]
 \end{ocaml}
 \end{minipage}
@@ -771,21 +807,26 @@ cette boîte (par exemple le point au milieu en bas avec
 \texttt{Command.label}.
 
 \medskip
-\begin{minipage}{0.22\linewidth}
+\begin{minipage}{0.28\linewidth}
 \vspace*{0.8em}
 \hspace*{-1.4em}\includegraphics{bresenham.mps}
 \end{minipage}
 \begin{minipage}{0.7\linewidth}\small
 \begin{ocaml}
 let bresenham = 
-  let width = bp 6. and height = bp 6. in
+  let width = bp 6. 
+  and height = bp 6. in
   let g = ... in
-  let get i j = Box.nth i (Box.nth (y2-j) g) in
+  let get i j = 
+    Box.nth i (Box.nth (y2-j) g) in
   let label pos s point i j =
-    Command.label ~pos (Picture.tex s) (point (get i j)) in
+    Command.label ~pos (Picture.tex s) 
+      (point (get i j)) in
   [ Box.draw g;
-    label `Bot "0" Box.south 0 0; label `Bot "$x_2$" Box.south x2 0;
-    label `Left "0" Box.west 0 0; label `Left "$y_2$" Box.west 0 y2 ]
+    label `Bot "0" Box.south 0 0; 
+    label `Bot "$x_2$" Box.south x2 0;
+    label `Left "0" Box.west 0 0; 
+    label `Left "$y_2$" Box.west 0 y2 ]
 \end{ocaml}
 \end{minipage}
 
@@ -807,7 +848,7 @@ changer l'extension des figures générées, ce qu'une option de l'outil
 
 \begin{figure}[h]
 \begin{center}
-\includegraphics{stages.mps}
+\includegraphics[width=\textwidth]{stages.mps}
 \end{center}
   \caption{Architecture de \mlpost}\label{fig:etapes}
 \end{figure}
@@ -946,15 +987,15 @@ Pour cela, on écrit un unique fichier
 modules à exporter :
 
 \medskip
-\begin{minipage}{0.33\textwidth}
-\begin{ocaml}
-module rec Num : sig
-  type t
-  ...
-end
-and Point : sig
+\begin{minipage}{0.3\textwidth}
+\small\begin{ocaml}
+module rec Point : sig
   type t
   val xpart : t -> Num.t
+  ...
+end
+and Num : sig
+  type t
   ...
 end
 and Path : sig
@@ -964,8 +1005,8 @@ end
 ...
 \end{ocaml}
 \end{minipage}
-\begin{minipage}{0.65\textwidth}
-  \includegraphics{deps.mps}
+\begin{minipage}{0.6\textwidth}
+  \includegraphics[width=1\textwidth]{deps.mps}
 \end{minipage}
 
 Toutes ces signatures sont déclarées de manière mutuellement
@@ -1045,7 +1086,8 @@ un type récursif de la forme suivante :
 \begin{ocaml}
 type t =
   { name : string option;
-    width : Num.t;  height : Num.t; pen : Pen.t option; ...
+    width : Num.t;  height : Num.t; 
+    pen : Pen.t option; ...
     desc : desc; }
     
 and desc = 
@@ -1086,7 +1128,7 @@ Une flèche \metapost\ suit  un chemin arbitraire   mais son tracé est
 limité aux différents styles de trait (plume et pointillés) et la tête
 de flèche est toujours la même : 
 \begin{center}
-\includegraphics{arrow_metapost.mps}
+\includegraphics[width=\textwidth]{arrow_metapost.mps}
 \end{center}
 Avec \mlpost, l'utilisateur peut créer ses propres catégories de
 flèches à l'aide du module \texttt{Arrow}. Celui-ci propose deux types :
@@ -1120,7 +1162,8 @@ triangulaire remplie, et on obtient :
 \begin{minipage}{0.2\linewidth}
 \begin{ocaml}
 let kind =
-  Arrow.add_head ~head:Arrow.head_triangle_full
+  Arrow.add_head 
+    ~head:Arrow.head_triangle_full
     (Arrow.add_line Arrow.empty) in 
 [ Arrow.draw ~kind (...path...) ]
 \end{ocaml}
@@ -1132,10 +1175,11 @@ fonctionnement de la fonction \texttt{loop}. Pour les besoins de cette
 figure, on  a créé un  type de flèche  spécial, composé d'un  début et
 d'une fin en pointillés et avec une tête placée différemment :
 \begin{center}
-\includegraphics{arrow_loop_explain.mps}
+\includegraphics[width=\textwidth]{arrow_loop_explain.mps}
 \end{center}
 Le code permettant d'obtenir cette  catégorie de flèche est le suivant
 :
+{\small
 \begin{ocaml}
 let kind =
   Arrow.add_belt ~point:0.9
@@ -1144,6 +1188,7 @@ let kind =
           (Arrow.add_line ~from_point:0.1 ~to_point:0.9
              Arrow.empty)))
 \end{ocaml}
+}
 
 \section{Conclusion}\label{conclusion}
 
@@ -1193,6 +1238,7 @@ pour l'inclusion de \LaTeX.
 
 \medskip
 \noindent
+\vbox{
 \begin{center}
   \includegraphics[width=0.3\textwidth]{ford.mps}
 
@@ -1210,6 +1256,7 @@ pour l'inclusion de \LaTeX.
 \medskip
   \includegraphics[angle=180,width=0.3\textwidth]{ford.mps}
 \end{center}
+}
 
 % La bibliographie
 % N'oubliez pas de l'inclure lors de votre soumission.
