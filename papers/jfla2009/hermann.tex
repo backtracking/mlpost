@@ -546,7 +546,8 @@ fonction \texttt{state} est juste une spé\-ci\-ali\-sa\-tion de la
 fonction {\tt Box.tex} à un contour circulaire, définie par
 l'application partielle suivante:
 \begin{ocaml}
-let state = Box.tex ~style:Circle ~stroke:(Some Color.black)
+let state = Box.tex ~style:Circle 
+                    ~stroke:(Some Color.black)
 \end{ocaml}
 Le paramètre \texttt{stroke} permet de spécifier si le contour doit
 être tracé et, le cas échéant, dans quelle couleur. De manière
