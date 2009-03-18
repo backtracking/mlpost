@@ -1,7 +1,7 @@
 open Printf
-let com_latex = "tex"
+let com_latex = "latex"
 let genfile_name = "gentex"
-let default_prelude = ""
+let default_prelude = "\\documentclass{article}\n\\begin{document}"
 
 let _ = Random.self_init ()
 
@@ -47,8 +47,7 @@ let create prelude texs =
 \\end{document}" (if prelude = "" then default_prelude else prelude)
 (fun fmt -> List.iter (Printf.fprintf fmt
 "\\mpxshipout
-%s
-\\stopmpxshipout")) texs in
+%s\\stopmpxshipout")) texs in
   let todo () = 
     let latex = genfile_name^".tex" in
     let file = open_out latex in
@@ -71,3 +70,6 @@ let get_dimen_pt x =
    point_of_cm x_max,
    point_of_cm y_max)
 (** donne la dimension en centimètre *)
+
+let get_bases_cm = Dev_save.get_bases_first_page
+let get_bases_pt x = List.map point_of_cm (get_bases_cm x)

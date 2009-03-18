@@ -89,6 +89,7 @@ let load_pfb_aux filename =
       let count = ref 0 in
       List.iter (fun x -> Hashtbl.add charstring_table x !count;incr(count)) charstring;
       if !info then printf "done@.";
+      Sys.remove temp_fn;
       encoding_table,charstring_table
     with
         (Parsing.Parse_error |Failure _) as a->

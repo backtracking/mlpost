@@ -26,6 +26,10 @@ testspline_lib:
 	ocamlbuild $(GENOPTIONS) -no-links testspline_lib.native
 	ln -sf _build/testspline_lib.native testspline_lib
 
+testwidth:
+	ocamlbuild $(GENOPTIONS) -no-links testwidth.native
+	ln -sf _build/testwidth.native testwidth
+
 test: testdvi
 	./testdvi hello.dvi math.dvi jfla.dvi
 
@@ -36,7 +40,7 @@ testspline: testspline_lib
 testtfm:
 	./tfm cmr10.tfm cmmi10.tfm cmsy10.tfm
 
-.PHONY : tfm dvicairo testdvi testdviinterp spline testspline_lib
+.PHONY : tfm dvicairo testdvi testdviinterp spline testspline_lib testwidth
 
 .SUFFIXES : .dvi .pdf
 .dvi.pdf: dvicairo

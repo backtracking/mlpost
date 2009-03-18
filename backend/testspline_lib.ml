@@ -74,6 +74,8 @@ let arc = Spline_lib.create
 
 let point_dist_min = {x = 100.;y=100.}
 
+let _ = Spline_lib.inter_depth := 10
+
 let draw cr =
   Cairo.set_line_width cr 10. ;
   (* The first page intersection*)
@@ -135,28 +137,81 @@ let draw cr =
   Spline_lib.iter (draw_spline cr) (fst (Spline_lib.split ribbon_t1 t1));
   Spline_lib.iter (draw_spline cr) (snd (Spline_lib.split ribbon_t2 t1));
 
+
+    Cairo.show_page cr;
+    
+  let segment1 = Spline_lib.create {x=150.;y=50.} {x=50.;y=150.} {x=150.;y=50.} {x=50.;y=150.} in
+  let segment2 = Spline_lib.translate segment1 {y=50.;x=50.} in
+  Spline_lib.iter (draw_spline cr) segment1;
+  Spline_lib.iter (draw_spline cr) segment2;
+  let (t1,t2) = Spline_lib.dist_min_path segment1 segment2 in
+  draw_point cr `Green (Spline_lib.abscissa_to_point segment1 t1);
+  draw_point cr `Green (Spline_lib.abscissa_to_point segment2 t2);
+
+    Cairo.show_page cr;
+  
+  let segment1 = Spline_lib.create {x=150.;y=50.} {x=50.;y=150.} {x=150.;y=50.} {x=50.;y=150.} in
+  let segment2 = Spline_lib.translate segment1 {y=50.;x=75.} in
+  Spline_lib.iter (draw_spline cr) segment1;
+  Spline_lib.iter (draw_spline cr) segment2;
+  let (t1,t2) = Spline_lib.dist_min_path segment1 segment2 in
+  draw_point cr `Green (Spline_lib.abscissa_to_point segment1 t1);
+  draw_point cr `Green (Spline_lib.abscissa_to_point segment2 t2);
+
+
   Cairo.show_page cr;
 
 (*  let texs = Gentex.create "" ["$\\frac{a}{b}$";"Bonjour";"$\\sqrt{1+2+3}^x_i$"] in*)
-  let texs = Gentex.create "" ["Hello World";"Bonjour";"$A^3_i$"] in
-  let box tex = 
+  let label = ["Hello World";
+               "$\\frac{a^3}{b}$";
+               "$A^3_i$";
+               "$\\sqrt{1+2+3}^x_i$";
+               "\\parbox{3cm}{Haut\\newline Bas}";
+               "\\newlength{\\hautw}\\settowidth{\\hautw}{Haut}\\parbox{\\hautw}{Haut\\newline Bas}"
+              ] in
+  let texs = Gentex.create "" label in
+  let box draw_bases tex = 
     let (x_min,y_min,x_max,y_max) = Gentex.get_dimen_pt tex in
     Cairo.save cr;
     Cairo.set_source_rgb cr 0. 0. 1. ;
-    Cairo.set_line_width cr 1. ;
+    Cairo.set_line_width cr 0.5 ;
     Cairo.move_to cr x_min y_min ;
     Cairo.line_to cr x_min y_max ;
     Cairo.line_to cr x_max y_max ;
     Cairo.line_to cr x_max y_min ;
     Cairo.line_to cr x_min y_min ;
     Cairo.stroke cr;
+    if draw_bases then
+      List.iter (fun x -> 
+                   Cairo.set_source_rgb cr 0. 1. 0. ;
+                   Cairo.move_to cr x_min x;
+                   Cairo.line_to cr x_max x;
+                   Cairo.stroke cr) (Gentex.get_bases_pt tex);
     Cairo.restore cr;
     Gentex.draw cr tex in
-  
-  Cairo.translate cr 50. 50.;
-  List.iter (fun tex ->
-               box tex;
-               Cairo.translate cr 100. 0.) texs
 
+  Cairo.translate cr 50. 50.;
+
+  let draw_all tx ty =
+    Cairo.save cr;
+    List.iter (fun tex ->
+                 box false tex;
+                 Cairo.translate cr tx 0.) texs;
+    Cairo.restore cr;
+    
+    Cairo.save cr;
+    Cairo.translate cr 0. ty;
+    List.iter (fun tex ->
+                 box true tex;
+                 Cairo.translate cr tx 0.) texs;
+    Cairo.restore cr in
+
+  draw_all 100. 100.;
+  Cairo.translate cr 0. 200.;
+  Cairo.scale cr 2. 2.;
+  draw_all 60. 50.
+
+
+  
 let _ = 
-  create_pdf 21. 29.7 draw "testspline_lib.pdf"
+  create_pdf 20. 29.7 draw "testspline_lib.pdf"

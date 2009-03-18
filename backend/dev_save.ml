@@ -47,6 +47,8 @@ let get_dimen_page s =
 
 let get_dimen_first_page s = get_dimen_page (List.hd s.pages)
 
+let get_bases_first_page s = (List.hd s.pages).bases
+
 let nb_pages s = List.length s.pages
 
 module Dev_save =
