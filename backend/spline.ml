@@ -6,6 +6,8 @@
 (*  GNU Lesser General Public License version 2.1 (the "LGPL").           *)
 (**************************************************************************)
 
+let _ = GMain.Main.init ()
+
 type point = Cairo.point = 
     { x : float ; 
       y : float }

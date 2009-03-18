@@ -1320,7 +1320,7 @@ module Tree : sig
 
   (** This module provides high-level means for creating and drawing Trees *)
 
-  type t = Box.t
+  type t
     (** The type of trees *)
 
   (** The style of arrows between nodes *)
@@ -1363,6 +1363,21 @@ module Tree : sig
     (** [bin label l r] creates a binary node with label [label] and 
 	children [l] and [r].
 	Optional arguments are the same as in [leaf]. *)
+
+  val to_box : t -> Box.t
+
+  val draw : t -> Command.t
+
+  module Simple : sig
+    type t = Box.t
+    val leaf : Box.t -> t
+    val node : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
+      ?edge_style:edge_style -> ?stroke:Color.t -> ?pen:Pen.t ->
+      Box.t -> t list -> t
+    val bin  : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
+      ?edge_style:edge_style -> ?stroke:Color.t -> ?pen:Pen.t ->
+      Box.t -> t -> t -> t
+  end
 
 end
 

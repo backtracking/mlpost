@@ -174,13 +174,15 @@ let d2c, d2s, d2sq, d2hsq =
   draw (random_tree ~edge_style:HalfSquare ~arrow_style ~stroke ~pen 17)
 
 let d5 = 
-  let rand_tree name i = set_name name (set_stroke Color.black (random_tree i)) in
+  let rand_tree name i = 
+    set_name name (set_stroke Color.black 
+		      (to_box (random_tree i))) in
   let t1 = rand_tree "1" 5 in
   let t2 = rand_tree "2" 6 in
   let bl = Box.hbox ~padding:(Num.cm 2.) [ box t1; box t2] in
   let b1 = nth 0 (get "1" bl) in
   let b2 = nth 0 (nth 0 (nth 1 (get "2" bl))) in
-  seq [ draw bl; box_arrow b1 b2; ]
+  seq [ Box.draw bl; box_arrow b1 b2; ]
 
 
 let tree1 () = pic (Picture.make (draw (random_tree (1 + Random.int 5))))
@@ -518,7 +520,7 @@ let grid_with_padding =
      [blue "titre 1"; red ""; red ""];
      [blue "titre 2"; red ""; red ""]]
   in
-  draw b
+  Box.draw b
 
 let grid_with_padding_2 = 
   let red s = rect ~stroke:None ~fill:Color.lightred (tex s) in
@@ -530,7 +532,7 @@ let grid_with_padding_2 =
      [blue "titre 1"; red ""; red ""];
      [blue "titre 2"; red ""; red ""]]
   in
-  seq [draw b; draw (shift (Point.pt (bp 5., bp 5.)) b)]
+  seq [Box.draw b; Box.draw (shift (Point.pt (bp 5., bp 5.)) b)]
 
 let figs = [
   grid_with_padding;
