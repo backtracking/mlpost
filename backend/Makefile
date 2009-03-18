@@ -11,7 +11,7 @@ testdvi:
 	ln -sf _build/testdvi.native testdvi
 
 testdvicairo :
-	ocamlbuild $(GENOPTIONS) -lflag "gtkInit.cmx" -no-links testdvicairo.native
+	ocamlbuild $(GENOPTIONS) -no-links testdvicairo.native
 	ln -sf _build/testdvicairo.native dvicairo
 
 tfm:
@@ -19,7 +19,7 @@ tfm:
 	ln -sf _build/testtfm.native tfm
 
 spline:
-	ocamlbuild $(GENOPTIONS) -lflag "gtkInit.cmx" -no-links spline.native
+	ocamlbuild $(GENOPTIONS) -no-links spline.native
 	ln -sf _build/spline.native spline
 
 testspline_lib:

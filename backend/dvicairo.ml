@@ -1,6 +1,7 @@
-open GtkInit
 open Format
 open Dviinterp
+
+
 
 type multi_page_pic = {pic :Cairo.t;
             new_page : unit -> unit;
