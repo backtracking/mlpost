@@ -133,7 +133,30 @@ let draw cr =
   Spline_lib.iter (draw_spline cr) (fst (Spline_lib.split arc_t1 t2));
   Spline_lib.iter (draw_spline cr) (snd (Spline_lib.split arc_t2 t2));
   Spline_lib.iter (draw_spline cr) (fst (Spline_lib.split ribbon_t1 t1));
-  Spline_lib.iter (draw_spline cr) (snd (Spline_lib.split ribbon_t2 t1))
+  Spline_lib.iter (draw_spline cr) (snd (Spline_lib.split ribbon_t2 t1));
+
+  Cairo.show_page cr;
+
+(*  let texs = Gentex.create "" ["$\\frac{a}{b}$";"Bonjour";"$\\sqrt{1+2+3}^x_i$"] in*)
+  let texs = Gentex.create "" ["Hello World";"Bonjour";"$A^3_i$"] in
+  let box tex = 
+    let (x_min,y_min,x_max,y_max) = Gentex.get_dimen_pt tex in
+    Cairo.save cr;
+    Cairo.set_source_rgb cr 0. 0. 1. ;
+    Cairo.set_line_width cr 1. ;
+    Cairo.move_to cr x_min y_min ;
+    Cairo.line_to cr x_min y_max ;
+    Cairo.line_to cr x_max y_max ;
+    Cairo.line_to cr x_max y_min ;
+    Cairo.line_to cr x_min y_min ;
+    Cairo.stroke cr;
+    Cairo.restore cr;
+    Gentex.draw cr tex in
+  
+  Cairo.translate cr 50. 50.;
+  List.iter (fun tex ->
+               box tex;
+               Cairo.translate cr 100. 0.) texs
 
 let _ = 
   create_pdf 21. 29.7 draw "testspline_lib.pdf"

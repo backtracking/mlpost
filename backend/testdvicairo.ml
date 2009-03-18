@@ -45,7 +45,8 @@ let all_output s =
       let fprefix = format_prefix prefix (Dev_save.nb_pages saved) in
       let count = ref 0 in
       List.iter (
-        function page,x_min,y_min,x_max,y_max ->
+        function page ->
+          let x_min,y_min,x_max,y_max = Dev_save.get_dimen_first_page page in
           let w = x_max -. x_min in
           let h = y_max -. y_min in
           all_output_aux h w (-.x_min) (-.y_min) (incr(count);fprefix !count) page 

@@ -38,12 +38,14 @@ let replay trace new_document new_page fill_rect draw_char end_document saved ar
   end_document dev
 
 let separe_pages saved =
-  List.map (fun page -> {pages = [page];doc=saved.doc},page.x_min,page.y_min,page.x_max,page.y_max) saved.pages
+  List.map (fun page -> {pages = [page];doc=saved.doc}) saved.pages
 
 let get_doc s = s.doc
 
 let get_dimen_page s = 
   (s.x_min,s.y_min,s.x_max,s.y_max)
+
+let get_dimen_first_page s = get_dimen_page (List.hd s.pages)
 
 let nb_pages s = List.length s.pages
 
