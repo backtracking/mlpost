@@ -13,11 +13,11 @@ main-pp.pdf: main-pp.tex biblio.bib figures.mp figmp.mps yannick1.mps florence.m
 
 hermann-pp.pdf: hermann-pp.tex biblio.bib figures.mp figmp.mps yannick1.mps florence.mps
 	pdflatex $<
-# 	bibtex hermann-pp
-# 	pdflatex $<
-# 	bibtex hermann-pp
-# 	pdflatex $<
-# 	pdflatex $<
+	bibtex hermann-pp
+	pdflatex $<
+	bibtex hermann-pp
+	pdflatex $<
+	pdflatex $<
 
 slides.pdf: slides.tex figures.mp alt_ergo.mp
 	pdflatex $<
