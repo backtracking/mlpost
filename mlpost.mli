@@ -1492,6 +1492,7 @@ module Plot : sig
   val draw_func : ?pen:Pen.t -> ?drawing:drawing -> 
                   ?style:Path.joint -> ?dashed:Dash.t -> ?color:Color.t ->
                   ?label:(Picture.t * Command.position * int) ->
+                  ?from_x:int -> ?to_x:int ->
                     (int -> float) -> skeleton -> Command.t
 end
 

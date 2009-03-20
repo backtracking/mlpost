@@ -170,7 +170,8 @@ let draw_simple_axes ?hpen ?vpen hcaption vcaption sk =
 type drawing = | Stepwise | Normal
 
 let draw_func ?(pen) ?(drawing=Normal) ?style ?dashed ?color ?label
-    f {width=w; height=h; stepx=sx; stepy=sy} =
+   ?(from_x=0) ?to_x f {width=w; height=h; stepx=sx; stepy=sy} =
+  let to_x = match to_x with None -> w | Some x -> x in
   let maxl, maxr, maxu, maxd = get_borders sx sy h w in
   let ul, ur, ll, lr = get_corners maxu maxr in
   let box = pathn ~style:jLine ~cycle:jLine [ul;ll;lr;ur] in
@@ -185,9 +186,10 @@ let draw_func ?(pen) ?(drawing=Normal) ?style ?dashed ?color ?label
   in
   let graph = 
     match drawing with
-    | Normal -> Misc.fold_from_to normal [] 0 w
+    | Normal -> Misc.fold_from_to normal [] from_x to_x
     | Stepwise -> 
-        let p, _,_ = Misc.fold_from_to stepwise ([],Num.bp 0.,Num.bp 0.) 0 w in p
+        let p, _,_ = 
+	  Misc.fold_from_to stepwise ([],Num.bp 0.,Num.bp 0.) from_x to_x in p
   in
   let pic = Picture.clip 
     (Picture.make (Command.draw ?pen ?dashed ?color (pathn ?style graph))) box in 
