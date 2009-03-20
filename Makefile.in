@@ -155,7 +155,7 @@ other.byte: $(CMA) othergraphs.ml
 	make -C test/othergraphs mpost
 	gv test/othergraphs.ps
 
-.PHONY: check-examples
+.PHONY: check-examples examples
 SUBDIRMLPOST:=../tool.opt -ccopt "-I ../ " -v -ps
 MAKEEXAMPLES=make -C examples MLPOST='$(SUBDIRMLPOST)'
 
@@ -165,6 +165,13 @@ check-examples: mlpost.cma tool.opt
 	$(MAKEEXAMPLES) tree.dummy
 	$(MAKEEXAMPLES) label.dummy
 	make -C multi-examples
+
+examples:
+	$(MAKEEXAMPLES)
+
+examples-html:
+	$(MAKEEXAMPLES) html
+
 
 #version.ml: Makefile
 #	echo "let version = \""$(MLPOSTVERSION)"\"" > version.ml
