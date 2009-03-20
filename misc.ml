@@ -48,3 +48,30 @@ let sprintf s =
 
   
 
+
+
+(* persistent queues *)
+module Q = struct
+
+  type 'a t = 'a list * 'a list
+
+  exception Empty
+
+  let empty = [], []
+
+  let push x (i, o) = (x :: i, o)
+
+  let pop = function
+    | [], [] -> raise Empty
+    | (i, x :: o) -> x, (i, o)
+    | (i, []) -> match List.rev i with
+	| x :: o -> x, ([], o)
+	| [] -> assert false
+
+  let of_list l =
+    List.fold_left (fun q c -> push c q) empty l
+
+end
+
+  
+

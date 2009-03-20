@@ -367,6 +367,14 @@ and Path : sig
   (** A full square of size 1 and centered on the origin *)
   val unitsquare: t
 
+  (** {2 } *)
+
+  type orientation = 
+    | Up | Down | Left | Right
+    | Upn of Num.t | Downn of Num.t | Leftn of Num.t | Rightn of Num.t
+
+  val smart_path : orientation list -> Point.t -> Point.t -> t
+
 end
 
 and Pen : sig
@@ -1369,7 +1377,7 @@ module Tree : sig
   val draw : ?debug:bool -> t -> Command.t
 
   module Simple : sig
-    type t = Box.t
+    type t
     val leaf : Box.t -> t
     val node : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
       ?edge_style:edge_style -> ?stroke:Color.t -> ?pen:Pen.t ->
@@ -1485,6 +1493,111 @@ module Plot : sig
                   ?style:Path.joint -> ?dashed:Dash.t -> ?color:Color.t ->
                   ?label:(Picture.t * Command.position * int) ->
                     (int -> float) -> skeleton -> Command.t
+end
+
+module Hist : sig
+
+  (** This module generates a few kinds of histograms. *)
+
+  type insideBox = Values | Pic of Picture.t list list
+
+  val simple :
+    ?width:Num.t ->
+    ?height:Num.t ->
+    ?padding:Num.t ->
+    ?fill:Color.t list ->
+    ?perspective: bool ->
+    ?hcaption:Picture.t ->
+    ?vcaption:Picture.t ->
+    ?histlabel:[> `Bot | `Center | `Top ] * insideBox ->
+    ?vlabel:Plot.labels ->
+    ?hlabel:Picture.t list -> 
+    float list -> Command.t
+    (** [simple l] draws an histogram from a list [l] of floating-point values.
+	@param fill The colors used to draw the successive blocks; it is used circularly
+    *)
+
+  val compare :
+    ?width:Num.t ->
+    ?height:Num.t ->
+    ?padding:Num.t ->
+    ?fill:Color.t list ->
+    ?perspective: bool ->
+    ?hcaption:Picture.t ->
+    ?vcaption:Picture.t ->
+    ?histlabel:[> `Bot | `Center | `Top ] * insideBox ->
+    ?vlabel:Plot.labels ->
+    ?hlabel:Picture.t list ->
+    float list list -> Command.t
+    (** [compare l] draws a comparative histogram from a list [l] of floating-point values lists. 
+	@param fill The colors used to draw the successive blocks; it is used circularly
+    *)
+
+  val stack :
+    ?width:Num.t ->
+    ?height:Num.t ->
+    ?padding:Num.t ->
+    ?fill:Color.t list ->
+    ?perspective: bool ->
+    ?hcaption:Picture.t ->
+    ?vcaption:Picture.t ->
+    ?histlabel:[> `Bot | `Center | `Top ] * insideBox ->
+    ?vlabel:Plot.labels ->
+    ?hlabel:Picture.t list -> 
+    float list list -> Command.t
+    (** [compare l] draws a stacked histogram from a list [l] of floating-point values lists. 
+	@param fill The colors used to draw the successive blocks; it is used circularly
+    *)
+
+end
+
+module Radar : sig
+
+  (** This module generates a couple of radar diagrams.*)
+
+  val stack :
+    ?radius:Num.t ->
+    ?color:Color.t list ->
+    ?pen:Pen.t ->
+    ?style:Dash.t list ->
+    ?ticks:float ->
+    ?label:string list ->
+    ?scale:float list ->
+    float list list -> Picture.t
+    (** [stack l] builds a picture from a list [l] of floating-point values lists. 
+	The radars are all in the same picture.
+	Every sublist represents radar's datas. These sublists must have the same size.
+	@param ticks The interval between each ticks on the axes (relative to the values)
+	@param scale The size of every axes (relative to the values)
+    *)
+
+  val compare :
+    ?radius:Num.t ->
+    ?color:Color.t list ->
+    ?fill:bool ->
+    ?pen:Pen.t ->
+    ?style:Dash.t list ->
+    ?ticks:float ->
+    ?label:string list ->
+    ?scale:float list ->
+    float list list -> Picture.t list
+    (** [stack l] builds a list of pictures from a list [l] of floating-point values lists. 
+	Every picture represents a radar.
+	Every sublist represents radar's datas. These sublists must have the same size.
+	@param ticks The interval between each ticks on the axes (relative to the values)
+	@param scale The size of every axes (relative to the values)
+    *)
+    
+end
+
+module Legend : sig
+
+  val legend : 
+    ?ensstroke:Color.t ->
+    ?colstroke:Color.t ->
+    ?fill:Color.t ->
+    (Color.t * string) list -> Picture.t
+
 end
 
 (** {2 Metapost generation} *)

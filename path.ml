@@ -64,3 +64,102 @@ let rotate f p = transform [Transform.rotated f] p
 let shift pt p = transform [Transform.shifted pt] p
 let yscale n p = transform [Transform.yscaled n] p
 let xscale n p = transform [Transform.xscaled n] p
+
+
+
+(* directed paths *)
+
+type orientation = 
+    | Up | Down | Left | Right
+    | Upn of Num.t | Downn of Num.t | Leftn of Num.t | Rightn of Num.t
+
+let divise_dir l =
+  let rec fct left_down right_up listn =function
+    |[] -> left_down,right_up,listn
+    |((Leftn _|Rightn _|Downn _|Upn _) as x) ::res -> fct left_down right_up (x::listn) res
+    |((Left|Down) as x) ::res -> fct (x::left_down) right_up listn res
+    |((Right|Up) as x) ::res -> fct left_down (x::right_up) listn res
+  in
+    fct [] [] [] l
+
+open Num
+open Num.Infix
+open Point
+
+let dist_horizontal dirlist abs distance =
+  let left,right,listn = divise_dir dirlist in
+  let diff = (List.length right) - (List.length left) in
+  let distance = gmean distance zero in
+  let d = List.fold_left (fun a x -> match x with 
+			    |Leftn n -> (-/) a n
+			    |Rightn n -> (+/) a n
+			    |_ -> failwith "impossible") distance listn in
+  let dist,b = if diff = 0 then (bp 10.),false else (gmean ((/./) d (float diff)) zero),true in
+    
+  let rec fct acc abs = function
+    |[] -> List.rev acc
+    |Left::res -> 
+       let abs = (-/) abs dist in 
+	 fct (abs::acc) abs res
+    |Leftn n::res -> let abs = (-/) abs n in 
+	fct (abs::acc) abs res
+    |Right::res -> 
+       let abs = (+/) abs dist in
+	 fct (abs::acc) abs res
+    |Rightn n::res -> let abs = (+/) abs n in
+	fct (abs::acc) abs res
+    |_ -> failwith "impossible"
+  in
+    fct [] abs dirlist
+	
+
+let dist_vertical dirlist ordo distance =
+
+  let down,up,listn = divise_dir dirlist in
+  let diff = (List.length up) - (List.length down) in
+  let d = List.fold_left (fun a x -> match x with 
+			    |Downn n -> (-/) a n
+			    |Upn n -> (+/) a n
+			    |_ -> failwith "impossible") distance listn in
+
+  let dist,b = if diff = 0 then (bp 10.),false else (gmean ((/./) d (float diff)) zero),true in
+  let rec fct acc ordo = function
+    |[] -> List.rev acc
+    |Down::res -> 
+       let ordo = (-/) ordo dist in
+	 fct (ordo::acc) ordo res
+    |Downn n::res -> let ordo = (-/) ordo n in
+	fct (ordo::acc) ordo res
+    |Up::res -> 
+       let ordo = (+/) ordo dist in
+	 fct (ordo::acc) ordo res
+    |Upn n::res -> let ordo = (+/) ordo n in 
+	fct (ordo::acc) ordo res
+    |_ -> failwith "impossible"
+  in
+    fct [] ordo dirlist
+    
+let smart_path dirlist p1 p2 =
+  let width = (-/) (xpart p2) (xpart p1) in
+  let height = (-/) (ypart p2) (ypart p1) in
+  let dirhorizontal, dirvertical = List.partition 
+    (fun x -> match x with |(Left|Right|Leftn _|Rightn _) -> true |_->false) dirlist in
+  let lesdisth = dist_horizontal dirhorizontal (xpart p1) width in
+  let lesdistv = dist_vertical dirvertical (ypart p1) height in
+
+  let rec fct pc acc dirl dv dh = 
+    match dirl,dv,dh with
+      |(Up|Upn _|Down|Downn _)::dres,
+	dv::dvres,
+	dhlist -> 
+	 let ps = pt (xpart pc, dv) in
+	   fct ps (ps::acc) dres dvres dhlist
+      |(Left|Leftn _|Right|Rightn _)::dres,
+	  dvlist,
+	  dh::dhres ->
+	 let ps = pt (dh, (ypart pc)) in
+	   fct ps (ps::acc) dres dvlist dhres
+      |[],_, _ -> List.rev (p2::acc)
+      |_ -> assert false
+  in
+  pathp (fct p1 [p1] dirlist lesdistv lesdisth)
