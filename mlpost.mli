@@ -1570,7 +1570,7 @@ end
 
 module Radar : sig
 
-  (** This module generates a couple of radar diagrams.*)
+  (** This module draws radar diagrams.*)
 
   val stack :
     ?radius:Num.t ->
@@ -1581,11 +1581,19 @@ module Radar : sig
     ?label:string list ->
     ?scale:float list ->
     float list list -> Picture.t
-    (** [stack l] builds a picture from a list [l] of floating-point values lists. 
-	The radars are all in the same picture.
-	Every sublist represents radar's datas. These sublists must have the same size.
-	@param ticks The interval between each ticks on the axes (relative to the values)
-	@param scale The size of every axes (relative to the values)
+    (** [stack l] builds a picture from a list [l] of floating-point lists. 
+	The radars are all drawn on the same picture.
+	Each sublist represents one radar datas. 
+	All sublists must have the same length.
+	@param radius The radius of the whole picture
+	@param pen The pen used to draw the radars
+	@param color The colors used to draw each radar; it is used circularly
+	@param style The dash-styles used to draw each radar; it is used 
+	  circularly
+	@param ticks The interval between each ticks along the axes 
+	  (relative to the values)
+	@param scale The size of every axe, relative to the values;
+	  when not specified, the maximal value along each axe is chosen
     *)
 
   val compare :
@@ -1598,11 +1606,13 @@ module Radar : sig
     ?label:string list ->
     ?scale:float list ->
     float list list -> Picture.t list
-    (** [stack l] builds a list of pictures from a list [l] of floating-point values lists. 
-	Every picture represents a radar.
-	Every sublist represents radar's datas. These sublists must have the same size.
-	@param ticks The interval between each ticks on the axes (relative to the values)
-	@param scale The size of every axes (relative to the values)
+    (** [stack l] builds a list of pictures from a list [l] of
+	floating-point lists. 
+	Each picture represents one radar, and all picture have the same size.
+	Each sublist represents one radar datas, and all sublists must have 
+	the same length. 
+	For most optional arguments, see function [stack] above.
+	@param fill Fill the radar with its color.
     *)
     
 end

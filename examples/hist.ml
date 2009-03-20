@@ -45,8 +45,27 @@ let hist7 =
   let pics =
     List.map Picture.tex ["2000";"2001";"2002";"2003";"2004";"2005"]
   in
-  Hist.simple ~histlabel:(`Center, Hist.User pics) 
+  Hist.simple ~histlabel:(`Top, Hist.User pics) 
     [4.5;5.0;6.2;8.;7.2;6.1]
+
+(*parse >> <<hist8 *)
+let hist8 =
+  Hist.compare
+    [[4.;5.;6.;8.;3.];
+     [1.;2.;8.;7.;-1.]]
+
+(*parse >> <<hist9 *)
+let hist9 =
+  Hist.stack ~fill:[lightred;lightblue;lightyellow;lightgreen]
+    [[4.;5.;5.;]; [8.;3.;1.]; [2.;8.;1.;4.]]
+
+(*parse >> <<hist10 *)
+let hist10 =
+  Hist.stack 
+    ~perspective:true ~padding:(bp 25.)
+    ~fill:[lightred;lightblue;lightyellow;lightgreen]
+    ~histlabel:(`Center, Hist.Values)
+    [[4.;5.;5.;]; [8.;3.;1.]; [2.;8.;1.;4.]]
 
 (*parse >> *)
 
@@ -59,4 +78,7 @@ let _ =
     "hist5", hist5;
     "hist6", hist6;
     "hist7", hist7;
+    "hist8", hist8;
+    "hist9", hist9;
+    "hist10", hist10;
   ]

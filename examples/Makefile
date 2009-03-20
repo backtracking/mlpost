@@ -31,16 +31,17 @@ AUTOMOUTFILES := $(AUTOMPNGFILES:.png=.1)
 HISTPNGFILES := hist1.png
 HISTOUTFILES := $(HISTPNGFILES:.png=.1)
 
-RADARPNGFILES := radar1.png
+RADARPNGFILES := radar1.png radar2.png
 RADAROUTFILES := $(RADARPNGFILES:.png=.1)
 
 HTMLFILES := boxes.ml.html paths.ml.html misc.ml.html tree.ml.html \
-             label.ml.html automata.ml.html hist.ml.html 
+             label.ml.html automata.ml.html hist.ml.html radar.ml.html
 
 MLPOST:=mlpost -v -ps
 
 all: $(BOXPNGFILES) $(PATHPNGFILES) $(MISCPNGFILES) \
-     $(TREEPNGFILES) $(LABELPNGFILES) $(AUTOMPNGFILES) $(HISTPNGFILES)
+     $(TREEPNGFILES) $(LABELPNGFILES) $(AUTOMPNGFILES) $(HISTPNGFILES) \
+     $(RADARPNGFILES)
 html: $(HTMLFILES)
 %.ml.html : %.ml parse
 	caml2html -hc -ext "parse:./parse" $*.ml
@@ -66,6 +67,7 @@ $(TREEOUTFILES): tree.dummy
 $(LABELOUTFILES): label.dummy
 $(AUTOMOUTFILES): automata.dummy
 $(HISTOUTFILES): hist.dummy
+$(RADAROUTFILES): radar.dummy
 
 
 %.dummy: %.ml
