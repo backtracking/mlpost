@@ -367,7 +367,7 @@ and Path : sig
   (** A full square of size 1 and centered on the origin *)
   val unitsquare: t
 
-  (** {2 } *)
+  (** {2 Smart path } *)
 
   type orientation = 
     | Up | Down | Left | Right
@@ -1498,9 +1498,11 @@ end
 
 module Hist : sig
 
-  (** This module generates a few kinds of histograms. *)
+  (** Histograms. *)
 
-  type insideBox = Values | Pic of Picture.t list list
+  (** This module draws histograms. *)
+
+  type 'a labels = Values | User of 'a list
 
   val simple :
     ?width:Num.t ->
@@ -1510,12 +1512,24 @@ module Hist : sig
     ?perspective: bool ->
     ?hcaption:Picture.t ->
     ?vcaption:Picture.t ->
-    ?histlabel:[> `Bot | `Center | `Top ] * insideBox ->
+    ?histlabel:[> `Bot | `Center | `Top ] * Picture.t labels ->
     ?vlabel:Plot.labels ->
     ?hlabel:Picture.t list -> 
     float list -> Command.t
     (** [simple l] draws an histogram from a list [l] of floating-point values.
-	@param fill The colors used to draw the successive blocks; it is used circularly
+	@param width Total width of the histogram (default: 200 bp)
+	@param height Total height for the histogram (default: 450 bp)
+	@param fill The colors used to draw the successive blocks;
+	  it is used circularly
+	@param padding Horizontal space between two blocks
+	@param hcaption See module Plot
+	@param vcaption See module Plot
+	@param hlabel Labels for each block
+	@param vlabel See module Plot
+	@param histlabel Add a label to each block; the first component controls 
+	  the placement of the label; the second component, of type [insideBox],
+	  controls the label itself, which is either the numerical value of the
+	  block (i.e. the float) or a user picture
     *)
 
   val compare :
@@ -1526,12 +1540,13 @@ module Hist : sig
     ?perspective: bool ->
     ?hcaption:Picture.t ->
     ?vcaption:Picture.t ->
-    ?histlabel:[> `Bot | `Center | `Top ] * insideBox ->
+    ?histlabel:[> `Bot | `Center | `Top ] * Picture.t list labels ->
     ?vlabel:Plot.labels ->
     ?hlabel:Picture.t list ->
     float list list -> Command.t
-    (** [compare l] draws a comparative histogram from a list [l] of floating-point values lists. 
-	@param fill The colors used to draw the successive blocks; it is used circularly
+    (** [compare l] draws a comparative histogram from a list [l] 
+	of floating-point lists. 
+	For optional arguments, see function [simple] above.
     *)
 
   val stack :
@@ -1542,12 +1557,13 @@ module Hist : sig
     ?perspective: bool ->
     ?hcaption:Picture.t ->
     ?vcaption:Picture.t ->
-    ?histlabel:[> `Bot | `Center | `Top ] * insideBox ->
+    ?histlabel:[> `Bot | `Center | `Top ] * Picture.t list labels ->
     ?vlabel:Plot.labels ->
     ?hlabel:Picture.t list -> 
     float list list -> Command.t
-    (** [compare l] draws a stacked histogram from a list [l] of floating-point values lists. 
-	@param fill The colors used to draw the successive blocks; it is used circularly
+    (** [compare l] draws a stacked histogram from a list [l] 
+	of floating-point lists. 
+	For optional arguments, see function [simple] above.
     *)
 
 end

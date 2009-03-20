@@ -6,7 +6,7 @@ open Point
 open Path
 
 
-type insideBox = Values | Pic of Picture.t list list
+type 'a labels = Values | User of 'a list
 
 module Q = Misc.Q
  
@@ -123,7 +123,7 @@ let box_labels lab hb l =
 	 let picl2 l = List.map (fun x -> Picture.tex (string_of_float x)) l in
 	 let picl l = List.map (fun x -> picl2 x) l in
            mk_labels nop poslab 0 hb (picl l) l
-      |(poslab,Pic pl) -> 
+      |(poslab,User pl) -> 
 	 mk_labels nop poslab 0 hb pl l
        
 
@@ -174,6 +174,11 @@ let drawing_parameters width height ?padding nbval valmax nbcol=
 (* Histogramme classique *)
 let simple ?(width=bp 200.) ?(height=bp 450.) ?padding ?(fill=[lightblue]) ?(perspective=false)
     ?hcaption ?vcaption ?histlabel ?vlabel ?hlabel l =
+  let histlabel = match histlabel with
+    | None -> None
+    | Some (_, Values) as h -> h
+    | Some (p, User l) -> Some (p, User (List.map (fun x -> [x]) l))
+  in
   let valmax = max l in
   let nbval = List.length l in
   let scalex, scaley, padding = drawing_parameters width height ?padding nbval valmax 1 in

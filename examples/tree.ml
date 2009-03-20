@@ -49,6 +49,14 @@ let tree6 =
   draw 
      (node "1" [node "2" [leaf "4"; leaf "5"]; 
 		node "3" [leaf "6"; leaf "7"]])
+(*parse >> <<tree7 *)
+let tree7 =
+  let node s = node ~arrow_style:Undirected ~edge_style:HalfSquare (Box.tex s) in
+  let leaf s = leaf (Box.tex s) in
+  draw 
+     (node "1" [node "2" [node "3" [leaf "4"]; leaf "5"]; 
+		node "3" [node "6" [leaf "8"; node "6" [leaf "8"; leaf "9"]]; 
+			  node "7" [leaf "10"]]])
 (*parse >> *)
 
 let _ = 
@@ -59,4 +67,5 @@ let _ =
     "tree4", tree4;
     "tree5", tree5;
     "tree6", tree6;
+    "tree7", tree7;
   ]

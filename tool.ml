@@ -47,6 +47,7 @@ let execopt = ref ""
 let eps = ref false
 let verbose = ref false
 let native = ref false
+let libdir = ref Version.libdir
 
 let version () =
   print_string Version.version;
@@ -72,6 +73,7 @@ let spec = Arg.align
     "-execopt", String add_execopt,
     "\"<options>\" Pass <options> to the compiled program";
     "-version", Unit version, " Print Mlpost version and exit";
+    "-libdir", String ((:=) libdir), " Set path for mlpost.cma";
   ]
 
 let () = 
@@ -170,10 +172,10 @@ let compile f =
       exit out
   end else
     if !native then
-      ocamlopt [|!ccopt; "-I"; Version.libdir;
+      ocamlopt [|!ccopt; "-I"; !libdir;
                  "unix.cmxa";"mlpost.cmxa"; mlf|] !execopt
     else
-      ocaml [|!ccopt; "-I"; Version.libdir;
+      ocaml [|!ccopt; "-I"; !libdir;
               "unix.cma";"mlpost.cma"; mlf|] !execopt;
 
   Sys.remove mlf;

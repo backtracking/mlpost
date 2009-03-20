@@ -28,11 +28,11 @@ let state = Box.tex ~dx:(bp 4.) ~style:Circle ~stroke:(Some Color.black)
 
 let final = Box.box ~style:Circle 
 
-let transition states tex pos ?outd ?ind x_name y_name = 
+let transition states tex anchor ?outd ?ind x_name y_name = 
   let x = Box.get x_name states and y = Box.get y_name states in
   let outd = match outd with None -> None | Some a -> Some (vec (dir a)) in
   let ind = match ind with None -> None | Some a -> Some (vec (dir a)) in
-  Arrow.draw ~tex ~pos (cpath ?outd ?ind x y) 
+  Arrow.draw ~tex ~anchor (cpath ?outd ?ind x y) 
 
 let loop states tex name =
   let box = Box.get name states in
@@ -44,7 +44,7 @@ let loop states tex name =
     knotp ~l: (vec (dir 135.)) c;
   ] in
   let bp = Box.bpath box in
-  Arrow.draw ~tex ~pos:`Bot (cut_after bp (cut_before bp p))
+  Arrow.draw ~tex ~anchor:`Bot (cut_after bp (cut_before bp p))
 
 let initial states name =
   let b = Box.get name states in

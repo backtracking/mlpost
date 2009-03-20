@@ -16,7 +16,8 @@ MISCPNGFILES := bresenham.png cfg.png chess.png diag1.png diag2.png\
 MISCOUTFILES := $(MISCPNGFILES:.png=.1)
 
 # all files that are generated from tree.ml
-TREEPNGFILES := tree1.png tree2.png tree3.png tree4.png tree5.png tree6.png
+TREEPNGFILES := tree1.png tree2.png tree3.png tree4.png tree5.png \
+                tree6.png tree7.png
 TREEOUTFILES := $(TREEPNGFILES:.png=.1)
 
 # all files that are generated from labels.ml
@@ -27,13 +28,19 @@ LABELOUTFILES := $(LABELPNGFILES:.png=.1)
 AUTOMPNGFILES := automaton1.png automaton2.png automaton4.png 
 AUTOMOUTFILES := $(AUTOMPNGFILES:.png=.1)
 
+HISTPNGFILES := hist1.png
+HISTOUTFILES := $(HISTPNGFILES:.png=.1)
+
+RADARPNGFILES := radar1.png
+RADAROUTFILES := $(RADARPNGFILES:.png=.1)
+
 HTMLFILES := boxes.ml.html paths.ml.html misc.ml.html tree.ml.html \
-             label.ml.html automata.ml.html
+             label.ml.html automata.ml.html hist.ml.html 
 
 MLPOST:=mlpost -v -ps
 
 all: $(BOXPNGFILES) $(PATHPNGFILES) $(MISCPNGFILES) \
-     $(TREEPNGFILES) $(LABELPNGFILES) $(AUTOMPNGFILES)
+     $(TREEPNGFILES) $(LABELPNGFILES) $(AUTOMPNGFILES) $(HISTPNGFILES)
 html: $(HTMLFILES)
 %.ml.html : %.ml parse
 	caml2html -hc -ext "parse:./parse" $*.ml
@@ -58,6 +65,7 @@ $(MISCOUTFILES): misc.dummy
 $(TREEOUTFILES): tree.dummy
 $(LABELOUTFILES): label.dummy
 $(AUTOMOUTFILES): automata.dummy
+$(HISTOUTFILES): hist.dummy
 
 
 %.dummy: %.ml
