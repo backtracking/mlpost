@@ -155,10 +155,18 @@ if echo "let _ = Sys.os_type" | ocaml | grep -q Win32; then
     LIBEXT=.lib
     OBJEXT=.obj
 else
+    AC_MSG_RESULT(not Win32)
     OCAMLWIN32=no
     EXE=
     LIBEXT=.a
     OBJEXT=.o
+fi
+
+# checking for lablgtk2
+AC_CHECK_FILE($OCAMLLIB/lablgtk2/lablgtk.cma,LABLGTK2=yes,LABLGTK2=no)
+# AC_CHECK_PROG(LABLGTK2,lablgtk2,yes,no) not always available (Win32)
+if test "$LABLGTK2" = yes ; then
+      INCLUDEGTK2="-I +lablgtk2"
 fi
 
 # substitutions to perform
@@ -174,6 +182,7 @@ AC_SUBST(BASICOFLAGS)
 #(not used) AC_SUBST(OCAMLLIB)
 AC_SUBST(OCAMLWEB)
 AC_SUBST(LABLGTK2)
+AC_SUBST(INCLUDEGTK2)
 AC_SUBST(OCAMLWIN32)
 AC_SUBST(EXE)
 AC_SUBST(LIBEXT)

@@ -38,8 +38,9 @@ EXE = @EXE@
 LIBEXT = @LIBEXT@
 OBJEXT = @OBJEXT@
 
-BFLAGS = -dtypes $(INCLUDES) 
-OFLAGS = @BASICOFLAGS@ -dtypes $(INCLUDES) @FORPACK@
+INCLUDES = -I gui
+BFLAGS = -dtypes $(INCLUDES) -I +threads @INCLUDEGTK2@ 
+OFLAGS = @BASICOFLAGS@ -dtypes $(INCLUDES) @FORPACK@ -I +threads @INCLUDEGTK2@
 
 # main target
 #############
@@ -77,7 +78,7 @@ OTHERCMX := $(OTHERCMO:.cmo=.cmx)
 
 $(HANDBOOKCMX) $(OTHERCMX): $(CMXA)
 
-GENERATED = version.ml scan_prelude.ml
+GENERATED = version.ml scan_prelude.ml gui/glexer.ml
 
 byte: $(CMA)
 opt: $(CMXA)
@@ -172,6 +173,20 @@ examples:
 examples-html:
 	$(MAKEEXAMPLES) html
 
+# GUI
+
+.PHONY: gui
+
+gui: gui/gmlpost.opt
+
+GUICMO = gui/glexer.cmo gui/gmlpost.cmo
+GUICMX := $(GUICMO:.cmo=.cmx)
+
+gui/gmlpost.opt: $(GUICMX)
+	$(OCAMLOPT) $(OFLAGS) -o $@ unix.cmxa threads.cmxa lablgtk.cmxa gtkThread.cmx $^
+
+gui/gmlpost.byte: $(GUICMO)
+	$(OCAMLC) $(BFLAGS) -o $@ unix.cma lablgtk.cma threads.cma gtkThread.cmo $^
 
 #version.ml: Makefile
 #	echo "let version = \""$(MLPOSTVERSION)"\"" > version.ml
@@ -370,6 +385,6 @@ dist-clean distclean:: clean
 
 .depend depend:: $(GENERATED)
 	rm -f .depend
-	$(OCAMLDEP) $(INCLUDES) *.ml *.mli > .depend
+	$(OCAMLDEP) $(INCLUDES) *.ml *.mli gui/*.mli gui/*.ml > .depend
 
 include .depend
