@@ -173,17 +173,34 @@ and direction d =
   | Curl f -> C.Curl f, nop
   | NoDir  -> C.NoDir, nop
 
-and path' = function
-  | PACycle (d,j,p) ->
-      let d, c1 = direction d in
-      let j, c2 = joint j in
-      let p, c3 = path p in
-      C.PACycle (d,j,p), c1 ++ c2 ++ c3
-  | PAConcat (pa,j,p) ->
-      let p, c1 = path p in
+and metapath p = 
+  match p.Hashcons.node with
+  | MPAConcat (pa,j,p) ->
+      let p, c1 = metapath p in
       let pa, c2 = knot pa in
       let j, c3 = joint j in
       C.PAConcat (pa,j,p), c1 ++ c2 ++ c3
+  | MPAAppend (p1,j,p2) ->
+      let p1, c1 = metapath p1 in
+      let j, c2 = joint j in
+      let p2, c3 = metapath p2 in
+      C.PAAppend (p1,j,p2), c1 ++ c2 ++ c3
+  | MPAKnot path ->
+      let path, code = knot path in
+      C.PAKnot path, code
+  | MPAofPA p -> 
+      let p,c = path p in
+      C.PAScope p, c
+
+and path' = function
+  | PAofMPA p -> 
+      let p,c = metapath p in
+      C.PAScope p, c
+  | MPACycle (d,j,p) ->
+      let d, c1 = direction d in
+      let j, c2 = joint j in
+      let p, c3 = metapath p in
+      C.PACycle (d,j,p), c1 ++ c2 ++ c3
   | PATransformed (p,tr) ->
       let p, c1 = path p in
       let tr, c2 = transform tr in
@@ -199,11 +216,6 @@ and path' = function
       let p1, c1 = path p1 in
       let p2, c2 = path p2 in
       C.PACutBefore (p1,p2), c1 ++ c2
-  | PAAppend (p1,j,p2) ->
-      let p1, c1 = path p1 in
-      let j, c2 = joint j in
-      let p2, c3 = path p2 in
-      C.PAAppend (p1,j,p2), c1 ++ c2 ++ c3
   | PABuildCycle pl ->
       let npl = List.map path pl in
       C.PABuildCycle (List.map fst npl), C.CSeq (List.map snd npl)
@@ -220,20 +232,14 @@ and path' = function
   | PABBox p ->
       let p, code = picture p in
       C.PABBox p, code
-  | PAKnot path ->
-      let path, code = knot path in
-      C.PAKnot path, code
   | PAUnitSquare -> C.PAUnitSquare, nop
   | PAQuarterCircle -> C.PAQuarterCircle, nop
   | PAHalfCircle -> C.PAHalfCircle, nop
   | PAFullCircle -> C.PAFullCircle, nop
 and path p =
-  match p.node with
-  | PAKnot _ -> path' p.node
-  | _ -> 
-      let cnt = !(D.PthM.find D.path_map p) in
-      if cnt >= 2 then path_save p
-      else path' p.node
+  let cnt = !(D.PthM.find D.path_map p) in
+  if cnt >= 2 then path_save p
+  else path' p.node
 and path_save p =
   try 
     let x = D.PthM.find path_names p in

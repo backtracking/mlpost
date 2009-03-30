@@ -296,10 +296,26 @@ let align_boxes f ?padding ?pos ?style
 let hbox ?padding ?pos = align_boxes horizontal ?padding ?pos
 let vbox ?padding ?pos = align_boxes vertical ?padding ?pos
 
+(*let pad_boxes ?(pos=`Center) pl =
+    try
+      let refb = List.hd pl in
+      let refc = ctr refb and refh = height refb 
+			  and refw = width refb in
+      let wmax = Num.fold_max width Num.zero pl in
+      let hmax = Num.fold_max height Num.zero pl in
+      let make_new p = modify_box wmax hmax refc (box (center refc p)) in
+	List.map make_new pl
+    with Failure "hd" -> []
+*)
 let empty ?(width=Num.zero) ?(height=Num.zero) ?style ?name ?(stroke=None) 
           ?pen ?fill () =
   mkbox ?style ?name ~dx:zero ~dy:zero ~stroke ?pen ?fill 
     width height Point.origin Emp
+
+let empty_from_box ?style ?name ?(stroke=None) ?pen ?fill box =
+  mkbox ?style ?name ~stroke ?pen ?fill 
+    (width box) (height box) (ctr box) Emp
+    
 
 (* groups the given boxes in a new box *)
 let group ?style ?(dx=Num.zero) ?(dy=Num.zero) 

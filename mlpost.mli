@@ -196,6 +196,137 @@ and Point : sig
   val ptlist : ?scale:(float -> Num.t) -> (float * float) list -> t list
 
 end
+    
+and MetaPath : sig
+  (** MetaPaths are the objects used to describe lines, curves, and 
+      more generally almost everything that is drawn with Mlpost. 
+      A path is defined by points and control points. A metapath is 
+      defined by point (knot) and constraints on the way the point are linked.
+      A metapath is an easy way to defined a path with only few point, 
+      afterward some heuristic are used to transforme it in a real path (of_metapath)*) 
+
+  (** A [direction] is used to put constraints on metapaths:
+      {ul {- [vec p] defines a direction by a point (interpreted as a vector)}
+      {- [curl f] changes the curling factor of the extremity of a metapath; 
+      higher curling factor means flatter curves}
+      {- [noDir] means no particular direction} } *)
+  type direction = Path.direction
+
+  val vec : Point.t -> direction
+  val curl : float -> direction
+  val noDir : direction
+
+  (** A [knot] is the basic element of a metapath, and is simply a point 
+      with an incoming and outgoing direction constraint *)
+  type knot = Path.knot
+
+  (** Build a knot from a point; the optional arguments are the incoming directions *)
+  val knotp :
+    ?l:direction -> ?r:direction -> Point.t -> knot
+
+  val knotlist : (direction * Point.t * direction) list -> knot list
+    
+
+  (** A joint is the connection between two knots in a metapath. It is either
+      {ul {- [jLine] for a straight line}
+      {- [jCurve] for a spline curve}
+      {- [jCurveNoInflex] to avoid inflexion points}
+      {- [jTension f1 f2] to specify "tension" on the joint; [jCurve] uses a default
+      tension of 1. Higher tension means less "wild" curves}
+      {- [jControls p1 p2] to explicitely specify control points}} *)
+  type joint = Path.joint
+  val jLine : joint
+  val jCurve : joint
+  val jCurveNoInflex : joint
+  val jTension : float -> float -> joint
+  val jControls : Point.t -> Point.t -> joint
+
+  (** The abstract type of metapaths *)
+  type t
+  type path = Path.t
+
+
+    (** In all the functions below :
+        - noDir is the default direction
+        - jCurve is the default joint *)
+
+  (** {2 Labelled metapath constructors} *)
+  (** Build a knot from a pair of floats
+      @param l an incoming direction
+      @param r an outgoing direction 
+      @param scale a scaling factor applied to the floats *)
+  val knot :
+    ?l:direction -> ?r:direction -> 
+    ?scale:(float -> Num.t) -> float * float -> knot
+
+  (** Build a knot from a Num.t pair; the optional arguments are as in {!knot} *)
+  val knotn : ?l:direction -> ?r:direction -> Num.t * Num.t -> knot
+
+  (** Build a metapath from a list of pairs of floats
+      @param style the joint style used for all joints in the metapath
+      @param cycle if given, the metapath is closed using the given style
+      @param scale permits to scale the whole metapath *)
+  val path : 
+    ?style:joint -> ?scale:(float -> Num.t) -> 
+    (float * float) list -> t
+
+  (** Same as [metapath], but uses a [Num.t] list *)
+  val pathn : 
+    ?style:joint -> (Num.t * Num.t) list -> t
+
+  (** Same as [metapath], but uses a knot list *)
+  val pathk :
+    ?style:joint -> knot list -> t
+
+  (** Same as [metapath] but uses a point list *)
+  val pathp : ?style:joint -> Point.t list -> t
+
+  (** Build a metapath from [n] knots and [n-1] joints *)
+  val jointpathk : knot list -> joint list -> t
+
+  (** Build a metapath from [n] points and [n-1] joints, 
+      with default directions *)
+  val jointpathp : Point.t list -> joint list -> t
+
+  val jointpathn : (Num.t * Num.t) list -> joint list -> t
+
+  (** Build a metapath from [n] float_pairs and [n-1] joints, 
+      with default directions *)
+  val jointpath : 
+    ?scale:(float -> Num.t) -> (float * float) list -> 
+    joint list -> t
+
+  (** Close a metapath using direction [dir] and style [style] *)
+  val cycle : ?dir:direction -> ?style:joint -> t -> path
+
+
+  (** {2 Primitive metapath constructors} *)
+  (** Add a knot at the end of a metapath  *)
+  val concat : ?style:joint -> t -> knot -> t
+
+  (** Create a simple metapath with one knot *)
+  val start : knot -> t
+
+  (** Append a metapath to another using joint [style] *)
+  val append : ?style:joint -> t -> t -> t
+
+  (** {2 Predefined values} *)
+
+  (** The default joint style ([JCurve]) *)
+  val defaultjoint : joint
+
+  (** {2 Conversions} *)
+  (** Compute the control point of the path 
+      for a good looking result according to the constraint
+      on the direction, tension, curve *)
+  val to_path : t -> path 
+    
+  (** Obtain a metapath from a path with exactly the same
+      control point. p = of_metapath (of_path p) is true but 
+      not the opposite.*)
+  val of_path : path -> t
+
+end
 
 and Path : sig
 
@@ -240,6 +371,10 @@ and Path : sig
 
   (** The abstract type of paths *)
   type t
+
+    (** In all the functions below :
+        - noDir is the default direction
+        - jCurve is the default joint *)
 
   (** {2 Labelled path constructors} *)
   (** Build a knot from a pair of floats
@@ -352,7 +487,7 @@ and Path : sig
 
   (** {2 Predefined values} *)
 
-  (** The default joint style ([JLine]) *)
+  (** The default joint style ([JCurve]) *)
   val defaultjoint : joint
 
   (** A full circle of radius 1 and centered on the origin *)
@@ -366,6 +501,18 @@ and Path : sig
 
   (** A full square of size 1 and centered on the origin *)
   val unitsquare: t
+
+  (** {2 Conversions} *)
+  type metapath = MetaPath.t
+  (** Compute the control point of the path 
+      for a good looking result according to the constraint
+      on the direction, tension, curve *)
+  val of_metapath : metapath -> t 
+    
+  (** Obtain a metapath from a path with exactly the same
+      control point. p = of_metapath (of_path p) is true but 
+      not the opposite.*)
+  val to_metapath : t -> metapath
 
   (** {2 Smart path } *)
 
@@ -809,6 +956,11 @@ and Box : sig
     ?stroke:Color.t option -> ?pen:Pen.t -> ?fill:Color.t -> unit -> t
     (** the empty box *)
 
+  val empty_from_box : 
+    ?style:style -> ?name:string -> 
+    ?stroke:Color.t option -> ?pen:Pen.t -> ?fill:Color.t -> t -> t
+    (** the empty box with the same position and dimension as the box *)
+
   val pic : ?style:style -> Picture.t box_creator
     (** [pic p] creates a new box containing the picture [p] *)
 
@@ -911,6 +1063,10 @@ and Box : sig
 
   (** {2 Boxes alignment} *)
 
+(*  val pad_boxes : ?pos:Command.position -> t list -> t list
+    (** put around each box a box which can include all the box and position them according to the given position inside this big box
+    *)
+*)
   val hbox : ?padding:Num.t -> ?pos:Command.vposition -> ?style:style -> 
     t list box_creator
       (** aligns the given boxes horizontally and returns a box containing

@@ -97,16 +97,23 @@ and knot_node =
 
 and knot = knot_node hash_consed
 
+and metapath_node = 
+  | MPAConcat of knot * joint * metapath
+  | MPAKnot of knot
+  | MPAAppend of metapath * joint * metapath
+  | MPAofPA of path
+  (*| MPATransformed of metapath * transform*)
+
+and metapath = metapath_node hash_consed
+
 and path_node =
-  | PAConcat of knot * joint * path
-  | PACycle of direction * joint * path
+  | PAofMPA of metapath
+  | MPACycle of direction * joint * metapath
   | PAFullCircle
   | PAHalfCircle
   | PAQuarterCircle
   | PAUnitSquare
   | PATransformed of path * transform
-  | PAKnot of knot
-  | PAAppend of path * joint * path
   | PACutAfter of path * path
   | PACutBefore of path * path
   | PABuildCycle of path list
@@ -231,19 +238,22 @@ let joint = function
 let knot k = 
   combine3 64 k.knot_in.hkey k.knot_p.hkey k.knot_out.hkey
 
+let metapath = function
+  | MPAConcat(k,j,p) -> 
+      combine3 85 k.hkey j.hkey p.hkey
+  | MPAAppend(p1,j,p2) -> combine3 86 p1.hkey j.hkey p2.hkey
+  | MPAofPA p -> combine 87 p.hkey
+  | MPAKnot k -> combine 88 k.hkey
 
 let path = function
-  | PAConcat(k,j,p) -> 
-      combine3 22 k.hkey j.hkey p.hkey
-  | PACycle(d,j,p) ->
-      combine3 23 d.hkey j.hkey p.hkey
+  | PAofMPA p -> combine 89 p.hkey
+  | MPACycle(d,j,p) ->
+      combine3 90 d.hkey j.hkey p.hkey
   | PAFullCircle -> 24
   | PAHalfCircle -> 25
   | PAQuarterCircle -> 26
   | PAUnitSquare -> 27
   | PATransformed(p,tr) -> combine2 28 p.hkey tr.hkey
-  | PAKnot k -> combine 30 k.hkey
-  | PAAppend(p1,j,p2) -> combine3 31 p1.hkey j.hkey p2.hkey
   | PACutAfter(p,q) -> combine2 32 p.hkey q.hkey
   | PACutBefore(p,q) -> combine2 33 p.hkey q.hkey
   | PABuildCycle l ->
@@ -406,11 +416,20 @@ let eq_point_node p1 p2 =
     | _ -> false
 
 
+let eq_metapath_node p1 p2 =
+  match p1,p2 with
+    | MPAConcat(k1,j1,p1),MPAConcat(k2,j2,p2) ->
+	eq_hashcons k1 k2 && eq_hashcons j1 j2 && eq_hashcons p1 p2
+    | MPAKnot(k1), MPAKnot(k2) -> eq_hashcons k1 k2
+    | MPAAppend(p11,j1,p12),MPAAppend(p21,j2,p22) ->
+	eq_hashcons p11 p21 && eq_hashcons j1 j2 && eq_hashcons p12 p22
+    | MPAofPA p1, MPAofPA p2 -> eq_hashcons p1 p2
+    | _ -> false
+
 let eq_path_node p1 p2 =
   match p1,p2 with
-    | PAConcat(k1,j1,p1),PAConcat(k2,j2,p2) ->
-	eq_hashcons k1 k2 && eq_hashcons j1 j2 && eq_hashcons p1 p2
-    | PACycle(d1,j1,p1),PACycle(d2,j2,p2) ->	
+    | PAofMPA p1, PAofMPA p2 -> eq_hashcons p1 p2
+    | MPACycle(d1,j1,p1),MPACycle(d2,j2,p2) ->	
 	eq_hashcons d1 d2 && eq_hashcons j1 j2 && eq_hashcons p1 p2
     | PAFullCircle, PAFullCircle 
     | PAHalfCircle, PAHalfCircle
@@ -419,9 +438,6 @@ let eq_path_node p1 p2 =
 	-> true
     | PATransformed(p1,tr1),PATransformed(p2,tr2) ->
 	eq_hashcons p1 p2 && eq_hashcons tr1 tr2
-    | PAKnot(k1), PAKnot(k2) -> eq_hashcons k1 k2
-    | PAAppend(p11,j1,p12),PAAppend(p21,j2,p22) ->
-	eq_hashcons p11 p21 && eq_hashcons j1 j2 && eq_hashcons p12 p22
     | PACutAfter(p11,p12),PACutAfter(p21,p22)
     | PACutBefore(p11,p12),PACutBefore(p21,p22) 
 	-> eq_hashcons p11 p21 && eq_hashcons p12 p22
@@ -616,6 +632,21 @@ let hashknot = HashKnot.hashcons hashknot_table
 
 let mkKnot d1 p d2 = hashknot { knot_in = d1; knot_p = p; knot_out = d2 }
 
+(* metapath *)
+module HashMetaPath = 
+  Hashcons.Make(struct type t = metapath_node
+		       let equal = eq_metapath_node
+		       let hash = unsigned metapath end)
+let hashmetapath_table = HashMetaPath.create 257;;
+
+let hashmetapath = HashMetaPath.hashcons hashmetapath_table
+
+let mkMPAKnot k = hashmetapath (MPAKnot k)
+let mkMPAConcat k j p2 = hashmetapath (MPAConcat(k,j,p2))
+let mkMPAAppend x y z = hashmetapath (MPAAppend (x,y,z))
+let mkMPAofPA p = hashmetapath (MPAofPA p)
+(*val mkMPATransformed : path -> transform -> path*)
+
 (* path *)
 
 module HashPath = 
@@ -627,13 +658,17 @@ let hashpath_table = HashPath.create 257;;
 
 let hashpath = HashPath.hashcons hashpath_table
 
-let mkPAKnot k = hashpath (PAKnot k)
+let mkPAofMPA p = hashpath (PAofMPA p)
 
-let mkPAConcat p1 j p2 = hashpath (PAConcat(p1,j,p2))
+let mkPAKnot k = mkPAofMPA (mkMPAKnot k)
 
-let mkPACycle p1 j d = hashpath (PACycle (p1,j,d))
+let mkPAConcat k j p2 = mkPAofMPA (mkMPAConcat k j (mkMPAofPA p2))
 
-let mkPAAppend x y z = hashpath (PAAppend (x,y,z))
+let mkMPACycle d j p1 = hashpath (MPACycle (d,j,p1))
+
+let mkPACycle d j p1 = (mkMPACycle d j  (mkMPAofPA p1))
+
+let mkPAAppend x y z = mkPAofMPA (mkMPAAppend (mkMPAofPA x) y (mkMPAofPA z))
 
 let mkPAFullCircle = hashpath (PAFullCircle)
 

@@ -83,21 +83,25 @@ and direction fmt d =
   | Curl f -> fprintf fmt "{curl %f}" f
   | NoDir  -> ()
 
+and metapath fmt p =
+  match p.Hashcons.node with
+  | MPAConcat (k,j,p) -> 
+      fprintf fmt "%a%a%a" metapath p joint j knot k
+  | MPAAppend (p1,j,p2) -> 
+      fprintf fmt "%a%a%a" metapath p1 joint j metapath p2
+  | MPAKnot k -> knot fmt k
+  | MPAofPA p -> fprintf fmt "(%a)" path p
 and path fmt p = 
   match p.Hashcons.node with
-  | PACycle (d,j,p) -> 
-      fprintf fmt "%a%acycle" path p joint j
-  | PAConcat (k,j,p) -> 
-      fprintf fmt "%a%a%a" path p joint j knot k
+  | PAofMPA p -> fprintf fmt "(%a)" metapath p
+  | MPACycle (d,j,p) -> 
+      fprintf fmt "%a%acycle" metapath p joint j
   | PATransformed (p,tr) -> assert false
   | PACutAfter (p1,p2) -> assert false
   | PACutBefore (p1,p2) -> assert false
-  | PAAppend (p1,j,p2) -> 
-      fprintf fmt "%a%a%a" path p1 joint j path p2
   | PABuildCycle pl -> assert false
   | PASub (f1, f2, p) -> assert false
   | PABBox p -> assert false
-  | PAKnot k -> knot fmt k
   | PAUnitSquare -> fprintf fmt "unitsquare"
   | PAQuarterCircle -> fprintf fmt "quartercircle"
   | PAHalfCircle -> fprintf fmt "halfcircle"

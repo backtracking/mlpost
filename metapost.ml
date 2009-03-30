@@ -116,6 +116,7 @@ and picture fmt = function
   | C.PIName n -> pp_print_string fmt n
 
 and path fmt = function
+    C.PAScope p -> fprintf fmt "(%a)" path p
   | C.PAFullCircle -> fprintf fmt "fullcircle"
   | C.PAHalfCircle -> fprintf fmt "halfcircle"
   | C.PAQuarterCircle -> fprintf fmt "quartercircle"

@@ -16,8 +16,15 @@
 
 module S = Point
 include PrimPath
-open Types
 
+let start x = of_metapath (start x)
+let concat x y z = of_metapath (concat (of_path x) y z)
+let append x y z = of_metapath (append (of_path x) y (of_path z))
+
+
+open Types
+type t = path
+type metapath = Types.metapath
 let knotp ?(l=defaultdir) ?(r=defaultdir) p = Types.mkKnot l p r 
 
 let knot ?(l) ?(r) ?(scale) p = knotp ?l (S.p ?scale p) ?r
@@ -30,15 +37,12 @@ let cycle = cycle_tmp
 let concat ?(style=defaultjoint) p k = concat p style k
 
 (* construct a path with a given style from a knot list *)
-let pathk ?(style) ?(cycle) = function
-  | [] -> failwith "empty path is not allowed"
-  | (x::xs) ->
-      let p = List.fold_left 
-                 (fun p knot -> concat ?style p knot) (start x) xs
+let pathk ?(style) ?(cycle) l =
+      let p = MetaPath.pathk ?style l
       in
         match cycle with
-          | None -> p
-          | Some style -> cycle_tmp ~style p
+          | None -> of_metapath p
+          | Some style -> metacycle defaultdir style p
 
 let pathp ?(style) ?(cycle) l =
   pathk ?style ?cycle
@@ -51,7 +55,7 @@ let path ?(style) ?(cycle) ?(scale) l =
 
 (* construct a path with knot list and joint list *)
 let jointpathk lp lj =
-  List.fold_left2 PrimPath.concat (start (List.hd lp)) lj (List.tl lp)
+  of_metapath (MetaPath.jointpathk lp lj)
 
 let jointpathp lp lj  = jointpathk (List.map (knotp) lp) lj
 let jointpathn lp lj  = jointpathk (List.map knotn lp) lj

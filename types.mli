@@ -97,16 +97,23 @@ and knot_node = private
 
 and knot = knot_node hash_consed
 
+and metapath_node = private
+  | MPAConcat of knot * joint * metapath
+  | MPAKnot of knot
+  | MPAAppend of metapath * joint * metapath
+  | MPAofPA of path
+  (*| MPATransformed of metapath * transform*)
+
+and metapath = metapath_node hash_consed
+
 and path_node = private
-  | PAConcat of knot * joint * path
-  | PACycle of direction * joint * path
+  | PAofMPA of metapath
+  | MPACycle of direction * joint * metapath
   | PAFullCircle
   | PAHalfCircle
   | PAQuarterCircle
   | PAUnitSquare
   | PATransformed of path * transform
-  | PAKnot of knot
-  | PAAppend of path * joint * path
   | PACutAfter of path * path
   | PACutBefore of path * path
   | PABuildCycle of path list
@@ -242,11 +249,22 @@ val mkTRRotateAround : point -> float -> transform
 
 val mkKnot : direction -> point -> direction -> knot
 
+
+(* metapath *)
+
+val mkMPAKnot : knot -> metapath
+val mkMPAConcat : knot -> joint -> metapath -> metapath
+val mkMPAAppend : metapath -> joint -> metapath -> metapath
+val mkMPAofPA : path -> metapath
+(*val mkMPATransformed : path -> transform -> path*)
+
 (* path *)
 
+val mkPAofMPA : metapath -> path
 val mkPAKnot : knot -> path
 val mkPAConcat : knot -> joint -> path -> path
 val mkPACycle : direction -> joint -> path -> path
+val mkMPACycle : direction -> joint -> metapath -> path
 val mkPAAppend : path -> joint -> path -> path
 val mkPAFullCircle : path
 val mkPAHalfCircle : path

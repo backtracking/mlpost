@@ -35,6 +35,13 @@ struct
   let hash x = x.hkey
 end
 
+module MetaPath = 
+struct
+  type t = metapath_node hash_consed
+  let equal = (==) 
+  let hash x = x.hkey
+end
+
 module Path = 
 struct
   type t = path_node hash_consed
@@ -51,6 +58,7 @@ end
 
 module NM = Hashtbl.Make (Num)
 module PtM = Hashtbl.Make (Point)
+module MPthM = Hashtbl.Make (MetaPath)
 module PthM = Hashtbl.Make (Path)
 module PicM = Hashtbl.Make (Picture)
 
@@ -121,17 +129,22 @@ and knot k =
   | { knot_in = d1 ; knot_p = p ; knot_out = d2 } ->
       direction d1; point p; direction d2
 
+and metapath p = 
+  match p.Hashcons.node with
+  | MPAConcat (k,j,p) -> knot k; joint j; metapath p
+  | MPAAppend (p1,j,p2) -> metapath p1; joint j; metapath p2
+  | MPAKnot k -> knot k
+  | MPAofPA p -> path p
+
 and path' = function
-  | PACycle (d,j,p) -> direction d; joint j; path p
-  | PAConcat (k,j,p) -> knot k; joint j; path p
+  | PAofMPA p -> metapath p
+  | MPACycle (d,j,p) -> direction d; joint j; metapath p
   | PATransformed (p,tr) -> path p; transform tr
   | PACutAfter (p1,p2) 
   | PACutBefore (p1,p2) -> path p1; path p2
-  | PAAppend (p1,j,p2) -> path p1; joint j; path p2
   | PABuildCycle pl -> List.iter path pl
   | PASub (f1, f2, p) -> num f1; num f2; path p
   | PABBox p -> picture p
-  | PAKnot k -> knot k
   | PAUnitSquare | PAQuarterCircle | PAHalfCircle | PAFullCircle -> ()
 and path p = 
 (*   Format.printf "%a@." Print.path p; *)

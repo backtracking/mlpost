@@ -55,6 +55,7 @@ and joint =
 and knot = direction * point * direction
 
 and path = 
+  | PAScope of path
   | PAConcat of knot * joint * path
   | PACycle of direction * joint * path
   | PAFullCircle

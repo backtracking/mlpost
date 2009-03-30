@@ -34,12 +34,17 @@ type knot = Types.knot
 
 (* the intention is to add new knots in front,
  * i. e. the list has to be reversed for printing *)
-type t = path
 
-let start k = mkPAKnot k
-let concat p j k = mkPAConcat k j p
+let of_path p = mkMPAofPA p
+let of_metapath p = mkPAofMPA p
+let to_path = of_metapath
+let to_metapath = of_path
+
+let start k = mkMPAKnot k
+let concat p j k = mkMPAConcat k j p
+let metacycle d j p = mkMPACycle d j p
 let cycle d j p = mkPACycle d j p
-let append p1 j p2 = mkPAAppend p1 j p2
+let append p1 j p2 = mkMPAAppend p1 j p2
 let fullcircle = mkPAFullCircle
 let halfcircle = mkPAHalfCircle
 let quartercircle = mkPAQuarterCircle
