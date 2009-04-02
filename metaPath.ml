@@ -15,9 +15,60 @@
 (**************************************************************************)
 
 module S = Point
-include PrimPath
-
 open Types
+
+module BaseDefs = 
+struct
+  type direction = Types.direction 
+
+  let vec = mkVec
+  let curl = mkCurl
+  let noDir = mkNoDir
+
+  type joint = Types.joint 
+
+  let jLine = mkJLine
+  let jCurve = mkJCurve
+  let jCurveNoInflex = mkJCurveNoInflex
+  let jTension = mkJTension
+  let jControls = mkJControls
+
+  type knot = Types.knot
+
+  (* the intention is to add new knots in front,
+   * i. e. the list has to be reversed for printing *)
+
+  let of_path p = mkMPAofPA p
+  let of_metapath p = mkPAofMPA p
+  let to_path = of_metapath
+  let to_metapath = of_path
+
+  let start k = mkMPAKnot k
+  let metacycle d j p = mkMPACycle d j p
+  let fullcircle = mkPAFullCircle
+  let halfcircle = mkPAHalfCircle
+  let quartercircle = mkPAQuarterCircle
+  let unitsquare = mkPAUnitSquare
+  let transform tr p = List.fold_left mkPATransformed p tr
+  let cut_after p1 p2 = mkPACutAfter p1 p2
+  let cut_before p1 p2 = mkPACutBefore p1 p2
+  let build_cycle l = mkPABuildCycle l
+
+  let subpath (f1: float) (f2: float) p = mkPASub (mkF f1) (mkF f2) p
+  let point (f: float) p = mkPTPointOf (mkF f) p
+  let direction (f: float) p = mkPTDirectionOf (mkF f) p
+
+  let pointn (n: num) p = mkPTPointOf n p
+  let directionn (n: num) p = mkPTDirectionOf n p
+  let subpathn (n1: num) (n2: num) p = mkPASub n1 n2 p
+
+  let length p = mkNLength p
+
+  let defaultjoint = jCurve
+  let defaultdir = noDir
+end
+
+include BaseDefs
 type t = metapath
 type path = Types.path
 let knotp ?(l=defaultdir) ?(r=defaultdir) p = Types.mkKnot l p r 
@@ -27,9 +78,9 @@ let knotn ?(l) ?(r) p = knotp ?l (S.pt p) ?r
 
 let knotlist = List.map (fun (x,y,z) -> Types.mkKnot x y z)
 
-let cycle ?(dir=defaultdir) ?(style=defaultjoint) p = PrimPath.metacycle dir style p
+let cycle ?(dir=defaultdir) ?(style=defaultjoint) p = metacycle dir style p
 
-let concat ?(style=defaultjoint) p k = concat p style k
+let concat ?(style=defaultjoint) p k = mkMPAConcat k style p
 
 (* construct a path with a given style from a knot list *)
 let pathk ?(style) = function
@@ -50,7 +101,9 @@ let path ?(style) ?(scale) l =
 (* construct a path with knot list and joint list *)
 let jointpathk lp lj =
   try
-    List.fold_left2 PrimPath.concat (start (List.hd lp)) lj (List.tl lp)
+    List.fold_left2  
+      (fun acc j k -> mkMPAConcat k j acc)
+      (start (List.hd lp)) lj (List.tl lp)
   with Invalid_argument _ -> invalid_arg "jointpathk : the list of knot must \
 be one more than the list of join"
 
@@ -58,4 +111,4 @@ let jointpathp lp lj  = jointpathk (List.map (knotp) lp) lj
 let jointpathn lp lj  = jointpathk (List.map knotn lp) lj
 let jointpath ?(scale) lp lj  = jointpathk (List.map (knot ?scale) lp) lj
 
-let append ?(style=defaultjoint) p1 p2 = append p1 style p2
+let append ?(style=defaultjoint) p1 p2 = mkMPAAppend p1 style p2

@@ -14,16 +14,16 @@
 (*                                                                        *)
 (**************************************************************************)
 
-module S = Point
-include PrimPath
+open MetaPath
+open Types
+
+include MetaPath.BaseDefs
 
 let start x = of_metapath (start x)
-let concat x y z = of_metapath (concat (of_path x) y z)
-let append x y z = of_metapath (append (of_path x) y (of_path z))
+let append ?style x y  = 
+  of_metapath (append ?style (of_path x) (of_path y))
 
-
-open Types
-type t = path
+type t = Types.path
 type metapath = Types.metapath
 let knotp ?(l=defaultdir) ?(r=defaultdir) p = Types.mkKnot l p r 
 
@@ -32,10 +32,10 @@ let knotn ?(l) ?(r) p = knotp ?l (S.pt p) ?r
 
 let knotlist = List.map (fun (x,y,z) -> Types.mkKnot x y z)
 
-let cycle_tmp ?(dir=defaultdir) ?(style=defaultjoint) p = PrimPath.cycle dir style p
-let cycle = cycle_tmp
-let concat ?(style=defaultjoint) p k = concat p style k
+let cycle_tmp ?(dir=defaultdir) ?(style=defaultjoint) p = mkPACycle dir style p
 
+let cycle = cycle_tmp
+let concat ?style x y = of_metapath (concat ?style (of_path x) y)
 (* construct a path with a given style from a knot list *)
 let pathk ?(style) ?(cycle) l =
       let p = MetaPath.pathk ?style l
@@ -60,8 +60,6 @@ let jointpathk lp lj =
 let jointpathp lp lj  = jointpathk (List.map (knotp) lp) lj
 let jointpathn lp lj  = jointpathk (List.map knotn lp) lj
 let jointpath ?(scale) lp lj  = jointpathk (List.map (knot ?scale) lp) lj
-
-let append ?(style=defaultjoint) p1 p2 = append p1 style p2
 
 let scale f p = transform [Transform.scaled f] p
 let rotate f p = transform [Transform.rotated f] p

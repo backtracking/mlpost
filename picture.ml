@@ -30,7 +30,7 @@ let lrcorner pic = mkPTPicCorner pic LR
 let corner_bbox ?(dx=Num.zero) ?(dy=Num.zero) pic = 
   let pdx = Point.pt (dx, Num.zero) in
   let pdy = Point.pt (Num.zero, dy) in
-  Path.pathp ~style:PrimPath.jLine ~cycle:PrimPath.jLine 
+  Path.pathp ~style:Path.jLine ~cycle:Path.jLine 
     [Point.add (Point.sub (ulcorner pic) pdx) pdy;
      Point.sub (Point.sub (llcorner pic) pdx) pdy;
      Point.sub (Point.add (lrcorner pic) pdx) pdy;
