@@ -12,12 +12,67 @@ let () = Format.printf "%d elements@." (List.length elements)
 
 let spins = ref []
 
+let size = ref (200.,200.)
+
+let belong x y = 
+  let x',y' = !size in
+  if(x>0. && x<x' && y>0. && y<y') then true
+  else false
+
 let string_of_dim = function
   |Pt -> "pt"
   |Bp -> "bp"
   |Cm -> "cm"
   |Mm -> "mm"
   |Inch -> "inch"
+
+let highlight_point item ev = 
+  begin match ev with
+  | `ENTER_NOTIFY _ ->
+      item#set [ `FILL_COLOR "red" ]
+  | `LEAVE_NOTIFY ev ->
+      let state = GdkEvent.Crossing.state ev in
+      if not (Gdk.Convert.test_modifier `BUTTON1 state)
+      then item#set [`FILL_COLOR "black" ]
+  | `BUTTON_PRESS ev ->
+      let curs = Gdk.Cursor.create `FLEUR in
+      item#grab [`POINTER_MOTION; `BUTTON_RELEASE] curs 
+	(GdkEvent.Button.time ev)
+  | `BUTTON_RELEASE ev ->
+      item#ungrab (GdkEvent.Button.time ev)
+  | _ -> ()
+  end ;
+  false
+
+let move_point x y item ev =
+  begin match ev with
+  | `MOTION_NOTIFY ev ->
+      let state = GdkEvent.Motion.state ev in
+      let x = GdkEvent.Motion.x ev +. x in
+      let y = GdkEvent.Motion.y ev +. y in
+      if Gdk.Convert.test_modifier `BUTTON1 state && (belong x y)
+      then begin
+	item#set [ `X1 (x -. 3.) ; `Y1 (y -. 3.) ;
+		   `X2 (x +. 3.) ; `Y2 (y +. 3.) ; ]
+      end
+  | _ -> ()
+  end ; false
+
+let draw_point root s n1 n2 d1 d2 = match d1,d2 with
+  |Pt,Pt -> ()
+  |Bp,Bp -> 
+     let w,h = !size in
+     let x = n1 *. 500. /. w in
+     let y = n2 *. 500. /. h in
+     let point = GnoCanvas.ellipse ~x1:(x-.3.) ~x2:(x+.3.) ~y1:(y-.3.) ~y2:(y+.3.) 
+       ~props:[ `FILL_COLOR "black" ; `OUTLINE_COLOR "black" ; `WIDTH_PIXELS 0 ] root in
+     let sigs = point#connect in
+     sigs#event (highlight_point point) ;
+     sigs#event (move_point x y point);
+     ()
+  |Cm,Cm -> ()
+  |Mm,Mm -> ()
+  |Inch,Inch -> ()
 
 let left_part_lign vbox vbox2 vbox3 s n d s' =
   GMisc.label ~text:(s^s') ~packing:vbox#add ();
@@ -29,14 +84,15 @@ let left_part_lign vbox vbox2 vbox3 s n d s' =
     spins := sb::!spins;
     ()
 
-let left_part vbox vbox2 vbox3 = function
+let left_part vbox vbox2 vbox3 root = function
   | Num (s,(n,d)) ->
       let s = String.sub s 1 ((String.length s )-2) in 
       left_part_lign vbox vbox2 vbox3 s n d " :" 
   | Point (s,(n1,d1),(n2,d2)) -> 
       let s = String.sub s 1 ((String.length s )-2) in
       left_part_lign vbox vbox2 vbox3 s n1 d1 " xpart :" ;
-      left_part_lign vbox vbox2 vbox3 s n2 d2 " ypart :" 
+      left_part_lign vbox vbox2 vbox3 s n2 d2 " ypart :" ;
+      draw_point root s n1 n2 d1 d2
   
 let rec go_string fmt = function
   |[],_|_,[] -> ()
@@ -59,7 +115,7 @@ let quit ()=
 
 (* *)
 let main () =
-  let window = GWindow.window ~width:800 ~height:400
+  let window = GWindow.window 
     ~title:"GMLPost" () in
   let vb = GPack.vbox ~spacing:10 ~packing:window#add () in
   
@@ -86,19 +142,20 @@ let main () =
   let hbox2 = GPack.hbox ~spacing:10 ~packing:scrolled_window#add_with_viewport () in
   let frame = GBin.frame ~shadow_type:`IN ~packing:hbox#add () in
   let canvas = GnoCanvas.canvas ~width:500 ~height:500 ~packing:frame#add () in
+  let root = canvas#root in
+  root#set [`X (-200.); `Y (-200.)];
   let vbox = GPack.vbox ~spacing:10 ~packing:hbox2#add () in
   let vbox2 = GPack.vbox ~spacing:10 ~packing:hbox2#add () in
   let vbox3 = GPack.vbox ~spacing:10 ~packing:hbox2#add () in
   
-    List.iter (left_part vbox vbox2 vbox3) elements;
-    Format.printf "%d spins@." (List.length !spins);
-    spins := List.rev !spins;
-    Format.printf "%d spins@." (List.length !spins);
+  List.iter (left_part vbox vbox2 vbox3 root) elements;
+  Format.printf "%d spins@." (List.length !spins);
+  spins := List.rev !spins;
+  Format.printf "%d spins@." (List.length !spins);
     
-    quit ();
-    
-    window#show ();
-    Main.main ()
+  window#show ();
+  Main.main ()
+
 ;;
 
 main ()
