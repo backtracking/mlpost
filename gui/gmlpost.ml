@@ -14,10 +14,10 @@ let spins = ref []
 
 let size = ref (200.,200.)
 
-let belong x y = 
-  let x',y' = !size in
-  if(x>0. && x<x' && y>0. && y<y') then true
-  else false
+let canvas_width = 500.
+let canvas_height = 500.
+
+let belong x y = (x>0. && x<canvas_width && y>0. && y<canvas_height)
 
 let string_of_dim = function
   |Pt -> "pt"
@@ -48,8 +48,8 @@ let move_point x y item ev =
   begin match ev with
   | `MOTION_NOTIFY ev ->
       let state = GdkEvent.Motion.state ev in
-      let x = GdkEvent.Motion.x ev +. x in
-      let y = GdkEvent.Motion.y ev +. y in
+      let x = GdkEvent.Motion.x ev  in
+      let y = GdkEvent.Motion.y ev  in
       if Gdk.Convert.test_modifier `BUTTON1 state && (belong x y)
       then begin
 	item#set [ `X1 (x -. 3.) ; `Y1 (y -. 3.) ;
@@ -62,8 +62,8 @@ let draw_point root s n1 n2 d1 d2 = match d1,d2 with
   |Pt,Pt -> ()
   |Bp,Bp -> 
      let w,h = !size in
-     let x = n1 *. 500. /. w in
-     let y = n2 *. 500. /. h in
+     let x = n1 *. canvas_width /. w in
+     let y = n2 *. canvas_height /. h in
      let point = GnoCanvas.ellipse ~x1:(x-.3.) ~x2:(x+.3.) ~y1:(y-.3.) ~y2:(y+.3.) 
        ~props:[ `FILL_COLOR "black" ; `OUTLINE_COLOR "black" ; `WIDTH_PIXELS 0 ] root in
      let sigs = point#connect in
@@ -137,13 +137,15 @@ let main () =
   let scrolled_window = GBin.scrolled_window  ~width:350
     ~border_width: 10 ~hpolicy: `AUTOMATIC ~packing: hbox#add ()
   in
-  (* let button = GButton.button ~use_mnemonic:true ~label:"_Coucou" ~packing:(hbox#pack ~padding:5) () in *)
-(*     button#connect#clicked ~callback:quit; *)
+
+
   let hbox2 = GPack.hbox ~spacing:10 ~packing:scrolled_window#add_with_viewport () in
   let frame = GBin.frame ~shadow_type:`IN ~packing:hbox#add () in
-  let canvas = GnoCanvas.canvas ~width:500 ~height:500 ~packing:frame#add () in
+  let canvas = GnoCanvas.canvas ~width:(int_of_float (canvas_width)) ~height:(int_of_float (canvas_height)) ~packing:frame#add () in
+  canvas#set_scroll_region 0. 0. canvas_width canvas_height ;
+
   let root = canvas#root in
-  root#set [`X (-200.); `Y (-200.)];
+
   let vbox = GPack.vbox ~spacing:10 ~packing:hbox2#add () in
   let vbox2 = GPack.vbox ~spacing:10 ~packing:hbox2#add () in
   let vbox3 = GPack.vbox ~spacing:10 ~packing:hbox2#add () in
