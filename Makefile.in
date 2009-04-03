@@ -183,7 +183,7 @@ GUICMO = gui/glexer.cmo gui/gmlpost.cmo
 GUICMX := $(GUICMO:.cmo=.cmx)
 
 gui/gmlpost.opt: $(GUICMX)
-	$(OCAMLOPT) $(OFLAGS) -o $@ unix.cmxa threads.cmxa lablgtk.cmxa gtkThread.cmx $^
+	$(OCAMLOPT) $(OFLAGS) -o $@ unix.cmxa threads.cmxa lablgtk.cmxa gtkThread.cmx lablgnomecanvas.cmxa $^
 
 gui/gmlpost.byte: $(GUICMO)
 	$(OCAMLC) $(BFLAGS) -o $@ unix.cma lablgtk.cma threads.cma gtkThread.cmo $^

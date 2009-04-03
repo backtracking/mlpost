@@ -37,7 +37,7 @@ let left_part vbox vbox2 vbox3 = function
 
 (* *)
 let main () =
-  let window = GWindow.window ~width:500 ~height:400
+  let window = GWindow.window ~width:800 ~height:400
     ~title:"GMLPost" () in
   let vb = GPack.vbox ~spacing:10 ~packing:window#add () in
   
@@ -54,10 +54,12 @@ let main () =
   window#add_accel_group accel_group;
 
   let hbox = GPack.hbox ~spacing:10 ~packing:vb#add () in
-  let scrolled_window = GBin.scrolled_window  ~width:250 ~height:100
+  let scrolled_window = GBin.scrolled_window  ~width:350
     ~border_width: 10 ~hpolicy: `AUTOMATIC ~packing: hbox#add ()
   in
   let hbox2 = GPack.hbox ~spacing:10 ~packing:scrolled_window#add_with_viewport () in
+  let frame = GBin.frame ~shadow_type:`IN ~packing:hbox#add () in
+  let canvas = GnoCanvas.canvas ~width:500 ~height:500 ~packing:frame#add () in
   let vbox = GPack.vbox ~spacing:10 ~packing:hbox2#add () in
   let vbox2 = GPack.vbox ~spacing:10 ~packing:hbox2#add () in
   let vbox3 = GPack.vbox ~spacing:10 ~packing:hbox2#add () in
