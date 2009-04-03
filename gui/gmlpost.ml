@@ -3,6 +3,7 @@ open GdkKeysyms
 open Glexer
 open Format
 
+
 let () = ignore (GtkMain.Main.init ())
 
 let file = Sys.argv.(1)
@@ -10,7 +11,20 @@ let file = Sys.argv.(1)
 let elements = Glexer.read_file file
 let () = Format.printf "%d elements@." (List.length elements)
 
+let pointstable = Hashtbl.create (List.length elements)
+
+let rec init_table = function
+  |[],_,_|_,[],_|_,_,[]|Point _::_ ,_::[],_-> ()
+  | Num _::r,_::sps,ps -> 
+     init_table (r,sps,ps)
+  | Point (s,_,_)::r,sp1::sp2::sps,p::ps -> 
+      Format.eprintf "le s : %s !!!!!!!! @." s;
+      
+      Hashtbl.add pointstable s ((sp1,sp2),p) ;
+      init_table (r,sps,ps)
+
 let spins = ref []
+let points = ref []
 
 let size = ref (200.,200.)
 
@@ -25,6 +39,33 @@ let string_of_dim = function
   |Cm -> "cm"
   |Mm -> "mm"
   |Inch -> "inch"
+
+(*------------------------------------------------------------------------*)
+
+let rec go_string fmt = function
+  |[],_|_,[]|Point _::_,_::[] -> ()
+  | Num (s,(_,d))::r,sp::sps ->
+      let n = sp#value in
+	fprintf fmt "num %s %f %s \n" s n (string_of_dim d);
+	go_string fmt (r,sps)
+  | Point (s,(_,d1),(_,d2))::r,sp1::sp2::sps ->
+      let n1 = sp1#value in
+      let n2 = sp2#value in
+	fprintf fmt "point %s %f %s , %f %s \n" s 
+	  n1 (string_of_dim d1) 
+	  n2 (string_of_dim d2);
+	go_string fmt (r,sps)
+	  
+let quit ()= 
+  let f = open_out "result" in
+  let fmt = formatter_of_out_channel f in
+    go_string fmt (elements,!spins);
+    fprintf fmt "@?";
+    close_out f
+
+
+
+(*------------------------------------------------------------------------*)
 
 let highlight_point item ev = 
   begin match ev with
@@ -44,17 +85,21 @@ let highlight_point item ev =
   end ;
   false
 
-let move_point x y item ev =
+let move_point x y s item ev =
   begin match ev with
   | `MOTION_NOTIFY ev ->
       let state = GdkEvent.Motion.state ev in
       let x = GdkEvent.Motion.x ev  in
       let y = GdkEvent.Motion.y ev  in
       if Gdk.Convert.test_modifier `BUTTON1 state && (belong x y)
-      then begin
-	item#set [ `X1 (x -. 3.) ; `Y1 (y -. 3.) ;
-		   `X2 (x +. 3.) ; `Y2 (y +. 3.) ; ]
-      end
+      then 
+	begin
+	  let (sp1,sp2),_ = Hashtbl.find pointstable s in
+	    sp1#set_value x;
+	    sp2#set_value y;
+	    item#set [ `X1 (x -. 3.) ; `Y1 (y -. 3.) ;
+		       `X2 (x +. 3.) ; `Y2 (y +. 3.) ]
+	end
   | _ -> ()
   end ; false
 
@@ -68,50 +113,53 @@ let draw_point root s n1 n2 d1 d2 = match d1,d2 with
        ~props:[ `FILL_COLOR "black" ; `OUTLINE_COLOR "black" ; `WIDTH_PIXELS 0 ] root in
      let sigs = point#connect in
      sigs#event (highlight_point point) ;
-     sigs#event (move_point x y point);
+     sigs#event (move_point x y s point);
+     points := point::!points;
      ()
   |Cm,Cm -> ()
   |Mm,Mm -> ()
   |Inch,Inch -> ()
 
-let left_part_lign vbox vbox2 vbox3 s n d s' =
+
+
+(*------------------------------------------------------------------------*)
+
+let point_of_spin s sb () = 
+  let n = sb#value in
+  let (sb1,_),p = Hashtbl.find pointstable s in 
+    if (sb == sb1)
+    then p#set [ `X1 (n -. 3.) ; `X2 (n +. 3.) ]
+    else p#set [ `Y1 (n -. 3.) ; `Y2 (n +. 3.) ] 
+
+let left_part_lign vbox vbox2 vbox3 s n d s' = 
   GMisc.label ~text:(s^s') ~packing:vbox#add ();
   GMisc.label ~text:(string_of_dim d) ~packing:vbox3#add ();      
   let sb = GEdit.spin_button ~packing:vbox2#add ~digits:2 ~numeric:true ~wrap:true ()
   in
     sb#adjustment#set_bounds ~lower:(-200.) ~upper:200. ~step_incr:0.01 ();
     sb#set_value n;
+    sb#adjustment#connect#value_changed ~callback:(point_of_spin s sb);
     spins := sb::!spins;
     ()
 
 let left_part vbox vbox2 vbox3 root = function
   | Num (s,(n,d)) ->
-      let s = String.sub s 1 ((String.length s )-2) in 
       left_part_lign vbox vbox2 vbox3 s n d " :" 
   | Point (s,(n1,d1),(n2,d2)) -> 
-      let s = String.sub s 1 ((String.length s )-2) in
       left_part_lign vbox vbox2 vbox3 s n1 d1 " xpart :" ;
       left_part_lign vbox vbox2 vbox3 s n2 d2 " ypart :" ;
       draw_point root s n1 n2 d1 d2
+
+
+
+
+
+
+
   
-let rec go_string fmt = function
-  |[],_|_,[] -> ()
-  | Num (s,(_,d))::r,sp::sps ->
-      let n = sp#value in
-	fprintf fmt "num %s %f %s \n" s n (string_of_dim d);
-	go_string fmt (r,sps)
-  | Point (s,(_,d1),(_,d2))::r,sp1::sp2::sps ->
-      let n1 = sp1#value in
-      let n2 = sp2#value in
-	fprintf fmt "point %s %f %s , %f %s \n" s n1 (string_of_dim d1) n2 (string_of_dim d2);
-	go_string fmt (r,sps)
-	  
-let quit ()= 
-  let f = open_out "result" in
-  let fmt = formatter_of_out_channel f in
-    go_string fmt (elements,!spins);
-    fprintf fmt "@?";
-    close_out f
+
+(*------------------------------------------------------------------------*)
+
 
 (* *)
 let main () =
@@ -151,10 +199,10 @@ let main () =
   let vbox3 = GPack.vbox ~spacing:10 ~packing:hbox2#add () in
   
   List.iter (left_part vbox vbox2 vbox3 root) elements;
-  Format.printf "%d spins@." (List.length !spins);
   spins := List.rev !spins;
-  Format.printf "%d spins@." (List.length !spins);
-    
+  points := List.rev !points;
+
+  init_table (elements,!spins,!points);
   window#show ();
   Main.main ()
 

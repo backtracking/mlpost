@@ -33,13 +33,15 @@ rule read = parse
   | '#' [^ '\n']* '\n'
       { read lexbuf }
   | "num" space* (string as s) space* (number as n) space* (dimension as d)
-      { add_elt (Num (s, (float_of_string n, dim_of_string d)));
+      { let s = String.sub s 1 ((String.length s )-2) in 
+	  add_elt (Num (s, (float_of_string n, dim_of_string d)));
 	read lexbuf }
   | "point" space* (string as s) space* (number as n1) space* 
       (dimension as d1) space* ',' space* (number as n2) space* (dimension as d2)
-      {add_elt (Point (s, 
-		       (float_of_string n1, dim_of_string d1),
-		       (float_of_string n2, dim_of_string d2)));
+      {let s = String.sub s 1 ((String.length s )-2) in 
+	 add_elt (Point (s, 
+			(float_of_string n1, dim_of_string d1),
+			(float_of_string n2, dim_of_string d2)));
 	read lexbuf }
   | _
       { read lexbuf }
