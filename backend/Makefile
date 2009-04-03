@@ -40,7 +40,10 @@ testspline: testspline_lib
 testtfm:
 	./tfm cmr10.tfm cmmi10.tfm cmsy10.tfm
 
-.PHONY : tfm dvicairo testdvi testdviinterp spline testspline_lib testwidth
+mlcairo :
+	ocamlbuild $(GENOPTIONS) -I trunk -no-links mlcairo.native
+
+.PHONY : tfm dvicairo testdvi testdviinterp spline testspline_lib testwidth cairo
 
 .SUFFIXES : .dvi .pdf
 .dvi.pdf: dvicairo

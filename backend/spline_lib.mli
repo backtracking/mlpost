@@ -1,4 +1,4 @@
-type point = Cairo.point
+type point = Point.point
 type path
 type abscissa = float
 
@@ -13,6 +13,9 @@ val create : point -> point -> point -> point -> path
       - point d as the ending point,
       - point c as its control point *)
 
+val create_line : point -> point -> path
+val create_lines : point list -> path
+
 val close : path -> path
 
 val min_abscissa : path -> abscissa
@@ -22,6 +25,9 @@ val max_abscissa : path -> abscissa
 val add_end : path -> point -> point -> path
   (** add_end p a b return the path p with one more spline at the end.*)
   
+val add_end_line : path -> point -> path
+
+
 val reverse : path -> path
   (** reverse p return the path p reversed *)
   
@@ -65,19 +71,23 @@ val dist_min_path : path -> path -> abscissa * abscissa
 val translate : path -> point -> path
 val transform : path -> Cairo.matrix -> path
 
-val buildcycle : path list -> path
+val buildcycle : path -> path -> path
+
+val of_bounding_box : float * float * float * float -> path
 
 module Epure :
 sig
   type t
-    
+  val empty : t
   val create : path -> t
+  val of_path : path -> t
   val union : t -> t -> t
   val transform : t -> Cairo.matrix -> t
   val bounding_box : t -> point * point
+val of_bounding_box : float * float * float * float -> t
 end
 
-module Approx =
+module Approx :
   sig
     val lineto : point list -> path
     val fullcircle : unit -> path
@@ -85,12 +95,12 @@ module Approx =
     val quartercircle : unit -> path
   end
 
-module Cairo =
+module Cairo :
   sig
     val draw : Cairo.t -> path -> unit
   end
 
-module Metapath =
+module Metapath :
  sig
    type t
 

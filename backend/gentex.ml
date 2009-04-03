@@ -62,19 +62,21 @@ let create prelude texs =
     if exit_status <> 0 then failwith (sprintf "Error with : %s %s" com_latex latex);
     let dvi = genfile_name^".dvi" in
     let saved = Saved_device.load_file () dvi in
-    List.map (fun x -> x,Matrix.identity) (Dev_save.separe_pages saved) in
+    List.map (fun x -> {tex = x;trans= Matrix.identity}) (Dev_save.separe_pages saved) in
   tempdir genfile_name "" todo
       
 let point_of_cm cm = (0.3937 *. 72.) *. cm
 
 let get_dimen_cm x = Dev_save.get_dimen_first_page x.tex
 let get_dimen_pt x = 
-  let (x_min,y_min,x_max,y_max) = get_dimen_cm x.tex in
+  let (x_min,y_min,x_max,y_max) = get_dimen_cm x in
   (point_of_cm x_min,
    point_of_cm y_min,
    point_of_cm x_max,
    point_of_cm y_max)
 (** donne la dimension en centimètre *)
 
-let get_bases_cm = Dev_save.get_bases_first_page
+let get_bases_cm x = Dev_save.get_bases_first_page x.tex
 let get_bases_pt x = List.map point_of_cm (get_bases_cm x)
+
+let bounding_box = get_dimen_pt
