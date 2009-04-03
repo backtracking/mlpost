@@ -1,15 +1,12 @@
-type point = Cairo.point =
-    { x : float ; 
-      y : float }
+exception Not_implemented of string
+
+let not_implemented s = raise (Not_impemented s)
+
+
+type point = Point.point = Cairo.point
 
 let id x = x
-
-let add a b = {x = a.x+.b.x; y = a.y+.b.y}
-let minus a b = {x = a.x-.b.x; y = a.y-.b.y}
-let half a = {x = a.x/.2.; y = a.y/.2.}
-let double a = {x = a.x*.2.; y = a.y*.2.}
-let scal a c = {x = a.x*.c; y = a.y*.c}
-let add_half a b = half (add a b)
+open Point
 
 let rec one_to_one f a = function
   | [] -> a
@@ -29,9 +26,11 @@ type spline = {sa : point;
                sc : point;
                sd : point;
                smin : abscissa;
-               smax : abscissa}
+               smax : abscissa;
+               start : bool}
 
-type path = spline list
+type path = {pl : spline list;
+             cycle : bool}
 
 
 let pt_f fmt p =
@@ -110,14 +109,16 @@ let give_bound s =
   (x_min,y_min,x_max,y_max)
     
 let list_min_max f p = 
-  let (x_min,y_min,x_max,y_max) = List.fold_left (fun (x_min,y_min,x_max,y_max) s ->
+ List.fold_left (fun (x_min,y_min,x_max,y_max) s ->
                                                     let (sx_min,sy_min,sx_max,sy_max) = f s in
                                                     (min x_min sx_min,min y_min sy_min,
-                                                     max x_max sx_max,max x_max sy_max)) (infinity,infinity,neg_infinity,neg_infinity) p in
-  ({x=x_min;y=y_min},{x=x_max;y=y_max})
+                                                     max x_max sx_max,max x_max sy_max)) (infinity,infinity,neg_infinity,neg_infinity) p
 
-let unprecise_bounding_box = list_min_max give_bound
-  
+let unprecise_bounding_box s = 
+    let (x_min,y_min,x_max,y_max) = 
+      list_min_max give_bound s in
+    ({x=x_min;y=y_min},{x=x_max;y=y_max})
+
 let give_bound_precise s =
   let x_remarq = List.map (cubic s.sa.x s.sb.x s.sc.x s.sd.x) (remarquable id [] s.sa.x s.sb.x s.sc.x s.sd.x) in
   let y_remarq = List.map (cubic s.sa.y s.sb.y s.sc.y s.sd.y) (remarquable id [] s.sa.y s.sb.y s.sc.y s.sd.y) in
@@ -127,7 +128,10 @@ let give_bound_precise s =
   let y_min = List.fold_left min infinity y_remarq in
   (x_min,y_min,x_max,y_max)
     
-let bounding_box = list_min_max give_bound_precise
+let bounding_box s =   
+  let (x_min,y_min,x_max,y_max) = 
+    list_min_max give_bound_precise s in
+  ({x=x_min;y=y_min},{x=x_max;y=y_max})
 
 let test_in amin amax bmin bmax =
   (amin <= bmax && bmin <= amax)
@@ -420,7 +424,92 @@ let translate p t =
                   sb=add a.sb t;
                   sc=add a.sc t;
                   sd=add a.sd t}) p
+
+let transform p t = 
+  List.map (function a ->
+              { a with sa=Cairo.Matrix.transform_point t a.sa;
+                  sb=Cairo.Matrix.transform_point t a.sb;
+                  sc=Cairo.Matrix.transform_point t a.sc;
+                  sd=Cairo.Matrix.transform_point t a.sd}) p
                       
+
+module Epure =
+  struct
+    (* A rendre plus performant *)
+    type t = path list
+    let create x = [x]
+    let union x y = List.append_rev x y
+    let transform x t = List.map (fun x -> transform x t) x
+    let bounding_box sl =
+      let (x_min,y_min,x_max,y_max) = 
+        list_min_max (list_min_max give_bound_precise) sl
+          ({x=x_min;y=y_min},{x=x_max;y=y_max})
+  end
+
+
+
+module Approx =
+  struct
+    let lineto l = not_implemented "lineto"
+    let fullcircle () = not_implemented "circle"
+    let halfcirle () = not_implemented "halfcircle"
+    let quartercircle () = not_implemented "quartercircle"
+  end
+
+module Metapath =
+ sig
+   type joint
+     | JLine
+     | JCurve
+     | JCurveNoInflex
+     | JTension of float * float
+     | JControls of point * point
+
+   type direction 
+     | DVec of point
+     | DCurl of float
+     | DNo
+
+   type knot = direction * point * direction
+
+   type t =
+     | Start of knot
+     | Cons of t * join * knot
+     | Start_Path of path
+     | Append_Path of t * join * path
+
+   let knot d1 p d2 = (d1,p,d2)
+   
+   let vec_direction p = DVec p
+   let curl_direction f = DCurl f
+   let no_direction = DNo
+   
+   let line_joint = JLine
+   let curve_joint = JCurve
+   let curve_no_inflex_joint = JCurveNoInflex
+   let tension_joint f1 f2 = Jtension (f1,f2)
+   let controls p1 p2 = JControls (p1,p2)
+   
+
+   let concat p j k = Cons (p,j,k)
+   let rec append p j = function
+     | Start knot -> Cons (p,j,k)
+     | Cons(p2,j2,k2) -> Cons(append p j p2,j2,k2)
+     | Start_path p2 -> Append_Path(p,j,p2)
+     | Append_Path (p2,j2,p3) -> Append_Path(append p j p2,j2,p3)
+
+
+   val to_path p = not_implemented "to_path"
+   val cycle d j p = not_implemented "cycle"
+
+   val from_path p = Start_Path of path
+ end
+
+module Cairo =
+  sig
+    val draw : Cairo.t -> path -> unit
+  end
+
 (*
   module Splines_lib_knuth = 
   struct

@@ -21,14 +21,19 @@ let tempdir prefix suffix f =
   res
   
 
-type t = Dev_save.t
+type t = {tex : Dev_save.t;
+          trans : Matrix.t}
 
 module Saved_device = Dviinterp.Interp(Dev_save.Dev_save)
 module Cairo_device = Dev_save.Dev_load(Dvicairo.Cairo_device)
 
-let draw cr tex = Cairo_device.replay false tex 
+let draw cr tex = 
+  Cairo.save cr;
+  Cairo.transform cr (Matrix.to_cairo tex.trans);
+  Cairo_device.replay false tex.tex 
   {Dvicairo.pic = cr;new_page = (fun () -> assert false);
-   x_origin = 0.; y_origin = 0.}
+   x_origin = 0.; y_origin = 0.};
+  Cairo.restore cr
 
 let create prelude texs =
   let format fmt = Printf.fprintf fmt
@@ -57,14 +62,14 @@ let create prelude texs =
     if exit_status <> 0 then failwith (sprintf "Error with : %s %s" com_latex latex);
     let dvi = genfile_name^".dvi" in
     let saved = Saved_device.load_file () dvi in
-    Dev_save.separe_pages saved in
+    List.map (fun x -> x,Matrix.identity) (Dev_save.separe_pages saved) in
   tempdir genfile_name "" todo
       
 let point_of_cm cm = (0.3937 *. 72.) *. cm
 
-let get_dimen_cm = Dev_save.get_dimen_first_page
+let get_dimen_cm x = Dev_save.get_dimen_first_page x.tex
 let get_dimen_pt x = 
-  let (x_min,y_min,x_max,y_max) = get_dimen_cm x in
+  let (x_min,y_min,x_max,y_max) = get_dimen_cm x.tex in
   (point_of_cm x_min,
    point_of_cm y_min,
    point_of_cm x_max,

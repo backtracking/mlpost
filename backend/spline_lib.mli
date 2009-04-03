@@ -13,6 +13,8 @@ val create : point -> point -> point -> point -> path
       - point d as the ending point,
       - point c as its control point *)
 
+val close : path -> path
+
 val min_abscissa : path -> abscissa
 val max_abscissa : path -> abscissa
   
@@ -61,3 +63,61 @@ val dist_min_point : path -> point -> abscissa
 val dist_min_path : path -> path -> abscissa * abscissa
 
 val translate : path -> point -> path
+val transform : path -> Cairo.matrix -> path
+
+val buildcycle : path list -> path
+
+module Epure :
+sig
+  type t
+    
+  val create : path -> t
+  val union : t -> t -> t
+  val transform : t -> Cairo.matrix -> t
+  val bounding_box : t -> point * point
+end
+
+module Approx =
+  sig
+    val lineto : point list -> path
+    val fullcircle : unit -> path
+    val halfcirle : unit -> path
+    val quartercircle : unit -> path
+  end
+
+module Cairo =
+  sig
+    val draw : Cairo.t -> path -> unit
+  end
+
+module Metapath =
+ sig
+   type t
+
+   type joint
+   type knot
+   type direction
+   val knot : direction -> point -> direction -> knot
+   
+   val vec_direction : point -> direction
+   val curl_direction : float -> direction
+   val no_direction : direction
+   
+   val line_joint : joint
+   val curve_joint : joint
+   val curve_no_inflex_joint : joint
+   val tension_joint : float -> float -> joint
+   val controls_joint : point -> point -> joint
+   
+
+   val concat : t -> joint -> knot -> t
+   val append : t -> joint -> t -> t
+   val cycle : direction -> joint -> t -> path
+
+   val to_path : t -> path
+   val from_path : path -> t
+ end
+
+
+     
+
