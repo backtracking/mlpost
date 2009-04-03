@@ -17,15 +17,13 @@ let rec init_table = function
   |[],_,_|_,[],_|_,_,[]|Point _::_ ,_::[],_-> ()
   | Num _::r,_::sps,ps -> 
      init_table (r,sps,ps)
-  | Point (s,_,_)::r,sp1::sp2::sps,p::ps -> 
-      Format.eprintf "le s : %s !!!!!!!! @." s;
-      
+  | Point (s,_,_)::r,sp1::sp2::sps,p::ps ->       
       Hashtbl.add pointstable s ((sp1,sp2),p) ;
       init_table (r,sps,ps)
 
 let spins = ref []
 let points = ref []
-
+let z = ref 100
 let size = ref (200.,200.)
 
 let canvas_width = 500.
@@ -57,7 +55,7 @@ let rec go_string fmt = function
 	go_string fmt (r,sps)
 	  
 let quit ()= 
-  let f = open_out "result" in
+  let f = open_out "gui/result" in
   let fmt = formatter_of_out_channel f in
     go_string fmt (elements,!spins);
     fprintf fmt "@?";
@@ -152,7 +150,11 @@ let left_part vbox vbox2 vbox3 root = function
 
 
 
-
+let zoom_changed canvas ev =
+  match ev with
+    |`SCROLL ev -> if((GdkEvent.Scroll.direction ev = `UP) && !z > 10 && !z < 200 ) then z:= !z+10 ;
+      Format.eprintf "chibre!!!!!!!!!!!!!!@.";
+      canvas#set_pixels_per_unit !z 
 
 
 
@@ -189,10 +191,16 @@ let main () =
 
   let hbox2 = GPack.hbox ~spacing:10 ~packing:scrolled_window#add_with_viewport () in
   let frame = GBin.frame ~shadow_type:`IN ~packing:hbox#add () in
-  let canvas = GnoCanvas.canvas ~width:(int_of_float (canvas_width)) ~height:(int_of_float (canvas_height)) ~packing:frame#add () in
-  canvas#set_scroll_region 0. 0. canvas_width canvas_height ;
+  let canvas = GnoCanvas.canvas ~width:(int_of_float (canvas_width)) 
+    ~height:(int_of_float (canvas_height)) ~packing:frame#add () in
+    canvas#set_scroll_region 0. 0. canvas_width canvas_height ;
+  let root = canvas#root in  
 
-  let root = canvas#root in
+(*   let signal = canvas#connect in *)
+(*   signal#event (zoom_changed canvas); *)
+
+  let bgr = GdkPixbuf.from_file "gui/test.png" in
+  let pic = GnoCanvas.pixbuf root ~pixbuf:bgr in
 
   let vbox = GPack.vbox ~spacing:10 ~packing:hbox2#add () in
   let vbox2 = GPack.vbox ~spacing:10 ~packing:hbox2#add () in
