@@ -20,6 +20,7 @@ val close : path -> path
 
 val min_abscissa : path -> abscissa
 val max_abscissa : path -> abscissa
+val length : path -> abscissa
   
 
 val add_end : path -> point -> point -> path
@@ -61,6 +62,7 @@ val cut_after : path -> path -> path
 val split : path -> abscissa -> path * path
 val subpath : path -> abscissa -> abscissa -> path
 
+val direction_of_abscissa : path -> abscissa -> point
 val abscissa_to_point : path -> abscissa -> point
 val bounding_box : path -> point * point
 val unprecise_bounding_box : path -> point * point
@@ -69,7 +71,7 @@ val dist_min_point : path -> point -> abscissa
 val dist_min_path : path -> path -> abscissa * abscissa
 
 val translate : path -> point -> path
-val transform : path -> Cairo.matrix -> path
+val transform : Cairo.matrix -> path -> path
 
 val buildcycle : path -> path -> path
 
@@ -82,7 +84,7 @@ sig
   val create : path -> t
   val of_path : path -> t
   val union : t -> t -> t
-  val transform : t -> Cairo.matrix -> t
+  val transform : Cairo.matrix -> t -> t
   val bounding_box : t -> point * point
 val of_bounding_box : float * float * float * float -> t
 end
@@ -93,6 +95,7 @@ module Approx :
     val fullcircle : unit -> path
     val halfcirle : unit -> path
     val quartercircle : unit -> path
+    val unitsquare : unit -> path
   end
 
 module Cairo :
@@ -119,7 +122,7 @@ module Metapath :
    val tension_joint : float -> float -> joint
    val controls_joint : point -> point -> joint
    
-
+   val start : knot -> t
    val concat : t -> joint -> knot -> t
    val append : t -> joint -> t -> t
    val cycle : direction -> joint -> t -> path

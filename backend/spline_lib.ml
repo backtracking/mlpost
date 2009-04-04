@@ -7,6 +7,7 @@ type point = Point.point
 
 let id x = x
 open Point
+open Point.Infix
 
 let rec one_to_one f a = function
   | [] -> a
@@ -71,7 +72,7 @@ let add_end p c d =
   let rec aux p = 
     match p with
       | [] -> assert false (* a path always have one element *)
-      | [{sc=mb;sd=a;smax=smax} as e] -> [e;{sa = a;sb = minus (double a) mb;
+      | [{sc=mb;sd=a;smax=smax} as e] -> [e;{sa = a;sb = (double a) -/ mb;
                                              sc = c;sd = d;smin=smax;smax=smax+.1.; start = false}]
       | a::l -> a::(aux l) in
   {p with pl=aux p.pl}
@@ -108,6 +109,9 @@ let abscissa_to_point p t =
   if min_abscissa p > t then 
     invalid_arg "abscissa_to_point : the abscissa given is smaller than min_abscissa"
   else aux p.pl
+
+let direction_of_abscissa p t = 
+  (* TODO *) assert false
 
 let extremum conv l a b c d =
   let test s l = if s>=0. && s<=1. then (conv s)::l else l in
@@ -176,21 +180,21 @@ let is_intersect_precise a b =
 let bisect a =
   let b = a in
   (*D\leftarrow (C+D)/2*)
-  let b = {b with sd=add_half b.sd b.sc} in
+  let b = {b with sd = add_half b.sd b.sc} in
   (*C\leftarrow (B+C)/2, D\leftarrow (C+D)/2*)
-  let b = {b with sc=add_half b.sc b.sb} in
-  let b = {b with sd=add_half b.sd b.sc} in
+  let b = {b with sc = add_half b.sc b.sb} in
+  let b = {b with sd = add_half b.sd b.sc} in
   (*B\leftarrow (A+B)/2, C\leftarrow (B+C)/2, D\leftarrow(C+D)/2*)
-  let b = {b with sb=add_half b.sb b.sa} in
-  let b = {b with sc=add_half b.sc b.sb} in
-  let b = {b with sd=add_half b.sd b.sc} in
+  let b = {b with sb = add_half b.sb b.sa} in
+  let b = {b with sc = add_half b.sc b.sb} in
+  let b = {b with sd = add_half b.sd b.sc} in
   let c = a in 
-  let c = {c with sa=add_half c.sa c.sb} in
-  let c = {c with sb=add_half c.sb c.sc} in
-  let c = {c with sa=add_half c.sa c.sb} in
-  let c = {c with sc=add_half c.sc c.sd} in
-  let c = {c with sb=add_half c.sb c.sc} in
-  let c = {c with sa=add_half c.sa c.sb} in
+  let c = {c with sa = add_half c.sa c.sb} in
+  let c = {c with sb = add_half c.sb c.sc} in
+  let c = {c with sa = add_half c.sa c.sb} in
+  let c = {c with sc = add_half c.sc c.sd} in
+  let c = {c with sb = add_half c.sb c.sc} in
+  let c = {c with sa = add_half c.sa c.sb} in
   (b,c)
 
 type graph = {gt1 : int;
@@ -293,7 +297,7 @@ let intersection_aux acc a b =
     let res = List.fold_left (fun acc (x,y) -> (f_from_i a x,f_from_i b y)::acc) acc l in
     if !debug then
       Format.printf "@[%a@]@." (fun fmt -> List.iter (pt_f fmt))
-        (List.map (fun (t1,t2) -> minus (cubic_point a t1) (cubic_point b t2)) res);
+        (List.map (fun (t1,t2) -> (cubic_point a t1) -/ (cubic_point b t2)) res);
     res
 
 
@@ -335,14 +339,16 @@ let split_aux s t l =
   else 
     let t0 = _01_of_s s t in
     let _1t0 = 1.-.t0 in
-    let b1 = add (scal s.sb t0) (scal s.sa _1t0) in
-    let c1 = add (scal s.sc (t0*.t0)) (add (scal s.sb (2.*.t0*._1t0)) (scal s.sa (_1t0*._1t0))) in
+    let b1 = t0 */ s.sb +/ _1t0 */ s.sa in
+    let c1 = 
+      (t0*.t0) */ s.sc +/ (2.*.t0*._1t0) */ s.sb +/ (_1t0*._1t0) */ s.sa in
     let d1 = cubic_point s t0 in
     let a2 = d1 in
-    let c2 = add (scal s.sc _1t0) (scal s.sd t0) in
-    let b2 = add (scal s.sb (_1t0*._1t0)) (add (scal s.sc (2.*._1t0*.t0)) (scal s.sd (t0*.t0))) in
-    ([{s with sb=b1;sd=d1;sc=c1;smax=t}],
-     {s with sa=a2;sb=b2;sc=c2;smin=t}::l)
+    let c2 = _1t0 */ s.sc +/ t0 */ s.sd in
+    let b2 = 
+      (_1t0*._1t0) */ s.sb +/ (2.*._1t0*.t0) */ s.sc +/ (t0*.t0) */ s.sd in
+    ([{s with sb = b1;sd = d1;sc = c1;smax = t}],
+     {s with sa = a2;sb = b2;sc = c2;smin = t}::l)
 
 let split p t = 
   let rec aux = function
@@ -446,21 +452,21 @@ let dist_min_path p1 p2 = snd (one_to_one2 dist_min_path_aux
 
 let translate p t = 
   {p with pl=List.map (function a ->
-                         { a with sa=add a.sa t;
-                             sb=add a.sb t;
-                             sc=add a.sc t;
-                             sd=add a.sd t}) p.pl}
+                         { a with sa= a.sa +/ t;
+                             sb=a.sb +/ t;
+                             sc=a.sc +/ t;
+                             sd=a.sd +/ t}) p.pl}
 
 
-let transform_aux p t = 
+let transform_aux t p = 
   List.map (function a ->
               { a with sa=Cairo.Matrix.transform_point t a.sa;
                   sb=Cairo.Matrix.transform_point t a.sb;
                   sc=Cairo.Matrix.transform_point t a.sc;
                   sd=Cairo.Matrix.transform_point t a.sd}) p
 
-let transform p t = 
-  {p with pl= transform_aux p.pl t}
+let transform t p = 
+  {p with pl= transform_aux t p.pl}
                       
 let buildcycle p1 p2 = not_implemented ("buildcycle")
 
@@ -476,6 +482,8 @@ let of_bounding_box (x_min,y_min,x_max,y_max) =
   let dr = {x=x_max;y=y_max} in
   close (create_lines [ul;ur;dl;dr;ul])
 
+let length p = max_abscissa p -. min_abscissa p
+
 module Epure =
   struct
     (* A rendre plus performant ou pas*)
@@ -484,7 +492,7 @@ module Epure =
     let create x = [x.pl]
     let of_path = create
     let union x y = List.rev_append x y
-    let transform x t = List.map (fun x -> transform_aux x t) x
+    let transform t x = List.map (fun x -> transform_aux t x) x
     let bounding_box sl =
       let (x_min,y_min,x_max,y_max) = 
         list_min_max (list_min_max give_bound_precise) sl in
@@ -500,6 +508,7 @@ module Approx =
     let fullcircle () = not_implemented "circle"
     let halfcirle () = not_implemented "halfcircle"
     let quartercircle () = not_implemented "quartercircle"
+    let unitsquare () = not_implemented "unit square"
   end
 
 module Metapath =
@@ -529,6 +538,8 @@ module Metapath =
    let vec_direction p = DVec p
    let curl_direction f = DCurl f
    let no_direction = DNo
+
+   let start k = Start k
    
    let line_joint = JLine
    let curve_joint = JCurve
@@ -570,6 +581,7 @@ module Cairo =
       if p.cycle then Cairo.close_path cr;
       Cairo.restore cr
   end
+
 
 (*
   module Splines_lib_knuth = 

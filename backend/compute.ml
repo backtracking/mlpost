@@ -30,6 +30,8 @@ let memoize f nb =
           Hashtbl.add memoize arg.tag result;
           result
 
+let nop = Figure_lib.nop
+
 let option_compile f = function
   | None -> None, nop
   | Some obj -> 
@@ -53,7 +55,7 @@ let point_of_position (xmin,ymin,xmax,ymax) = function
   | `Lowright -> {P.x=xmin;y=ymin}
 
 let rec num' = function
-  | F f -> C.F f, nop
+  | F f -> f
   | NXPart p -> 
       let p = point p in
       p.P.x
@@ -92,7 +94,7 @@ let rec num' = function
       let p = path p in
       Spline_lib.length p
 and num = memoize num' 50
-and point' = function
+and point' : Types.point_node -> Point.t  = function
   | PTPair (f1,f2) -> 
       let f1 = num f1 in
       let f2 = num f2 in 
@@ -100,48 +102,49 @@ and point' = function
   | PTPointOf (f,p) -> 
       let f = num f in
       let p = path p in
-      Spline_lib.point_of_abscisse p f
+      Spline_lib.abscissa_to_point p f
   | PTDirectionOf (f,p) -> 
       let f = num f in
       let p = path p in
-      Spline_lib.direction_of_abscisse p f
+      Spline_lib.direction_of_abscissa p f
   | PTAdd (p1,p2) -> 
-      let p1,c1 = point p1 in
-      let p2,c2 = point p2 in
-        C.PTAdd (p1,p2)
+      let p1 = point p1 in
+      let p2 = point p2 in
+      Point.add p1 p2
   | PTSub (p1,p2) ->
       let p1 = point p1 in
       let p2 = point p2 in
-        Point.add p1 p2
+        Point.sub p1 p2
   | PTMult (f,p) ->
       let f = num f in
       let p1 = point p in
-        Point.mult p1 f
+        Point.mult f p1
   | PTRotated (f,p) ->
       let p1 = point p in
-      Point.rotated p1 f
+      Point.rotated f p1
   | PTPicCorner (pic, corner) ->
       let p = picture pic in
-      let (xmin,ymin,ymax,ymax) = Picture_lib.bounding_box p in
+      let pmin ,pmax = Picture_lib.bounding_box p in
       begin
         match corner with
-          | N -> {P.x=middle xmin xmax;
-                  y=ymin}
-          | S -> {P.x=middle xmin xmax;
-                  y=ymax}
-          | W -> {P.x=xmin;
-                  y=middle ymin ymax}
-          | E -> {P.x=xmax;
-                  y=middle ymin ymax}
-          | NW -> {P.x=xmin;y=ymin}
-          | NE -> {P.x=xmax;y=ymin}
-          | SW -> {P.x=xmin;y=ymax}
-          | SE -> {P.x=xmax;y=ymax}
+          | `Top -> {P.x=middle pmin.P.x pmax.P.x;
+                  y=pmin.P.y}
+          | `Bot -> {P.x=middle pmin.P.x pmax.P.x;
+                  y=pmax.P.y}
+          | `Left -> {P.x=pmin.P.x;
+                  y=middle pmin.P.y pmax.P.y}
+          | `Right -> {P.x=pmax.P.x;
+                  y=middle pmin.P.y pmax.P.y}
+          | `Upleft -> {P.x=pmin.P.x;y=pmin.P.y}
+          | `Upright -> {P.x=pmax.P.x;y=pmin.P.y}
+          | `Lowleft -> {P.x=pmin.P.x;y=pmax.P.y}
+          | `Lowright -> {P.x=pmax.P.x;y=pmax.P.y}
+          | `Ctr -> Point.add_half pmin pmax
       end
   | PTTransformed (p,tr) ->
       let p = point p in
       let tr = transform tr in
-      Point.transform p tr
+      Point.transform tr p
 and point = memoize point' 50
 and knot k =
   match k.Hashcons.node with
@@ -153,32 +156,32 @@ and knot k =
 
 and joint j = 
   match j.Hashcons.node with
-  | JLine -> Spline_lib.Metapath.line
-  | JCurve -> Spline_lib.Metapath.curve
-  | JCurveNoInflex -> Spline_lib.Metapath.curvenoinflex
-  | JTension (a,b) -> Spline_lib.Metapath.tension a b
+  | JLine -> Spline_lib.Metapath.line_joint
+  | JCurve -> Spline_lib.Metapath.curve_joint
+  | JCurveNoInflex -> Spline_lib.Metapath.curve_no_inflex_joint
+  | JTension (a,b) -> Spline_lib.Metapath.tension_joint a b
   | JControls (p1,p2) ->
       let p1 = point p1 in
       let p2 = point p2 in
-      Spline_lib.Metapath.join_controls p1 p2
+      Spline_lib.Metapath.controls_joint p1 p2
 and direction d = 
   match d.Hashcons.node with
   | Vec p -> 
       let p = point p in
-      Spline_lib.Metapath.dir_vec p
-  | Curl f -> Spline_lib.Metapath.dir_curv f
-  | NoDir  -> Spline_lib.Metapath.nodir
+      Spline_lib.Metapath.vec_direction p
+  | Curl f -> Spline_lib.Metapath.curl_direction f
+  | NoDir  -> Spline_lib.Metapath.no_direction
 and metapath' = function
   | MPAConcat (pa,j,p) ->
       let p = metapath p in
       let pa = knot pa in
       let j = joint j in
-      Spline_lib.Metafont.concat p j pa
+      Spline_lib.Metapath.concat p j pa
   | MPAAppend (p1,j,p2) ->
       let p1 = metapath p1 in
       let j = joint j in
       let p2 = metapath p2 in
-      Spline_lib.append p1 j p2
+      Spline_lib.Metapath.append p1 j p2
   | MPAKnot k -> Spline_lib.Metapath.start (knot k)
   | MPAofPA p -> Spline_lib.Metapath.from_path (path p)
 and metapath = memoize metapath' 50
@@ -188,11 +191,11 @@ and path' = function
       let d = direction d in
       let j = joint j in
       let p = metapath p in
-      Spline_lib.Metafont.cycle d j p
+      Spline_lib.Metapath.cycle d j p
   | PATransformed (p,tr) ->
       let p = path p in
       let tr = transform tr in
-      Spline_lib.transform p tr
+      Spline_lib.transform tr p
   | PACutAfter (p1,p2) ->
       let p1 = path p1 in
       let p2 = path p2 in
@@ -202,8 +205,9 @@ and path' = function
       let p2 = path p2 in
       Spline_lib.cut_before p1 p2
   | PABuildCycle pl ->
-      let npl = List.map path pl in
-      Spline_lib.build_cycle npl
+(*       let npl = List.map path pl in *)
+      (* TODO *) assert false
+(*       Spline_lib.buildcycle npl *)
   | PASub (f1, f2, p) ->
       let f1 = num f1 in
       let f2 = num f2 in
@@ -211,17 +215,17 @@ and path' = function
       Spline_lib.subpath p f1 f2
   | PABBox p ->
       let p = picture p in
-      let (xmin,ymin,xmax,ymax) = Picture_lib.bounding_box p in
-      Spline_lib.close_line 
-        (Spline_lib.line_to [{P.x=xmin;y=ymin};
-                             {P.x=xmin;y=ymax};
-                             {P.x=xmax;y=ymax};
-                             {P.x=xmax;y=ymin}])
+      let pmin,pmax = Picture_lib.bounding_box p in
+      Spline_lib.close 
+        (Spline_lib.create_lines [{P.x = pmin.P.x; y = pmin.P.y};
+                                  {P.x = pmin.P.x; y = pmax.P.y};
+                                  {P.x = pmax.P.x; y = pmax.P.y};
+                                  {P.x = pmax.P.x; y = pmin.P.y}])
                           
-  | PAUnitSquare -> Spline_lib.Approx.unit_square
-  | PAQuarterCircle -> Spline_lib.Approx.quarter_circle
-  | PAHalfCircle -> Spline_lib.Approx.half_circle
-  | PAFullCircle -> Spline_lib.Approx.full_circle
+  | PAUnitSquare -> Spline_lib.Approx.unitsquare ()
+  | PAQuarterCircle -> Spline_lib.Approx.quartercircle ()
+  | PAHalfCircle -> Spline_lib.Approx.halfcirle ()
+  | PAFullCircle -> Spline_lib.Approx.fullcircle ()
 and path = memoize path' 50
 and picture' = function
   | PITransformed (p,tr) ->
@@ -233,7 +237,7 @@ and picture' = function
   | PIClip (pic,pth) ->
       let pic = picture pic in
       let pth = path pth in
-      Picture_lib.clip pic path
+      Picture_lib.clip pic pth
 
 and picture pic = memoize picture' 50
 and transform t = 
