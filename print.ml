@@ -22,12 +22,6 @@ let option_print pr fmt = function
   | None -> ()
   | Some x -> pr fmt x
 
-let piccorner fmt = function
-  | UL -> fprintf fmt "ulcorner"
-  | LL -> fprintf fmt "llcorner"
-  | UR -> fprintf fmt "urcorner"
-  | LR -> fprintf fmt "lrcorner"
-
 let position fmt = function
   | `Center  -> fprintf fmt ""
   | `Left   -> fprintf fmt ".lft"
@@ -54,7 +48,7 @@ let rec num fmt n =
 and point fmt p = 
   match p.Hashcons.node with
   | PTPair (n1,n2) -> fprintf fmt "(%a,%a)" num n1 num n2
-  | PTPicCorner (p,pc) -> fprintf fmt "%a(%a)" piccorner pc picture p
+  | PTPicCorner (p,pc) -> fprintf fmt "%a(%a)" position pc picture p
   | PTAdd (p1,p2) -> fprintf fmt "(%a + %a)" point p1 point p2
   | PTSub (p1,p2) -> fprintf fmt "(%a - %a)" point p1 point p2
   | PTMult (n,p) -> fprintf fmt "(%a * %a)" num n point p

@@ -25,20 +25,11 @@ type color =
 
 type name = string
 
-type corner = N | S | W | E | NE | NW | SW | SE
-type piccorner = UL | UR | LL | LR
-
+type corner = [ | `Upleft | `Upright | `Lowleft | `Lowright ]
 
 type hposition = [`Center | `Left | `Right]
 type vposition = [`Center | `Top | `Bot]
-type position = [
-  | hposition 
-  | vposition 
-  | `Upleft
-  | `Upright
-  | `Lowleft
-  | `Lowright
-]
+type position = [ | hposition | vposition | corner ]
 
 open Hashcons
 
@@ -59,7 +50,7 @@ and num = num_node hash_consed
 
 and point_node = private
   | PTPair of num * num
-  | PTPicCorner of picture * piccorner
+  | PTPicCorner of picture * corner
   | PTPointOf of num * path
   | PTDirectionOf of num * path
   | PTAdd of point * point
@@ -223,7 +214,7 @@ val mkPTTransformed : point -> transform -> point
 val mkPTPointOf : num -> path -> point
 val mkPTDirectionOf : num -> path -> point
 
-val mkPTPicCorner : picture -> piccorner -> point
+val mkPTPicCorner : picture -> corner -> point
 
 (* transform *)
 

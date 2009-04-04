@@ -30,7 +30,7 @@ type num =
 
 and point =
   | PTPair of num * num
-  | PTPicCorner of picture * piccorner
+  | PTPicCorner of picture * Types.corner
   | PTPointOf of num * path
   | PTDirectionOf of num * path
   | PTAdd of point * point
@@ -128,7 +128,5 @@ and spec_image =
 and color = Types.color
 and position = Types.position
 and name = Types.name
-and corner = Types.corner
-and piccorner = Types.piccorner
 and on_off =
   | On of num | Off of num

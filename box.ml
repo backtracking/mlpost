@@ -75,6 +75,19 @@ let north_east x = build_point (east x) (north x)
 let south_west x = build_point (west x) (south x)
 let south_east x = build_point (east x) (south x)
 
+let corner pos x = 
+  match pos with
+  | `Upleft -> north_west x
+  | `Upright -> north_east x
+  | `Lowleft -> south_west x
+  | `Lowright -> south_east x
+  | `Left -> west x
+  | `Right -> east x
+  | `Center -> ctr x
+  | `Top -> north x
+  | `Bot -> south x
+
+
 let rec transform t b = 
   let tr = Point.transform t in
   let nw = tr (north_west b) and sw = tr (south_west b)

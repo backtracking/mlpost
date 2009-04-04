@@ -26,19 +26,11 @@ type color =
 
 type name = string
 
-type corner = N | S | W | E | NE | NW | SW | SE
-type piccorner = UL | UR | LL | LR
+type corner = [ | `Upleft | `Upright | `Lowleft | `Lowright ]
 
 type hposition = [`Center | `Left | `Right]
 type vposition = [`Center | `Top | `Bot]
-type position = [
-  | hposition 
-  | vposition 
-  | `Upleft
-  | `Upright
-  | `Lowleft
-  | `Lowright
-]
+type position = [ | hposition | vposition | corner ]
 
 open Hashcons
 
@@ -59,7 +51,7 @@ and num = num_node hash_consed
 
 and point_node = 
   | PTPair of num * num
-  | PTPicCorner of picture * piccorner
+  | PTPicCorner of picture * corner
   | PTPointOf of num * path
   | PTDirectionOf of num * path
   | PTAdd of point * point
@@ -375,10 +367,6 @@ let eq_on_off o1 o2 =
 let eq_position (p1:position) (p2:position) = 
   p1 == p2 (* correct because this type contains only constants *)
 
-let eq_piccorner (p1:piccorner) (p2:piccorner) =
-  p1 == p2 (* correct because this type contains only constants *)
-
-
 let eq_num_node n1 n2 =
   match n1,n2 with
     | F f1, F f2 -> eq_float f1 f2
@@ -400,7 +388,8 @@ let eq_point_node p1 p2 =
     | PTPair(n11,n12),PTPair(n21,n22) -> 
 	eq_hashcons n11 n21 && eq_hashcons n12 n22 
     | PTPicCorner(pic1,corn1), PTPicCorner(pic2,corn2) ->
-	eq_hashcons pic1 pic2 && eq_piccorner corn1 corn2
+	eq_hashcons pic1 pic2 && 
+        eq_position (corn1 :> position) (corn2 :> position)
     | PTPointOf(n1,p1), PTPointOf(n2,p2)
     | PTDirectionOf(n1,p1), PTDirectionOf(n2,p2)
 	-> eq_hashcons n1 n2 && eq_hashcons p1 p2 

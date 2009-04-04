@@ -757,11 +757,34 @@ and Picture : sig
 
   (** {2 Special points of the bounding box of a picture} *)
 
+  val ctr : t -> Point.t
+  (** @img ctr.png *)
+  val north : t -> Point.t
+  (** @img north.png *)
+  val south : t -> Point.t
+  (** @img south.png *)
+  val west  : t -> Point.t
+  (** @img west.png *)
+  val east  : t -> Point.t 
+  (** @img east.png *)
+  val north_west : t -> Point.t
+  (** @img north_west.png *)
+  val south_west : t -> Point.t
+  (** @img south_west.png *)
+  val north_east : t -> Point.t
+  (** @img north_east.png *)
+  val south_east : t -> Point.t
+  (** @img south_east.png *)
+
+  val corner : Command.position -> t -> Point.t
+
+  (** {2 Special points of the bounding box of a picture (Deprecated)} *)
+
+  (** These have been superseded by the preceding functions *)
   val ulcorner : t -> Point.t
   val llcorner : t -> Point.t
   val urcorner : t -> Point.t
   val lrcorner : t -> Point.t
-  val ctr : t -> Point.t
 
   val clip : t -> Path.t -> t
   (** [clip pic path] limits [pic] to the cyclic path [path]; all elements 
@@ -1035,6 +1058,8 @@ and Box : sig
   (** @img north_east.png *)
   val south_east : t -> Point.t
   (** @img south_east.png *)
+
+  val corner : Command.position -> t -> Point.t
 
   (** {2 Operators} *)
 

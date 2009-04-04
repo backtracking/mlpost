@@ -27,21 +27,11 @@ let externalimage_dimension filename : float * float =
 
 let name = pp_print_string
 
-let corner fmt = function
-  | N -> fprintf fmt "n"
-  | S -> fprintf fmt "s"
-  | W -> fprintf fmt "w"
-  | E -> fprintf fmt "e"
-  | NW -> fprintf fmt "nw"
-  | NE -> fprintf fmt "ne"
-  | SW -> fprintf fmt "sw"
-  | SE -> fprintf fmt "se"
-
 let piccorner fmt = function
-  | UL -> fprintf fmt "ulcorner"
-  | LL -> fprintf fmt "llcorner"
-  | UR -> fprintf fmt "urcorner"
-  | LR -> fprintf fmt "lrcorner"
+  | `Upleft  -> fprintf fmt "ulcorner"
+  | `Upright -> fprintf fmt "urcorner"
+  | `Lowleft -> fprintf fmt "llcorner"
+  | `Lowright -> fprintf fmt "lrcorner"
 
 let position fmt = function
   | `Center  -> fprintf fmt ""

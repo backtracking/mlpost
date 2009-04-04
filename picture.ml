@@ -22,10 +22,16 @@ let tex s = mkPITex s
 let make l = mkPIMake l
 let empty = mkPIMake (mkCSeq [])
 let bbox pic = mkPABBox pic
-let ulcorner pic = mkPTPicCorner pic UL
-let llcorner pic = mkPTPicCorner pic LL
-let urcorner pic = mkPTPicCorner pic UR
-let lrcorner pic = mkPTPicCorner pic LR
+
+let ulcorner pic = mkPTPicCorner pic `Upleft
+let llcorner pic = mkPTPicCorner pic `Lowleft
+let urcorner pic = mkPTPicCorner pic `Upright
+let lrcorner pic = mkPTPicCorner pic `Lowright
+
+let north_west = ulcorner
+let south_west = llcorner
+let north_east = urcorner
+let south_east = lrcorner
 
 let corner_bbox ?(dx=Num.zero) ?(dy=Num.zero) pic = 
   let pdx = Point.pt (dx, Num.zero) in
@@ -66,3 +72,20 @@ let clip pic pth = mkPIClip pic pth
 let width p = Point.xpart (Point.sub (urcorner p) (ulcorner p))
 
 let height p = Point.ypart (Point.sub (urcorner p) (lrcorner p))
+
+let north p = Point.segment 0.5 (north_east p) (north_west p)
+let south p = Point.segment 0.5 (south_east p) (south_west p)
+let west p = Point.segment 0.5 (south_west p) (north_west p)
+let east p = Point.segment 0.5 (north_east p) (south_east p)
+
+let corner pos x = 
+  match pos with
+  | `Upleft -> north_west x
+  | `Upright -> north_east x
+  | `Lowleft -> south_west x
+  | `Lowright -> south_east x
+  | `Left -> west x
+  | `Right -> east x
+  | `Center -> ctr x
+  | `Top -> north x
+  | `Bot -> south x
