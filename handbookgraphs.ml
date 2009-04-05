@@ -22,6 +22,7 @@ module H = Helpers
 open Num
 open Num.Infix
 open Point
+module MP = MetaPath
 
 let draw1 = 1, seq [ draw 
                    (path ~style:jLine [20.,20.; 0.,0.; 0.,30.; 30.,0.; 0.,0.])]
@@ -80,19 +81,22 @@ let draw6 = 6,
    labels1 ]
 
 
-let lex = knot ~r:(vec (dir 45.)) (0.,0.)
-let rex a = knot ~l:(vec (dir (10.*.a))) ~scale:cm (6., 0.)
+let lex = MP.knot ~r:(vec (dir 45.)) (0.,0.)
+let rex a = MP.knot ~l:(vec (dir (10.*.a))) ~scale:cm (6., 0.)
+
 let draw7 = 7, 
             seq [Command.iter 0 9
                (fun a ->
-                  draw (concat (start lex) ~style:jCurve 
-                          (rex (float_of_int (-a))))) ]
+                 let p = MP.concat (MP.start lex) ~style:jCurve 
+                          (rex (float_of_int (-a))) in 
+                 draw (MP.to_path p) ) ]
 
 let draw8 = 8,
             seq [Command.iter 0 7
-               (fun a ->
-                  draw (concat (start lex) ~style:jCurve 
-                          (rex (float_of_int a)))) ]
+              (fun a ->
+                let p = MP.concat (MP.start lex) ~style:jCurve 
+                          (rex (float_of_int a)) in
+                draw (MP.to_path p) ) ]
 
 let z0 = (-1., 0.)
 let z1 = (0., 0.2)
@@ -162,11 +166,11 @@ let draw18 =
   let u = Num.cm in
   let pen = Pen.scale one Pen.circle in
   let rec pg = function
-    | 0 -> start (knot ~r:(vec up) ~scale:u (0.,0.))
+    | 0 -> MP.start (MP.knot ~r:(vec up) ~scale:u (0.,0.))
     | n -> let f = (float_of_int n /. 2.) in 
-	concat ~style:jCurve (pg (n-1)) (knot ~scale:u (f, sqrt f)) in
+	MP.concat ~style:jCurve (pg (n-1)) (MP.knot ~scale:u (f, sqrt f)) in
     18, seq [draw (pathn ~style:jLine [(zero,u 2.); (zero,zero); (u 4.,zero)]);
-	 draw ~pen (pg 8);
+	 draw ~pen (MP.to_path (pg 8));
 	 label ~pos:`Lowright (tex "$ \\sqrt x$") (pt (u 3., u (sqrt 3.)));
 	 label ~pos:`Bot (tex "$x$") (pt (u 2., zero));
 	 label ~pos:`Lowleft (tex "$y$") (pt (zero, u 1.))]
