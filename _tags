@@ -18,8 +18,13 @@
 <plot.cmx>: for-pack(Mlpost)
 <point.cmx>: for-pack(Mlpost)
 <pos.cmx>: for-pack(Mlpost)
-<primPath.cmx>: for-pack(Mlpost)
+<metaPath.cmx>: for-pack(Mlpost)
 <print.cmx>: for-pack(Mlpost)
 <shapes.cmx>: for-pack(Mlpost)
 <transform.cmx>: for-pack(Mlpost)
 <tree.cmx>: for-pack(Mlpost)
+<radar.cmx>: for-pack(Mlpost)
+<hist.cmx>: for-pack(Mlpost)
+<legend.cmx>: for-pack(Mlpost)
+
+<mlpost.*>: use_unix

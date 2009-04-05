@@ -1,5 +1,3 @@
-module C = Compute
-
 type point = Cairo.point =
     { x : float ; 
       y : float }

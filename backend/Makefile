@@ -1,6 +1,6 @@
 GENOPTIONS=-cflag -dtypes -j 2
 
-all: testdviinterp testdvi testdvicairo tfm spline testspline_lib
+all: mlcairo
 
 testdviinterp:
 	ocamlbuild $(GENOPTIONS) -no-links testdviinterp.native
@@ -43,7 +43,7 @@ testtfm:
 mlcairo :
 	ocamlbuild $(GENOPTIONS) -I trunk -no-links mlcairo.native
 
-.PHONY : tfm dvicairo testdvi testdviinterp spline testspline_lib testwidth cairo
+.PHONY : tfm dvicairo testdvi testdviinterp spline testspline_lib testwidth mlcairo
 
 .SUFFIXES : .dvi .pdf
 .dvi.pdf: dvicairo

@@ -18,9 +18,10 @@ open Types
 open Hashcons
 module P = Point
 module M = Matrix
+module S = Spline_lib
+module Pi = Picture_lib
 
-let memoize f nb =
-  let memoize = Hashtbl.create nb in
+let memoize f memoize =
   fun arg -> 
     try
       Hashtbl.find memoize arg.tag
@@ -50,6 +51,16 @@ let point_of_position
       | `Lowleft -> {P.x=xmax;y=ymin}
       | `Lowright -> {P.x=xmin;y=ymin}
       | `Center -> {P.x = middle xmin xmax; P.y = middle ymin ymax }
+
+let num_memoize = Hashtbl.create 50
+let point_memoize = Hashtbl.create 50
+let metapath_memoize = Hashtbl.create 50
+let path_memoize = Hashtbl.create 50
+let picture_memoize = Hashtbl.create 50
+let command_memoize = Hashtbl.create 50
+
+let prelude = ref ""
+let set_prelude = (:=) prelude
 
 let rec num' = function
   | F f -> f
@@ -90,7 +101,7 @@ let rec num' = function
   | NLength p ->
       let p = path p in
       Spline_lib.length p
-and num n = memoize num' 50 n
+and num n = memoize num' num_memoize n
 and point' = function
   | PTPair (f1,f2) -> 
       let f1 = num f1 in
@@ -126,7 +137,7 @@ and point' = function
       let p = point p in
       let tr = transform tr in
       Point.transform tr p
-and point p = memoize point' 50 p
+and point p = memoize point' point_memoize p
 and knot k =
   match k.Hashcons.node with
     | { knot_in = d1 ; knot_p = p ; knot_out = d2 } ->
@@ -165,7 +176,7 @@ and metapath' = function
       Spline_lib.Metapath.append p1 j p2
   | MPAKnot k -> Spline_lib.Metapath.start (knot k)
   | MPAofPA p -> Spline_lib.Metapath.from_path (path p)
-and metapath p = memoize metapath' 50 p
+and metapath p = memoize metapath' metapath_memoize p
 and path' = function
   | PAofMPA p -> Spline_lib.Metapath.to_path (metapath p)
   | MPACycle (d,j,p) ->
@@ -207,20 +218,22 @@ and path' = function
   | PAQuarterCircle -> Spline_lib.Approx.quartercircle ()
   | PAHalfCircle -> Spline_lib.Approx.halfcirle ()
   | PAFullCircle -> Spline_lib.Approx.fullcircle ()
-and path p = memoize path' 50 p
+and path p = memoize path' path_memoize p
 and picture' = function
   | PITransformed (p,tr) ->
       let tr = transform tr in
       let pic = picture p in
       Picture_lib.transform tr pic
-  | PITex s -> (* TODO *)assert false 
+  | PITex s -> 
+      let tex = List.hd (Gentex.create !prelude [s]) in
+      Picture_lib.tex tex
   | PIMake c -> command c
   | PIClip (pic,pth) ->
       let pic = picture pic in
       let pth = path pth in
       Picture_lib.clip pic pth
 
-and picture p = memoize picture' 50 p
+and picture p = memoize picture' picture_memoize p
 and transform t = 
   match t.Hashcons.node with
   | TRRotated f -> Matrix.rotation f
@@ -256,10 +269,9 @@ and dash_pattern o =
 and command' = function
   | CDraw (p, c, pe, dsh) ->
       let p = path p in
-      (* TODO *)
-(*       let pe = (option_compile pen) pe in *)
+      let pe = (option_compile pen) pe in
       let dsh = (option_compile dash) dsh in
-      Picture_lib.stroke_path p c None dsh
+      Picture_lib.stroke_path p c pe dsh
   | CDrawArrow (p, color, pe, dsh) -> assert false
   | CDrawPic p -> picture p
   | CFill (p, c) -> 
@@ -294,17 +306,15 @@ and spec = function
   | `Width n -> `Width (num n)
   | `Inside (n1,n2) -> `Inside (num n1, num n2)
   | `None -> `None
-and pen p = (* TODO *) assert false
-(*
-    match p.Hashcons.node with
-  | PenCircle -> Picture_lib.PenCircle, Matrix.identity
-  | PenSquare -> Picture_lib.PenSquare, Matrix.identity
-  | PenFromPath p -> 
-      Picture_lib.PenFromPath (path p), Matrix.identity
-  | PenTransformed (p, tr) ->
-      let p, trp = pen p in
-      let tr = Matrix.multiply (transform tr) trp in
-        p, tr
-*)
+and pen p = 
+  (* TODO : the bounding box is not aware of the pen size *)
+  match p.Hashcons.node with
+    | PenCircle -> Matrix.identity
+    | PenSquare -> (*TODO not with cairo...*)assert false
+        (*Picture_lib.PenSquare*)
+    | PenFromPath p -> (*TODO : very hard*)assert false
+        (*Picture_lib.PenFromPath (path p)*)
+    | PenTransformed (p, tr) ->
+        Matrix.multiply (transform tr) (pen p)
 
-and command c = memoize command' 50 c
+and command c = memoize command' command_memoize c

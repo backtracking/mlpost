@@ -19,6 +19,7 @@ let create_pdf = create Cairo_pdf.surface_create_for_channel
 
 
 let emit_gen create fname fig = 
+  let fig = Compute.command fig in
   let ({x=xmin;y=ymin},{x=xmax;y=ymax}) = Picture_lib.bounding_box fig in
   let height = ymax -. ymin in
   let width = xmax -. xmin in
