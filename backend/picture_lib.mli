@@ -1,8 +1,8 @@
 type point = Point.t
 type transform = Matrix.t
 type num = float
-type dash = point * num list
-type pen = transform option
+type dash = float * num list
+type pen = transform
 type color = Types.color
 
 type path = Spline_lib.path
@@ -15,8 +15,8 @@ type commands =
   | Transform of transform * commands
   | OnTop of commands list
   | Tex of tex
-  | Stroke_path of path * color * pen * dash
-  | Fill_path of path * color
+  | Stroke_path of path * color option * pen option * dash option 
+  | Fill_path of path * color option
   | Clip of commands  * path
   | ExternalImage of string * float * float
 
@@ -27,8 +27,9 @@ type id = int
 val content : t -> commands
 
 val tex : Gentex.t -> t
-val fill_path : path -> color -> t
-val stroke_path : path -> color -> pen -> dash -> t
+val fill_path : path -> color option -> t
+val stroke_path : path -> color option -> pen option -> dash option -> t
+val draw_point : point -> t
 val clip : t -> path -> t
 val external_image : string -> 
   [< `Exact of float * float
@@ -40,7 +41,8 @@ val interative : Spline_lib.path -> id -> t
 
 val on_top : t -> t -> t
 
-val transform : t -> Matrix.t -> t
+val empty : t
+val transform : Matrix.t -> t -> t
 val shift : t -> float -> float -> t
 val bounding_box : t -> point * point
 

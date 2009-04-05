@@ -7,8 +7,8 @@ let not_implemented s = raise (Not_implemented s)
 type transform = Matrix.t
 type num = float
 type point = Point.point
-type dash = point * num list
-type pen = transform option
+type dash = float * num list
+type pen = transform
 type color = Types.color
 
 type path = Spline_lib.path
@@ -27,8 +27,8 @@ type commands =
   | Transform of transform * commands
   | OnTop of commands list
   | Tex of tex
-  | Stroke_path of path * color * pen * dash
-  | Fill_path of path * color
+  | Stroke_path of path * color option * pen option * dash option
+  | Fill_path of path * color option
   | Clip of commands  * path
   | ExternalImage of string * float * float
 
@@ -38,6 +38,7 @@ and t = { fcl : commands;
 
 let content x = x.fcl
 
+let empty = { fcl = Empty; fb = Spline_lib.Epure.empty ; fi = IntEmpty }
 let tex t = {fcl = Tex t;
              fb = Spline_lib.Epure.of_bounding_box (Gentex.bounding_box t);
              fi = IntEmpty}
@@ -47,6 +48,8 @@ let fill_path p c = {fcl = Fill_path (p,c);
 let stroke_path p c pen d = {fcl= Stroke_path (p,c,pen,d);
                              fb = Spline_lib.Epure.of_path p;
                              fi = IntEmpty}
+
+let draw_point p = stroke_path (Spline_lib.create p p p p) None None None
 
 let clip p path = {fcl= Clip (p.fcl,path);
                    fb = Spline_lib.Epure.of_path path; 
@@ -86,11 +89,11 @@ let on_top t1 t2 = {fcl = OnTop [t1.fcl;t2.fcl];
                     fb = Spline_lib.Epure.union (t1.fb) (t2.fb);
                     fi = IntOnTop (t1.fi,t2.fi)}
 
-let transform t m = {fcl = Transform (m,t.fcl);
-                     fb = Spline_lib.Epure.transform t.fb m;
+let transform m t = {fcl = Transform (m,t.fcl);
+                     fb = Spline_lib.Epure.transform m t.fb;
                      fi = IntTransform (t.fi,m)}
 
-let shift t w h = transform t (Matrix.translation w h)
+let shift t w h = transform (Matrix.xy_translation w h) t
 let bounding_box t = Spline_lib.Epure.bounding_box t.fb
 
 module Cairo =
@@ -103,9 +106,13 @@ struct
     | TRANSPARENT (a,CMYK _) -> not_implemented "cmyk"
     | TRANSPARENT (a,(Gray g)) -> color cr (TRANSPARENT (a,RGB (g,g,g)))
 
+  let color_option cr = function
+    | None -> ()
+    | Some c -> color cr c
+
   let dash cr = function
-    | _,[] -> ();
-    | _ -> not_implemented "dash"
+    | None | Some (_,[]) -> ();
+    | Some (f,l) -> Cairo.set_dash cr (Array.of_list l) f
 
   let rec draw_aux cr = function
     | Empty -> ()
@@ -118,7 +125,7 @@ struct
     | Tex t -> Gentex.draw cr t
     | Stroke_path (path,c,pen,d) ->
         Cairo.save cr;
-        color cr c;
+        color_option cr c;
         Spline_lib.Cairo.draw cr path;
         dash cr d;
         (match pen with
@@ -128,7 +135,7 @@ struct
         Cairo.restore cr
     | Fill_path (path,c)-> 
         Cairo.save cr;
-        color cr c;
+        color_option cr c;
         Spline_lib.Cairo.draw cr path;
         Cairo.fill cr;
         Cairo.restore cr

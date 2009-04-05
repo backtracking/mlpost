@@ -33,26 +33,23 @@ let memoize f nb =
 let nop = Figure_lib.nop
 
 let option_compile f = function
-  | None -> None, nop
-  | Some obj -> 
-      let obj, c = f obj in
-        Some obj, c
+  | None -> None
+  | Some obj -> Some (f obj)
 
 let middle x y = (x/.2.)+.(y/.2.)
 
-let point_of_position (xmin,ymin,xmax,ymax) = function
-  | `Top -> {P.x=middle xmin xmax;
-          y=ymax}
-  | `Bottom -> {P.x=middle xmin xmax;
-             y=ymin}
-  | `Left -> {P.x=xmax;
-          y=middle ymin ymax}
-  | `Right -> {P.x=xmin;
-          y=middle ymin ymax}
-  | `Upleft -> {P.x=xmax;y=ymax}
-  | `Upright -> {P.x=xmin;y=ymax}
-  | `Lowleft -> {P.x=xmax;y=ymin}
-  | `Lowright -> {P.x=xmin;y=ymin}
+let point_of_position 
+  ({ P.x = xmin; y = ymin}, { P.x = xmax; y = ymax}) = 
+    function
+      | `Top -> {P.x=middle xmin xmax; y=ymax}
+      | `Bot -> {P.x=middle xmin xmax; y=ymin}
+      | `Left -> {P.x=xmax; y=middle ymin ymax}
+      | `Right -> {P.x=xmin; y=middle ymin ymax}
+      | `Upleft -> {P.x=xmax;y=ymax}
+      | `Upright -> {P.x=xmin;y=ymax}
+      | `Lowleft -> {P.x=xmax;y=ymin}
+      | `Lowright -> {P.x=xmin;y=ymin}
+      | `Center -> {P.x = middle xmin xmax; P.y = middle ymin ymax }
 
 let rec num' = function
   | F f -> f
@@ -93,8 +90,8 @@ let rec num' = function
   | NLength p ->
       let p = path p in
       Spline_lib.length p
-and num = memoize num' 50
-and point' : Types.point_node -> Point.t  = function
+and num n = memoize num' 50 n
+and point' = function
   | PTPair (f1,f2) -> 
       let f1 = num f1 in
       let f2 = num f2 in 
@@ -124,28 +121,12 @@ and point' : Types.point_node -> Point.t  = function
       Point.rotated f p1
   | PTPicCorner (pic, corner) ->
       let p = picture pic in
-      let pmin ,pmax = Picture_lib.bounding_box p in
-      begin
-        match corner with
-          | `Top -> {P.x=middle pmin.P.x pmax.P.x;
-                  y=pmin.P.y}
-          | `Bot -> {P.x=middle pmin.P.x pmax.P.x;
-                  y=pmax.P.y}
-          | `Left -> {P.x=pmin.P.x;
-                  y=middle pmin.P.y pmax.P.y}
-          | `Right -> {P.x=pmax.P.x;
-                  y=middle pmin.P.y pmax.P.y}
-          | `Upleft -> {P.x=pmin.P.x;y=pmin.P.y}
-          | `Upright -> {P.x=pmax.P.x;y=pmin.P.y}
-          | `Lowleft -> {P.x=pmin.P.x;y=pmax.P.y}
-          | `Lowright -> {P.x=pmax.P.x;y=pmax.P.y}
-          | `Ctr -> Point.add_half pmin pmax
-      end
+      point_of_position (Picture_lib.bounding_box p) corner
   | PTTransformed (p,tr) ->
       let p = point p in
       let tr = transform tr in
       Point.transform tr p
-and point = memoize point' 50
+and point p = memoize point' 50 p
 and knot k =
   match k.Hashcons.node with
     | { knot_in = d1 ; knot_p = p ; knot_out = d2 } ->
@@ -184,7 +165,7 @@ and metapath' = function
       Spline_lib.Metapath.append p1 j p2
   | MPAKnot k -> Spline_lib.Metapath.start (knot k)
   | MPAofPA p -> Spline_lib.Metapath.from_path (path p)
-and metapath = memoize metapath' 50
+and metapath p = memoize metapath' 50 p
 and path' = function
   | PAofMPA p -> Spline_lib.Metapath.to_path (metapath p)
   | MPACycle (d,j,p) ->
@@ -226,33 +207,95 @@ and path' = function
   | PAQuarterCircle -> Spline_lib.Approx.quartercircle ()
   | PAHalfCircle -> Spline_lib.Approx.halfcirle ()
   | PAFullCircle -> Spline_lib.Approx.fullcircle ()
-and path = memoize path' 50
+and path p = memoize path' 50 p
 and picture' = function
   | PITransformed (p,tr) ->
       let tr = transform tr in
       let pic = picture p in
-      Picture_lib.transform pic tr
-  | PITex s -> Picture_lib.tex s
+      Picture_lib.transform tr pic
+  | PITex s -> (* TODO *)assert false 
   | PIMake c -> command c
   | PIClip (pic,pth) ->
       let pic = picture pic in
       let pth = path pth in
       Picture_lib.clip pic pth
 
-and picture pic = memoize picture' 50
+and picture p = memoize picture' 50 p
 and transform t = 
   match t.Hashcons.node with
-  | TRRotated f -> Matrix.rotation (num f)
-  | TRScaled f -> Matrix.scaled (num f)
+  | TRRotated f -> Matrix.rotation f
+  | TRScaled f -> Matrix.scale (num f)
   | TRSlanted f -> Matrix.slanted (num f)
   | TRXscaled f -> Matrix.xscaled (num f)
   | TRYscaled f -> Matrix.yscaled (num f)
-  | TRShifted p -> Matrix.shifted (point p)
+  | TRShifted p -> Matrix.translation (point p)
   | TRZscaled p -> Matrix.zscaled (point p)
   | TRReflect (p1,p2) -> Matrix.reflect (point p1) (point p2)
-  | TRRotateAround (p,f) -> Matrix.rotate_around (point p) (num f)
+  | TRRotateAround (p,f) -> Matrix.rotate_around (point p) f
 
-and pen p = 
+and dash d = 
+    match d.Hashcons.node with
+  | DEvenly -> Figure_lib.Dash.line
+  | DWithdots -> Figure_lib.Dash.dots
+  | DScaled (f, d) -> 
+      let d = dash d in
+      Figure_lib.Dash.scale f d
+  | DShifted (p,d) ->
+      let p = point p in
+      let d = dash d in
+      Figure_lib.Dash.shifted p.P.x d
+  | DPattern l ->
+      let l = List.map dash_pattern l in
+      Figure_lib.Dash.pattern l
+
+and dash_pattern o = 
+    match o.Hashcons.node with
+      | On f -> Figure_lib.Dash.On (num f)
+      | Off f -> Figure_lib.Dash.Off (num f)
+	
+and command' = function
+  | CDraw (p, c, pe, dsh) ->
+      let p = path p in
+      (* TODO *)
+(*       let pe = (option_compile pen) pe in *)
+      let dsh = (option_compile dash) dsh in
+      Picture_lib.stroke_path p c None dsh
+  | CDrawArrow (p, color, pe, dsh) -> assert false
+  | CDrawPic p -> picture p
+  | CFill (p, c) -> 
+      let p = path p in
+      Picture_lib.fill_path p c
+  | CSeq l ->
+      begin match l with
+      | [] -> Picture_lib.empty
+      | [x] -> command x
+      | (x::r) -> 
+          List.fold_left 
+          (fun acc c -> Picture_lib.on_top acc (command c)) (command x) r
+      end
+  | CDotLabel (pic, pos, pt) -> 
+      let pic = picture pic in
+      let pt = point pt in
+      let tr = Matrix.translation
+        (Point.sub (point_of_position (Picture_lib.bounding_box pic) pos) pt) in
+      Picture_lib.on_top (Picture_lib.draw_point pt)
+        (Picture_lib.transform tr pic)
+  | CLabel (pic, pos ,pt) -> 
+      let pic = picture pic in
+      let pt = point pt in
+      let tr = Matrix.translation
+        (Point.sub (point_of_position (Picture_lib.bounding_box pic) pos) pt) in
+      Picture_lib.transform tr pic
+  | CExternalImage (filename,sp) -> 
+      Picture_lib.external_image filename (spec sp)
+and spec = function
+  | `Exact (n1,n2) -> `Exact (num n1, num n2)
+  | `Height n -> `Height (num n)
+  | `Width n -> `Width (num n)
+  | `Inside (n1,n2) -> `Inside (num n1, num n2)
+  | `None -> `None
+and pen p = (* TODO *) assert false
+(*
     match p.Hashcons.node with
   | PenCircle -> Picture_lib.PenCircle, Matrix.identity
   | PenSquare -> Picture_lib.PenSquare, Matrix.identity
@@ -260,67 +303,8 @@ and pen p =
       Picture_lib.PenFromPath (path p), Matrix.identity
   | PenTransformed (p, tr) ->
       let p, trp = pen p in
-      let tr = Matrix.product (transform tr) trp in
+      let tr = Matrix.multiply (transform tr) trp in
         p, tr
+*)
 
-and dash d = 
-    match d.Hashcons.node with
-  | DEvenly -> Figure_lib.Dash.line [3.;3.]
-  | DWithdots -> Figure_lib.Dash.dots [5.]
-  | DScaled (f, d) -> 
-      let d = dash d in
-      Figure_lib.Dash.scale d f
-  | DShifted (p,d) ->
-      let p = point p in
-      let d = dash d in
-      Figure_lib.Dash.shifted d p.P.x
-  | DPattern l ->
-      let l = List.map dash_pattern l in
-      Figure_lib.Dash.pattern l
-
-and dash_pattern o = 
-    match o.Hashcons.node with
-      | On f -> 
-	  let f1, c1 = num f in Figure_lib.Dash.On f1
-      | Off f -> 
-	  let f1, c1 = num f in Figure_lib.Dash.Off f1
-	
-and command' = function
-  | CDraw (p, color, pe, dsh) ->
-      let p = path p in
-      let pe = (option_compile pen) pe in
-      let dsh = (option_compile dash) dsh in
-      Figure_lib.draw_path p pe dsh
-  | CDrawArrow (p, color, pe, dsh) -> assert false
-  | CDrawPic p -> picture p
-  | CFill (p, c) -> 
-      let p = path p in
-      Figure_lib.fill_path p c
-  | CSeq l ->
-      List.fold_left Figure_lib.on_top (command l)
-  | CDotLabel (pic, pos, pt) -> 
-      let pic = picture pic in
-      let pt = point pt in
-      let tr = Matrix.translation
-        (Point.sub (point_of_position (Picture_lib.bounding_box pic)) pt) in
-      Figure_lib.on_top (Figure_lib.draw_point pt)
-        (Figure_lib.transform pic tr)
-  | CLabel (pic, pos ,pt) -> 
-      let pic = picture pic in
-      let pt = point pt in
-      let tr = Matrix.translation
-        (Point.sub (point_of_position (Picture_lib.bounding_box pic)) pt) in
-      Figure_lib.transform pic tr
-  | CExternalImage (filename,spec) -> 
-      Figure_lib.external_image filename spec
-and command = memoize command' 50
-
-let reset () =
-  D.NM.clear D.num_map;
-  D.NM.clear num_names;
-  D.PtM.clear point_names;
-  D.PtM.clear D.point_map;
-  D.PthM.clear D.path_map;
-  D.PthM.clear path_names;
-  D.PicM.clear D.picture_map;
-  D.PicM.clear picture_names
+and command c = memoize command' 50 c
