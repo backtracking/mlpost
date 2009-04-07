@@ -308,7 +308,8 @@ let sharing =
       )
       (node (tex "g") [leaf (tex "h")])
   in
-  seq [ draw tree;
+  let tree = to_box tree in
+  seq [ Box.draw tree;
     box_arrow (get "h" tree) (get "f" tree);
     box_arrow (get "g" tree) (get "d" tree);
       ]
@@ -332,7 +333,7 @@ let sharingcompile =
      ])
   in
   let arrow x y = box_arrow (get x b) (get y b) in
-  seq [draw b; arrow "tree" "code" ]
+  seq [Box.draw b; arrow "tree" "code" ]
             
 
 let stages = 
@@ -346,7 +347,7 @@ let stages =
     box "ps" (vbox ~stroke:(Some Color.black) ~style:RoundRect ~dx ~dy
              [tex' "figure.1"; tex' "(\\postscript)"]) in
   let all = hbox ~padding:(cm 3.5) [fml; fmp; ps ] in
-  seq [ draw all;
+  seq [ Box.draw all;
     box_labelbox_arrow ~pos:`Top 
       (vbox [tex "\\ocaml"; arrowpic; tex' "compiler \\& ex\\'ecuter"])
       (get "fml" all) (get "fmp" all);
@@ -356,16 +357,16 @@ let stages =
   ]
 
 let simple = 
-  seq [ draw (tex "\\LaTeX");
-    draw (shift (Point.pt (cm 1., zero)) (circle (empty ()))) ]
+  seq [ Box.draw (tex "\\LaTeX");
+    Box.draw (shift (Point.pt (cm 1., zero)) (circle (empty ()))) ]
 
 let align = 
-  seq [ draw
+  seq [ Box.draw
     (hbox ~padding:(cm 1.) [tex "\\LaTeX"; circle (empty ())]) ]
 
 let persistance = 
   let b = hbox ~padding:(cm 1.) [tex "\\LaTeX"; circle (empty ())] in
-  draw (vbox [b; set_stroke Color.black b; b])
+  Box.draw (vbox [b; set_stroke Color.black b; b])
 
 
 (* Bresenham (JCF) *)
@@ -515,7 +516,7 @@ let sous_typage =
   in
   seq [group ["Left"; "Center"; "Right"] Color.red;
        group ["Top"; "Center"; "Bot"] Color.blue;
-       draw b;
+       Box.draw b;
        
   ]
 

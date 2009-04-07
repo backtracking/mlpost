@@ -1,6 +1,8 @@
 
 all: hermann-pp.pdf
 
+PDFLATEX:=pdflatex -interaction="errorstopmode"
+
 WWW=/users/demons/filliatr/WWW
 
 main-pp.pdf: main-pp.tex biblio.bib figures.mp figmp.mps yannick1.mps florence.mps
@@ -12,12 +14,12 @@ main-pp.pdf: main-pp.tex biblio.bib figures.mp figmp.mps yannick1.mps florence.m
 	pdflatex $<
 
 hermann-pp.pdf: hermann-pp.tex biblio.bib figures.mp figmp.mps yannick1.mps florence.mps
-	pdflatex $<
-	bibtex hermann-pp
-	pdflatex $<
-	bibtex hermann-pp
-	pdflatex $<
-	pdflatex $<
+	$(PDFLATEX) $<
+#	bibtex hermann-pp
+#	$(PDFLATEX) $<
+#	bibtex hermann-pp
+#       $(PDFLATEX) $<
+#       $(PDFLATEX) $<
 
 slides.pdf: slides.tex figures.mp alt_ergo.mp
 	pdflatex $<
