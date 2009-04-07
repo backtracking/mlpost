@@ -72,7 +72,7 @@ let add_end p c d =
   let rec aux p = 
     match p with
       | [] -> assert false (* a path always have one element *)
-      | [{sc=mb;sd=a;smax=smax} as e] -> [e;{sa = a;sb = (double a) -/ mb;
+      | [{sc=mb;sd=a;smax=smax} as e] -> [e;{sa = a;sb = 2. */ a -/ mb;
                                              sc = c;sd = d;smin=smax;smax=smax+.1.; start = false}]
       | a::l -> a::(aux l) in
   {p with pl=aux p.pl}
@@ -180,21 +180,21 @@ let is_intersect_precise a b =
 let bisect a =
   let b = a in
   (*D\leftarrow (C+D)/2*)
-  let b = {b with sd = add_half b.sd b.sc} in
+  let b = {b with sd = middle b.sd b.sc} in
   (*C\leftarrow (B+C)/2, D\leftarrow (C+D)/2*)
-  let b = {b with sc = add_half b.sc b.sb} in
-  let b = {b with sd = add_half b.sd b.sc} in
+  let b = {b with sc = middle b.sc b.sb} in
+  let b = {b with sd = middle b.sd b.sc} in
   (*B\leftarrow (A+B)/2, C\leftarrow (B+C)/2, D\leftarrow(C+D)/2*)
-  let b = {b with sb = add_half b.sb b.sa} in
-  let b = {b with sc = add_half b.sc b.sb} in
-  let b = {b with sd = add_half b.sd b.sc} in
+  let b = {b with sb = middle b.sb b.sa} in
+  let b = {b with sc = middle b.sc b.sb} in
+  let b = {b with sd = middle b.sd b.sc} in
   let c = a in 
-  let c = {c with sa = add_half c.sa c.sb} in
-  let c = {c with sb = add_half c.sb c.sc} in
-  let c = {c with sa = add_half c.sa c.sb} in
-  let c = {c with sc = add_half c.sc c.sd} in
-  let c = {c with sb = add_half c.sb c.sc} in
-  let c = {c with sa = add_half c.sa c.sb} in
+  let c = {c with sa = middle c.sa c.sb} in
+  let c = {c with sb = middle c.sb c.sc} in
+  let c = {c with sa = middle c.sa c.sb} in
+  let c = {c with sc = middle c.sc c.sd} in
+  let c = {c with sb = middle c.sb c.sc} in
+  let c = {c with sa = middle c.sa c.sb} in
   (b,c)
 
 type graph = {gt1 : int;
