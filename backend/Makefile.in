@@ -37,13 +37,10 @@ OCAMLWIN32 = @OCAMLWIN32@
 EXE = @EXE@
 LIBEXT = @LIBEXT@
 OBJEXT = @OBJEXT@
-ifeq "@CAIRO@" "yes"
-INCLUDES = -I gui -I backend
-else
-INCLUDES = -I gui
-endif
-BFLAGS = -dtypes $(INCLUDES) -I +threads @INCLUDEGTK2@ 
-OFLAGS = @BASICOFLAGS@ -dtypes $(INCLUDES) @FORPACK@ -I +threads @INCLUDEGTK2@
+
+INCLUDES = @INCLUDECAIRO@ -I ..
+BFLAGS = -dtypes $(INCLUDES)
+OFLAGS = @BASICOFLAGS@ -dtypes $(INCLUDES)
 
 # main target
 #############
@@ -54,44 +51,12 @@ MLPOSTVERSION=@MLPOSTVERSION@
 TESTS = handbookgraphs.cmx othergraphs.cmx tests.cmx
 TOOL = tool.$(OCAMLBEST)
 
-all: byte $(OCAMLBEST) $(TOOL)
+all: icairost.cmo icairost.cmx
 
 check: byte $(OCAMLBEST) $(TOOL) $(TESTS) check-examples
 
 # bytecode and native-code compilation
 ######################################
-
-CMO := misc.cmo name.cmo compiled_types.cmo print.cmo hashcons.cmo \
-       types.cmo num.cmo point.cmo duplicate.cmo compile.cmo	   \
-       transform.cmo color.cmo metaPath.cmo path.cmo picture.cmo   \
-       dash.cmo pen.cmo command.cmo shapes.cmo box.cmo arrow.cmo   \
-       helpers.cmo diag.cmo tree.cmo radar.cmo plot.cmo hist.cmo   \
-       legend.cmo scan_prelude.cmo metapost_tool.cmo metapost.cmo  \
-       generate.cmo cairost.cmo
-
-CMX := $(CMO:.cmo=.cmx)
-
-BACKENDCMO := tfm.cmo dvi.cmo map_parser.cmo pfb_parser.cmo fonts.cmo \
-	      dviinterp.cmo dev_save.cmo dvicairo.cmo point_lib.cmo   \
-	      matrix.cmo spline_lib.cmo gentex.cmo picture_lib.cmo    \
-	      compute.cmo icairost.cmo
-
-BACKENDCMX := $(BACKENDCMO:.cmo=.cmx)
-
-CAIROSTCMO := $(addprefix backend/,$(BACKENDCMO))
-
-CAIROSTCMX := $(CAIROSTCMO:.cmo=.cmx)
-
-ifeq "@CAIRO@" "yes"
-CMOALL := $(CAIROSTCMO) $(CMO)
-else
-CMOALL := $(CMO)
-endif
-
-CMXALL := $(CMO:.cmo=.cmx)
-
-CMA := mlpost.cma
-CMXA := mlpost.cmxa
 
 HANDBOOKCMO := handbookgraphs.cmo
 OTHERCMO := othergraphs.cmo
@@ -101,74 +66,10 @@ OTHERCMX := $(OTHERCMO:.cmo=.cmx)
 
 $(HANDBOOKCMX) $(OTHERCMX): $(CMXA)
 
-GENERATED = version.ml scan_prelude.ml gui/glexer.ml cairost.ml cairost_sig.ml
+GENERATED = pfb_parser.ml pfb_parser.mli pfb_lexer.ml map_parser.ml map_parser.mli map_lexer.ml
 
 byte: $(CMA)
 opt: $(CMXA)
-
-$(CMA): mlpost.cmo
-	$(OCAMLC) -a $(BFLAGS) -o $@ $^
-
-$(CMXA): mlpost.cmx
-	$(OCAMLOPT) -a $(OFLAGS) -o $@ $^
-
-mlpost.cmo: mlpost.cmi
-mlpost.cmo: $(CMO) backend_cmo
-	$(OCAMLC) $(INCLUDES) -pack -o $@ $(CMOALL)
-
-mlpost.cmx: mlpost.cmi
-mlpost.cmx: $(CMX) backend_cmx
-	$(OCAMLOPT) $(INCLUDES) -pack -o $@ $(CMXALL)
-
-cairost.ml: cairost_yes.ml cairost_no.ml
-	cp -f cairost_@CAIRO@.ml $@
-cairost_sig.ml: cairost_sig_yes.ml cairost_sig_no.ml
-	cp -f cairost_sig_@CAIRO@.ml $@
-
-ifeq "@CAIRO@" "yes"
-backend_cmo:
-	make -C backend .depend $(BACKENDCMO)
-
-backend_cmx:
-	make -C backend .depend $(BACKENDCMX)
-else
-backend_cmo:
-
-backend_cmx:
-
-endif
-TOOLCMO= version.cmo scan_prelude.cmo metapost_tool.cmo tool.cmo
-TOOLCMX := $(TOOLCMO:.cmo=.cmx)
-
-tool.byte: $(TOOLCMO)
-	$(OCAMLC) -o $@ unix.cma $^
-
-tool.opt: $(TOOLCMX)
-	$(OCAMLOPT) -o $@ unix.cmxa $^
-
-tests: $(CMXA) tests.ml
-	$(OCAMLOPT) -o tests.exe unix.cmxa $(CMXA) tests.ml
-	./tests.exe
-	make -C test tests
-	gv test/tests.ps
-
-testbox: $(CMXA) testbox.ml
-	$(OCAMLOPT) -o testbox.exe unix.cmxa $(CMXA) testbox.ml
-	./testbox.exe
-	make -C test testbox
-	gv test/testbox.ps
-
-tests.pdf: $(CMXA) tests.ml
-	$(OCAMLOPT) -o tests.exe unix.cmxa $(CMXA) tests.ml
-	./tests.exe
-	make -C test tests.pdf
-	xpdf test/tests.pdf
-
-
-tests.byte: $(CMA) tests.ml
-	ocaml unix.cma $(CMA) tests.ml
-	make -C test tests
-	gv test/tests.ps
 
 handbook: $(CMXA) handbookgraphs.ml
 	$(OCAMLOPT) -o handbook.exe unix.cmxa $(CMXA) handbookgraphs.ml
@@ -207,29 +108,11 @@ check-examples: mlpost.cma tool.opt
 	$(MAKEEXAMPLES) label.dummy
 	make -C multi-examples
 
-example-cairo: mlpost.cma tool.opt
-	$(MAKEEXAMPLES) cairo_test.dummy
-
 examples:
 	$(MAKEEXAMPLES)
 
 examples-html:
 	$(MAKEEXAMPLES) html
-
-# GUI
-
-.PHONY: gui
-
-gui: gui/gmlpost.opt
-
-GUICMO = gui/glexer.cmo gui/gmlpost.cmo
-GUICMX := $(GUICMO:.cmo=.cmx)
-
-gui/gmlpost.opt: $(GUICMX)
-	$(OCAMLOPT) $(OFLAGS) -o $@ unix.cmxa threads.cmxa lablgtk.cmxa gtkThread.cmx lablgnomecanvas.cmxa $^
-
-gui/gmlpost.byte: $(GUICMO)
-	$(OCAMLC) $(BFLAGS) -o $@ unix.cma lablgtk.cma threads.cma gtkThread.cmo $^
 
 #version.ml: Makefile
 #	echo "let version = \""$(MLPOSTVERSION)"\"" > version.ml
@@ -338,6 +221,20 @@ SOURCES =
 $(NAME).tex: $(SOURCES)
 	$(OCAMLWEB) -o $@ $^
 
+# specific rules
+################
+PP= -pp "camlp4o @INCLUDECAIRO@ bitstring.cma bitstring_persistent.cma pa_bitstring.cmo"
+
+dvi.cmo : dvi.ml
+	$(OCAMLC) $(PP) -c $(BFLAGS) -o dvi.cmo dvi.ml
+dvi.cmx : dvi.ml
+	$(OCAMLOPT) $(PP) -c $(OFLAGS) -o dvi.cmx dvi.ml
+
+tfm.cmo : tfm.ml
+	$(OCAMLC) $(PP) -c $(BFLAGS) -o tfm.cmo tfm.ml
+tfm.cmx : tfm.ml
+	$(OCAMLOPT) $(PP) -c $(OFLAGS) -o tfm.cmx tfm.ml
+
 # generic rules
 ###############
 
@@ -394,11 +291,11 @@ ocamlwizard:
 # Makefile is rebuilt whenever Makefile.in or configure.in is modified
 ######################################################################
 
-backend/Makefile Makefile META version.ml: backend/Makefile.in Makefile.in META.in version.ml.in config.status
-	./config.status
+Makefile : Makefile.in ../config.status
+	../config.status
 
 config.status: configure
-	./config.status --recheck
+	../config.status --recheck
 
 configure: configure.in
 	autoconf 
@@ -410,8 +307,7 @@ clean::
 	rm -f *.cm[iox] *.o *~ *.annot
 	rm -f $(GENERATED) parser.output
 	rm -f $(NAME).cma $(NAME).cmxa $(NAME).a
-	rm -f *.aux *.log $(NAME).tex $(NAME).dvi $(NAME).ps
-	rm -f *.opt *.byte test.dvi test.ps *.exe
+	rm -f *.opt *.byte *.exe
 
 cleaner:: clean
 	make -C test clean
@@ -419,16 +315,18 @@ cleaner:: clean
 	make -C www clean
 	make -C doc clean
 	make -C examples clean
-	make -C backend clean
 
 dist-clean distclean:: clean
-	rm -f Makefile config.cache config.log config.status META version.ml
+	rm -f Makefile
 
 # depend
 ########
 
-.depend depend:: $(GENERATED)
+depend :: .depend
+
+.depend:: $(GENERATED)
 	rm -f .depend
-	$(OCAMLDEP) $(INCLUDES) *.ml *.mli gui/*.mli gui/*.ml > .depend
+	$(OCAMLDEP) $(INCLUDES) *.mly *.mll $(filter-out dvi.ml tfm.ml,$(echo *.ml)) > .depend
 
 include .depend
+

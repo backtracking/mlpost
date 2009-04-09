@@ -3,11 +3,11 @@ exception Not_implemented of string
 let not_implemented s = raise (Not_implemented s)
 
 
-type point = Point.point
+type point = Point_lib.point
 
 let id x = x
-open Point
-open Point.Infix
+open Point_lib
+open Point_lib.Infix
 
 let rec one_to_one f a = function
   | [] -> a

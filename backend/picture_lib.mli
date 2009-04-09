@@ -1,4 +1,4 @@
-type point = Point.t
+type point = Point_lib.t
 type transform = Matrix.t
 type num = float
 type dash = float * num list
@@ -54,4 +54,19 @@ sig
   val draw : Cairo.t -> t -> unit
   val where : Cairo.t -> t -> float * float -> id list
   val move : Cairo.t -> t -> id -> Point.t -> Point.t
+end
+
+
+module Dash :
+  sig
+    type t = dash
+    type input_dash =
+      | On of float
+      | Off of float
+
+    val shifted : float -> t -> t
+    val line : t
+    val dots : t
+    val pattern : input_dash list -> t
+    val scale : float -> t -> t
 end

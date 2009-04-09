@@ -1,4 +1,4 @@
-open Point
+open Point_lib
 type t = Cairo.matrix =
   { xx : float; yx : float; xy : float; yy : float; x0 : float; y0 : float; }
 

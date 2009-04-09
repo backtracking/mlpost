@@ -1,8 +1,8 @@
-open Point
+open Point_lib
 open Format
 let info = ref false
 
-let create create_surface draw height width out_file =
+let create create_surface (draw:Cairo.t -> unit) height width out_file =
   if !info then printf "height = %f, width = %f@." height width;
   let oc = open_out out_file in
   let s = create_surface oc ~width_in_points:width ~height_in_points:height in
@@ -14,9 +14,8 @@ let create create_surface draw height width out_file =
   close_out oc
 
 let create_ps = create Cairo_ps.surface_create_for_channel
-
 let create_pdf = create Cairo_pdf.surface_create_for_channel
-
+let create_svg = create Cairo_svg.surface_create_for_channel
 
 let emit_gen create fname fig = 
   let fig = Compute.command fig in
@@ -28,3 +27,8 @@ let emit_gen create fname fig =
 
 let emit_pdf = emit_gen create_pdf
 let emit_ps = emit_gen create_ps
+let emit_svg = emit_gen create_svg
+
+let emit_gtk gtk fig = failwith "not implemented"
+let emit_pdfs s figs = failwith "not implemented"
+let emit_png s f = failwith "not implemented"

@@ -2,3 +2,5 @@ let version = "@MLPOSTVERSION@"
 let date = "@TODAY@"
 let ocamlopt = "@OCAMLOPT@"
 let libdir = "@LIBDIR@"
+let includecairo = "@INCLUDECAIRO@"
+

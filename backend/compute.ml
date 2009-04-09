@@ -16,7 +16,7 @@
 
 open Types
 open Hashcons
-module P = Point
+module P = Point_lib
 module M = Matrix
 module S = Spline_lib
 module Pi = Picture_lib
@@ -31,7 +31,7 @@ let memoize f memoize =
           Hashtbl.add memoize arg.tag result;
           result
 
-let nop = Figure_lib.nop
+let nop = Picture_lib.empty
 
 let option_compile f = function
   | None -> None
@@ -118,25 +118,25 @@ and point' = function
   | PTAdd (p1,p2) -> 
       let p1 = point p1 in
       let p2 = point p2 in
-      Point.add p1 p2
+      P.add p1 p2
   | PTSub (p1,p2) ->
       let p1 = point p1 in
       let p2 = point p2 in
-        Point.sub p1 p2
+        P.sub p1 p2
   | PTMult (f,p) ->
       let f = num f in
       let p1 = point p in
-        Point.mult f p1
+        P.mult f p1
   | PTRotated (f,p) ->
       let p1 = point p in
-      Point.rotated f p1
+      P.rotated f p1
   | PTPicCorner (pic, corner) ->
       let p = picture pic in
       point_of_position (Picture_lib.bounding_box p) corner
   | PTTransformed (p,tr) ->
       let p = point p in
       let tr = transform tr in
-      Point.transform tr p
+      P.transform tr p
 and point p = memoize point' point_memoize p
 and knot k =
   match k.Hashcons.node with
@@ -248,23 +248,23 @@ and transform t =
 
 and dash d = 
     match d.Hashcons.node with
-  | DEvenly -> Figure_lib.Dash.line
-  | DWithdots -> Figure_lib.Dash.dots
+  | DEvenly -> Picture_lib.Dash.line
+  | DWithdots -> Picture_lib.Dash.dots
   | DScaled (f, d) -> 
       let d = dash d in
-      Figure_lib.Dash.scale f d
+      Picture_lib.Dash.scale f d
   | DShifted (p,d) ->
       let p = point p in
       let d = dash d in
-      Figure_lib.Dash.shifted p.P.x d
+      Picture_lib.Dash.shifted p.P.x d
   | DPattern l ->
       let l = List.map dash_pattern l in
-      Figure_lib.Dash.pattern l
+      Picture_lib.Dash.pattern l
 
 and dash_pattern o = 
     match o.Hashcons.node with
-      | On f -> Figure_lib.Dash.On (num f)
-      | Off f -> Figure_lib.Dash.Off (num f)
+      | On f -> Picture_lib.Dash.On (num f)
+      | Off f -> Picture_lib.Dash.Off (num f)
 	
 and command' = function
   | CDraw (p, c, pe, dsh) ->
@@ -289,14 +289,14 @@ and command' = function
       let pic = picture pic in
       let pt = point pt in
       let tr = Matrix.translation
-        (Point.sub (point_of_position (Picture_lib.bounding_box pic) pos) pt) in
+        (P.sub (point_of_position (Picture_lib.bounding_box pic) pos) pt) in
       Picture_lib.on_top (Picture_lib.draw_point pt)
         (Picture_lib.transform tr pic)
   | CLabel (pic, pos ,pt) -> 
       let pic = picture pic in
       let pt = point pt in
       let tr = Matrix.translation
-        (Point.sub (point_of_position (Picture_lib.bounding_box pic) pos) pt) in
+        (P.sub (point_of_position (Picture_lib.bounding_box pic) pos) pt) in
       Picture_lib.transform tr pic
   | CExternalImage (filename,sp) -> 
       Picture_lib.external_image filename (spec sp)

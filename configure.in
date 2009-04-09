@@ -217,7 +217,12 @@ if test -n "$CAIROLIB" -a -n "$BITSTRINGLIB"; then
    INCLUDECAIRO="-I $CAIROLIB -I $BITSTRINGLIB"
 else
    CAIRO=no
+   INCLUDECAIRO=""
 fi
+
+#TEMPORAIRE
+CAIRO=no
+INCLUDECAIRO=""
 
 # checking for lablgtk2
 if test "$OCAMLFIND" == yes; then
@@ -279,7 +284,8 @@ echo "  Cairo support          : "$CAIRO
 echo "---------------------------------------------------"
 
 # Finally create the Makefile from Makefile.in
-AC_OUTPUT(Makefile META version.ml)
+AC_OUTPUT(Makefile META version.ml backend/Makefile)
 chmod a-w Makefile
+chmod a-w backend/Makefile
 chmod a-w META
 chmod a-w version.ml

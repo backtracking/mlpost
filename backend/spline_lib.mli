@@ -1,4 +1,4 @@
-type point = Point.point
+type point = Point_lib.point
 type path
 type abscissa = float
 

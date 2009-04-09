@@ -37,6 +37,8 @@ RADAROUTFILES := $(RADARPNGFILES:.png=.1)
 HTMLFILES := boxes.ml.html paths.ml.html misc.ml.html tree.ml.html \
              label.ml.html automata.ml.html hist.ml.html radar.ml.html
 
+CAIRO := cairo_test.ml
+
 MLPOST:=mlpost -v -ps
 
 all: $(BOXPNGFILES) $(PATHPNGFILES) $(MISCPNGFILES) \
