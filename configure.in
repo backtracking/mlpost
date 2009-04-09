@@ -279,8 +279,7 @@ echo "  Cairo support          : "$CAIRO
 echo "---------------------------------------------------"
 
 # Finally create the Makefile from Makefile.in
-AC_OUTPUT(Makefile META version.ml backend/trunk.Makefile)
+AC_OUTPUT(Makefile META version.ml)
 chmod a-w Makefile
-chmod a-w backend/trunk.Makefile
 chmod a-w META
 chmod a-w version.ml
