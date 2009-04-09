@@ -162,6 +162,17 @@ else
     OBJEXT=.o
 fi
 
+# checking for mlcairo
+AC_CHECK_FILE($OCAMLLIB/cairo/cairo.cma,CAIRO=yes,CAIRO=no)
+if test "$CAIRO" = yes ; then
+   AC_CHECK_FILE($OCAMLLIB/bitstring/bitstring.cma,BITSTRING=yes,BITSTRING=no)
+   if test "$BITSTRING" = yes ; then
+      INCLUDECAIRO="-I +cairo"
+   else	    
+      CAIRO=no
+   fi
+fi
+
 # checking for lablgtk2
 AC_CHECK_FILE($OCAMLLIB/lablgtk2/lablgtk.cma,LABLGTK2=yes,LABLGTK2=no)
 # AC_CHECK_PROG(LABLGTK2,lablgtk2,yes,no) not always available (Win32)
@@ -183,6 +194,8 @@ AC_SUBST(BASICOFLAGS)
 AC_SUBST(OCAMLWEB)
 AC_SUBST(LABLGTK2)
 AC_SUBST(INCLUDEGTK2)
+AC_SUBST(CAIRO)
+AC_SUBST(INCLUDECAIRO)
 AC_SUBST(OCAMLWIN32)
 AC_SUBST(EXE)
 AC_SUBST(LIBEXT)
@@ -190,6 +203,12 @@ AC_SUBST(OBJEXT)
 AC_SUBST(LIBDIR)
 AC_SUBST(MLPOSTVERSION)
 AC_SUBST(TODAY)
+
+echo "---------------------------------------------------"
+echo -n "  native code compilation: "
+if test "$OCAMLBEST" == "opt"; then echo "yes"; else echo "no"; fi
+echo "  Cairo support          : "$CAIRO
+echo "---------------------------------------------------"
 
 # Finally create the Makefile from Makefile.in
 AC_OUTPUT(Makefile META version.ml)

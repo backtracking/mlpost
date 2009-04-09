@@ -64,7 +64,7 @@ CMO := misc.cmo name.cmo compiled_types.cmo print.cmo hashcons.cmo types.cmo \
        dash.cmo pen.cmo command.cmo shapes.cmo \
 	box.cmo arrow.cmo helpers.cmo diag.cmo tree.cmo \
 	radar.cmo plot.cmo hist.cmo legend.cmo \
-       scan_prelude.cmo metapost.cmo generate.cmo
+       scan_prelude.cmo metapost.cmo generate.cmo cairost.cmo
 CMX := $(CMO:.cmo=.cmx)
 
 CMA := mlpost.cma
@@ -78,7 +78,7 @@ OTHERCMX := $(OTHERCMO:.cmo=.cmx)
 
 $(HANDBOOKCMX) $(OTHERCMX): $(CMXA)
 
-GENERATED = version.ml scan_prelude.ml gui/glexer.ml
+GENERATED = version.ml scan_prelude.ml gui/glexer.ml cairost.ml cairost_sig.ml
 
 byte: $(CMA)
 opt: $(CMXA)
@@ -96,6 +96,11 @@ mlpost.cmo: $(CMO)
 mlpost.cmx: mlpost.cmi
 mlpost.cmx: $(CMX)
 	$(OCAMLOPT) $(INCLUDES) -pack -o $@ $(CMX)
+
+cairost.ml: cairost_yes.ml cairost_no.ml
+	cp -f cairost_@CAIRO@.ml $@
+cairost_sig.ml: cairost_sig_yes.ml cairost_sig_no.ml
+	cp -f cairost_sig_@CAIRO@.ml $@
 
 TOOLCMO= version.cmo $(CMO) tool.cmo
 TOOLCMX := $(TOOLCMO:.cmo=.cmx)

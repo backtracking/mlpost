@@ -1869,3 +1869,12 @@ module Generate : sig
   val generate_tex : string -> string -> string -> (int * 'a) list -> unit
 end
 
+module Cairost : sig
+
+  val supported : bool
+
+  val emit_pdf : string -> Command.t -> unit
+
+  include Cairost_sig.S
+
+end
