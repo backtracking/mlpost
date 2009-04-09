@@ -1874,6 +1874,11 @@ module Cairost : sig
   val supported : bool
 
   val emit_pdf : string -> Command.t -> unit
+  val emit_ps : string -> Command.t -> unit
+  val emit_png : string -> Command.t -> unit
+  val emit_svg : string -> Command.t -> unit
+  val emit_pdfs : string -> Command.t list -> unit
+    (** One figure by page *)
 
   include Cairost_sig.S
 

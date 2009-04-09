@@ -52,7 +52,14 @@ fi
 OCAMLVERSION=`$OCAMLC -v | sed -n -e 's|.*version *\(.*\)$|\1|p' `
 echo "ocaml version is $OCAMLVERSION"
 OCAMLLIB=`$OCAMLC -v | tail -1 | cut -f 4 -d " "`
-echo "ocaml library path is $OCAMLLIB"
+if test "$OCAMLLIB" != ${OCAMLLIB#/usr} -a \
+        -d /usr/local${OCAMLLIB#/usr}; then
+   OCAMLLIBLOCAL=/usr/local${OCAMLLIB#/usr}
+   echo "ocaml library path is $OCAMLLIB and $OCAMLLIBLOCAL"
+else
+        echo "ocaml library path is $OCAMLLIB"
+fi
+
 
 if test "$LIBDIR" = ""; then
         LIBDIR=$OCAMLLIB/mlpost
@@ -162,22 +169,82 @@ else
     OBJEXT=.o
 fi
 
+
+## Where are the library we need
+# we look for ocamlfind; if not present, we just not use it to find
+# the library
+AC_CHECK_PROG(OCAMLFIND,ocamlfind,yes,no)
+
 # checking for mlcairo
-AC_CHECK_FILE($OCAMLLIB/cairo/cairo.cma,CAIRO=yes,CAIRO=no)
-if test "$CAIRO" = yes ; then
-   AC_CHECK_FILE($OCAMLLIB/bitstring/bitstring.cma,BITSTRING=yes,BITSTRING=no)
-   if test "$BITSTRING" = yes ; then
-      INCLUDECAIRO="-I +cairo"
-   else	    
-      CAIRO=no
-   fi
+if test "$OCAMLFIND" == yes; then
+   CAIROLIB=$(ocamlfind query cairo)
+fi
+
+if test -n "$CAIROLIB";then
+   echo "ocamlfind found cairo in $CAIROLIB"
+else
+    AC_CHECK_FILE($OCAMLLIB/cairo/cairo.cma,CAIRO=yes,CAIRO=no)
+    if test "$CAIRO" = yes; then
+       CAIROLIB=$OCAMLLIB/cairo/
+    elif test -z "$CAIROLIBLOCAL"; then
+       AC_CHECK_FILE($OCAMLLIBLOCAL/cairo/cairo.cma,CAIRO=yes,CAIRO=no)
+       if test "$CAIRO" = yes; then
+       CAIROLIB=$OCAMLLIBLOCAL/cairo/
+       fi
+    fi
+fi
+
+if test "$OCAMLFIND" == yes; then
+   BITSTRINGLIB=$(ocamlfind query bitstring)
+fi
+
+if test -n "$BITSTRINGLIB";then
+   echo "ocamlfind found bitstring in $BITSTRINGLIB"
+else
+    AC_CHECK_FILE($OCAMLLIB/bitstring/bitstring.cma,BITSTRING=yes,BITSTRING=no)
+    if test "$BITSTRING" = yes; then
+       BITSTRINGLIB=$OCAMLLIB/bitstring/
+    elif test -z "$BITSTRINGLIBLOCAL"; then
+       AC_CHECK_FILE($OCAMLLIBLOCAL/bitstring/bitstring.cma,BITSTRING=yes,BITSTRING=no)
+       if test "$BITSTRING" = yes; then
+       BITSTRINGLIB=$OCAMLLIBLOCAL/bitstring/
+       fi
+    fi
+fi
+
+if test -n "$CAIROLIB" -a -n "$BITSTRINGLIB"; then
+   CAIRO=yes
+   INCLUDECAIRO="-I $CAIROLIB -I $BITSTRINGLIB"
+else
+   CAIRO=no
 fi
 
 # checking for lablgtk2
-AC_CHECK_FILE($OCAMLLIB/lablgtk2/lablgtk.cma,LABLGTK2=yes,LABLGTK2=no)
-# AC_CHECK_PROG(LABLGTK2,lablgtk2,yes,no) not always available (Win32)
-if test "$LABLGTK2" = yes ; then
-      INCLUDEGTK2="-I +lablgtk2"
+if test "$OCAMLFIND" == yes; then
+   LABLGTK2LIB=$(ocamlfind query lablgtk2)
+fi
+
+if test -n "$LABLGTK2LIB";then
+   echo "ocamlfind found lablgtk2 in $LABLGTK2LIB"
+else
+    AC_CHECK_FILE($OCAMLLIB/lablgtk2/lablgtk.cma,LABLGTK2=yes,LABLGTK2=no)
+    if test "$LABLGTK2" = yes; then
+       LABLGTK2LIB=$OCAMLLIB/lablgtk2/
+    elif test -z "$LABLGTK2LIBLOCAL"; then
+       AC_CHECK_FILE($OCAMLLIBLOCAL/lablgtk2/lablgtk2.cma,LABLGTK2=yes,LABLGTK2=no)
+       if test "$LABLGTK2" = yes; then
+       LABLGTK2LIB=$OCAMLLIBLOCAL/lablgtk2/
+       fi
+    fi
+fi
+
+##AC_CHECK_FILE($OCAMLLIB/lablgtk2/lablgtk.cma,LABLGTK2=yes,LABLGTK2=no)
+## AC_CHECK_PROG(LABLGTK2,lablgtk2,yes,no) not always available (Win32)
+if test -n "$LABLGTK2LIB" ; then
+   LABLGTK2=yes
+   INCLUDEGTK2="-I $LABLGTK2LIB"
+else
+   LABLGTK2=no
 fi
 
 # substitutions to perform
@@ -196,6 +263,7 @@ AC_SUBST(LABLGTK2)
 AC_SUBST(INCLUDEGTK2)
 AC_SUBST(CAIRO)
 AC_SUBST(INCLUDECAIRO)
+AC_SUBST(BITSTRINGLIB)
 AC_SUBST(OCAMLWIN32)
 AC_SUBST(EXE)
 AC_SUBST(LIBEXT)
@@ -211,7 +279,8 @@ echo "  Cairo support          : "$CAIRO
 echo "---------------------------------------------------"
 
 # Finally create the Makefile from Makefile.in
-AC_OUTPUT(Makefile META version.ml)
+AC_OUTPUT(Makefile META version.ml backend/trunk.Makefile)
 chmod a-w Makefile
+chmod a-w backend/trunk.Makefile
 chmod a-w META
 chmod a-w version.ml
