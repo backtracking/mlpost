@@ -38,9 +38,9 @@ EXE = @EXE@
 LIBEXT = @LIBEXT@
 OBJEXT = @OBJEXT@
 ifeq "@CAIRO@" "yes"
-INCLUDES = -I gui -I backend
+INCLUDES = -I gui -I backend @INCLUDEGTK2@
 else
-INCLUDES = -I gui
+INCLUDES = -I gui @INCLUDEGTK2@
 endif
 BFLAGS = -dtypes $(INCLUDES)
 OFLAGS = @BASICOFLAGS@ -dtypes $(INCLUDES) @FORPACK@
@@ -103,6 +103,8 @@ $(HANDBOOKCMX) $(OTHERCMX): $(CMXA)
 
 GENERATED = version.ml scan_prelude.ml gui/glexer.ml cairost.ml cairost_sig.ml
 
+.PHONY: all byte opt
+
 byte: $(CMA)
 opt: $(CMXA)
 
@@ -113,17 +115,19 @@ $(CMXA): mlpost.cmx
 	$(OCAMLOPT) -a $(OFLAGS) -o $@ $^
 
 mlpost.cmo: mlpost.cmi
-mlpost.cmo: backend_cmo $(CMO)
+mlpost.cmo: $(CMO)
 	$(OCAMLC) $(INCLUDES) -pack -o $@ $(CMOALL)
 
 mlpost.cmx: mlpost.cmi
-mlpost.cmx: backend_cmx $(CMX)
+mlpost.cmx: $(CMX)
 	$(OCAMLOPT) $(INCLUDES) -pack -o $@ $(CMXALL)
 
 cairost.ml: cairost_yes.ml cairost_no.ml
 	cp -f cairost_@CAIRO@.ml $@
 cairost_sig.ml: cairost_sig_yes.ml cairost_sig_no.ml
 	cp -f cairost_sig_@CAIRO@.ml $@
+
+.PHONY: backend_cmx backend_cmo
 
 ifeq "@CAIRO@" "yes"
 backend_cmo: types.cmi hashcons.cmi
@@ -220,7 +224,7 @@ examples-html:
 
 .PHONY: gui
 
-gui: gui/gmlpost.opt
+gui: gui/gmlpost.opt gui/glexer.cmo
 
 GUICMO = gui/glexer.cmo gui/gmlpost.cmo
 GUICMX := $(GUICMO:.cmo=.cmx)

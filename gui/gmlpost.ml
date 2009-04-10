@@ -6,10 +6,79 @@ open Format
 
 let () = ignore (GtkMain.Main.init ())
 
-let file = Sys.argv.(1)
+let usage () =
+  eprintf "usage: gmlpost file.ml fig-name@.";
+  exit 1
 
-let elements = Glexer.read_file file
-let () = Format.printf "%d elements@." (List.length elements)
+let ml_file, fig_name = 
+  if Array.length Sys.argv <> 3 then usage ();
+  let f = Sys.argv.(1) in
+  if not (Sys.file_exists f && Filename.check_suffix f ".ml") then usage ();
+  f, Sys.argv.(2)
+
+(* run the mlpost file and create PNG image *)
+
+let sys_command cmd =
+  let c = Sys.command cmd in
+  if c <> 0 then begin
+    eprintf "command '%s' failed with exit code %d@." cmd c;
+    exit 1
+  end
+
+(* size parameters *)
+let canvas_width = 500.
+let canvas_height = 500.
+
+let xmin = ref (-1.)
+let xmax = ref (1.)
+let ymin = ref (-1.)
+let ymax = ref (1.)
+let dx = ref 2.
+let dy = ref 2.
+let pic_w = ref 1.
+let pic_h = ref 1.
+
+let set_bbox xmi ymi xma yma =
+  xmin := xmi;
+  xmax := xma;
+  ymin := ymi;
+  ymax := yma;
+  dx := !xmax -. !xmin;
+  dy := !ymax -. !ymin
+
+let update_bbox () =
+  let file = fig_name ^ ".1" in
+  let c = open_in file in
+  try 
+    while true do
+      let s = input_line c in
+      try
+	Scanf.sscanf s "%%%%HiResBoundingBox: %f %f %f %f" (fun a b c d -> set_bbox a b c d; raise Exit)
+      with Scanf.Scan_failure _ ->
+	()
+    done 
+  with 
+    | End_of_file ->
+	eprintf "warning: could not find the bounding box in %s @." file;
+	close_in c
+    | Exit -> 
+	close_in c
+
+let make_png () =
+  sys_command ("mlpost -ps -ccopt glexer.cmo " ^ ml_file);
+  sys_command "latex tree1 > /dev/null";
+  sys_command "dvips -E tree1.dvi > /dev/null";
+  sys_command "convert tree1.ps tree1.png > /dev/null";
+  update_bbox ()
+
+let () = make_png ()
+
+let png_file = fig_name ^ ".png"
+
+let edit_file =
+  Filename.chop_suffix ml_file ".ml" ^ ".edit"
+
+let elements = Glexer.read_file edit_file
 
 let pointstable = Hashtbl.create (List.length elements)
 
@@ -24,19 +93,13 @@ let rec init_table = function
 let spins = ref []
 let points = ref []
 let z = ref 100
-let size = ref (200.,200.)
 
-let canvas_width = 500.
-let canvas_height = 500.
 
 let belong x y = (x>0. && x<canvas_width && y>0. && y<canvas_height)
 
-let string_of_dim = function
-  |Pt -> "pt"
-  |Bp -> "bp"
-  |Cm -> "cm"
-  |Mm -> "mm"
-  |Inch -> "inch"
+
+  
+
 
 (*------------------------------------------------------------------------*)
 
@@ -44,23 +107,47 @@ let rec go_string fmt = function
   |[],_|_,[]|Point _::_,_::[] -> ()
   | Num (s,(_,d))::r,sp::sps ->
       let n = sp#value in
-	fprintf fmt "num %s %f %s \n" s n (string_of_dim d);
+	fprintf fmt "num \"%s\" %f %s \n" s n (string_of_dim d);
 	go_string fmt (r,sps)
   | Point (s,(_,d1),(_,d2))::r,sp1::sp2::sps ->
       let n1 = sp1#value in
       let n2 = sp2#value in
-	fprintf fmt "point %s %f %s , %f %s \n" s 
+	fprintf fmt "point \"%s\" %f %s , %f %s \n" s 
 	  n1 (string_of_dim d1) 
 	  n2 (string_of_dim d2);
 	go_string fmt (r,sps)
 	  
-let quit ()= 
-  let f = open_out "gui/result" in
+let write_edit ()= 
+  let f = open_out edit_file in
   let fmt = formatter_of_out_channel f in
-    go_string fmt (elements,!spins);
-    fprintf fmt "@?";
-    close_out f
+  go_string fmt (elements,!spins);
+  fprintf fmt "@?";
+  close_out f
+    
 
+let refresh (* canvas *) pic () = 
+  eprintf "@.------------------------------refresh------------------------------@.";
+  write_edit (); ignore (Sys.command "cp fig.edit fig.bak");
+  make_png ();
+  let pixbuf = GdkPixbuf.from_file png_file in
+  pic#set [`PIXBUF pixbuf];
+  
+  pic_w := float_of_int (GdkPixbuf.get_width pixbuf);
+  pic_h := float_of_int (GdkPixbuf.get_height pixbuf);
+  
+  eprintf "refresh:@.";
+  eprintf "  xmin = %f@." !xmin;
+  eprintf "  xmax = %f@." !xmax;
+  eprintf "  ymin = %f@." !ymin;
+  eprintf "  ymax = %f@." !ymax;
+  eprintf "  png  = %f x %f pixels@." !pic_w !pic_h;
+
+  (* update_bbox(); *)
+(*   canvas#set [`WIDTH_PIXELS 50];  *)
+(*   canvas#set_pixels_per_unit 2.; *)
+(*   canvas#update_now (); *)
+  ()
+  
 
 
 (*------------------------------------------------------------------------*)
@@ -93,20 +180,21 @@ let move_point x y s item ev =
       then 
 	begin
 	  let (sp1,sp2),_ = Hashtbl.find pointstable s in
-	    sp1#set_value x;
-	    sp2#set_value y;
+	    sp1#set_value (!xmin+.(x*. !dx/. !pic_w));
+	    sp2#set_value (!ymax-.(y*. !dy/. !pic_h));
 	    item#set [ `X1 (x -. 3.) ; `Y1 (y -. 3.) ;
 		       `X2 (x +. 3.) ; `Y2 (y +. 3.) ]
 	end
+  | `BUTTON_RELEASE ev -> 
+      eprintf "toto@.";
   | _ -> ()
   end ; false
 
 let draw_point root s n1 n2 d1 d2 = match d1,d2 with
   |Pt,Pt -> ()
   |Bp,Bp -> 
-     let w,h = !size in
-     let x = n1 *. canvas_width /. w in
-     let y = n2 *. canvas_height /. h in
+     let x = (n1 -. !xmin) *. !pic_w /. !dx in
+     let y = (!ymax -. n2) *. !pic_h /. !dy in
      let point = GnoCanvas.ellipse ~x1:(x-.3.) ~x2:(x+.3.) ~y1:(y-.3.) ~y2:(y+.3.) 
        ~props:[ `FILL_COLOR "black" ; `OUTLINE_COLOR "black" ; `WIDTH_PIXELS 0 ] root in
      let sigs = point#connect in
@@ -124,28 +212,36 @@ let draw_point root s n1 n2 d1 d2 = match d1,d2 with
 
 let point_of_spin s sb () = 
   let n = sb#value in
-  let (sb1,_),p = Hashtbl.find pointstable s in 
+  try 
+    let (sb1,_),p = Hashtbl.find pointstable s in 
     if (sb == sb1)
-    then p#set [ `X1 (n -. 3.) ; `X2 (n +. 3.) ]
-    else p#set [ `Y1 (n -. 3.) ; `Y2 (n +. 3.) ] 
+    then begin
+      let n = (n -. !xmin) *. !pic_w /. !dx in
+      p#set [ `X1 (n -. 3.) ; `X2 (n +. 3.) ]
+    end
+    else begin
+      let n = (!ymax -. n) *. !pic_h /. !dy in
+      p#set [ `Y1 (n -. 3.) ; `Y2 (n +. 3.) ] 
+    end
+  with Not_found -> ()
 
-let left_part_lign vbox vbox2 vbox3 s n d s' = 
+let left_part_lign pic vbox vbox2 vbox3 s n d s' = 
   GMisc.label ~text:(s^s') ~packing:vbox#add ();
   GMisc.label ~text:(string_of_dim d) ~packing:vbox3#add ();      
   let sb = GEdit.spin_button ~packing:vbox2#add ~digits:2 ~numeric:true ~wrap:true ()
   in
     sb#adjustment#set_bounds ~lower:(-200.) ~upper:200. ~step_incr:0.01 ();
     sb#set_value n;
-    sb#adjustment#connect#value_changed ~callback:(point_of_spin s sb);
+    sb#adjustment#connect#value_changed ~callback:(point_of_spin s sb (* ;refresh pic *));
     spins := sb::!spins;
     ()
 
-let left_part vbox vbox2 vbox3 root = function
+let left_part pic vbox vbox2 vbox3 root = function
   | Num (s,(n,d)) ->
-      left_part_lign vbox vbox2 vbox3 s n d " :" 
+      left_part_lign pic vbox vbox2 vbox3 s n d " :" 
   | Point (s,(n1,d1),(n2,d2)) -> 
-      left_part_lign vbox vbox2 vbox3 s n1 d1 " xpart :" ;
-      left_part_lign vbox vbox2 vbox3 s n2 d2 " ypart :" ;
+      left_part_lign pic vbox vbox2 vbox3 s n1 d1 " xpart :" ;
+      left_part_lign pic vbox vbox2 vbox3 s n2 d2 " ypart :" ;
       draw_point root s n1 n2 d1 d2
 
 
@@ -153,7 +249,6 @@ let left_part vbox vbox2 vbox3 root = function
 let zoom_changed canvas ev =
   match ev with
     |`SCROLL ev -> if((GdkEvent.Scroll.direction ev = `UP) && !z > 10 && !z < 200 ) then z:= !z+10 ;
-      Format.eprintf "chibre!!!!!!!!!!!!!!@.";
       canvas#set_pixels_per_unit !z 
 
 
@@ -171,17 +266,9 @@ let main () =
   
   (* Menu bar *)
   let menubar = GMenu.menu_bar ~packing:vb#pack () in
-  let factory = new GMenu.factory menubar in
-  let accel_group = factory#accel_group in
-  let file_menu = factory#add_submenu "File" in
-
-  (* File menu *)
-  let factory = new GMenu.factory file_menu ~accel_group in
-  factory#add_item "Quit" ~key:_Q ~callback: Main.quit;
     
-  window#connect#destroy ~callback:quit ;
+  window#connect#destroy ~callback:write_edit ;
   window#connect#destroy ~callback:Main.quit ;
-  window#add_accel_group accel_group;
 
   let hbox = GPack.hbox ~spacing:10 ~packing:vb#add () in
   let scrolled_window = GBin.scrolled_window  ~width:350
@@ -199,14 +286,29 @@ let main () =
 (*   let signal = canvas#connect in *)
 (*   signal#event (zoom_changed canvas); *)
 
-  let bgr = GdkPixbuf.from_file "gui/test.png" in
-  let pic = GnoCanvas.pixbuf root ~pixbuf:bgr in
+  let pixbuf = GdkPixbuf.from_file png_file in
+  
+  let pic = GnoCanvas.pixbuf root ~pixbuf in
+  pic_w := float_of_int (GdkPixbuf.get_width pixbuf);
+  pic_h := float_of_int (GdkPixbuf.get_height pixbuf);
 
+  let factory = new GMenu.factory menubar in
+  let accel_group = factory#accel_group in
+  let file_menu = factory#add_submenu "File" in
+  
+  (* File menu *)
+  let factory = new GMenu.factory file_menu ~accel_group in
+  factory#add_item "Refresh" ~key:_r ~callback: (refresh (* canvas *) pic);
+  let factory = new GMenu.factory file_menu ~accel_group in
+  factory#add_item "Quit" ~key:_Q ~callback: Main.quit;
+  
+  window#add_accel_group accel_group;  
+  
   let vbox = GPack.vbox ~spacing:10 ~packing:hbox2#add () in
   let vbox2 = GPack.vbox ~spacing:10 ~packing:hbox2#add () in
   let vbox3 = GPack.vbox ~spacing:10 ~packing:hbox2#add () in
   
-  List.iter (left_part vbox vbox2 vbox3 root) elements;
+  List.iter (left_part pic vbox vbox2 vbox3 root) elements;
   spins := List.rev !spins;
   points := List.rev !points;
 

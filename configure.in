@@ -247,7 +247,8 @@ fi
 ## AC_CHECK_PROG(LABLGTK2,lablgtk2,yes,no) not always available (Win32)
 if test -n "$LABLGTK2LIB" ; then
    LABLGTK2=yes
-   INCLUDEGTK2="-I $LABLGTK2LIB"
+dnl    INCLUDEGTK2="-I $LABLGTK2LIB"
+   INCLUDEGTK2="-I +lablgtk2"
 else
    LABLGTK2=no
 fi
