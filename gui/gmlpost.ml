@@ -92,7 +92,7 @@ let rec init_table = function
 
 let spins = ref []
 let points = ref []
-let z = ref 100
+let z = ref 1.
 
 
 let belong x y = (x>0. && x<canvas_width && y>0. && y<canvas_height)
@@ -124,16 +124,26 @@ let write_edit ()=
   fprintf fmt "@?";
   close_out f
     
+let update_points _ ((sp1,sp2),p) = 
+  let x = (sp1#value -. !xmin) *. !pic_w /. !dx in
+  let y = (!ymax -. sp2#value ) *. !pic_h /. !dy in
+  p#set [ `X1 (x -. 3.) ; `Y1 (y -. 3.) ;
+	  `X2 (x +. 3.) ; `Y2 (y +. 3.) ];
+  ()
 
 let refresh (* canvas *) pic () = 
   eprintf "@.------------------------------refresh------------------------------@.";
-  write_edit (); ignore (Sys.command "cp fig.edit fig.bak");
+  write_edit (); (* ignore (Sys.command "cp fig.edit fig.bak"); *)
   make_png ();
   let pixbuf = GdkPixbuf.from_file png_file in
   pic#set [`PIXBUF pixbuf];
   
   pic_w := float_of_int (GdkPixbuf.get_width pixbuf);
   pic_h := float_of_int (GdkPixbuf.get_height pixbuf);
+  
+  (*mise a l'echelle de tous les points 
+    au cas ou il y aurait un changement de bbox*)
+  Hashtbl.iter update_points pointstable;
   
   eprintf "refresh:@.";
   eprintf "  xmin = %f@." !xmin;
@@ -142,7 +152,7 @@ let refresh (* canvas *) pic () =
   eprintf "  ymax = %f@." !ymax;
   eprintf "  png  = %f x %f pixels@." !pic_w !pic_h;
 
-  (* update_bbox(); *)
+  
 (*   canvas#set [`WIDTH_PIXELS 50];  *)
 (*   canvas#set_pixels_per_unit 2.; *)
 (*   canvas#update_now (); *)
@@ -245,13 +255,9 @@ let left_part pic vbox vbox2 vbox3 root = function
       draw_point root s n1 n2 d1 d2
 
 
-
-let zoom_changed canvas ev =
-  match ev with
-    |`SCROLL ev -> if((GdkEvent.Scroll.direction ev = `UP) && !z > 10 && !z < 200 ) then z:= !z+10 ;
-      canvas#set_pixels_per_unit !z 
-
-
+let zoom canvas zoo = 
+  z:= !z +. zoo;
+  canvas#set_pixels_per_unit !z
 
   
 
@@ -295,6 +301,7 @@ let main () =
   let factory = new GMenu.factory menubar in
   let accel_group = factory#accel_group in
   let file_menu = factory#add_submenu "File" in
+  let zoom_menu = factory#add_submenu "Zoom" in
   
   (* File menu *)
   let factory = new GMenu.factory file_menu ~accel_group in
@@ -302,6 +309,11 @@ let main () =
   let factory = new GMenu.factory file_menu ~accel_group in
   factory#add_item "Quit" ~key:_Q ~callback: Main.quit;
   
+  (* Zoom *)
+  let factory = new GMenu.factory zoom_menu ~accel_group in
+  factory#add_item "++" ~key:_A ~callback:(fun()->zoom canvas 0.1);
+  factory#add_item "--" ~key:_B ~callback:(fun()->zoom canvas (-.0.1));
+
   window#add_accel_group accel_group;  
   
   let vbox = GPack.vbox ~spacing:10 ~packing:hbox2#add () in
