@@ -25,7 +25,7 @@ MANDIR=@mandir@
 
 # other variables set by ./configure
 OCAMLC   = @OCAMLC@
-OCAMLOPT = @OCAMLOPT@		
+OCAMLOPT = @OCAMLOPT@
 OCAMLDEP = @OCAMLDEP@
 OCAMLLEX = @OCAMLLEX@
 OCAMLYACC= @OCAMLYACC@
@@ -42,8 +42,8 @@ INCLUDES = -I gui -I backend
 else
 INCLUDES = -I gui
 endif
-BFLAGS = -dtypes $(INCLUDES) -I +threads @INCLUDEGTK2@ 
-OFLAGS = @BASICOFLAGS@ -dtypes $(INCLUDES) @FORPACK@ -I +threads @INCLUDEGTK2@
+BFLAGS = -dtypes $(INCLUDES)
+OFLAGS = @BASICOFLAGS@ -dtypes $(INCLUDES) @FORPACK@
 
 # main target
 #############
@@ -113,11 +113,11 @@ $(CMXA): mlpost.cmx
 	$(OCAMLOPT) -a $(OFLAGS) -o $@ $^
 
 mlpost.cmo: mlpost.cmi
-mlpost.cmo: $(CMO) backend_cmo
+mlpost.cmo: backend_cmo $(CMO)
 	$(OCAMLC) $(INCLUDES) -pack -o $@ $(CMOALL)
 
 mlpost.cmx: mlpost.cmi
-mlpost.cmx: $(CMX) backend_cmx
+mlpost.cmx: backend_cmx $(CMX)
 	$(OCAMLOPT) $(INCLUDES) -pack -o $@ $(CMXALL)
 
 cairost.ml: cairost_yes.ml cairost_no.ml
@@ -126,10 +126,10 @@ cairost_sig.ml: cairost_sig_yes.ml cairost_sig_no.ml
 	cp -f cairost_sig_@CAIRO@.ml $@
 
 ifeq "@CAIRO@" "yes"
-backend_cmo:
+backend_cmo: types.cmi hashcons.cmi
 	make -C backend .depend $(BACKENDCMO)
 
-backend_cmx:
+backend_cmx: types.cmi hashcons.cmi
 	make -C backend .depend $(BACKENDCMX)
 else
 backend_cmo:
@@ -226,10 +226,10 @@ GUICMO = gui/glexer.cmo gui/gmlpost.cmo
 GUICMX := $(GUICMO:.cmo=.cmx)
 
 gui/gmlpost.opt: $(GUICMX)
-	$(OCAMLOPT) $(OFLAGS) -o $@ unix.cmxa threads.cmxa lablgtk.cmxa gtkThread.cmx lablgnomecanvas.cmxa $^
+	$(OCAMLOPT) $(OFLAGS) -I +threads @INCLUDEGTK2@ -o $@ unix.cmxa threads.cmxa lablgtk.cmxa gtkThread.cmx lablgnomecanvas.cmxa $^
 
 gui/gmlpost.byte: $(GUICMO)
-	$(OCAMLC) $(BFLAGS) -o $@ unix.cma lablgtk.cma threads.cma gtkThread.cmo $^
+	$(OCAMLC) $(BFLAGS) -I +threads @INCLUDEGTK2@ -o $@ unix.cma lablgtk.cma threads.cma gtkThread.cmo $^
 
 #version.ml: Makefile
 #	echo "let version = \""$(MLPOSTVERSION)"\"" > version.ml

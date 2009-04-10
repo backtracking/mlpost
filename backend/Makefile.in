@@ -25,7 +25,7 @@ MANDIR=@mandir@
 
 # other variables set by ./configure
 OCAMLC   = @OCAMLC@
-OCAMLOPT = @OCAMLOPT@		
+OCAMLOPT = @OCAMLOPT@
 OCAMLDEP = @OCAMLDEP@
 OCAMLLEX = @OCAMLLEX@
 OCAMLYACC= @OCAMLYACC@
@@ -305,9 +305,10 @@ configure: configure.in
 
 clean::
 	rm -f *.cm[iox] *.o *~ *.annot
-	rm -f $(GENERATED) parser.output
+	rm -f $(GENERATED) map_parser.output pfb_parser.output
 	rm -f $(NAME).cma $(NAME).cmxa $(NAME).a
 	rm -f *.opt *.byte *.exe
+	rm -f .depend config.log
 
 cleaner:: clean
 	make -C test clean
@@ -324,9 +325,14 @@ dist-clean distclean:: clean
 
 depend :: .depend
 
+ML := compute.ml dev_save.ml dvicairo.ml dviinterp.ml fonts.ml gentex.ml icairost.ml matrix.ml myocamlbuild.ml picture_lib.ml point_lib.ml spline_lib.ml spline.ml standardenc.ml map_parser.ml map_lexer.ml pfb_parser.ml pfb_lexer.ml
+
 .depend:: $(GENERATED)
 	rm -f .depend
-	$(OCAMLDEP) $(INCLUDES) *.mly *.mll $(filter-out dvi.ml tfm.ml,$(echo *.ml)) > .depend
+	$(OCAMLDEP) @INCLUDECAIRO@ *.mli $(ML) > .depend
+
+#$(OCAMLDEP) @INCLUDECAIRO@ *.mli $(filter-out dvi.ml tfm.ml,$(wildcard *.ml)) > .depend
+
 
 include .depend
 

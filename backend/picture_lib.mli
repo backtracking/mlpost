@@ -53,7 +53,7 @@ module Cairo :
 sig
   val draw : Cairo.t -> t -> unit
   val where : Cairo.t -> t -> float * float -> id list
-  val move : Cairo.t -> t -> id -> Point.t -> Point.t
+  val move : Cairo.t -> t -> id -> float * float -> float * float
 end
 
 
