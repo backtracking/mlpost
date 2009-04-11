@@ -1,3 +1,4 @@
+open Format
 exception Not_implemented of string
 
 let not_implemented s = raise (Not_implemented s)
@@ -52,7 +53,7 @@ let create a b c d = {pl=[{sa = a;sb = b;sc = c; sd = d;smin = 0.;smax = 1.;star
 let create_line a d = {pl=[{sa=a;sb=a;sc=d;sd=d;smin=0.;smax=1.;start=true}];cycle=false}
 let create_lines l = 
   let rec aux = function
-  |[] |[_] -> invalid_arg "The list must have at least 2 elements"
+  |[] |[_]-> []
   |a::(d::_ as l) -> {sa=a;sb=a;sc=d;sd=d;smin=0.;smax=1.;start=false}::aux l in
   match aux l with
     |[] -> assert false
@@ -83,6 +84,16 @@ let add_end_line p d =
       | [] -> assert false (* a path always have one element *)
       | [{sc=mb;sd=a;smax=smax} as e] -> [e;{sa = a;sb = a;
                                              sc = d;sd = d;smin=smax;smax=smax+.1.; start = false}]
+      | a::l -> a::(aux l) in
+  {p with pl=aux p.pl}
+
+let add_end_spline p sb sc d =
+  let rec aux p = 
+    match p with
+      | [] -> assert false (* a path always have one element *)
+      | [{sc=mb;sd=a;smax=smax} as e] -> [e;{sa = a;sb = sb;
+                                             sc = sc;sd = d;smin=smax;
+                                             smax=smax+.1.; start = false}]
       | a::l -> a::(aux l) in
   {p with pl=aux p.pl}
 
@@ -138,9 +149,10 @@ let give_bound s =
     
 let list_min_max f p = 
  List.fold_left (fun (x_min,y_min,x_max,y_max) s ->
-                                                    let (sx_min,sy_min,sx_max,sy_max) = f s in
-                                                    (min x_min sx_min,min y_min sy_min,
-                                                     max x_max sx_max,max x_max sy_max)) (infinity,infinity,neg_infinity,neg_infinity) p
+                   let (sx_min,sy_min,sx_max,sy_max) = f s in
+                   (min x_min sx_min,min y_min sy_min,
+                    max x_max sx_max,max y_max sy_max))
+   (infinity,infinity,neg_infinity,neg_infinity) p
 
 let unprecise_bounding_box s = 
     let (x_min,y_min,x_max,y_max) = 
@@ -318,6 +330,29 @@ let union ap bp =
   {pl=List.map (function {smin=smin;smax=smax} as b -> 
               {b with smin=conv smin;smax=conv smax}) bp.pl;cycle=false}
 
+let append_conv ap bp = 
+  let union_conv = union_conv ap bp in
+  (fun x -> (union_conv x)+.1.)
+
+let ext_list = function
+  | [] -> assert false
+  | a::l -> a,l
+
+let append ap sb sc bp = 
+  let conv = append_conv ap bp in
+  let fbpconv,bpconv = 
+    ext_list (List.map (function {smin=smin;smax=smax} as b -> 
+                          {b with smin=(conv smin)+.1.;smax=(conv smax)+.1.})
+                bp.pl) in
+  let rec aux = function
+    |[] -> assert false
+    |[{smax=smin;sd=sa} as a] -> 
+       a::{smin=smin;smax=smin+.1.;
+           sa=sa;sb=sb;sc=sc;sd=fbpconv.sa;start=false}::
+         {fbpconv with start=false}::bpconv
+    |a::l -> a::(aux l) in
+  {pl=aux ap.pl;cycle=false}
+
 let reverse p =
   let conv = 
     let max = max_abscissa p in
@@ -475,32 +510,14 @@ let close p1 =
     {p1 with cycle = true}
   else invalid_arg ("This path is not closed")
 
-let of_bounding_box (x_min,y_min,x_max,y_max) =
-  let ul = {x=x_min;y=y_min} in
-  let ur = {x=x_max;y=y_min} in
-  let dl = {x=x_min;y=y_max} in
-  let dr = {x=x_max;y=y_max} in
-  close (create_lines [ul;ur;dl;dr;ul])
+let of_bounding_box ({x=x_min;y=y_min},{x=x_max;y=y_max}) =
+  let dl = {x=x_min;y=y_min} in
+  let dr = {x=x_max;y=y_min} in
+  let ul = {x=x_min;y=y_max} in
+  let ur = {x=x_max;y=y_max} in
+  close (create_lines [ul;ur;dr;dl;ul])
 
 let length p = max_abscissa p -. min_abscissa p
-
-module Epure =
-  struct
-    (* A rendre plus performant ou pas*)
-    type t = spline list list
-    let empty = []
-    let create x = [x.pl]
-    let of_path = create
-    let union x y = List.rev_append x y
-    let transform t x = List.map (fun x -> transform_aux t x) x
-    let bounding_box sl =
-      let (x_min,y_min,x_max,y_max) = 
-        list_min_max (list_min_max give_bound_precise) sl in
-          ({x=x_min;y=y_min},{x=x_max;y=y_max})
-    let of_bounding_box l = create (of_bounding_box l)
-  end
-
-
 
 module Approx =
   struct
@@ -533,6 +550,36 @@ module Metapath =
      | Start_Path of path
      | Append_Path of t * joint * path
 
+
+   let rec print_dir fmt = function
+     |DNo -> fprintf fmt "DNo"
+     |DVec p -> fprintf fmt "DVec %a" Point_lib.print p
+     |DCurl f -> fprintf fmt "Dcurl %f" f
+   and print_knot fmt (dir1,p,dir2) = 
+     fprintf fmt "(%a,%a,%a)" print_dir dir1 Point_lib.print p print_dir dir2
+   and print_joint fmt = function
+     | JLine -> fprintf fmt "JLine"
+     | JCurve -> fprintf fmt "JCurve"
+     | JCurveNoInflex -> fprintf fmt "JCurveNoInflex"
+     | JTension (f1,f2) -> fprintf fmt "JTension (%f,%f)" f1 f2
+     | JControls (p1,p2) -> fprintf fmt "JControls (%a,%a)" Point_lib.print p1 Point_lib.print p2
+   and print fmt = function
+     | Start k1 -> fprintf fmt "[%a" print_knot k1
+     | Cons (p,j,k) -> fprintf fmt "%a;%a-%a" print p print_joint j print_knot k
+     | Start_Path p-> fprintf fmt "{%a}" printf p
+     | Append_Path (p1,j,p2) ->fprintf fmt "%a;%a-%a" print p1 print_joint j printf p2
+
+
+   let rec to_path_simple = function
+     | Start (DNo,p,DNo) -> create_line p p
+     | Cons (pa,JLine,(_,p,_)) -> add_end_line (to_path_simple pa) p
+     | Cons (Cons(_,_,(_,_,DVec c1)) as pa,JCurve,(DVec c2,p,_))
+     | Cons (pa,JControls(c1,c2),(_,p,_)) -> add_end_spline (to_path_simple pa) c1 c2 p
+     | Start_Path p -> p
+     | Append_Path (p1,JControls(c1,c2),p2) -> append (to_path_simple p1) c1 c2 p2
+     | (Cons(pa,JCurve,(_,p,_))) -> add_end_line (to_path_simple pa) p (* Faux*)
+     |p -> Format.printf "not implemented %a@." print p; not_implemented "to_path"
+
    let knot d1 p d2 = (d1,p,d2)
    
    let vec_direction p = DVec p
@@ -555,17 +602,16 @@ module Metapath =
      | Start_Path p2 -> Append_Path(p,j,p2)
      | Append_Path (p2,j2,p3) -> Append_Path(append p j p2,j2,p3)
 
-
-   let to_path p = not_implemented "to_path"
+   let to_path p = to_path_simple p
    let cycle d j p = not_implemented "cycle"
 
    let from_path p = Start_Path p
  end
 
-module Cairo =
+module ToCairo =
   struct
     let draw cr p = 
-      Cairo.save cr ;
+      Format.printf "%a@." printf p;
       List.iter (function 
                    | {start = true} as s -> 
                        Cairo.move_to cr s.sa.x s.sa.y ;
@@ -579,8 +625,34 @@ module Cairo =
                          s.sc.x s.sc.y 
                          s.sd.x s.sd.y) p.pl;
       if p.cycle then Cairo.close_path cr;
-      Cairo.restore cr
   end
+
+module Epure =
+  struct
+    (* A rendre plus performant ou pas*)
+    type t = spline list list
+    let empty = []
+    let create x = [x.pl]
+    let of_path = create
+    let union x y = List.rev_append x y
+    let transform t x = List.map (fun x -> transform_aux t x) x
+    let bounding_box sl =
+      let (x_min,y_min,x_max,y_max) = 
+        list_min_max (list_min_max give_bound_precise) sl in
+          ({x=x_min;y=y_min},{x=x_max;y=y_max})
+    let of_bounding_box l = create (of_bounding_box l)
+
+    let draw cr p = List.iter (List.iter 
+      (function 
+           s -> 
+             Cairo.move_to cr s.sa.x s.sa.y ;
+             Cairo.curve_to cr 
+               s.sb.x s.sb.y 
+               s.sc.x s.sc.y 
+               s.sd.x s.sd.y)) p;
+      Cairo.stroke cr
+  end
+
 
 
 (*

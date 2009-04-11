@@ -1,0 +1,40 @@
+open Ocamlbuild_plugin
+
+let cairopossible = "@CAIRO@" = "yes"
+let tagcairo = ref false
+
+let packages = ["cairo","@CAIROLIB@","cairo";
+                "bitstring","@BITSTRINGLIB@","bitstring";
+                "lablgtk2","@LABLGTK2LIB@","lablgtk";
+                "lablgnomecanvas","@LABLGTK2LIB@","lablgnomecanvas"]
+
+let syntaxes = ["bitstring","@BITSTRINGLIB@",
+                "camlp4o -I @BITSTRINGLIB@ bitstring.cma bitstring_persistent.cma pa_bitstring.cmo"]
+
+
+let _ = dispatch begin function
+  | Before_options -> Options.include_dirs := ["backend";"gui"]
+  | Before_rules ->
+      tagcairo := Ocamlbuild_pack.Configuration.has_tag "cairo_yes";
+      if !tagcairo && not cairopossible then failwith ("configure don't find the library for the cairo backend, I can't compile");
+       let cairost_rule suf yesno = rule ("cairost generation for "^suf^yesno) ~deps:["cairost"^suf^yesno^".ml"] ~prod:("cairost"^suf^".ml")
+         (fun _ _ -> cp ("cairost"^suf^yesno^".ml") ("cairost"^suf^".ml")) in
+       if !tagcairo
+       then (cairost_rule "" "_yes";cairost_rule "_sig" (*"_yes"*) "_no") (*temporaire*)
+       else (cairost_rule "" "_no";cairost_rule "_sig" "_no";)
+  | After_rules ->
+       List.iter begin function pkg,dir,file ->
+         ocaml_lib ~extern:true ~tag_name:("pkg_"^pkg) ~dir file;
+	 flag ["ocaml"; "pack";  "pkg_"^pkg] & S[A"-I"; P dir];
+       end packages;
+
+       (* Like -package but for extensions syntax. Morover -syntax is useless
+       	* when linking. *)
+       List.iter begin function syntax,lib,pp ->
+         flag ["ocaml"; "compile";  "syntax_"^syntax] & S[A"-pp"; A pp];
+         flag ["ocaml"; "ocamldep"; "syntax_"^syntax] & S[A"-pp"; A pp];
+         flag ["ocaml"; "doc";      "syntax_"^syntax] & S[A"-pp"; A pp];
+       end syntaxes;
+   
+   | _ -> ()
+end

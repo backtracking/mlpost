@@ -1,0 +1,390 @@
+##########################################################################
+#                                                                        #
+#  Copyright (C) Johannes Kanig, Stephane Lescuyer                       #
+#  and Jean-Christophe Filliatre                                         #
+#                                                                        #
+#  This software is free software; you can redistribute it and/or        #
+#  modify it under the terms of the GNU Library General Public           #
+#  License version 2.1, with the special exception on linking            #
+#  described in file LICENSE.                                            #
+#                                                                        #
+#  This software is distributed in the hope that it will be useful,      #
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                  #
+#                                                                        #
+##########################################################################
+
+# where to install the binaries
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+BINDIR=@bindir@
+LIBDIR=@LIBDIR@
+
+# where to install the man page
+MANDIR=@mandir@
+
+# other variables set by ./configure
+OCAMLC   = @OCAMLC@
+OCAMLOPT = @OCAMLOPT@		
+OCAMLDEP = @OCAMLDEP@
+OCAMLLEX = @OCAMLLEX@
+OCAMLYACC= @OCAMLYACC@
+#(not used) OCAMLLIB = @OCAMLLIB@
+OCAMLBEST= @OCAMLBEST@
+OCAMLVERSION = @OCAMLVERSION@
+OCAMLWEB = @OCAMLWEB@
+OCAMLWIN32 = @OCAMLWIN32@
+EXE = @EXE@
+LIBEXT = @LIBEXT@
+OBJEXT = @OBJEXT@
+
+INCLUDES = -I gui
+BFLAGS = -dtypes $(INCLUDES) -I +threads @INCLUDEGTK2@ 
+OFLAGS = @BASICOFLAGS@ -dtypes $(INCLUDES) @FORPACK@ -I +threads @INCLUDEGTK2@
+
+# main target
+#############
+
+NAME = mlpost
+MLPOSTVERSION=@MLPOSTVERSION@
+
+TESTS = handbookgraphs.cmx othergraphs.cmx tests.cmx
+TOOL = tool.$(OCAMLBEST)
+
+all: byte $(OCAMLBEST) $(TOOL)
+
+check: byte $(OCAMLBEST) $(TOOL) $(TESTS) check-examples
+
+# bytecode and native-code compilation
+######################################
+
+CMO := misc.cmo name.cmo compiled_types.cmo print.cmo hashcons.cmo types.cmo \
+	num.cmo point.cmo duplicate.cmo compile.cmo \
+       transform.cmo color.cmo metaPath.cmo path.cmo picture.cmo \
+       dash.cmo pen.cmo command.cmo shapes.cmo \
+	box.cmo arrow.cmo helpers.cmo diag.cmo tree.cmo \
+	radar.cmo plot.cmo hist.cmo legend.cmo \
+       scan_prelude.cmo metapost.cmo generate.cmo
+CMX := $(CMO:.cmo=.cmx)
+
+CMA := mlpost.cma
+CMXA := mlpost.cmxa
+
+HANDBOOKCMO := handbookgraphs.cmo
+OTHERCMO := othergraphs.cmo
+TESTSCMO := tests.cmo
+HANDBOOKCMX := $(HANDBOOKCMO:.cmo=.cmx)
+OTHERCMX := $(OTHERCMO:.cmo=.cmx)
+
+$(HANDBOOKCMX) $(OTHERCMX): $(CMXA)
+
+GENERATED = version.ml scan_prelude.ml gui/glexer.ml
+
+byte: $(CMA)
+opt: $(CMXA)
+
+$(CMA): mlpost.cmo
+	$(OCAMLC) -a $(BFLAGS) -o $@ $^
+
+$(CMXA): mlpost.cmx
+	$(OCAMLOPT) -a $(OFLAGS) -o $@ $^
+
+mlpost.cmo: mlpost.cmi
+mlpost.cmo: $(CMO)
+	$(OCAMLC) $(INCLUDES) -pack -o $@ $(CMO)
+
+mlpost.cmx: mlpost.cmi
+mlpost.cmx: $(CMX)
+	$(OCAMLOPT) $(INCLUDES) -pack -o $@ $(CMX)
+
+TOOLCMO= version.cmo $(CMO) tool.cmo
+TOOLCMX := $(TOOLCMO:.cmo=.cmx)
+
+tool.byte: $(TOOLCMO)
+	$(OCAMLC) -o $@ unix.cma $^
+
+tool.opt: $(TOOLCMX)
+	$(OCAMLOPT) -o $@ unix.cmxa $^
+
+tests: $(CMXA) tests.ml
+	$(OCAMLOPT) -o tests.exe unix.cmxa $(CMXA) tests.ml
+	./tests.exe
+	make -C test tests
+	gv test/tests.ps
+
+testbox: $(CMXA) testbox.ml
+	$(OCAMLOPT) -o testbox.exe unix.cmxa $(CMXA) testbox.ml
+	./testbox.exe
+	make -C test testbox
+	gv test/testbox.ps
+
+tests.pdf: $(CMXA) tests.ml
+	$(OCAMLOPT) -o tests.exe unix.cmxa $(CMXA) tests.ml
+	./tests.exe
+	make -C test tests.pdf
+	xpdf test/tests.pdf
+
+
+tests.byte: $(CMA) tests.ml
+	ocaml unix.cma $(CMA) tests.ml
+	make -C test tests
+	gv test/tests.ps
+
+handbook: $(CMXA) handbookgraphs.ml
+	$(OCAMLOPT) -o handbook.exe unix.cmxa $(CMXA) handbookgraphs.ml
+	./handbook.exe
+	make -C test manual
+	make -C test/manual mpost
+	gv test/testmanual.ps
+
+handbook.byte: $(CMA) handbookgraphs.ml
+	ocaml unix.cma $(CMA) handbookgraphs.ml
+	make -C test manual
+	make -C test/manual mpost
+	gv test/testmanual.ps
+
+other: $(CMXA) othergraphs.ml
+	$(OCAMLOPT) -o othergraphs.exe unix.cmxa $(CMXA) othergraphs.ml
+	./othergraphs.exe
+	make -C test other
+	make -C test/othergraphs mpost
+	gv test/othergraphs.ps
+
+other.byte: $(CMA) othergraphs.ml
+	ocaml unix.cma $(CMA) othergraphs.ml
+	make -C test other
+	make -C test/othergraphs mpost
+	gv test/othergraphs.ps
+
+.PHONY: check-examples examples
+SUBDIRMLPOST:=../tool.opt -ccopt "-I ../ " -v -ps
+MAKEEXAMPLES=make -C examples MLPOST='$(SUBDIRMLPOST)'
+
+check-examples: mlpost.cma tool.opt
+	$(MAKEEXAMPLES) boxes.dummy
+	$(MAKEEXAMPLES) paths.dummy
+	$(MAKEEXAMPLES) tree.dummy
+	$(MAKEEXAMPLES) label.dummy
+	make -C multi-examples
+
+examples:
+	$(MAKEEXAMPLES)
+
+examples-html:
+	$(MAKEEXAMPLES) html
+
+# GUI
+
+.PHONY: gui
+
+gui: gui/gmlpost.opt
+
+GUICMO = gui/glexer.cmo gui/gmlpost.cmo
+GUICMX := $(GUICMO:.cmo=.cmx)
+
+gui/gmlpost.opt: $(GUICMX)
+	$(OCAMLOPT) $(OFLAGS) -o $@ unix.cmxa threads.cmxa lablgtk.cmxa gtkThread.cmx lablgnomecanvas.cmxa $^
+
+gui/gmlpost.byte: $(GUICMO)
+	$(OCAMLC) $(BFLAGS) -o $@ unix.cma lablgtk.cma threads.cma gtkThread.cmo $^
+
+#version.ml: Makefile
+#	echo "let version = \""$(MLPOSTVERSION)"\"" > version.ml
+#	echo "let date = \""`date`"\"" >> version.ml
+#	echo "let ocamlopt = \""$(OCAMLOPT)"\"" >> version.ml
+
+dep:
+	$(OCAMLDEP) *.mli *.ml | ocamldot | dot -Tps | gv -
+
+wc:
+	ocamlwc *.ml* -p
+
+# headers
+#########
+
+headers:
+	headache -c headache_config.txt -h header.txt \
+		Makefile.in configure.in README.txt *.mli *.ml *.mll
+
+# installation
+##############
+
+install: install-$(OCAMLBEST) 
+
+install-byte: $(CMA) tool.byte
+	mkdir -p $(LIBDIR)
+	cp -f mlpost.cmo mlpost.cmi META $(CMA) "$(LIBDIR)"
+	mkdir -p $(BINDIR)
+	cp -f tool.byte $(BINDIR)/mlpost
+	cp -f mlpost.1 $(MANDIR)/man1
+
+install-opt: $(CMXA) tool.opt
+	mkdir -p $(LIBDIR)
+	cp -f mlpost.cmo mlpost.cmi META $(CMA) "$(LIBDIR)"
+	cp -f mlpost$(LIBEXT) mlpost.cmx $(CMXA) "$(LIBDIR)"
+	mkdir -p $(BINDIR)
+	cp -f tool.opt $(BINDIR)/mlpost
+	cp -f mlpost.1 $(MANDIR)/man1
+
+# export
+########
+
+EXPORTDIR=$(NAME)-$(MLPOSTVERSION)
+TAR=$(EXPORTDIR).tar
+
+WWW = /users/www-perso/projets/mlpost
+FTP = $(WWW)/download
+
+FILES = *.ml *.mli *.mll \
+	Makefile.in configure configure.in .depend \
+	README.txt INSTALL LICENSE CHANGES FAQ META.in version.ml.in mlpost.1
+EXFILES = examples/Makefile examples/*.ml examples/all.template\
+	  examples/index.html examples/parse.mll examples/README examples/automaton4.tex
+DOCFILES = doc/Makefile doc/*.ml doc/all.template\ doc/
+LATEXFILES = latex/*sty latex/*tex latex/README
+
+export: export-source export-www export-examples export-doc
+	cp README.txt INSTALL LICENSE CHANGES FAQ $(FTP)
+
+export-source: source
+	cp export/$(TAR).gz $(FTP)
+
+source: 
+	mkdir -p export/$(EXPORTDIR)
+	cp $(FILES) export/$(EXPORTDIR)
+	mkdir -p export/$(EXPORTDIR)/examples
+	cp $(EXFILES) export/$(EXPORTDIR)/examples
+	mkdir -p export/$(EXPORTDIR)/doc
+	cp $(DOCFILES) export/$(EXPORTDIR)/doc
+	mkdir -p export/$(EXPORTDIR)/latex
+	cp $(LATEXFILES) export/$(EXPORTDIR)/latex
+	cd export ; tar cf $(TAR) $(EXPORTDIR) ; gzip -f --best $(TAR)
+
+
+DOCFILES:=$(shell echo *.mli)
+DOCFILES:=$(filter-out types.mli, $(DOCFILES))
+
+.PHONY: doc
+doc: doc/index.html tool.opt
+	make -C doc MLPOST='$(SUBDIRMLPOST)'
+
+doc/index.html: mlpost.mli customdoc/img.cmo
+	ocamldoc -hide Mlpost -g customdoc/img.cmo -d doc mlpost.mli
+
+customdoc/img.cmo: customdoc/img.ml
+	make -C customdoc
+
+export-doc: doc
+	cp -r doc/*.html doc/*.png doc/style.css $(WWW)/doc
+
+export-www: www/version.prehtml
+	make -C www
+
+www/version.prehtml: Makefile
+	echo "<#def version>$(MLPOSTVERSION)</#def>" > www/version.prehtml
+
+export-examples: 
+	$(MAKEEXAMPLES)
+	cp -f --parents examples/*.png examples/*.html $(WWW)
+
+# literate programming
+######################
+
+SOURCES = 
+
+$(NAME).tex: $(SOURCES)
+	$(OCAMLWEB) -o $@ $^
+
+# generic rules
+###############
+
+.SUFFIXES: .mli .ml .cmi .cmo .cmx .mll .mly .tex .dvi .ps .html
+
+.mli.cmi:
+	$(OCAMLC) -c $(BFLAGS) $<
+
+.ml.cmo:
+	$(OCAMLC) -c $(BFLAGS) $<
+
+.ml.o:
+	$(OCAMLOPT) -c $(OFLAGS) $<
+
+.ml.cmx:
+	$(OCAMLOPT) -c $(OFLAGS) $<
+
+.mll.ml:
+	$(OCAMLLEX) $<
+
+.mly.ml:
+	$(OCAMLYACC) -v $<
+
+.mly.mli:
+	$(OCAMLYACC) -v $<
+
+.tex.dvi:
+	latex $< && latex $<
+
+.dvi.ps:
+	dvips $< -o $@ 
+
+.tex.html:
+	hevea $<
+
+
+# Emacs tags
+############
+
+tags:
+	find . -name "*.ml*" | sort -r | xargs \
+	etags "--regex=/let[ \t]+\([^ \t]+\)/\1/" \
+	      "--regex=/let[ \t]+rec[ \t]+\([^ \t]+\)/\1/" \
+	      "--regex=/and[ \t]+\([^ \t]+\)/\1/" \
+	      "--regex=/type[ \t]+\([^ \t]+\)/\1/" \
+              "--regex=/exception[ \t]+\([^ \t]+\)/\1/" \
+	      "--regex=/val[ \t]+\([^ \t]+\)/\1/" \
+	      "--regex=/module[ \t]+\([^ \t]+\)/\1/"
+
+.PHONY: ocamlwizard
+ocamlwizard:
+	ocamlrun -bt ocamlwizard compile types.mli $(CMO:.cmo=.ml) mlpost.mli
+
+# Makefile is rebuilt whenever Makefile.in or configure.in is modified
+######################################################################
+
+Makefile META version.ml: Makefile.in META.in version.ml.in config.status
+	./config.status
+
+config.status: configure
+	./config.status --recheck
+
+configure: configure.in
+	autoconf 
+
+# clean
+#######
+
+clean::
+	rm -f *.cm[iox] *.o *~ *.annot
+	rm -f $(GENERATED) parser.output
+	rm -f $(NAME).cma $(NAME).cmxa $(NAME).a
+	rm -f *.aux *.log $(NAME).tex $(NAME).dvi $(NAME).ps
+	rm -f *.opt *.byte test.dvi test.ps *.exe
+
+cleaner:: clean
+	make -C test clean
+	make -C multi-examples clean
+	make -C www clean
+	make -C doc clean
+	make -C examples clean
+
+dist-clean distclean:: clean
+	rm -f Makefile config.cache config.log config.status META version.ml
+
+# depend
+########
+
+.depend depend:: $(GENERATED)
+	rm -f .depend
+	$(OCAMLDEP) $(INCLUDES) *.ml *.mli gui/*.mli gui/*.ml > .depend
+
+include .depend

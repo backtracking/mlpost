@@ -139,7 +139,7 @@ and pen fmt x =
   | PenCircle -> assert false
   | PenSquare -> assert false
   | PenFromPath p -> assert false
-  | PenTransformed (p,trl) -> assert false
+  | PenTransformed (p,trl) -> fprintf fmt "(%a,%a)" pen p transform trl
 
 and dash fmt x = 
   match x.Hashcons.node with

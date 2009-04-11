@@ -1,4 +1,5 @@
 open Printf
+open Point_lib
 let com_latex = "latex"
 let genfile_name = "gentex"
 let default_prelude = "\\documentclass{article}\n\\begin{document}"
@@ -27,14 +28,6 @@ type t = {tex : Dev_save.t;
 module Saved_device = Dviinterp.Interp(Dev_save.Dev_save)
 module Cairo_device = Dev_save.Dev_load(Dvicairo.Cairo_device)
 
-let draw cr tex = 
-  Cairo.save cr;
-  Cairo.transform cr (Matrix.to_cairo tex.trans);
-  Cairo_device.replay false tex.tex 
-  {Dvicairo.pic = cr;new_page = (fun () -> assert false);
-   x_origin = 0.; y_origin = 0.};
-  Cairo.restore cr
-
 let create prelude texs =
   let format fmt = Printf.fprintf fmt
     "%s
@@ -58,7 +51,7 @@ let create prelude texs =
     let file = open_out latex in
     Printf.fprintf file "%t" format;
     close_out file;
-    let exit_status = Sys.command (sprintf "%s %s" com_latex latex) in
+    let exit_status = Sys.command (sprintf "%s %s > /dev/null" com_latex latex) in
     if exit_status <> 0 then failwith (sprintf "Error with : %s %s" com_latex latex);
     let dvi = genfile_name^".dvi" in
     let saved = Saved_device.load_file () dvi in
@@ -79,4 +72,19 @@ let get_dimen_pt x =
 let get_bases_cm x = Dev_save.get_bases_first_page x.tex
 let get_bases_pt x = List.map point_of_cm (get_bases_cm x)
 
-let bounding_box = get_dimen_pt
+let bounding_box x = 
+  let (xmin,ymin,xmax,ymax) = get_dimen_pt x in
+  {x=xmin;y=ymin},{x=xmax;y=ymax}
+
+let print fmt tex =
+  let min,max = bounding_box tex in
+  Format.fprintf fmt "[%a,%a]" print min print max
+
+let draw cr tex = 
+  Cairo.save cr;
+  Cairo.transform cr (Matrix.to_cairo tex.trans);
+  Cairo_device.replay false tex.tex 
+  {Dvicairo.pic = cr;new_page = (fun () -> assert false);
+   x_origin = 0.; y_origin = 0.};
+  Cairo.restore cr
+  ;Format.printf "Gentex : %a@." print tex

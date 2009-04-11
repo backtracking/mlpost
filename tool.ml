@@ -103,7 +103,7 @@ let ocaml args execopt =
 
 let ocamlopt args execopt =
   let exe = Filename.temp_file "mlpost" ".exe" in
-  let cmd = "ocamlopt.opt -o " ^ exe ^ " " ^ String.concat " " args in
+  let cmd = Version.ocamlopt^"-o " ^ exe ^ " " ^ String.concat " " args in
   let () = if !verbose then Format.eprintf "%s@." cmd in
   let out = Sys.command cmd in
   if out <> 0 then exit 2;
@@ -178,14 +178,14 @@ let compile f =
     let notcairo = Version.includecairo = "" in
     if !native then
       let cairo_args = if notcairo then [] 
-      else [Version.includecairo; "cairo.cmxa"; "bitstring.cmxa"] in
-      ocamlopt ([!ccopt; "-I"; !libdir] @ cairo_args @ 
-        ["unix.cmxa";"mlpost.cmxa"; mlf]) !execopt
+      else [Version.includecairo; "bigarray.cmxa"; "cairo.cmxa"; "bitstring.cmxa"] in
+      ocamlopt ([!ccopt; "-I"; !libdir;"unix.cmxa"] @ cairo_args @ 
+        ["mlpost.cmxa"; mlf]) !execopt
     else
       let cairo_args = if notcairo then [] 
-      else [Version.includecairo; "cairo.cma"; "bitstring.cma"] in
-      ocaml ([!ccopt; "-I"; !libdir] @ cairo_args @
-               ["unix.cma";"mlpost.cma"; mlf]) !execopt;
+      else [Version.includecairo; "bigarray.cma"; "cairo.cma"; "bitstring.cma"] in
+      ocaml ([!ccopt; "-I"; !libdir;"unix.cma"] @ cairo_args @
+               ["mlpost.cma"; mlf]) !execopt;
 
   Sys.remove mlf;
   if !xpdf then begin

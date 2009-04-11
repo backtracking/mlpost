@@ -14,6 +14,9 @@
 (*                                                                        *)
 (**************************************************************************)
 
+let default_labeloffset = 2.
+
+
 open Types
 open Hashcons
 module P = Point_lib
@@ -39,17 +42,17 @@ let option_compile f = function
 
 let middle x y = (x/.2.)+.(y/.2.)
 
-let point_of_position 
+let point_of_position ecart
   ({ P.x = xmin; y = ymin}, { P.x = xmax; y = ymax}) = 
     function
-      | `Top -> {P.x=middle xmin xmax; y=ymax}
-      | `Bot -> {P.x=middle xmin xmax; y=ymin}
-      | `Left -> {P.x=xmax; y=middle ymin ymax}
-      | `Right -> {P.x=xmin; y=middle ymin ymax}
-      | `Upleft -> {P.x=xmax;y=ymax}
-      | `Upright -> {P.x=xmin;y=ymax}
-      | `Lowleft -> {P.x=xmax;y=ymin}
-      | `Lowright -> {P.x=xmin;y=ymin}
+      | `Top -> {P.x=middle xmin xmax; y=ymin-.ecart}
+      | `Bot -> {P.x=middle xmin xmax; y=ymax+.ecart}
+      | `Left -> {P.x=xmax+.ecart; y=middle ymin ymax}
+      | `Right -> {P.x=xmin-.ecart; y=middle ymin ymax}
+      | `Upleft -> {P.x=xmax+.ecart;y=ymin-.ecart}
+      | `Upright -> {P.x=xmin-.ecart;y=ymin-.ecart}
+      | `Lowleft -> {P.x=xmax+.ecart;y=ymax+.ecart}
+      | `Lowright -> {P.x=xmin-.ecart;y=ymax+.ecart}
       | `Center -> {P.x = middle xmin xmax; P.y = middle ymin ymax }
 
 let num_memoize = Hashtbl.create 50
@@ -132,7 +135,7 @@ and point' = function
       P.rotated f p1
   | PTPicCorner (pic, corner) ->
       let p = picture pic in
-      point_of_position (Picture_lib.bounding_box p) corner
+      point_of_position 0. (Picture_lib.bounding_box p) corner
   | PTTransformed (p,tr) ->
       let p = point p in
       let tr = transform tr in
@@ -226,6 +229,7 @@ and picture' = function
       Picture_lib.transform tr pic
   | PITex s -> 
       let tex = List.hd (Gentex.create !prelude [s]) in
+      Format.printf "tex : %a@." Gentex.print tex;
       Picture_lib.tex tex
   | PIMake c -> command c
   | PIClip (pic,pth) ->
@@ -241,7 +245,10 @@ and transform t =
   | TRSlanted f -> Matrix.slanted (num f)
   | TRXscaled f -> Matrix.xscaled (num f)
   | TRYscaled f -> Matrix.yscaled (num f)
-  | TRShifted p -> Matrix.translation (point p)
+  | TRShifted p -> 
+      let p = point p in
+      let m = Matrix.translation p in
+      Format.printf "Shifted p:%a  m:%a@." P.print p M.print m;m
   | TRZscaled p -> Matrix.zscaled (point p)
   | TRReflect (p1,p2) -> Matrix.reflect (point p1) (point p2)
   | TRRotateAround (p,f) -> Matrix.rotate_around (point p) f
@@ -288,15 +295,16 @@ and command' = function
   | CDotLabel (pic, pos, pt) -> 
       let pic = picture pic in
       let pt = point pt in
-      let tr = Matrix.translation
-        (P.sub (point_of_position (Picture_lib.bounding_box pic) pos) pt) in
+      let mm = (Picture_lib.bounding_box pic) in
+      let pos = (point_of_position default_labeloffset mm pos) in
+      let tr = Matrix.translation (P.sub pt pos) in
       Picture_lib.on_top (Picture_lib.draw_point pt)
         (Picture_lib.transform tr pic)
   | CLabel (pic, pos ,pt) -> 
       let pic = picture pic in
       let pt = point pt in
-      let tr = Matrix.translation
-        (P.sub (point_of_position (Picture_lib.bounding_box pic) pos) pt) in
+      let pos = (point_of_position default_labeloffset (Pi.bounding_box pic) pos) in
+      let tr = Matrix.translation (P.sub pt pos) in
       Picture_lib.transform tr pic
   | CExternalImage (filename,sp) -> 
       Picture_lib.external_image filename (spec sp)

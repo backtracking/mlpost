@@ -175,6 +175,25 @@ fi
 # the library
 AC_CHECK_PROG(OCAMLFIND,ocamlfind,yes,no)
 
+if test "$OCAMLFIND" == "yes"; then
+   OCAMLFINDLIB=$(ocamlfind printconf stdlib)
+   if test "$OCAMLFINDLIB" != "$OCAMLLIB"; then
+   OCAMLFIND=no;
+   echo "but your ocamlfind is not compatible with your ocamlc:"
+   echo "ocamlfind : $OCAMLFINDLIB, ocamlc : $OCAMLLIB"
+   fi
+fi
+
+case $OCAMLVERSION in
+  3.08|3.09*)
+        echo "Your ocaml is too old. I can't compile the backend cairo without ocamlbuild"
+        MAKEFILE=simple.Makefile;;
+  *)
+        OCAMLBUILD=yes
+        echo "ocamlbuild ok"
+        MAKEFILE=ocamlbuild.Makefile;;
+esac
+
 # checking for mlcairo
 if test "$OCAMLFIND" == yes; then
    CAIROLIB=$(ocamlfind query cairo)
@@ -186,7 +205,7 @@ else
     AC_CHECK_FILE($OCAMLLIB/cairo/cairo.cma,CAIRO=yes,CAIRO=no)
     if test "$CAIRO" = yes; then
        CAIROLIB=$OCAMLLIB/cairo/
-    elif test -z "$CAIROLIBLOCAL"; then
+    elif test -n "$OCAMLLIBLOCAL"; then
        AC_CHECK_FILE($OCAMLLIBLOCAL/cairo/cairo.cma,CAIRO=yes,CAIRO=no)
        if test "$CAIRO" = yes; then
        CAIROLIB=$OCAMLLIBLOCAL/cairo/
@@ -204,7 +223,7 @@ else
     AC_CHECK_FILE($OCAMLLIB/bitstring/bitstring.cma,BITSTRING=yes,BITSTRING=no)
     if test "$BITSTRING" = yes; then
        BITSTRINGLIB=$OCAMLLIB/bitstring/
-    elif test -z "$BITSTRINGLIBLOCAL"; then
+    elif test -n "$OCAMLLIBLOCAL"; then
        AC_CHECK_FILE($OCAMLLIBLOCAL/bitstring/bitstring.cma,BITSTRING=yes,BITSTRING=no)
        if test "$BITSTRING" = yes; then
        BITSTRINGLIB=$OCAMLLIBLOCAL/bitstring/
@@ -212,7 +231,7 @@ else
     fi
 fi
 
-if test -n "$CAIROLIB" -a -n "$BITSTRINGLIB"; then
+if test -n "$OCAMLBUILD" -a -n "$CAIROLIB" -a -n "$BITSTRINGLIB"; then
    CAIRO=yes
    INCLUDECAIRO="-I $CAIROLIB -I $BITSTRINGLIB"
 else
@@ -221,8 +240,8 @@ else
 fi
 
 #TEMPORAIRE
-CAIRO=no
-INCLUDECAIRO=""
+#CAIRO=no
+#INCLUDECAIRO=""
 
 # checking for lablgtk2
 if test "$OCAMLFIND" == yes; then
@@ -235,7 +254,7 @@ else
     AC_CHECK_FILE($OCAMLLIB/lablgtk2/lablgtk.cma,LABLGTK2=yes,LABLGTK2=no)
     if test "$LABLGTK2" = yes; then
        LABLGTK2LIB=$OCAMLLIB/lablgtk2/
-    elif test -z "$LABLGTK2LIBLOCAL"; then
+    elif test -n "$OCAMLLIBLOCAL"; then
        AC_CHECK_FILE($OCAMLLIBLOCAL/lablgtk2/lablgtk2.cma,LABLGTK2=yes,LABLGTK2=no)
        if test "$LABLGTK2" = yes; then
        LABLGTK2LIB=$OCAMLLIBLOCAL/lablgtk2/
@@ -265,9 +284,12 @@ AC_SUBST(FORPACK)
 AC_SUBST(BASICOFLAGS)
 #(not used) AC_SUBST(OCAMLLIB)
 AC_SUBST(OCAMLWEB)
+AC_SUBST(OCAMLBUILD)
 AC_SUBST(LABLGTK2)
 AC_SUBST(INCLUDEGTK2)
+AC_SUBST(LABLGTK2LIB)
 AC_SUBST(CAIRO)
+AC_SUBST(CAIROLIB)
 AC_SUBST(INCLUDECAIRO)
 AC_SUBST(BITSTRINGLIB)
 AC_SUBST(OCAMLWIN32)
@@ -285,8 +307,10 @@ echo "  Cairo support          : "$CAIRO
 echo "---------------------------------------------------"
 
 # Finally create the Makefile from Makefile.in
-AC_OUTPUT(Makefile META version.ml backend/Makefile)
+
+AC_OUTPUT(META version.ml $MAKEFILE Makefile myocamlbuild.ml)
+chmod a-w $MAKEFILE
 chmod a-w Makefile
-chmod a-w backend/Makefile
+chmod a-w myocamlbuild.ml
 chmod a-w META
 chmod a-w version.ml

@@ -75,7 +75,7 @@ val transform : Cairo.matrix -> path -> path
 
 val buildcycle : path -> path -> path
 
-val of_bounding_box : float * float * float * float -> path
+val of_bounding_box : point * point -> path
 
 module Epure :
 sig
@@ -86,7 +86,8 @@ sig
   val union : t -> t -> t
   val transform : Cairo.matrix -> t -> t
   val bounding_box : t -> point * point
-val of_bounding_box : float * float * float * float -> t
+  val of_bounding_box : point * point -> t
+  val draw : Cairo.t -> t -> unit
 end
 
 module Approx :
@@ -98,7 +99,7 @@ module Approx :
     val unitsquare : unit -> path
   end
 
-module Cairo :
+module ToCairo :
   sig
     val draw : Cairo.t -> path -> unit
   end

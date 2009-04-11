@@ -1,5 +1,5 @@
 open Types
-
+open Point_lib
 exception Not_implemented of string
 
 let not_implemented s = raise (Not_implemented s)
@@ -78,7 +78,7 @@ let external_image filename spec =
               (fh/.fw)*.w,w
     end in
   {fcl = ExternalImage (filename,height,width);
-   fb = Spline_lib.Epure.of_bounding_box (0.,0.,width,height);
+   fb = Spline_lib.Epure.of_bounding_box ({x=0.;y=0.},{x=width;y=height});
    fi = IntEmpty}
    
 let interative path id = {fcl = Empty;
@@ -96,7 +96,7 @@ let transform m t = {fcl = Transform (m,t.fcl);
 let shift t w h = transform (Matrix.xy_translation w h) t
 let bounding_box t = Spline_lib.Epure.bounding_box t.fb
 
-module Cairo =
+module ToCairo =
 struct
   let rec color cr = function
     | OPAQUE (RGB (r,g,b)) -> Cairo.set_source_rgb cr r g b
@@ -114,19 +114,29 @@ struct
     | None | Some (_,[]) -> ();
     | Some (f,l) -> Cairo.set_dash cr (Array.of_list l) f
 
+  let inversey cr height = 
+    Cairo.translate cr ~tx:0. ~ty:height;
+    Cairo.scale cr ~sx:1. ~sy:(-.1.)
+
   let rec draw_aux cr = function
     | Empty -> ()
     | Transform (m,t) -> 
         Cairo.save cr;
         Matrix.transform cr m;
+        Format.printf "Transform : %a@." Matrix.print m;
         draw_aux cr t;
         Cairo.restore cr
     | OnTop l -> List.iter (draw_aux cr) l
-    | Tex t -> Gentex.draw cr t
+    | Tex t -> 
+        Cairo.save cr;
+        let ({y=min},{y=max}) = Gentex.bounding_box t in
+        inversey cr (max+.min);
+        Gentex.draw cr t;
+        Cairo.restore cr
     | Stroke_path (path,c,pen,d) ->
         Cairo.save cr;
         color_option cr c;
-        Spline_lib.Cairo.draw cr path;
+        Spline_lib.ToCairo.draw cr path;
         dash cr d;
         (match pen with
            | None -> ()
@@ -136,17 +146,18 @@ struct
     | Fill_path (path,c)-> 
         Cairo.save cr;
         color_option cr c;
-        Spline_lib.Cairo.draw cr path;
+        Spline_lib.ToCairo.draw cr path;
         Cairo.fill cr;
         Cairo.restore cr
     | Clip (com,p) -> 
         Cairo.save cr;
-        Spline_lib.Cairo.draw cr p;
+        Spline_lib.ToCairo.draw cr p;
         Cairo.clip cr;
         draw_aux cr com;
         Cairo.restore cr
     | ExternalImage (filename,height,width) -> 
         Cairo.save cr;
+        inversey cr height;
         let img = Cairo_png.image_surface_create_from_file filename in
         let iwidth = float_of_int (Cairo.image_surface_get_width img) in
         let iheight = float_of_int (Cairo.image_surface_get_height img) in
@@ -155,7 +166,13 @@ struct
         Cairo.paint cr;
         Cairo.restore cr
 
-  let draw cr p = draw_aux cr p.fcl
+  let draw cr width height p =
+    Cairo.save cr;
+    inversey cr height;
+    Cairo.set_line_width cr 1.;
+    draw_aux cr p.fcl;
+    (*Spline_lib.Epure.draw cr p.fb;*)
+    Cairo.restore cr
 
   let where cr t (x,y) = not_implemented "where"
   let move t id p = not_implemented "move"

@@ -38,6 +38,6 @@ let handbook3 = seq [ draw (path ~style:jCurve  l1); labels1 ]
 
 let _ = 
   List.iter (fun (name,fig) -> Cairost.emit_pdf name fig)
-  [ "other27", other27;
-    "handbook3", handbook3;
+  [ "other27.pdf", other27;
+    "handbook3.pdf", handbook3;
   ]

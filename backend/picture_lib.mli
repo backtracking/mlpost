@@ -49,9 +49,9 @@ val bounding_box : t -> point * point
 
 
 
-module Cairo :
+module ToCairo :
 sig
-  val draw : Cairo.t -> t -> unit
+  val draw : Cairo.t -> float -> float -> t -> unit
   val where : Cairo.t -> t -> float * float -> id list
   val move : Cairo.t -> t -> id -> float * float -> float * float
 end

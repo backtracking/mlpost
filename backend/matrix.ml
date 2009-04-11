@@ -20,7 +20,12 @@ let reflect p1 p2 = (*TODO *) assert false
 let rotate_around p f = 
   translate (rotate (translation (mult (-1.) p)) f) p.x p.y
 
+let invert = invert
+
 let to_cairo x = x
 let identity = init_identity
 
 let transform = Cairo.transform
+
+let print fmt m = 
+  Format.fprintf fmt "[|[|%f;%f|];[|%f;%f|];[|%f;%f|]|]" m.xx m.xy m.yx m.yy m.x0 m.y0
