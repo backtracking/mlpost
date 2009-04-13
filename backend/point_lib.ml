@@ -24,3 +24,6 @@ open Infix
 let segment f p1 p2 = (1.-.f) */ p1 +/ f */ p2
 let middle = segment 0.5
 let print fmt x = Format.fprintf fmt "(%f,%f)" x.x x.y
+
+let norm2 p : float = p.x*.p.x+.p.y*.p.y
+let norm p = sqrt (norm2 p)

@@ -3,8 +3,8 @@ exception Not_implemented of string
 
 let not_implemented s = raise (Not_implemented s)
 
-
-type point = Point_lib.point
+module P = Point_lib
+type point = P.point
 
 let id x = x
 open Point_lib
@@ -568,6 +568,89 @@ module Metapath =
      | Cons (p,j,k) -> fprintf fmt "%a;%a-%a" print p print_joint j print_knot k
      | Start_Path p-> fprintf fmt "{%a}" printf p
      | Append_Path (p1,j,p2) ->fprintf fmt "%a;%a-%a" print p1 print_joint j printf p2
+
+
+   let p213 p1 p2 p3 : P.t * P.t =
+   let p21 = P.sub p2 p1 in
+   let p23 = P.sub p2 p3 in
+   (p21,p23)
+
+   let ro p1 p2 p3 = 
+     let (p21,p23) = p213 p1 p2 p3 in
+     sqrt ((P.norm2 p23)/.(P.norm2 p21))
+
+   let psi p1 p2 p3 =
+     let (p21,p23) = p213 p1 p2 p3 in
+     (atan2 p23.x p23.y)-.(atan2 p21.x p21.y)
+
+   let deltak p1 p2 = 
+     let p21 = P.sub p2 p1 in
+     P.norm2 p21
+
+   type tension = float
+   type delta = float
+   and tc = tension * point * tc_aux
+   and tc_aux =
+     | COpen of tension * tc
+     | CEnd of tcend
+     | CCycle of tension * tcend * point * delta * float
+   and tcend =
+     [ `Open
+     | `Curve of float
+     | `Given of float ]
+
+   and tcl =
+     | TC of tcend * tc * tcl
+     | TExplicit of spline * tcl
+     | TEnd
+
+(*   let solve_choices first tc =
+     (* Metafont is wiser in the computation of 
+        calc_value, calc_ff *)
+     (* dk1, uk1 are d_k-1, u_k-1 *)
+     let calc_value dk1 dk absrtension absltension uk =
+       let aa = 1./.(3.*.absrtension -. 1.) in
+       let bb = 1./.(3.*.absltension -. 1.) in
+       let dd = dk*.(3.-.1./.absrtension) in
+       let ee = dk1*.(3.-.1./.absltension) in
+       let cc = 1.-.(uk*.aa) in
+       (aa,bb,cc,dd,ee)
+   let calc_ff cc dd ee absrtension absltension =
+     let dd = dd*.cc in
+     let tmp = absltension/.absrtension in
+     let tmp = tmp*.tmp in
+     let dd = dd*.tmp in
+     ee/.(ee+.ff)
+     let rec aux dk1 pk1 psik uk1 vk1 wk1 = function
+       | t1,pk,((COpen (t2,(p1k,_))|CCycle (t2,p1k,_,_)) as n) -> 
+           let dk = deltak p p1k in
+           let absrtension,absltension = (abs t1),(abs t2) in
+           let (aa,bb,cc,dd,ee) = calc_value dk1 dk absrtension absltension uk1 in
+           let ff = calc_ff cc dd ee absrtension absltension in
+           let uk = ff*.bb in
+           let psi1k = match n with 
+             | COpen (_,(_,COpen(_,p2k))) -> phi pk p1k p2k
+             | _ -> 0 in
+           (* perhaps should test for curl as in metafont *)
+           let acc = -.psi1k*.uk in
+           let ff = (1.-.ff)*.cc in 
+           let acc = acc -. (psik*.ff) in
+           let ff = ff*.aa in
+           let vk = acc -. (vk1*.ff) in
+           let wk = -.(wk1*.ff) in
+           match n with
+             |COpen _ -> let = aux dk p psi1k uk vk wk n in
+             |CCycle _ ->
+       | CEnd 
+
+     in
+     let equa = 
+       match first with
+         | `Open -> 
+         | `Curve f ->
+         | `Given f -> in
+     let l = aux equa tc in
+     *) 
 
 
    let rec to_path_simple = function
