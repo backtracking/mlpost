@@ -45,11 +45,12 @@ else
 TOOL= tool.byte
 endif
 
+OCAMLBUILD := ocamlbuild -tag cairo_@CAIRO@
+BUILD := _build/
+
 CMA := mlpost.cma
 CMXA := mlpost.cmxa
 
-OCAMLBUILD := ocamlbuild -tag cairo_@CAIRO@
-BUILD := _build/
 
 ifeq "$(OCAMLBEST)" "opt"
 all: 
@@ -72,52 +73,52 @@ tool.byte:
 tool.opt:
 	$(OCAMLBUILD) tool.native
 
-tests: $(CMXA) tests.ml
-	$(OCAMLOPT) -o tests.exe unix.cmxa $(CMXA) tests.ml
+tests: opt tests.ml
+	$(OCAMLOPT) -o tests.exe unix.cmxa $(BUILD)$(CMXA) tests.ml
 	./tests.exe
 	make -C test tests
 	gv test/tests.ps
 
-testbox: $(CMXA) testbox.ml
+testbox: opt testbox.ml
 	$(OCAMLOPT) -o testbox.exe unix.cmxa $(CMXA) testbox.ml
 	./testbox.exe
 	make -C test testbox
 	gv test/testbox.ps
 
-tests.pdf: $(CMXA) tests.ml
-	$(OCAMLOPT) -o tests.exe unix.cmxa $(CMXA) tests.ml
+tests.pdf: opt tests.ml
+	$(OCAMLOPT) -o tests.exe unix.cmxa $(BUILD)$(CMXA) tests.ml
 	./tests.exe
 	make -C test tests.pdf
 	xpdf test/tests.pdf
 
 
-tests.byte: $(CMA) tests.ml
-	ocaml unix.cma $(CMA) tests.ml
+tests.byte: byte tests.ml
+	ocaml unix.cma $(BUILD)$(CMA) tests.ml
 	make -C test tests
 	gv test/tests.ps
 
-handbook: $(CMXA) handbookgraphs.ml
-	$(OCAMLOPT) -o handbook.exe unix.cmxa $(CMXA) handbookgraphs.ml
+handbook: opt handbookgraphs.ml
+	$(OCAMLOPT) -o handbook.exe unix.cmxa $(BUILD)$(CMXA) handbookgraphs.ml
 	./handbook.exe
 	make -C test manual
 	make -C test/manual mpost
 	gv test/testmanual.ps
 
-handbook.byte: $(CMA) handbookgraphs.ml
-	ocaml unix.cma $(CMA) handbookgraphs.ml
+handbook.byte: byte handbookgraphs.ml
+	ocaml unix.cma $(BUILD)$(CMA) handbookgraphs.ml
 	make -C test manual
 	make -C test/manual mpost
 	gv test/testmanual.ps
 
-other: $(CMXA) othergraphs.ml
-	$(OCAMLOPT) -o othergraphs.exe unix.cmxa $(CMXA) othergraphs.ml
+other: opt othergraphs.ml
+	$(OCAMLOPT) -o othergraphs.exe unix.cmxa $(BUILD)$(CMXA) othergraphs.ml
 	./othergraphs.exe
 	make -C test other
 	make -C test/othergraphs mpost
 	gv test/othergraphs.ps
 
-other.byte: $(CMA) othergraphs.ml
-	ocaml unix.cma $(CMA) othergraphs.ml
+other.byte: byte othergraphs.ml
+	ocaml unix.cma $(BUILD)$(CMA) othergraphs.ml
 	make -C test other
 	make -C test/othergraphs mpost
 	gv test/othergraphs.ps

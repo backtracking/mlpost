@@ -17,11 +17,21 @@ let _ = dispatch begin function
   | Before_rules ->
       tagcairo := Ocamlbuild_pack.Configuration.has_tag "cairo_yes";
       if !tagcairo && not cairopossible then failwith ("configure don't find the library for the cairo backend, I can't compile");
-       let cairost_rule suf yesno = rule ("cairost generation for "^suf^yesno) ~deps:["cairost"^suf^yesno^".ml"] ~prod:("cairost"^suf^".ml")
-         (fun _ _ -> cp ("cairost"^suf^yesno^".ml") ("cairost"^suf^".ml")) in
+
+
+       let yesnofile_rule file yesno ext = rule (file^" generation for "^yesno) ~deps:[file^yesno^ext] ~prod:(file^ext)
+         (fun _ _ -> cp (file^yesno^ext) (file^ext)) in
        if !tagcairo
-       then (cairost_rule "" "_yes";cairost_rule "_sig" (*"_yes"*) "_no") (*temporaire*)
-       else (cairost_rule "" "_no";cairost_rule "_sig" "_no";)
+       then (yesnofile_rule "cairost" "_yes" ".ml";
+             yesnofile_rule "cairost_sig" "_yes" ".ml";
+             yesnofile_rule "mlpost" "_yes" ".mlpack";
+            ) (*temporaire*)
+       else (yesnofile_rule "cairost" "_no" ".ml";
+             yesnofile_rule "cairost_sig" "_no" ".ml";
+             yesnofile_rule "mlpost" "_no" ".mlpack";
+            )
+
+
   | After_rules ->
        List.iter begin function pkg,dir,file ->
          ocaml_lib ~extern:true ~tag_name:("pkg_"^pkg) ~dir file;
