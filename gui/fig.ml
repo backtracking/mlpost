@@ -27,35 +27,35 @@ module Edit = struct
     | Bp -> Num.bp
     | Inch -> Num.inch
 
-  let num s v =
+  let num s v dimension =
     try match Hashtbl.find table s with
       | Num (_, (f, dim)) -> mk_num dim f
       | Point _ -> invalid_arg ("already a point of name " ^ s)
     with Not_found ->
-      let e = Num (s, (v, Bp)) in
+      let e = Num (s, (v, dimension)) in
       elements := e :: !elements;
       Hashtbl.add table s e;
-      Num.bp v
+      mk_num dimension v
 
-  let point s v1 v2 =
+  let point s v1 dim1 v2 dim2 =
     try match Hashtbl.find table s with
       | Num _ -> invalid_arg ("already a num of name " ^ s)
       | Point (_,(n1,d1),(n2,d2)) -> Point.pt (mk_num d1 n1,mk_num d2 n2)
     with Not_found ->
-      let e = Point (s, (v1,Bp), (v2,Bp)) in
+      let e = Point (s, (v1,dim1), (v2,dim2)) in
       elements := e :: !elements;
       Hashtbl.add table s e;
-      Point.pt(Num.bp v1,Num.bp v2)
+      Point.pt(mk_num dim1 v1,mk_num dim2 v2)
 	
   let () =
     at_exit (fun () -> Glexer.write_file file !elements)
 
 end
 
-let ls = Edit.num "ls" (-10.)
-let cs = Edit.num "cs" 30.
-let p1 = Edit.point "p1" 5. 5.
-let p2 = Edit.point "p2" 10. 10.
+let ls = Edit.num "ls" 5. Glexer.Cm
+let cs = Edit.num "cs" 5. Glexer.Cm
+let p1 = Edit.point "p1" 50. Glexer.Bp 50. Glexer.Bp
+let p2 = Edit.point "p2" 100. Glexer.Bp 100. Glexer.Bp
 let chemin = Path.pathp [p1;p2]
 
 let node = node ~ls ~cs

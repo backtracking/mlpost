@@ -1,3 +1,4 @@
+
 open GMain
 open GdkKeysyms
 open Glexer
@@ -80,14 +81,14 @@ let edit_file =
 
 let elements = Glexer.read_file edit_file
 
-let pointstable = Hashtbl.create (List.length elements)
+let pointstable = Hashtbl.create 17
 
 let rec init_table = function
   |[],_,_|_,[],_|_,_,[]|Point _::_ ,_::[],_-> ()
   | Num _::r,_::sps,ps -> 
      init_table (r,sps,ps)
-  | Point (s,_,_)::r,sp1::sp2::sps,p::ps ->       
-      Hashtbl.add pointstable s ((sp1,sp2),p) ;
+  | Point (s,(_,d1),(_,d2))::r,sp1::sp2::sps,p::ps ->       
+      Hashtbl.add pointstable s ((sp1,d1,sp2,d2),p) ;
       init_table (r,sps,ps)
 
 let spins = ref []
@@ -123,17 +124,33 @@ let write_edit ()=
   go_string fmt (elements,!spins);
   fprintf fmt "@?";
   close_out f
+
+let bp_of_dim n = function
+  |Bp -> n
+  |Pt -> n *. 0.99626
+  |Cm -> n *. 28.34645
+  |Mm -> n *. 2.83464
+  |Inch -> n *. 72.
+
+let dim_of_bp n = function
+  |Bp -> n
+  |Pt -> n /. 0.99626
+  |Cm -> n /. 28.34645
+  |Mm -> n /. 2.83464
+  |Inch -> n /. 72.
     
-let update_points _ ((sp1,sp2),p) = 
-  let x = (sp1#value -. !xmin) *. !pic_w /. !dx in
-  let y = (!ymax -. sp2#value ) *. !pic_h /. !dy in
+let update_points _ ((sp1,d1,sp2,d2),p) = 
+  let v1 = bp_of_dim sp1#value d1 in
+  let v2 = bp_of_dim sp2#value d2 in
+  let x = (v1 -. !xmin) *. !pic_w /. !dx in
+  let y = (!ymax -. v2) *. !pic_h /. !dy in
   p#set [ `X1 (x -. 3.) ; `Y1 (y -. 3.) ;
 	  `X2 (x +. 3.) ; `Y2 (y +. 3.) ];
   ()
 
 let refresh (* canvas *) pic () = 
   eprintf "@.------------------------------refresh------------------------------@.";
-  write_edit (); (* ignore (Sys.command "cp fig.edit fig.bak"); *)
+  write_edit (); 
   make_png ();
   let pixbuf = GdkPixbuf.from_file png_file in
   pic#set [`PIXBUF pixbuf];
@@ -151,11 +168,6 @@ let refresh (* canvas *) pic () =
   eprintf "  ymin = %f@." !ymin;
   eprintf "  ymax = %f@." !ymax;
   eprintf "  png  = %f x %f pixels@." !pic_w !pic_h;
-
-  
-(*   canvas#set [`WIDTH_PIXELS 50];  *)
-(*   canvas#set_pixels_per_unit 2.; *)
-(*   canvas#update_now (); *)
   ()
   
 
@@ -189,7 +201,9 @@ let move_point x y s item ev =
       if Gdk.Convert.test_modifier `BUTTON1 state && (belong x y)
       then 
 	begin
-	  let (sp1,sp2),_ = Hashtbl.find pointstable s in
+	  let (sp1,d1,sp2,d2),_ = Hashtbl.find pointstable s in
+	  let x = dim_of_bp x d1 in
+	  let y = dim_of_bp y d2 in
 	    sp1#set_value (!xmin+.(x*. !dx/. !pic_w));
 	    sp2#set_value (!ymax-.(y*. !dy/. !pic_h));
 	    item#set [ `X1 (x -. 3.) ; `Y1 (y -. 3.) ;
@@ -200,37 +214,36 @@ let move_point x y s item ev =
   | _ -> ()
   end ; false
 
-let draw_point root s n1 n2 d1 d2 = match d1,d2 with
-  |Pt,Pt -> ()
-  |Bp,Bp -> 
-     let x = (n1 -. !xmin) *. !pic_w /. !dx in
-     let y = (!ymax -. n2) *. !pic_h /. !dy in
-     let point = GnoCanvas.ellipse ~x1:(x-.3.) ~x2:(x+.3.) ~y1:(y-.3.) ~y2:(y+.3.) 
-       ~props:[ `FILL_COLOR "black" ; `OUTLINE_COLOR "black" ; `WIDTH_PIXELS 0 ] root in
-     let sigs = point#connect in
-     sigs#event (highlight_point point) ;
-     sigs#event (move_point x y s point);
-     points := point::!points;
-     ()
-  |Cm,Cm -> ()
-  |Mm,Mm -> ()
-  |Inch,Inch -> ()
 
-
+let draw_point root s n1 n2 d1 d2 =
+  let v1 = bp_of_dim n1 d1 in
+  let v2 = bp_of_dim n2 d2 in
+  let x = (v1 -. !xmin) *. !pic_w /. !dx in
+  let y = (!ymax -. v2) *. !pic_h /. !dy in
+  let point = GnoCanvas.ellipse ~x1:(x-.3.) ~x2:(x+.3.) ~y1:(y-.3.) ~y2:(y+.3.) 
+    ~props:[ `FILL_COLOR "black" ; `OUTLINE_COLOR "black" ; `WIDTH_PIXELS 0 ] root in
+  let sigs = point#connect in
+  sigs#event (highlight_point point) ;
+  sigs#event (move_point x y s point);
+  points := point::!points;
+  ()
+  
 
 (*------------------------------------------------------------------------*)
 
 let point_of_spin s sb () = 
   let n = sb#value in
   try 
-    let (sb1,_),p = Hashtbl.find pointstable s in 
+    let (sb1,d1,_,d2),p = Hashtbl.find pointstable s in 
     if (sb == sb1)
     then begin
-      let n = (n -. !xmin) *. !pic_w /. !dx in
+      let v = bp_of_dim n d1 in
+      let n = (v -. !xmin) *. !pic_w /. !dx in
       p#set [ `X1 (n -. 3.) ; `X2 (n +. 3.) ]
     end
     else begin
-      let n = (!ymax -. n) *. !pic_h /. !dy in
+      let v = bp_of_dim n d2 in
+      let n = (!ymax -. v) *. !pic_h /. !dy in
       p#set [ `Y1 (n -. 3.) ; `Y2 (n +. 3.) ] 
     end
   with Not_found -> ()
@@ -256,7 +269,7 @@ let left_part pic vbox vbox2 vbox3 root = function
 
 
 let zoom canvas zoo = 
-  z:= !z +. zoo;
+  z:= zoo;
   canvas#set_pixels_per_unit !z
 
   
@@ -311,8 +324,11 @@ let main () =
   
   (* Zoom *)
   let factory = new GMenu.factory zoom_menu ~accel_group in
-  factory#add_item "++" ~key:_A ~callback:(fun()->zoom canvas 0.1);
-  factory#add_item "--" ~key:_B ~callback:(fun()->zoom canvas (-.0.1));
+  factory#add_item "50%" ~callback:(fun()->zoom canvas 0.5);
+  factory#add_item "75%" ~callback:(fun()->zoom canvas 0.75);
+  factory#add_item "100%" ~callback:(fun()->zoom canvas 1.);
+  factory#add_item "125%" ~callback:(fun()->zoom canvas 1.25);
+  factory#add_item "150%" ~callback:(fun()->zoom canvas 1.5);
 
   window#add_accel_group accel_group;  
   
