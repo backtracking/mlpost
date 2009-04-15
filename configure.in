@@ -272,6 +272,11 @@ else
    LABLGTK2=no
 fi
 
+
+#Viewer for ps and pdf
+AC_CHECK_PROGS(PSVIEWER,gv evince)
+AC_CHECK_PROGS(PDFVIEWER,xpdf acroread evince)
+
 # substitutions to perform
 AC_SUBST(OCAMLC)
 AC_SUBST(OCAMLOPT)

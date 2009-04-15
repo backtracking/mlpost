@@ -1,3 +1,6 @@
 <*.cmx> and not <mlpost.cmx>: for-pack(Mlpost)
 
 <cairost.*> or <cairost_sig.*> or <mlpost.mlpack>: pkg_cairo
+
+<test*> : use_unix, pkg_bitstring, pkg_cairo, use_cairo_bigarray
+<handbookgraphs.*> : use_unix, pkg_bitstring, pkg_cairo, use_cairo_bigarray

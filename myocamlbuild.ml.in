@@ -3,9 +3,10 @@ open Ocamlbuild_plugin
 let cairopossible = "@CAIRO@" = "yes"
 let tagcairo = ref false
 
-let packages = ["cairo","@CAIROLIB@","cairo";
-                "bitstring","@BITSTRINGLIB@","bitstring";
-                "lablgtk2","@LABLGTK2LIB@","lablgtk";
+let packages_cairo = ["cairo","@CAIROLIB@","cairo";
+                      "bitstring","@BITSTRINGLIB@","bitstring"]
+
+let packages = ["lablgtk2","@LABLGTK2LIB@","lablgtk";
                 "lablgnomecanvas","@LABLGTK2LIB@","lablgnomecanvas"]
 
 let syntaxes = ["bitstring","@BITSTRINGLIB@",
@@ -33,10 +34,15 @@ let _ = dispatch begin function
 
 
   | After_rules ->
+
+      if !tagcairo then
+        ocaml_lib ~extern:true ~tag_name:("use_cairo_bigarray") "bigarray";
+
        List.iter begin function pkg,dir,file ->
          ocaml_lib ~extern:true ~tag_name:("pkg_"^pkg) ~dir file;
 	 flag ["ocaml"; "pack";  "pkg_"^pkg] & S[A"-I"; P dir];
-       end packages;
+       end (if !tagcairo then packages_cairo@packages else packages);
+
 
        (* Like -package but for extensions syntax. Morover -syntax is useless
        	* when linking. *)

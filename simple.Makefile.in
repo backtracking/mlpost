@@ -23,6 +23,9 @@ LIBDIR=@LIBDIR@
 # where to install the man page
 MANDIR=@mandir@
 
+PSVIEWER=@PSVIEWER@
+PDFVIEWER=@PDFVIEWER@
+
 # other variables set by ./configure
 OCAMLC   = @OCAMLC@
 OCAMLOPT = @OCAMLOPT@		
@@ -110,51 +113,51 @@ tests: $(CMXA) tests.ml
 	$(OCAMLOPT) -o tests.exe unix.cmxa $(CMXA) tests.ml
 	./tests.exe
 	make -C test tests
-	gv test/tests.ps
+	$(PSVIEWER) test/tests.ps
 
 testbox: $(CMXA) testbox.ml
 	$(OCAMLOPT) -o testbox.exe unix.cmxa $(CMXA) testbox.ml
 	./testbox.exe
 	make -C test testbox
-	gv test/testbox.ps
+	$(PSVIEWER) test/testbox.ps
 
 tests.pdf: $(CMXA) tests.ml
 	$(OCAMLOPT) -o tests.exe unix.cmxa $(CMXA) tests.ml
 	./tests.exe
 	make -C test tests.pdf
-	xpdf test/tests.pdf
+	$(PDFVIEWER) test/tests.pdf
 
 
 tests.byte: $(CMA) tests.ml
 	ocaml unix.cma $(CMA) tests.ml
 	make -C test tests
-	gv test/tests.ps
+	$(PSVIEWER) test/tests.ps
 
 handbook: $(CMXA) handbookgraphs.ml
 	$(OCAMLOPT) -o handbook.exe unix.cmxa $(CMXA) handbookgraphs.ml
 	./handbook.exe
 	make -C test manual
 	make -C test/manual mpost
-	gv test/testmanual.ps
+	$(PSVIEWER) test/testmanual.ps
 
 handbook.byte: $(CMA) handbookgraphs.ml
 	ocaml unix.cma $(CMA) handbookgraphs.ml
 	make -C test manual
 	make -C test/manual mpost
-	gv test/testmanual.ps
+	$(PSVIEWER) test/testmanual.ps
 
 other: $(CMXA) othergraphs.ml
 	$(OCAMLOPT) -o othergraphs.exe unix.cmxa $(CMXA) othergraphs.ml
 	./othergraphs.exe
 	make -C test other
 	make -C test/othergraphs mpost
-	gv test/othergraphs.ps
+	$(PSVIEWER) test/othergraphs.ps
 
 other.byte: $(CMA) othergraphs.ml
 	ocaml unix.cma $(CMA) othergraphs.ml
 	make -C test other
 	make -C test/othergraphs mpost
-	gv test/othergraphs.ps
+	$(PSVIEWER) test/othergraphs.ps
 
 .PHONY: check-examples examples
 SUBDIRMLPOST:=../tool.opt -ccopt "-I ../ " -v -ps
@@ -194,7 +197,7 @@ gui/gmlpost.byte: $(GUICMO)
 #	echo "let ocamlopt = \""$(OCAMLOPT)"\"" >> version.ml
 
 dep:
-	$(OCAMLDEP) *.mli *.ml | ocamldot | dot -Tps | gv -
+	$(OCAMLDEP) *.mli *.ml | ocamldot | dot -Tps | $(PSVIEWER) -
 
 wc:
 	ocamlwc *.ml* -p
