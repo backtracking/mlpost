@@ -1004,25 +1004,25 @@ and Box : sig
     @img circle.png *)
 
   val ellipse : t box_creator
-    (** [ellipse p pic] creates a elliptic box containing the picture
+    (** [ellipse pic] creates a elliptic box containing the picture
 	[pic]. Optional padding is given by arguments [dx] and [dy]; 
 	default is 2bp
     @img ellipse.png *)
 
   val rect :  t box_creator
-    (** [rect p pic] creates a rectangular box containing the picture
+    (** [rect pic] creates a rectangular box containing the picture
 	[pic]. Optional padding is given by arguments [dx] and [dy]; 
 	default is 2bp.
     @img rect.png *)
 
   val round_rect : t box_creator
-    (** [round_rect p pic] creates a rectangular box containing the picture 
+    (** [round_rect pic] creates a rectangular box containing the picture 
 	[pic], with rounded corners. Optional padding is given by [dx] 
 	and [dy]; default is 2bp
     @img round_rect.png *)
 
   val patatoid : t box_creator
-    (** [patatoid p pic] creates an undefined, vaguely rectangular box 
+    (** [patatoid pic] creates an undefined, vaguely rectangular box 
 	containing the picture [pic]. It may happen that the content 
 	overlaps with the box.
     @img patatoid.png *)

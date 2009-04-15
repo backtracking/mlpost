@@ -103,7 +103,7 @@ let ocaml args execopt =
 
 let ocamlopt args execopt =
   let exe = Filename.temp_file "mlpost" ".exe" in
-  let cmd = Version.ocamlopt^"-o " ^ exe ^ " " ^ String.concat " " args in
+  let cmd = Version.ocamlopt^" -o " ^ exe ^ " " ^ String.concat " " args in
   let () = if !verbose then Format.eprintf "%s@." cmd in
   let out = Sys.command cmd in
   if out <> 0 then exit 2;
