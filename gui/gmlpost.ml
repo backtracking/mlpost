@@ -1,4 +1,3 @@
-
 open GMain
 open GdkKeysyms
 open Glexer
@@ -293,17 +292,15 @@ let main () =
   let scrolled_window = GBin.scrolled_window  ~width:350
     ~border_width: 10 ~hpolicy: `AUTOMATIC ~packing: hbox#add ()
   in
-
-
   let hbox2 = GPack.hbox ~spacing:10 ~packing:scrolled_window#add_with_viewport () in
-  let frame = GBin.frame ~shadow_type:`IN ~packing:hbox#add () in
+  
+  (* Partie Canvas *)
+  let scrolled_canvas = GBin.scrolled_window  ~width:(int_of_float (canvas_width)) ~height:(int_of_float (canvas_height))
+    ~border_width: 10 ~hpolicy: `AUTOMATIC ~packing:hbox#add () in
   let canvas = GnoCanvas.canvas ~width:(int_of_float (canvas_width)) 
-    ~height:(int_of_float (canvas_height)) ~packing:frame#add () in
+    ~height:(int_of_float (canvas_height)) ~packing:scrolled_canvas#add_with_viewport () in
     canvas#set_scroll_region 0. 0. canvas_width canvas_height ;
   let root = canvas#root in  
-
-(*   let signal = canvas#connect in *)
-(*   signal#event (zoom_changed canvas); *)
 
   let pixbuf = GdkPixbuf.from_file png_file in
   
