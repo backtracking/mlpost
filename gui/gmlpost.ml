@@ -20,14 +20,13 @@ let ml_file, fig_name =
 
 let sys_command cmd =
   let c = Sys.command cmd in
+  eprintf "%s@." cmd;
   if c <> 0 then begin
     eprintf "command '%s' failed with exit code %d@." cmd c;
     exit 1
   end
 
 (* size parameters *)
-let canvas_width = 500.
-let canvas_height = 500.
 
 let xmin = ref (-1.)
 let xmax = ref (1.)
@@ -95,7 +94,7 @@ let points = ref []
 let z = ref 1.
 
 
-let belong x y = (x>0. && x<canvas_width && y>0. && y<canvas_height)
+let belong x y = (x>0. && x< !pic_w && y>0. && y< !pic_h)
 
 
   
@@ -157,6 +156,8 @@ let refresh (* canvas *) pic () =
   pic_w := float_of_int (GdkPixbuf.get_width pixbuf);
   pic_h := float_of_int (GdkPixbuf.get_height pixbuf);
   
+  
+
   (*mise a l'echelle de tous les points 
     au cas ou il y aurait un changement de bbox*)
   Hashtbl.iter update_points pointstable;
@@ -222,7 +223,7 @@ let draw_point root s n1 n2 d1 d2 =
   let point = GnoCanvas.ellipse ~x1:(x-.3.) ~x2:(x+.3.) ~y1:(y-.3.) ~y2:(y+.3.) 
     ~props:[ `FILL_COLOR "black" ; `OUTLINE_COLOR "black" ; `WIDTH_PIXELS 0 ] root in
   let sigs = point#connect in
-  sigs#event (highlight_point point) ;
+ ignore( sigs#event (highlight_point point) );
   sigs#event (move_point x y s point);
   points := point::!points;
   ()
@@ -254,7 +255,7 @@ let left_part_lign pic vbox vbox2 vbox3 s n d s' =
   in
     sb#adjustment#set_bounds ~lower:(-200.) ~upper:200. ~step_incr:0.01 ();
     sb#set_value n;
-    sb#adjustment#connect#value_changed ~callback:(point_of_spin s sb (* ;refresh pic *));
+    sb#adjustment#connect#value_changed ~callback:(point_of_spin s sb);
     spins := sb::!spins;
     ()
 
@@ -293,20 +294,21 @@ let main () =
     ~border_width: 10 ~hpolicy: `AUTOMATIC ~packing: hbox#add ()
   in
   let hbox2 = GPack.hbox ~spacing:10 ~packing:scrolled_window#add_with_viewport () in
-  
-  (* Partie Canvas *)
-  let scrolled_canvas = GBin.scrolled_window  ~width:(int_of_float (canvas_width)) ~height:(int_of_float (canvas_height))
-    ~border_width: 10 ~hpolicy: `AUTOMATIC ~packing:hbox#add () in
-  let canvas = GnoCanvas.canvas ~width:(int_of_float (canvas_width)) 
-    ~height:(int_of_float (canvas_height)) ~packing:scrolled_canvas#add_with_viewport () in
-    canvas#set_scroll_region 0. 0. canvas_width canvas_height ;
-  let root = canvas#root in  
 
+  (* Partie Canvas *)
   let pixbuf = GdkPixbuf.from_file png_file in
-  
-  let pic = GnoCanvas.pixbuf root ~pixbuf in
   pic_w := float_of_int (GdkPixbuf.get_width pixbuf);
   pic_h := float_of_int (GdkPixbuf.get_height pixbuf);
+
+  let scrolled_canvas = GBin.scrolled_window  ~width:500 ~height:500
+    ~border_width: 10 ~hpolicy: `AUTOMATIC ~packing:hbox#add () in
+  let canvas = GnoCanvas.canvas ~width:(int_of_float (!pic_w)) 
+    ~height:(int_of_float (!pic_h)) ~packing:scrolled_canvas#add_with_viewport () in
+    canvas#set_scroll_region 0. 0. !pic_w !pic_h ;
+
+  let root = canvas#root in  
+  
+  let pic = GnoCanvas.pixbuf root ~pixbuf in
 
   let factory = new GMenu.factory menubar in
   let accel_group = factory#accel_group in
@@ -338,8 +340,9 @@ let main () =
   points := List.rev !points;
 
   init_table (elements,!spins,!points);
+  
   window#show ();
-  Main.main ()
+  Main.main ();
 
 ;;
 

@@ -52,8 +52,8 @@ module Edit = struct
 
 end
 
-let ls = Edit.num "ls" 5. Glexer.Cm
-let cs = Edit.num "cs" 5. Glexer.Cm
+let ls = Edit.num "ls" 3. Glexer.Cm
+let cs = Edit.num "cs" 3. Glexer.Cm
 let p1 = Edit.point "p1" 50. Glexer.Bp 50. Glexer.Bp
 let p2 = Edit.point "p2" 100. Glexer.Bp 100. Glexer.Bp
 let chemin = Path.pathp [p1;p2]
@@ -66,6 +66,6 @@ let t =
      node (tex "C") []]
 
 let () = Metapost.emit "tree1" 
-  (Box.draw (shift p1 (Tree.to_box t)) ++(Box.draw (Box.empty ~stroke:(Some Color.red) ~width:(bp 50.) ~height:(bp 50.) ())) ++ (draw chemin))
+  (Box.draw (shift p1 (Tree.to_box t)) ++(Box.draw (Box.empty ~stroke:(Some Color.red) ~width:(bp 150.) ~height:(bp 150.) ())) ++ (draw chemin))
 
 
