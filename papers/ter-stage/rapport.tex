@@ -4,23 +4,25 @@
 \usepackage[french]{babel}
 \usepackage{fullpage,url,graphicx,alltt}
 
-\newcommand{\mlpost}{\textsc{Mlpost }}
+\newcommand{\mlpost}{\textsc{Mlpost}}
 
 \begin{document}
 
 \section{Introduction}
 
 \subsection{Présentation de \mlpost}
-\mlpost est une interface Objective Caml de Metapost.
+\mlpost\ est une interface Objective Caml de Metapost, permettant la création de figures.
 \subsubsection{Motivations}
+Dans un cadre scientifique, il est très souvent nécessaire d'inclure des figures aux documents (cours, articles).
+~\\Une façon très commune de rédiger ces documents est d'utiliser \LaTeX. \LaTeX\ permet l'importation d'images, voire la création, mais ceci reste compliqué, long, et les erreurs sont difficiles à interpréter. Il doit également être possible d'ajouter des éléments de \LaTeX\ à la figure, et de garder une homogénéité du document. 
+
+~\\L'utilisation d'un langage comme OCaml, avec un typage fort et des erreur plus simples à déchiffrer s'imposait donc! De plus, OCaml bénéficie d'arguments optionnels, très pratiques dans la conception d'une librairie graphique.Enfin, la quantité de code tapé devient plus concise, rendant la conception de figures possible d'un simple appel de fonction.
 
 \subsubsection{Exemples}
 
 \includegraphics{simple_block.mps}
 
-\begin{alltt}
-  let f x = x + 1
-\end{alltt}
+
 
 \subsection{Notre TER}
 \subsubsection{Modules au dessus de \mlpost}
@@ -28,7 +30,31 @@
 
 \section{Modules \mlpost}
 
+
 \subsection{Histogrammes}
+Il existe trois types d'histogramme:
+
+\subsubsection{simple:}
+Un histogramme classique construit à partir d'une liste de nombres
+flottants.
+
+~\\
+
+\begin{minipage}{0.5\linewidth}
+  \begin{alltt}
+    let hist = Hist.simple [3.;1.;6.]
+  \end{alltt}
+\end{minipage}
+\begin{minipage}{0.5\linewidth}
+\begin{center}
+\includegraphics[scale=0.5]{hist1.mps}
+\end{center}
+\end{minipage}
+
+\subsubsection{comparatif :} 
+Un histogramme comparatif construit à partir d'une liste. Cette liste
+contient N listes de nombres flottants, chacune étant un histogramme.
+
 \subsection{Radar}
 \subsection{Path}
 \subsection{Arbres}
@@ -58,5 +84,5 @@ Journal of Functional Programming,
 %%% mode: latex
 %%% mode: whizzytex
 %%% mode: flyspell
-%%% ispell-local-dictionary: "francais"
+%%% ispell-local-dictionary: "francais-latin1"
 %%% End: 
