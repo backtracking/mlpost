@@ -141,7 +141,7 @@ let dist_vertical dirlist ordo distance =
   in
     fct [] ordo dirlist
     
-let smart_path dirlist p1 p2 =
+let smart_path ?style dirlist p1 p2 =
   let width = (-/) (xpart p2) (xpart p1) in
   let height = (-/) (ypart p2) (ypart p1) in
   let dirhorizontal, dirvertical = List.partition 
@@ -164,4 +164,4 @@ let smart_path dirlist p1 p2 =
       |[],_, _ -> List.rev (p2::acc)
       |_ -> assert false
   in
-  pathp (fct p1 [p1] dirlist lesdistv lesdisth)
+  pathp ?style (fct p1 [p1] dirlist lesdistv lesdisth)

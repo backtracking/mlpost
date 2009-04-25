@@ -1,6 +1,6 @@
 (whizzy-add-configuration
  "rapport\.tex" 
-  '((whizzy . "section -pdf ."))
+  '((whizzy . "frame -pdf ."))
 )
 (whizzy-add-configuration
  "slides\.tex" 

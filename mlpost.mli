@@ -520,7 +520,7 @@ and Path : sig
     | Up | Down | Left | Right
     | Upn of Num.t | Downn of Num.t | Leftn of Num.t | Rightn of Num.t
 
-  val smart_path : orientation list -> Point.t -> Point.t -> t
+  val smart_path : ?style:joint -> orientation list -> Point.t -> Point.t -> t
 
 end
 

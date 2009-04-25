@@ -34,7 +34,7 @@ Dans un cadre scientifique, il est très souvent nécessaire d'inclure des figur
 \subsection{Histogrammes}
 Il existe trois types d'histogramme:
 
-\subsubsection{simple:}
+\subsubsection{Simple:}
 Un histogramme classique construit à partir d'une liste de nombres
 flottants.
 
@@ -51,12 +51,184 @@ flottants.
 \end{center}
 \end{minipage}
 
-\subsubsection{comparatif :} 
+\subsubsection{Comparatif :} 
 Un histogramme comparatif construit à partir d'une liste. Cette liste
 contient N listes de nombres flottants, chacune étant un histogramme.
 
+~\\
+
+\begin{minipage}{0.5\linewidth}
+  \begin{alltt}
+    let hist = Hist.compare
+    [[1.;5.;6.;5.;3.];
+      [1.;2.;3.;6.;-1.]]
+  \end{alltt}
+\end{minipage}
+\begin{minipage}{0.5\linewidth}
+\begin{center}
+\includegraphics[scale=0.5]{hist2.mps}
+\end{center}
+\end{minipage}
+
+\subsubsection{Cumulatif :} 
+Un histogramme cumulatif.
+
+~\\
+
+\begin{minipage}{0.5\linewidth}
+  \begin{alltt}
+    let hist = Hist.stack 
+    ~fill:[lightred;lightblue
+      ;lightyellow;lightgreen]
+    [[4.;5.;5.;]; [8.;3.;1.]; [2.;8.;1.;4.]]
+  \end{alltt}
+\end{minipage}
+\begin{minipage}{0.5\linewidth}
+\begin{center}
+\includegraphics[scale=0.5]{hist3.mps}
+\end{center}
+\end{minipage}
+
+\subsubsection{Pour aller plus loin:}
+Il est possible de faire des histogrammes bien plus complexes, mais toujours de façon très simple.
+
+~\\
+
+\begin{minipage}{0.5\linewidth}
+  \begin{alltt}
+    let hist =
+    let pics =
+    List.map Picture.tex ["2000";"2001";
+      "2002";"2003";"2004";"2005"]
+    in
+    Hist.simple 
+    ~histlabel:(`Top, Hist.User pics)
+    [4.5;5.0;6.2;8.;7.2;6.1]
+  \end{alltt}
+\end{minipage}
+\begin{minipage}{0.5\linewidth}
+\begin{center}
+\includegraphics[scale=0.5]{hist4.mps}
+\end{center}
+\end{minipage}
+
+~\\
+
+\begin{minipage}{0.5\linewidth}
+  \begin{alltt}
+    let hist = Hist.stack
+    ~perspective:true ~padding:(bp 25.)
+    ~fill:[lightred;lightblue;
+      lightyellow;lightgreen]
+    ~histlabel:(`Center, Hist.Values)
+    [[4.;5.;5.;]; [8.;3.;1.]; [2.;8.;1.;4.]]
+  \end{alltt}
+\end{minipage}
+\begin{minipage}{0.5\linewidth}
+\begin{center}
+\includegraphics[scale=0.5]{hist5.mps}
+\end{center}
+\end{minipage}
+
 \subsection{Radar}
+Ce module permet la création de diagrammes radar.
+Nous donnons la possibilité d'en créer deux sortes.
+Lorsqu'un radar est créé, l'objet \mlpost\ renvoyé est une Picture.
+Nous en verrons l'utilité plus tard.
+
+\subsubsection{Cumulatif:}
+Le diagramme radar classique. Toutes les données sont regroupées sur la même figure, de façon à les comparer instantanément. 
+
+~\\
+
+\begin{minipage}{0.5\linewidth}
+  \begin{alltt}
+    let radar =
+    let pic =
+    Radar.stack
+    ~pen:(Pen.scale (bp 3.) Pen.circle)
+    ~color:[blue;red;green]
+    ~label:["weight";"acceleration";
+      "speed";"maniability";"stickiness"]
+    [[3.;4.;5.;6.;4.];
+      [6.;5.;2.;1.;1.];
+      [1.;7.;2.;4.;5.]]
+    in
+    Command.draw_pic pic
+  \end{alltt}
+\end{minipage}
+\begin{minipage}{0.5\linewidth}
+\begin{center}
+\includegraphics[scale=0.8]{radar1.mps}
+\end{center}
+\end{minipage}
+
+\subsubsection{Comparatif}
+Contrairement au diagramme précédent, celui ci ne fabrique pas qu'une seule Picture, mais autant qu'il existe d'objets à comparer. Cela permet donc un plus grand choix dans la mise en page.
+
+~\\
+
+\begin{minipage}{0.5\linewidth}
+  \begin{alltt}
+    let radar =
+    let pics =
+    Radar.compare
+    ~pen:(Pen.scale (bp 1.5) Pen.circle)
+    ~color:[lightblue;lightred;lightgreen] 
+    ~fill:true
+    [[3.;4.;5.;6.;4.];
+      [6.;5.;2.;1.;1.];
+      [1.;7.;2.;4.;5.]]
+    in
+    Box.draw (Box.vbox ~padding:(bp 10.) 
+    (List.map (Box.pic ~stroke:None) pics))
+
+  \end{alltt}
+\end{minipage}
+\begin{minipage}{0.5\linewidth}
+\begin{center}
+\includegraphics[scale=0.5]{radar2.mps}
+\end{center}
+\end{minipage}
+
 \subsection{Path}
+Dans \mlpost, le module Path permet à l'utilisateur de tracer toutes sortes de lignes, qu'elles soient droites ou des courbes de Bézier, et ce par le biais de nombreuses fonctions.
+Nous n'avons rien modifié de ce qui était déjà en place. Nous avons seulement ajouter une nouvelle manière de tracer un Path, appelée \textit{smart\_path}. 
+
+~\\Cette fonction prend en paramètre deux points: le point de départ du Path, et le point d'arrivée. 
+\begin{alltt}
+  val smart_path : ?style:joint -> orientation list -> Point.t -> Point.t -> t
+\end{alltt}
+~\\La particularité de \textit{smart\_path} est que la fonction prend un troisième paramètre, qui est une liste d'orientations.
+~\\Le type orientation se définit comme ceci:
+\begin{alltt}
+  type orientation =
+  Up | Down | Left | Right |
+  Upn of Num.t | Downn of Num.t | Leftn of Num.t | Rightn of Num.t
+\end{alltt}
+Ceci permet à l'utilisateur de choisir la façon dont il veut relier les deux points. Dans la mesure du possible, \mlpost\ créera ce path, ou retournera une erreur. 
+
+~\\exemples de \textit{smart\_path}:
+
+~\\
+\begin{minipage}{0.5\linewidth}
+  \begin{alltt}
+    let path = 
+    let p = Path.smart_path 
+    ~style:jLine
+    [Right;Down;Right]
+    (Point.pt (bp 10.,bp 20.)) 
+    (Point.pt (bp 100.,bp 100.))
+    in
+    Command.draw p
+  \end{alltt}
+\end{minipage}
+\begin{minipage}{0.5\linewidth}
+\begin{center}
+\includegraphics[scale=0.5]{path1.mps}
+\end{center}
+\end{minipage}
+
 \subsection{Arbres}
 
 \cite{tree}
