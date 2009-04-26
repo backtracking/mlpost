@@ -51,8 +51,8 @@ let hist7 =
 (*parse >> <<hist8 *)
 let hist8 =
   Hist.compare
-    [[4.;5.;6.;8.;3.];
-     [1.;2.;8.;7.;-1.]]
+    [[1.;5.;6.;5.;3.];
+     [1.;2.;3.;6.;-1.]]
 
 (*parse >> <<hist9 *)
 let hist9 =
