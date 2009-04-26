@@ -3,6 +3,7 @@ open Num
 open Color
 open Box
 open Path
+open Tree
 
 (* blocks mémoire *)     
 
@@ -76,12 +77,54 @@ let radar2 =
 
 let path1 = 
   let p = Path.smart_path 
+    [Right;Up;Right]
     ~style:jLine
-    [Right;Down;Right]
-    (Point.pt (bp 10.,bp 20.)) 
-    (Point.pt (bp 100.,bp 100.))
+    (Point.pt (bp 0.,bp 0.)) 
+    (Point.pt (bp 50.,bp 50.))
   in
   Command.draw p
+
+let path2 = 
+  let p = Path.smart_path 
+    [Right;Down;Left;Down;Right;Down;Left;Down;Right]
+    ~style:jLine
+    (Point.pt (bp 0.,bp 100.)) 
+    (Point.pt (bp 100.,bp 0.))
+  in
+  Command.draw_arrow p
+
+let path3 = 
+  let p = Path.smart_path 
+    [Left;Down;Left;Down;Left] 
+    (Point.pt (bp 0.,bp 0.)) 
+    (Point.pt (bp (-50.),bp (-50.)))
+  in
+  Command.draw_arrow p
+
+
+let path4 = 
+  let p = Path.smart_path 
+    [Down;Right;Upn (bp 10.);Right;Downn (bp 10.);Right;Upn (bp 10.);Right;Downn (bp 10.);Right;Upn (bp 10.);Right;Down]
+    (Point.pt (bp 0.,bp 100.)) 
+    (Point.pt (bp 100.,bp 0.))
+  in
+  Command.draw p
+
+ 
+let tree1 =
+  let node s = Tree.node ~edge_style:Curve (Box.tex s) in
+  let leaf s = Tree.leaf (Box.tex s) in
+  Tree.draw (node "1" [node "2" [leaf "4"; leaf "5"]; 
+		       node "3" [leaf "6"; leaf "7"]])
+
+
+let tree2 =
+  let node s = Tree.node ~arrow_style:Undirected ~edge_style:HalfSquare (Box.tex s) in
+  let leaf s = Tree.leaf (Box.tex s) in
+  Tree.draw 
+    (node "1" [node "2" [node "4" [leaf "8"]; leaf "5"]; 
+	       node "3" [node "6" [leaf "9"; node "10" [leaf "12"; leaf "13"]]; 
+			 node "7" [leaf "11"]]])
 
 let _ =
   List.iter (fun (name,fig) -> Metapost.emit name fig)
@@ -94,5 +137,10 @@ let _ =
     "radar2",radar2;
     "simple_block",simple_block;
     "interface",interface;
-    "path1",path1
+    "path1",path1;
+    "path2",path2;
+    "path3",path3;
+    "path4",path4;
+    "tree1",tree1;
+    "tree2",tree2;
   ]

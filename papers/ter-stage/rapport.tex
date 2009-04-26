@@ -208,30 +208,155 @@ Nous n'avons rien modifié de ce qui était déjà en place. Nous avons seulemen
 \end{alltt}
 Ceci permet à l'utilisateur de choisir la façon dont il veut relier les deux points. Dans la mesure du possible, \mlpost\ créera ce path, ou retournera une erreur. 
 
-~\\exemples de \textit{smart\_path}:
+~\\exemples d'utilisations de \textit{smart\_path}:
 
 ~\\
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
-    let path = 
-    let p = Path.smart_path 
+    let path1 = 
+    let p1 = Path.smart_path 
     ~style:jLine
-    [Right;Down;Right]
-    (Point.pt (bp 10.,bp 20.)) 
-    (Point.pt (bp 100.,bp 100.))
+    [Right;Up;Right]
+    (Point.pt (bp 0.,bp 0.)) 
+    (Point.pt (bp 50.,bp 50.))
     in
-    Command.draw p
+    Command.draw p1
   \end{alltt}
 \end{minipage}
 \begin{minipage}{0.5\linewidth}
 \begin{center}
-\includegraphics[scale=0.5]{path1.mps}
+\includegraphics{path1.mps}
 \end{center}
 \end{minipage}
 
-\subsection{Arbres}
+~\\
+\begin{minipage}{0.5\linewidth}
+  \begin{alltt}
+    let path2 = 
+    let p2 = Path.smart_path 
+    [Right;Down;Left;Down;
+      Right;Down;Left;Down;Right]
+    ~style:jLine
+    (Point.pt (bp 0.,bp 100.)) 
+    (Point.pt (bp 100.,bp 0.))
+    in
+    Command.draw_arrow p2
+  \end{alltt}
+\end{minipage}
+\begin{minipage}{0.5\linewidth}
+\begin{center}
+\includegraphics[scale=0.8]{path2.mps}
+\end{center}
+\end{minipage}
 
-\cite{tree}
+~\\
+\begin{minipage}{0.5\linewidth}
+  \begin{alltt}
+    let path3 = 
+    let p3 = Path.smart_path 
+    [Left;Down;Left;Down;Left] 
+    (Point.pt (bp 0.,bp 0.)) 
+    (Point.pt (bp (-50.),bp (-50.)))
+    in
+    Command.draw_arrow p3
+  \end{alltt}
+\end{minipage}
+\begin{minipage}{0.5\linewidth}
+\begin{center}
+\includegraphics{path3.mps}
+\end{center}
+\end{minipage}
+
+~\\
+\begin{minipage}{0.5\linewidth}
+  \begin{alltt}
+    let path4 = 
+    let p4 = Path.smart_path 
+    [Down;Right;Upn (bp 10.);
+      Right;Downn (bp 10.);
+      Right;Upn (bp 10.);
+      Right;Downn (bp 10.);
+      Right;Upn (bp 10.);
+      Right;Down]
+    (Point.pt (bp 0.,bp 100.)) 
+    (Point.pt (bp 100.,bp 0.))
+    in
+    Command.draw p4
+  \end{alltt}
+\end{minipage}
+\begin{minipage}{0.5\linewidth}
+\begin{center}
+\includegraphics{path4.mps}
+\end{center}
+\end{minipage}
+
+
+\subsection{Arbres}
+Ce module permet la création d'arbres \mlpost\ de façon esthétique.
+Il s'appuie sur l'ancien module Tree de \mlpost (qu'il a remplacé), ainsi que sur l'article d'un chercheur américain. \cite{tree}
+~\\
+Le module contient deux fonctions principales:
+\begin{itemize}
+\item node pour construire un noeud
+  \begin{alltt}
+    val node : 
+    ?ls:Num.t -> ?cs:Num.t -> 
+    ?arrow_style:arrow_style -> 
+    ?edge_style:edge_style -> 
+    ?stroke:Color.t -> ?pen:Pen.t ->
+    Box.t -> t list -> t
+  \end{alltt}
+  La liste contient les éventuels sous arbres.~\\
+\item leaf pour construire une feuille
+  \begin{alltt}
+    val leaf : Box.t -> t
+  \end{alltt}
+\end{itemize}
+
+Quelques exemples d'arbres:
+
+~\\
+
+\begin{minipage}{0.5\linewidth}
+  \begin{alltt}
+    let tree1 =
+    let node s = Tree.node ~edge_style:Curve 
+    (Box.tex s) in
+    let leaf s = Tree.leaf (Box.tex s) in
+    Tree.draw (node "1" 
+    [node "2" [leaf "4"; leaf "5"]; 
+      node "3" [leaf "6"; leaf "7"]])
+  \end{alltt}
+\end{minipage}
+\begin{minipage}{0.5\linewidth}
+  \begin{center}
+    \includegraphics[scale=1.75]{tree1.mps}
+  \end{center}
+\end{minipage}
+
+~\\
+
+\begin{minipage}{0.5\linewidth}
+  \begin{alltt}
+    let tree2 =
+    let node s = 
+    Tree.node ~arrow_style:Undirected 
+    ~edge_style:HalfSquare (Box.tex s) in
+    let leaf s = Tree.leaf (Box.tex s) in
+    
+    Tree.draw 
+    (node "1" [
+      node "2" [node "4" [leaf "8"]; leaf "5"]; 
+      node "3" [node "6" [leaf "9"; node "10" 
+          [leaf "12"; leaf "13"]];node "7" 
+        [leaf "11"]]])
+  \end{alltt}
+\end{minipage}
+\begin{minipage}{0.5\linewidth}
+  \begin{center}
+    \includegraphics[scale=1.75]{tree2.mps}
+  \end{center}
+\end{minipage}
 
 \section{Interface graphique}
 \subsection{Motivations}

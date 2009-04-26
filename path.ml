@@ -164,4 +164,6 @@ let smart_path ?style dirlist p1 p2 =
       |[],_, _ -> List.rev (p2::acc)
       |_ -> assert false
   in
-  pathp ?style (fct p1 [p1] dirlist lesdistv lesdisth)
+  let points = fct p1 [p1] dirlist lesdistv lesdisth
+  in
+  pathp ?style points
