@@ -1,12 +1,14 @@
+open Format
 exception Not_implemented of string
 
-let not_implemented s = raise (Not_impemented s)
+let not_implemented s = raise (Not_implemented s)
 
-
-type point = Point.point = Cairo.point
+module P = Point_lib
+type point = P.point
 
 let id x = x
-open Point
+open Point_lib
+open Point_lib.Infix
 
 let rec one_to_one f a = function
   | [] -> a
@@ -40,26 +42,60 @@ let print_spline fmt pt =
   Format.fprintf fmt "@[{ %a,@ %a,@ %a,@ %a }@]@." 
     pt_f pt.sa pt_f pt.sb pt_f pt.sc pt_f pt.sd
 
-let printf fmt = Format.fprintf fmt "@[[%a]" 
-  (fun fmt -> List.iter (fun e -> Format.fprintf fmt "%a;" print_spline e))
+let printf fmt p = Format.fprintf fmt "@[[%a]" 
+  (fun fmt -> List.iter (fun e -> Format.fprintf fmt "%a;" print_spline e)) p.pl
 
 
 let s_of_01 s t = t*.(s.smax-.s.smin)+.s.smin
 let _01_of_s s t = (t-.s.smin)/.(s.smax-.s.smin)
 
-let create a b c d = [{sa = a;sb = b;sc = c; sd = d;smin = 0.;smax = 1.}]
-let min_abscissa p = (List.hd p).smin
-let rec max_abscissa = function
-  | [] -> assert false
-  | [a] -> a.smax
-  | a::l -> max_abscissa l
+let create a b c d = {pl=[{sa = a;sb = b;sc = c; sd = d;smin = 0.;smax = 1.;start = true}];cycle=false}
+let create_line a d = {pl=[{sa=a;sb=a;sc=d;sd=d;smin=0.;smax=1.;start=true}];cycle=false}
+let create_lines l = 
+  let rec aux = function
+  |[] |[_]-> []
+  |a::(d::_ as l) -> {sa=a;sb=a;sc=d;sd=d;smin=0.;smax=1.;start=false}::aux l in
+  match aux l with
+    |[] -> assert false
+    |a::l -> {pl={a with start = true}::l;cycle=false}
 
-let rec add_end p c d =
-  match p with
-    | [] -> assert false (* a path always have one element *)
-    | [{sc=mb;sd=a;smax=smax} as e] -> [e;{sa = a;sb = minus (double a) mb;
-                                           sc = c;sd = d;smin=smax;smax=smax+.1.}]
-    | a::l -> a::(add_end l c d)
+
+let min_abscissa p = (List.hd p.pl).smin
+let max_abscissa p =
+  let rec aux = function
+    | [] -> assert false
+    | [a] -> a.smax
+    | a::l -> aux l in
+  aux p.pl
+
+
+let add_end p c d =
+  let rec aux p = 
+    match p with
+      | [] -> assert false (* a path always have one element *)
+      | [{sc=mb;sd=a;smax=smax} as e] -> [e;{sa = a;sb = 2. */ a -/ mb;
+                                             sc = c;sd = d;smin=smax;smax=smax+.1.; start = false}]
+      | a::l -> a::(aux l) in
+  {p with pl=aux p.pl}
+
+let add_end_line p d =
+  let rec aux p = 
+    match p with
+      | [] -> assert false (* a path always have one element *)
+      | [{sc=mb;sd=a;smax=smax} as e] -> [e;{sa = a;sb = a;
+                                             sc = d;sd = d;smin=smax;smax=smax+.1.; start = false}]
+      | a::l -> a::(aux l) in
+  {p with pl=aux p.pl}
+
+let add_end_spline p sb sc d =
+  let rec aux p = 
+    match p with
+      | [] -> assert false (* a path always have one element *)
+      | [{sc=mb;sd=a;smax=smax} as e] -> [e;{sa = a;sb = sb;
+                                             sc = sc;sd = d;smin=smax;
+                                             smax=smax+.1.; start = false}]
+      | a::l -> a::(aux l) in
+  {p with pl=aux p.pl}
 
 let apply f s = f s.sa s.sb s.sc s.sd
 
@@ -83,7 +119,10 @@ let abscissa_to_point p t =
     | _::l -> aux l in
   if min_abscissa p > t then 
     invalid_arg "abscissa_to_point : the abscissa given is smaller than min_abscissa"
-  else aux p
+  else aux p.pl
+
+let direction_of_abscissa p t = 
+  (* TODO *) assert false
 
 let extremum conv l a b c d =
   let test s l = if s>=0. && s<=1. then (conv s)::l else l in
@@ -110,13 +149,14 @@ let give_bound s =
     
 let list_min_max f p = 
  List.fold_left (fun (x_min,y_min,x_max,y_max) s ->
-                                                    let (sx_min,sy_min,sx_max,sy_max) = f s in
-                                                    (min x_min sx_min,min y_min sy_min,
-                                                     max x_max sx_max,max x_max sy_max)) (infinity,infinity,neg_infinity,neg_infinity) p
+                   let (sx_min,sy_min,sx_max,sy_max) = f s in
+                   (min x_min sx_min,min y_min sy_min,
+                    max x_max sx_max,max y_max sy_max))
+   (infinity,infinity,neg_infinity,neg_infinity) p
 
 let unprecise_bounding_box s = 
     let (x_min,y_min,x_max,y_max) = 
-      list_min_max give_bound s in
+      list_min_max give_bound s.pl in
     ({x=x_min;y=y_min},{x=x_max;y=y_max})
 
 let give_bound_precise s =
@@ -130,7 +170,7 @@ let give_bound_precise s =
     
 let bounding_box s =   
   let (x_min,y_min,x_max,y_max) = 
-    list_min_max give_bound_precise s in
+    list_min_max give_bound_precise s.pl in
   ({x=x_min;y=y_min},{x=x_max;y=y_max})
 
 let test_in amin amax bmin bmax =
@@ -152,21 +192,21 @@ let is_intersect_precise a b =
 let bisect a =
   let b = a in
   (*D\leftarrow (C+D)/2*)
-  let b = {b with sd=add_half b.sd b.sc} in
+  let b = {b with sd = middle b.sd b.sc} in
   (*C\leftarrow (B+C)/2, D\leftarrow (C+D)/2*)
-  let b = {b with sc=add_half b.sc b.sb} in
-  let b = {b with sd=add_half b.sd b.sc} in
+  let b = {b with sc = middle b.sc b.sb} in
+  let b = {b with sd = middle b.sd b.sc} in
   (*B\leftarrow (A+B)/2, C\leftarrow (B+C)/2, D\leftarrow(C+D)/2*)
-  let b = {b with sb=add_half b.sb b.sa} in
-  let b = {b with sc=add_half b.sc b.sb} in
-  let b = {b with sd=add_half b.sd b.sc} in
+  let b = {b with sb = middle b.sb b.sa} in
+  let b = {b with sc = middle b.sc b.sb} in
+  let b = {b with sd = middle b.sd b.sc} in
   let c = a in 
-  let c = {c with sa=add_half c.sa c.sb} in
-  let c = {c with sb=add_half c.sb c.sc} in
-  let c = {c with sa=add_half c.sa c.sb} in
-  let c = {c with sc=add_half c.sc c.sd} in
-  let c = {c with sb=add_half c.sb c.sc} in
-  let c = {c with sa=add_half c.sa c.sb} in
+  let c = {c with sa = middle c.sa c.sb} in
+  let c = {c with sb = middle c.sb c.sc} in
+  let c = {c with sa = middle c.sa c.sb} in
+  let c = {c with sc = middle c.sc c.sd} in
+  let c = {c with sb = middle c.sb c.sc} in
+  let c = {c with sa = middle c.sa c.sb} in
   (b,c)
 
 type graph = {gt1 : int;
@@ -204,7 +244,7 @@ let one_intersection_aux () a b =
 
 let one_intersection a b = 
   try
-    one_to_one2 one_intersection_aux () a b;
+    one_to_one2 one_intersection_aux () a.pl b.pl;
     raise Not_found
   with
       Found (t1,t2) -> (t1,t2)
@@ -269,15 +309,15 @@ let intersection_aux acc a b =
     let res = List.fold_left (fun acc (x,y) -> (f_from_i a x,f_from_i b y)::acc) acc l in
     if !debug then
       Format.printf "@[%a@]@." (fun fmt -> List.iter (pt_f fmt))
-        (List.map (fun (t1,t2) -> minus (cubic_point a t1) (cubic_point b t2)) res);
+        (List.map (fun (t1,t2) -> (cubic_point a t1) -/ (cubic_point b t2)) res);
     res
 
 
-let intersection a b = one_to_one2 intersection_aux [] a b
+let intersection a b = one_to_one2 intersection_aux [] a.pl b.pl
 
-let fold_left f = List.fold_left (fun acc s -> f acc s.sa s.sb s.sc s.sd)
+let fold_left f acc p = List.fold_left (fun acc s -> f acc s.sa s.sb s.sc s.sd) acc p.pl
   
-let iter f =  List.iter (fun s -> f s.sa s.sb s.sc s.sd)
+let iter f p =  List.iter (fun s -> f s.sa s.sb s.sc s.sd) p.pl
 
 let union_conv ap bp = 
   let max = max_abscissa ap in
@@ -287,8 +327,31 @@ let union_conv ap bp =
 
 let union ap bp = 
   let conv = union_conv ap bp in
-  List.map (function {smin=smin;smax=smax} as b -> 
-              {b with smin=conv smin;smax=conv smax}) bp
+  {pl=List.map (function {smin=smin;smax=smax} as b -> 
+              {b with smin=conv smin;smax=conv smax}) bp.pl;cycle=false}
+
+let append_conv ap bp = 
+  let union_conv = union_conv ap bp in
+  (fun x -> (union_conv x)+.1.)
+
+let ext_list = function
+  | [] -> assert false
+  | a::l -> a,l
+
+let append ap sb sc bp = 
+  let conv = append_conv ap bp in
+  let fbpconv,bpconv = 
+    ext_list (List.map (function {smin=smin;smax=smax} as b -> 
+                          {b with smin=(conv smin)+.1.;smax=(conv smax)+.1.})
+                bp.pl) in
+  let rec aux = function
+    |[] -> assert false
+    |[{smax=smin;sd=sa} as a] -> 
+       a::{smin=smin;smax=smin+.1.;
+           sa=sa;sb=sb;sc=sc;sd=fbpconv.sa;start=false}::
+         {fbpconv with start=false}::bpconv
+    |a::l -> a::(aux l) in
+  {pl=aux ap.pl;cycle=false}
 
 let reverse p =
   let conv = 
@@ -301,7 +364,7 @@ let reverse p =
     | ({sa=sa;sd=sd;smin=smin;smax=smax} as a)::l -> 
         aux ({a with sa=sd;sd=sa;
                 smin=conv smin; smax=conv smax}::acc) l in
-  aux [] p
+  {p with pl = aux [] p.pl}
 
 (*left ((t^3)*(d + (3*(b - c)) - a)) + ((t^2)*(d - (3*b) + (2*a))) + (t*((2*c) - b - a)) + b *)
 (*right 3*d - c *)
@@ -311,14 +374,16 @@ let split_aux s t l =
   else 
     let t0 = _01_of_s s t in
     let _1t0 = 1.-.t0 in
-    let b1 = add (scal s.sb t0) (scal s.sa _1t0) in
-    let c1 = add (scal s.sc (t0*.t0)) (add (scal s.sb (2.*.t0*._1t0)) (scal s.sa (_1t0*._1t0))) in
+    let b1 = t0 */ s.sb +/ _1t0 */ s.sa in
+    let c1 = 
+      (t0*.t0) */ s.sc +/ (2.*.t0*._1t0) */ s.sb +/ (_1t0*._1t0) */ s.sa in
     let d1 = cubic_point s t0 in
     let a2 = d1 in
-    let c2 = add (scal s.sc _1t0) (scal s.sd t0) in
-    let b2 = add (scal s.sb (_1t0*._1t0)) (add (scal s.sc (2.*._1t0*.t0)) (scal s.sd (t0*.t0))) in
-    ([{s with sb=b1;sd=d1;sc=c1;smax=t}],
-     {s with sa=a2;sb=b2;sc=c2;smin=t}::l)
+    let c2 = _1t0 */ s.sc +/ t0 */ s.sd in
+    let b2 = 
+      (_1t0*._1t0) */ s.sb +/ (2.*._1t0*.t0) */ s.sc +/ (t0*.t0) */ s.sd in
+    ([{s with sb = b1;sd = d1;sc = c1;smax = t}],
+     {s with sa = a2;sb = b2;sc = c2;smin = t}::l)
 
 let split p t = 
   let rec aux = function
@@ -327,7 +392,9 @@ let split p t =
     | a::l -> let (p1,p2) = aux l in (a::p1,p2) in
   if min_abscissa p >= t then 
     invalid_arg "abscissa_to_point : the abscissa given is smaller than min_abscissa"
-  else aux p
+  else 
+    let (p1,p2) = aux p.pl in
+    ({pl=p1;cycle = false},{pl=p2;cycle=false})
 
 let subpath p t1 t2 = fst (split (snd (split p t1)) t2)
 
@@ -373,7 +440,7 @@ let dist_min_point_aux {x=px;y=py} pmin s =
   aux s pmin 0 (int_of_float nmax) !inter_depth
            
 let dist_min_point p point = snd (List.fold_left (dist_min_point_aux point)
-  (let one = (List.hd p) in (norm2 (one.sa.x -. point.x) (one.sa.y -. point.y),one.smin)) p)
+  (let one = (List.hd p.pl) in (norm2 (one.sa.x -. point.x) (one.sa.y -. point.y),one.smin)) p.pl)
 
 let dist_min_path_aux pmin s1 s2 =
   let is_possible_at a b = 
@@ -414,58 +481,63 @@ let dist_min_path_aux pmin s1 s2 =
   aux s1 s2 pmin 0 0 (int_of_float nmax) !inter_depth
 
 let dist_min_path p1 p2 = snd (one_to_one2 dist_min_path_aux
-(let one1 = (List.hd p1) in 
- let one2 = (List.hd p2) in 
- (norm2 (one1.sa.x -. one2.sa.x) (one1.sa.y -. one2.sa.y),(one1.smin,one2.smin))) p1 p2)
+(let one1 = (List.hd p1.pl) in 
+ let one2 = (List.hd p2.pl) in 
+ (norm2 (one1.sa.x -. one2.sa.x) (one1.sa.y -. one2.sa.y),(one1.smin,one2.smin))) p1.pl p2.pl)
 
 let translate p t = 
-  List.map (function a ->
-              { a with sa=add a.sa t;
-                  sb=add a.sb t;
-                  sc=add a.sc t;
-                  sd=add a.sd t}) p
+  {p with pl=List.map (function a ->
+                         { a with sa= a.sa +/ t;
+                             sb=a.sb +/ t;
+                             sc=a.sc +/ t;
+                             sd=a.sd +/ t}) p.pl}
 
-let transform p t = 
+
+let transform_aux t p = 
   List.map (function a ->
               { a with sa=Cairo.Matrix.transform_point t a.sa;
                   sb=Cairo.Matrix.transform_point t a.sb;
                   sc=Cairo.Matrix.transform_point t a.sc;
                   sd=Cairo.Matrix.transform_point t a.sd}) p
+
+let transform t p = 
+  {p with pl= transform_aux t p.pl}
                       
+let buildcycle p1 p2 = not_implemented ("buildcycle")
 
-module Epure =
-  struct
-    (* A rendre plus performant *)
-    type t = path list
-    let create x = [x]
-    let union x y = List.append_rev x y
-    let transform x t = List.map (fun x -> transform x t) x
-    let bounding_box sl =
-      let (x_min,y_min,x_max,y_max) = 
-        list_min_max (list_min_max give_bound_precise) sl
-          ({x=x_min;y=y_min},{x=x_max;y=y_max})
-  end
+let close p1 = 
+  if true (* TODO: tester si il est fermé*) then
+    {p1 with cycle = true}
+  else invalid_arg ("This path is not closed")
 
+let of_bounding_box ({x=x_min;y=y_min},{x=x_max;y=y_max}) =
+  let dl = {x=x_min;y=y_min} in
+  let dr = {x=x_max;y=y_min} in
+  let ul = {x=x_min;y=y_max} in
+  let ur = {x=x_max;y=y_max} in
+  close (create_lines [ul;ur;dr;dl;ul])
 
+let length p = max_abscissa p -. min_abscissa p
 
 module Approx =
-  structr
+  struct
     let lineto l = not_implemented "lineto"
     let fullcircle () = not_implemented "circle"
     let halfcirle () = not_implemented "halfcircle"
     let quartercircle () = not_implemented "quartercircle"
+    let unitsquare () = not_implemented "unit square"
   end
 
 module Metapath =
- sig
-   type joint
+ struct
+   type joint =
      | JLine
      | JCurve
      | JCurveNoInflex
      | JTension of float * float
      | JControls of point * point
 
-   type direction 
+   type direction =
      | DVec of point
      | DCurl of float
      | DNo
@@ -474,41 +546,197 @@ module Metapath =
 
    type t =
      | Start of knot
-     | Cons of t * join * knot
+     | Cons of t * joint * knot
      | Start_Path of path
-     | Append_Path of t * join * path
+     | Append_Path of t * joint * path
+
+
+   let rec print_dir fmt = function
+     |DNo -> fprintf fmt "DNo"
+     |DVec p -> fprintf fmt "DVec %a" Point_lib.print p
+     |DCurl f -> fprintf fmt "Dcurl %f" f
+   and print_knot fmt (dir1,p,dir2) = 
+     fprintf fmt "(%a,%a,%a)" print_dir dir1 Point_lib.print p print_dir dir2
+   and print_joint fmt = function
+     | JLine -> fprintf fmt "JLine"
+     | JCurve -> fprintf fmt "JCurve"
+     | JCurveNoInflex -> fprintf fmt "JCurveNoInflex"
+     | JTension (f1,f2) -> fprintf fmt "JTension (%f,%f)" f1 f2
+     | JControls (p1,p2) -> fprintf fmt "JControls (%a,%a)" Point_lib.print p1 Point_lib.print p2
+   and print fmt = function
+     | Start k1 -> fprintf fmt "[%a" print_knot k1
+     | Cons (p,j,k) -> fprintf fmt "%a;%a-%a" print p print_joint j print_knot k
+     | Start_Path p-> fprintf fmt "{%a}" printf p
+     | Append_Path (p1,j,p2) ->fprintf fmt "%a;%a-%a" print p1 print_joint j printf p2
+
+
+   let p213 p1 p2 p3 : P.t * P.t =
+   let p21 = P.sub p2 p1 in
+   let p23 = P.sub p2 p3 in
+   (p21,p23)
+
+   let ro p1 p2 p3 = 
+     let (p21,p23) = p213 p1 p2 p3 in
+     sqrt ((P.norm2 p23)/.(P.norm2 p21))
+
+   let psi p1 p2 p3 =
+     let (p21,p23) = p213 p1 p2 p3 in
+     (atan2 p23.x p23.y)-.(atan2 p21.x p21.y)
+
+   let deltak p1 p2 = 
+     let p21 = P.sub p2 p1 in
+     P.norm2 p21
+
+   type tension = float
+   type delta = float
+   and tc = tension * point * tc_aux
+   and tc_aux =
+     | COpen of tension * tc
+     | CEnd of tcend
+     | CCycle of tension * tcend * point * delta * float
+   and tcend =
+     [ `Open
+     | `Curve of float
+     | `Given of float ]
+
+   and tcl =
+     | TC of tcend * tc * tcl
+     | TExplicit of spline * tcl
+     | TEnd
+
+(*   let solve_choices first tc =
+     (* Metafont is wiser in the computation of 
+        calc_value, calc_ff *)
+     (* dk1, uk1 are d_k-1, u_k-1 *)
+     let calc_value dk1 dk absrtension absltension uk =
+       let aa = 1./.(3.*.absrtension -. 1.) in
+       let bb = 1./.(3.*.absltension -. 1.) in
+       let dd = dk*.(3.-.1./.absrtension) in
+       let ee = dk1*.(3.-.1./.absltension) in
+       let cc = 1.-.(uk*.aa) in
+       (aa,bb,cc,dd,ee)
+   let calc_ff cc dd ee absrtension absltension =
+     let dd = dd*.cc in
+     let tmp = absltension/.absrtension in
+     let tmp = tmp*.tmp in
+     let dd = dd*.tmp in
+     ee/.(ee+.ff)
+     let rec aux dk1 pk1 psik uk1 vk1 wk1 = function
+       | t1,pk,((COpen (t2,(p1k,_))|CCycle (t2,p1k,_,_)) as n) -> 
+           let dk = deltak p p1k in
+           let absrtension,absltension = (abs t1),(abs t2) in
+           let (aa,bb,cc,dd,ee) = calc_value dk1 dk absrtension absltension uk1 in
+           let ff = calc_ff cc dd ee absrtension absltension in
+           let uk = ff*.bb in
+           let psi1k = match n with 
+             | COpen (_,(_,COpen(_,p2k))) -> phi pk p1k p2k
+             | _ -> 0 in
+           (* perhaps should test for curl as in metafont *)
+           let acc = -.psi1k*.uk in
+           let ff = (1.-.ff)*.cc in 
+           let acc = acc -. (psik*.ff) in
+           let ff = ff*.aa in
+           let vk = acc -. (vk1*.ff) in
+           let wk = -.(wk1*.ff) in
+           match n with
+             |COpen _ -> let = aux dk p psi1k uk vk wk n in
+             |CCycle _ ->
+       | CEnd 
+
+     in
+     let equa = 
+       match first with
+         | `Open -> 
+         | `Curve f ->
+         | `Given f -> in
+     let l = aux equa tc in
+     *) 
+
+
+   let rec to_path_simple = function
+     | Start (DNo,p,DNo) -> create_line p p
+     | Cons (pa,JLine,(_,p,_)) -> add_end_line (to_path_simple pa) p
+     | Cons (Cons(_,_,(_,_,DVec c1)) as pa,JCurve,(DVec c2,p,_))
+     | Cons (pa,JControls(c1,c2),(_,p,_)) -> add_end_spline (to_path_simple pa) c1 c2 p
+     | Start_Path p -> p
+     | Append_Path (p1,JControls(c1,c2),p2) -> append (to_path_simple p1) c1 c2 p2
+     | (Cons(pa,JCurve,(_,p,_))) -> add_end_line (to_path_simple pa) p (* Faux*)
+     |p -> Format.printf "not implemented %a@." print p; not_implemented "to_path"
 
    let knot d1 p d2 = (d1,p,d2)
    
    let vec_direction p = DVec p
    let curl_direction f = DCurl f
    let no_direction = DNo
+
+   let start k = Start k
    
    let line_joint = JLine
    let curve_joint = JCurve
    let curve_no_inflex_joint = JCurveNoInflex
-   let tension_joint f1 f2 = Jtension (f1,f2)
-   let controls p1 p2 = JControls (p1,p2)
+   let tension_joint f1 f2 = JTension (f1,f2)
+   let controls_joint p1 p2 = JControls (p1,p2)
    
 
    let concat p j k = Cons (p,j,k)
    let rec append p j = function
-     | Start knot -> Cons (p,j,k)
+     | Start knot -> Cons (p,j,knot)
      | Cons(p2,j2,k2) -> Cons(append p j p2,j2,k2)
-     | Start_path p2 -> Append_Path(p,j,p2)
+     | Start_Path p2 -> Append_Path(p,j,p2)
      | Append_Path (p2,j2,p3) -> Append_Path(append p j p2,j2,p3)
 
+   let to_path p = to_path_simple p
+   let cycle d j p = not_implemented "cycle"
 
-   val to_path p = not_implemented "to_path"
-   val cycle d j p = not_implemented "cycle"
-
-   val from_path p = Start_Path of path
+   let from_path p = Start_Path p
  end
 
-module Cairo =
-  sig
-    val draw : Cairo.t -> path -> unit
+module ToCairo =
+  struct
+    let draw cr p = 
+      Format.printf "%a@." printf p;
+      List.iter (function 
+                   | {start = true} as s -> 
+                       Cairo.move_to cr s.sa.x s.sa.y ;
+                       Cairo.curve_to cr 
+                         s.sb.x s.sb.y 
+                         s.sc.x s.sc.y 
+                         s.sd.x s.sd.y
+                   | s -> 
+                       Cairo.curve_to cr 
+                         s.sb.x s.sb.y 
+                         s.sc.x s.sc.y 
+                         s.sd.x s.sd.y) p.pl;
+      if p.cycle then Cairo.close_path cr;
   end
+
+module Epure =
+  struct
+    (* A rendre plus performant ou pas*)
+    type t = spline list list
+    let empty = []
+    let create x = [x.pl]
+    let of_path = create
+    let union x y = List.rev_append x y
+    let transform t x = List.map (fun x -> transform_aux t x) x
+    let bounding_box sl =
+      let (x_min,y_min,x_max,y_max) = 
+        list_min_max (list_min_max give_bound_precise) sl in
+          ({x=x_min;y=y_min},{x=x_max;y=y_max})
+    let of_bounding_box l = create (of_bounding_box l)
+
+    let draw cr p = List.iter (List.iter 
+      (function 
+           s -> 
+             Cairo.move_to cr s.sa.x s.sa.y ;
+             Cairo.curve_to cr 
+               s.sb.x s.sb.y 
+               s.sc.x s.sc.y 
+               s.sd.x s.sd.y)) p;
+      Cairo.stroke cr
+  end
+
+
 
 (*
   module Splines_lib_knuth = 
