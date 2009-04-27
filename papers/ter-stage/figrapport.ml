@@ -56,22 +56,36 @@ let interface =
   let tex' = tex ~style:RoundRect ~dx ~dy in
   let tex = tex' ~stroke:(Some Color.black) in
   let box name = box ~stroke:None ~dx:(mm 2.) ~name in
-  let fml = Box.shift (Point.pt ((bp 0.),(bp 0.))) (box "fml" (tex "figure.ml")) in
-  let fedit = Box.shift (Point.pt ((bp 100.),(bp 0.))) (box "fedit" (tex "figure.edit")) in
-  let gmlpost = Box.shift (Point.pt ((bp 200.),(bp 0.))) (box "gmlpost" (tex "GMLPost")) in
-  let glexer = Box.shift (Point.pt ((bp 100.),(bp (-75.)))) (box "glexer" (tex "glexer.mll")) in
-  let mlpost = Box.shift (Point.pt ((bp 100.),(bp (75.)))) (box "mlpost" (tex "MLPost")) in
-  let png = Box.shift (Point.pt ((bp 0.),(bp (75.)))) (box "png" (tex "figure.png")) in
-  let a1 = Command.draw_arrow ~color:Color.green (pathp [(Box.north_west glexer);(Box.south_east fml)]) in
-  let a2 = Command.draw_arrow ~color:Color.green (pathp [(Box.south_east fml);(Box.north_west glexer)]) in
-  let a3 = Command.draw_arrow (pathp [(Box.north_east glexer);(Box.south_west gmlpost)]) in
-  let a4 = Command.draw_arrow ~color:Color.green (pathp [(Box.north glexer);(Box.south fedit)]) in
-  let a5 = Command.draw_arrow (pathp [(Box.west mlpost);(Box.east png)]) in
-  let a6 = Command.draw_arrow (pathp [(Box.north_west gmlpost);(Box.south_east mlpost)]) in
-  let a7 = Command.draw_arrow (pathp [(Box.south_west gmlpost);(Box.north_east glexer)]) in
-  (Box.draw fml)++(Box.draw fedit)++(Box.draw gmlpost)++(Box.draw png)
-  ++(Box.draw glexer)++(Box.draw mlpost)++a1++a2++a3++a4++a5++a6++a7
+  let fml = Box.shift (Point.pt ((bp 15.),(bp 50.))) (box "fml" (tex ".ml")) in
+  let fedit = Box.shift (Point.pt ((bp 100.),(bp (-100.)))) (box "fedit" (tex ".edit")) in
+  let gmlpost = Box.shift (Point.pt ((bp 0.),(bp 0.))) (box "gmlpost" (tex "GMLPost")) in
+  let glexer = Box.shift (Point.pt ((bp 195.),(bp (-100.)))) (box "glexer" (tex "glexer")) in
+  let mlpost = Box.shift (Point.pt ((bp 100.),(bp (0.)))) (box "mlpost" (tex "MLPost")) in
+  let png = Box.shift (Point.pt ((bp 108.),(bp (-50.)))) (box "png" (tex ".png")) in
+  let edit = Box.shift (Point.pt ((bp 200.),(bp 0.))) (box "edit" (tex "edit")) in
+  fml,fedit,gmlpost,glexer,mlpost,png,edit
+
+let interface1 =
+  let fml,fedit,gmlpost,glexer,mlpost,png,edit = interface in
+  let a1 = Command.draw_arrow ~color:Color.blue (pathp [(Box.south fml);(Box.north gmlpost)]) in 
+  let a2 = Command.draw_arrow ~color:Color.blue (pathp [(Box.east gmlpost);(Box.west mlpost)]) in 
+  let a3 = Command.draw_arrow ~color:Color.blue (pathp [(Box.south mlpost);(Box.north png)]) in 
+  let a4 = Command.draw_arrow ~color:Color.blue (pathp [(Box.east mlpost);(Box.west edit)]) in 
+  let a5 = Command.draw_arrow ~color:Color.blue (pathp [(Box.south edit);(Box.north glexer)]) in 
+  let a6 = Command.draw_arrow ~color:Color.blue (pathp [(Box.west glexer);(Box.east fedit)]) in 
+  let a7 = Command.draw_arrow ~color:Color.blue (smart_path ~style:jLine [Left;Up] (Box.west fedit) (Box.south gmlpost)) in 
+  let a8 = Command.draw ~color:Color.blue (smart_path ~style:jLine [Left;Up] (Box.west png) (Box.south gmlpost)) in 
+  (Box.draw fml)++(Box.draw fedit)++(Box.draw gmlpost)++(Box.draw png)++(Box.draw edit)
+  ++(Box.draw glexer)++(Box.draw mlpost)++a1++a2++a3++a4++a5++a6++a7++a8
   
+let interface2 =
+  let fml,fedit,gmlpost,glexer,mlpost,png,edit = interface in
+  let a1 = Command.draw_arrow ~color:Color.red (smart_path ~style:jLine [Down;Right] (Box.south gmlpost) (Box.west fedit)) in 
+  let a2 = Command.draw_arrow ~color:Color.red (pathp [(Box.south mlpost);(Box.north png)]) in 
+  let a3 = Command.draw_arrow ~color:Color.red (smart_path ~style:jLine [Left;Up;Left] (Box.west png) (Box.east gmlpost)) in 
+  let a4 = Command.draw_arrow ~color:Color.red (smart_path ~style:jLine [Rightn (bp 30.);Up;Leftn (bp 5.)] (Box.east fedit) (Box.east mlpost)) in 
+  (Box.draw fml)++(Box.draw fedit)++(Box.draw gmlpost)++(Box.draw png)++(Box.draw edit)
+  ++(Box.draw glexer)++(Box.draw mlpost)++a1++a2++a3++a4
 
 let hist1 =
   Hist.simple [3.;1.;6.]
@@ -198,7 +212,8 @@ let _ =
     "radar1",radar1;
     "radar2",radar2;
     "simple_block",simple_block;
-    "interface",interface;
+    "interface1",interface1;
+    "interface2",interface2;
     "path1",path1;
     "path2",path2;
     "path3",path3;
