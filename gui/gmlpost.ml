@@ -248,12 +248,21 @@ let point_of_spin s sb () =
     end
   with Not_found -> ()
 
+
+let init_spin_bounds = function
+  |Bp -> (-150.),150.,0.5
+  |Pt -> (-150.),150.,0.5
+  |Cm -> (-50.),50.,0.1
+  |Mm -> (-500.),500.,1.
+  |Inch -> (-3.),3.,0.05
+
 let left_part_lign pic vbox vbox2 vbox3 s n d s' = 
   GMisc.label ~text:(s^s') ~packing:vbox#add ();
   GMisc.label ~text:(string_of_dim d) ~packing:vbox3#add ();      
-  let sb = GEdit.spin_button ~packing:vbox2#add ~digits:2 ~numeric:true ~wrap:true ()
+  let sb = GEdit.spin_button ~packing:vbox2#add ~digits:2 ~numeric:true ~wrap:true () in
+  let lower,upper,step_incr = init_spin_bounds d 
   in
-    sb#adjustment#set_bounds ~lower:(-200.) ~upper:200. ~step_incr:0.01 ();
+    sb#adjustment#set_bounds ~lower ~upper ~step_incr ();
     sb#set_value n;
     sb#adjustment#connect#value_changed ~callback:(point_of_spin s sb);
     spins := sb::!spins;

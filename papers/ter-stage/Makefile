@@ -3,11 +3,11 @@ all: rapport.pdf
 
 PDFLATEX:=pdflatex -interaction="errorstopmode"
 
-rapport.pdf: rapport.tex figures.mp
+rapport.pdf: rapport.tex figrapport.mp
 	pdflatex $<
 	pdflatex $<
 
-slides.pdf: slides.tex figures.mp 
+slides.pdf: slides.tex figrapport.mp 
 	pdflatex $<
 
 wc:
@@ -19,6 +19,6 @@ wc:
 
 clean:
 	rm -f *~ *.aux *.log *.bbl *.blg *.mps
-	rm -f rapport.dvi rapport.ps figures.mp
+	rm -f rapport.dvi rapport.ps figrapport.mp
 	rm -f mpxerr.dvi mpxerr.tex rapport.pdf
 

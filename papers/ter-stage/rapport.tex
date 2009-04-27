@@ -5,6 +5,7 @@
 \usepackage{fullpage,url,graphicx,alltt}
 
 \newcommand{\mlpost}{\textsc{Mlpost}}
+\newcommand{\gmlpost}{\textsc{GMlpost}}
 
 \begin{document}
 
@@ -18,11 +19,89 @@ Dans un cadre scientifique, il est très souvent nécessaire d'inclure des figur
 
 ~\\L'utilisation d'un langage comme OCaml, avec un typage fort et des erreur plus simples à déchiffrer s'imposait donc! De plus, OCaml bénéficie d'arguments optionnels, très pratiques dans la conception d'une librairie graphique.Enfin, la quantité de code tapé devient plus concise, rendant la conception de figures possible d'un simple appel de fonction.
 
+~\\Enfin il est important de préciser qu'une figure \mlpost\ peut être utilisée comme la vue du résultat d'un calcul ou d'un algorithme OCaml. On pourra par exemple calculer un arbre couvrant d'un graphe, et le représenter sous forme d'arbre \mlpost\ dans le même programme.
+
 \subsubsection{Exemples}
+Un exemple facile d'utilisation de boîte avec \mlpost. On notera l'utilisation du symbole mathématique $\pi$ qui se fait aisément en conservant l'homogénéité du tout. 
+~\\
 
-\includegraphics{simple_block.mps}
+\begin{minipage}{0.7\linewidth}
+  \begin{alltt}
+    let simple_block =
+    let b = Box.hblock ~pos:`Bot 
+    [Box.tex "a"; Box.tex "A"; Box.tex "1"; Box.tex "$\\pi$"] 
+    in
+    Box.draw b
+  \end{alltt}
+\end{minipage}
+\begin{minipage}{0.3\linewidth}
+  \begin{center}
+    \includegraphics[scale=2]{simple_block.mps}
+  \end{center}
+\end{minipage}
 
 
+Un exemple légèrement plus compliqué dans lequel on utilise des arguments optionnels pour mieux personnaliser la figure.
+~\\
+
+\begin{minipage}{0.7\linewidth}
+  \begin{alltt}
+    let traffic =
+    let two = Num.bp 2. in
+    let b = 
+    vbox ~fill:black ~padding:(Num.bp 3.) ~dx:two ~dy:two
+    [ tex ~style:Circle ~fill:red "R";
+      tex ~style:Circle ~fill:yellow "Y";
+      tex ~style:Circle ~fill:green "G"; ]
+    in
+    draw b
+  \end{alltt}
+\end{minipage}
+\begin{minipage}{0.3\linewidth}
+  \begin{center}
+    \includegraphics[scale=2]{traffic.mps}
+  \end{center}
+\end{minipage}
+
+Un dernier exemple plus compliqué utilisant les module Path, Point et Pen pour dessiner un rubik's cube.
+~\\
+
+\begin{minipage}{0.7\linewidth}
+  \begin{alltt}
+    let alpha = atan 1.
+    let beta = atan 1. /. 2. 
+    let mag = 10.
+    
+    let proj x y z = 
+    mag *. float (x - y) *. cos alpha, 
+    mag *. (float (x + y) *. sin alpha *. sin beta +. float z *. cos beta)
+    
+    let pen = Pen.scale (bp 2.5) Pen.default
+  
+    let square color p i j =
+    let pt i j = let x,y = p i j in 
+    Point.pt (bp x, bp y) in
+    let points = [pt i j; pt (i+1) j; 
+      pt (i+1) (j+1); pt i (j+1)] in
+    let path = pathp ~style:jLine 
+    ~cycle:jLine points in
+    seq [fill ~color path; Command.draw ~pen path]
+    
+    let right = square Color.orange (fun i j -> proj i 0 j)
+    let up = square Color.yellow (fun i j -> proj i j 3)
+    let left = square Color.green (fun i j -> proj 0 (3 - i) j)
+    
+    let rubik = 
+    seq [iter 0 2 (fun i -> iter 0 2 (right i));
+      iter 0 2 (fun i -> iter 0 2 (up i));
+      iter 0 2 (fun i -> iter 0 2 (left i));]
+  \end{alltt}
+\end{minipage}
+\begin{minipage}{0.3\linewidth}
+  \begin{center}
+    \includegraphics[scale=3]{rubik.mps}
+  \end{center}
+\end{minipage}
 
 \subsection{Notre TER}
 \subsubsection{Modules au dessus de \mlpost}
@@ -46,9 +125,9 @@ flottants.
   \end{alltt}
 \end{minipage}
 \begin{minipage}{0.5\linewidth}
-\begin{center}
-\includegraphics[scale=0.5]{hist1.mps}
-\end{center}
+  \begin{center}
+    \includegraphics[scale=0.5]{hist1.mps}
+  \end{center}
 \end{minipage}
 
 \subsubsection{Comparatif :} 
@@ -293,7 +372,7 @@ Ceci permet à l'utilisateur de choisir la façon dont il veut relier les deux p
 
 \subsection{Arbres}
 Ce module permet la création d'arbres \mlpost\ de façon esthétique.
-Il s'appuie sur l'ancien module Tree de \mlpost (qu'il a remplacé), ainsi que sur l'article d'un chercheur américain. \cite{tree}
+Il s'appuie sur l'ancien module Tree de \mlpost\ (qu'il a remplacé), ainsi que sur l'article d'un chercheur américain. \cite{tree}
 ~\\
 Le module contient deux fonctions principales:
 \begin{itemize}
@@ -343,7 +422,6 @@ Quelques exemples d'arbres:
     Tree.node ~arrow_style:Undirected 
     ~edge_style:HalfSquare (Box.tex s) in
     let leaf s = Tree.leaf (Box.tex s) in
-    
     Tree.draw 
     (node "1" [
       node "2" [node "4" [leaf "8"]; leaf "5"]; 
@@ -358,9 +436,77 @@ Quelques exemples d'arbres:
   \end{center}
 \end{minipage}
 
+~\\
+
+\begin{minipage}{0.5\linewidth}
+  \begin{alltt}
+    let leaf s = Tree.leaf 
+    (Box.set_stroke Color.black (Box.tex s))
+    let node s l = Tree.node  
+    ~arrow_style:Undirected 
+    ~edge_style:Straight 
+    ~ls:(bp 30.)
+    (Box.set_stroke Color.black 
+    (Box.tex s)) l
+  \end{alltt}
+\end{minipage}
+\begin{minipage}{0.5\linewidth}
+  \begin{center}
+    \includegraphics[scale=1.4]{tree3.mps}
+  \end{center}
+\end{minipage}
+\begin{alltt}
+  let subtree = node "subroot" [leaf "son1"; leaf "son2"; leaf "son3"]
+  let treebox = Box.rect (to_box subtree)
+  let maintree = node "root" [subtree; leaf "son"; Tree.node treebox [subtree]]
+  let tree3 = Tree.draw maintree 
+\end{alltt}
 \section{Interface graphique}
+\gmlpost\ est une interface graphique pour \mlpost\ permettant d'éditer des figures à partir d'un fichier \textit{.ml}. 
 \subsection{Motivations}
+Le processus de création ou d'édition d'une figure peut être ennuyeux lorsque l'on essaie de regler certaines valeurs à tatons. Il faut avoir un editeur de texte lancé, éventuellement un terminal, et il faut recompiler à chaque fois et lancer le fichier postscript ou le pdf obtenu avec un viewer.
+
+~\\Grâce à \gmlpost, il suffit de lancer le fichier, et l'interface va permettre à l'utilisateur, soit de modifier les valeurs elles-mêmes dans la partie gauche, soit de déplacer les points éditables sur le canvas situé sur la partie droite de la fenêtre.
+~\\Ainsi les actions de l'utilisateur se limitent désormais à éditer des valeurs et rafraichir l'image, ce qui devient quasi-instantané.
 \subsection{Structure}
+\gmlpost\ n'a nécessité aucune modification de \mlpost, nous y avons seulement dû ajouter un module Edit par dessus le module Num.
+
+L'interface de ce module comporte ces deux fonctions:
+\begin{alltt}
+  val num: string -> float -> Glexer.dimension -> Num.t
+
+  val point: string -> 
+  float -> Glexer.dimension -> 
+  float -> Glexer.dimension -> Point.t
+\end{alltt}
+
+Lors de la compilation d'un fichier par \gmlpost, les Num et les Point éditables sont interprété par le fichier \textit{glexer.mll}. Puis le programme crée un fichier \textit{fig.edit} contenant des éléments définis par le type:
+\begin{alltt}
+  type elt = 
+  | Num of string * value
+  | Point of string * value * value
+\end{alltt}
+avec value le type:
+\begin{alltt}
+  type value = float * dimension
+\end{alltt}
+et dimension le type:
+\begin{alltt}
+  type dimension =
+  Pt | Cm | Mm | Bp | Inch
+\end{alltt}
+
+\gmlpost\ peut enfin utiliser le fichier généré pour créer l'image de la figure \mlpost\ et afficher celle-ci ainsi que ses valeurs éditables, et ses points déplaçables sur le canvas.
+~\\
+
+Lors d'un rafraichissement, le programme va écraser le fichier \textit{fig.edit} avec les nouvelles valeurs, et compiler la nouvelle image fraichement obtenue.
+
+~\\
+
+\begin{center}
+\includegraphics{interface.mps}
+\end{center}
+
 \subsection{Screenshots}
 \section{Conclusion}
 
