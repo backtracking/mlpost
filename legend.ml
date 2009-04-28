@@ -17,11 +17,11 @@ let rec mklegend ensstroke colstroke fill vb1 vb2 = function
 
 let legend ?ensstroke ?colstroke ?fill l =
   let ensstroke = match ensstroke with
-    |None-> Color.black
+    |None-> Color.white
     |Some i -> i
   in
   let colstroke = match colstroke with
-    |None-> Color.black
+    |None-> Color.white
     |Some i -> i
   in
   let fill = match fill with

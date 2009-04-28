@@ -6,23 +6,37 @@
 
 \newcommand{\mlpost}{\textsc{Mlpost}}
 \newcommand{\gmlpost}{\textsc{GMlpost}}
+\newcommand{\meta}{\textsc{Metapost}}
 
 \begin{document}
 
 \section{Introduction}
 
 \subsection{Présentation de \mlpost}
-\mlpost\ est une interface Objective Caml de Metapost, permettant la création de figures.
+\mlpost\ est une interface Objective Caml de \meta, permettant la création de figures. \cite{mlpost}
+
 \subsubsection{Motivations}
-Dans un cadre scientifique, il est très souvent nécessaire d'inclure des figures aux documents (cours, articles).
+Dans un cadre scientifique, il est très souvent nécessaire d'inclure des figures aux documents (cours, articles). Il existe bien sûr de nombreux éditeurs graphiques, mais la conception de figures complexes s'avère longue et nuit à l'homogénéité du tout. 
 ~\\Une façon très commune de rédiger ces documents est d'utiliser \LaTeX. \LaTeX\ permet l'importation d'images, voire la création, mais ceci reste compliqué, long, et les erreurs sont difficiles à interpréter. Il doit également être possible d'ajouter des éléments de \LaTeX\ à la figure, et de garder une homogénéité du document. 
 
 ~\\L'utilisation d'un langage comme OCaml, avec un typage fort et des erreur plus simples à déchiffrer s'imposait donc! De plus, OCaml bénéficie d'arguments optionnels, très pratiques dans la conception d'une librairie graphique.Enfin, la quantité de code tapé devient plus concise, rendant la conception de figures possible d'un simple appel de fonction.
 
 ~\\Enfin il est important de préciser qu'une figure \mlpost\ peut être utilisée comme la vue du résultat d'un calcul ou d'un algorithme OCaml. On pourra par exemple calculer un arbre couvrant d'un graphe, et le représenter sous forme d'arbre \mlpost\ dans le même programme.
 
+\subsubsection{Structure de \mlpost}
+\mlpost\ est constitué de nombreux modules open sources séparés en quatre catégories:
+\begin{itemize}
+\item les interfaces des types basiques de \meta\ (Command,Num,Point,Path,Picture...)
+\item les composants graphique avancés (Box,Shapes,Arrow...) 
+\item les extensions (Tree,Histogram,Diag,Plot...)
+\item les modules de génération de \meta
+\end{itemize}
+
+Pour simplifier les choses, on peut dire qu'une figure est une somme de Command qui sera passée aux modules de génération de \meta.
+
+
 \subsubsection{Exemples}
-Un exemple facile d'utilisation de boîte avec \mlpost. On notera l'utilisation du symbole mathématique $\pi$ qui se fait aisément en conservant l'homogénéité du tout. 
+Un exemple facile d'utilisation de boîte avec \mlpost. On notera l'utilisation du symbole mathématique $\pi$ qui se fait aisément en conservant l'homogénéité du tout, ainsi que la concision du code pour générer la boîte. 
 ~\\
 
 \begin{minipage}{0.7\linewidth}
@@ -63,7 +77,7 @@ Un exemple légèrement plus compliqué dans lequel on utilise des arguments opt
   \end{center}
 \end{minipage}
 
-Un dernier exemple plus compliqué utilisant les module Path, Point et Pen pour dessiner un rubik's cube.
+Un dernier exemple plus compliqué utilisant les module Path, Point et Pen pour dessiner un rubik's cube. Cette figure étant le résultat d'un calcul, on voit bien à quel point il serait facile de changer certains paramètres pour la modifier.
 ~\\
 
 \begin{minipage}{0.7\linewidth}
@@ -104,13 +118,21 @@ Un dernier exemple plus compliqué utilisant les module Path, Point et Pen pour 
 \end{minipage}
 
 \subsection{Notre TER}
+Le sujet du stage était à l'origine \textit{Implémentation d'une bibliothèque de diagrammes pour \mlpost}.Il s'agissait de réaliser une extension de \mlpost, sans bien sûr avoir à modifier ce qui était déjà présent. Nous avons donc dû d'abord maîtriser très vite l'API.
+Pour ce stage, il fallait bien sûr que notre API soit claire, dans les choix de types, de noms de fonctions et d'arguments (surtout optionnels), et qu'elle soit accompagnée d'une documentation (conçue avec \textsc{OCamldoc}).
+
+Dans la deuxième partie du stage, notre encadrant nous a proposé de modifier le module Tree et d'implémenter une interface graphique pour \mlpost.
+
 \subsubsection{Modules au dessus de \mlpost}
+Nous avons travaillé sur cinq modules. 
+Sur ces cinq modules, nous en avons créé trois (Histogram,Radar,Legend), enrichi un (Path), et modifié un autre (Tree).
+Nos trois modules sont des modules \og haut niveau\fg\ qui n'ont nécessité aucune modification du noyau de \mlpost. 
 \subsubsection{Interface Graphique}
+\gmlpost\ est une interface graphique de \mlpost\ permettant l'édition de figure \mlpost\ avec un gain de temps de praticité. Sa conception nous a permis de devenir familier avec \textsc{lablgtk2} (et donc \textsc{gkt2} par extension) et d'utiliser à nouveau l'outil \textsc{OCamllex}.
 
 \section{Modules \mlpost}
 
-
-\subsection{Histogrammes}
+\subsection{Histogram}
 Il existe trois types d'histogramme:
 
 \subsubsection{Simple:}
@@ -370,7 +392,7 @@ Ceci permet à l'utilisateur de choisir la façon dont il veut relier les deux p
 \end{minipage}
 
 
-\subsection{Arbres}
+\subsection{Tree}
 Ce module permet la création d'arbres \mlpost\ de façon esthétique.
 Il s'appuie sur l'ancien module Tree de \mlpost\ (qu'il a remplacé), ainsi que sur l'article d'un chercheur américain. \cite{tree}
 ~\\
@@ -452,15 +474,52 @@ Quelques exemples d'arbres:
 \end{minipage}
 \begin{minipage}{0.5\linewidth}
   \begin{center}
-    \includegraphics[scale=1.4]{tree3.mps}
+    \includegraphics[scale=1.1]{tree3.mps}
   \end{center}
 \end{minipage}
+
+~\\
+
 \begin{alltt}
   let subtree = node "subroot" [leaf "son1"; leaf "son2"; leaf "son3"]
   let treebox = Box.rect (to_box subtree)
   let maintree = node "root" [subtree; leaf "son"; Tree.node treebox [subtree]]
   let tree3 = Tree.draw maintree 
 \end{alltt}
+
+\subsection{Legend}
+Un petit module, très pratique, servant à représenter la légende d'une figure \mlpost\ quelconque.
+
+La signature du module est définie comme ceci:
+\begin{alltt}
+  val legend : 
+  ?ensstroke:Color.t ->
+  ?colstroke:Color.t ->
+  ?fill:Color.t ->
+  (Color.t * string) list -> Picture.t
+\end{alltt}
+
+Cette fonction prend en argument une liste de couples couleur/chaine, et renvoie une Picture. Celle ci peut ainsi être dessinée n'importe où sur ou à côté de la figure à laquelle elle se rapporte.
+
+~\\
+
+\begin{minipage}{0.5\linewidth}
+  \begin{alltt}
+    let legend1 = 
+    let l = Legend.legend
+    [(Color.lightgreen,"2009");
+      (Color.lightyellow,"2010");
+      (Color.lightred,"2011")]
+    in Command.draw_pic l
+  \end{alltt}
+\end{minipage}
+\begin{minipage}{0.5\linewidth}
+  \begin{center}
+    \includegraphics[scale=1.5]{legend1.mps}
+  \end{center}
+\end{minipage}
+
+
 \section{Interface graphique}
 \gmlpost\ est une interface graphique pour \mlpost\ permettant d'éditer des figures à partir d'un fichier \textit{.ml}. 
 \subsection{Motivations}
@@ -519,8 +578,15 @@ Schéma de l'exécution du rafraîchissement:
 \section{Conclusion}
 
 \begin{thebibliography}{99}
-\bibitem{mlpost} \mlpost, une bibliothèque de dessin 
- scientifique pour Objective Caml.
+\bibitem{mlpost} \mlpost, une bibliothèque OCaml développée au sein du projet Proval de l’INRIA Saclay – Île-de-France, permettant la réalisation de dessins scientifiques destinés à être inclus dans des documents \LaTeX.
+
+Auteurs:
+\begin{itemize}
+    \item Romain Bardou
+    \item Johannes Kanig
+    \item Stéphane Lescuyer
+    \item Jean-Christophe Filliâtre 
+\end{itemize}
 
 \bibitem{tree}
 Andrew Kennedy. 

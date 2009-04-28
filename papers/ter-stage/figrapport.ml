@@ -6,13 +6,19 @@ open Path
 open Tree
 open Command
 
-(* blocks mémoire *)     
+
+
+(***************** Simple Block ******************)
+     
 
 let simple_block =
   let b = Box.hblock ~pos:`Bot [Box.tex "a"; Box.tex "A"; Box.tex "1"; Box.tex "$\\pi$"] in
   Box.draw b
-    
-(* traffic lights *)
+
+
+(***************** Traffic Lights ******************)    
+
+
 let traffic =
   let two = Num.bp 2. in
   let b = 
@@ -23,7 +29,10 @@ let traffic =
   in
   Box.draw b
     
-(* rubik's cube *)
+
+(***************** Rubik's Cube ******************)
+
+
 let alpha = atan 1.
 let beta = atan 1. /. 2. 
 let mag = 10.
@@ -48,44 +57,10 @@ let rubik =
   seq [iter 0 2 (fun i -> iter 0 2 (right i));
        iter 0 2 (fun i -> iter 0 2 (up i));
        iter 0 2 (fun i -> iter 0 2 (left i));]
-    
-    
-(* schema de l'interface *)
-let interface = 
-  let dx = bp 5. and dy = bp 5. in
-  let tex' = tex ~style:RoundRect ~dx ~dy in
-  let tex = tex' ~stroke:(Some Color.black) in
-  let box name = box ~stroke:None ~dx:(mm 2.) ~name in
-  let fml = Box.shift (Point.pt ((bp 15.),(bp 50.))) (box "fml" (tex ".ml")) in
-  let fedit = Box.shift (Point.pt ((bp 100.),(bp (-100.)))) (box "fedit" (tex ".edit")) in
-  let gmlpost = Box.shift (Point.pt ((bp 0.),(bp 0.))) (box "gmlpost" (tex "GMLPost")) in
-  let glexer = Box.shift (Point.pt ((bp 195.),(bp (-100.)))) (box "glexer" (tex "glexer")) in
-  let mlpost = Box.shift (Point.pt ((bp 100.),(bp (0.)))) (box "mlpost" (tex "MLPost")) in
-  let png = Box.shift (Point.pt ((bp 108.),(bp (-50.)))) (box "png" (tex ".png")) in
-  let edit = Box.shift (Point.pt ((bp 200.),(bp 0.))) (box "edit" (tex "edit")) in
-  fml,fedit,gmlpost,glexer,mlpost,png,edit
 
-let interface1 =
-  let fml,fedit,gmlpost,glexer,mlpost,png,edit = interface in
-  let a1 = Command.draw_arrow ~color:Color.blue (pathp [(Box.south fml);(Box.north gmlpost)]) in 
-  let a2 = Command.draw_arrow ~color:Color.blue (pathp [(Box.east gmlpost);(Box.west mlpost)]) in 
-  let a3 = Command.draw_arrow ~color:Color.blue (pathp [(Box.south mlpost);(Box.north png)]) in 
-  let a4 = Command.draw_arrow ~color:Color.blue (pathp [(Box.east mlpost);(Box.west edit)]) in 
-  let a5 = Command.draw_arrow ~color:Color.blue (pathp [(Box.south edit);(Box.north glexer)]) in 
-  let a6 = Command.draw_arrow ~color:Color.blue (pathp [(Box.west glexer);(Box.east fedit)]) in 
-  let a7 = Command.draw_arrow ~color:Color.blue (smart_path ~style:jLine [Left;Up] (Box.west fedit) (Box.south gmlpost)) in 
-  let a8 = Command.draw ~color:Color.blue (smart_path ~style:jLine [Left;Up] (Box.west png) (Box.south gmlpost)) in 
-  (Box.draw fml)++(Box.draw fedit)++(Box.draw gmlpost)++(Box.draw png)++(Box.draw edit)
-  ++(Box.draw glexer)++(Box.draw mlpost)++a1++a2++a3++a4++a5++a6++a7++a8
-  
-let interface2 =
-  let fml,fedit,gmlpost,glexer,mlpost,png,edit = interface in
-  let a1 = Command.draw_arrow ~color:Color.red (smart_path ~style:jLine [Down;Right] (Box.south gmlpost) (Box.west fedit)) in 
-  let a2 = Command.draw_arrow ~color:Color.red (pathp [(Box.south mlpost);(Box.north png)]) in 
-  let a3 = Command.draw_arrow ~color:Color.red (smart_path ~style:jLine [Left;Up;Left] (Box.west png) (Box.east gmlpost)) in 
-  let a4 = Command.draw_arrow ~color:Color.red (smart_path ~style:jLine [Rightn (bp 30.);Up;Leftn (bp 5.)] (Box.east fedit) (Box.east mlpost)) in 
-  (Box.draw fml)++(Box.draw fedit)++(Box.draw gmlpost)++(Box.draw png)++(Box.draw edit)
-  ++(Box.draw glexer)++(Box.draw mlpost)++a1++a2++a3++a4
+
+(***************** Histograms ******************)
+
 
 let hist1 =
   Hist.simple [3.;1.;6.]
@@ -114,6 +89,10 @@ let hist4 =
   Hist.simple ~histlabel:(`Top, Hist.User pics)
     [4.5;5.0;6.2;8.;7.2;6.1]
 
+
+(***************** Radars ******************)
+
+
 let radar1 =
   let pic =
     Radar.stack
@@ -138,6 +117,10 @@ let radar2 =
     in
     Box.draw (Box.vbox ~padding:(bp 10.) 
     (List.map (Box.pic ~stroke:None) pics))
+
+
+(***************** Paths ******************)
+
 
 let path1 = 
   let p = Path.smart_path 
@@ -175,6 +158,9 @@ let path4 =
   Command.draw p
 
  
+(***************** Trees ******************)
+
+
 let tree1 =
   let node s = Tree.node ~edge_style:Curve (Box.tex s) in
   let leaf s = Tree.leaf (Box.tex s) in
@@ -202,6 +188,80 @@ let treebox = Box.rect (to_box subtree)
 let maintree = node "root" [subtree; leaf "son"; Tree.node treebox [subtree]]
 let tree3 = Tree.draw maintree 
 
+
+(***************** GMlpost ******************)
+
+
+let init = 
+  let dx = bp 5. and dy = bp 5. in
+  let tex' = tex ~style:RoundRect ~dx ~dy  in
+  let tex = tex' ~stroke:(Some Color.black) in
+  let box name = box ~stroke:None ~dx:(mm 2.) ~name in
+  let fml = box "fml" (tex ".ml") in
+  let gmlpost = box "gmlpost" (tex "GMLPost") in
+  let mlpost = box "mlpost" (tex "MLPost") in 
+  let glexer = box "glexer" (tex "Glexer") in
+  let edit = box "edit" (tex "Edit") in
+  let png = box "png"(tex ".png") in
+  let fedit = box "fedit" (tex ".edit")
+  in
+  fml,gmlpost,mlpost,glexer,edit,png,fedit
+
+let interface = 
+  let fml,gmlpost,mlpost,glexer,edit,png,fedit = init in
+  let boxarray = Array.make_matrix 4 3 (Box.empty ()) in
+  boxarray.(0).(0) <-  fml ;
+  boxarray.(1).(0) <-  gmlpost ;
+  boxarray.(1).(1) <-  mlpost ;
+  boxarray.(1).(2) <-  edit ;
+  boxarray.(3).(2) <-  glexer ;
+  boxarray.(2).(1) <-  png ;
+  boxarray.(3).(1) <-  fedit ;
+  tabular ~hpadding:(bp 20.) ~vpadding:(bp 20.)  boxarray 
+
+let interface1 = 
+  let mbox = interface in
+  let a1 = Command.draw_arrow ~color:Color.blue 
+    (pathp [(Box.south (Box.get "fml" mbox));(Box.north (Box.get "gmlpost" mbox))]) in
+  let a2 = Command.draw_arrow ~color:Color.blue 
+    (pathp [(Box.east (Box.get "gmlpost" mbox));(Box.west (Box.get "mlpost" mbox))]) in
+  let a3 = Command.draw_arrow ~color:Color.blue 
+    (pathp [(Box.south (Box.get "mlpost" mbox));(Box.north (Box.get "png" mbox))]) in
+  let a4 = Command.draw_arrow ~color:Color.blue 
+    (pathp [(Box.east (Box.get "mlpost" mbox));(Box.west (Box.get "edit" mbox))]) in
+  let a5 = Command.draw_arrow ~color:Color.blue 
+    (pathp [(Box.south (Box.get "edit" mbox));(Box.north (Box.get "glexer" mbox))]) in
+  let a6 = Command.draw_arrow ~color:Color.blue 
+    (pathp [(Box.west (Box.get "glexer" mbox));(Box.east (Box.get "fedit" mbox))]) in
+  let a7 = Command.draw_arrow ~color:Color.blue 
+    (smart_path ~style:jLine [Left;Up] (Box.west (Box.get "fedit" mbox)) (Box.south (Box.get "gmlpost" mbox))) in
+  let a8 = Command.draw_arrow ~color:Color.blue 
+    (smart_path ~style:jLine [Left;Up] (Box.west (Box.get "png" mbox)) (Box.south (Box.get "gmlpost" mbox))) in
+  (Box.draw mbox)++a1++a2++a3++a4++a5++a6++a7++a8
+
+let interface2 = 
+  let mbox = interface in
+  let a1 = Command.draw_arrow ~color:Color.red 
+    (smart_path ~style:jLine [Down;Right] (Box.south (Box.get "gmlpost" mbox)) (Box.west (Box.get "fedit" mbox))) in
+  let a2 = Command.draw_arrow ~color:Color.red 
+    (pathp [(Box.south (Box.get "mlpost" mbox));(Box.north (Box.get "png" mbox))]) in
+  let a3 = Command.draw_arrow ~color:Color.red 
+    (smart_path ~style:jLine [Left;Up;Left] (Box.west (Box.get "png" mbox)) (Box.east (Box.get "gmlpost" mbox))) in
+  let a4 = Command.draw_arrow ~color:Color.red 
+    (smart_path ~style:jLine [Rightn (bp 20.);Up;Leftn (bp 5.)] (Box.east (Box.get "fedit" mbox)) (Box.east (Box.get "mlpost" mbox))) in
+  (Box.draw mbox)++a1++a2++a3++a4
+
+
+(***************** Legend ******************)
+let legend1 = 
+  let l = Legend.legend 
+    [(Color.lightgreen,"2009");(Color.lightyellow,"2010");(Color.lightred,"2011")]
+  in Command.draw_pic l
+
+
+(***************** ******************)
+
+
 let _ =
   List.iter (fun (name,fig) -> Metapost.emit name fig)
   [ "hist1", hist1;
@@ -222,5 +282,6 @@ let _ =
     "tree2",tree2;
     "tree3",tree3;
     "traffic",traffic;
-    "rubik",rubik
+    "rubik",rubik;
+    "legend1",legend1
   ]
