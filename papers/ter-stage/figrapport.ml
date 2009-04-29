@@ -9,15 +9,15 @@ open Command
 
 
 (***************** Simple Block ******************)
-     
+
 
 let simple_block =
   let b = Box.hblock ~pos:`Bot [Box.tex "a"; Box.tex "A"; Box.tex "1"; Box.tex "$\\pi$"] in
   Box.draw b
-
-
+    
+    
 (***************** Traffic Lights ******************)    
-
+    
 
 let traffic =
   let two = Num.bp 2. in
@@ -29,10 +29,10 @@ let traffic =
   in
   Box.draw b
     
-
+    
 (***************** Rubik's Cube ******************)
-
-
+    
+    
 let alpha = atan 1.
 let beta = atan 1. /. 2. 
 let mag = 10.
@@ -57,36 +57,54 @@ let rubik =
   seq [iter 0 2 (fun i -> iter 0 2 (right i));
        iter 0 2 (fun i -> iter 0 2 (up i));
        iter 0 2 (fun i -> iter 0 2 (left i));]
-
-
+    
+    
 (***************** Histograms ******************)
-
-
+    
+    
 let hist1 =
-  Hist.simple [3.;1.;6.]
-
+  Hist.simple
+    ~width:(bp 100.)
+    ~height:(bp 200.)
+    [3.;1.;6.]
+    
 let hist2 =
   Hist.compare
-  [[1.;5.;6.;5.;3.];
-   [1.;2.;3.;6.;-1.]]
-
+    ~width:(bp 100.)
+    ~height:(bp 200.)
+    [[1.;5.;6.;5.;3.];
+     [1.;2.;3.;6.;-1.]]
+    
 let hist3 =
-  Hist.stack ~fill:[lightred;lightblue;lightyellow;lightgreen]
-    [[4.;5.;5.;]; [8.;3.;1.]; [2.;8.;1.;4.]]
-
+  let vlabel _ _ = None in
+    Hist.stack 
+      ~vlabel
+      ~fill:[lightred;lightblue;lightyellow;lightgreen]
+      [[4.;5.;5.;]; [8.;3.;1.]; [2.;8.;1.;4.];[1.5;3.5];[2.;2.;7.;1.]]
+    
 let hist5 =
+  let vlabel _ _ = None in
+  let rot s = Picture.rotate 25. (Picture.tex ("\\large{"^s^"}")) in
   Hist.stack
-    ~perspective:true ~padding:(bp 25.)
+    ~vlabel
+    ~width:(bp 100.)
+    ~height:(bp 200.)
+    ~perspective:true ~padding:(bp 15.)
     ~fill:[lightred;lightblue;lightyellow;lightgreen]
     ~histlabel:(`Center, Hist.Values)
+    ~hlabel:[rot "first";rot "second";rot "third" ]
     [[4.;5.;5.;]; [8.;3.;1.]; [2.;8.;1.;4.]]
-
+    
 
 let hist4 =
   let pics =
     List.map Picture.tex ["2000";"2001";"2002";"2003";"2004";"2005"]
   in
-  Hist.simple ~histlabel:(`Top, Hist.User pics)
+  Hist.simple 
+    ~width:(bp 150.)
+    ~height:(bp 270.)
+    ~histlabel:(`Top, Hist.User pics)
+    ~hcaption:(Picture.tex "Year")
     [4.5;5.0;6.2;8.;7.2;6.1]
 
 

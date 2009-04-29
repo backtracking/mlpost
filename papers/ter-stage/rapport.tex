@@ -8,8 +8,14 @@
 \newcommand{\gmlpost}{\textsc{GMlpost}}
 \newcommand{\meta}{\textsc{Metapost}}
 
-\begin{document}
+\title{\huge{TER Stage : ~\\
+  Implémentation d'une bibliothèque de diagrammes pour \mlpost}}
+\author{ Guillaume Von Tokarski et Julien Robert}
 
+\begin{document}
+\maketitle
+
+\begin{center}M1 Informatique, Université Paris Sud XI\end{center}
 \section{Introduction}
 
 \subsection{Présentation de \mlpost}
@@ -134,55 +140,120 @@ Nos trois modules sont des modules \og haut niveau\fg\ qui n'ont nécessité auc
 
 \subsection{Histogram}
 Il existe trois types d'histogramme:
+\begin{itemize}
+\item simple
+\item comparatif
+\item cumulatif
+\end{itemize}
+
+Chacun est construit à partir d'une certaine utilisation de la fonction \textit{hist}. Cette fonction est le coeur du module. Elle permet la création d'un ensemble de boîtes avec leurs labels, et la réduction de la taille du code (pas de duplication). La fonction \textit{hist} renvoie une Command, qui est utilisée par les fonctions -- simple, compare, stack -- couplée au dessin d'un repère grâce au module Plot.
+Concrètement, un histogramme est une \textit{hbox}, un ensemble de boîtes horizontal. Chaque boîte contient une \textit{vbox}, un ensemble de boîtes vertical. Ceci forme une sorte de matrice, où chaque élément est un morceau d'histogramme.
 
 \subsubsection{Simple:}
 Un histogramme classique construit à partir d'une liste de nombres
 flottants.
+\begin{alltt}
+  val simple :
+  ?width:Num.t ->
+  ?height:Num.t ->
+  ?padding:Num.t ->
+  ?fill:Color.t list ->
+  ?perspective: bool ->
+  ?hcaption:Picture.t ->
+  ?vcaption:Picture.t ->
+  ?histlabel:[> `Bot | `Center | `Top ] * Picture.t labels ->
+  ?vlabel:Plot.labels ->
+  ?hlabel:Picture.t list -> 
+  float list -> Command.t
+\end{alltt}
 
 ~\\
 
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
-    let hist = Hist.simple [3.;1.;6.]
+    let hist1 = Hist.simple
+    ~width:(bp 100.)
+    ~height:(bp 200.)
+    [3.;1.;6.]
   \end{alltt}
+
+  Utilisation très simple de \textit{simple} pour trois valeurs. On spécifie la taille totale de la figure. La construction de cet histogramme nécessite un appel à la fonction \textit{hist} et l'ajout d'un repère. Un histogramme simple est matrice où chaque colonne est un seul élément, c'est à dire une \textit{hbox} dont chaque sous boîte contient une \textit{vbox} qui contient un seul élément.
 \end{minipage}
 \begin{minipage}{0.5\linewidth}
   \begin{center}
-    \includegraphics[scale=0.5]{hist1.mps}
+    \includegraphics[scale=1.]{hist1.mps}
   \end{center}
 \end{minipage}
 
 \subsubsection{Comparatif :} 
 Un histogramme comparatif construit à partir d'une liste. Cette liste
-contient N listes de nombres flottants, chacune étant un histogramme.
+contient des listes de nombres flottants, chacune étant un histogramme.
+\begin{alltt}
+  val compare :
+  ?width:Num.t ->
+  ?height:Num.t ->
+  ?padding:Num.t ->
+  ?fill:Color.t list ->
+  ?perspective: bool ->
+  ?hcaption:Picture.t ->
+  ?vcaption:Picture.t ->
+  ?histlabel:[> `Bot | `Center | `Top ] * Picture.t list labels ->
+  ?vlabel:Plot.labels ->
+  ?hlabel:Picture.t list ->
+  float list list -> Command.t
+\end{alltt}
 
 ~\\
 
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
-    let hist = Hist.compare
+    let hist2 = Hist.compare
+    ~width:(bp 100.)
+    ~height:(bp 200.)
     [[1.;5.;6.;5.;3.];
       [1.;2.;3.;6.;-1.]]
   \end{alltt}
+  
+  L'histogramme comparatif se construit ici après deux appels à \textit{hist}. Ceci génère deux histogrammes \og simples \fg\, avec de gros paddings calculés pour les mettre côtes à côtes, et une légère translation pour le deuxième, puis le repère est calculé.
 \end{minipage}
 \begin{minipage}{0.5\linewidth}
 \begin{center}
-\includegraphics[scale=0.5]{hist2.mps}
+\includegraphics[scale=1.]{hist2.mps}
 \end{center}
 \end{minipage}
 
 \subsubsection{Cumulatif :} 
-Un histogramme cumulatif.
+Un histogramme cumulatif, construit avec la même signature que les histogrammes comparatifs. Cependant, chaque sous liste correspond cette fois à une barre cumulée.
+\begin{alltt}
+  val stack :
+  ?width:Num.t ->
+  ?height:Num.t ->
+  ?padding:Num.t ->
+  ?fill:Color.t list ->
+  ?perspective: bool ->
+  ?hcaption:Picture.t ->
+  ?vcaption:Picture.t ->
+  ?histlabel:[> `Bot | `Center | `Top ] * Picture.t list labels ->
+  ?vlabel:Plot.labels ->
+  ?hlabel:Picture.t list -> 
+  float list list -> Command.t
+\end{alltt}
 
 ~\\
 
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
-    let hist = Hist.stack 
-    ~fill:[lightred;lightblue
-      ;lightyellow;lightgreen]
-    [[4.;5.;5.;]; [8.;3.;1.]; [2.;8.;1.;4.]]
+    let hist3 =
+    let vlabel _ _ = None in
+    Hist.stack 
+    ~vlabel
+    ~fill:[lightred;lightblue;
+      lightyellow;lightgreen]
+    [[4.;5.;5.;]; [8.;3.;1.]; [2.;8.;1.;4.];
+      [1.5;3.5];[2.;2.;7.;1.]]
   \end{alltt}
+  
+  Cette figure est construite à partir d'un seul appel de la fonction \textit{hist}. Contrairement à l'histogramme \og simple \fg, chaque colonne est désormais constituée de plusieurs boîtes, c'est à dire chaque \textit{vbox} contient désormais plusieurs boîtes. L'histogramme \og simple \fg\ est donc un cas particulier de l'histogramme \og cumulatif \fg.
 \end{minipage}
 \begin{minipage}{0.5\linewidth}
 \begin{center}
@@ -197,19 +268,22 @@ Il est possible de faire des histogrammes bien plus complexes, mais toujours de 
 
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
-    let hist =
+    let hist4 =
     let pics =
     List.map Picture.tex ["2000";"2001";
       "2002";"2003";"2004";"2005"]
     in
     Hist.simple 
+    ~width:(bp 150.)
+    ~height:(bp 270.)
     ~histlabel:(`Top, Hist.User pics)
+    ~hcaption:(Picture.tex "Year")
     [4.5;5.0;6.2;8.;7.2;6.1]
   \end{alltt}
 \end{minipage}
 \begin{minipage}{0.5\linewidth}
 \begin{center}
-\includegraphics[scale=0.5]{hist4.mps}
+\includegraphics[scale=.7]{hist4.mps}
 \end{center}
 \end{minipage}
 
@@ -217,17 +291,27 @@ Il est possible de faire des histogrammes bien plus complexes, mais toujours de 
 
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
-    let hist = Hist.stack
-    ~perspective:true ~padding:(bp 25.)
+    let hist5 =
+    let vlabel _ _ = None in
+    let rot s = 
+    Picture.rotate 25. (Picture.tex s) in
+    Hist.stack
+    ~vlabel
+    ~width:(bp 100.)
+    ~height:(bp 200.)
+    ~perspective:true 
+    ~padding:(bp 15.)
     ~fill:[lightred;lightblue;
       lightyellow;lightgreen]
     ~histlabel:(`Center, Hist.Values)
+    ~hlabel:[rot "first";
+      rot "second";rot "third" ]
     [[4.;5.;5.;]; [8.;3.;1.]; [2.;8.;1.;4.]]
   \end{alltt}
 \end{minipage}
 \begin{minipage}{0.5\linewidth}
 \begin{center}
-\includegraphics[scale=0.5]{hist5.mps}
+\includegraphics[scale=1.]{hist5.mps}
 \end{center}
 \end{minipage}
 
@@ -237,8 +321,22 @@ Nous donnons la possibilité d'en créer deux sortes.
 Lorsqu'un radar est créé, l'objet \mlpost\ renvoyé est une Picture.
 Nous en verrons l'utilité plus tard.
 
+Un radar est constitué de N (=cardinal des listes) Path, correspondant aux axes. Chaque axe est décalé du précédent par le même angle (360 / N).
+La longueur du ième axe correspond au maximum entre les ième valeurs de chaque liste. L'origine du diagramme étant (0,0), pour placer un point sur axe, une simple règle de trois suffit: multiplier les coordonnées de l'extrêmité de l'axe par la valeur, et de diviser le tout par la valeur maximum sur cet axe. Enfin il ne reste plus qu'à relier les points grâce à des Path.
+
 \subsubsection{Cumulatif:}
 Le diagramme radar classique. Toutes les données sont regroupées sur la même figure, de façon à les comparer instantanément. 
+\begin{alltt}
+  val stack :
+  ?radius:Num.t ->
+  ?color:Color.t list ->
+  ?pen:Pen.t ->
+  ?style:Dash.t list ->
+  ?ticks:float ->
+  ?label:string list ->
+  ?scale:float list ->
+  float list list -> Picture.t
+\end{alltt}
 
 ~\\
 
@@ -266,6 +364,19 @@ Le diagramme radar classique. Toutes les données sont regroupées sur la même 
 
 \subsubsection{Comparatif}
 Contrairement au diagramme précédent, celui ci ne fabrique pas qu'une seule Picture, mais autant qu'il existe d'objets à comparer. Cela permet donc un plus grand choix dans la mise en page.
+\begin{alltt}
+ val compare :
+ ?radius:Num.t ->
+ ?color:Color.t list ->
+ ?fill:bool ->
+ ?pen:Pen.t ->
+ ?style:Dash.t list ->
+ ?ticks:float ->
+ ?label:string list ->
+ ?scale:float list ->
+ float list list -> Picture.t list
+\end{alltt}
+
 
 ~\\
 
@@ -395,6 +506,10 @@ Ceci permet à l'utilisateur de choisir la façon dont il veut relier les deux p
 \subsection{Tree}
 Ce module permet la création d'arbres \mlpost\ de façon esthétique.
 Il s'appuie sur l'ancien module Tree de \mlpost\ (qu'il a remplacé), ainsi que sur l'article d'un chercheur américain. \cite{tree}
+La particularité de ces arbres est qu'ils sont dessinés en optimisant l'espace sur chaque ligne pour n'importe quelle taille d'arbre.
+
+Nous avons dû adapter cet algorithme à OCaml, et procéder à certains changements. Tout d'abord, l'algorithme a été conçu pour des noeuds et des feuilles de taille unitaire en largeur, et sans notion de hauteur. Hors, dans \mlpost on veut manipuler des objets de taille variable comme des Box, et les utiliser dans l'arbre. La première étape a donc été d'ajouter la taille des éléments à la largeur. Puis la seconde fut d'adapter ceci pour la profondeur.
+
 ~\\
 Le module contient deux fonctions principales:
 \begin{itemize}
