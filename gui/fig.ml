@@ -1,7 +1,6 @@
 open Mlpost
 open Num
-open Box
-open Tree
+open Path
 open Command
 
 module Edit = struct
@@ -52,20 +51,13 @@ module Edit = struct
 
 end
 
-let ls = Edit.num "ls" 3. Glexer.Cm
-let cs = Edit.num "cs" 3. Glexer.Cm
-let p1 = Edit.point "p1" 50. Glexer.Bp 50. Glexer.Bp
-let p2 = Edit.point "p2" 100. Glexer.Bp 100. Glexer.Bp
-let chemin = Path.pathp [p1;p2]
+let p1 = Edit.point "p1" 0. Glexer.Bp 100. Glexer.Bp
+let p2 = Edit.point "p2" (-75.) Glexer.Bp 50. Glexer.Bp
+let p3 = Edit.point "p3" 75. Glexer.Bp 50. Glexer.Bp
+let p5 = Edit.point "p4" (-50.) Glexer.Bp 0. Glexer.Bp
+let p4 = Edit.point "p5" 50. Glexer.Bp 0. Glexer.Bp
+let example = fill ~color:Color.lightyellow (Path.pathp ~style:jLine ~cycle:jLine [p1;p2;p5;p4;p3])
 
-let node = node ~ls ~cs
-
-let t =
-  node (tex "A")
-    [node (tex "B") [];
-     node (tex "C") []]
-
-let () = Metapost.emit "tree1" 
-  (Box.draw (shift p1 (Tree.to_box t)) ++(Box.draw (Box.empty ~stroke:(Some Color.red) ~width:(bp 150.) ~height:(bp 150.) ())) ++ (draw chemin))
+let () = Metapost.emit "example" example
 
 

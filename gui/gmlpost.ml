@@ -63,16 +63,18 @@ let update_bbox () =
     | Exit -> 
 	close_in c
 
+let png_file = fig_name ^ ".png"
+
 let make_png () =
+  let dvi_file = fig_name^".dvi" in
+  let ps_file = fig_name^".ps" in
   sys_command ("mlpost -ps -ccopt glexer.cmo " ^ ml_file);
-  sys_command "latex tree1 > /dev/null";
-  sys_command "dvips -E tree1.dvi > /dev/null";
-  sys_command "convert tree1.ps tree1.png > /dev/null";
+  sys_command ("latex "^fig_name^" > /dev/null");
+  sys_command ("dvips -E "^dvi_file^" > /dev/null");
+  sys_command ("convert "^ps_file^" "^png_file^" > /dev/null");
   update_bbox ()
 
 let () = make_png ()
-
-let png_file = fig_name ^ ".png"
 
 let edit_file =
   Filename.chop_suffix ml_file ".ml" ^ ".edit"
