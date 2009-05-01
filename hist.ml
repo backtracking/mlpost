@@ -8,6 +8,9 @@ open Path
 
 type 'a labels = Values | User of 'a list
 
+type path_3D = Prems of (Path.t*Path.t*Color.t)
+	       |PasPrems of (Path.t*Color.t)
+
 module Q = Misc.Q
  
 let max l = 
@@ -53,9 +56,14 @@ let laxe ~nbcol ?(vlabel=default_vlabel) padding scalex scaley hcaption vcaption
     Plot.draw_axes ?hcaption ?vcaption ~vlabel ~hlabel ~ticks:None axe
 
 
+let rec draw_perspect acc = function
+  |Prems (p1,p2,c)::r -> draw_perspect ((fill ~color:c p1)++(fill ~color:c p2)++(Command.draw p1)++(Command.draw p2)++acc) r
+  |PasPrems (p,c)::r -> draw_perspect ((fill ~color:c p)++(Command.draw p)++acc) r
+  |[] -> acc
+
 
 (* Construit les composantes 3D à partir d'un vecteur, d'une boite et d'une couleur *)
-let perspect scale b c = 
+let perspect scale derns b c = 
   let c = match c with
     |None -> Color.white
     |Some i -> i
@@ -70,24 +78,28 @@ let perspect scale b c =
 	    pt ((addn (xpart ne) dep),(addn (ypart ne) dep))] in
   let path1 = pathp ~cycle:jLine ~style:jLine p1 in
   let path2 = pathp ~cycle:jLine ~style:jLine p2 in
-    (fill ~color:c path1) ++ (fill ~color:c path2) ++ 
-      (Command.draw path1) ++ (Command.draw path2)
+    (* (fill ~color:c path1) ++ (fill ~color:c path2) ++  *)
+(*       (Command.draw path1) ++ (Command.draw path2) *)
+    if derns
+    then Prems (path1,path2,c)
+    else PasPrems(path2,c)
 
 
-let rec mk_perspect2 acc scale hb i j l =
+let rec mk_perspect2 acc prems scale hb i j l =
   match l with
     |x::res -> 
        let b = Box.nth j (Box.nth i hb) in
-       let paths = perspect scale b (get_fill b) in
-	 mk_perspect2 (paths++acc) scale hb i (j+1) res
+       let paths = perspect scale prems b (get_fill b) in
+	 mk_perspect2 (paths::acc) false scale hb i (j+1) res
+    
     |[]-> acc
 
 let box_perspect scale hb l =
   let rec mk_perspect acc scale hb i l = 
     match l with
-      |x::res -> mk_perspect ((mk_perspect2 nop scale hb i 0 x)++acc) scale hb (i+1) res
+      |x::res -> mk_perspect ((mk_perspect2 [] true scale hb i 0 x)@acc) scale hb (i+1) res
       |[] -> acc
-  in mk_perspect nop scale hb 0 l
+  in mk_perspect [] scale hb 0 l
 
 
 (* Gère la position du label pour qu'elle soit cohérente *)
@@ -154,7 +166,7 @@ let hist ~cumul width height padding fill perspective scalex scaley ?histlabel ?
   in
   let fcth = (fct_hist [] (l,fill)) in
   let hb = move_hbox cumul cpt scalex fcth in
-  let persp = if perspective then box_perspect scalex hb l else nop in
+  let persp = if perspective then draw_perspect nop (box_perspect scalex hb l) else nop in
   let labels = match histlabel with | None -> nop | Some lab -> (box_labels lab hb l) in
     persp ++ draw  hb ++ labels 
     ++ (match hlabel with | None -> nop | Some hlab -> (hist_labels hlab hb)) 
@@ -172,7 +184,7 @@ let drawing_parameters width height ?padding nbval valmax nbcol=
 
 
 (* Histogramme classique *)
-let simple ?(width=bp 200.) ?(height=bp 450.) ?padding ?(fill=[lightblue]) ?(perspective=false)
+let simple ?(width=bp 100.) ?(height=bp 200.) ?padding ?(fill=[lightblue]) ?(perspective=false)
     ?hcaption ?vcaption ?histlabel ?vlabel ?hlabel l =
   let histlabel = match histlabel with
     | None -> None
@@ -190,7 +202,7 @@ let simple ?(width=bp 200.) ?(height=bp 450.) ?padding ?(fill=[lightblue]) ?(per
 
 
 (* Histogramme de comparaison *)
-let compare ?(width=bp 200.) ?(height=bp 450.) ?padding ?(fill=[lightblue;red]) ?(perspective=false)
+let compare ?(width=bp 100.) ?(height=bp 200.) ?padding ?(fill=[lightblue;red]) ?(perspective=false)
     ?hcaption ?vcaption ?histlabel ?vlabel ?hlabel l =
   let nblist = List.length l in
   let valmax = maxlist l in
@@ -212,7 +224,7 @@ let compare ?(width=bp 200.) ?(height=bp 450.) ?padding ?(fill=[lightblue;red]) 
 
 
 (* Histogramme cumulé *)
-let stack ?(width=bp 200.) ?(height=bp 450.) ?padding ?(fill=[lightblue;red;green]) ?(perspective=false)
+let stack ?(width=bp 100.) ?(height=bp 200.) ?padding ?(fill=[lightblue;red;green]) ?(perspective=false)
     ?hcaption ?vcaption ?histlabel ?vlabel ?hlabel l =
   let nblist = List.length l in
   let valmax = maxcumul l in

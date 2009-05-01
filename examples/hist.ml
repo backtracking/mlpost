@@ -12,11 +12,11 @@ let hist1 =
 
 (*parse >> <<hist2 *)
 let hist2 =
-  Hist.simple ~width:(bp 60.) ~height:(bp 80.) [3.;1.;6.]
+  Hist.simple ~width:(bp 30.) ~height:(bp 40.) [3.;1.;6.]
 
 (*parse >> <<hist3 *)
 let hist3 =
-  Hist.simple ~padding:(bp 60.) [3.;1.;6.]
+  Hist.simple ~padding:(bp 10.) [3.;1.;6.]
 
 (*parse >> <<hist4 *)
 let hist4 =
@@ -31,7 +31,7 @@ let hist5 =
   let vlabel n _ = 
     if n mod 10 = 0 then Some (Picture.tex (string_of_int n)) else None
   in
-  Hist.simple 
+  Hist.simple ~width:(bp 300.)
     ~vcaption:(Picture.tex "students")
     ~hlabel ~vlabel [45.;50.;62.;80.;72.;61.]
 
@@ -45,7 +45,7 @@ let hist7 =
   let pics =
     List.map Picture.tex ["2000";"2001";"2002";"2003";"2004";"2005"]
   in
-  Hist.simple ~histlabel:(`Top, Hist.User pics) 
+  Hist.simple ~width:(bp 210.) ~histlabel:(`Top, Hist.User pics) 
     [4.5;5.0;6.2;8.;7.2;6.1]
 
 (*parse >> <<hist8 *)
@@ -62,7 +62,7 @@ let hist9 =
 (*parse >> <<hist10 *)
 let hist10 =
   Hist.stack 
-    ~perspective:true ~padding:(bp 25.)
+    ~perspective:true  ~padding:(bp 5.) 
     ~fill:[lightred;lightblue;lightyellow;lightgreen]
     ~histlabel:(`Center, Hist.Values)
     [[4.;5.;5.;]; [8.;3.;1.]; [2.;8.;1.;4.]]
