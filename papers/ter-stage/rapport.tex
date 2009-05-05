@@ -16,6 +16,9 @@
 \maketitle
 
 \begin{center}M1 Informatique, Université Paris Sud XI\end{center}
+\newpage
+\tableofcontents
+\newpage
 \section{Introduction}
 
 \subsection{Présentation de \mlpost}
@@ -710,12 +713,31 @@ Schéma de l'exécution du rafraîchissement:
 \includegraphics{interface2.mps}
 \end{center}
 
+\newpage
 \subsection{Screenshots}
-\includegraphics[scale=0.5]{screen1.png}
+\bigskip
 
-\includegraphics[scale=0.5]{screen2.png}
+\includegraphics[scale=0.45]{screen1.png}
+
+\begin{center}
+\texttt{Exemple d'utilisation de \gmlpost\ avec 5 points éditables formant un polygone jaune} 
+\end{center}
+
+\includegraphics[scale=0.45]{screen2.png}
+
+\begin{center}
+\texttt{Exemple d'utilisation de \gmlpost\ avec un histogramme dont le padding est éditable et une légende dont la position est un point éditable } 
+\end{center}
 
 \section{Conclusion}
+Les modules de ce TER ont tous été élaborés dans le but d'être ajouté à \mlpost\ comme des modules \og haut niveau \fg\ à part entière. Nous avons respecté l'homogénéité de la bibliothèque au niveau des arguments optionnels (ex: dans tous les modules, \texttt{?fill} est l'argument remplissant l'élément de la couleur spécifiée), et au niveau de la documentation, rendant nos modules simples d'utilisation.
+
+Nous avons effectué de nombreux tests pour nous assurer qu'après notre TER, les utilisateurs et les développeurs n'auront pas à débugger. Le code est écrit assez proprement, et les fonctions récurcives sont terminales si possible.
+Les modules sont opérationnels, mais peuvent ainsi être modifiés et complétés si nécessaire.
+
+L'interface graphique n'a pu être terminée par faute de temps, et il demeure encore de nombreux aspects à travailler au niveau du canvas, du zoom, et de l'importation de figure.
+
+Ce TER nous a permis de participer à l'élaboration à un stade avancé d'une bibliothèque de diagrammes, avec tout ce que cela implique de rigueur. Nous avons pu nous rendre compte en utilisant \texttt{lablgtk2} qu'une interface compliquée et pas claire rendait le travail beaucoup plus dur, ce qui rebutera à coup sûr les utilisateurs. Nous avons appris à utiliser les arguments optionnels fournis par \textsc{OCaml} et leurs subtilités, et nous sommes frottés à l'aspect object d'\textsc{OCaml}.
 
 \begin{thebibliography}{99}
 \bibitem{mlpost} \mlpost, une bibliothèque OCaml développée au sein du projet Proval de l’INRIA Saclay – Île-de-France, permettant la réalisation de dessins scientifiques destinés à être inclus dans des documents \LaTeX.
