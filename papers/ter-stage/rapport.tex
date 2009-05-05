@@ -23,11 +23,12 @@
 
 \subsubsection{Motivations}
 Dans un cadre scientifique, il est très souvent nécessaire d'inclure des figures aux documents (cours, articles). Il existe bien sûr de nombreux éditeurs graphiques, mais la conception de figures complexes s'avère longue et nuit à l'homogénéité du tout. 
-~\\Une façon très commune de rédiger ces documents est d'utiliser \LaTeX. \LaTeX\ permet l'importation d'images, voire la création, mais ceci reste compliqué, long, et les erreurs sont difficiles à interpréter. Il doit également être possible d'ajouter des éléments de \LaTeX\ à la figure, et de garder une homogénéité du document. 
 
-~\\L'utilisation d'un langage comme OCaml, avec un typage fort et des erreur plus simples à déchiffrer s'imposait donc! De plus, OCaml bénéficie d'arguments optionnels, très pratiques dans la conception d'une librairie graphique.Enfin, la quantité de code tapé devient plus concise, rendant la conception de figures possible d'un simple appel de fonction.
+Une façon très commune de rédiger ces documents est d'utiliser \LaTeX. \LaTeX\ permet l'importation d'images, voire la création, mais ceci reste compliqué, long, et les erreurs sont difficiles à interpréter. Il doit également être possible d'ajouter des éléments de \LaTeX\ à la figure, et de garder une homogénéité du document. 
 
-~\\Enfin il est important de préciser qu'une figure \mlpost\ peut être utilisée comme la vue du résultat d'un calcul ou d'un algorithme OCaml. On pourra par exemple calculer un arbre couvrant d'un graphe, et le représenter sous forme d'arbre \mlpost\ dans le même programme.
+L'utilisation d'un langage comme OCaml, avec un typage fort et des erreur plus simples à déchiffrer s'imposait donc! De plus, OCaml bénéficie d'arguments optionnels, très pratiques dans la conception d'une librairie graphique.Enfin, la quantité de code tapé devient plus concise, rendant la conception de figures possible d'un simple appel de fonction.
+
+Enfin il est important de préciser qu'une figure \mlpost\ peut être utilisée comme la vue du résultat d'un calcul ou d'un algorithme OCaml. On pourra par exemple calculer un arbre couvrant d'un graphe, et le représenter sous forme d'arbre \mlpost\ dans le même programme.
 
 \subsubsection{Structure de \mlpost}
 \mlpost\ est constitué de nombreux modules open sources séparés en quatre catégories:
@@ -43,16 +44,16 @@ Pour simplifier les choses, on peut dire qu'une figure est une somme de Command 
 
 \subsubsection{Exemples}
 Un exemple facile d'utilisation de boîte avec \mlpost. On notera l'utilisation du symbole mathématique $\pi$ qui se fait aisément en conservant l'homogénéité du tout, ainsi que la concision du code pour générer la boîte. 
-~\\
 
 \begin{minipage}{0.7\linewidth}
-  \begin{alltt}
+  \begin{verbatim}
     let simple_block =
     let b = Box.hblock ~pos:`Bot 
-    [Box.tex "a"; Box.tex "A"; Box.tex "1"; Box.tex "$\\pi$"] 
+    [Box.tex "a"; Box.tex "A"; Box.tex "1"; 
+     Box.tex "$\\pi$"] 
     in
     Box.draw b
-  \end{alltt}
+  \end{verbatim}
 \end{minipage}
 \begin{minipage}{0.3\linewidth}
   \begin{center}
@@ -62,7 +63,6 @@ Un exemple facile d'utilisation de boîte avec \mlpost. On notera l'utilisation 
 
 
 Un exemple légèrement plus compliqué dans lequel on utilise des arguments optionnels pour mieux personnaliser la figure.
-~\\
 
 \begin{minipage}{0.7\linewidth}
   \begin{alltt}
@@ -84,7 +84,6 @@ Un exemple légèrement plus compliqué dans lequel on utilise des arguments opt
 \end{minipage}
 
 Un dernier exemple plus compliqué utilisant les module Path, Point et Pen pour dessiner un rubik's cube. Cette figure étant le résultat d'un calcul, on voit bien à quel point il serait facile de changer certains paramètres pour la modifier.
-~\\
 
 \begin{minipage}{0.7\linewidth}
   \begin{alltt}
@@ -167,7 +166,7 @@ flottants.
   float list -> Command.t
 \end{alltt}
 
-~\\
+\bigskip
 
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
@@ -177,7 +176,7 @@ flottants.
     [3.;1.;6.]
   \end{alltt}
 
-  Utilisation très simple de \textit{simple} pour trois valeurs. On spécifie la taille totale de la figure. La construction de cet histogramme nécessite un appel à la fonction \textit{hist} et l'ajout d'un repère. Un histogramme simple est matrice où chaque colonne est un seul élément, c'est à dire une \textit{hbox} dont chaque sous boîte contient une \textit{vbox} qui contient un seul élément.
+  Utilisation très simple de \texttt{simple} pour trois valeurs. On spécifie la taille totale de la figure. La construction de cet histogramme nécessite un appel à la fonction \textit{hist} et l'ajout d'un repère. Un histogramme simple est matrice où chaque colonne est un seul élément, c'est à dire une \textit{hbox} dont chaque sous boîte contient une \textit{vbox} qui contient un seul élément.
 \end{minipage}
 \begin{minipage}{0.5\linewidth}
   \begin{center}
@@ -203,7 +202,7 @@ contient des listes de nombres flottants, chacune étant un histogramme.
   float list list -> Command.t
 \end{alltt}
 
-~\\
+\bigskip
 
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
@@ -239,7 +238,7 @@ Un histogramme cumulatif, construit avec la même signature que les histogrammes
   float list list -> Command.t
 \end{alltt}
 
-~\\
+\bigskip
 
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
@@ -264,8 +263,6 @@ Un histogramme cumulatif, construit avec la même signature que les histogrammes
 \subsubsection{Pour aller plus loin:}
 Il est possible de faire des histogrammes bien plus complexes, mais toujours de façon très simple.
 
-~\\
-
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
     let hist4 =
@@ -287,7 +284,7 @@ Il est possible de faire des histogrammes bien plus complexes, mais toujours de 
 \end{center}
 \end{minipage}
 
-~\\
+\bigskip
 
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
@@ -338,7 +335,7 @@ Le diagramme radar classique. Toutes les données sont regroupées sur la même 
   float list list -> Picture.t
 \end{alltt}
 
-~\\
+\bigskip
 
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
@@ -378,7 +375,7 @@ Contrairement au diagramme précédent, celui ci ne fabrique pas qu'une seule Pi
 \end{alltt}
 
 
-~\\
+\bigskip
 
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
@@ -407,12 +404,12 @@ Contrairement au diagramme précédent, celui ci ne fabrique pas qu'une seule Pi
 Dans \mlpost, le module Path permet à l'utilisateur de tracer toutes sortes de lignes, qu'elles soient droites ou des courbes de Bézier, et ce par le biais de nombreuses fonctions.
 Nous n'avons rien modifié de ce qui était déjà en place. Nous avons seulement ajouter une nouvelle manière de tracer un Path, appelée \textit{smart\_path}. 
 
-~\\Cette fonction prend en paramètre deux points: le point de départ du Path, et le point d'arrivée. 
+Cette fonction prend en paramètre deux points: le point de départ du Path, et le point d'arrivée. 
 \begin{alltt}
   val smart_path : ?style:joint -> orientation list -> Point.t -> Point.t -> t
 \end{alltt}
-~\\La particularité de \textit{smart\_path} est que la fonction prend un troisième paramètre, qui est une liste d'orientations.
-~\\Le type orientation se définit comme ceci:
+La particularité de \textit{smart\_path} est que la fonction prend un troisième paramètre, qui est une liste d'orientations.
+Le type orientation se définit comme ceci:
 \begin{alltt}
   type orientation =
   Up | Down | Left | Right |
@@ -420,9 +417,9 @@ Nous n'avons rien modifié de ce qui était déjà en place. Nous avons seulemen
 \end{alltt}
 Ceci permet à l'utilisateur de choisir la façon dont il veut relier les deux points. Dans la mesure du possible, \mlpost\ créera ce path, ou retournera une erreur. 
 
-~\\exemples d'utilisations de \textit{smart\_path}:
+Exemples d'utilisations de \textit{smart\_path} :
 
-~\\
+\bigskip
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
     let path1 = 
@@ -441,7 +438,7 @@ Ceci permet à l'utilisateur de choisir la façon dont il veut relier les deux p
 \end{center}
 \end{minipage}
 
-~\\
+\bigskip
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
     let path2 = 
@@ -461,7 +458,7 @@ Ceci permet à l'utilisateur de choisir la façon dont il veut relier les deux p
 \end{center}
 \end{minipage}
 
-~\\
+\bigskip
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
     let path3 = 
@@ -479,7 +476,7 @@ Ceci permet à l'utilisateur de choisir la façon dont il veut relier les deux p
 \end{center}
 \end{minipage}
 
-~\\
+\bigskip
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
     let path4 = 
@@ -510,7 +507,6 @@ La particularité de ces arbres est qu'ils sont dessinés en optimisant l'espace
 
 Nous avons dû adapter cet algorithme à OCaml, et procéder à certains changements. Tout d'abord, l'algorithme a été conçu pour des noeuds et des feuilles de taille unitaire en largeur, et sans notion de hauteur. Hors, dans \mlpost on veut manipuler des objets de taille variable comme des Box, et les utiliser dans l'arbre. La première étape a donc été d'ajouter la taille des éléments à la largeur. Puis la seconde fut d'adapter ceci pour la profondeur.
 
-~\\
 Le module contient deux fonctions principales:
 \begin{itemize}
 \item node pour construire un noeud
@@ -531,7 +527,7 @@ Le module contient deux fonctions principales:
 
 Quelques exemples d'arbres:
 
-~\\
+\bigskip
 
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
@@ -550,7 +546,7 @@ Quelques exemples d'arbres:
   \end{center}
 \end{minipage}
 
-~\\
+\bigskip
 
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
@@ -573,7 +569,7 @@ Quelques exemples d'arbres:
   \end{center}
 \end{minipage}
 
-~\\
+\bigskip
 
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
@@ -593,7 +589,7 @@ Quelques exemples d'arbres:
   \end{center}
 \end{minipage}
 
-~\\
+\bigskip
 
 \begin{alltt}
   let subtree = node "subroot" [leaf "son1"; leaf "son2"; leaf "son3"]
@@ -616,7 +612,7 @@ La signature du module est définie comme ceci:
 
 Cette fonction prend en argument une liste de couples couleur/chaine, et renvoie une Picture. Celle ci peut ainsi être dessinée n'importe où sur ou à côté de la figure à laquelle elle se rapporte.
 
-~\\
+\bigskip
 
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
@@ -640,8 +636,9 @@ Cette fonction prend en argument une liste de couples couleur/chaine, et renvoie
 \subsection{Motivations}
 Le processus de création ou d'édition d'une figure peut être ennuyeux lorsque l'on essaie de regler certaines valeurs à tatons. Il faut avoir un editeur de texte lancé, éventuellement un terminal, et il faut recompiler à chaque fois et lancer le fichier postscript ou le pdf obtenu avec un viewer.
 
-~\\Grâce à \gmlpost, il suffit de lancer le fichier, et l'interface va permettre à l'utilisateur, soit de modifier les valeurs elles-mêmes dans la partie gauche, soit de déplacer les points éditables sur le canvas situé sur la partie droite de la fenêtre.
-~\\Ainsi les actions de l'utilisateur se limitent désormais à éditer des valeurs et rafraichir l'image, ce qui devient quasi-instantané.
+Grâce à \gmlpost, il suffit de lancer le fichier, et l'interface va permettre à l'utilisateur, soit de modifier les valeurs elles-mêmes dans la partie gauche, soit de déplacer les points éditables sur le canvas situé sur la partie droite de la fenêtre.
+
+Ainsi les actions de l'utilisateur se limitent désormais à éditer des valeurs et rafraichir l'image, ce qui devient quasi-instantané.
 \subsection{Structure}
 \gmlpost\ n'a nécessité aucune modification de \mlpost, nous y avons seulement dû ajouter un module Edit par dessus le module Num.
 
@@ -671,18 +668,17 @@ et dimension le type:
 \end{alltt}
 
 \gmlpost\ peut enfin utiliser le fichier généré pour créer l'image de la figure \mlpost\ et afficher celle-ci ainsi que ses valeurs éditables, et ses points déplaçables sur le canvas.
-~\\
 
 Lors d'un rafraichissement, le programme va écraser le fichier \textit{fig.edit} avec les nouvelles valeurs, et compiler la nouvelle image fraichement obtenue.
 
-~\\
+\bigskip
 
 Schéma de l'exécution au démarrage:
 \begin{center}
 \includegraphics{interface1.mps}
 \end{center}
 
-~\\
+\bigskip
 
 Schéma de l'exécution du rafraîchissement:
 \begin{center}
