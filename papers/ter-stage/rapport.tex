@@ -26,7 +26,10 @@ Dans un cadre scientifique, il est très souvent nécessaire d'inclure des figur
 
 Une façon très commune de rédiger ces documents est d'utiliser \LaTeX. \LaTeX\ permet l'importation d'images, voire la création, mais ceci reste compliqué, long, et les erreurs sont difficiles à interpréter. Il doit également être possible d'ajouter des éléments de \LaTeX\ à la figure, et de garder une homogénéité du document. 
 
-L'utilisation d'un langage comme OCaml, avec un typage fort et des erreur plus simples à déchiffrer s'imposait donc! De plus, OCaml bénéficie d'arguments optionnels, très pratiques dans la conception d'une librairie graphique.Enfin, la quantité de code tapé devient plus concise, rendant la conception de figures possible d'un simple appel de fonction.
+L'utilisation d'un langage comme OCaml, avec un typage fort et des
+erreur plus simples à déchiffrer s'imposait donc! De plus, OCaml
+bénéficie d'arguments optionnels, très pratiques dans la conception
+d'une librairie graphique. Enfin, la quantité de code tapé devient plus concise, rendant la conception de figures possible d'un simple appel de fonction.
 
 Enfin il est important de préciser qu'une figure \mlpost\ peut être utilisée comme la vue du résultat d'un calcul ou d'un algorithme OCaml. On pourra par exemple calculer un arbre couvrant d'un graphe, et le représenter sous forme d'arbre \mlpost\ dans le même programme.
 
@@ -123,7 +126,8 @@ Un dernier exemple plus compliqué utilisant les module Path, Point et Pen pour 
 \end{minipage}
 
 \subsection{Notre TER}
-Le sujet du stage était à l'origine \textit{Implémentation d'une bibliothèque de diagrammes pour \mlpost}.Il s'agissait de réaliser une extension de \mlpost, sans bien sûr avoir à modifier ce qui était déjà présent. Nous avons donc dû d'abord maîtriser très vite l'API.
+Le sujet du stage était à l'origine \textit{Implémentation d'une
+  bibliothèque de diagrammes pour \mlpost}. Il s'agissait de réaliser une extension de \mlpost, sans bien sûr avoir à modifier ce qui était déjà présent. Nous avons donc dû d'abord maîtriser très vite l'API.
 Pour ce stage, il fallait bien sûr que notre API soit claire, dans les choix de types, de noms de fonctions et d'arguments (surtout optionnels), et qu'elle soit accompagnée d'une documentation (conçue avec \textsc{OCamldoc}).
 
 Dans la deuxième partie du stage, notre encadrant nous a proposé de modifier le module Tree et d'implémenter une interface graphique pour \mlpost.
