@@ -18,6 +18,11 @@ class my_gen =
   end
 
 let my_generator = new my_gen
-let _ = Odoc_args.set_doc_generator 
-         (Some my_generator :> Odoc_args.doc_generator option)
+let _ = 
+  Odoc_args.set_doc_generator 
+         (Some my_generator :> Odoc_args.doc_generator option) ;
+  (* we need to deactivate the -html option of ocamldoc, otherwise our generator
+   * is overwritten by the standard html generator. Ocamlbuild gives the -html
+   * option to ocamldoc, so this is really required *)
+  Odoc_args.add_option ("-html", Arg.Unit (fun () -> ()), "")
 
