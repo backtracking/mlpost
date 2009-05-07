@@ -151,25 +151,26 @@ let yannick style =
   draw tree
 
 
-let rec random_tree ?arrow_style ?edge_style ?stroke ?pen n = 
+let rec random_tree ?arrow_style ?edge_style ?stroke ?pen ?sep n = 
+  let random_tree = random_tree ?arrow_style ?edge_style ?stroke ?pen ?sep in
   let tex s = shadow (tex ~fill:Color.yellow ~stroke:(Some Color.black) s) in
   match n with
   | 1 -> leaf (tex "1")
   | 2 -> 
-      node ?arrow_style ?edge_style 
+      node ?arrow_style ?edge_style ?stroke ?pen ?sep 
         (Box.tex ~style:Box.Rect ~fill:(Color.rgb 0.5 0.3 0.2) "2") 
         [leaf (tex "1")]
   | n -> 
       let k = 1 + Random.int (n - 2) in
-      node ?arrow_style ?edge_style ?stroke ?pen
+      node ?arrow_style ?edge_style ?stroke ?pen ?sep 
         (tex (string_of_int n)) 
         [random_tree k; random_tree (n - 1 - k)]
 
 let d2c, d2s, d2sq, d2hsq = 
 (*   let ls = bp (-1.0) in *)
   let stroke = Color.blue and pen = Pen.circle and arrow_style = Directed in
-  draw (random_tree ~edge_style:Curve ~arrow_style ~stroke ~pen 17),
-  draw (random_tree ~edge_style:Straight ~arrow_style ~stroke ~pen 17),
+  draw (random_tree ~edge_style:Curve ~arrow_style ~stroke ~pen ~sep:(bp 5.) 17),
+  draw (random_tree ~edge_style:Straight ~arrow_style ~stroke ~pen ~sep:(bp 3.) 17),
   draw (random_tree ~edge_style:Square ~arrow_style ~stroke ~pen 17),
   draw (random_tree ~edge_style:HalfSquare ~arrow_style ~stroke ~pen 17)
 
@@ -182,7 +183,7 @@ let d5 =
   let bl = Box.hbox ~padding:(Num.cm 2.) [ box t1; box t2] in
   let b1 = nth 0 (get "1" bl) in
   let b2 = nth 0 (nth 0 (nth 1 (get "2" bl))) in
-  seq [ Box.draw bl; box_arrow b1 b2; ]
+  seq [ Box.draw bl; box_arrow ~sep:(bp 5.) b1 b2; ]
 
 
 let tree1 () = pic (Picture.make (draw (random_tree (1 + Random.int 5))))

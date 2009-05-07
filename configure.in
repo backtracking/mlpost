@@ -313,7 +313,7 @@ echo "---------------------------------------------------"
 
 # Finally create the Makefile from Makefile.in
 
-AC_OUTPUT(META version.ml $MAKEFILE Makefile myocamlbuild.ml)
+AC_OUTPUT(META version.ml simple.Makefile ocamlbuild.Makefile Makefile myocamlbuild.ml)
 chmod a-w $MAKEFILE
 chmod a-w Makefile
 chmod a-w myocamlbuild.ml

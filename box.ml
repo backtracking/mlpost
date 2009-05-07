@@ -629,10 +629,14 @@ let vblock ?(pos=`Center) ?name ?(min_height=Num.zero) ?(same_height=false) pl =
 
 open Path
 
-let cpath ?style ?outd ?ind a b =
+let strip ?sep p = match sep with
+  | None -> p
+  | Some n -> Path.strip n p
+
+let cpath ?style ?outd ?ind ?sep a b =
   let r,l = outd, ind in
   let p = pathk ?style [knotp ?r (ctr a); knotp ?l (ctr b)] in
-  cut_after (bpath b) (cut_before (bpath a) p)
+  strip ?sep (cut_after (bpath b) (cut_before (bpath a) p))
 
 let cpath_left ?style ?outd ?ind a b =
   let r,l = outd, ind in

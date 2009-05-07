@@ -67,7 +67,11 @@ let shift pt p = transform [Transform.shifted pt] p
 let yscale n p = transform [Transform.yscaled n] p
 let xscale n p = transform [Transform.xscaled n] p
 
-
+let strip n p =
+  let p0 = point 0. p in
+  let p1 = pointn (length p) p in
+  let c = scale n fullcircle in
+  cut_after (shift p1 c) (cut_before (shift p0 c) p)
 
 (* directed paths *)
 

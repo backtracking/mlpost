@@ -482,6 +482,9 @@ and Path : sig
   (** Same as {!cut_after}, but cuts before *)
   val cut_before: t -> t -> t
 
+  (** [strip n p] removes two segments of length [n] at each end of path [p] *)
+  val strip : Num.t -> t -> t
+
   (** Build a cycle from a set of intersecting paths *)
   val build_cycle : t list -> t
 
@@ -1205,7 +1208,9 @@ and Box : sig
   val cpath :
     ?style:Path.joint ->
     ?outd:Path.direction ->
-    ?ind:Path.direction -> t -> t -> Path.t
+    ?ind:Path.direction -> 
+    ?sep:Num.t ->
+    t -> t -> Path.t
     (** the path that connects 2 boxes and stops at the box boundaries *) 
 
   val cpath_left :
@@ -1475,24 +1480,29 @@ module Helpers : sig
   val box_arrow :
     ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction -> 
+    ?sep:Num.t ->
     Box.t -> Box.t -> Command.t
   val box_line :
     ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction -> 
+    ?sep:Num.t ->
     Box.t -> Box.t -> Command.t
   val box_label_arrow :
     ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
+    ?sep:Num.t ->
     ?pos:Command.position -> Picture.t -> 
     Box.t -> Box.t -> Command.t
   val box_label_line :
     ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
+    ?sep:Num.t ->
     ?pos:Command.position -> Picture.t -> 
     Box.t -> Box.t -> Command.t
   val box_labelbox_arrow :
     ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
+    ?sep:Num.t ->
     ?pos:Command.position -> Box.t -> 
     Box.t -> Box.t -> Command.t
 (***
@@ -1535,6 +1545,7 @@ module Tree : sig
 
   val node : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
              ?edge_style:edge_style -> ?stroke:Color.t -> ?pen:Pen.t ->
+             ?sep:Num.t ->
              Box.t -> t list -> t
     (** [node label children] creates a node with label [label] and a list
 	of children [children]. 
@@ -1548,6 +1559,7 @@ module Tree : sig
 
   val bin  : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
              ?edge_style:edge_style -> ?stroke:Color.t -> ?pen:Pen.t ->
+             ?sep:Num.t ->
              Box.t -> t -> t -> t
     (** [bin label l r] creates a binary node with label [label] and 
 	children [l] and [r].
@@ -1561,10 +1573,10 @@ module Tree : sig
     type t
     val leaf : Box.t -> t
     val node : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
-      ?edge_style:edge_style -> ?stroke:Color.t -> ?pen:Pen.t ->
+      ?edge_style:edge_style -> ?stroke:Color.t -> ?pen:Pen.t -> ?sep:Num.t ->
       Box.t -> t list -> t
     val bin  : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
-      ?edge_style:edge_style -> ?stroke:Color.t -> ?pen:Pen.t ->
+      ?edge_style:edge_style -> ?stroke:Color.t -> ?pen:Pen.t -> ?sep:Num.t ->
       Box.t -> t -> t -> t
     val to_box : t -> Box.t
     val draw : ?debug:bool -> t -> Command.t

@@ -148,7 +148,7 @@ let update_points _ ((sp1,d1,sp2,d2),p) =
 	  `X2 (x +. 3.) ; `Y2 (y +. 3.) ];
   ()
 
-let refresh (* canvas *) pic () = 
+let refresh canvas pic () = 
   eprintf "@.------------------------------refresh------------------------------@.";
   write_edit (); 
   make_png ();
@@ -316,7 +316,7 @@ let main () =
   let canvas = GnoCanvas.canvas ~width:(int_of_float (!pic_w)) 
     ~height:(int_of_float (!pic_h)) ~packing:scrolled_canvas#add_with_viewport () in
     canvas#set_scroll_region 0. 0. !pic_w !pic_h ;
-
+  
   let root = canvas#root in  
   
   let pic = GnoCanvas.pixbuf root ~pixbuf in
@@ -328,7 +328,7 @@ let main () =
   
   (* File menu *)
   let factory = new GMenu.factory file_menu ~accel_group in
-  factory#add_item "Refresh" ~key:_r ~callback: (refresh (* canvas *) pic);
+  factory#add_item "Refresh" ~key:_r ~callback: (refresh canvas pic);
   let factory = new GMenu.factory file_menu ~accel_group in
   factory#add_item "Quit" ~key:_Q ~callback: Main.quit;
   

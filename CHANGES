@@ -1,6 +1,9 @@
+
 o - changes in behaviour, new features
 * - incompatible changes in the interface
 
+o new optional argument sep to strip both ends of a path; used in
+  Tree, Box.cpath, and Helpers
 * mlpost tool: -pdf now the default; use -ps to produce .1 files
 * Arrow.draw: ~pos becomes ~anchor, new ~pos is point on path
 * Arrow.draw2 becomes Arrow.point_to_point

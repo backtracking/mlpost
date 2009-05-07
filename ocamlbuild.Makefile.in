@@ -148,9 +148,9 @@ examples-html:
 
 # GUI
 
-.PHONY: gui
+.PHONY: gui gui/gmlpost.native gui/glexer.cmo gui/glexer.cmi
 
-gui: gui/gmlpost.native
+gui: gui/gmlpost.native gui/glexer.cmo
 
 gui/gmlpost.native:
 	$(OCAMLBUILD) gui/gmlpost.native
@@ -158,6 +158,8 @@ gui/gmlpost.native:
 gui/gmlpost.byte:
 	$(OCAMLBUILD) gui/gmlpost.byte
 
+gui/glexer.cmo:
+	$(OCAMLBUILD) gui/glexer.cmo
 
 #version.ml: Makefile
 #	echo "let version = \""$(MLPOSTVERSION)"\"" > version.ml
@@ -240,6 +242,7 @@ doc: doc/index.html tool.opt
 	make -C doc MLPOST='$(SUBDIRMLPOST)'
 
 doc/index.html: mlpost.mli customdoc/img.cmo
+	$(OCAMLC) -c cairost_sig.ml
 	ocamldoc -hide Mlpost -g customdoc/img.cmo -d doc mlpost.mli
 
 customdoc/img.cmo: customdoc/img.ml
