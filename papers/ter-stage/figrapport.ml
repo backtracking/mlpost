@@ -151,10 +151,10 @@ let path1 =
 
 let path2 = 
   let p = Path.smart_path 
-    [Right;Down;Left;Down;Right;Down;Left;Down;Right]
+    [Rightn(bp 25.);Down;Left;Down(* ;Right;Down;Left;Down;Right *)]
     ~style:jLine
-    (Point.pt (bp 0.,bp 100.)) 
-    (Point.pt (bp 100.,bp 0.))
+    (Point.pt (bp 0.,bp 0.)) 
+    (Point.pt (bp 0.,bp (-100.)))
   in
   Command.draw_arrow p
 

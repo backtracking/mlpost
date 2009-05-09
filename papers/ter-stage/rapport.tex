@@ -36,7 +36,7 @@ erreur plus simples à déchiffrer s'imposait donc. De plus, OCaml
 bénéficie d'arguments optionnels, très pratiques dans la conception
 d'une librairie graphique. Enfin, la quantité de code tapé devient plus concise, rendant la conception de figures possible d'un simple appel de fonction.
 
-Enfin il est important de préciser qu'une figure \mlpost\ peut être utilisée comme la vue du résultat d'un calcul ou d'un algorithme OCaml. On pourra par exemple calculer un arbre couvrant d'un graphe, et le représenter sous forme d'arbre \mlpost\ dans le même programme.
+Enfin il est important de préciser qu'une figure \mlpost\ peut être utilisée comme la vue du résultat d'un calcul ou d'un algorithme. On pourra par exemple calculer un arbre couvrant d'un graphe, et le représenter sous forme d'arbre \mlpost\ dans le même programme.
 
 \subsubsection{Structure de \mlpost}
 \mlpost\ est constitué de nombreux modules open sources séparés en quatre catégories:
@@ -438,6 +438,18 @@ Le type orientation se définit comme ceci:
   Upn of Num.t | Downn of Num.t | Leftn of Num.t | Rightn of Num.t
 \end{alltt}
 
+\textbf{
+L'utilisateur peut donner une list d'orientation avec la possibilité de donner une taille aux segments.
+L'objectif était donc de s'approcher le plus possible de ce que l'utilisateur voudrai si il n'indique pas la taille des segments, du moins pour une liste d'orientation courte. 
+Celui-ci observe le résultat et si cela ne lui convient pas ou qu'il veut ajuster la figure, il ajoute des dimensions a autant de segment que nécessaire.
+On a tout d'abord simplifier le probleme en le divisant en deux objectifs similaire.
+D'un coté on a une abcsisse de départ et un distance a parcourir sur cette axe avec les orientation Left,Right et de l'autre coté la symetrie en ordonnée.
+Dans les deux partie on retire les tailles données aux segments a la distance a parcourir, puis on attribut aux segment restant la taille t qui est égale a la distance a parcourir divisé par la difference entre élément positif et négatif.
+Les éléments positif étant en abscisse Right et en ordonnée Up, avec si cette différence est null une taille definie par défault. 
+On obtient donc des deux cotés une liste de distance, on a plus qu'a combinée ses deux listes en fonction de la liste d'orientation pour pouvoir créer le path résultat.
+}
+
+
 Ceci permet à l'utilisateur de choisir la façon dont il veut relier les deux points. Dans la mesure du possible, \mlpost\ créera ce path, ou retournera une erreur. 
 \bigskip 
 
@@ -466,14 +478,13 @@ Exemples d'utilisations de \texttt{smart\_path} :
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
     let path2 = 
-    let p2 = Path.smart_path 
-    [Right;Down;Left;Down;
-      Right;Down;Left;Down;Right]
+  let p = Path.smart_path 
+    [Rightn(bp 25.);Down;Left;Down(* ;Right;Down;Left;Down;Right *)]
     ~style:jLine
-    (Point.pt (bp 0.,bp 100.)) 
-    (Point.pt (bp 100.,bp 0.))
-    in
-    Command.draw_arrow p2
+    (Point.pt (bp 0.,bp 0.)) 
+    (Point.pt (bp 0.,bp (-100.)))
+  in
+  Command.draw_arrow p
   \end{alltt}
 \end{minipage}
 \begin{minipage}{0.5\linewidth}
