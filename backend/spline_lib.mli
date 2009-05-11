@@ -111,22 +111,22 @@ module Metapath :
    type joint
    type knot
    type direction
-   val knot : direction -> point -> direction -> knot
+   val knot : point -> knot
    
    val vec_direction : point -> direction
    val curl_direction : float -> direction
    val no_direction : direction
    
    val line_joint : joint
-   val curve_joint : joint
-   val curve_no_inflex_joint : joint
-   val tension_joint : float -> float -> joint
+   val curve_joint : direction -> direction -> joint
+   val curve_no_inflex_joint : direction -> direction -> joint
+   val tension_joint : direction -> float -> float -> direction -> joint
    val controls_joint : point -> point -> joint
    
    val start : knot -> t
    val concat : t -> joint -> knot -> t
    val append : t -> joint -> t -> t
-   val cycle : direction -> joint -> t -> path
+   val cycle : joint -> t -> path
 
    val to_path : t -> path
    val from_path : path -> t

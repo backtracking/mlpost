@@ -135,7 +135,7 @@ let load_enc_aux filename =
 
 let load_enc = memoize load_enc_aux 15
 
-let fonts_map_table = load_fonts_map (find_file which_fonts_table)
+let fonts_map_table = lazy (load_fonts_map (find_file which_fonts_table))
 
 let fonts_table = (HString.create 1500 : (string,t) Hashtbl.t)
 
@@ -168,7 +168,7 @@ let compute_trans_enc encoding_table charset_table char =
 
 let load_font doc fdef =
   let tex_name = fdef.Dvi.name in
-  let font_map = try HString.find fonts_map_table tex_name
+  let font_map = try HString.find (Lazy.force fonts_map_table) tex_name
   with Not_found -> invalid_arg ("Unknown font : "^tex_name) in
   let tfm = load_font_tfm fdef in
   let pfab = find_file font_map.Fonts_type.pfab_name in

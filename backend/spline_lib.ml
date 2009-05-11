@@ -13,7 +13,7 @@ open Point_lib.Infix
 let rec one_to_one f a = function
   | [] -> a
   | e::l -> one_to_one f (List.fold_left (f e) a l) l
-          
+      
 let rec one_to_one2 f acc a b =
   List.fold_left (fun acc ea -> List.fold_left (fun acc eb -> f acc ea eb) acc b) acc a
 
@@ -53,8 +53,8 @@ let create a b c d = {pl=[{sa = a;sb = b;sc = c; sd = d;smin = 0.;smax = 1.;star
 let create_line a d = {pl=[{sa=a;sb=a;sc=d;sd=d;smin=0.;smax=1.;start=true}];cycle=false}
 let create_lines l = 
   let rec aux = function
-  |[] |[_]-> []
-  |a::(d::_ as l) -> {sa=a;sb=a;sc=d;sd=d;smin=0.;smax=1.;start=false}::aux l in
+    |[] |[_]-> []
+    |a::(d::_ as l) -> {sa=a;sb=a;sc=d;sd=d;smin=0.;smax=1.;start=false}::aux l in
   match aux l with
     |[] -> assert false
     |a::l -> {pl={a with start = true}::l;cycle=false}
@@ -68,6 +68,7 @@ let max_abscissa p =
     | a::l -> aux l in
   aux p.pl
 
+let last_point p = (List.hd (List.rev p.pl)).sa
 
 let add_end p c d =
   let rec aux p = 
@@ -137,7 +138,7 @@ let remarquable conv l a b c d = 0.::1.::(extremum conv l a b c d)
 
 (*let extremum_point p = List.fold_left (fun s -> extremum s_of_01) p
 
-let remarquable_point p = List.fold_left (fun l s -> s.smin::(s.smax::(extremum s_of_01 l s))) p
+  let remarquable_point p = List.fold_left (fun l s -> s.smin::(s.smax::(extremum s_of_01 l s))) p
 *)
 (** simple intersection *)
 let give_bound s =
@@ -148,16 +149,16 @@ let give_bound s =
   (x_min,y_min,x_max,y_max)
     
 let list_min_max f p = 
- List.fold_left (fun (x_min,y_min,x_max,y_max) s ->
-                   let (sx_min,sy_min,sx_max,sy_max) = f s in
-                   (min x_min sx_min,min y_min sy_min,
-                    max x_max sx_max,max y_max sy_max))
-   (infinity,infinity,neg_infinity,neg_infinity) p
+  List.fold_left (fun (x_min,y_min,x_max,y_max) s ->
+                    let (sx_min,sy_min,sx_max,sy_max) = f s in
+                    (min x_min sx_min,min y_min sy_min,
+                     max x_max sx_max,max y_max sy_max))
+    (infinity,infinity,neg_infinity,neg_infinity) p
 
 let unprecise_bounding_box s = 
-    let (x_min,y_min,x_max,y_max) = 
-      list_min_max give_bound s.pl in
-    ({x=x_min;y=y_min},{x=x_max;y=y_max})
+  let (x_min,y_min,x_max,y_max) = 
+    list_min_max give_bound s.pl in
+  ({x=x_min;y=y_min},{x=x_max;y=y_max})
 
 let give_bound_precise s =
   let x_remarq = List.map (cubic s.sa.x s.sb.x s.sc.x s.sd.x) (remarquable id [] s.sa.x s.sb.x s.sc.x s.sd.x) in
@@ -328,7 +329,7 @@ let union_conv ap bp =
 let union ap bp = 
   let conv = union_conv ap bp in
   {pl=List.map (function {smin=smin;smax=smax} as b -> 
-              {b with smin=conv smin;smax=conv smax}) bp.pl;cycle=false}
+                  {b with smin=conv smin;smax=conv smax}) bp.pl;cycle=false}
 
 let append_conv ap bp = 
   let union_conv = union_conv ap bp in
@@ -404,7 +405,7 @@ let cut_after a b = reverse (fst (split a (fst (one_intersection (reverse a) b))
 let dicho_split x = assert false
 
 let norm2 a b = a*.a +. b*.b
-    
+  
 let dist_min_point_aux {x=px;y=py} pmin s =
   let is_possible_at a = 
     let (xmin,ymin,xmax,ymax) = give_bound a in
@@ -438,9 +439,9 @@ let dist_min_point_aux {x=px;y=py} pmin s =
         let pmin = doit pmin dist_al al (t1+dt) in
         doit pmin dist_af af t1 in
   aux s pmin 0 (int_of_float nmax) !inter_depth
-           
+    
 let dist_min_point p point = snd (List.fold_left (dist_min_point_aux point)
-  (let one = (List.hd p.pl) in (norm2 (one.sa.x -. point.x) (one.sa.y -. point.y),one.smin)) p.pl)
+                                    (let one = (List.hd p.pl) in (norm2 (one.sa.x -. point.x) (one.sa.y -. point.y),one.smin)) p.pl)
 
 let dist_min_path_aux pmin s1 s2 =
   let is_possible_at a b = 
@@ -481,9 +482,9 @@ let dist_min_path_aux pmin s1 s2 =
   aux s1 s2 pmin 0 0 (int_of_float nmax) !inter_depth
 
 let dist_min_path p1 p2 = snd (one_to_one2 dist_min_path_aux
-(let one1 = (List.hd p1.pl) in 
- let one2 = (List.hd p2.pl) in 
- (norm2 (one1.sa.x -. one2.sa.x) (one1.sa.y -. one2.sa.y),(one1.smin,one2.smin))) p1.pl p2.pl)
+                                 (let one1 = (List.hd p1.pl) in 
+                                  let one2 = (List.hd p2.pl) in 
+                                  (norm2 (one1.sa.x -. one2.sa.x) (one1.sa.y -. one2.sa.y),(one1.smin,one2.smin))) p1.pl p2.pl)
 
 let translate p t = 
   {p with pl=List.map (function a ->
@@ -502,7 +503,7 @@ let transform_aux t p =
 
 let transform t p = 
   {p with pl= transform_aux t p.pl}
-                      
+    
 let buildcycle p1 p2 = not_implemented ("buildcycle")
 
 let close p1 = 
@@ -520,221 +521,506 @@ let of_bounding_box ({x=x_min;y=y_min},{x=x_max;y=y_max}) =
 let length p = max_abscissa p -. min_abscissa p
 
 module Approx =
-  struct
-    let lineto l = not_implemented "lineto"
-    let fullcircle () = not_implemented "circle"
-    let halfcirle () = not_implemented "halfcircle"
-    let quartercircle () = not_implemented "quartercircle"
-    let unitsquare () = not_implemented "unit square"
-  end
+struct
+  let lineto l = not_implemented "lineto"
+  let fullcircle () = not_implemented "circle"
+  let halfcirle () = not_implemented "halfcircle"
+  let quartercircle () = not_implemented "quartercircle"
+  let unitsquare () = not_implemented "unit square"
+end
 
 module Metapath =
- struct
-   type joint =
-     | JLine
-     | JCurve
-     | JCurveNoInflex
-     | JTension of float * float
-     | JControls of point * point
+struct
+  type direction =
+    | DVec of point
+    | DCurl of float
+    | DNo
 
-   type direction =
-     | DVec of point
-     | DCurl of float
-     | DNo
+  type joint =
+    | JLine
+    | JCurve of direction * direction
+    | JCurveNoInflex  of direction * direction
+    | JTension of direction * float * float * direction
+    | JControls of point * point
 
-   type knot = direction * point * direction
+  type knot = point
 
-   type t =
-     | Start of knot
-     | Cons of t * joint * knot
-     | Start_Path of path
-     | Append_Path of t * joint * path
-
-
-   let rec print_dir fmt = function
-     |DNo -> fprintf fmt "DNo"
-     |DVec p -> fprintf fmt "DVec %a" Point_lib.print p
-     |DCurl f -> fprintf fmt "Dcurl %f" f
-   and print_knot fmt (dir1,p,dir2) = 
-     fprintf fmt "(%a,%a,%a)" print_dir dir1 Point_lib.print p print_dir dir2
-   and print_joint fmt = function
-     | JLine -> fprintf fmt "JLine"
-     | JCurve -> fprintf fmt "JCurve"
-     | JCurveNoInflex -> fprintf fmt "JCurveNoInflex"
-     | JTension (f1,f2) -> fprintf fmt "JTension (%f,%f)" f1 f2
-     | JControls (p1,p2) -> fprintf fmt "JControls (%a,%a)" Point_lib.print p1 Point_lib.print p2
-   and print fmt = function
-     | Start k1 -> fprintf fmt "[%a" print_knot k1
-     | Cons (p,j,k) -> fprintf fmt "%a;%a-%a" print p print_joint j print_knot k
-     | Start_Path p-> fprintf fmt "{%a}" printf p
-     | Append_Path (p1,j,p2) ->fprintf fmt "%a;%a-%a" print p1 print_joint j printf p2
+  type t =
+    | Start of knot
+    | Cons of t * joint * knot
+    | Start_Path of path
+    | Append_Path of t * joint * path
 
 
-   let p213 p1 p2 p3 : P.t * P.t =
-   let p21 = P.sub p2 p1 in
-   let p23 = P.sub p2 p3 in
-   (p21,p23)
-
-   let ro p1 p2 p3 = 
-     let (p21,p23) = p213 p1 p2 p3 in
-     sqrt ((P.norm2 p23)/.(P.norm2 p21))
-
-   let psi p1 p2 p3 =
-     let (p21,p23) = p213 p1 p2 p3 in
-     (atan2 p23.x p23.y)-.(atan2 p21.x p21.y)
-
-   let deltak p1 p2 = 
-     let p21 = P.sub p2 p1 in
-     P.norm2 p21
-
-   type tension = float
-   type delta = float
-   and tc = tension * point * tc_aux
-   and tc_aux =
-     | COpen of tension * tc
-     | CEnd of tcend
-     | CCycle of tension * tcend * point * delta * float
-   and tcend =
-     [ `Open
-     | `Curve of float
-     | `Given of float ]
-
-   and tcl =
-     | TC of tcend * tc * tcl
-     | TExplicit of spline * tcl
-     | TEnd
-
-(*   let solve_choices first tc =
-     (* Metafont is wiser in the computation of 
-        calc_value, calc_ff *)
-     (* dk1, uk1 are d_k-1, u_k-1 *)
-     let calc_value dk1 dk absrtension absltension uk =
-       let aa = 1./.(3.*.absrtension -. 1.) in
-       let bb = 1./.(3.*.absltension -. 1.) in
-       let dd = dk*.(3.-.1./.absrtension) in
-       let ee = dk1*.(3.-.1./.absltension) in
-       let cc = 1.-.(uk*.aa) in
-       (aa,bb,cc,dd,ee)
-   let calc_ff cc dd ee absrtension absltension =
-     let dd = dd*.cc in
-     let tmp = absltension/.absrtension in
-     let tmp = tmp*.tmp in
-     let dd = dd*.tmp in
-     ee/.(ee+.ff)
-     let rec aux dk1 pk1 psik uk1 vk1 wk1 = function
-       | t1,pk,((COpen (t2,(p1k,_))|CCycle (t2,p1k,_,_)) as n) -> 
-           let dk = deltak p p1k in
-           let absrtension,absltension = (abs t1),(abs t2) in
-           let (aa,bb,cc,dd,ee) = calc_value dk1 dk absrtension absltension uk1 in
-           let ff = calc_ff cc dd ee absrtension absltension in
-           let uk = ff*.bb in
-           let psi1k = match n with 
-             | COpen (_,(_,COpen(_,p2k))) -> phi pk p1k p2k
-             | _ -> 0 in
-           (* perhaps should test for curl as in metafont *)
-           let acc = -.psi1k*.uk in
-           let ff = (1.-.ff)*.cc in 
-           let acc = acc -. (psik*.ff) in
-           let ff = ff*.aa in
-           let vk = acc -. (vk1*.ff) in
-           let wk = -.(wk1*.ff) in
-           match n with
-             |COpen _ -> let = aux dk p psi1k uk vk wk n in
-             |CCycle _ ->
-       | CEnd 
-
-     in
-     let equa = 
-       match first with
-         | `Open -> 
-         | `Curve f ->
-         | `Given f -> in
-     let l = aux equa tc in
-     *) 
+  let rec print_dir fmt = function
+    |DNo -> fprintf fmt "DNo"
+    |DVec p -> fprintf fmt "DVec %a" Point_lib.print p
+    |DCurl f -> fprintf fmt "Dcurl %f" f
+  and print_knot = Point_lib.print
+  and print_joint fmt = function
+    | JLine -> fprintf fmt "JLine"
+    | JCurve _ -> fprintf fmt "JCurve"
+    | JCurveNoInflex _ -> fprintf fmt "JCurveNoInflex"
+    | JTension (_,f1,f2,_) -> fprintf fmt "JTension (%f,%f)" f1 f2
+    | JControls (p1,p2) -> fprintf fmt "JControls (%a,%a)" Point_lib.print p1 Point_lib.print p2
+  and print fmt = function
+    | Start k1 -> fprintf fmt "[%a" print_knot k1
+    | Cons (p,j,k) -> fprintf fmt "%a;%a-%a" print p print_joint j print_knot k
+    | Start_Path p-> fprintf fmt "{%a}" printf p
+    | Append_Path (p1,j,p2) ->fprintf fmt "%a;%a-%a" print p1 print_joint j printf p2
 
 
-   let rec to_path_simple = function
-     | Start (DNo,p,DNo) -> create_line p p
-     | Cons (pa,JLine,(_,p,_)) -> add_end_line (to_path_simple pa) p
-     | Cons (Cons(_,_,(_,_,DVec c1)) as pa,JCurve,(DVec c2,p,_))
-     | Cons (pa,JControls(c1,c2),(_,p,_)) -> add_end_spline (to_path_simple pa) c1 c2 p
-     | Start_Path p -> p
-     | Append_Path (p1,JControls(c1,c2),p2) -> append (to_path_simple p1) c1 c2 p2
-     | (Cons(pa,JCurve,(_,p,_))) -> add_end_line (to_path_simple pa) p (* Faux*)
-     |p -> Format.printf "not implemented %a@." print p; not_implemented "to_path"
+  let p213 p1 p2 p3 : P.t * P.t =
+    let p21 = P.sub p2 p1 in
+    let p23 = P.sub p2 p3 in
+    (p21,p23)
 
-   let knot d1 p d2 = (d1,p,d2)
-   
-   let vec_direction p = DVec p
-   let curl_direction f = DCurl f
-   let no_direction = DNo
+  let ro p1 p2 p3 = 
+    let (p21,p23) = p213 p1 p2 p3 in
+    sqrt ((P.norm2 p23)/.(P.norm2 p21))
 
-   let start k = Start k
-   
-   let line_joint = JLine
-   let curve_joint = JCurve
-   let curve_no_inflex_joint = JCurveNoInflex
-   let tension_joint f1 f2 = JTension (f1,f2)
-   let controls_joint p1 p2 = JControls (p1,p2)
-   
+  let psi p1 p2 p3 =
+    let (p21,p23) = p213 p1 p2 p3 in
+    (atan2 p23.x p23.y)-.(atan2 p21.x p21.y)
 
-   let concat p j k = Cons (p,j,k)
-   let rec append p j = function
-     | Start knot -> Cons (p,j,knot)
-     | Cons(p2,j2,k2) -> Cons(append p j p2,j2,k2)
-     | Start_Path p2 -> Append_Path(p,j,p2)
-     | Append_Path (p2,j2,p3) -> Append_Path(append p j p2,j2,p3)
+  let deltak p1 p2 = 
+    let p21 = P.sub p2 p1 in
+    P.norm2 p21
 
-   let to_path p = to_path_simple p
-   let cycle d j p = not_implemented "cycle"
+  type tension = float
+  type delta = float
+  and tc = tension * point * tc_aux
+  and tc_aux =
+    | COpen of tension * tc
+    | CEnd of tcend
+    | CCycle of tension * tcend * (point * delta * float)
+  and tcend =
+      [ `Curve of tension * tension * float
+      | `Given of point * float ]
 
-   let from_path p = Start_Path p
- end
+  and tcl =
+    | TC of (tcend * point * tension ) * tc * tcl
+    | TExplicit of spline * tcl
+    | TEnd
+
+  type sc_data = 
+      {psi1k : float;
+       psik : float;
+       dk : float;
+       dk1 : float;
+       deltak :point;
+       rtension : float;
+       ltension : float;
+       pk: point;
+       p1k: point;
+      }
+
+  type tc_cycle = sc_data list
+
+  (* Metafont is wiser in the computation of 
+     calc_value, calc_ff, curl_ratio, ... *)
+  (* dk1, uk1 are d_k-1, u_k-1 *)
+  let curl_ratio gamma alpha1 beta1 =
+    let alpha = 1./.alpha1 in
+    let beta = 1./.beta1 in
+    ((3.-.alpha)*.alpha*.alpha*.gamma+.beta**3.)/.
+      (alpha**3.*.gamma +. (3.-.beta)*.beta*.beta)
+
+  let reduce_angle x = 
+    if (abs_float x) > 1.80 
+    then if x>0. then x -. 3.60 else x +. 3.60
+    else x
+
+  let velocity st ct sf cf t = 
+    let num = 2.+.(sqrt 2.)*.(st -. (sf /. 16.))*.(sf -. (st /. 16.))*.(ct-.cf) in
+    let denom = 3.*.(1.+.0.5*.((sqrt 5.) -. 1.)*.ct +. 0.5 *.(3.-.(sqrt 5.))*.cf) in
+    min ((t*.num)/.denom) 4.
+
+  let calc_value dk1 dk absrtension absltension uk =
+    let aa = 1./.(3.*.absrtension -. 1.) in
+    let bb = 1./.(3.*.absltension -. 1.) in
+    let dd = dk*.(3.-.1./.absrtension) in
+    let ee = dk1*.(3.-.1./.absltension) in
+    let cc = 1.-.(uk*.aa) in
+    (aa,bb,cc,dd,ee)
+      
+  let calc_ff cc dd ee absrtension absltension =
+    let dd = dd*.cc in
+    let tmp = absltension/.absrtension in
+    let tmp = tmp*.tmp in
+    let dd = dd*.tmp in
+    ee/.(ee+.dd)
+
+      
+  let rec calc_angle athetal thetal = function
+    | [] -> athetal::thetal
+    | (uk,vk,wk)::uvwkl -> 
+        let nathetal = vk -. (athetal *. uk) in
+        calc_angle nathetal (athetal::thetal) uvwkl
+
+  (* set_controls*)
+  let rec calc_control_points smin splines dkpsil thetal= 
+    match dkpsil,thetal with
+      | [],_ | _,[] | _,[_] -> splines
+      | (data::dkpsil),(theta1k::(thetak::_ as thetal)) -> 
+          let st,ct = sin thetak,cos thetak in
+          let tmp = -.data.psi1k-.theta1k in
+          let sf,cf = sin tmp,cos tmp in
+          let rr = velocity st ct sf cf (abs_float data.rtension) in
+          let ss = velocity st ct sf cf (abs_float data.ltension) in
+          if (data.rtension < 0.) && (data.ltension < 0.) then
+            (*TODO*) ();
+          let sa = data.pk in
+          let sb = sa +/ (rr*/ ((ct */ data.deltak) +/ 
+                                  (st*/{data.deltak with x= -.data.deltak.x}))) in
+          let sc = sa -/ (ss*/((cf */ data.deltak) +/ 
+                                 (sf*/{data.deltak with y= -.data.deltak.y}))) in
+          let sd = data.p1k in
+          calc_control_points (smin+.1.)
+            ({sa = sd;
+              sb = sc;
+              sc = sb;
+              sd = sa;
+              smin = smin;
+              smax = smin+.1.;
+              start =false}::splines)
+            dkpsil thetal
+            
+  let solve_choices_cycle smin first tc =
+    let rec aux uvwkl = function
+      | {ltension=ltension;rtension=rtension;
+         pk=pk;p1k=p1k;
+         psik=psik;psi1k=psi1k;
+         deltak=deltak;
+         dk=dk;dk1=dk1}::ltc ->
+          let (uk1,vk1,wk1) = List.hd uvwkl in
+          let (aa,bb,cc,dd,ee) = calc_value dk1 dk (abs_float rtension) (abs_float ltension) uk1 in
+          let ff = calc_ff cc dd ee (abs_float rtension) (abs_float ltension) in
+          let uk = ff*.bb in
+          (* perhaps should test for curl as in metafont *)
+          let acc = -.psi1k*.uk in
+          let ff = (1.-.ff)*.cc in 
+          let acc = acc -. (psik*.ff) in
+          let ff = ff*.aa in
+          let vk = acc -. (vk1*.ff) in
+          let wk = -.(wk1*.ff) in
+          let uvwkl = (uk,vk,wk)::uvwkl in
+          aux uvwkl ltc
+      | [] ->
+          let aa,bb = 
+            List.fold_left (fun (aa,bb) (uk,vk,wk) -> vk -. aa*.uk, wk-. bb*.uk)
+              (0.,1.) uvwkl in
+          let aa = aa/.(1.-.bb) in 
+          let thetan = aa in
+          (List.map (fun (uk,vk,wk) -> (uk,vk+. aa*.wk,wk)) uvwkl,thetan) in
+    let uvwkl =  [0.,0.,1.] in
+    let uvwkl,thetan = aux uvwkl tc in
+    let thetal = calc_angle thetan [] uvwkl in
+    let splines = calc_control_points smin [] tc thetal in
+    splines
+
+
+  let rec solve_choices_nocycle smin sfirst send tc =
+    let rec aux uvwkl = function
+      | {ltension=ltension;rtension=rtension;
+         pk=pk;p1k=p1k;
+         psi1k=psi1k;psik=psik;
+         deltak=deltak;
+         dk=dk;dk1=dk1}::ll ->
+          let (uk1,vk1,wk1) = List.hd uvwkl in
+          let (aa,bb,cc,dd,ee) = calc_value dk1 dk (abs_float rtension) (abs_float ltension) uk1 in
+          let ff = calc_ff cc dd ee (abs_float rtension) (abs_float ltension) in
+          let uk = ff*.bb in
+          (* perhaps should test for curl as in metafont *)
+          let acc = -.psi1k*.uk in
+          let ff = (1.-.ff)*.cc in 
+          let acc = acc -. (psik*.ff) in
+          let ff = ff*.aa in
+          let vk = acc -. (vk1*.ff) in
+          let wk = -.(wk1*.ff) in
+          let uvwkl = (uk,vk,wk)::uvwkl in
+          aux uvwkl ll
+      | [] -> 
+          match send with 
+            | `Curve (rt,lt,f) -> 
+                let (uk1,vk1,wk1) = List.hd uvwkl in
+                let ff = curl_ratio f lt (abs_float rt) in
+                let thetan = -. ((vk1*.ff)/.1.-.(ff*.uk1)) in
+                (uvwkl,thetan)
+            | `Given (deltak1,f) -> 
+                let thetan = reduce_angle (f -. (atan2 deltak1.x deltak1.y)) in
+                (uvwkl,thetan) in
+
+    (*la première courbe *)
+    let uvwkl = 
+      let {dk=dk;psi1k=psi1k;deltak=deltak;
+           rtension=rt;
+           pk=pk;
+           p1k=p1k},{ltension=lt} = 
+        match tc with a::b::_ -> a,b| _ -> assert false in
+      begin
+        match sfirst with
+          | `Curve f ->
+              let u0 = curl_ratio f rt lt in
+              let v0 = -. psi1k *. u0 in
+              let w0 = 0. in
+              [u0,v0,w0]
+          | `Given f -> 
+              let v0 = reduce_angle  (f -. (atan2 deltak.x deltak.y)) in  
+              let u0 = 0. in
+              let w0 = 0. in
+              [u0,v0,w0]
+      end in
+    let uvwkl,thetan = aux uvwkl tc in
+    let thetal = calc_angle thetan [] uvwkl in
+    let splines = calc_control_points smin [] tc thetal in
+    splines
+
+
+
+  (*     let data,uvwkl = 
+         let lt,p1,n = tc in
+         let cond,p0,rt = first in
+         let pk = p0 in
+         let p1k = p1 in
+         let deltak = pk -/ p1k in
+         let dk = P.norm deltak in
+         let psi1k = match n with 
+         | COpen(_,(_,p2k,_)) -> psi pk p1k p2k
+         | _ -> assert false in
+         let rtension = rt in
+         let ltension = rtension in (* dumb value*)
+         let data = [{dk=dk;psi1k=psi1k;deltak=deltak;
+         ltension=ltension;
+         rtension=rtension;
+         pk=pk;
+         p1k=p1k}] in
+  *)
+
+  (*   let cycle_or_not l = 
+       let put_to_the_end 
+  *)
+  let create_temp_data rt lt pk1 pk p1k p2k =
+    let deltak = p1k -/ pk in
+    let dk = P.norm deltak in
+    let deltak1 = pk -/ pk1 in
+    let dk1 = P.norm deltak1 in
+    let psi1k = psi pk p1k p2k in
+    let psik = psi pk1 pk p1k in
+    {psi1k = psi1k; psik = psik;
+     dk = dk;dk1 = dk1;
+     deltak = deltak;
+     rtension = rt;
+     ltension = lt;
+     pk = pk;
+     p1k = p1k
+    }
+
+  let print_data fmt p = 
+    Format.fprintf fmt "{@[psi1k=%f;@.psik=%f;@.dk=%f;@.deltak=%a;@.rtension=%f;@.ltension=%f;@.pk=%a;@.p1k=%a@]}" p.psi1k p.psik p.dk P.print p.deltak p.rtension p.ltension P.print p.pk P.print p.p1k
+      
+
+  let splines_of acc l sfirst send =
+    Format.printf "@.[@[%a@]]@." (fun fmt x ->
+                                         List.iter (fun (pk1,(lt,rt),pk) ->
+                                                      fprintf fmt "(%a,%f,%f,%a);" P.print pk1 lt rt P.print pk) x) l;
+    let rec datas = function
+      | []|[_] -> []
+      | [(pk1,(_,rt),pk);(_,(lt,_),p1k)] -> [create_temp_data rt lt pk1 pk p1k p1k]
+      | (pk1,(_,rt),pk)::((_,(lt,_),p1k)::(_,_,p2k)::_ as ln) ->
+          create_temp_data rt lt pk1 pk p1k p2k::(datas ln) in
+    let data = datas l in
+    Format.printf "@.[@[%a@]]@." (fun fmt ->
+                                         List.iter (fun e -> 
+                             Format.fprintf fmt "%a;@." print_data e)) data;
+    match data with
+      | [] | [_] -> []
+      | _ -> Format.printf "start...@?";
+          let res = solve_choices_nocycle 1. (*mettre le bon*)
+            sfirst send data in
+         Format.printf "done@.";res
+            
+  let one_spline path p1 join p2 = 
+    match join with
+      | JLine -> (create_line p1 p2).pl@path
+      | JControls (c1,c2) -> (create p1 c1 c2 p2).pl@path
+      | JTension (d1,t1,t2,d2) -> (create_line p1 p2).pl@path (*TODO*)
+      | JCurve (d1,d2) -> (create_line p1 p2).pl@path (*TODO*)
+      | JCurveNoInflex (d1,d2) -> (create_line p1 p2).pl@path (*TODO*)
+
+  let tension_of = function
+    | JTension (_,t1,t2,_) -> (t1,t2)
+    | _ -> (1.,1.)
+
+  let last_point_of = function
+    | Start p1  | Cons (_,_,p1) -> p1
+    | Start_Path p |Append_Path (_,_,p) -> last_point p
+
+  let c_to_cl = function
+    | DCurl x -> `Curve x
+    | DVec {x=x;y=y} -> `Given (atan2 x y)
+    | DNo -> `Curve 0.
+
+  let c_to_cr (rt,lt) deltak1 = function
+    | DCurl x -> `Curve (rt,lt,x)
+    | DVec {x=x;y=y} -> `Given (deltak1,atan2 x y)
+    | DNo -> `Curve (1.,1.,0.)
+
+  let left_dir_of_join = function
+     | JLine -> DCurl 0.
+     | JControls (c1,c2) -> DCurl 0.
+     | JTension (d,_,_,_) 
+     | JCurve (d,_)
+     | JCurveNoInflex (d,_) -> d
+
+  let right_dir_of_join = function
+     | JLine -> DCurl 0.
+     | JControls (c1,c2) -> DCurl 0.
+     | JTension (_,_,_,d) 
+     | JCurve (_,d)
+     | JCurveNoInflex (_,d) -> d
+
+  let rec aux accl send = function
+    | Start _ -> splines_of [] accl (`Curve 0.) send
+    | Cons(c,
+           (JTension (DNo,_,_,DNo)
+           | JCurve (DNo,DNo)
+           | JCurveNoInflex (DNo,DNo) as join),p2) ->
+        let p1 = last_point_of c in
+        (aux ((p1,tension_of join,p2)::accl) send c)
+    | Cons(c,
+           ( JTension (d,_,_,DNo)
+           | JCurve (d,DNo)
+           | JCurveNoInflex (d,DNo) as join),p2) -> 
+        let p1 = last_point_of c in
+        let sfirst = c_to_cl d in
+        let nsend = c_to_cr (tension_of join) (P.sub p2 p1) d in
+        (splines_of (aux [] nsend c) ((p1,tension_of join,p2)::accl) sfirst send)
+    | Cons(c,
+           (JTension (DNo,_,_,d)
+           | JCurve (DNo,d)
+           | JCurveNoInflex (DNo,d) as join),p2) -> 
+        let p1 = last_point_of c in
+        let sfirst = c_to_cl d in
+        let nsend = c_to_cr (tension_of join) (P.sub p1 p2) d in
+        (splines_of (aux [(p1,tension_of join,p2)] nsend c) accl sfirst send)
+    | Cons(c,join,p2) ->
+        let p1 = last_point_of c in
+        let nsend = c_to_cr (tension_of join) (P.sub p1 p2) (right_dir_of_join join) in
+        let sfirst = c_to_cl (left_dir_of_join join) in
+        (splines_of (one_spline (aux [] nsend c) p1 join p2) accl sfirst  send)
+    | Start_Path p -> List.rev p.pl
+    | Append_Path (c,
+                   ( JTension (DNo,_,_,d)
+                   | JCurve (DNo,d)
+                   | JCurveNoInflex (DNo,d) as join),p) -> 
+        let p1 = last_point_of c in
+        let p2 = (List.hd p.pl).sa in
+        let sfirst = `Curve 0. in (*false*)
+        let nsend = c_to_cr (tension_of join) (P.sub p1 p2) d in
+        (splines_of (List.rev_append p.pl (aux [(p1,tension_of join,p2)] nsend c)) accl sfirst send)
+    | Append_Path (c,
+                   ( JTension (d,_,_,DNo)
+                   | JCurve (d,DNo)
+                   | JCurveNoInflex (d,DNo) as join),p) -> 
+        let p1 = last_point_of c in
+        let p2 = (List.hd p.pl).sa in
+        let sfirst = `Curve 0. in (*false*)
+        let nsend = c_to_cr (tension_of join) (P.sub p1 p2) d in
+        (splines_of (List.rev_append p.pl (one_spline (aux [] nsend c) p1 join p2)) accl sfirst send)
+    | Append_Path (c,join,p) -> 
+        let p1 = last_point_of c in
+        let p2 = (List.hd p.pl).sa in
+        let nsend = c_to_cr (tension_of join) (P.sub p1 p2) (right_dir_of_join join) in
+        let sfirst = `Curve 0. in
+        (splines_of (List.rev_append p.pl (one_spline (aux [] nsend c) p1 join p2)) accl sfirst send)
+
+
+  let true_to_path mp =
+    { pl = aux [] (`Curve (1.,1.,0.)) mp; cycle = false}
+    
+
+  let rec to_path_simple = function
+    | Start p -> create_line p p
+    | Cons (pa,JLine,p) -> add_end_line (to_path_simple pa) p
+    | Cons (pa,JControls(c1,c2),p) -> add_end_spline (to_path_simple pa) c1 c2 p
+    | Start_Path p -> p
+    | Append_Path (p1,JControls(c1,c2),p2) -> append (to_path_simple p1) c1 c2 p2
+    | (Cons(pa,JCurve _,p)) -> add_end_line (to_path_simple pa) p (* Faux*)
+    |p -> Format.printf "not implemented %a@." print p; not_implemented "to_path"
+
+  let knot p = p
+    
+  let vec_direction p = DVec p
+  let curl_direction f = DCurl f
+  let no_direction = DNo
+
+  let start k = Start k
+    
+  let line_joint = JLine
+  let curve_joint dir1 dir2 = JCurve(dir1,dir2)
+  let curve_no_inflex_joint dir1 dir2 = JCurveNoInflex(dir1,dir2)
+  let tension_joint dir1 f1 f2 dir2 = JTension (dir1,f1,f2,dir2)
+  let controls_joint p1 p2 = JControls (p1,p2)
+    
+
+  let concat p j k = Cons (p,j,k)
+  let rec append p j = function
+    | Start knot -> Cons (p,j,knot)
+    | Cons(p2,j2,k2) -> Cons(append p j p2,j2,k2)
+    | Start_Path p2 -> Append_Path(p,j,p2)
+    | Append_Path (p2,j2,p3) -> Append_Path(append p j p2,j2,p3)
+
+  let to_path p = true_to_path p
+  let cycle j p = not_implemented "cycle"
+
+  let from_path p = Start_Path p
+end
 
 module ToCairo =
-  struct
-    let draw cr p = 
-      Format.printf "%a@." printf p;
-      List.iter (function 
-                   | {start = true} as s -> 
-                       Cairo.move_to cr s.sa.x s.sa.y ;
-                       Cairo.curve_to cr 
-                         s.sb.x s.sb.y 
-                         s.sc.x s.sc.y 
-                         s.sd.x s.sd.y
-                   | s -> 
-                       Cairo.curve_to cr 
-                         s.sb.x s.sb.y 
-                         s.sc.x s.sc.y 
-                         s.sd.x s.sd.y) p.pl;
-      if p.cycle then Cairo.close_path cr;
-  end
+struct
+  let draw cr p = 
+    Format.printf "%a@." printf p;
+    List.iter (function 
+                 | {start = true} as s -> 
+                     Cairo.move_to cr s.sa.x s.sa.y ;
+                     Cairo.curve_to cr 
+                       s.sb.x s.sb.y 
+                       s.sc.x s.sc.y 
+                       s.sd.x s.sd.y
+                 | s -> 
+                     Cairo.curve_to cr 
+                       s.sb.x s.sb.y 
+                       s.sc.x s.sc.y 
+                       s.sd.x s.sd.y) p.pl;
+    if p.cycle then Cairo.close_path cr;
+end
 
 module Epure =
-  struct
-    (* A rendre plus performant ou pas*)
-    type t = spline list list
-    let empty = []
-    let create x = [x.pl]
-    let of_path = create
-    let union x y = List.rev_append x y
-    let transform t x = List.map (fun x -> transform_aux t x) x
-    let bounding_box sl =
-      let (x_min,y_min,x_max,y_max) = 
-        list_min_max (list_min_max give_bound_precise) sl in
-          ({x=x_min;y=y_min},{x=x_max;y=y_max})
-    let of_bounding_box l = create (of_bounding_box l)
+struct
+  (* A rendre plus performant ou pas*)
+  type t = spline list list
+  let empty = []
+  let create x = [x.pl]
+  let of_path = create
+  let union x y = List.rev_append x y
+  let transform t x = List.map (fun x -> transform_aux t x) x
+  let bounding_box sl =
+    let (x_min,y_min,x_max,y_max) = 
+      list_min_max (list_min_max give_bound_precise) sl in
+    ({x=x_min;y=y_min},{x=x_max;y=y_max})
+  let of_bounding_box l = create (of_bounding_box l)
 
-    let draw cr p = List.iter (List.iter 
-      (function 
-           s -> 
-             Cairo.move_to cr s.sa.x s.sa.y ;
-             Cairo.curve_to cr 
-               s.sb.x s.sb.y 
-               s.sc.x s.sc.y 
-               s.sd.x s.sd.y)) p;
-      Cairo.stroke cr
-  end
+  let draw cr p = List.iter (List.iter 
+                               (function 
+                                    s -> 
+                                      Cairo.move_to cr s.sa.x s.sa.y ;
+                                      Cairo.curve_to cr 
+                                        s.sb.x s.sb.y 
+                                        s.sc.x s.sc.y 
+                                        s.sd.x s.sd.y)) p;
+    Cairo.stroke cr
+end
 
 
 

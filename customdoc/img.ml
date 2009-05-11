@@ -9,7 +9,7 @@ class my_gen =
       | (x::r) ->
           begin
           match x with
-          | Odoc_info.Raw s -> Format.sprintf "<img alt=\"%s\" src=\"%s\"/>" s s
+          | Odoc_info.Raw s -> Format.sprintf "<img alt=\"%s\" src=\"img/%s\"/>" s s
           | _ -> ""
           end
           

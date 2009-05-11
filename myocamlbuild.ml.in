@@ -13,6 +13,23 @@ let packages = ["lablgtk2","@LABLGTK2LIB@","lablgtk";
 let syntaxes = ["bitstring","@BITSTRINGLIB@",
                 "camlp4o -I @BITSTRINGLIB@ bitstring.cma bitstring_persistent.cma pa_bitstring.cmo"]
 
+let img_doc_prod = ["circle";"rect";"ellipse";"round_rect";
+                    "patatoid";"tex";"ctr";"north";"south";
+                    "west";"east";"north_west";"south_west";
+                    "north_east";"south_east";"width";"height";
+	            "shift";"center"]
+
+(*Filename.generic_quote*)
+let generic_quote whatquote quotequote s =
+  let l = String.length s in
+  let b = Buffer.create (l + 20) in
+  for i = 0 to l - 1 do
+    if s.[i] = whatquote
+    then Buffer.add_string b quotequote
+    else Buffer.add_char b  s.[i]
+  done;
+  Buffer.contents b
+
 
 let _ = dispatch begin function
   | Before_options -> Options.include_dirs := ["backend";"gui"]
@@ -31,7 +48,79 @@ let _ = dispatch begin function
        else (yesnofile_rule "cairost" "_no" ".ml";
              yesnofile_rule "cairost_sig" "_no" ".ml";
              yesnofile_rule "mlpost" "_no" ".mlpack";
-            )
+            );
+
+         (**doc *)
+         rule "generation of the documentation" ~prod:"doc/index.html" 
+           ~deps:["mlpost.docdir/index.html";"img/stamp"]
+           (fun _ _ -> Cmd(Sh "rm -rf doc && cp -r mlpost.docdir doc && cp -r img doc"));
+
+         flag ["ocaml"; "compile"; "use_ocamldoc"] & S[A"-I"; A "+ocamldoc"];
+         dep ["ocaml";"doc"] ["customdoc/img.cmo"];
+         flag ["ocaml";"doc"] & S[A"-hide" ; A "Mlpost"; A"-g"; A "customdoc/img.cmo"];
+
+           rule "generation of the images for the documentation" 
+             ~prod:"img/image.png"
+             ~stamp:"img/stamp"
+             ~deps:(List.map (fun x -> "img/"^x^".png") img_doc_prod)
+             (fun _ _ -> Nop);
+
+           
+
+       (** For img *)
+       rule "produce image in img from img_doc.ml"
+         ~prods: (List.map (fun x -> "img/"^x^".1") img_doc_prod)
+         ~dep: "customdoc/img_doc.byte"
+         begin fun env _ ->
+           Cmd(Sh "mkdir -p img/ && cd img/ && ../customdoc/img_doc.byte >> /dev/null && cd ..")
+         end;
+           
+
+       (** conversion of images *)
+       rule ".1 -> .dvi"
+         ~prod: "%.dvi"
+         ~deps: ["%.1";"customdoc/all.template"]
+         begin fun env _ ->
+           let base = env "%" in
+           let dirname = Pathname.dirname base in
+           let basename = Pathname.basename base in
+           let sed =
+             Sh(Printf.sprintf "sed -e 's/all/%s/' customdoc/all.template > %s.tex"
+                  basename base)
+           in
+           let latex = S[
+             A "cd" ; P dirname; Sh " && ";
+             A "latex"; A "-interaction"; A "nonstopmode";
+             A "-file-line-error"; A "-halt-on-error";
+             A basename;
+             Sh "> /dev/null"; (* DELETE THIS IF YOU WANT TO DEBUG *)
+           ] in
+           Seq[Cmd sed; Cmd latex]
+         end;
+       
+       rule ".dvi -> .ps"
+         ~prod: "%.ps"
+         ~dep: "%.dvi"
+         begin fun env _ ->
+           let base = env "%.dvi" in
+           let dirname = Pathname.dirname base in
+           let basename = Pathname.basename base in
+           Cmd(S[A "cd" ; P dirname; Sh " && ";A "dvips"; A "-q"; A "-E"; A basename; A "-o"])
+         end;
+       
+      rule ".ps -> png"
+        ~prod: "%.png"
+        ~dep: "%.ps"
+        begin fun env _ ->
+          Cmd(S[A "convert"; A(env "%.ps"); A(env "%.png")])
+        end;
+
+      (*rule ".1 -> png"
+        ~prod: "%.png"
+        ~dep: "%.1"
+        begin fun env _ ->
+          Cmd(S[A "convert"; A(env "%.1"); A(env "%.png")])
+        end;*)
 
 
   | After_rules ->
@@ -52,6 +141,7 @@ let _ = dispatch begin function
          flag ["ocaml"; "ocamldep"; "syntax_"^syntax] & S[A"-pp"; A pp];
          flag ["ocaml"; "doc";      "syntax_"^syntax] & S[A"-pp"; A pp];
        end syntaxes;
-   
+      
+
    | _ -> ()
 end

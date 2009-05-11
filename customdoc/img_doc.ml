@@ -86,3 +86,5 @@ let _ = Metapost.emit "width" width
 let _ = Metapost.emit "height" height
 let _ = Metapost.emit "shift" shift
 let _ = Metapost.emit "center" center
+
+let () = Mlpost.Metapost.dump "img_doc"

@@ -22,7 +22,7 @@ LIBDIR=@LIBDIR@
 
 # other variables set by ./configure
 OCAMLC   = @OCAMLC@
-OCAMLOPT = @OCAMLOPT@	
+OCAMLOPT = @OCAMLOPT@	
 OCAMLBEST= @OCAMLBEST@
 OCAMLVERSION = @OCAMLVERSION@
 OCAMLWEB = @OCAMLWEB@
@@ -48,7 +48,15 @@ else
 TOOL= tool.byte
 endif
 
-OCAMLBUILD := ocamlbuild -tag cairo_@CAIRO@
+ifeq "$(TERM)" "dumb"
+DISPLAY= -classic-display
+else
+DISPLAY=
+endif
+
+DTYPES = -tag dtypes
+
+OCAMLBUILD := ocamlbuild -no-links $(DTYPES) -tag cairo_@CAIRO@ $(DISPLAY)
 BUILD := _build/
 
 CMA := mlpost.cma
@@ -65,6 +73,7 @@ endif
 
 byte : 
 	$(OCAMLBUILD) $(CMA) tool.byte
+
 opt : 
 	$(OCAMLBUILD) $(CMXA) tool.native
 
@@ -78,59 +87,59 @@ tool.opt:
 
 tests: tests.ml
 	$(OCAMLBUILD) tests.native
-	./tests.native
+	$(BUILD)/tests.native
 	make -C test tests
 	$(PSVIEWER) test/tests.ps
 
 testbox: testbox.ml
 	$(OCAMLBUILD) testbox.native
-	./testbox.native
+	$(BUILD)/testbox.native
 	make -C test testbox
 	$(PSVIEWER) test/testbox.ps
 
 tests.pdf: tests.ml
 	$(OCAMLBUILD) tests.native
-	./tests.native
+	$(BUILD)/tests.native
 	make -C test tests.pdf
 	$(PDFVIEWER) test/tests.pdf
 
 
 tests.byte: tests.ml
 	$(OCAMLBUILD) tests.byte
-	./tests.byte
+	$(BUILD)/tests.byte
 	make -C test tests
 	$(PSVIEWER) test/tests.ps
 
 handbook: handbookgraphs.ml
 	$(OCAMLBUILD) handbookgraphs.native
-	./handbookgraphs.native
+	$(BUILD)/handbookgraphs.native
 	make -C test manual
 	make -C test/manual mpost
 	$(PSVIEWER) test/testmanual.ps
 
 handbook.byte: handbookgraphs.ml
 	$(OCAMLBUILD) handbookgraphs.byte
-	./handbookgraphs.byte
+	$(BUILD)/handbookgraphs.byte
 	make -C test manual
 	make -C test/manual mpost
 	$(PSVIEWER) test/testmanual.ps
 
 other: othergraphs.ml
 	$(OCAMLBUILD) othergraphs.native
-	./othergraphs.native
+	$(BUILD)/othergraphs.native
 	make -C test other
 	make -C test/othergraphs mpost
 	$(PSVIEWER) test/othergraphs.ps
 
 other.byte: othergraphs.ml
 	$(OCAMLBUILD) othergraphs.byte
-	./othergraphs.byte
+	$(BUILD)/othergraphs.byte
 	make -C test other
 	make -C test/othergraphs mpost
 	$(PSVIEWER) test/othergraphs.ps
 
 .PHONY: check-examples examples
-SUBDIRMLPOST:=../tool.opt -ccopt "-I ../ " -v -ps
+SUBDIRMLPOST:=../$(BUILD)tool.native -ccopt "-I ../ " -v -ps
 MAKEEXAMPLES=make -C examples MLPOST='$(SUBDIRMLPOST)'
 
 check-examples: mlpost.cma tool.opt
@@ -140,10 +149,10 @@ check-examples: mlpost.cma tool.opt
 	$(MAKEEXAMPLES) label.dummy
 	make -C multi-examples
 
-examples:
+examples: tool.opt
 	$(MAKEEXAMPLES)
 
-examples-html:
+examples-html: tool.opt
 	$(MAKEEXAMPLES) html
 
 # GUI
@@ -196,7 +205,7 @@ install-opt:
 	cp -f $(BUILD)mlpost.cmo $(BUILD)mlpost.cmi META $(BUILD)$(CMA) "$(LIBDIR)"
 	cp -f $(BUILD)mlpost$(LIBEXT) $(BUILD)mlpost.cmx $(BUILD)$(CMXA) "$(LIBDIR)"
 	mkdir -p $(BINDIR)
-	cp -f tool.native $(BINDIR)/mlpost
+	cp -f $(BUILD)tool.native $(BINDIR)/mlpost
 	cp -f mlpost.1 $(MANDIR)/man1
 
 # export
@@ -238,15 +247,20 @@ DOCFILES:=$(shell echo *.mli)
 DOCFILES:=$(filter-out types.mli, $(DOCFILES))
 
 .PHONY: doc
-doc: doc/index.html tool.opt
-	make -C doc MLPOST='$(SUBDIRMLPOST)'
+doc:
+	rm -f doc
+	$(OCAMLBUILD) doc/index.html
+	ln -s _build/doc doc
 
-doc/index.html: mlpost.mli customdoc/img.cmo
-	$(OCAMLC) -c cairost_sig.ml
-	ocamldoc -hide Mlpost -g customdoc/img.cmo -d doc mlpost.mli
+# 	make -C doc MLPOST='$(SUBDIRMLPOST)'
 
-customdoc/img.cmo: customdoc/img.ml
-	make -C customdoc
+# doc/index.html: mlpost.mli customdoc/img.cmo
+# 	ocamlbuild mlpost.docdir/index.html
+# 	ocamldoc -hide Mlpost -g customdoc/img.cmo -d doc mlpost.mli
+# 	ln -sf
+
+# customdoc/img.cmo: customdoc/img.ml
+# 	make -C customdoc
 
 export-doc: doc
 	cp -r doc/*.html doc/*.png doc/style.css $(WWW)/doc
@@ -317,14 +331,14 @@ configure: configure.in
 #######
 
 clean::
-	$(OCAMLBUILD) -clean
+	rm -f doc
 	rm -f test.dvi test.ps *.exe
+	$(OCAMLBUILD) -clean
 
 cleaner:: clean
 	make -C test clean
 	make -C multi-examples clean
 	make -C www clean
-	make -C doc clean
 	make -C examples clean
 
 dist-clean distclean:: clean

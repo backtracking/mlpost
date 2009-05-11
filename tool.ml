@@ -154,21 +154,21 @@ let compile f =
     command ("cp " ^ mlf ^ " " ^ mlf2);
     let ext = if !native then ".native" else ".byte" in
     try
-      let args =
-        [ "-lib unix"; "-lib mlpost";
-          Filename.chop_extension mlf2 ^ ext; !ccopt;
-          "--"; !execopt ]
-      in
+      let args = ["-lib unix"] in
       let args =
         if Version.libdir = "" then args else
-          sprintf "-cflags -I,%s -lflags -I,%s"
-            Version.libdir Version.libdir
-          :: args in
+          args@[sprintf "-cflags -I,%s -lflags -I,%s"
+            Version.libdir Version.libdir] in
       let args = 
         if Version.includecairo = "" then args else
-          sprintf "-cflag \"%s\" -lflag  \"%s\""
-            Version.includecairo Version.includecairo
-          :: args in
+          let includecairos = 
+            String.concat "," Version.cairolibs in
+          args@[sprintf "-lib bigarray -libs %s"
+            includecairos] in
+      let args =
+        args@["-lib mlpost";
+          Filename.chop_extension mlf2 ^ ext; !ccopt;"--"; !execopt]
+      in
       ocamlbuild args;
       Sys.remove mlf2
     with Command_failed out -> 

@@ -147,14 +147,14 @@ and knot k =
         let d1 = direction d1 in
         let p = point p in
         let d2 = direction d2 in
-        Spline_lib.Metapath.knot d1 p d2
+        d1,Spline_lib.Metapath.knot p,d2
 
-and joint j = 
+and joint dl j dr = 
   match j.Hashcons.node with
   | JLine -> Spline_lib.Metapath.line_joint
-  | JCurve -> Spline_lib.Metapath.curve_joint
-  | JCurveNoInflex -> Spline_lib.Metapath.curve_no_inflex_joint
-  | JTension (a,b) -> Spline_lib.Metapath.tension_joint a b
+  | JCurve -> Spline_lib.Metapath.curve_joint dl dr
+  | JCurveNoInflex -> Spline_lib.Metapath.curve_no_inflex_joint dl dr
+  | JTension (a,b) -> Spline_lib.Metapath.tension_joint dl a b dr
   | JControls (p1,p2) ->
       let p1 = point p1 in
       let p2 = point p2 in
@@ -168,25 +168,33 @@ and direction d =
   | NoDir  -> Spline_lib.Metapath.no_direction
 and metapath' = function
   | MPAConcat (pa,j,p) ->
-      let p = metapath p in
-      let pa = knot pa in
-      let j = joint j in
-      Spline_lib.Metapath.concat p j pa
+      let pdl,p,pdr = metapath p in
+      let dl,pa,dr = knot pa in
+      let j = joint pdr j dl in
+      pdl,Spline_lib.Metapath.concat p j pa,dr
   | MPAAppend (p1,j,p2) ->
-      let p1 = metapath p1 in
-      let j = joint j in
-      let p2 = metapath p2 in
-      Spline_lib.Metapath.append p1 j p2
-  | MPAKnot k -> Spline_lib.Metapath.start (knot k)
-  | MPAofPA p -> Spline_lib.Metapath.from_path (path p)
+      let p1dl,p1,p1dr = metapath p1 in
+      let p2dl,p2,p2dr = metapath p2 in
+      let j = joint p1dr j p2dl in
+      p1dl,Spline_lib.Metapath.append p1 j p2,p2dr
+  | MPAKnot k -> 
+      let dl,p,dr = knot k in
+      dl,Spline_lib.Metapath.start p, dr
+  | MPAofPA p -> 
+      Spline_lib.Metapath.no_direction,
+      Spline_lib.Metapath.from_path (path p),
+      Spline_lib.Metapath.no_direction
+
 and metapath p = memoize metapath' metapath_memoize p
 and path' = function
-  | PAofMPA p -> Spline_lib.Metapath.to_path (metapath p)
+  | PAofMPA p -> 
+      let _,mp,_ = (metapath p) in
+      Spline_lib.Metapath.to_path mp
   | MPACycle (d,j,p) ->
       let d = direction d in
-      let j = joint j in
-      let p = metapath p in
-      Spline_lib.Metapath.cycle d j p
+      let dl,p,_ = metapath p in
+      let j = joint d j dl in
+      Spline_lib.Metapath.cycle j p
   | PATransformed (p,tr) ->
       let p = path p in
       let tr = transform tr in

@@ -87,4 +87,4 @@ let draw cr tex =
   {Dvicairo.pic = cr;new_page = (fun () -> assert false);
    x_origin = 0.; y_origin = 0.};
   Cairo.restore cr
-  ;Format.printf "Gentex : %a@." print tex
+  (*;Format.printf "Gentex : %a@." print tex*)

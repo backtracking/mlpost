@@ -123,7 +123,7 @@ struct
     | Transform (m,t) -> 
         Cairo.save cr;
         Matrix.transform cr m;
-        Format.printf "Transform : %a@." Matrix.print m;
+        (*Format.printf "Transform : %a@." Matrix.print m;*)
         draw_aux cr t;
         Cairo.restore cr
     | OnTop l -> List.iter (draw_aux cr) l
