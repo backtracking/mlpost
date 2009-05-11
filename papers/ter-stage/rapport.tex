@@ -479,9 +479,9 @@ Exemples d'utilisations de \texttt{smart\_path} :
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
     let path2 = 
-  let p = Path.smart_path 
-    [Rightn(bp 25.);Down;Left;Down(* ;Right;Down;Left;Down;Right *)]
+    let p = Path.smart_path 
     ~style:jLine
+    [Rightn(bp 25.);Down;Left;Down]
     (Point.pt (bp 0.,bp 0.)) 
     (Point.pt (bp 0.,bp (-100.)))
   in
