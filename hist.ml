@@ -208,17 +208,23 @@ let compare ?(width=bp 100.) ?(height=bp 200.) ?padding ?(fill=[lightblue;red]) 
   let valmax = maxlist l in
   let nbval = List.fold_left (fun acc x -> (List.length x)+acc) 0 l in
   let scalex, scaley, padding = drawing_parameters width height ?padding nbval valmax nblist in
-  let rec fct_hist c cpt =function
+  let rec fct_hist bhlabel c cpt =function
     |[],_ -> c
     |x::res,cq -> 
        let col, rescol = Q.pop cq in
        let x = List.map (fun x -> [x]) x in
-	fct_hist (c ++ (hist ?hlabel ?histlabel ~cumul:false width height 
-			  (addn padding (multn (bp ((float_of_int) (nblist-1))) scalex)) 
-			  (Q.push col Q.empty) perspective scalex scaley cpt x)) 
-	  (cpt+1) (res, Q.push col rescol)
+         if (bhlabel) then
+	   fct_hist false (c ++ (hist ?hlabel ?histlabel ~cumul:false width height 
+			     (addn padding (multn (bp ((float_of_int) (nblist-1))) scalex)) 
+			     (Q.push col Q.empty) perspective scalex scaley cpt x)) 
+	     (cpt+1) (res, Q.push col rescol)
+	 else
+	   fct_hist false (c ++ (hist ?histlabel ~cumul:false width height 
+			     (addn padding (multn (bp ((float_of_int) (nblist-1))) scalex)) 
+			     (Q.push col Q.empty) perspective scalex scaley cpt x)) 
+	     (cpt+1) (res, Q.push col rescol)
   in
-    (fct_hist nop 0 (l, Q.of_list fill)) 
+    (fct_hist true nop 0 (l, Q.of_list fill)) 
     ++ (laxe ~nbcol:nblist padding scalex scaley hcaption vcaption valmax nbval ?vlabel)
       
 
