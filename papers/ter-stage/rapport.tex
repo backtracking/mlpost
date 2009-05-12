@@ -28,10 +28,10 @@
 Dans un cadre scientifique, il est très souvent nécessaire d'inclure des figures aux documents (cours, articles). Il existe bien sûr de nombreux éditeurs graphiques, mais la conception de figures complexes s'avère longue et nuit à l'homogénéité du tout. 
 \bigskip 
 
-Une façon très commune de rédiger ces documents est d'utiliser \LaTeX. \LaTeX\ permet l'importation d'images, voire la création, mais ceci reste compliqué, long, et les erreurs sont difficiles à interpréter. Il doit également être possible d'ajouter des éléments de \LaTeX\ à la figure, et de garder une homogénéité du document. 
+Une façon très commune de rédiger ces documents est d'utiliser \LaTeX. \LaTeX\ et \meta\ permettent la création de figures, mais ces langages sont difficiles d'utilisation, notamment avec des messages d'erreurs compliqués. Il doit également être possible d'ajouter des éléments de \LaTeX\ ($\Pi$, $\Sigma$ ...) à la figure, et de garder une homogénéité du document, ce qui s'avère impossible avec des éditeurs graphiques comme Dia ou Gimp. 
 \bigskip
 
-L'utilisation d'un langage comme OCaml, avec un typage fort et des erreurs plus simples à déchiffrer. De plus, OCaml bénéficie d'arguments optionnels, très pratiques dans la conception d'une librairie graphique. Enfin, la quantité de code tapé devient plus concise, rendant la conception de figures possible d'un simple appel de fonction.
+Les concepteurs ont choisi d'interfacer \meta\ avec OCaml. Un langage comme OCaml permet de résoudre les erreurs plus aisément que \meta. OCaml bénéficie d'arguments optionnels, très pratiques dans la conception d'une librairie graphique. 
 
 Enfin il est important de préciser qu'une figure \mlpost\ peut être utilisée comme la vue du résultat d'un calcul ou d'un algorithme. On pourra par exemple calculer un arbre couvrant d'un graphe, et le représenter sous forme d'arbre \mlpost\ dans le même programme.
 
@@ -155,7 +155,7 @@ Il existe trois types d'histogrammes:
 \end{itemize}
 \bigskip 
 
-Chacun est construit à partir d'une certaine utilisation de la fonction \texttt{hist}. Cette fonction est le c\oeur du module. Elle permet la création d'un ensemble de boîtes avec leurs labels, et la réduction de la taille du code (pas de duplication). La fonction \texttt{hist} renvoie une Command, qui est utilisée par les fonctions -- simple, compare, stack -- couplée au dessin d'un repère grâce au module Plot.
+Le c\oe ur du module est la fonction  \texttt{hist}. Cette fonction est nécessaire car elle permet de factoriser une grande quantité de code commun à chaque type d'histogramme. Elle permet la création d'un ensemble de boîtes avec leurs labels. La fonction \texttt{hist} renvoie une Command, qui est utilisée par les fonctions -- simple, compare, stack -- couplée au dessin d'un repère grâce au module Plot.
 Concrètement, un histogramme est une \texttt{hbox}, un alignement horizontal de boîtes. Chaque boîte contient une \texttt{vbox}, un alignement vertical de boîtes. Ceci forme une sorte de matrice, où chaque élément est un morceau d'histogramme.
 
 \subsubsection{Simple:}
@@ -221,7 +221,7 @@ contient des listes de nombres flottants, chacune étant un histogramme.
       [1.;2.;3.;6.;-1.]]
   \end{alltt}
   
-  L'histogramme comparatif se construit ici après deux appels à \texttt{hist}. Ceci génère deux histogrammes \og simples \fg\, avec un padding calculé pour les mettre côtes à côtes, et une légère translation pour le deuxième, puis le repère est calculé.
+  L'histogramme comparatif se construit ici après deux appels à \texttt{hist}. Ceci génère deux histogrammes \og simples \fg\, avec un padding entre les barres calculé pour mettre ces histogrammes côtes à côtes, et une légère translation pour le deuxième, puis le repère est calculé.
 \end{minipage}
 \begin{minipage}{0.5\linewidth}
 \begin{center}
@@ -323,7 +323,7 @@ Il est possible de faire des histogrammes plus personnalisés, mais toujours de 
 \subsection{Radar}
 Ce module permet la création de diagrammes radar.
 Nous donnons la possibilité d'en créer deux sortes.
-Lorsqu'un radar est créé, l'objet \mlpost\ renvoyé est une Picture.
+Lorsqu'un radar est créé, l'objet \mlpost\ renvoyé est une Picture, une image de \mlpost.
 Nous en verrons l'utilité plus tard.
 \bigskip 
 
@@ -537,12 +537,12 @@ Il remplace l'ancien module Tree de \mlpost. L'algorithme utilisé est issu de l
 La particularité de ces arbres est qu'ils sont dessinés en optimisant l'espace sur chaque ligne pour n'importe quelle taille d'arbre.
 \bigskip 
 
-Nous avons dû adapter cet algorithme à OCaml, et procéder à certains changements. Tout d'abord, l'algorithme a été conçu pour des n\oeuds et des feuilles de taille unitaire en largeur, et sans notion de hauteur. Hors, dans \mlpost\ on veut manipuler des objets de taille variable comme des Box, et les utiliser dans l'arbre. La première étape a donc été d'ajouter la taille des éléments à la largeur. Puis la seconde fut d'adapter ceci pour la profondeur. Nous parcourons l'arbre en accumulant la valeur de l'objet le plus grand (en hauteur) pour chaque niveau. Puis nous parcourons à nouveau l'arbre pour calculer et appliquer l'écart entre chaque niveau, grâce au résultat précédent.
+Nous avons dû adapter cet algorithme à OCaml, et procéder à certains changements. Tout d'abord, l'algorithme a été conçu pour des n\oe uds et des feuilles de taille unitaire en largeur, et sans notion de hauteur. Hors, dans \mlpost\ on veut manipuler des objets de taille variable comme des Box, et les utiliser dans l'arbre. La première étape a donc été d'ajouter la taille des éléments à la largeur. Puis la seconde fut d'adapter ceci pour la profondeur. Nous parcourons l'arbre en accumulant la valeur de l'objet le plus grand (en hauteur) pour chaque niveau. Puis nous parcourons à nouveau l'arbre pour calculer et appliquer l'écart entre chaque niveau, grâce au résultat précédent.
 \bigskip 
 
 Le module contient deux fonctions principales:
 \begin{itemize}
-\item node pour construire un n\oeud
+\item node pour construire un n\oe ud
   \begin{alltt}
     val node : 
     ?ls:Num.t -> ?cs:Num.t -> 
@@ -673,6 +673,21 @@ Le processus de création ou d'édition d'une figure peut être ennuyeux lorsque
 
 Les actions de l'utilisateur se limitent désormais à éditer des valeurs et rafraichir l'image, ce qui devient quasi-instantané.
 \subsection{Structure}
+
+Schéma de l'exécution au démarrage:
+\begin{center}
+\includegraphics{interface1.mps}
+\end{center}
+
+\bigskip
+
+Schéma de l'exécution du rafraîchissement:
+\begin{center}
+\includegraphics{interface2.mps}
+\end{center}
+
+\bigskip
+
 \gmlpost\ n'a nécessité aucune modification de \mlpost, nous y avons seulement dû ajouter un module Edit par dessus le module Num.
 
 L'interface de ce module comporte ces deux fonctions:
@@ -703,20 +718,6 @@ et dimension le type:
 \gmlpost\ peut enfin utiliser le fichier généré pour créer l'image de la figure \mlpost\ et afficher celle-ci ainsi que ses valeurs éditables, et ses points déplaçables sur le canvas.
 
 Lors d'un rafraîchissement, le programme va écraser le fichier \texttt{fig.edit} avec les nouvelles valeurs, et compiler la nouvelle image fraichement obtenue.
-
-\bigskip
-
-Schéma de l'exécution au démarrage:
-\begin{center}
-\includegraphics{interface1.mps}
-\end{center}
-
-\bigskip
-
-Schéma de l'exécution du rafraîchissement:
-\begin{center}
-\includegraphics{interface2.mps}
-\end{center}
 
 \newpage
 \subsection{Screenshots}
