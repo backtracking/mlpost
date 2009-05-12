@@ -132,7 +132,7 @@ let extremum conv l a b c d =
   match compare delta 0. with
     | x when x<0 -> []
     | 0 -> test (sol 0.) l
-    | _ -> test delta (test (-.delta) l)
+    | _ -> test (sol delta) (test (sol (-.delta)) l)
 
 let remarquable conv l a b c d = 0.::1.::(extremum conv l a b c d)
 
@@ -570,6 +570,459 @@ struct
     | Append_Path (p1,j,p2) ->fprintf fmt "%a;%a-%a" print p1 print_joint j printf p2
 
 
+  (* Metafont is wiser in the computation of 
+     calc_value, calc_ff, curl_ratio, ... *)
+  (* dk1, uk1 are d_k-1, u_k-1 *)
+  let curl_ratio gamma alpha1 beta1 =
+    let alpha = 1./.alpha1 in
+    let beta = 1./.beta1 in
+    ((3.-.alpha)*.alpha*.alpha*.gamma+.beta**3.)/.
+      (alpha**3.*.gamma +. (3.-.beta)*.beta*.beta)
+
+  let reduce_angle x = 
+    (* 292. define reduce angle (#) *)
+    if (abs_float x) > 180. 
+    then if x>0. then x -. 360. else x +. 360.
+    else x
+
+  let velocity st ct sf cf t = 
+    let num = 2.+.(sqrt 2.)*.(st -. (sf /. 16.))*.(sf -. (st /. 16.))*.(ct-.cf) in
+    let denom = 3.*.(1.+.0.5*.((sqrt 5.) -. 1.)*.ct +. 0.5 *.(3.-.(sqrt 5.))*.cf) in
+    min ((t*.num)/.denom) 4.
+
+  let calc_value dk1 dk absrtension absltension uk1 =
+    (* Calculate the values aa = Ak /Bk , bb = Dk /Ck , dd = (3 - k-1 )dk,k+1 , ee = (3 - k+1 )dk-1,k , and
+     cc = (Bk - uk-1 Ak )/Bk 288 *)
+    let aa = 1./.(3.*.absrtension -. 1.) in
+    let bb = 1./.(3.*.absltension -. 1.) in
+    let dd = dk*.(3.-.1./.absrtension) in
+    let ee = dk1*.(3.-.1./.absltension) in
+    let cc = 1.-.(uk1*.aa) in
+    (aa,bb,cc,dd,ee)
+      
+  let calc_ff cc dd ee absrtension absltension =
+    (* Calculate the ratio ff = Ck /(Ck + Bk - uk-1 Ak ) 289 *)
+    (*let dd = dd*.cc in
+    if absltension = absrtension 
+    then ee/.(ee+.dd)
+    else if absltension < absrtension
+    then 
+      let tmp = absltension/.absrtension in
+      let tmp = tmp*.tmp in
+      let dd = dd*.tmp in
+      ee/.(ee+.dd)
+    else
+      let tmp = absrtension/.absltension in
+      let tmp = tmp*.tmp in
+      let ee = ee*.tmp in
+      ee/.(ee+.dd)*)
+    let dd = dd*.cc in
+    let tmp = absltension/.absrtension in
+    let tmp = tmp*.tmp in
+    let dd = dd*.tmp in
+    ee/.(ee+.dd)
+
+  type tension = float
+      
+  type path_type = 
+    | Endpoint
+    | Explicit of point
+    | Open of tension
+    | Endcycle of tension
+    | Curl of tension * float
+    | Given of tension * float
+
+  let tension = function
+    | Endpoint -> 1. (* not sure ... *)
+    | Explicit _ -> assert false
+    | Open t | Endcycle t | Curl (t,_) | Given (t,_) -> t
+
+  type kpath = {
+    mutable left : path_type;
+    mutable right : path_type;
+    mutable link : kpath;
+    mutable coord : point}
+
+  let print_path_type fmt = function
+    | Endpoint -> fprintf fmt "Endpoint"
+    | Explicit p -> fprintf fmt "Explicit %a" P.print p
+    | Open t -> fprintf fmt "Open %f" t
+    | Endcycle t -> fprintf fmt "Explicit %f" t
+    | Curl (t,f) -> fprintf fmt "Curl (%f,%f)" t f
+    | Given (t,f) -> fprintf fmt "Given (%f,%f)" t f
+
+  let print_one_kpath fmt q =
+    fprintf fmt "@[{left = @[%a@];@,coord = @[%a@];@,right = @[%a@]}@]"
+          print_path_type q.left
+          P.print q.coord
+          print_path_type q.right
+
+  let print_kpath fmt p = 
+    let rec aux fmt q =
+        fprintf fmt "@[{left = @[%a@];@,coord = @[%a@];@,right = @[%a@];@,link= @[%a@]}@]"
+          print_path_type q.left
+          P.print q.coord
+          print_path_type q.right
+          (fun fmt q -> 
+             if p!=q 
+             then aux fmt q
+             else fprintf fmt "...") q.link in
+    aux fmt p
+
+  let tunity:tension = 1.
+
+  let pi = acos (-.1.)
+
+  let n_arg = 
+    let coef = 180./.pi in
+    fun x y -> (atan2 y x)*.coef
+
+  let sincos = 
+    let coef = pi/.180. in
+    fun a -> let a = coef *. a in
+    sin a, cos a
+
+  let set_controls p q at af rtension ltension deltaxy =
+    (* procedure set controls (p, q : pointer ; k : integer ) 299 *)
+    let st,ct = sincos at in
+    let sf,cf = sincos af in
+    let rr = velocity st ct sf cf (abs_float rtension) in
+    let ss = velocity sf cf st ct (abs_float ltension) in
+    Format.printf "st = %f@ ct = %f@ sf = %f@ cf = %f@ rr = %f@ ss = %f@."
+      st ct sf cf rr ss;
+    if (rtension < 0.) && (ltension < 0.) then
+      (*TODO*) ();
+    let sbp = (rr*/ ((ct */ deltaxy) +/ 
+                                 (st*/(P.swapmy deltaxy)))) in
+    let sb = p.coord +/  sbp in
+    p.right <- Explicit sb;
+    let scm = (ss*/((cf */ deltaxy) +/ 
+                                (sf*/(P.swapmx deltaxy)))) in
+    let sc = q.coord -/ scm in
+    q.left <- Explicit sc;
+    Format.printf "sb += %a; sc -= %a@." P.print sbp P.print scm
+
+  let print_array print fmt =
+    Array.iter (fun e -> fprintf fmt "%a;@," print e)
+
+  let print_float fmt = fprintf fmt "%f"
+
+  let solve_choices p q n deltaxyk deltak psik =
+    (* If Only one simple arc*)
+    match p with
+      | {right = Given (rt,rp);link={left=Given (lt,lq)}} -> 
+          (* Reduce to simple case of two givens and return 301 *)
+          let aa = n_arg deltaxyk.(0).x deltaxyk.(0).y in
+          let at = rp -. aa in let af = lq -. aa in
+          set_controls p q at af rt lt deltaxyk.(0)
+      | {right = Curl (tp,cp);link={left=Curl (tq,cq)}} -> 
+          (* Reduce to simple case of straight line and return 302 *)
+          let lt = abs_float tq in let rt = abs_float tp in
+          let tmp = 
+            {x=if deltaxyk.(0).x >= 0. then 1. else -.1.;
+             y=if deltaxyk.(0).y >= 0. then 1. else -.1.} in
+          p.right <- Explicit  
+            begin
+              if rt = tunity then 
+                p.coord +/ ((deltaxyk.(0) +/ tmp)// 3.)
+              else
+                let ff = 1. /. (3. *. rt) in
+                p.coord +/ (deltaxyk.(0) // ff)
+            end;
+          q.left <- Explicit  
+            begin
+              if lt = tunity then 
+                q.coord +/ ((deltaxyk.(0) +/ tmp)// 3.)
+              else
+                let ff = 1. /. (3. *. rt) in
+                q.coord +/ (deltaxyk.(0) // ff)
+            end
+      | {link=t} as s -> 
+          let thetak = Array.make (n+1) 0. in
+          let uu = Array.make n 0. in
+          let vv = Array.make n 0. in
+          let ww = Array.make n 0. in
+          begin
+            Format.printf "Open : @[k : @[%i@];@,s : @[%a@]@]@." 0 print_one_kpath p;
+            match p with
+              |{right=Given (_,rp)} ->
+                 (* Set up the equation for a given value of 0 293 *)
+                 vv.(0) <- reduce_angle (rp -. (n_arg deltaxyk.(0).x deltaxyk.(0).y));
+                  uu.(0) <- 0.;ww.(0) <- 0.
+              |{right=Curl (tp,cc);link={left=lt}} ->
+                 (* Set up the equation for a curl at 0 294 *)
+                 let lt = abs_float (tension lt) in let rt = abs_float tp in
+                 if lt = tunity && rt = tunity 
+                 then uu.(0) <- (2.*.cc+.1.)/.(cc+.2.)
+                 else uu.(0) <- curl_ratio cc rt lt;
+                 vv.(0) <- -. (psik.(1)*.uu.(0));
+                 ww.(0) <- 0.
+              |{right=Open _} ->
+                 uu.(0) <- 0.;vv.(0) <- 0.;ww.(0) <- 1.
+              | _ -> assert false (* { there are no other cases } in 285 because of 273 *)
+          end;
+          (let rec aux k r = function
+              (* last point*)
+            | {left=Curl (t,cc)} -> 
+                (* Set up equation for a curl at n and goto found 295 *)
+                let lt = abs_float t in
+                let rt = abs_float (tension r.right) in
+                let ff = if lt=1. && rt=1. 
+                then (2.*.cc+.1.)/.(cc+.2.)
+                else curl_ratio cc lt rt in
+                thetak.(n) <- -.((vv.(n-1)*.ff)/.(1.-.ff*.uu.(n-1)))
+            | {left=Given (_,f)} -> 
+                (* Calculate the given value of n and goto found 292 *)
+                thetak.(n) <- reduce_angle (f -. (n_arg deltaxyk.(n-1).x deltaxyk.(n-1).y))
+            | {link=t} as s-> 
+                  (*end cycle , open : Set up equation to match mock curvatures at zk ;
+                    then goto found with n adjusted to equal 0 , if a cycle has ended 287 *)
+                Format.printf "Open : @[k : @[%i@];@,s : @[%a@]@]@." k print_one_kpath s;
+                let absrtension = abs_float (tension r.right) in
+                let absltension = abs_float (tension t.left) in
+                let (aa,bb,cc,dd,ee) = calc_value deltak.(k-1) deltak.(k) 
+                  absrtension absltension uu.(k-1) in
+                let ff = calc_ff cc dd ee absrtension absltension in
+                uu.(k)<- ff*.bb;
+                (* Calculate the values of vk and wk 290 *)
+                let acc = -. (psik.(k+1)*.uu.(k)) in
+                (match r.right with 
+                  | Curl _ -> (*k=1...*) ww.(k) <- 0.; 
+                      vv.(k) <- acc -. (psik.(1) *. (1. -. ff))
+                  | _ -> 
+                      let ff = (1. -. ff)/. cc in
+                      let acc = acc -. (psik.(k) *. ff) in
+                      let ff = ff*.aa in
+                      vv.(k) <- acc -. (vv.(k-1)*.ff);
+                      ww.(k) <- -. (ww.(k-1)*.ff));
+                (match s.left with
+                   | Endcycle _ -> 
+                       (* Adjust n to equal 0 and goto found 291 *)
+                       let aa,bb = 
+                         (let rec aux aa bb = function
+                            | 0 -> (vv.(n) -. (aa/.uu.(n))),(ww.(n) -. (bb/.uu.(n)))
+                            | k -> aux (vv.(k) -. (aa/.uu.(k))) (ww.(k) -. (bb/.uu.(k))) (k-1) in
+                          aux 0. 1. (n-1)) in
+                       let aa = aa /. (1. -. bb) in
+                       thetak.(n) <- aa;
+                       vv.(0) <- aa;
+                       for k = 1 to n-1 do
+                         vv.(k) <- vv.(k) +. (aa*.ww.(k));
+                       done;
+                   | _ -> aux (k+1) s t);
+           in aux 1 s t);
+          (* Finish choosing angles and assigning control points 297 *)
+          Format.printf "Finish choosing angles and assigning control points 297@.";
+          for k = n-1 downto 0 do
+            thetak.(k) <- vv.(k) -. (thetak.(k+1) *. uu.(k))
+          done;
+          Format.printf "thetak : %a@." (print_array print_float) thetak;
+          Format.printf "uu : %a@." (print_array print_float) uu;
+          Format.printf "vv : %a@." (print_array print_float) vv;
+          Format.printf "ww : %a@." (print_array print_float) ww;
+          (let rec aux k = function
+             | _ when k = n -> ()
+             | {right=rt;link={left=lt} as t} as s ->
+                 let at = thetak.(k) in
+                 let af = -.psik.(k+1) -. thetak.(k+1) in
+                 (*Format.printf "Set_controls before : @[%a ." print_one_kpath s;*)
+                 set_controls s t at af (tension rt) (tension lt) deltaxyk.(k);
+                 (*Format.printf "Set_controls after : @[%a@]@." print_one_kpath s;*)
+                 aux (k+1) t
+           in aux 0 p)
+
+  let make_choices knots =
+    (* If consecutive knots are equal, join them explicitly 271*)
+    (let p = ref knots in
+    while !p != knots do
+      (match !p with
+        | ({coord=coord;right=(Given _|Curl _|Open _);link=q} as k) when coord == q.coord ->
+            k.right <- Explicit coord;
+            q.left  <- Explicit coord;
+            (match k.left with
+              | Open tension -> k.left <- Curl (tension,tunity)
+              | _ -> ());
+            (match k.right with
+              | Open tension -> k.right <- Curl (tension,tunity)
+              | _ -> ());
+        | _ -> ());
+      p:=(!p).link;
+    done);
+    (*Find the first breakpoint, h, on the path; insert an artificial breakpoint if the path is an unbroken
+      cycle 272*)
+    let h = 
+      (let rec aux = function
+         | {left = (Endpoint | Endcycle _ | Explicit _ | Curl _ | Given _)}
+         | {right= (Endpoint | Endcycle _ | Explicit _ | Curl _ | Given _)} as h -> h
+         | {left = Open t} as h when h==knots -> knots.left <- Endcycle t; knots
+         | {link=h} -> aux h in
+       aux knots) in
+    (*repeat Fill in the control points between p and the next breakpoint, then advance p to that
+      breakpoint 273
+      until p = h*)
+  (let rec aux = function
+     | {right =(Endpoint|Explicit _);link = q} -> if q!=h then aux q
+     | p -> let n,q = 
+         (let rec search_q n = function
+            |{left=Open _;right=Open _;link=q} -> search_q (n+1) q
+            | q -> (n,q) in
+          search_q 1 p.link) in
+       Format.printf "@[search_q : n = %i;@,p = @[%a@];@,q = @[%a@]@]@."
+         n print_one_kpath p print_one_kpath q;
+       (*Fill in the control information between consecutive breakpoints p and q 278*)
+       (*  Calculate the turning angles k and the distances dk,k+1 ; set n to the length of the path 281*)
+       let deltaxyk = Array.make n P.zero in
+       let deltak = Array.make n 0. in
+       let psik = Array.make (n+1) 0. in
+       (let rec fill_array k = function
+          | _ when k=n -> psik.(n) <- 0.
+          | {left = Endcycle _} -> psik.(k)<-psik.(1) (* Comment se cas arrive?*)
+          | {link=t} as s ->
+              deltaxyk.(k) <- t.coord -/ s.coord;
+              deltak.(k) <- P.norm deltaxyk.(k);
+              (if k > 0 then
+                 let {x=cosine;y=sine} = deltaxyk.(k-1) // deltak.(k-1) in
+                 let psi = n_arg (deltaxyk.(k).x*.cosine+.deltaxyk.(k).y*.sine)
+                   (deltaxyk.(k).y*.cosine-.deltaxyk.(k).x*.sine) in
+                 psik.(k) <- psi);
+              fill_array (k+1) t
+        in fill_array 0 p);
+       Format.printf "deltaxyk : %a@." (print_array P.print) deltaxyk;
+       Format.printf "deltak : %a@." (print_array print_float) deltak;
+       Format.printf "psik : %a@." (print_array print_float) psik;
+       (*Remove open types at the breakpoints 282*)
+       (match q with
+         | {left=Open t} -> q.left <- Curl (t,1.) (* TODO cas bizarre *)
+         | _ -> ());
+       (match p with
+          | {left=Explicit pe;right=Open t} -> 
+             let del = p.coord -/ pe in
+             if del=P.zero 
+             then p.right <- Curl (t,1.)
+             else p.right <- Given (t,n_arg del.x del.y)
+          | _ -> ());
+       (* an auxiliary function *)
+         solve_choices p q n deltaxyk deltak psik;
+       if q!=h then aux q
+   in aux h)
+        
+  let tension_of = function
+    | JTension (_,t1,t2,_) -> (t1,t2)
+    | _ -> (1.,1.)
+        
+  let direction t = function
+    | DNo -> Open t
+    | DVec p -> Given (t,n_arg p.x p.y)
+    | DCurl f -> Curl (t,f)
+        
+  let right_of_join p = function
+    | JLine -> Explicit p
+    | JControls (c,_) -> Explicit c
+    | JCurve (d,_) -> direction 1. d
+    | JCurveNoInflex (d,_) -> direction 1. d (*pas totalement correcte*)
+    | JTension (d,f,_,_) -> direction f d
+        
+  let left_of_join p = function
+    | JLine -> Explicit p
+    | JControls (_,c) -> Explicit c
+    | JCurve (_,d) -> direction 1. d
+    | JCurveNoInflex (_,d) -> direction 1. d (*pas totalement correcte*)
+    | JTension (_,_,f,d) -> direction f d
+
+ let dumb_pos = {x=666.;y=42.}
+ let dumb_dir = Endcycle 42.
+
+ let rec dumb_link = { left = dumb_dir;
+                       right = dumb_dir;
+                       coord = dumb_pos;
+                       link = dumb_link}
+
+  let path_to_meta nknot l =
+    let rec aux aknot = function
+    | [] -> assert false
+    | [{sa=sa;sb=sb;sc=sc;sd=sd}] ->
+        nknot.left <- Explicit sc;
+        nknot.coord <- sd;
+        aknot.link <- nknot ;
+        aknot.right <- Explicit sb;
+        aknot.coord <- sa; ()
+    | {sa=sa;sb=sb;sc=sc}::l -> 
+        let nknot = {left = Explicit sc;
+                     right = dumb_dir;
+                     coord = dumb_pos;
+                     link = dumb_link} in
+        aknot.link <- nknot;
+        aknot.right <- Explicit sb;
+        aknot.coord <- sa;
+        aux nknot l in
+    let aknot = {left = Endpoint;
+         right = dumb_dir;
+         coord = dumb_pos;
+         link = dumb_link} in
+    aux aknot l;
+    aknot
+                     
+   let kmeta_to_path meta = 
+     let cycle = false in
+     let rec to_knots aknot = function
+       | Start p -> 
+           aknot.coord <- p;
+           aknot.left <- Endpoint;
+           aknot
+       | Cons (pa,join,p) ->
+           aknot.coord <- p;
+           aknot.left <- left_of_join p join;
+           let nknot = {right = right_of_join p join;
+                        left = dumb_dir;
+                        coord = dumb_pos;
+                        link = aknot} in
+           to_knots nknot pa
+       | Start_Path pa -> path_to_meta aknot pa.pl
+       | Append_Path (p1,join,p2) -> 
+           let aknot2 = path_to_meta aknot p2.pl in 
+           aknot2.left<- left_of_join aknot2.coord join;
+           let nknot = {right = right_of_join aknot2.coord join;
+                        left = dumb_dir;
+                        coord = dumb_pos;
+                        link = aknot} in
+           to_knots nknot p1 in
+     let lknots = {right = Endpoint;
+                   left = dumb_dir;
+                   coord = dumb_pos;
+                   link = dumb_link} in
+     let knots = to_knots lknots meta in
+     lknots.link <- knots;
+     (* Choose control points for the path and put the result into cur exp 891 *)
+     (* when nocycle *)
+     if cycle = true 
+     then ()
+     else 
+       begin 
+         (match knots.right with
+            | Open t -> knots.right <- Curl (t,1.)
+            | _ -> ());
+         (match lknots.left with
+            | Open t -> lknots.left <- Curl (t,1.)
+            | _ -> ());
+       end;
+     Format.printf "@[before : @[%a@];@.middle : @[%a@]@]@." print meta print_kpath knots;
+     make_choices knots;
+     Format.printf "@[after : @[%a@]@]@." print_kpath knots;
+     let rec aux smin = function
+     | {right = Explicit sb;coord = sa;
+        link={left = Explicit sc;coord = sd} as s} ->
+         {sa = sa;sb = sb;sc = sc;sd = sd;smin=smin;smax=smin+.1.;start=false}::
+           (aux (smin+.1.) s)
+     | {right = Endpoint} -> []
+     | _ -> assert false in
+      let l = aux 0. knots in
+      try 
+        {(List.hd l) with start = true}::(List.tl l)
+      with Failure _ as exn-> Format.printf "Fail HERE!!!@.";raise exn
+         
+
+
+(*
   let p213 p1 p2 p3 : P.t * P.t =
     let p21 = P.sub p2 p1 in
     let p23 = P.sub p2 p3 in
@@ -581,13 +1034,13 @@ struct
 
   let psi p1 p2 p3 =
     let (p21,p23) = p213 p1 p2 p3 in
-    (atan2 p23.x p23.y)-.(atan2 p21.x p21.y)
+    (atan2 p23.x p23.y)-.(atan2 p21.x p21.y) (* faux*)
 
   let deltak p1 p2 = 
     let p21 = P.sub p2 p1 in
     P.norm2 p21
 
-  type tension = float
+
   type delta = float
   and tc = tension * point * tc_aux
   and tc_aux =
@@ -617,46 +1070,12 @@ struct
 
   type tc_cycle = sc_data list
 
-  (* Metafont is wiser in the computation of 
-     calc_value, calc_ff, curl_ratio, ... *)
-  (* dk1, uk1 are d_k-1, u_k-1 *)
-  let curl_ratio gamma alpha1 beta1 =
-    let alpha = 1./.alpha1 in
-    let beta = 1./.beta1 in
-    ((3.-.alpha)*.alpha*.alpha*.gamma+.beta**3.)/.
-      (alpha**3.*.gamma +. (3.-.beta)*.beta*.beta)
-
-  let reduce_angle x = 
-    if (abs_float x) > 1.80 
-    then if x>0. then x -. 3.60 else x +. 3.60
-    else x
-
-  let velocity st ct sf cf t = 
-    let num = 2.+.(sqrt 2.)*.(st -. (sf /. 16.))*.(sf -. (st /. 16.))*.(ct-.cf) in
-    let denom = 3.*.(1.+.0.5*.((sqrt 5.) -. 1.)*.ct +. 0.5 *.(3.-.(sqrt 5.))*.cf) in
-    min ((t*.num)/.denom) 4.
-
-  let calc_value dk1 dk absrtension absltension uk =
-    let aa = 1./.(3.*.absrtension -. 1.) in
-    let bb = 1./.(3.*.absltension -. 1.) in
-    let dd = dk*.(3.-.1./.absrtension) in
-    let ee = dk1*.(3.-.1./.absltension) in
-    let cc = 1.-.(uk*.aa) in
-    (aa,bb,cc,dd,ee)
-      
-  let calc_ff cc dd ee absrtension absltension =
-    let dd = dd*.cc in
-    let tmp = absltension/.absrtension in
-    let tmp = tmp*.tmp in
-    let dd = dd*.tmp in
-    ee/.(ee+.dd)
-
-      
   let rec calc_angle athetal thetal = function
     | [] -> athetal::thetal
     | (uk,vk,wk)::uvwkl -> 
         let nathetal = vk -. (athetal *. uk) in
         calc_angle nathetal (athetal::thetal) uvwkl
+
 
   (* set_controls*)
   let rec calc_control_points smin splines dkpsil thetal= 
@@ -848,10 +1267,6 @@ struct
       | JCurve (d1,d2) -> (create_line p1 p2).pl@path (*TODO*)
       | JCurveNoInflex (d1,d2) -> (create_line p1 p2).pl@path (*TODO*)
 
-  let tension_of = function
-    | JTension (_,t1,t2,_) -> (t1,t2)
-    | _ -> (1.,1.)
-
   let last_point_of = function
     | Start p1  | Cons (_,_,p1) -> p1
     | Start_Path p |Append_Path (_,_,p) -> last_point p
@@ -938,7 +1353,11 @@ struct
 
   let true_to_path mp =
     { pl = aux [] (`Curve (1.,1.,0.)) mp; cycle = false}
-    
+*)    
+       
+ let kto_path mp =
+    { pl = kmeta_to_path mp; cycle = false}
+
 
   let rec to_path_simple = function
     | Start p -> create_line p p
@@ -971,7 +1390,7 @@ struct
     | Start_Path p2 -> Append_Path(p,j,p2)
     | Append_Path (p2,j2,p3) -> Append_Path(append p j p2,j2,p3)
 
-  let to_path p = true_to_path p
+  let to_path p = kto_path p
   let cycle j p = not_implemented "cycle"
 
   let from_path p = Start_Path p
@@ -1000,6 +1419,9 @@ module Epure =
 struct
   (* A rendre plus performant ou pas*)
   type t = spline list list
+  let print fmt p = 
+    Format.fprintf fmt "@[[%a]" 
+      (fun fmt -> List.iter (List.iter (fun e -> Format.fprintf fmt "%a;" print_spline e))) p
   let empty = []
   let create x = [x.pl]
   let of_path = create
@@ -1009,6 +1431,7 @@ struct
     let (x_min,y_min,x_max,y_max) = 
       list_min_max (list_min_max give_bound_precise) sl in
     ({x=x_min;y=y_min},{x=x_max;y=y_max})
+
   let of_bounding_box l = create (of_bounding_box l)
 
   let draw cr p = List.iter (List.iter 

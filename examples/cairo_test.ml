@@ -22,8 +22,8 @@ let other27 =
 
 (*parse >> <<handbook3 *)
 let z0 = 0.,0.
-let z1 = 60.,40.
-let z2 = 40.,90.
+let z1 = 50.,30.
+let z2 = 80.,80.
 let z3 = 10.,70.
 let z4 = 30.,50.
 let l1 = z0::z1::z2::z3::z4::[]
@@ -36,8 +36,19 @@ let labels1 =
 let handbook3 = seq [ draw (path ~style:jCurve  l1); labels1 ]
 (*parse >> *)
 
+let bp = Num.bp
+
+let ribbon = MetaPath.concat ~style:(MetaPath.jControls (pt (bp 310.,bp 300.)) (pt (bp 10.,bp 310.))) (MetaPath.start (knotp (pt (bp 110., bp 20.)))) 
+   (MetaPath.knotp (pt (bp 210.,bp 20.)))
+
+let ribbon = draw (of_metapath ribbon)
+
+let test = seq [ draw (path ~style:jCurve (z0::z1::z2::[]))]
+
 let _ = 
-  List.iter (fun (name,fig) -> Cairost.emit_pdf name fig)
-  [ "other27.pdf", other27;
-    "handbook3.pdf", handbook3;
+  List.iter (fun (name,fig) -> Cairost.emit_pdf (name^".pdf") fig;Metapost.emit name fig)
+  [ (*"other27", other27;*)
+    "handbook3", handbook3;
+    "ribbon", ribbon;
+    "test", test;
   ]
