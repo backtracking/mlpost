@@ -23,6 +23,7 @@
 
 \section{MLPost}
 \begin{frame}{Introduction à MLPost}
+  \includegraphics{ford.mps}
 \end{frame}
 
 \begin{frame}{Exemple de MLPost}
@@ -35,27 +36,21 @@
 \begin{frame}
   \frametitle{Nos modules}
   \begin{itemize}
-    \item<1-> Hist
-    \item<2-> Radar
-    \item<3-> Path
-    \item<4-> Tree
-    \item<5-> Legend
+    \item Hist
+    
   \end{itemize}
 \end{frame}
 
 \section{Nos modules}
 \subsection{Hist}
 \subsubsection{Simple}
-\begin{frame}{Histogramme simple}
-\end{frame}
 
-\begin{frame}{Exemple}
+
+\begin{frame}{Histogramme Simple}
   \begin{columns}
     \column{0.5\linewidth}
     \begin{alltt}
       let hist1 = Hist.simple
-      \textasciitilde width:(bp 100.)
-      \textasciitilde height:(bp 200.)
       [3.;1.;6.]
     \end{alltt}
     \column{0.5\linewidth}
@@ -66,62 +61,64 @@
     
 \end{frame}
 
-\subsubsection{Comparatif}
-\begin{frame}{Histogramme comparatif}
-\end{frame}
-
-\begin{frame}{Exemple}
+\subsubsection{Comparatif et Cumulatif}
+\begin{frame}{Histogrammes Comparatif et Cumulatif}
   \begin{columns}
     \column{0.5\linewidth}
-    \begin{alltt}
-      let hist2 = 
-
-      Hist.compare
-      
-      \textasciitilde width:(bp 100.)
-      
-      \textasciitilde height:(bp 200.)
-      [[1.;5.;6.;5.;3.];
-      [1.;2.;3.;6.;-1.]]
-    \end{alltt}
+    \begin{center}
+      \includegraphics% [scale=0.8]
+      {hist2.mps}
+    \end{center}
+    
     \column{0.5\linewidth}
     \begin{center}
-      \includegraphics[scale=0.8]{hist2.mps}
+      \includegraphics% [scale=0.4]
+      {hist3.mps}
     \end{center}
   \end{columns}
 \end{frame}
 
-\subsubsection{Cumulatif}
-\begin{frame}{Histogramme cumulatif}
-\end{frame}
 
-\begin{frame}{Exemple}
+\subsubsection{API}
+\begin{frame}{API}
   \begin{columns}
     \column{0.5\linewidth}
-    \begin{alltt}
-      let hist3 =
+    \begin{center}
+      \begin{alltt}
+        ?width:Num.t
 
-      let vlabel \_ \_ = None in
+        ?height:Num.t
 
-      Hist.stack
- 
-      \textasciitilde vlabel
+        ?padding:Num.t
 
-      \textasciitilde fill:[lightred;lightblue;
-      lightyellow;lightgreen]
+        ?fill:Color.t list
 
-      [[4.;5.;5.;]; [8.;3.;1.]; [2.;8.;1.;4.];
-      [1.5;3.5];[2.;2.;7.;1.]]
-    \end{alltt}
+        ?perspective: bool
+
+        ?hcaption:Picture.t
+
+        ?vcaption:Picture.t
+
+        ?histlabel:[> `Bot | `Center | `Top ] * Picture.t labels
+
+        ?vlabel:Plot.labels
+
+        ?hlabel:Picture.t list 
+      \end{alltt}
+    \end{center}
+    
     \column{0.5\linewidth}
     \begin{center}
-      \includegraphics[scale=0.4]{hist3.mps}
+      \includegraphics[scale=0.7]{hist5.mps}
     \end{center}
   \end{columns}
 \end{frame}
-
-\subsubsection{Exemple complexe}
-\begin{frame}{Exemple complexe}
+    
+\subsection{Legend}
+\begin{frame}{Legend}
+  \begin{center}
+    \includegraphics[scale=0.7]{hist1.mps}
+  \end{center}
   \begin{columns}
     \column{0.6\linewidth}
     \begin{alltt}
@@ -164,59 +161,28 @@
 \begin{frame}{Radar cumulatif}
 \end{frame}
 
-\begin{frame}{Exemple}
-\end{frame}
 
 \subsubsection{Comparatif}
 \begin{frame}{Radar comparatif}
 \end{frame}
 
-\begin{frame}{Exemple}
-\end{frame}
 
 \subsection{Path}
 \begin{frame}{Path}
 \end{frame}
 
-\begin{frame}{Exemple}
-\end{frame}
 
 \subsection{Tree}
 \begin{frame}{Tree}
 \end{frame}
 
-\begin{frame}{Exemple}
-\end{frame}
 
-\subsection{Legend}
-\begin{frame}{Legend}
-\end{frame}
-
-\begin{frame}{Exemple}
-\end{frame}
 
 \section{GMLPost}
 \begin{frame}{GMLPost}
 \end{frame}
 
-  % \begin{columns}
-%     \column{0.5\textwidth}
-%     qdqd kjhqd jkqd kjhqdkj
-
-%     \begin{center}
-%       \includegraphics{simple_block.mps}
-%     \end{center}
-%     hqd lk kljsqdlkqdlk
-
-%     \column{0.5\textwidth}
-%     deuxième colonne
-
-%     \begin{alltt}
-%       let f x = x+1
-
-%       let g x = x
-%     \end{alltt}
-%   \end{columns}
+  
 
 
 \end{document}

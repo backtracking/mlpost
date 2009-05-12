@@ -28,6 +28,7 @@
 Dans un cadre scientifique, il est très souvent nécessaire d'inclure des figures aux documents (cours, articles). Il existe bien sûr de nombreux éditeurs graphiques, mais la conception de figures complexes s'avère longue et nuit à l'homogénéité du tout. 
 \bigskip 
 
+
 Une façon très commune de rédiger ces documents est d'utiliser \LaTeX. \LaTeX\ et \meta\ permettent la création de figures, mais ces langages sont difficiles d'utilisation, notamment avec des messages d'erreurs compliqués. Il doit également être possible d'ajouter des éléments de \LaTeX\ ($\Pi$, $\Sigma$ ...) à la figure, et de garder une homogénéité du document, ce qui s'avère impossible avec des éditeurs graphiques comme Dia ou Gimp. 
 \bigskip
 
@@ -89,6 +90,7 @@ Un exemple légèrement plus compliqué dans lequel on utilise des arguments opt
     \includegraphics[scale=2]{traffic.mps}
   \end{center}
 \end{minipage}
+
 
 Un dernier exemple plus compliqué utilisant les module Path, Point et Pen pour dessiner un rubik's cube. Cette figure étant le résultat d'un calcul, on voit bien à quel point il serait facile de changer certains paramètres pour la modifier.
 \bigskip 
@@ -474,13 +476,13 @@ Exemples d'utilisations de \texttt{smart\_path} :
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
     let path2 = 
-  let p = Path.smart_path 
+    let p = Path.smart_path 
     [Right;Down;Left;Down]
     ~style:jLine
     (Point.pt (bp 0.,bp 0.)) 
     (Point.pt (bp 0.,bp (-30.)))
-  in
-  Command.draw_arrow p
+    in
+    Command.draw_arrow p
   \end{alltt}
 \end{minipage}
 \begin{minipage}{0.5\linewidth}

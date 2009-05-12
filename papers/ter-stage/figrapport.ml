@@ -64,8 +64,8 @@ let rubik =
     
 let hist1 =
   Hist.simple
-    ~width:(bp 100.)
-    ~height:(bp 200.)
+    (* ~width:(bp 100.) *)
+    (* ~height:(bp 200.)*)			
     [3.;1.;6.]
     
 let hist2 =
@@ -147,7 +147,7 @@ let path1 =
     [Right;Up;Right]
     ~style:jLine
     (Point.pt (bp 0.,bp 0.)) 
-    (Point.pt (bp 50.,bp 50.))
+    (Point.pt (bp (-50.),bp 50.))
   in
   Command.draw p
 
@@ -282,6 +282,31 @@ let legend1 =
 (***************** ******************)
 
 
+let figford =
+  let ford n =
+    let u x = Num.bp (200.0 *. x) in
+    let circle x y r =
+      Command.draw ~color:Color.black
+	(Path.shift (Point.pt (u x, u y))
+	   (Path.scale (u (2.*.r)) fullcircle)) 
+    in    
+    let rec aux acc p1 q1 p2 q2 =
+      let p = p1 + p2 in
+      let q = q1 + q2 in
+      if q>n then acc else
+	let fq = float q in
+	let fr = 0.5 /. fq /. fq in
+	let acc = circle (float p /. fq) fr fr :: acc in
+	let acc = aux acc p1 q1 p q in
+	aux acc p q p2 q2
+    in
+    let l = aux [] 0 1 1 1 in
+    let pic = Picture.make (Command.seq l) in
+    Picture.scale (Num.bp 30.0) pic
+  in
+  (Command.draw_pic (ford 17))
+
+
 let _ =
   List.iter (fun (name,fig) -> Metapost.emit name fig)
   [ "hist1", hist1;
@@ -303,5 +328,6 @@ let _ =
     "tree3",tree3;
     "traffic",traffic;
     "rubik",rubik;
-    "legend1",legend1
+    "legend1",legend1;
+    "ford",figford
   ]
