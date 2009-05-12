@@ -64,14 +64,10 @@ let rubik =
     
 let hist1 =
   Hist.simple
-    (* ~width:(bp 100.) *)
-    (* ~height:(bp 200.)*)			
     [3.;1.;6.]
     
 let hist2 =
   Hist.compare
-    ~width:(bp 100.)
-    ~height:(bp 200.)
     [[1.;5.;6.;5.;3.];
      [1.;2.;3.;6.;-1.]]
     
@@ -87,8 +83,6 @@ let hist5 =
   let rot s = Picture.rotate 25. (Picture.tex s) in
   Hist.stack
     ~vlabel
-    ~width:(bp 100.)
-    ~height:(bp 200.)
     ~perspective:true ~padding:(bp 15.)
     ~fill:[lightred;lightblue;lightyellow;lightgreen]
     ~histlabel:(`Center, Hist.Values)
@@ -147,7 +141,7 @@ let path1 =
     [Right;Up;Right]
     ~style:jLine
     (Point.pt (bp 0.,bp 0.)) 
-    (Point.pt (bp (-50.),bp 50.))
+    (Point.pt (bp 50.,bp 50.))
   in
   Command.draw p
 

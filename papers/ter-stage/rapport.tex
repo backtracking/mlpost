@@ -186,7 +186,7 @@ flottants.
     [3.;1.;6.]
   \end{alltt}
 
-  Utilisation très simple de \texttt{simple} pour trois valeurs. On spécifie la taille totale de la figure. La construction de cet histogramme nécessite un appel à la fonction \texttt{hist} et l'ajout d'un repère. Un histogramme simple est une matrice où chaque colonne est un seul élément, c'est-à-dire une \texttt{hbox} dont chaque sous boîte contient une \texttt{vbox} qui contient un seul élément.
+  Utilisation très simple de \texttt{simple} pour trois valeurs. La construction de cet histogramme nécessite un appel à la fonction \texttt{hist} et l'ajout d'un repère. Un histogramme simple est une matrice où chaque colonne est un seul élément, c'est-à-dire une \texttt{hbox} dont chaque sous boîte contient une \texttt{vbox} qui contient un seul élément.
 \end{minipage}
 \begin{minipage}{0.5\linewidth}
   \begin{center}
@@ -217,8 +217,6 @@ contient des listes de nombres flottants, chacune étant un histogramme.
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
     let hist2 = Hist.compare
-    ~width:(bp 100.)
-    ~height:(bp 200.)
     [[1.;5.;6.;5.;3.];
       [1.;2.;3.;6.;-1.]]
   \end{alltt}
@@ -304,15 +302,13 @@ Il est possible de faire des histogrammes plus personnalisés, mais toujours de 
     Picture.rotate 25. (Picture.tex s) in
     Hist.stack
     ~vlabel
-    ~width:(bp 100.)
-    ~height:(bp 200.)
     ~perspective:true 
     ~padding:(bp 15.)
     ~fill:[lightred;lightblue;
       lightyellow;lightgreen]
     ~histlabel:(`Center, Hist.Values)
-    ~hlabel:[rot "first";
-      rot "second";rot "third" ]
+    ~vcaption:(Picture.tex "Dollars")
+    ~hlabel:[rot "2007";rot "2008";rot "2009"]
     [[4.;5.;5.;]; [8.;3.;1.]; [2.;8.;1.;4.]]
   \end{alltt}
 \end{minipage}
@@ -741,7 +737,7 @@ Lors d'un rafraîchissement, le programme va écraser le fichier \texttt{fig.edi
 Les modules de ce TER ont tous été élaborés dans le but d'être ajoutés à \mlpost\ comme des modules \og haut niveau \fg\ à part entière. Nous avons respecté l'homogénéité de la bibliothèque au niveau des arguments optionnels (ex: dans tous les modules, \texttt{?fill} est l'argument remplissant l'élément de la couleur spécifiée), et au niveau de la documentation, rendant nos modules simples d'utilisation.
 
 Nous avons effectué de nombreux tests pour nous assurer qu'après notre TER, les utilisateurs et les développeurs n'auraient pas à débugger. Le code est écrit assez proprement, et les fonctions récurcives sont terminales si possible.
-Les modules sont opérationnels, mais peuvent ainsi être modifiés et complétés si nécessaire.
+Les modules sont opérationnels, mais peuvent ainsi être modifiés et complétés si nécessaire. Nos modules sont intégrés à \mlpost, et ils seront disponibles avec la prochaine version de \mlpost.
 
 L'interface graphique n'a pu être terminée par faute de temps, et il demeure encore de nombreux aspects à travailler au niveau du canvas, du zoom, et de l'importation de figure.
 
