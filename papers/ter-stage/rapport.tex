@@ -479,18 +479,18 @@ Exemples d'utilisations de \texttt{smart\_path} :
 \begin{minipage}{0.5\linewidth}
   \begin{alltt}
     let path2 = 
-    let p = Path.smart_path 
+  let p = Path.smart_path 
+    [Right;Down;Left;Down(* ;Right;Down;Left;Down;Right *)]
     ~style:jLine
-    [Rightn(bp 25.);Down;Left;Down]
     (Point.pt (bp 0.,bp 0.)) 
-    (Point.pt (bp 0.,bp (-100.)))
+    (Point.pt (bp 0.,bp (-30.)))
   in
   Command.draw_arrow p
   \end{alltt}
 \end{minipage}
 \begin{minipage}{0.5\linewidth}
 \begin{center}
-\includegraphics[scale=0.8]{path2.mps}
+\includegraphics[scale=1.5]{path2.mps}
 \end{center}
 \end{minipage}
 
