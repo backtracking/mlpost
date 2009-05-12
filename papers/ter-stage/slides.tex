@@ -7,7 +7,7 @@
 \usetheme{Madrid}
 
 \title{Extension de la bibliothèque Mlpost}
-\author{}
+\author{J. Robert - G. Von Tokarski}
 \date{15 mai 2009}
 
 \begin{document}
@@ -16,28 +16,174 @@
   \maketitle
 \end{frame}
 
+\section*{Sommaire}
 \begin{frame}
-  \frametitle{Titre}
+  \tableofcontents
+\end{frame}
 
+\section{MLPost}
+\begin{frame}{Introduction à MLPost}
+\end{frame}
+
+\begin{frame}{Exemple de MLPost}
+\end{frame}
+
+\section{Notre TER}
+\begin{frame}{Objectifs}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Nos modules}
+  \begin{itemize}
+    \item<1-> Hist
+    \item<2-> Radar
+    \item<3-> Path
+    \item<4-> Tree
+    \item<5-> Legend
+  \end{itemize}
+\end{frame}
+
+\section{Nos modules}
+\subsection{Hist}
+\subsubsection{Simple}
+\begin{frame}{Histogramme simple}
+  
+\end{frame}
+
+\begin{frame}{Exemple}
   \begin{columns}
-    \column{0.5\textwidth}
-    qdqd kjhqd jkqd kjhqdkj
-
-    \begin{center}
-      \includegraphics{simple_block.mps}
-    \end{center}
-    hqd lk kljsqdlkqdlk
-
-    \column{0.5\textwidth}
-    deuxième colonne
-
+    \column{0.5\linewidth}
     \begin{alltt}
-      let f x = x+1
-
-      let g x = x
+      let hist1 = Hist.simple
+      \textasciitilde width:(bp 100.)
+      \textasciitilde height:(bp 200.)
+      [3.;1.;6.]
     \end{alltt}
+    \column{0.5\linewidth}
+    \begin{center}
+      \includegraphics[scale=0.7]{hist1.mps}
+    \end{center}
+  \end{columns}
+    
+\end{frame}
+
+\subsubsection{Comparatif}
+\begin{frame}{Histogramme comparatif}
+\end{frame}
+
+\begin{frame}{Exemple}
+  \begin{columns}
+    \column{0.5\linewidth}
+    \begin{alltt}
+      let hist2 = 
+
+      Hist.compare
+      
+      \textasciitilde width:(bp 100.)
+      
+      \textasciitilde height:(bp 200.)
+      [[1.;5.;6.;5.;3.];
+      [1.;2.;3.;6.;-1.]]
+    \end{alltt}
+    \column{0.5\linewidth}
+    \begin{center}
+      \includegraphics[scale=0.8]{hist2.mps}
+    \end{center}
   \end{columns}
 \end{frame}
+
+\subsubsection{Cumulatif}
+\begin{frame}{Histogramme cumulatif}
+\end{frame}
+
+\begin{frame}{Exemple}
+  \begin{columns}
+    \column{0.5\linewidth}
+    \begin{alltt}
+      let hist3 =
+
+      let vlabel \_ \_ = None in
+
+      Hist.stack
+ 
+      \textasciitilde vlabel
+
+      \textasciitilde fill:[lightred;lightblue;
+      lightyellow;lightgreen]
+
+      [[4.;5.;5.;]; [8.;3.;1.]; [2.;8.;1.;4.];
+      [1.5;3.5];[2.;2.;7.;1.]]
+    \end{alltt}
+    \column{0.5\linewidth}
+    \begin{center}
+      \includegraphics[scale=0.4]{hist3.mps}
+    \end{center}
+  \end{columns}
+\end{frame}
+
+\subsubsection{Exemple complexe}
+\begin{frame}{Exemple complexe}
+\end{frame}
+
+\subsection{Radar}
+\subsubsection{Cumulatif}
+\begin{frame}{Radar cumulatif}
+\end{frame}
+
+\begin{frame}{Exemple}
+\end{frame}
+
+\subsubsection{Comparatif}
+\begin{frame}{Radar comparatif}
+\end{frame}
+
+\begin{frame}{Exemple}
+\end{frame}
+
+\subsection{Path}
+\begin{frame}{Path}
+\end{frame}
+
+\begin{frame}{Exemple}
+\end{frame}
+
+\subsection{Tree}
+\begin{frame}{Tree}
+\end{frame}
+
+\begin{frame}{Exemple}
+\end{frame}
+
+\subsection{Legend}
+\begin{frame}{Legend}
+\end{frame}
+
+\begin{frame}{Exemple}
+\end{frame}
+
+\section{GMLPost}
+\begin{frame}{GMLPost}
+\end{frame}
+
+  % \begin{columns}
+%     \column{0.5\textwidth}
+%     qdqd kjhqd jkqd kjhqdkj
+
+%     \begin{center}
+%       \includegraphics{simple_block.mps}
+%     \end{center}
+%     hqd lk kljsqdlkqdlk
+
+%     \column{0.5\textwidth}
+%     deuxième colonne
+
+%     \begin{alltt}
+%       let f x = x+1
+
+%       let g x = x
+%     \end{alltt}
+%   \end{columns}
+
 
 \end{document}
 
