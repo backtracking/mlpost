@@ -84,7 +84,7 @@ let hist3 =
     
 let hist5 =
   let vlabel _ _ = None in
-  let rot s = Picture.rotate 25. (Picture.tex ("\\large{"^s^"}")) in
+  let rot s = Picture.rotate 25. (Picture.tex s) in
   Hist.stack
     ~vlabel
     ~width:(bp 100.)
@@ -92,7 +92,8 @@ let hist5 =
     ~perspective:true ~padding:(bp 15.)
     ~fill:[lightred;lightblue;lightyellow;lightgreen]
     ~histlabel:(`Center, Hist.Values)
-    ~hlabel:[rot "first";rot "second";rot "third" ]
+    ~vcaption:(Picture.tex "Dollars")
+    ~hlabel:[rot "2007";rot "2008";rot "2009"]
     [[4.;5.;5.;]; [8.;3.;1.]; [2.;8.;1.;4.]]
     
 
@@ -106,7 +107,8 @@ let hist4 =
     ~histlabel:(`Top, Hist.User pics)
     ~hcaption:(Picture.tex "Year")
     [4.5;5.0;6.2;8.;7.2;6.1]
-
+    
+    
 
 (***************** Radars ******************)
 
