@@ -32,13 +32,13 @@ val add_end_line : path -> point -> path
 val reverse : path -> path
   (** reverse p return the path p reversed *)
   
-val union : path -> path -> path
+(*val union : path -> path -> path
   (** union p1 p2 return the union of path p1 and p2. [min_abscissa p1;max_abscissa p1] 
       are points of p1, ]max_abscissa p1;max_abscissa p1+max_abscissa p2-min_abscissa p2]
       are points of p2 *)
 
 val union_conv : path -> path -> (abscissa -> abscissa)
-  
+*)
 val one_intersection : path -> path -> (abscissa * abscissa)
 
 val intersection : path -> path -> (abscissa * abscissa) list

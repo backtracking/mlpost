@@ -189,9 +189,24 @@ case $OCAMLVERSION in
         echo "Your ocaml is too old. I can't compile the backend cairo without ocamlbuild"
         MAKEFILE=simple.Makefile;;
   *)
-        OCAMLBUILD=yes
-        echo "ocamlbuild ok"
-        MAKEFILE=ocamlbuild.Makefile;;
+        AC_CHECK_PROG(OCAMLBUILD,ocamlbuild,yes,no)
+        if test "$OCAMLBUILD" == "yes"; then
+           OCAMLBUILDLIB=$(ocamlbuild -where)
+           if test "$OCAMLBUILDLIB" != "${OCAMLLIB}/ocamlbuild"; then
+              OCAMLBUILD=no
+              echo "ocamlbuild present but your ocamlbuild is not compatible with your ocamlc:"
+              echo "ocamlfind : $OCAMLFINDLIB, ocamlc : $OCAMLLIB"
+              MAKEFILE=simple.Makefile
+           else
+              echo "ocamlbuild ok"
+              OCAMLBUILD=yes
+              MAKEFILE=ocamlbuild.Makefile
+           fi
+        else
+           OCAMLBUILD=no
+           echo "With your version of ocaml you should have ocamlbuild in your path"
+           MAKEFILE=simple.Makefile
+        fi;;
 esac
 
 # checking for mlcairo

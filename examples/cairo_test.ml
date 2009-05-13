@@ -57,13 +57,18 @@ let labels2 =
 
 (*let circle = seq [ draw (MetaPath.cycle ~style:jCurve (MetaPath.path ~style:jCurve (w0::w1::w2::w3::[])));labels2]*)
 
-let circle = draw (Path.halfcircle)
+let circle = seq [draw (Path.scale (bp 100.) Path.halfcircle);draw (Path.scale (bp 50.) Path.quartercircle)]
 
 let _ = 
-  List.iter (fun (name,fig) -> Cairost.emit_pdf (name^".pdf") fig;Metapost.emit name fig)
+  List.iter (fun (name,fig) -> Cairost.emit_pdf (name^".pdf") fig; Metapost.emit name fig)
   [ (*"other27", other27;*)
-    (*"handbook3", handbook3;
+    "handbook3", handbook3;
     "ribbon", ribbon;
-    "test", test;*)
+    "test", test;
     "circle", circle;
   ]
+
+let _ =
+  let north_east = Picture.north_east (Picture.make circle) in
+  let x,y = Point.xpart north_east, Point.ypart north_east in
+  Format.printf "@.north_east of circle : (%f,%f)@." (Cairost.float_of_num x) (Cairost.float_of_num y)

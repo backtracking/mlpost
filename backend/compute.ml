@@ -45,14 +45,14 @@ let middle x y = (x/.2.)+.(y/.2.)
 let point_of_position ecart
   ({ P.x = xmin; y = ymin}, { P.x = xmax; y = ymax}) = 
     function
-      | `Top -> {P.x=middle xmin xmax; y=ymin-.ecart}
-      | `Bot -> {P.x=middle xmin xmax; y=ymax+.ecart}
-      | `Left -> {P.x=xmax+.ecart; y=middle ymin ymax}
-      | `Right -> {P.x=xmin-.ecart; y=middle ymin ymax}
-      | `Upleft -> {P.x=xmax+.ecart;y=ymin-.ecart}
-      | `Upright -> {P.x=xmin-.ecart;y=ymin-.ecart}
-      | `Lowleft -> {P.x=xmax+.ecart;y=ymax+.ecart}
-      | `Lowright -> {P.x=xmin-.ecart;y=ymax+.ecart}
+      | `Top -> {P.x=middle xmin xmax; y=ymax+.ecart}
+      | `Bot -> {P.x=middle xmin xmax; y=ymin-.ecart}
+      | `Left -> {P.x=xmin-.ecart; y=middle ymin ymax}
+      | `Right -> {P.x=xmax+.ecart; y=middle ymin ymax}
+      | `Upleft -> {P.x=xmin-.ecart;y=ymax+.ecart}
+      | `Upright -> {P.x=xmax+.ecart;y=ymax+.ecart}
+      | `Lowleft -> {P.x=xmin-.ecart;y=ymin-.ecart}
+      | `Lowright -> {P.x=xmax+.ecart;y=ymin-.ecart}
       | `Center -> {P.x = middle xmin xmax; P.y = middle ymin ymax }
 
 let num_memoize = Hashtbl.create 50

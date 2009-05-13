@@ -1,3 +1,5 @@
+let diameter_of_a_dot = 5.
+
 open Types
 open Point_lib
 exception Not_implemented of string
@@ -49,7 +51,7 @@ let stroke_path p c pen d = {fcl= Stroke_path (p,c,pen,d);
                              fb = Spline_lib.Epure.of_path p;
                              fi = IntEmpty}
 
-let draw_point p = stroke_path (Spline_lib.create p p p p) None None None
+let draw_point p = fill_path (Spline_lib.Approx.fullcircle diameter_of_a_dot) None
 
 let clip p path = {fcl= Clip (p.fcl,path);
                    fb = Spline_lib.Epure.of_path path; 

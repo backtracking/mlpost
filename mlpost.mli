@@ -1885,6 +1885,8 @@ module Cairost : sig
 
   val supported : bool
 
+  val float_of_num : Num.t -> float
+
   val emit_pdf : string -> Command.t -> unit
   val emit_ps : string -> Command.t -> unit
   val emit_png : string -> Command.t -> unit
