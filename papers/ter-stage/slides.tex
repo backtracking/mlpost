@@ -26,7 +26,7 @@
 \end{frame}
 
 \begin{frame}{Problématique}
-  Comment réaliser des figures
+  Pour l'utilisateur de \LaTeX, comment réaliser des figures
   \begin{itemize}
   \item nécessitant des calculs ?
   \begin{center}
@@ -75,26 +75,12 @@
 
 \end{frame}
 
-% \begin{frame}
-%   \frametitle{Nos contributions}
-  
-%   \begin{itemize}
-%     \item Nouveaux modules
-%       \begin{enumerate}
-%       \item \texttt{Hist}
-%       \item \texttt{Radar}
-%       \end{enumerate}
-
-%     \item Améliorations
-%   \end{itemize}
-% \end{frame}
-
 
 \begin{frame}[fragile]{Histogramme Simple}
   \begin{columns}
     \column{0.5\linewidth}
     \begin{verbatim}
-   let hist1 = 
+   let hist = 
      Hist.simple [3.;1.;6.]
     \end{verbatim}
     \column{0.5\linewidth}
@@ -125,35 +111,56 @@
 \begin{frame}{API}
   \begin{center}
     \begin{alltt}
-      Hist.f : arguments optionnels -> valeurs -> dessin
+      \color{red}hist :
+      \color{blue}
+      ?width:Num.t ->
+
+      ?height:Num.t ->
+
+      ?padding:Num.t ->
+
+      ?fill:Color.t list ->
+
+      ?perspective: bool ->
+
+      ?hcaption:Picture.t ->
+
+      ?vcaption:Picture.t ->
+
+      ?histlabel:[> `Bot | `Center | `Top ] 
+      
+      * Picture.t list labels ->
+
+      ?vlabel:Plot.labels ->
+      
+      ?hlabel:Picture.t list -> 
+      
+      \color{red}données -> dessin
     \end{alltt}
-  \end{center}
-
-  \begin{columns}
-    \column{0.5\linewidth}
-    \begin{center}
-      \begin{alltt}
-        ?width:Num.t
-
-        ?height:Num.t
-
-        ?padding:Num.t
-
-        ?fill:Color.t list
-
-        ?perspective: bool
-
-        ?hcaption:Picture.t
-
-        ?vcaption:Picture.t
-
-        ?histlabel:[> `Bot | `Center | `Top ] * Picture.t labels
-
-        ?vlabel:Plot.labels
-
-        ?hlabel:Picture.t list 
-      \end{alltt}
     \end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Exemple d'utilisation}
+\begin{columns}
+  \column{0.5\linewidth}
+  \begin{center}\footnotesize{
+\begin{verbatim}
+  let hist =
+    let vlabel _ _ = None in
+    let rot s = Picture.rotate 25. 
+      (Picture.tex s) in
+    Hist.stack
+    ~vlabel
+    ~perspective:true 
+    ~padding:(bp 15.)
+    ~fill:[lightred;lightblue;
+      lightyellow;lightgreen]
+    ~histlabel:(`Center, Hist.Values)
+    ~vcaption:(Picture.tex "Dollars")
+    ~hlabel:[rot "2007";rot "2008";rot "2009"]
+    [[4.;5.;5.;]; [8.;3.;1.]; [2.;8.;1.;4.]]
+\end{verbatim}}
+      \end{center}
     
     \column{0.5\linewidth}
     \begin{center}
@@ -163,17 +170,26 @@
 \end{frame}
     
 \begin{frame}{Structure du code}
-  \begin{center}
-    Code factorisé: les 3 types d'histogrammes sont principalement construits à partir de la même fonction.
-  \end{center}
+  \begin{itemize}
+  \item Code factorisé: les 3 types d'histogrammes sont principalement construits à partir de la même fonction.
+  
+  \bigskip
+  \item Cette fonction générale prend en paramètre une liste de liste et construit un histogramme cumulatif.
+  
+  \bigskip
+  \item Les histogrammes simples et comparatifs sont des cas particuliers.
+  \end{itemize}
 \end{frame}
 
 
 \begin{frame}{Legend}
-  \begin{center}
-    \includegraphics% [scale=0.7]
-    {legend1.mps}
-  \end{center}
+  \begin{columns}
+    \column{0.8 \linewidth}
+    \begin{center}
+      \includegraphics {hist3.mps}
+    \end{center}
+    \column{0.2 \linewidth} \includegraphics [scale=0.8]{legend1.mps}
+  \end{columns}
 \end{frame}
 
 \begin{frame}{Radar comparatif}
@@ -220,16 +236,19 @@
 
 \begin{frame}[fragile]{Path}
   \begin{columns}
-    \column{0.4 \linewidth}
-    \includegraphics {path1.mps}
+   % \column{0.4 \linewidth}
+    
     \bigskip
     \bigskip
-    \includegraphics {path2.mps}
-    \column{0.6 \linewidth}
+    \column{0.8 \linewidth}
+    \begin{center}
     \includegraphics {path5.mps}
     \bigskip
-    \bigskip
+    
     \includegraphics {path4.mps}
+  \end{center}
+    \column{0.2 \linewidth}
+    \includegraphics {path1.mps}
   \end{columns}
 \end{frame}
 
@@ -264,10 +283,18 @@ val smart_path : ?style:joint -> orientation list
 \end{frame}
 
 \begin{frame}{Tree}
-  \begin{center}
-    \includegraphics [scale=1.2]
-    {tree2.mps}
-  \end{center}
+  \begin{columns}
+    \column{0.5\textwidth}
+    \begin{center}
+      \includegraphics [scale=1.2]
+      {tree2simple.mps}
+    \end{center}
+    \column{0.5\textwidth}
+    \begin{center}
+      \includegraphics [scale=1.2]
+      {tree2.mps}
+    \end{center}
+  \end{columns}
 \end{frame}
 
 \begin{frame}[fragile]{API}
@@ -293,11 +320,59 @@ val smart_path : ?style:joint -> orientation list
     \end{columns}
 \end{frame}
 
-\begin{frame}{GMLPost}
+\begin{frame}{GMlpost - Motivations}
+  \begin{itemize}
+  \item<1-> \mlpost\ permet de fabriquer des figures jolies et personnalisées.
+  
+  \bigskip
+  
+  Or il est souvent nécessaire de recompiler plusieurs fois la figure en changeant certaines valeurs pour se rapprocher du rendu souhaité. 
+
+\bigskip
+
+  \item<2->  \gmlpost\ est une interface graphique de \mlpost.
+
+    \bigskip
+
+    \gmlpost\ permet d'éditer interactivement des valeurs et des points choisis par l'utilisateur.
+
+  \end{itemize}
 \end{frame}
 
-  
+\begin{frame}{Screenshot}
+\includegraphics[scale=0.4]{screen2.png}
+\end{frame}
 
+
+\begin{frame}{Solution technique}
+  \begin{columns}
+    \column{0.5 \linewidth}
+    \begin{center}
+      \includegraphics [scale=0.7]{interface1.mps}
+    \end{center}
+    \column{0.5 \linewidth}
+    \begin{center}
+      \includegraphics[scale=0.7]{interface2.mps}
+    \end{center}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Conclusion}
+  \begin{itemize}
+  \item contribution significative à \mlpost
+    \begin{itemize}
+    \item<1-> utilisée dès à présent dans l'équipe ProVal
+    \item<2-> sera distribuée avec la prochaine version de \mlpost
+    \end{itemize}
+
+    \bigskip
+  \item sur un plan personnel
+    \begin{itemize}
+      \item<3-> utilisation différente d'Objective Caml
+      \item<4-> découverte de lablgkt2
+    \end{itemize}
+  \end{itemize}
+\end{frame}
 
 \end{document}
 

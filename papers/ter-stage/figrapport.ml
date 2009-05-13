@@ -199,6 +199,14 @@ let tree2 =
 	       node "3" [node "6" [leaf "9";leaf "10";leaf "11";leaf "12"]; 
 			 leaf "7" ]])
 
+let tree2simple =
+  let node s = Tree.Simple.node ~ls:(bp 18.) ~arrow_style:Undirected ~edge_style:HalfSquare (Box.tex s) in
+  let leaf s = Tree.Simple.leaf (Box.tex s) in
+  Tree.Simple.draw 
+    (node "1" [node "2" [node "4" [node "8" [leaf "13"; leaf "14"]]; leaf "5"]; 
+	       node "3" [node "6" [leaf "9";leaf "10";leaf "11";leaf "12"]; 
+			 leaf "7" ]])
+
 
 let leaf s = Tree.leaf (Box.set_stroke Color.black (Box.tex s))
 let node s l = Tree.node  
@@ -229,6 +237,16 @@ let node s l = Tree.node
   (Box.tex s) l
 
 let tree5 = Tree.draw (node "$\\alpha$" [leaf "$\\gamma$";leaf "$\\beta$"])
+
+let leaf s = Tree.leaf (Box.set_stroke Color.black (Box.tex s))
+let node s l = Tree.node  
+  ~arrow_style:Directed 
+  ~edge_style:HalfSquare 
+  ~ls:(bp 30.)
+  ~cs:(bp 30.)
+  (Box.set_stroke Color.black (Box.tex s)) l
+
+let tree6 = Tree.draw (node "Combined A B C" [node "Combined A B" [leaf "A";leaf "B"];leaf "C"])
 
 (***************** GMlpost ******************)
 
@@ -298,7 +316,8 @@ let legend1 =
   let l = Legend.legend
     ~ensstroke:Color.black
     ~colstroke:Color.black
-    [(Color.lightgreen,"2009");(Color.lightyellow,"2010");(Color.lightred,"2011")]
+    [(Color.lightgreen,"vert");(Color.lightyellow,"jaune");(Color.lightred,"rouge");
+    Color.lightblue,"bleu"]
   in Command.draw_pic l
 
 
@@ -427,9 +446,11 @@ let _ =
     "path5",path5;
     "tree1",tree1;
     "tree2",tree2;
+    "tree2simple",tree2simple;
     "tree3",tree3;
     "tree4",tree4;
     "tree5",tree5;
+    "tree6",tree6;
     "traffic",traffic;
     "rubik",rubik;
     "legend1",legend1;
