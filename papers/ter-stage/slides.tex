@@ -42,13 +42,25 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]\frametitle{\meta\ et \mlpost}
-  \meta\ est un langage (de programmation) pour construire des dessins incluant des éléments \LaTeX
+\begin{frame}[fragile]\frametitle{Metapost et MLpost}
+  \meta\ est un langage (de programmation) pour construire des dessins incluant des éléments \LaTeX.
 
   \bigskip
-  \mlpost\ est une interface Objective Caml de \meta
+  \mlpost\ est une interface Objective Caml de \meta.
 
+  \mlpost\ est développé dans l'équipe ProVal, et est disponible en téléchargement. 
   \bigskip
+
+  Avantages d'une interface Objective Caml par rapport à \meta:
+  \begin{itemize}
+  \item langage fonctionnel
+  \item typage fort
+  \item messages d'erreurs plus clairs
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Exemple de MLpost}  
   \begin{columns}
     \column{0.7\textwidth}\small
     \begin{verbatim}
@@ -65,9 +77,13 @@
 \end{frame}
 
 
-\begin{frame}{Objectif du TER}
-  Ajouter/Améliorer des modules haut niveau de \mlpost
+\begin{frame}{Objectifs du TER}
+  Se familiariser avec l'API.
 
+  Ajouter/Améliorer des modules haut niveau de \mlpost.
+
+  Documenter et tester ces modules.
+  
   \vfill
   \begin{center}
     \includegraphics{architecture.mps}
@@ -75,6 +91,11 @@
 
 \end{frame}
 
+\begin{frame}{TER Stage}
+  \begin{center}
+    \Huge{Nos modules}
+  \end{center}
+\end{frame}
 
 \begin{frame}[fragile]{Histogramme Simple}
   \begin{columns}
@@ -109,35 +130,7 @@
 
 
 \begin{frame}{API}
-  \begin{center}
-    \begin{alltt}
-      \color{red}hist :
-      \color{blue}
-      ?width:Num.t ->
-
-      ?height:Num.t ->
-
-      ?padding:Num.t ->
-
-      ?fill:Color.t list ->
-
-      ?perspective: bool ->
-
-      ?hcaption:Picture.t ->
-
-      ?vcaption:Picture.t ->
-
-      ?histlabel:[> `Bot | `Center | `Top ] 
-      
-      * Picture.t list labels ->
-
-      ?vlabel:Plot.labels ->
-      
-      ?hlabel:Picture.t list -> 
-      
-      \color{red}données -> dessin
-    \end{alltt}
-    \end{center}
+  \includegraphics[scale=0.29]{ocamldoc.png}
 \end{frame}
 
 \begin{frame}[fragile]{Exemple d'utilisation}
@@ -174,7 +167,7 @@
   \item Code factorisé: les 3 types d'histogrammes sont principalement construits à partir de la même fonction.
   
   \bigskip
-  \item Cette fonction générale prend en paramètre une liste de liste et construit un histogramme cumulatif.
+  \item Cette fonction générale prend en paramètre une liste de listes et construit un histogramme cumulatif.
   
   \bigskip
   \item Les histogrammes simples et comparatifs sont des cas particuliers.
@@ -300,17 +293,10 @@ val smart_path : ?style:joint -> orientation list
 \begin{frame}[fragile]{API}
   \begin{columns}
     \column{0.7 \linewidth}
-  \begin{verbatim}
- val leaf : Box.t -> t
- val node : ?ls:Num.t -> 
-            ?cs:Num.t -> 
-            ?pen:Pen.t -> 
-            ?sep:Num.t ->
-            ?stroke:Color.t -> 
-            ?edge_style:edge_style -> 
-            ?arrow_style:arrow_style -> 
-            Box.t -> t list -> t
-  \end{verbatim}
+    \begin{itemize}
+    \item Utilisation de l'article d'Andrew J. Kennedy: \textit{Drawing Trees}
+    \item Adaptation des algorithmes pour le module
+    \end{itemize}
     \column{0.3 \linewidth}
     \includegraphics[scale=1.5]{tree5.mps}
 
@@ -318,6 +304,12 @@ val smart_path : ?style:joint -> orientation list
     \bigskip
     \includegraphics[scale=1.2]{tree4.mps}
     \end{columns}
+\end{frame}
+
+\begin{frame}{TER Stage}
+  \begin{center}
+    \Huge{GMlpost}
+  \end{center}
 \end{frame}
 
 \begin{frame}{GMlpost - Motivations}
@@ -364,12 +356,12 @@ val smart_path : ?style:joint -> orientation list
     \item<1-> utilisée dès à présent dans l'équipe ProVal
     \item<2-> sera distribuée avec la prochaine version de \mlpost
     \end{itemize}
-
+    
     \bigskip
-  \item sur un plan personnel
+  \item<3-> sur un plan personnel
     \begin{itemize}
-      \item<3-> utilisation différente d'Objective Caml
-      \item<4-> découverte de lablgkt2
+    \item<3-> utilisation différente d'Objective Caml (arguments optionnels, OCamldoc)
+    \item<4-> découverte de lablgtk2
     \end{itemize}
   \end{itemize}
 \end{frame}

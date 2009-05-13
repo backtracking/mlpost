@@ -1710,8 +1710,8 @@ module Hist : sig
     ?hlabel:Picture.t list -> 
     float list -> Command.t
     (** [simple l] draws an histogram from a list [l] of floating-point values.
-	@param width Total width of the histogram (default: 200 bp)
-	@param height Total height for the histogram (default: 450 bp)
+	@param width Total width of the histogram (default: 100 bp)
+	@param height Total height for the histogram (default: 200 bp)
 	@param fill The colors used to draw the successive blocks;
 	  it is used circularly
 	@param padding Horizontal space between two blocks
