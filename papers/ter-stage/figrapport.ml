@@ -69,7 +69,7 @@ let hist1 =
 let hist2 =
   Hist.compare
     [[1.;5.;6.;5.;3.];
-     [1.;2.;3.;6.;-1.]]
+     [1.;2.;3.;6.;1.]]
     
 let hist3 =
   let vlabel _ _ = None in
@@ -129,7 +129,7 @@ let radar2 =
       [6.;5.;2.;1.;1.];
       [1.;7.;2.;4.;5.]]
     in
-    Box.draw (Box.vbox ~padding:(bp 10.) 
+    Box.draw (Box.hbox ~padding:(bp 10.) 
     (List.map (Box.pic ~stroke:None) pics))
 
 
@@ -147,7 +147,7 @@ let path1 =
 
 let path2 = 
   let p = Path.smart_path 
-    [Right;Down;Left;Down(* ;Right;Down;Left;Down;Right *)]
+    [Right;Down;Left;Down]
     ~style:jLine
     (Point.pt (bp 0.,bp 0.)) 
     (Point.pt (bp 0.,bp (-30.)))
@@ -183,12 +183,12 @@ let tree1 =
 
 
 let tree2 =
-  let node s = Tree.node ~arrow_style:Undirected ~edge_style:HalfSquare (Box.tex s) in
+  let node s = Tree.node ~ls:(bp 30.) ~arrow_style:Undirected ~edge_style:HalfSquare (Box.tex s) in
   let leaf s = Tree.leaf (Box.tex s) in
   Tree.draw 
-    (node "1" [node "2" [node "4" [leaf "8"]; leaf "5"]; 
-	       node "3" [node "6" [leaf "9"; node "10" [leaf "12"; leaf "13"]]; 
-			 node "7" [leaf "11"]]])
+    (node "1" [node "2" [node "4" [node "8" [leaf "13"; leaf "14"]]; leaf "5"]; 
+	       node "3" [node "6" [leaf "9";leaf "10";leaf "11";leaf "12"]; 
+			 leaf "7" ]])
 
 
 let leaf s = Tree.leaf (Box.set_stroke Color.black (Box.tex s))
@@ -202,6 +202,24 @@ let treebox = Box.rect (to_box subtree)
 let maintree = node "root" [subtree; leaf "son"; Tree.node treebox [subtree]]
 let tree3 = Tree.draw maintree 
 
+let node s l = Tree.node
+  ~ls:(bp 20.)
+  ~cs:(bp 20.) 
+  ~arrow_style:Directed
+  ~edge_style:Curve
+  (Box.set_stroke Color.black (Box.tex s)) l
+
+let tree4 = Tree.draw (node "A" [leaf "B";leaf "C"])
+
+let leaf s = Tree.leaf (Box.tex s)
+
+let node s l = Tree.node
+  ~sep:(bp 5.)
+  ~arrow_style:Undirected
+  ~edge_style:Straight
+  (Box.tex s) l
+
+let tree5 = Tree.draw (node "$\\alpha$" [leaf "$\\gamma$";leaf "$\\beta$"])
 
 (***************** GMlpost ******************)
 
@@ -268,7 +286,7 @@ let interface2 =
 
 (***************** Legend ******************)
 let legend1 = 
-  let l = Legend.legend 
+  let l = Legend.legend
     [(Color.lightgreen,"2009");(Color.lightyellow,"2010");(Color.lightred,"2011")]
   in Command.draw_pic l
 
@@ -296,10 +314,88 @@ let figford =
     in
     let l = aux [] 0 1 1 1 in
     let pic = Picture.make (Command.seq l) in
-    Picture.scale (Num.bp 30.0) pic
+    Picture.scale (Num.bp 1.5) pic
   in
   (Command.draw_pic (ford 17))
 
+let graph_sqrt =
+  let u = cm 1. in
+  let sk = Plot.mk_skeleton 4 3 u u in
+  let label = Picture.tex "$y=\\sqrt{x+\\frac{1}{2}}$", `Upleft, 3 in
+  let graph = Plot.draw_func ~label (fun x -> sqrt (float x +. 0.5)) sk in
+  seq [graph; Plot.draw_simple_axes "$x$" "$y$" sk]
+
+open Num.Infix
+
+let architecture =
+  let mk_box fill name m = 
+    let m = "{\\tt " ^ m ^ "}" in
+    Box.tex ~stroke:(Some Color.black) 
+      ~style:RoundRect ~dx:(bp 5.) ~dy:(bp 5.) ~name ~fill m in
+  let mk_unbox name m = 
+    Box.tex ~style:RoundRect ~stroke:None ~dx:(bp 5.) ~dy:(bp 5.) ~name m in
+    (* les types de base *)
+  let fill = Color.color "salmon" in 
+  let num = mk_box fill "num" "Num" in
+  let point = mk_box fill "point" "Point" in
+  let path = mk_box (Color.lightblue) "path" "Path" in
+  let dots = mk_unbox "dots" "$\\ldots$" in
+  let cmd = mk_box fill "cmd" "Command" in
+  let basictypes = Box.hbox ~padding:(mm 2.) [num; point; path; dots; cmd] in
+    (* compile *)
+  let compile = mk_unbox "compile" "\\tt Compile" in
+  let compile_ext = 
+    let dx = (Box.width basictypes -/ Box.width compile) /./ 2. in
+    Box.hbox ~style:RoundRect ~dx ~fill ~stroke:(Some Color.black) [compile] in
+    (* metapost *)
+  let metapost = mk_unbox "metapost" "\\metapost" in
+  let metapost_ext =
+    let dx = (Box.width basictypes -/ Box.width metapost) /./ 2. in
+      Box.hbox ~name:"mpost_ext" 
+	~style:Rect ~dx ~stroke:(Some Color.black) [metapost] in
+    (* composants avancés *)
+  let fill = Color.color "pink" in 
+  let box_ = mk_box fill "box" "\\phantom{p}Box\\phantom{p}" in
+  let shapes = mk_box fill "shapes" "\\phantom{p}Shapes\\phantom{p}" in
+  let arrows = mk_box fill "arrow" "\\phantom{p}Arrow\\phantom{p}" in
+  let advanced = Box.hbox ~pos:`Bot ~padding:(mm 2.) [box_; shapes; arrows] in
+    (* extensions *)
+  let fill = Color.color "blanched almond" in 
+  let fill2 = Color.lightgreen in 
+  let hist = mk_box fill2 "hist" "\\phantom{g}Hist\\phantom{g}" in
+  let radar = mk_box fill2 "radar" "\\phantom{g}Radar\\phantom{g}" in
+  let tree = mk_box fill2 "tree" "\\phantom{g}Tree\\phantom{g}" in
+  let legend = mk_box fill2 "legend" "\\phantom{g}Legend\\phantom{g}" in
+  let plot = mk_box fill "plot" "\\phantom{g}Plot\\phantom{g}" in
+  let extensions = Box.hbox ~pos:`Bot ~padding:(mm 2.) 
+    [hist; radar; tree; legend; plot] in
+    (* wrapping *)
+  let pyramid = 
+    let pen = Pen.scale (Num.bp 1.0) Pen.square in
+    Box.vbox ~padding:(mm 2.) ~pen
+      ~dx:(bp 5.) ~dy:(bp 5.) ~style:RoundRect ~stroke:(Some Color.black)
+      [extensions; advanced; basictypes; compile_ext; metapost_ext] in
+  let mlpost = mk_unbox "mlpost" "\\tt Mlpost" in
+  let mlpost_ext = 
+    let dx = (Box.width pyramid -/ Box.width mlpost) /./ 2. in 
+      Box.hbox ~dx [mlpost] in
+  let full = Box.vbox ~padding:(mm (-1.)) [mlpost_ext; pyramid] in
+  let _ = Box.set_stroke Color.black (Box.nth 1 full) in
+    (* arrows *)
+  let arrows = 
+    let mp = Box.get "mpost_ext" full in
+      List.map 
+	(fun n -> Helpers.box_label_arrow 
+	   ~outd:(Path.vec Point.down) ~pos:`Bot (Picture.make Command.nop)
+	   (Box.get n full) mp)
+	(* une variante *)
+(*     let mp = Box.get "metapost" full in *)
+(*       List.map  *)
+(* 	(fun n -> Helpers.box_arrow  *)
+(* 	   (Box.get n full) mp) *)
+	["num"; "point"; "path"; "dots"; "cmd"]
+  in
+  seq [seq arrows; Box.draw full]
 
 let _ =
   List.iter (fun (name,fig) -> Metapost.emit name fig)
@@ -320,8 +416,12 @@ let _ =
     "tree1",tree1;
     "tree2",tree2;
     "tree3",tree3;
+    "tree4",tree4;
+    "tree5",tree5;
     "traffic",traffic;
     "rubik",rubik;
     "legend1",legend1;
-    "ford",figford
+    "ford",figford;
+    "graph", graph_sqrt;
+    "architecture",architecture;
   ]

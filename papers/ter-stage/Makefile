@@ -1,5 +1,5 @@
 
-all: rapport.pdf
+all: slides.pdf
 
 PDFLATEX:=pdflatex -interaction="errorstopmode"
 
@@ -16,6 +16,8 @@ wc:
 %.mp: %.ml
 	../../tool.opt -ccopt "-I ../../" -pdf -latex rapport.tex $^
 
+test:
+	../../tool.opt -ccopt "-I ../../" -xpdf -latex slides.tex figrapport.ml
 
 clean:
 	rm -f *~ *.aux *.log *.bbl *.blg *.mps

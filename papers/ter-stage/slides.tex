@@ -4,6 +4,11 @@
 \usepackage[french]{babel}
 \usepackage{url,graphicx,alltt}
 
+\newcommand{\mlpost}{\textsc{Mlpost}}
+\newcommand{\gmlpost}{\textsc{GMlpost}}
+\newcommand{\meta}{\textsc{Metapost}}
+\newcommand{\metapost}{\textsc{Metapost}}
+
 \usetheme{Madrid}
 
 \title{Extension de la bibliothèque Mlpost}
@@ -14,45 +19,84 @@
 
 \begin{frame}
   \maketitle
+
+  \begin{center}
+    TER Stage - Equipe \includegraphics[scale=0.4]{proval.png}
+  \end{center}
 \end{frame}
 
-\section*{Sommaire}
-\begin{frame}
-  \tableofcontents
-\end{frame}
-
-\section{MLPost}
-\begin{frame}{Introduction à MLPost}
-  \includegraphics{ford.mps}
-\end{frame}
-
-\begin{frame}{Exemple de MLPost}
-\end{frame}
-
-\section{Notre TER}
-\begin{frame}{Objectifs}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Nos modules}
+\begin{frame}{Problématique}
+  Comment réaliser des figures
   \begin{itemize}
-    \item Hist
-    
+  \item nécessitant des calculs ?
+  \begin{center}
+    \includegraphics[scale=0.6]{ford.mps}
+  \end{center}
+
+  \bigskip
+  \item incluant des éléments \LaTeX\ arbitraires ?
+    \bigskip
+    \begin{center}
+      \includegraphics[scale=0.8]{graph.mps}
+    \end{center}
   \end{itemize}
 \end{frame}
 
-\section{Nos modules}
-\subsection{Hist}
-\subsubsection{Simple}
+\begin{frame}[fragile]\frametitle{\meta\ et \mlpost}
+  \meta\ est un langage (de programmation) pour construire des dessins incluant des éléments \LaTeX
+
+  \bigskip
+  \mlpost\ est une interface Objective Caml de \meta
+
+  \bigskip
+  \begin{columns}
+    \column{0.7\textwidth}\small
+    \begin{verbatim}
+  let simple_block =
+    let b = Box.hblock ~pos:`Bot 
+    [Box.tex "a"; Box.tex "A"; Box.tex "1"; 
+     Box.tex "$\\pi$"] 
+    in
+    Box.draw b
+    \end{verbatim}
+    \column{0.3\textwidth}
+    \includegraphics{simple_block.mps}
+  \end{columns}
+\end{frame}
 
 
-\begin{frame}{Histogramme Simple}
+\begin{frame}{Objectif du TER}
+  Ajouter/Améliorer des modules haut niveau de \mlpost
+
+  \vfill
+  \begin{center}
+    \includegraphics{architecture.mps}
+  \end{center}
+
+\end{frame}
+
+% \begin{frame}
+%   \frametitle{Nos contributions}
+  
+%   \begin{itemize}
+%     \item Nouveaux modules
+%       \begin{enumerate}
+%       \item \texttt{Hist}
+%       \item \texttt{Radar}
+%       \end{enumerate}
+
+%     \item Améliorations
+%   \end{itemize}
+% \end{frame}
+
+
+\begin{frame}[fragile]{Histogramme Simple}
   \begin{columns}
     \column{0.5\linewidth}
-    \begin{alltt}
-      let hist1 = Hist.simple
-      [3.;1.;6.]
-    \end{alltt}
+    \begin{verbatim}
+   let hist1 = 
+     Hist.simple [3.;1.;6.]
+    \end{verbatim}
     \column{0.5\linewidth}
     \begin{center}
       \includegraphics[scale=0.7]{hist1.mps}
@@ -61,8 +105,7 @@
     
 \end{frame}
 
-\subsubsection{Comparatif et Cumulatif}
-\begin{frame}{Histogrammes Comparatif et Cumulatif}
+\begin{frame}{Histogrammes comparatifs et cumulatifs}
   \begin{columns}
     \column{0.5\linewidth}
     \begin{center}
@@ -81,6 +124,12 @@
 
 \subsubsection{API}
 \begin{frame}{API}
+  \begin{center}
+    \begin{alltt}
+      Hist.f : arguments optionnels -> valeurs -> dessin
+    \end{alltt}
+  \end{center}
+
   \begin{columns}
     \column{0.5\linewidth}
     \begin{center}
@@ -114,71 +163,126 @@
   \end{columns}
 \end{frame}
     
-\subsection{Legend}
+\begin{frame}{Structure du code}
+  \begin{center}
+    Code factorisé: les 3 types d'histogrammes sont principalement construits à partir de la même fonction.
+  \end{center}
+\end{frame}
+
+
 \begin{frame}{Legend}
   \begin{center}
-    \includegraphics[scale=0.7]{hist1.mps}
+    \includegraphics% [scale=0.7]
+    {legend1.mps}
   \end{center}
+\end{frame}
+
+
+\begin{frame}[fragile]{Radar cumulatif}
   \begin{columns}
-    \column{0.6\linewidth}
-    \begin{alltt}
-      \footnotesize{let hist5 =
-      
-      let vlabel \_ \_ = None in
-      
-      let rot s = 
-
-      Picture.rotate 25. (Picture.tex s) in
-      
-      Hist.stack
-      
-      \textasciitilde vlabel 
-
-      \textasciitilde width:(bp 100.) \textasciitilde height:(bp 200.)
-      
-      \textasciitilde perspective:true ~padding:(bp 15.)
-      
-      \textasciitilde fill:[lightred;lightblue;
-
-      lightyellow;lightgreen]
-      
-      \textasciitilde histlabel:(`Center, Hist.Values)
-      
-      \textasciitilde vcaption:(Picture.tex "Dollars")
-
-      \textasciitilde hlabel:[rot "2007";rot "2008";rot "2009"]
-      [[4.;5.;5.;]; [8.;3.;1.]; [2.;8.;1.;4.]]}
-    \end{alltt}
-    \column{0.4\linewidth}
-    \begin{center}
-      \includegraphics[scale=0.8]{hist5.mps}
-    \end{center}
+    \column{0.5 \linewidth}
+\begin{verbatim}
+  val stack :
+    ?radius:Num.t ->
+    ?color:Color.t list ->
+    ?pen:Pen.t ->
+    ?style:Dash.t list ->
+    ?ticks:float ->
+    ?label:string list ->
+    ?scale:float list ->
+    float list list -> Picture.t
+\end{verbatim}
+    \column{0.5 \linewidth}\includegraphics [scale=0.6]{radar1.mps}
   \end{columns}
 \end{frame}
 
-\subsection{Radar}
-\subsubsection{Cumulatif}
-\begin{frame}{Radar cumulatif}
-\end{frame}
 
-
-\subsubsection{Comparatif}
 \begin{frame}{Radar comparatif}
+  \begin{center}
+    \includegraphics [scale=0.6]
+    {radar2.mps}
+  \end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Radar comparatif}
+\begin{alltt}
+  val compare :
+    ?radius:Num.t ->
+    ?color:Color.t list ->
+    ?pen:Pen.t ->
+    \color{red}?fill:bool ->
+\color{black}    ?style:Dash.t list ->
+    ?ticks:float ->
+    ?label:string list ->
+    ?scale:float list ->
+    float list list -> Picture.t \color{red}list
+\end{alltt}
 \end{frame}
 
 
-\subsection{Path}
-\begin{frame}{Path}
+\begin{frame}[fragile]{Path}
+  \begin{columns}
+    \column{0.6 \linewidth}
+\begin{verbatim}
+type orientation = 
+  | Up | Down | Left | Right
+  | Upn of Num.t | Downn of Num.t 
+  | Leftn of Num.t | Rightn of Num.t
+  
+val smart_path : ?style:joint -> orientation list 
+  -> Point.t -> Point.t -> t
+\end{verbatim}
+\column{0.4 \linewidth}
+\includegraphics {path4.mps}
+\end{columns}
 \end{frame}
 
+\begin{frame}[fragile]{Path}
+  \begin{columns}
+    \column{0.7 \linewidth}
+\begin{verbatim}
+ let path = smart_path 
+    ~style:jLine
+    [Right;Down;Left;Down]
+    (Point.pt (bp 0.,bp 0.)) 
+    (Point.pt (bp 0.,bp (-30.)))
+\end{verbatim}
+    \column{0.3 \linewidth}
+    \includegraphics [scale=1.2]
+    {path2.mps}
+\end{columns}
+\end{frame}
 
-\subsection{Tree}
 \begin{frame}{Tree}
+  \begin{center}
+    \includegraphics [scale=1.2]
+    {tree2.mps}
+  \end{center}
 \end{frame}
 
+\begin{frame}[fragile]{API}
+  \begin{columns}
+    \column{0.7 \linewidth}
+  \begin{verbatim}
+ val leaf : Box.t -> t
+ val node : ?ls:Num.t -> 
+            ?cs:Num.t -> 
+            ?pen:Pen.t -> 
+            ?sep:Num.t ->
+            ?stroke:Color.t -> 
+            ?edge_style:edge_style -> 
+            ?arrow_style:arrow_style -> 
+            Box.t -> t list -> t
+  \end{verbatim}
+    \column{0.3 \linewidth}
+    \includegraphics[scale=1.5]{tree5.mps}
 
+    \bigskip
+    \bigskip
+    \includegraphics[scale=1.2]{tree4.mps}
+    \end{columns}
+\end{frame}
 
-\section{GMLPost}
 \begin{frame}{GMLPost}
 \end{frame}
 
