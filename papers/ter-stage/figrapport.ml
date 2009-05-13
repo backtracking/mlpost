@@ -171,6 +171,15 @@ let path4 =
   in
   Command.draw p
 
+let path5 = 
+  let p = Path.smart_path 
+    ~style:jLine
+    [Rightn(bp 30.);Upn (bp 25.);Rightn(bp 80.);Down;Rightn( bp 30.)]
+    (Point.pt (bp (-50.),bp 0.)) 
+    (Point.pt (bp 90.,bp 0.))
+  in
+  (Command.draw_arrow p)++(Box.draw (Box.set_stroke Color.black (Box.tex "Obstacle")))
+
  
 (***************** Trees ******************)
 
@@ -287,6 +296,8 @@ let interface2 =
 (***************** Legend ******************)
 let legend1 = 
   let l = Legend.legend
+    ~ensstroke:Color.black
+    ~colstroke:Color.black
     [(Color.lightgreen,"2009");(Color.lightyellow,"2010");(Color.lightred,"2011")]
   in Command.draw_pic l
 
@@ -413,6 +424,7 @@ let _ =
     "path2",path2;
     "path3",path3;
     "path4",path4;
+    "path5",path5;
     "tree1",tree1;
     "tree2",tree2;
     "tree3",tree3;

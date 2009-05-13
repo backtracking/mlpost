@@ -122,7 +122,6 @@
 \end{frame}
 
 
-\subsubsection{API}
 \begin{frame}{API}
   \begin{center}
     \begin{alltt}
@@ -177,6 +176,12 @@
   \end{center}
 \end{frame}
 
+\begin{frame}{Radar comparatif}
+  \begin{center}
+    \includegraphics [scale=0.6]
+    {radar2.mps}
+  \end{center}
+\end{frame}
 
 \begin{frame}[fragile]{Radar cumulatif}
   \begin{columns}
@@ -197,13 +202,6 @@
 \end{frame}
 
 
-\begin{frame}{Radar comparatif}
-  \begin{center}
-    \includegraphics [scale=0.6]
-    {radar2.mps}
-  \end{center}
-\end{frame}
-
 \begin{frame}[fragile]{Radar comparatif}
 \begin{alltt}
   val compare :
@@ -222,7 +220,21 @@
 
 \begin{frame}[fragile]{Path}
   \begin{columns}
+    \column{0.4 \linewidth}
+    \includegraphics {path1.mps}
+    \bigskip
+    \bigskip
+    \includegraphics {path2.mps}
     \column{0.6 \linewidth}
+    \includegraphics {path5.mps}
+    \bigskip
+    \bigskip
+    \includegraphics {path4.mps}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile]{API}
 \begin{verbatim}
 type orientation = 
   | Up | Down | Left | Right
@@ -232,10 +244,8 @@ type orientation =
 val smart_path : ?style:joint -> orientation list 
   -> Point.t -> Point.t -> t
 \end{verbatim}
-\column{0.4 \linewidth}
-\includegraphics {path4.mps}
-\end{columns}
 \end{frame}
+
 
 \begin{frame}[fragile]{Path}
   \begin{columns}
