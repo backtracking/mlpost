@@ -32,7 +32,9 @@ let generic_quote whatquote quotequote s =
 
 
 let _ = dispatch begin function
-  | Before_options -> Options.include_dirs := ["backend";"gui"]
+  | Before_options -> 
+      Options.include_dirs := ["backend";"gui"];
+      Options.ocamldoc := S[A"ocamldoc"]
   | Before_rules ->
       tagcairo := Ocamlbuild_pack.Configuration.has_tag "cairo_yes";
       if !tagcairo && not cairopossible then failwith ("configure don't find the library for the cairo backend, I can't compile");
