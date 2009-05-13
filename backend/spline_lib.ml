@@ -39,12 +39,11 @@ let pt_f fmt p =
   Format.fprintf fmt "{@[ %.20g,@ %.20g @]}" p.x p.y
 
 let print_spline fmt pt =
-  Format.fprintf fmt "@[{ %a,@ %a,@ %a,@ %a }@]@." 
-    pt_f pt.sa pt_f pt.sb pt_f pt.sc pt_f pt.sd
+  Format.fprintf fmt "@[%f|%f { %a,@ %a,@ %a,@ %a }@]@." 
+    pt.smin pt.smax pt_f pt.sa pt_f pt.sb pt_f pt.sc pt_f pt.sd
 
 let printf fmt p = Format.fprintf fmt "@[[%a]" 
   (fun fmt -> List.iter (fun e -> Format.fprintf fmt "%a;" print_spline e)) p.pl
-
 
 let s_of_01 s t = t*.(s.smax-.s.smin)+.s.smin
 let _01_of_s s t = (t-.s.smin)/.(s.smax-.s.smin)
@@ -388,11 +387,11 @@ let split_aux s t l =
 
 let split p t = 
   let rec aux = function
-    |[] -> invalid_arg "abscissa_to_point : the abscissa given is greater than max_abscissa" 
+    |[] -> invalid_arg "split : the abscissa given is greater than max_abscissa" 
     | a::l when a.smax > t -> split_aux a t l
     | a::l -> let (p1,p2) = aux l in (a::p1,p2) in
-  if min_abscissa p >= t then 
-    invalid_arg "abscissa_to_point : the abscissa given is smaller than min_abscissa"
+  if min_abscissa p > t then 
+    invalid_arg "split : the abscissa given is smaller than min_abscissa"
   else 
     let (p1,p2) = aux p.pl in
     ({pl=p1;cycle = false},{pl=p2;cycle=false})
@@ -520,15 +519,6 @@ let of_bounding_box ({x=x_min;y=y_min},{x=x_max;y=y_max}) =
 
 let length p = max_abscissa p -. min_abscissa p
 
-module Approx =
-struct
-  let lineto l = not_implemented "lineto"
-  let fullcircle () = not_implemented "circle"
-  let halfcirle () = not_implemented "halfcircle"
-  let quartercircle () = not_implemented "quartercircle"
-  let unitsquare () = not_implemented "unit square"
-end
-
 module Metapath =
 struct
   type direction =
@@ -647,7 +637,7 @@ struct
     | Endpoint -> fprintf fmt "Endpoint"
     | Explicit p -> fprintf fmt "Explicit %a" P.print p
     | Open t -> fprintf fmt "Open %f" t
-    | Endcycle t -> fprintf fmt "Explicit %f" t
+    | Endcycle t -> fprintf fmt "Endcycle %f" t
     | Curl (t,f) -> fprintf fmt "Curl (%f,%f)" t f
     | Given (t,f) -> fprintf fmt "Given (%f,%f)" t f
 
@@ -738,10 +728,10 @@ struct
                 q.coord +/ (deltaxyk.(0) // ff)
             end
       | {link=t} as s -> 
-          let thetak = Array.make (n+1) 0. in
-          let uu = Array.make n 0. in
-          let vv = Array.make n 0. in
-          let ww = Array.make n 0. in
+          let thetak = Array.make (n+2) 0. in
+          let uu = Array.make (n+1) 0. in
+          let vv = Array.make (n+1) 0. in
+          let ww = Array.make (n+1) 0. in
           begin
             Format.printf "Open : @[k : @[%i@];@,s : @[%a@]@]@." 0 print_one_kpath p;
             match p with
@@ -800,8 +790,8 @@ struct
                        (* Adjust n to equal 0 and goto found 291 *)
                        let aa,bb = 
                          (let rec aux aa bb = function
-                            | 0 -> (vv.(n) -. (aa/.uu.(n))),(ww.(n) -. (bb/.uu.(n)))
-                            | k -> aux (vv.(k) -. (aa/.uu.(k))) (ww.(k) -. (bb/.uu.(k))) (k-1) in
+                            | 0 -> (vv.(n) -. (aa*.uu.(n))),(ww.(n) -. (bb*.uu.(n)))
+                            | k -> aux (vv.(k) -. (aa*.uu.(k))) (ww.(k) -. (bb*.uu.(k))) (k-1) in
                           aux 0. 1. (n-1)) in
                        let aa = aa /. (1. -. bb) in
                        thetak.(n) <- aa;
@@ -837,6 +827,8 @@ struct
     while !p != knots do
       (match !p with
         | ({coord=coord;right=(Given _|Curl _|Open _);link=q} as k) when coord == q.coord ->
+            Format.printf "@[find consecutive knots :k = @[%a@];@,q = @[%a@]@]@."
+              print_one_kpath k print_one_kpath q;
             k.right <- Explicit coord;
             q.left  <- Explicit coord;
             (match k.left with
@@ -850,6 +842,8 @@ struct
     done);
     (*Find the first breakpoint, h, on the path; insert an artificial breakpoint if the path is an unbroken
       cycle 272*)
+    Format.printf "@[knots? :knots = @[%a@]@]@."
+         print_one_kpath knots;
     let h = 
       (let rec aux = function
          | {left = (Endpoint | Endcycle _ | Explicit _ | Curl _ | Given _)}
@@ -857,6 +851,8 @@ struct
          | {left = Open t} as h when h==knots -> knots.left <- Endcycle t; knots
          | {link=h} -> aux h in
        aux knots) in
+    Format.printf "@[find h :h = @[%a@]@]@."
+         print_one_kpath h;
     (*repeat Fill in the control points between p and the next breakpoint, then advance p to that
       breakpoint 273
       until p = h*)
@@ -871,12 +867,15 @@ struct
          n print_one_kpath p print_one_kpath q;
        (*Fill in the control information between consecutive breakpoints p and q 278*)
        (*  Calculate the turning angles k and the distances dk,k+1 ; set n to the length of the path 281*)
-       let deltaxyk = Array.make n P.zero in
-       let deltak = Array.make n 0. in
-       let psik = Array.make (n+1) 0. in
+       let deltaxyk = Array.make (n+1) P.zero in
+       (* Un chemin sans cycle demande un tableau de taille n, de n+1 avec cycle *)
+       let deltak = Array.make (n+1) 0. in
+       let psik = Array.make (n+2) 0. in
        (let rec fill_array k = function
-          | _ when k=n -> psik.(n) <- 0.
-          | {left = Endcycle _} -> psik.(k)<-psik.(1) (* Comment se cas arrive?*)
+            (* K. utilise des inégalitées pour k=n et k = n+1 -> k>=n*)
+          | s when k = n && (match s.left with |Endcycle _ -> false | _ -> false) -> psik.(n) <- 0. 
+              (* On a fait un tour le s.left précédent était un Endcycle *) 
+          | _ when k = n+1 -> psik.(n+1)<-psik.(1) 
           | {link=t} as s ->
               deltaxyk.(k) <- t.coord -/ s.coord;
               deltak.(k) <- P.norm deltaxyk.(k);
@@ -962,8 +961,7 @@ struct
     aux aknot l;
     aknot
                      
-   let kmeta_to_path meta = 
-     let cycle = false in
+   let kmeta_to_path ?cycle meta = 
      let rec to_knots aknot = function
        | Start p -> 
            aknot.coord <- p;
@@ -994,31 +992,37 @@ struct
      lknots.link <- knots;
      (* Choose control points for the path and put the result into cur exp 891 *)
      (* when nocycle *)
-     if cycle = true 
-     then ()
-     else 
-       begin 
-         (match knots.right with
-            | Open t -> knots.right <- Curl (t,1.)
-            | _ -> ());
-         (match lknots.left with
-            | Open t -> lknots.left <- Curl (t,1.)
-            | _ -> ());
-       end;
+     begin
+       match cycle with
+         |Some join -> 
+            begin
+              lknots.right <- right_of_join knots.coord join;
+              knots.left <- left_of_join knots.coord join;
+            end
+         | None ->
+             begin 
+               (match knots.right with
+                  | Open t -> knots.right <- Curl (t,1.)
+                  | _ -> ());
+               (match lknots.left with
+                  | Open t -> lknots.left <- Curl (t,1.)
+                  | _ -> ());
+             end
+     end;
      Format.printf "@[before : @[%a@];@.middle : @[%a@]@]@." print meta print_kpath knots;
      make_choices knots;
      Format.printf "@[after : @[%a@]@]@." print_kpath knots;
      let rec aux smin = function
+     | {right = Endpoint} -> []
      | {right = Explicit sb;coord = sa;
         link={left = Explicit sc;coord = sd} as s} ->
          {sa = sa;sb = sb;sc = sc;sd = sd;smin=smin;smax=smin+.1.;start=false}::
-           (aux (smin+.1.) s)
-     | {right = Endpoint} -> []
+           (if s==knots then [] else (aux (smin+.1.) s))
      | _ -> assert false in
       let l = aux 0. knots in
-      try 
-        {(List.hd l) with start = true}::(List.tl l)
-      with Failure _ as exn-> Format.printf "Fail HERE!!!@.";raise exn
+      {(List.hd l) with start = true}::(List.tl l)
+
+
          
 
 
@@ -1355,9 +1359,10 @@ struct
     { pl = aux [] (`Curve (1.,1.,0.)) mp; cycle = false}
 *)    
        
- let kto_path mp =
-    { pl = kmeta_to_path mp; cycle = false}
-
+ let kto_path ?cycle mp =
+   let res = { pl = kmeta_to_path ?cycle mp; cycle = cycle <> None} in
+      Format.printf "@[end : @[%a@]@]@." printf res;
+   res
 
   let rec to_path_simple = function
     | Start p -> create_line p p
@@ -1391,9 +1396,26 @@ struct
     | Append_Path (p2,j2,p3) -> Append_Path(append p j p2,j2,p3)
 
   let to_path p = kto_path p
-  let cycle j p = not_implemented "cycle"
+  let cycle j p = kto_path ~cycle:j p
 
   let from_path p = Start_Path p
+end
+
+module Approx =
+struct
+  let lineto = create_lines
+  module M = Metapath
+  let simple_join = M.curve_joint M.no_direction M.no_direction
+  let rec curve = function
+    | [] -> assert false
+    | [a] -> M.start (M.knot a)
+    | a::l -> M.concat (curve l) simple_join (M.knot a)
+  let fullcircle l = 
+    let l2 = l/.2. in 
+    M.cycle simple_join (curve [{x=l2;y=0.};{x=0.;y=l2};{x= -.l2;y=0.};{x=0.;y= -.l2}])
+  let halfcirle l = subpath (fullcircle l) 0. 2. (* 2. because fullcircle is defined with 4 points *)
+  let quartercircle l = subpath (fullcircle l) 0. 1.
+  let unitsquare l = (close (create_lines [{x=0.;y=0.};{x=l;y=0.};{x=l;y=l};{x=0.;y=l};{x=0.;y=0.}]))
 end
 
 module ToCairo =

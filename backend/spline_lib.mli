@@ -21,7 +21,7 @@ val close : path -> path
 val min_abscissa : path -> abscissa
 val max_abscissa : path -> abscissa
 val length : path -> abscissa
-  
+(** It's not the real length of the path *)  
 
 val add_end : path -> point -> point -> path
   (** add_end p a b return the path p with one more spline at the end.*)
@@ -93,10 +93,14 @@ end
 module Approx :
   sig
     val lineto : point list -> path
-    val fullcircle : unit -> path
-    val halfcirle : unit -> path
-    val quartercircle : unit -> path
-    val unitsquare : unit -> path
+    val fullcircle : float -> path
+      (** fullcircle l is the circle of diameter l centered on (0, 0) *)
+    val halfcirle : float -> path
+      (** halfcircle l is the upper half of a fullcircle of diameter l *)
+    val quartercircle : float -> path
+      (** quartercircle l is the first quadrant of a circle of diameter l *)
+    val unitsquare : float -> path
+      (** unitsquare l : the path (0,0)--(l,0)--(l,l)--(0,l)--cycle *)
   end
 
 module ToCairo :

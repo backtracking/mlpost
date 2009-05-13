@@ -45,10 +45,25 @@ let ribbon = draw (of_metapath ribbon)
 
 let test = seq [ draw (path ~style:jCurve (z0::z1::z2::[]))]
 
+let w0 = 0.,0.
+let w1 = -50.,50.
+let w2 = 0.,100.
+let w3 = 50.,50.
+
+let labels2 =
+  seq [H.dotlabels ~pos:`Top ["0";"2"] (map_bp [w0;w2]);
+       dotlabel ~pos:`Left (tex "3") (bpp w3);
+       dotlabel ~pos:`Right (tex "1") (bpp w1) ]
+
+(*let circle = seq [ draw (MetaPath.cycle ~style:jCurve (MetaPath.path ~style:jCurve (w0::w1::w2::w3::[])));labels2]*)
+
+let circle = draw (Path.halfcircle)
+
 let _ = 
   List.iter (fun (name,fig) -> Cairost.emit_pdf (name^".pdf") fig;Metapost.emit name fig)
   [ (*"other27", other27;*)
-    "handbook3", handbook3;
+    (*"handbook3", handbook3;
     "ribbon", ribbon;
-    "test", test;
+    "test", test;*)
+    "circle", circle;
   ]

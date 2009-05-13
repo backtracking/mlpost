@@ -225,10 +225,10 @@ and path' = function
                                   {P.x = pmax.P.x; y = pmax.P.y};
                                   {P.x = pmax.P.x; y = pmin.P.y}])
                           
-  | PAUnitSquare -> Spline_lib.Approx.unitsquare ()
-  | PAQuarterCircle -> Spline_lib.Approx.quartercircle ()
-  | PAHalfCircle -> Spline_lib.Approx.halfcirle ()
-  | PAFullCircle -> Spline_lib.Approx.fullcircle ()
+  | PAUnitSquare -> Spline_lib.Approx.unitsquare 1.
+  | PAQuarterCircle -> Spline_lib.Approx.quartercircle 1.
+  | PAHalfCircle -> Spline_lib.Approx.halfcirle 1.
+  | PAFullCircle -> Spline_lib.Approx.fullcircle 1.
 and path p = memoize path' path_memoize p
 and picture' = function
   | PITransformed (p,tr) ->
