@@ -75,8 +75,8 @@ let _ =
 (*  ;Cairost.emit_pdfs "cairo_test.pdf" (List.map snd to_export)*)
 
 
-(*let _ =
-  let north_east = Picture.north_east (Picture.make circle) in
+let _ =
+  let north_east = Picture.north_east (Picture.make handbook3) in
   let x,y = Point.xpart north_east, Point.ypart north_east in
   Format.printf "@.north_east of circle : (%f,%f)@." (Cairost.float_of_num x) (Cairost.float_of_num y)
-*)
+

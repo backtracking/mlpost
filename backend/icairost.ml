@@ -20,8 +20,7 @@ let rec iter_after f after = function
 
 let emit_gen create next_page figs = 
   (*Format.printf "Fig : %a" Print.command fig;*)
-  LookForTeX.commandl figs;
-  let figs = List.map Compute.command figs in
+  let figs = LookForTeX.commandl figs in
   let ({x=xmin;y=ymin},{x=xmax;y=ymax}) = Point_lib.list_min_max Picture_lib.bounding_box figs in
   let height = ymax -. ymin in
   let width = xmax -. xmin in

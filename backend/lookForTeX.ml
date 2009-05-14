@@ -122,17 +122,17 @@ let compile_tex l =
 let ct_aux f = fun arg -> compile_tex (f [] arg)
 let ct_auxl f = fun argl -> compile_tex (List.fold_left f [] argl)
 
-let commandl = ct_auxl command
-let numl = ct_auxl num
-let pointl = ct_auxl point
-let pathl = ct_auxl path
-let metapathl = ct_auxl metapath
-let picturel = ct_auxl picture
+let commandl arg = ct_auxl command arg; List.map Compute.command arg
+let numl arg = ct_auxl num arg; List.map Compute.num arg
+let pointl arg = ct_auxl point arg; List.map Compute.point arg
+let pathl arg = ct_auxl path arg; List.map Compute.path arg
+let metapathl arg = ct_auxl metapath arg; List.map Compute.metapath arg
+let picturel arg = ct_auxl picture arg; List.map Compute.picture arg
 
 
-let command = ct_aux command
-let num = ct_aux num
-let point = ct_aux point
-let path = ct_aux path
-let metapath = ct_aux metapath
-let picture = ct_aux picture
+let command arg = ct_aux command arg; Compute.command arg
+let num arg = ct_aux num arg; Compute.num arg
+let point arg = ct_aux point arg; Compute.point arg
+let path arg = ct_aux path arg; Compute.path arg
+let metapath arg = ct_aux metapath arg; Compute.metapath arg
+let picture arg = ct_aux picture arg; Compute.picture arg
