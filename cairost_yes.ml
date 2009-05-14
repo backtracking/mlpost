@@ -11,3 +11,8 @@ let emit_svg = emit_svg
 let emit_pdfs = emit_pdfs
 
 let emit_cairo : (float -> float -> Cairo.t) -> Command.t -> unit = emit_cairo
+
+let dump_pdf () = Queue.iter (fun (_,fname,fig) -> emit_pdf (fname^".pdf") fig) Metapost.figures
+let dump_pdfs fname = 
+  let figs = List.rev (Queue.fold (fun l (_,_,x) ->  x::l) [] Metapost.figures) in
+  emit_pdfs (fname^".pdf") figs

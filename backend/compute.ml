@@ -14,8 +14,7 @@
 (*                                                                        *)
 (**************************************************************************)
 
-let default_labeloffset = 2.
-
+let default_labeloffset = 3.5 (* should be 2. but not enough*)
 
 open Types
 open Hashcons
@@ -23,6 +22,8 @@ module P = Point_lib
 module M = Matrix
 module S = Spline_lib
 module Pi = Picture_lib
+
+let debug = false
 
 let memoize f memoize =
   fun arg -> 
@@ -54,6 +55,17 @@ let point_of_position ecart
       | `Lowleft -> {P.x=xmin-.ecart;y=ymin-.ecart}
       | `Lowright -> {P.x=xmax+.ecart;y=ymin-.ecart}
       | `Center -> {P.x = middle xmin xmax; P.y = middle ymin ymax }
+
+let anchor_of_position = function
+  | `Top -> `Bot
+  | `Bot -> `Top
+  | `Left -> `Right
+  | `Right -> `Left
+  | `Upleft -> `Lowright
+  | `Upright -> `Lowleft
+  | `Lowleft -> `Upright
+  | `Lowright -> `Upleft
+  | `Center -> `Center
 
 let num_memoize = Hashtbl.create 50
 let point_memoize = Hashtbl.create 50
@@ -236,8 +248,8 @@ and picture' = function
       let pic = picture p in
       Picture_lib.transform tr pic
   | PITex s -> 
+      (* With lookfortex we never pass this point *)
       let tex = List.hd (Gentex.create !prelude [s]) in
-      Format.printf "tex : %a@." Gentex.print tex;
       Picture_lib.tex tex
   | PIMake c -> command c
   | PIClip (pic,pth) ->
@@ -255,8 +267,7 @@ and transform t =
   | TRYscaled f -> Matrix.yscaled (num f)
   | TRShifted p -> 
       let p = point p in
-      let m = Matrix.translation p in
-      Format.printf "Shifted p:%a  m:%a@." P.print p M.print m;m
+      Matrix.translation p
   | TRZscaled p -> Matrix.zscaled (point p)
   | TRReflect (p1,p2) -> Matrix.reflect (point p1) (point p2)
   | TRRotateAround (p,f) -> Matrix.rotate_around (point p) f
@@ -287,7 +298,7 @@ and command' = function
       let pe = (option_compile pen) pe in
       let dsh = (option_compile dash) dsh in
       Picture_lib.stroke_path p c pe dsh
-  | CDrawArrow (p, color, pe, dsh) -> assert false
+  | CDrawArrow (p, color, pe, dsh) -> (*TODO*) command (mkCDraw p color pe dsh)
   | CDrawPic p -> picture p
   | CFill (p, c) -> 
       let p = path p in
@@ -301,17 +312,13 @@ and command' = function
           (fun acc c -> Picture_lib.on_top acc (command c)) (command x) r
       end
   | CDotLabel (pic, pos, pt) -> 
-      let pic = picture pic in
-      let pt = point pt in
-      let mm = (Picture_lib.bounding_box pic) in
-      let pos = (point_of_position default_labeloffset mm pos) in
-      let tr = Matrix.translation (P.sub pt pos) in
-      Picture_lib.on_top (Picture_lib.draw_point pt)
-        (Picture_lib.transform tr pic)
+      Picture_lib.on_top (Picture_lib.draw_point (point pt)) (command (mkCLabel pic pos pt))
   | CLabel (pic, pos ,pt) -> 
       let pic = picture pic in
       let pt = point pt in
-      let pos = (point_of_position default_labeloffset (Pi.bounding_box pic) pos) in
+      let mm = (Picture_lib.bounding_box pic) in
+      let anchor = anchor_of_position pos in
+      let pos = (point_of_position default_labeloffset mm anchor) in
       let tr = Matrix.translation (P.sub pt pos) in
       Picture_lib.transform tr pic
   | CExternalImage (filename,sp) -> 

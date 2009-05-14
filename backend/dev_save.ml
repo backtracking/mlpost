@@ -53,7 +53,7 @@ let nb_pages s = List.length s.pages
 
 module Dev_save =
 struct
-  type arg = unit
+  type arg = bool
   type cooked = t
   type t = { mutable tpages : page list;
              tdoc : Dvi.t;
@@ -63,11 +63,12 @@ struct
              mutable ty_min : float;
              mutable tx_max : float;
              mutable ty_max : float;
-             mutable tbases : float list}
+             mutable tbases : float list;
+             use_last_vrule : bool}
 
 
 
-  let new_document () doc =
+  let new_document use_last_vrule doc =
     {
       tpages = [];
       tdoc = doc;
@@ -78,6 +79,7 @@ struct
       ty_min = infinity;
       ty_max = neg_infinity;
       tbases = [];
+      use_last_vrule = use_last_vrule
     }
   
   let new_page s =
@@ -85,13 +87,24 @@ struct
     then s.tfirst_page<-false
     else
       begin
-        s.tpages <- {c = (List.rev s.tc);
-                     x_min = s.tx_min;
-                     y_min = s.ty_min;
-                     x_max = s.tx_max;
-                     y_max = s.ty_max;
-                     bases = s.tbases;
-                    }::s.tpages;
+        let page = match s.use_last_vrule, s.tc with
+          | false, _ -> {c = List.rev s.tc;
+                         x_min = s.tx_min;
+                         y_min = s.ty_min;
+                         x_max = s.tx_max;
+                         y_max = s.ty_max;
+                         bases = s.tbases;
+                        }
+          | true, (Rectangle (x,y,_,h))::l -> {c = List.rev l;
+                                               x_min = 0.;
+                                               y_min = y;
+                                               x_max = x;
+                                               y_max = y+.h;
+                                               bases = s.tbases;
+                                              }
+          | _ -> failwith "I thought there is always a vrule at the end, please report. thx"
+        in
+        s.tpages <- page::s.tpages;
         s.tc <- [];
         s.tx_min <- infinity;
         s.tx_max <- neg_infinity;
@@ -102,26 +115,31 @@ struct
 
   let fill_rect s x y w h =
     s.tc <- (Rectangle (x,y,w,h))::s.tc;
-    s.tx_min <- (min s.tx_min x);
-    s.ty_min <- (min s.ty_min y);
-    s.tx_max <- (max s.tx_max (x+.w));
-    s.ty_max <- (max s.ty_max (y+.h))
+    if s.use_last_vrule then
+      let xmin,xmax = x,x+.w(*min x (x+.w), max x (x+.w)*) in
+      let ymin,ymax = y,y+.h(*min y (y+.h), max y (y+.h)*) in
+      s.tx_min <- (min s.tx_min xmin);
+      s.ty_min <- (min s.ty_min ymin);
+      s.tx_max <- (max s.tx_max xmax);
+      s.ty_max <- (max s.ty_max ymax)
 
 
 
   let draw_char s font char x y =
     s.tc <- (Glyph (font,char,x,y))::s.tc;
-    let idx = (Int32.to_int char) - font.metric.file_hdr.bc in
-    let body = font.metric.body in
-    let info = body.char_info.(idx) in
-    let width = body.width.(info.width_index) *. font.ratio_cm in
-    let height = body.height.(info.height_index) *. font.ratio_cm in
-    let depth = body.depth.(info.depth_index) *. font.ratio_cm in
-    s.tx_min <- min s.tx_min x;
-    s.ty_min <- min s.ty_min (y-.height);
-    s.tx_max <- max s.tx_max (x+.width);
-    s.ty_max <- max s.ty_max (y+.depth);
-    if not (List.mem y s.tbases) then s.tbases <- y::s.tbases
+    if not (List.mem y s.tbases) then s.tbases <- y::s.tbases;
+    if s.use_last_vrule then
+      let idx = (Int32.to_int char) - font.metric.file_hdr.bc in
+      let body = font.metric.body in
+      let info = body.char_info.(idx) in
+      let width = body.width.(info.width_index) *. font.ratio_cm in
+      let height = body.height.(info.height_index) *. font.ratio_cm in
+      let depth = body.depth.(info.depth_index) *. font.ratio_cm in
+      s.tx_min <- min s.tx_min x;
+      s.ty_min <- min s.ty_min (y-.depth);
+      s.tx_max <- max s.tx_max (x+.width);
+      s.ty_max <- max s.ty_max (y+.height)
+
 
   let end_document s =
     new_page s;

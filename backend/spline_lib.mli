@@ -3,8 +3,6 @@ type path
 type abscissa = float
 
 val inter_depth : int ref
-val debug : bool ref
-
 
 val create : point -> point -> point -> point -> path
   (** create a b c d return a path with :
@@ -12,6 +10,8 @@ val create : point -> point -> point -> point -> path
       - point b as its control point,
       - point d as the ending point,
       - point c as its control point *)
+
+val create_point : point -> path
 
 val create_line : point -> point -> path
 val create_lines : point list -> path
@@ -71,11 +71,13 @@ val dist_min_point : path -> point -> abscissa
 val dist_min_path : path -> path -> abscissa * abscissa
 
 val translate : path -> point -> path
-val transform : Cairo.matrix -> path -> path
+val transform : Matrix.t -> path -> path
 
 val buildcycle : path -> path -> path
 
 val of_bounding_box : point * point -> path
+
+val print : Format.formatter -> path -> unit
 
 module Epure :
 sig
@@ -84,7 +86,7 @@ sig
   val create : path -> t
   val of_path : path -> t
   val union : t -> t -> t
-  val transform : Cairo.matrix -> t -> t
+  val transform : Matrix.t -> t -> t
   val bounding_box : t -> point * point
   val of_bounding_box : point * point -> t
   val draw : Cairo.t -> t -> unit
@@ -105,7 +107,10 @@ module Approx :
 
 module ToCairo :
   sig
-    val draw : Cairo.t -> path -> unit
+    type pen = Matrix.t
+    val stroke : Cairo.t -> ?pen:pen -> path -> unit
+    val fill : Cairo.t -> path -> unit
+    val draw_path : Cairo.t -> path -> unit
   end
 
 module Metapath :

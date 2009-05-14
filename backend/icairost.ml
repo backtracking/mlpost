@@ -13,21 +13,29 @@ let create create_surface out_file (draw:Cairo.t -> unit) height width =
   if !info then printf "Clean up close file ...@.";
   close_out oc
 
-let emit_gen create fig = 
+let rec iter_after f after = function
+  | [] -> ()
+  | [a] -> f a
+  | a::l -> f a; after a;iter_after f after l
+
+let emit_gen create next_page figs = 
   (*Format.printf "Fig : %a" Print.command fig;*)
-  let fig = Compute.command fig in
-  let ({x=xmin;y=ymin},{x=xmax;y=ymax}) = Picture_lib.bounding_box fig in
+  LookForTeX.commandl figs;
+  let figs = List.map Compute.command figs in
+  let ({x=xmin;y=ymin},{x=xmax;y=ymax}) = Point_lib.list_min_max Picture_lib.bounding_box figs in
   let height = ymax -. ymin in
   let width = xmax -. xmin in
-  let fig = Picture_lib.shift fig (-.xmin) (-.ymin) in
+  let figs = List.map (fun fig -> Picture_lib.shift fig (-.xmin) (-.ymin)) figs in
   create (fun cr -> 
-            Picture_lib.ToCairo.draw cr width height fig
+            iter_after (Picture_lib.ToCairo.draw cr width height) (next_page cr) figs
          ) height width
 
-let emit_pdf fname = emit_gen (create Cairo_pdf.surface_create_for_channel fname)
-let emit_ps fname = emit_gen (create Cairo_ps.surface_create_for_channel fname)
-let emit_svg fname = emit_gen (create Cairo_svg.surface_create_for_channel fname)
-let emit_png fname = emit_gen 
+let dumb_next_page _ _ = assert false
+
+let emit_pdf fname fig = emit_gen (create Cairo_pdf.surface_create_for_channel fname) dumb_next_page [fig]
+let emit_ps fname fig = emit_gen (create Cairo_ps.surface_create_for_channel fname) dumb_next_page [fig]
+let emit_svg fname fig = emit_gen (create Cairo_svg.surface_create_for_channel fname) dumb_next_page [fig]
+let emit_png fname fig = emit_gen 
   (fun draw height width ->
      let width = int_of_float (ceil width) in
      let height = int_of_float (ceil height) in
@@ -35,8 +43,8 @@ let emit_png fname = emit_gen
      let cr = (Cairo.create surf) in
      draw cr;
      Cairo.surface_finish surf;
-     Cairo_png.surface_write_to_file surf fname)
+     Cairo_png.surface_write_to_file surf fname) dumb_next_page [fig]
 
-let emit_cairo gencr (fig:Command.t) = emit_gen (fun draw height width -> draw (gencr height width)) fig
+let emit_cairo gencr (fig:Command.t) = emit_gen (fun draw height width -> draw (gencr height width)) dumb_next_page [fig]
 
-let emit_pdfs s figs = failwith "not implemented"
+let emit_pdfs fname figs = emit_gen (create Cairo_pdf.surface_create_for_channel fname) (fun cr _ -> Cairo.show_page cr) figs

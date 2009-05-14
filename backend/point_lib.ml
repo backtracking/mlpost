@@ -34,3 +34,10 @@ let norm2 p : float = p.x*.p.x+.p.y*.p.y
 let norm p = sqrt (norm2 p)
 
 let zero = {x=0.;y=0.}
+
+let list_min_max f = 
+  List.fold_left (fun ({x=x_min;y=y_min},{x=x_max;y=y_max}) s ->
+                    let ({x=sx_min;y=sy_min},{x=sx_max;y=sy_max}) = f s in
+                    {x=min x_min sx_min;y=min y_min sy_min},
+                     {x=max x_max sx_max;y=max y_max sy_max})
+    ({x=infinity;y=infinity},{x=neg_infinity;y=neg_infinity})

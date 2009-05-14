@@ -81,7 +81,7 @@ OTHERCMX := $(OTHERCMO:.cmo=.cmx)
 
 $(HANDBOOKCMX) $(OTHERCMX): $(CMXA)
 
-GENERATED = version.ml scan_prelude.ml gui/glexer.ml cairost_sig.ml cairost.ml
+GENERATED = scan_prelude.ml gui/glexer.ml cairost_sig.ml cairost.ml
 
 byte: $(CMA)
 opt: $(CMXA)
@@ -110,10 +110,10 @@ tool.opt: $(TOOLCMX)
 	$(OCAMLOPT) -o $@ unix.cmxa $^
 
 cairost_sig.ml : cairost_sig_no.ml
-	cp $^ $@
+	cp -f $^ $@
 
 cairost.ml : cairost_no.ml
-	cp $^ $@
+	cp -f $^ $@
 
 tests: $(CMXA) tests.ml
 	$(OCAMLOPT) -o tests.exe unix.cmxa $(CMXA) tests.ml
@@ -274,8 +274,11 @@ DOCFILES:=$(shell echo *.mli)
 DOCFILES:=$(filter-out types.mli, $(DOCFILES))
 
 .PHONY: doc
-doc: doc/index.html tool.opt
-	make -C doc MLPOST='$(SUBDIRMLPOST)'
+doc: doc/index.html tool.opt customdoc/Makefile_doc customdoc/img_doc.ml
+	mkdir -p doc/img
+	cp customdoc/Makefile_doc doc/img/Makefile
+	cp customdoc/img_doc.ml doc/img/
+	make -C doc/img MLPOST='$(SUBDIRMLPOST)'
 
 doc/index.html: mlpost.mli customdoc/img.cmo
 	ocamldoc -hide Mlpost -g customdoc/img.cmo -d doc mlpost.mli
@@ -383,7 +386,7 @@ cleaner:: clean
 	make -C test clean
 	make -C multi-examples clean
 	make -C www clean
-	make -C doc clean
+	rm -rf doc
 	make -C examples clean
 
 dist-clean distclean:: clean

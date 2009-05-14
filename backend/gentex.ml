@@ -6,6 +6,9 @@ let default_prelude = "\\documentclass{article}\n\\begin{document}"
 
 let _ = Random.self_init ()
 
+let debug = false
+
+
 let tempdir prefix suffix f =
   let rec create_dir () =
     try
@@ -28,7 +31,9 @@ type t = {tex : Dev_save.t;
 module Saved_device = Dviinterp.Interp(Dev_save.Dev_save)
 module Cairo_device = Dev_save.Dev_load(Dvicairo.Cairo_device)
 
-let create prelude texs =
+let create prelude = function
+  | [] -> []
+  | texs ->
   let format fmt = Printf.fprintf fmt
     "%s
 \\gdef\\mpxshipout{\\shipout\\hbox\\bgroup%%
@@ -54,7 +59,7 @@ let create prelude texs =
     let exit_status = Sys.command (sprintf "%s %s > /dev/null" com_latex latex) in
     if exit_status <> 0 then failwith (sprintf "Error with : %s %s" com_latex latex);
     let dvi = genfile_name^".dvi" in
-    let saved = Saved_device.load_file () dvi in
+    let saved = Saved_device.load_file true dvi in
     List.map (fun x -> {tex = x;trans= Matrix.identity}) (Dev_save.separe_pages saved) in
   tempdir genfile_name "" todo
       
@@ -74,6 +79,8 @@ let get_bases_pt x = List.map point_of_cm (get_bases_cm x)
 
 let bounding_box x = 
   let (xmin,ymin,xmax,ymax) = get_dimen_pt x in
+  if debug then
+    Format.printf "gentex bb : %f %f %f %f@." xmin ymin xmax ymax;
   {x=xmin;y=ymin},{x=xmax;y=ymax}
 
 let print fmt tex =

@@ -48,6 +48,7 @@ let eps = ref false
 let verbose = ref false
 let native = ref false
 let libdir = ref Version.libdir
+let cairo = ref false
 
 let version () =
   print_string Version.version;
@@ -57,8 +58,10 @@ let version () =
 let add_ccopt x = ccopt := !ccopt ^ " " ^ x
 let add_execopt x = execopt := !execopt ^ " " ^ x
 
+let notcairo = Version.includecairo = ""
+
 let spec = Arg.align
-  [ "-pdf", Set pdf, " Generate .mps files (default)";
+  ([ "-pdf", Set pdf, " Generate .mps files (default)";
     "-ps", Clear pdf, " Generate .1 files";
     "-latex", String set_latex_file, "<main.tex> Scan the LaTeX prelude";
     "-eps", Set eps, " Generate encapsulated postscript files";
@@ -73,8 +76,10 @@ let spec = Arg.align
     "-execopt", String add_execopt,
     "\"<options>\" Pass <options> to the compiled program";
     "-version", Unit version, " Print Mlpost version and exit";
-    "-libdir", String ((:=) libdir), " Set path for mlpost.cma";
-  ]
+    "-libdir", String ((:=) libdir), " Set path for mlpost.cma"
+  ]@
+  if notcairo then [] else
+  ["-cairo" , Set cairo, " Use the experimental cairo backend instead of metapost"])
 
 let () = 
   Arg.parse spec add_file "Usage: mlpost [options] files..."
@@ -141,12 +146,26 @@ let compile f =
     | None -> ""
     | Some f -> sprintf "~prelude:%S" (Metapost_tool.read_prelude_from_tex_file f)
   in
-  Printf.fprintf cout 
-    "\nlet () = Mlpost.Metapost.dump %s %s %s \"%s\"\n" prelude pdf eps bn;
-  if !xpdf then 
-    Printf.fprintf cout 
-      "\nlet () = Mlpost.Metapost.dump_tex %s \"_mlpost\"\n" prelude;
+  if !cairo then
+    begin
+      if not (!xpdf) then 
+        Printf.fprintf cout 
+          "\nlet () = Mlpost.Cairost.dump_pdf () \n"
+      else
+        Printf.fprintf cout 
+          "\nlet () = Mlpost.Cairost.dump_pdfs \"_mlpost\"\n"
+    end
+  else
+    begin
+      Printf.fprintf cout 
+        "\nlet () = Mlpost.Metapost.dump %s %s %s \"%s\"\n" prelude pdf eps bn;
+
+      if !xpdf then 
+        Printf.fprintf cout 
+          "\nlet () = Mlpost.Metapost.dump_tex %s \"_mlpost\"\n" prelude
+    end;
   close_out cout;
+
 
   if !use_ocamlbuild then begin
     (* Ocamlbuild cannot compile a file which is in /tmp *)
@@ -175,7 +194,6 @@ let compile f =
       Sys.remove mlf2;
       exit out
   end else
-    let notcairo = Version.includecairo = "" in
     if !native then
       let cairo_args = if notcairo then [] 
       else [Version.includecairo; "bigarray.cmxa"; "cairo.cmxa"; "bitstring.cmxa"] in
@@ -189,8 +207,11 @@ let compile f =
 
   Sys.remove mlf;
   if !xpdf then begin
-    begin try Sys.remove "_mlpost.aux" with _ -> () end;
-    ignore (Sys.command "pdflatex _mlpost.tex");
+    if not (!cairo) then
+      begin
+        begin try Sys.remove "_mlpost.aux" with _ -> () end;
+        ignore (Sys.command "pdflatex _mlpost.tex");
+      end;
 (*     ignore (Sys.command "setsid xpdf -remote mlpost _mlpost.pdf &") *)
     if Sys.command "fuser _mlpost.pdf" = 0 then
       ignore (Sys.command "xpdf -remote mlpost -reload")

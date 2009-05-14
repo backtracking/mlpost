@@ -10,7 +10,10 @@ module H = Helpers
 (*parse <<other27 *)
 
 let a = Point.pt (Num.bp 0., Num.bp 0.)
-let pen = Pen.scale (Num.bp 4.) Pen.circle
+let pen = Pen.scale (Num.bp 7.) Pen.circle
+let label ~pos pic p =
+  let pic = Picture.make (seq [draw_pic pic;draw (corner_bbox pic)]) in
+  label ~pos pic p
 let other27 = 
   seq [
     draw (Path.pathp [a]) ~pen;
@@ -59,16 +62,21 @@ let labels2 =
 
 let circle = seq [draw (Path.scale (bp 100.) Path.halfcircle);draw (Path.scale (bp 50.) Path.quartercircle)]
 
-let _ = 
-  List.iter (fun (name,fig) -> Cairost.emit_pdf (name^".pdf") fig; Metapost.emit name fig)
-  [ (*"other27", other27;*)
+let to_export =     
+  [ "other27", other27;
     "handbook3", handbook3;
     "ribbon", ribbon;
     "test", test;
     "circle", circle;
   ]
 
-let _ =
+let _ = 
+  List.iter (fun (name,fig) -> (*Cairost.emit_pdf (name^".pdf") fig;*) Metapost.emit name fig) to_export
+(*  ;Cairost.emit_pdfs "cairo_test.pdf" (List.map snd to_export)*)
+
+
+(*let _ =
   let north_east = Picture.north_east (Picture.make circle) in
   let x,y = Point.xpart north_east, Point.ypart north_east in
   Format.printf "@.north_east of circle : (%f,%f)@." (Cairost.float_of_num x) (Cairost.float_of_num y)
+*)

@@ -166,7 +166,8 @@ let compute_trans_enc encoding_table charset_table char =
 
 
 
-let load_font doc fdef =
+
+let load_font doc_conv fdef =
   let tex_name = fdef.Dvi.name in
   let font_map = try HString.find (Lazy.force fonts_map_table) tex_name
   with Not_found -> invalid_arg ("Unknown font : "^tex_name) in
@@ -181,7 +182,7 @@ let load_font doc fdef =
     (*(Int32.to_float (Int32.mul mag fdef.Dvi.scale_factor)) 
     /. 1000. (* fdef.Dvi.design_size *)*)
   and ratio_cm = 
-    (Int32.to_float fdef.Dvi.scale_factor) *. (Dvi.get_conv doc)
+    (Int32.to_float fdef.Dvi.scale_factor) *. doc_conv
     in
   { tex_name = tex_name;
     metric = tfm;
@@ -192,3 +193,15 @@ let load_font doc fdef =
     ratio = ratio;
     ratio_cm = ratio_cm
   }
+
+let load_font =   
+  let memoize = Hashtbl.create 15 in
+  fun doc fdef -> 
+    let doc_conv = (Dvi.get_conv doc) in
+    try
+      Hashtbl.find memoize (doc_conv,fdef)
+    with
+        Not_found -> 
+          let result = load_font doc_conv fdef in
+          Hashtbl.add memoize (doc_conv,fdef) result;
+          result

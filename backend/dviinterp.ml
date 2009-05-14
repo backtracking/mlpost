@@ -154,7 +154,9 @@ struct
     let fonts = load_fonts doc doc.font_map in
     dev := Some (Dev.new_document arg doc);
     List.iter (fun p -> 
-		printf "#### Starting New Page ####@.";
+                 if !debug then
+		   printf "#### Starting New Page ####@."
+                 else printf ".";
 		interp_page fonts p)
       doc.pages;
     Dev.end_document (unsome !dev)
@@ -162,6 +164,9 @@ struct
 
   let load_file arg file =
     let doc = Dvi.read_file file in
-    printf "Dvi file parsed successfully.@.";
-    load_doc arg doc
+    printf "Dvi file parsing and interpretation :@.@?";
+    let res = load_doc arg doc in
+    printf " done@.@?";
+    res
+
 end

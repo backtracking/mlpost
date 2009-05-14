@@ -19,7 +19,7 @@ let rec one_to_one2 f acc a b =
 
 
 let inter_depth = ref 15
-let debug = ref false
+let debug = false
 
 type abscissa = float
 
@@ -49,12 +49,16 @@ let print_spline fmt pt =
 let print_splines fmt pl =
   List.iter (fun e -> Format.fprintf fmt "%a;" print_spline e) pl
 
-let printf fmt = function 
-  | Point p -> fprintf fmt "@[(%a@)]" P.print p
+let print fmt = function 
+  | Point p -> fprintf fmt "@[Point %a@]" P.print p
   | Path p -> fprintf fmt "@[cycle : %b; %a@]" p.cycle print_splines p.pl
+
+let printf = print
 
 let s_of_01 s t = t*.(s.smax-.s.smin)+.s.smin
 let _01_of_s s t = (t-.s.smin)/.(s.smax-.s.smin)
+
+let create_point p = Point p
 
 let create a b c d = Path {pl=[{sa = a;sb = b;sc = c; sd = d;smin = 0.;smax = 1.;start = true}];cycle=false}
 let create_line a d = Path {pl=[{sa=a;sb=a;sc=d;sd=d;smin=0.;smax=1.;start=true}];cycle=false}
@@ -292,7 +296,7 @@ let intersection_aux acc a b =
     let rec aux a b l t1 t2 dt= function
       | 0 -> if is_intersect a b then (t1+(dt/2),t2+(dt/2))::l else l
       | n -> 
-          if !debug then
+          if debug then
             (Format.printf "%a" print_spline a;
 	     Format.printf "%a" print_spline b);
           if is_intersect a b then
@@ -345,7 +349,7 @@ let intersection_aux acc a b =
     let l = rem_noise delta mdelta l in
     let f_from_i s x = s_of_01 s (x*.(1./.nmax)) in
     let res = List.fold_left (fun acc (x,y) -> (f_from_i a x,f_from_i b y)::acc) acc l in
-    if !debug then
+    if debug then
       Format.printf "@[%a@]@." (fun fmt -> List.iter (pt_f fmt))
         (List.map (fun (t1,t2) -> (cubic_point a t1) -/ (cubic_point b t2)) res);
     res
@@ -747,8 +751,6 @@ struct
     let sf,cf = sincos af in
     let rr = velocity st ct sf cf (abs_float rtension) in
     let ss = velocity sf cf st ct (abs_float ltension) in
-    Format.printf "st = %f@ ct = %f@ sf = %f@ cf = %f@ rr = %f@ ss = %f@."
-      st ct sf cf rr ss;
     if (rtension < 0.) && (ltension < 0.) then
       (*TODO*) ();
     let sbp = (rr*/ ((ct */ deltaxy) +/ 
@@ -758,9 +760,8 @@ struct
     let scm = (ss*/((cf */ deltaxy) +/ 
                                 (sf*/(P.swapmx deltaxy)))) in
     let sc = q.coord -/ scm in
-    q.left <- Explicit sc;
-    Format.printf "sb += %a; sc -= %a@." P.print sbp P.print scm
-
+    q.left <- Explicit sc
+    
   let print_array print fmt =
     Array.iter (fun e -> fprintf fmt "%a;@," print e)
 
@@ -802,7 +803,8 @@ struct
           let vv = Array.make (n+1) 0. in
           let ww = Array.make (n+1) 0. in
           begin
-            Format.printf "Open : @[k : @[%i@];@,s : @[%a@]@]@." 0 print_one_kpath p;
+            if debug then
+              Format.printf "Open : @[k : @[%i@];@,s : @[%a@]@]@." 0 print_one_kpath p;
             match p with
               |{right=Given (_,rp)} ->
                  (* Set up the equation for a given value of 0 293 *)
@@ -836,7 +838,8 @@ struct
             | {link=t} as s-> 
                   (*end cycle , open : Set up equation to match mock curvatures at zk ;
                     then goto found with n adjusted to equal 0 , if a cycle has ended 287 *)
-                Format.printf "Open : @[k : @[%i@];@,s : @[%a@]@]@." k print_one_kpath s;
+                if debug then
+                  Format.printf "Open : @[k : @[%i@];@,s : @[%a@]@]@." k print_one_kpath s;
                 let absrtension = abs_float (tension r.right) in
                 let absltension = abs_float (tension t.left) in
                 let (aa,bb,cc,dd,ee) = calc_value deltak.(k-1) deltak.(k) 
@@ -871,14 +874,15 @@ struct
                    | _ -> aux (k+1) s t);
            in aux 1 s t);
           (* Finish choosing angles and assigning control points 297 *)
-          Format.printf "Finish choosing angles and assigning control points 297@.";
+          if debug then
+            Format.printf "Finish choosing angles and assigning control points 297@.";
           for k = n-1 downto 0 do
             thetak.(k) <- vv.(k) -. (thetak.(k+1) *. uu.(k))
           done;
-          Format.printf "thetak : %a@." (print_array print_float) thetak;
+          (*Format.printf "thetak : %a@." (print_array print_float) thetak;
           Format.printf "uu : %a@." (print_array print_float) uu;
           Format.printf "vv : %a@." (print_array print_float) vv;
-          Format.printf "ww : %a@." (print_array print_float) ww;
+          Format.printf "ww : %a@." (print_array print_float) ww;*)
           (let rec aux k = function
              | _ when k = n -> ()
              | {right=rt;link={left=lt} as t} as s ->
@@ -896,8 +900,9 @@ struct
     while !p != knots do
       (match !p with
         | ({coord=coord;right=(Given _|Curl _|Open _);link=q} as k) when coord == q.coord ->
-            Format.printf "@[find consecutive knots :k = @[%a@];@,q = @[%a@]@]@."
-              print_one_kpath k print_one_kpath q;
+            if debug then
+              Format.printf "@[find consecutive knots :k = @[%a@];@,q = @[%a@]@]@."
+                print_one_kpath k print_one_kpath q;
             k.right <- Explicit coord;
             q.left  <- Explicit coord;
             (match k.left with
@@ -911,8 +916,6 @@ struct
     done);
     (*Find the first breakpoint, h, on the path; insert an artificial breakpoint if the path is an unbroken
       cycle 272*)
-    Format.printf "@[knots? :knots = @[%a@]@]@."
-         print_one_kpath knots;
     let h = 
       (let rec aux = function
          | {left = (Endpoint | Endcycle _ | Explicit _ | Curl _ | Given _)}
@@ -920,8 +923,9 @@ struct
          | {left = Open t} as h when h==knots -> knots.left <- Endcycle t; knots
          | {link=h} -> aux h in
        aux knots) in
-    Format.printf "@[find h :h = @[%a@]@]@."
-         print_one_kpath h;
+    if debug then 
+      Format.printf "@[find h :h = @[%a@]@]@."
+        print_one_kpath h;
     (*repeat Fill in the control points between p and the next breakpoint, then advance p to that
       breakpoint 273
       until p = h*)
@@ -932,8 +936,9 @@ struct
             |{left=Open _;right=Open _;link=q} -> search_q (n+1) q
             | q -> (n,q) in
           search_q 1 p.link) in
-       Format.printf "@[search_q : n = %i;@,p = @[%a@];@,q = @[%a@]@]@."
-         n print_one_kpath p print_one_kpath q;
+       if debug then
+         Format.printf "@[search_q : n = %i;@,p = @[%a@];@,q = @[%a@]@]@."
+           n print_one_kpath p print_one_kpath q;
        (*Fill in the control information between consecutive breakpoints p and q 278*)
        (*  Calculate the turning angles k and the distances dk,k+1 ; set n to the length of the path 281*)
        let deltaxyk = Array.make (n+1) P.zero in
@@ -942,7 +947,7 @@ struct
        let psik = Array.make (n+2) 0. in
        (let rec fill_array k = function
             (* K. utilise des inégalitées pour k=n et k = n+1 -> k>=n*)
-          | s when k = n && (match s.left with |Endcycle _ -> false | _ -> false) -> psik.(n) <- 0. 
+          | s when k = n && (match s.left with |Endcycle _ -> false | _ -> true) -> psik.(n) <- 0. 
               (* On a fait un tour le s.left précédent était un Endcycle *) 
           | _ when k = n+1 -> psik.(n+1)<-psik.(1) 
           | {link=t} as s ->
@@ -955,9 +960,9 @@ struct
                  psik.(k) <- psi);
               fill_array (k+1) t
         in fill_array 0 p);
-       Format.printf "deltaxyk : %a@." (print_array P.print) deltaxyk;
+       (*Format.printf "deltaxyk : %a@." (print_array P.print) deltaxyk;
        Format.printf "deltak : %a@." (print_array print_float) deltak;
-       Format.printf "psik : %a@." (print_array print_float) psik;
+       Format.printf "psik : %a@." (print_array print_float) psik;*)
        (*Remove open types at the breakpoints 282*)
        (match q with
          | {left=Open t} -> q.left <- Curl (t,1.) (* TODO cas bizarre *)
@@ -1078,9 +1083,11 @@ struct
                   | _ -> ());
              end
      end;
-     Format.printf "@[before : @[%a@];@.middle : @[%a@]@]@." print meta print_kpath knots;
+     if debug then
+       Format.printf "@[before : @[%a@];@.middle : @[%a@]@]@." print meta print_kpath knots;
      make_choices knots;
-     Format.printf "@[after : @[%a@]@]@." print_kpath knots;
+     if debug then
+       Format.printf "@[after : @[%a@]@]@." print_kpath knots;
      let rec aux smin = function
      | {right = Endpoint} -> []
      | {right = Explicit sb;coord = sa;
@@ -1432,7 +1439,8 @@ struct
    | Start p -> Point p
    | mp -> 
        let res = Path { pl = kmeta_to_path ?cycle mp; cycle = cycle <> None} in
-       Format.printf "@[end : @[%a@]@]@." printf res;
+       if debug then
+         Format.printf "@[end : @[%a@]@]@." printf res;
        res
 
   let rec to_path_simple = function
@@ -1485,9 +1493,15 @@ struct
     | [a] -> M.start (M.knot a)
     | a::l -> M.concat (aux l) simple_join (M.knot a) in
     aux (List.rev l)
-  let fullcircle l = 
+  let fullcircle_ l = 
     let l2 = l/.2. in 
     M.cycle simple_join (curve [{x=l2;y=0.};{x=0.;y=l2};{x= -.l2;y=0.};{x=0.;y= -.l2}])
+
+  let fullcircle1 = lazy (fullcircle_ 1.)
+  let fullcircle = function
+    | 1. -> Lazy.force fullcircle1
+    | l  -> fullcircle_ l
+
   let halfcirle l = subpath (fullcircle l) 0. 2. (* 2. because fullcircle is defined with 4 points *)
   let quartercircle l = subpath (fullcircle l) 0. 1.
   let unitsquare l = (close (create_lines [{x=0.;y=0.};{x=l;y=0.};{x=l;y=l};{x=0.;y=l};{x=0.;y=0.}]))
@@ -1495,23 +1509,46 @@ end
 
 module ToCairo =
 struct
-  let draw cr = function
-    | Path p ->
-    (*Format.printf "%a@." printf p;*)
-        List.iter (function 
-                     | {start = true} as s -> 
-                         Cairo.move_to cr s.sa.x s.sa.y ;
-                         Cairo.curve_to cr 
-                           s.sb.x s.sb.y 
-                           s.sc.x s.sc.y 
-                           s.sd.x s.sd.y
-                     | s -> 
-                         Cairo.curve_to cr 
-                           s.sb.x s.sb.y 
-                           s.sc.x s.sc.y 
-                           s.sd.x s.sd.y) p.pl;
-        if p.cycle then Cairo.close_path cr;
-    | Point p -> Cairo.move_to cr p.x p.y
+
+  type pen = Matrix.t
+
+  let draw_path cr = function
+    |Path p ->
+       List.iter (function 
+                    | {start = true} as s -> 
+                        Cairo.move_to cr s.sa.x s.sa.y ;
+                        Cairo.curve_to cr 
+                          s.sb.x s.sb.y 
+                          s.sc.x s.sc.y 
+                          s.sd.x s.sd.y
+                    | s -> 
+                        Cairo.curve_to cr 
+                          s.sb.x s.sb.y 
+                          s.sc.x s.sc.y 
+                          s.sd.x s.sd.y) p.pl;
+        if p.cycle then Cairo.close_path cr
+    | Point _ -> failwith "Metapost fail in that case what should I do???"
+
+  let stroke cr ?(pen=Matrix.identity) = function
+    | Path _ as path -> 
+        draw_path cr path;
+        Cairo.save cr;
+        Matrix.set cr pen;
+        Cairo.stroke cr;
+        Cairo.restore cr;
+    | Point p ->
+        Cairo.save cr;
+        Matrix.transform cr (Matrix.translation p);
+        Matrix.transform cr pen;
+        draw_path cr (Approx.fullcircle 1.);
+        Cairo.fill cr;
+        Cairo.restore cr
+        
+
+
+    let fill cr path =
+      draw_path cr path; Cairo.fill cr
+
 end
 
 module Epure =

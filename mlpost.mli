@@ -1894,6 +1894,10 @@ module Cairost : sig
   val emit_pdfs : string -> Command.t list -> unit
     (** One figure by page *)
 
+  val dump_pdf : unit -> unit
+  val dump_pdfs : string -> unit
+    (** Use the figures recorded by the function emit of metapost *)
+
   include Cairost_sig.S
 
 end

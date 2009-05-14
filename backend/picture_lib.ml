@@ -1,4 +1,5 @@
-let diameter_of_a_dot = 5.
+let diameter_of_a_dot = 3.
+let default_line_size = 0.5
 
 open Types
 open Point_lib
@@ -51,7 +52,7 @@ let stroke_path p c pen d = {fcl= Stroke_path (p,c,pen,d);
                              fb = Spline_lib.Epure.of_path p;
                              fi = IntEmpty}
 
-let draw_point p = fill_path (Spline_lib.Approx.fullcircle diameter_of_a_dot) None
+let draw_point p = stroke_path (Spline_lib.create_point p) None (Some (Matrix.scale diameter_of_a_dot)) None
 
 let clip p path = {fcl= Clip (p.fcl,path);
                    fb = Spline_lib.Epure.of_path path; 
@@ -138,22 +139,17 @@ struct
     | Stroke_path (path,c,pen,d) ->
         Cairo.save cr;
         color_option cr c;
-        Spline_lib.ToCairo.draw cr path;
         dash cr d;
-        (match pen with
-           | None -> ()
-           | Some m -> Matrix.transform cr m);
-        Cairo.stroke cr;
+        Spline_lib.ToCairo.stroke cr ?pen path;
         Cairo.restore cr
     | Fill_path (path,c)-> 
         Cairo.save cr;
         color_option cr c;
-        Spline_lib.ToCairo.draw cr path;
-        Cairo.fill cr;
+        Spline_lib.ToCairo.fill cr path;
         Cairo.restore cr
     | Clip (com,p) -> 
         Cairo.save cr;
-        Spline_lib.ToCairo.draw cr p;
+        Spline_lib.ToCairo.draw_path cr p;
         Cairo.clip cr;
         draw_aux cr com;
         Cairo.restore cr
@@ -171,7 +167,8 @@ struct
   let draw cr width height p =
     Cairo.save cr;
     inversey cr height;
-    Cairo.set_line_width cr 1.;
+    Cairo.set_line_width cr default_line_size;
+    (*Cairo.set_line_cap cr Cairo.LINE_CAP_ROUND;*)
     draw_aux cr p.fcl;
     (*Spline_lib.Epure.draw cr p.fb;*)
     Cairo.restore cr
