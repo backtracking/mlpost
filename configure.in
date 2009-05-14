@@ -195,7 +195,7 @@ case $OCAMLVERSION in
            if test "$OCAMLBUILDLIB" != "${OCAMLLIB}/ocamlbuild"; then
               OCAMLBUILD=no
               echo "ocamlbuild present but your ocamlbuild is not compatible with your ocamlc:"
-              echo "ocamlfind : $OCAMLFINDLIB, ocamlc : $OCAMLLIB"
+              echo "ocamlbuild : $OCAMLBUILDLIB, ocamlc : $OCAMLLIB"
               MAKEFILE=simple.Makefile
            else
               echo "ocamlbuild ok"
