@@ -316,8 +316,7 @@ let legend1 =
   let l = Legend.legend
     ~ensstroke:Color.black
     ~colstroke:Color.black
-    [(Color.lightgreen,"vert");(Color.lightyellow,"jaune");(Color.lightred,"rouge");
-    Color.lightblue,"bleu"]
+    [(Color.lightred,"january");(Color.lightblue,"february");(Color.lightyellow,"march");(Color.lightgreen,"extra")]
   in Command.draw_pic l
 
 

@@ -58,13 +58,15 @@ end
 (* let p4 = Edit.point "p5" 50. Glexer.Bp 0. Glexer.Bp *)
 (* let example = fill ~color:Color.lightyellow (Path.pathp ~style:jLine ~cycle:jLine [p1;p2;p5;p4;p3]) *)
 
-let p1 = Edit.point "p1" 100. Glexer.Bp 100. Glexer.Bp 
+let box = Box.draw (Box.empty ~width:(bp 100.) ~height:(bp 200.) ())
+let p1 = Edit.point "legend" 100. Glexer.Bp 100. Glexer.Bp 
+let p2 = Edit.point "y-axis" -100. GGlexer.Bp 100 Glexer.Bp
 let padding = Edit.num "padding" 5. Glexer.Bp
 let leg = Legend.legend [(Color.lightblue,"2006");(Color.lightgreen,"2007");(Color.lightyellow,"2008");(Color.lightred,"2009")]
 let fill = [Color.lightblue;Color.lightgreen;Color.lightyellow;Color.lightred]
-let hist = Hist.simple ~width:(bp 50.) ~height:(bp 100.) ~fill ~padding [1.;2.;3.;4.]
+let hist = Hist.simple ~hcaption:(Picture.shift p2 (Picture.tex "knowledge")) ~width:(bp 50.) ~height:(bp 100.) ~fill ~padding [1.;2.;3.;4.]
 let pic = Command.draw_pic (Picture.shift p1 (Picture.scale (bp 0.5) leg))
-let example = hist++pic
+let example = box++hist++pic
 
 let () = Metapost.emit "example" example
 
