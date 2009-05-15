@@ -52,7 +52,7 @@ and point fmt p =
   | PTAdd (p1,p2) -> fprintf fmt "(%a + %a)" point p1 point p2
   | PTSub (p1,p2) -> fprintf fmt "(%a - %a)" point p1 point p2
   | PTMult (n,p) -> fprintf fmt "(%a * %a)" num n point p
-  | _ -> assert false
+  | _ -> fprintf fmt "somepoint..."
 and picture fmt p = 
   match p.Hashcons.node with
   | PITex s -> fprintf fmt "tex(%s)" s
@@ -64,7 +64,7 @@ and picture fmt p =
 and transform fmt t = 
   match t.Hashcons.node with
     | TRShifted p -> fprintf fmt "shifted %a" point p
-    | _ -> assert false
+    | _ -> fprintf fmt "something"
 
 and knot fmt k =
   match k.Hashcons.node with
@@ -87,15 +87,15 @@ and metapath fmt p =
   | MPAofPA p -> fprintf fmt "(%a)" path p
 and path fmt p = 
   match p.Hashcons.node with
-  | PAofMPA p -> fprintf fmt "(%a)" metapath p
+  | PAofMPA p -> fprintf fmt "(from_metapath %a)" metapath p
   | MPACycle (d,j,p) -> 
-      fprintf fmt "%a%acycle" metapath p joint j
-  | PATransformed (p,tr) -> assert false
-  | PACutAfter (p1,p2) -> assert false
-  | PACutBefore (p1,p2) -> assert false
-  | PABuildCycle pl -> assert false
-  | PASub (f1, f2, p) -> assert false
-  | PABBox p -> assert false
+      fprintf fmt "(cycle of %a with %a)" metapath p joint j
+  | PATransformed (p,tr) -> fprintf fmt "(tr %a by %a)" path p transform tr
+  | PACutAfter (p1,p2) -> fprintf fmt "(cutafter %a by %a)" path p1 path p2
+  | PACutBefore (p1,p2) -> fprintf fmt "(cutbefore %a by %a)" path p1 path p2
+  | PABuildCycle pl -> fprintf fmt "(buildcycle %a)" (Misc.print_list Misc.semicolon path) pl
+  | PASub (f1, f2, p) ->  fprintf fmt "(sub %a from %a to %a)" path p num f1 num f2
+  | PABBox p -> fprintf fmt "(bbox %a)" picture p
   | PAUnitSquare -> fprintf fmt "unitsquare"
   | PAQuarterCircle -> fprintf fmt "quartercircle"
   | PAHalfCircle -> fprintf fmt "halfcircle"

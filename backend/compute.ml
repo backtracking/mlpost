@@ -25,15 +25,22 @@ module Pi = Picture_lib
 
 let debug = false
 
-let memoize f memoize =
+let memoize f fname memoize =
   fun arg -> 
     try
       Hashtbl.find memoize arg.tag
     with
         Not_found -> 
-          let result = f arg.node in
+          let result = 
+            try 
+              f arg.node 
+            with exn -> 
+              Format.printf "Compute.%s raises : %s@.@?" fname (Printexc.to_string exn);
+              raise exn
+          in
           Hashtbl.add memoize arg.tag result;
           result
+              
 
 let nop = Picture_lib.empty
 
@@ -116,7 +123,7 @@ let rec num' = function
   | NLength p ->
       let p = path p in
       Spline_lib.length p
-and num n = memoize num' num_memoize n
+and num n = memoize num' "num" num_memoize n
 and point' = function
   | PTPair (f1,f2) -> 
       let f1 = num f1 in
@@ -152,7 +159,7 @@ and point' = function
       let p = point p in
       let tr = transform tr in
       P.transform tr p
-and point p = memoize point' point_memoize p
+and point p = memoize point' "point" point_memoize p
 and knot k =
   match k.Hashcons.node with
     | { knot_in = d1 ; knot_p = p ; knot_out = d2 } ->
@@ -197,7 +204,7 @@ and metapath' = function
       Spline_lib.Metapath.from_path (path p),
       Spline_lib.Metapath.no_direction
 
-and metapath p = memoize metapath' metapath_memoize p
+and metapath p = memoize metapath' "metapath" metapath_memoize p
 and path' = function
   | PAofMPA p -> 
       let _,mp,_ = (metapath p) in
@@ -241,7 +248,7 @@ and path' = function
   | PAQuarterCircle -> Spline_lib.Approx.quartercircle 1.
   | PAHalfCircle -> Spline_lib.Approx.halfcirle 1.
   | PAFullCircle -> Spline_lib.Approx.fullcircle 1.
-and path p = memoize path' path_memoize p
+and path p = (*Format.printf "path : %a@.@?" Print.path p;*) memoize path' "path" path_memoize p
 and picture' = function
   | PITransformed (p,tr) ->
       let tr = transform tr in
@@ -257,7 +264,7 @@ and picture' = function
       let pth = path pth in
       Picture_lib.clip pic pth
 
-and picture p = memoize picture' picture_memoize p
+and picture p = memoize picture' "picture" picture_memoize p
 and transform t = 
   match t.Hashcons.node with
   | TRRotated f -> Matrix.rotation f
@@ -340,4 +347,4 @@ and pen p =
     | PenTransformed (p, tr) ->
         Matrix.multiply (transform tr) (pen p)
 
-and command c = memoize command' command_memoize c
+and command c = memoize command' "command" command_memoize c

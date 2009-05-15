@@ -20,6 +20,7 @@ let rec one_to_one2 f acc a b =
 
 let inter_depth = ref 15
 let debug = false
+let info = true
 
 type abscissa = float
 
@@ -153,10 +154,26 @@ let abscissa_to_point p0 t =
           invalid_arg "abscissa_to_point : the abscissa given is smaller than min_abscissa"
         else aux p.pl
     | Point p when t = 0. -> p
-    | Point _ -> invalid_arg "abscissa_to_point : a point have only the abscissa 0."
+    | Point _ -> invalid_arg "abscissa_to_point : a point has only the abscissa 0."
 
-let direction_of_abscissa p t = 
-  (* TODO *) assert false
+
+let direction_of_abscissa_aux s t = 
+  (*Format.printf "s = %a; t = %f@." print_spline s t;*)
+  (t**2.)*/ s.sd +/ (((2.*.t)-.(3.*.(t**2.)))) */ s.sc +/ ((1.-.(4.*.t)+.(3.*.(t**2.)))) */ s.sb +/ (-.((1.-.t)**2.)) */ s.sa
+(* le // 3 est pour la comp avec metapost *)
+
+let direction_of_abscissa p0 t = 
+  match p0 with
+    | Point _ -> invalid_arg "direction_of_abscissa : a point has no direction."
+    | Path p ->  
+        let rec aux = function
+          |[] -> invalid_arg "direction_of_abscissa : the abscissa given is greater than max_abscissa" 
+          | a::_ when a.smax >= t -> direction_of_abscissa_aux a (_01_of_s a t)
+          | _::l -> aux l in
+        if min_abscissa p0 > t then 
+          invalid_arg "direction_of_abscissa : the abscissa given is smaller than min_abscissa"
+        else aux p.pl
+        
 
 let extremum conv l a b c d =
   let test s l = if s>=0. && s<=1. then (conv s)::l else l in
@@ -286,10 +303,16 @@ let one_intersection a b =
     | Path a,Path b ->
         (try
           one_to_one2 one_intersection_aux () a.pl b.pl;
-          raise Not_found
+           if debug then
+             (Format.printf "one_intersection : Not_found use 0.,0.@.@?";
+              0.,0.)
+           else
+             raise Not_found
         with
             Found (t1,t2) -> (t1,t2))
-    | _ -> raise Not_found
+    | _ -> if debug then
+             Format.printf "one_intersection : Not_found not two path@.@?";
+        raise Not_found
 
 let intersection_aux acc a b =
   if a=b then [] else
@@ -423,9 +446,13 @@ let reverse = function
 
 (*left ((t^3)*(d + (3*(b - c)) - a)) + ((t^2)*(d - (3*b) + (2*a))) + (t*((2*c) - b - a)) + b *)
 (*right 3*d - c *)
+let cast_path_to_point p = function
+  | Path {pl=[];} -> Point p
+  | x -> x
+
 let split_aux s t l = 
-  if t = s.smax then ([s],l)
-  else if t = s.smin then ([],s::l)
+  if t = s.smax then ([s],cast_path_to_point s.sd (Path {pl=l;cycle=false}))
+  else if t = s.smin then ([],Path {pl=s::l;cycle=false})
   else 
     let t0 = _01_of_s s t in
     let _1t0 = 1.-.t0 in
@@ -438,7 +465,7 @@ let split_aux s t l =
     let b2 = 
       (_1t0*._1t0) */ s.sb +/ (2.*._1t0*.t0) */ s.sc +/ (t0*.t0) */ s.sd in
     ([{s with sb = b1;sd = d1;sc = c1;smax = t}],
-     {s with sa = a2;sb = b2;sc = c2;smin = t}::l)
+     Path {pl={s with sa = a2;sb = b2;sc = c2;smin = t}::l;cycle=false})
 
 let split p0 t = 
   match p0 with
@@ -451,14 +478,20 @@ let split p0 t =
           invalid_arg "split : the abscissa given is smaller than min_abscissa"
         else 
           let (p1,p2) = aux p.pl in
-          (Path {pl=p1;cycle = false},Path {pl=p2;cycle=false})
+          (cast_path_to_point (List.hd p.pl).sa (Path {pl=p1;cycle = false}),p2)
     | Point _ when t = 0. -> p0,p0
     | Point _ -> invalid_arg "split : a point can be split only at 0."
       
 let subpath p t1 t2 = fst (split (snd (split p t1)) t2)
 
-let cut_before a b = fst (split a (fst (one_intersection a b)))
-let cut_after a b = reverse (fst (split a (fst (one_intersection (reverse a) b))))
+let cut_before a b = 
+  if debug then
+    Format.printf "Spline_lib.cut_before : a = %a; b = %a" print a print b;
+  fst (split a (fst (one_intersection a b)))
+let cut_after a b = 
+  if debug then
+    Format.printf "Spline_lib.cut_after : a = %a; b = %a" print a print b;
+  reverse (fst (split a (fst (one_intersection (reverse a) b))))
 
 let dicho_split x = assert false
 
@@ -1439,7 +1472,7 @@ struct
    | Start p -> Point p
    | mp -> 
        let res = Path { pl = kmeta_to_path ?cycle mp; cycle = cycle <> None} in
-       if debug then
+       if info then
          Format.printf "@[end : @[%a@]@]@." printf res;
        res
 

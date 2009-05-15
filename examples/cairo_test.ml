@@ -24,7 +24,7 @@ let other27 =
   ]
 
 (*parse >> <<handbook3 *)
-let z0 = 0.,0.
+let z0 = -1.3,-1.
 let z1 = 50.,30.
 let z2 = 80.,80.
 let z3 = 10.,70.
@@ -46,7 +46,11 @@ let ribbon = MetaPath.concat ~style:(MetaPath.jControls (pt (bp 310.,bp 300.)) (
 
 let ribbon = draw (of_metapath ribbon)
 
-let test = seq [ draw (path ~style:jCurve (z0::z1::z2::[]))]
+let path_test = path ~style:jCurve (z0::z1::z2::[])
+
+let tg p t = draw (pathp ~style:jLine [point t p;add (point t p) (direction t p)])
+
+let test = seq ((draw path_test)::(List.map (tg path_test) [0.;0.264543;0.5;0.785651;1.;1.3528;1.5;1.8653;2.;]))
 
 let w0 = 0.,0.
 let w1 = -50.,50.
@@ -63,11 +67,11 @@ let labels2 =
 let circle = seq [draw (Path.scale (bp 100.) Path.halfcircle);draw (Path.scale (bp 50.) Path.quartercircle)]
 
 let to_export =     
-  [ "other27", other27;
+  [ (*"other27", other27;
     "handbook3", handbook3;
-    "ribbon", ribbon;
+    "ribbon", ribbon;*)
     "test", test;
-    "circle", circle;
+(*    "circle", circle;*)
   ]
 
 let _ = 
@@ -75,8 +79,8 @@ let _ =
 (*  ;Cairost.emit_pdfs "cairo_test.pdf" (List.map snd to_export)*)
 
 
-let _ =
+(*let _ =
   let north_east = Picture.north_east (Picture.make handbook3) in
   let x,y = Point.xpart north_east, Point.ypart north_east in
   Format.printf "@.north_east of circle : (%f,%f)@." (Cairost.float_of_num x) (Cairost.float_of_num y)
-
+*)

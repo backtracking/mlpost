@@ -61,8 +61,8 @@ let automaton1 =
   in
   seq [ Box.draw states;
         transition states "0..9" `Top "0" "1";
-        loop states "0..9" "1";
-        initial states "0" ]
+        (*loop states "0..9" "1";
+        initial states "0" *)]
 
 (*parse >> *)
 
@@ -202,5 +202,5 @@ let automaton4 =
 (*parse >> *)
 
 let () = Metapost.emit "automaton1" automaton1
-let () = Metapost.emit "automaton2" automaton2
-let () = Metapost.emit "automaton4" automaton4
+(*let () = Metapost.emit "automaton2" automaton2
+let () = Metapost.emit "automaton4" automaton4*)
