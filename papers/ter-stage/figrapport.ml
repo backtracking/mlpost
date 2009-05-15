@@ -12,7 +12,9 @@ open Command
 
 
 let simple_block =
-  let b = Box.hblock ~pos:`Bot [Box.tex "a"; Box.tex "A"; Box.tex "1"; Box.tex "$\\pi$"] in
+  let b = Box.hblock 
+    ~pos:`Bot [Box.tex "a"; Box.tex "A"; Box.tex "1"; Box.tex "$\\pi$"] 
+  in
   Box.draw b
     
     
@@ -226,7 +228,7 @@ let node s l = Tree.node
   ~edge_style:Curve
   (Box.set_stroke Color.black (Box.tex s)) l
 
-let tree4 = Tree.draw (node "A" [leaf "B";leaf "C"])
+let tree4 = Tree.draw (node "A" [leaf "$\\int_H\\dots$";node "B" [leaf "texte"; leaf "a"]])
 
 let leaf s = Tree.leaf (Box.tex s)
 

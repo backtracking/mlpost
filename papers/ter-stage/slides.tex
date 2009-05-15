@@ -64,21 +64,18 @@
   \begin{columns}
     \column{0.7\textwidth}\small
     \begin{verbatim}
-  let simple_block =
-    let b = Box.hblock ~pos:`Bot 
-    [Box.tex "a"; Box.tex "A"; Box.tex "1"; 
-     Box.tex "$\\pi$"] 
-    in
-    Box.draw b
+  Tree.draw 
+    (node "$\\alpha$" 
+      [leaf "$\\gamma$";leaf "$\\beta$"])
     \end{verbatim}
     \column{0.3\textwidth}
-    \includegraphics{simple_block.mps}
+    \includegraphics[scale=2.]{tree5.mps}
   \end{columns}
 \end{frame}
 
 
 \begin{frame}{Objectifs du TER}
-  Se familiariser avec l'API.
+  Se familiariser avec \mlpost\ et son API.
 
   Ajouter/Améliorer des modules haut niveau de \mlpost.
 
@@ -130,7 +127,11 @@
 
 
 \begin{frame}{API}
-  \includegraphics[scale=0.29]{ocamldoc.png}
+\begin{itemize}
+\item Utilisation des arguments optionnels et étiquettés d'Ocaml
+\item Documentation générée automatiquement avec Ocamldoc
+\end{itemize}
+%  \includegraphics[scale=0.5]{ocamldoc.png}
 \end{frame}
 
 \begin{frame}[fragile]{Exemple d'utilisation}
@@ -227,7 +228,7 @@
 \end{frame}
 
 
-\begin{frame}[fragile]{Path}
+\begin{frame}[fragile]{Path.smart\_path}
   \begin{columns}
    % \column{0.4 \linewidth}
     
@@ -259,7 +260,7 @@ val smart_path : ?style:joint -> orientation list
 \end{frame}
 
 
-\begin{frame}[fragile]{Path}
+\begin{frame}[fragile]{Path.smart\_path}
   \begin{columns}
     \column{0.7 \linewidth}
 \begin{verbatim}
@@ -294,14 +295,16 @@ val smart_path : ?style:joint -> orientation list
   \begin{columns}
     \column{0.7 \linewidth}
     \begin{itemize}
-    \item Utilisation de l'article d'Andrew J. Kennedy: \textit{Drawing Trees}
-    \item Adaptation des algorithmes pour le module
+    \item Point de départ : l'article
+
+      Andrew J. Kennedy, \textit{Drawing Trees}, Journal of Functional Programming 
+
+    \item Adaptation de l'algorithme pour prendre en compte la taille
+      des n\oe uds
     \end{itemize}
     \column{0.3 \linewidth}
-    \includegraphics[scale=1.5]{tree5.mps}
+%    \includegraphics[scale=1.5]{tree5.mps}
 
-    \bigskip
-    \bigskip
     \includegraphics[scale=1.2]{tree4.mps}
     \end{columns}
 \end{frame}
@@ -331,8 +334,8 @@ val smart_path : ?style:joint -> orientation list
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Screenshot}
-\includegraphics[scale=0.4]{screen2.png}
+\begin{frame}{Démo}
+  
 \end{frame}
 
 
