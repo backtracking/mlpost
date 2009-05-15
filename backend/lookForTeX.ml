@@ -52,7 +52,7 @@ and joint acc j =
 and direction acc d = 
   match d.Hashcons.node with
     | Vec p -> point acc p
-    | Curl _ | NoDir _ -> acc
+    | Curl _ | NoDir -> acc
 and metapath' acc = function
   | MPAConcat (pa,j,p) -> metapath (knot (joint acc j) pa) p
   | MPAAppend (p1,j,p2) -> metapath (metapath (joint acc j) p1) p2
