@@ -10,13 +10,11 @@ let id x = x
 open Point_lib
 open Point_lib.Infix
 
-let rec one_to_one f a = function
-  | [] -> a
-  | e::l -> one_to_one f (List.fold_left (f e) a l) l
-      
 let rec one_to_one2 f acc a b =
-  List.fold_left (fun acc ea -> List.fold_left (fun acc eb -> f acc ea eb) acc b) acc a
-
+  List.fold_left 
+    (fun acc ea -> 
+      List.fold_left (fun acc eb -> f acc ea eb) acc b) 
+    acc a
 
 let inter_depth = ref 15
 let debug = false
@@ -47,8 +45,7 @@ let print_spline fmt pt =
   Format.fprintf fmt "@[%f|%f { %a,@ %a,@ %a,@ %a }@]@." 
     pt.smin pt.smax pt_f pt.sa pt_f pt.sb pt_f pt.sc pt_f pt.sd
 
-let print_splines fmt pl =
-  List.iter (fun e -> Format.fprintf fmt "%a;" print_spline e) pl
+let print_splines = Misc.print_list Misc.semicolon print_spline
 
 let print fmt = function 
   | Point p -> fprintf fmt "@[Point %a@]" P.print p
@@ -56,22 +53,38 @@ let print fmt = function
 
 let printf = print
 
-let s_of_01 s t = t*.(s.smax-.s.smin)+.s.smin
-let _01_of_s s t = (t-.s.smin)/.(s.smax-.s.smin)
+let s_of_01 s t = t *. (s.smax -. s.smin) +. s.smin
+let _01_of_s s t = (t -. s.smin) /. (s.smax -. s.smin)
 
 let create_point p = Point p
 
-let create a b c d = Path {pl=[{sa = a;sb = b;sc = c; sd = d;smin = 0.;smax = 1.;start = true}];cycle=false}
-let create_line a d = Path {pl=[{sa=a;sb=a;sc=d;sd=d;smin=0.;smax=1.;start=true}];cycle=false}
+let create_spline ?(start=false) ?(min=0.) ?(max=1.) a b c d = 
+  { sa = a; sb = b;
+    sc = c; sd = d;
+    smin = min; smax = max;
+    start = start
+  }
+
+let create_with_offset ?start offs a b c d =
+  create_spline ?start ~min:offs ~max:(offs +. 1.) a b c d
+
+let create a b c d = 
+  Path {pl = [create_spline ~start:true a b c d ]; cycle = false}
+
+let create_line a d = create a a d d 
+
 let create_lines = function 
   | [] -> assert false
   | [a] -> Point a
-  | l -> let rec aux = function
-      |[] |[_]-> []
-      |a::(d::_ as l) -> {sa=a;sb=a;sc=d;sd=d;smin=0.;smax=1.;start=false}::aux l in
-    match aux l with
-      |[] -> assert false
-      |a::l -> Path {pl={a with start = true}::l;cycle=false}
+  | l -> 
+      let rec aux = function
+        | [] |[_]-> []
+        | a::(d::_ as l) -> 
+            (create_spline a a d d) :: aux l
+      in
+      match aux l with
+      | [] -> assert false
+      | a::l -> Path {pl={a with start = true}::l;cycle=false}
 
 
 let min_abscissa = function
@@ -91,44 +104,33 @@ let last_point = function
   | Path p -> (List.hd (List.rev p.pl)).sa
   | Point p -> p
 
+let with_last f p = 
+  let rec aux = function
+    | [] -> assert false
+    | [{sc=sc; sd = sd; smax = smax}] -> [ e; f sc sd smax]
+    | a::l -> a::(aux l) 
+  in
+  {p with pl = aux p.pl}
+
 let add_end p c d =
   match p with
-    | Path p ->
-        let rec aux p = 
-          match p with
-            | [] -> assert false (* a path always have one element *)
-            | [{sc=mb;sd=a;smax=smax} as e] -> [e;{sa = a;sb = 2. */ a -/ mb;
-                                                   sc = c;sd = d;smin=smax;smax=smax+.1.; start = false}]
-            | a::l -> a::(aux l) in
-        Path {p with pl=aux p.pl}
-    | Point p -> create p c c d
+  | Point p -> create p c c d
+  | Path p ->
+      Path (with_last 
+        (fun mb a smax -> create_with_offset smax a (2. */ a -/ mb) c d) p)
 
 let add_end_line p d =
   match p with
-    | Path p -> 
-        let rec aux p = 
-          match p with
-            | [] -> assert false (* a path always have one element *)
-            | [{sc=mb;sd=a;smax=smax} as e] -> [e;{sa = a;sb = a;
-                                                   sc = d;sd = d;smin=smax;smax=smax+.1.; start = false}]
-            | a::l -> a::(aux l) in
-        Path {p with pl=aux p.pl}
-    |Point p -> create_line p d
+  | Point p -> create_line p d
+  | Path p ->
+      Path (with_last (fun mb a smax -> create_with_offset smax a a d d) p)
 
 let add_end_spline p sb sc d =
   match p with
-    | Path p ->
-        let rec aux p = 
-          match p with
-            | [] -> assert false (* a path always have one element *)
-            | [{sc=mb;sd=a;smax=smax} as e] -> [e;{sa = a;sb = sb;
-                                                   sc = sc;sd = d;smin=smax;
-                                                   smax=smax+.1.; start = false}]
-            | a::l -> a::(aux l) in
-        Path {p with pl=aux p.pl}
-    | Point p -> create p sb sc d
+  | Point p -> create p sb sc d
+  | Path p ->
+      Path (with_last (fun mb a smax -> create_with_offset smax a sb sc d) p)
 
-let apply f s = f s.sa s.sb s.sc s.sd
 
 let f4 f a b c d = f (f a b) (f c d)
 
@@ -159,7 +161,8 @@ let abscissa_to_point p0 t =
 
 let direction_of_abscissa_aux s t = 
   (*Format.printf "s = %a; t = %f@." print_spline s t;*)
-  (t**2.)*/ s.sd +/ (((2.*.t)-.(3.*.(t**2.)))) */ s.sc +/ ((1.-.(4.*.t)+.(3.*.(t**2.)))) */ s.sb +/ (-.((1.-.t)**2.)) */ s.sa
+  (t**2.) */ s.sd +/ (((2. *. t) -. (3. *. (t**2.)))) */ s.sc +/ 
+  ((1. -. (4. *. t)+.(3. *. (t**2.)))) */ s.sb +/ (-.((1. -. t)**2.)) */ s.sa
 (* le // 3 est pour la comp avec metapost *)
 
 let direction_of_abscissa p0 t = 
