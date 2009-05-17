@@ -107,7 +107,7 @@ let last_point = function
 let with_last f p = 
   let rec aux = function
     | [] -> assert false
-    | [{sc=sc; sd = sd; smax = smax}] -> [ e; f sc sd smax]
+    | [{sc=sc; sd = sd; smax = smax} as e] -> [ e; f sc sd smax]
     | a::l -> a::(aux l) 
   in
   {p with pl = aux p.pl}
