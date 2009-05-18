@@ -129,6 +129,13 @@ let pathl arg = ct_auxl path arg; List.map Compute.path arg
 let metapathl arg = ct_auxl metapath arg; List.map Compute.metapath arg
 let picturel arg = ct_auxl picture arg; List.map Compute.picture arg
 
+let commandl_error ferror arg = ct_auxl command arg; List.map (ferror Compute.command) arg
+let numl_error ferror arg = ct_auxl num arg; List.map (ferror Compute.num) arg
+let pointl_error ferror  arg = ct_auxl point arg; List.map (ferror Compute.point) arg
+let pathl_error ferror  arg = ct_auxl path arg; List.map (ferror Compute.path) arg
+let metapathl_error ferror  arg = ct_auxl metapath arg; List.map (ferror Compute.metapath) arg
+let picturel_error ferror arg = ct_auxl picture arg; List.map (ferror Compute.picture) arg
+
 
 let command arg = ct_aux command arg; Compute.command arg
 let num arg = ct_aux num arg; Compute.num arg

@@ -202,5 +202,5 @@ let automaton4 =
 (*parse >> *)
 
 let () = Metapost.emit "automaton1" automaton1
-(*let () = Metapost.emit "automaton2" automaton2
-let () = Metapost.emit "automaton4" automaton4*)
+let () = Metapost.emit "automaton2" automaton2
+let () = Metapost.emit "automaton4" automaton4

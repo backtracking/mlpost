@@ -16,16 +16,18 @@
 
 open Format
 
-let generate_tex tf tmpl1 tmpl2 l =
-  let minipage fmt i tmpl =
-    fprintf fmt "@[<hov 2>\\begin{minipage}[tb]{0.5\\textwidth}@\n";
+  let minipage fmt coef i tmpl sep suf =
+    fprintf fmt "@[<hov 2>\\begin{minipage}[tb]{%f\\textwidth}@\n" coef;
     fprintf fmt "@[<hov 2>\\begin{center}@\n";
     fprintf fmt 
-      "\\includegraphics[width=\\textwidth,height=\\textwidth,keepaspectratio]{%s.%i}" 
-      tmpl i;
+      "\\includegraphics[width=\\textwidth,height=\\textwidth,keepaspectratio]{%s%s%i%s}" 
+      tmpl sep i suf;
     fprintf fmt "@]@\n\\end{center}@\n";
     fprintf fmt "@]@\n\\end{minipage}@\n"
-  in
+
+let generate_tex ?(pdf=false) tf tmpl1 tmpl2 l =
+  let suf = if pdf then ".mps" else "" in
+  let sep = if pdf then "-" else "." in
     Misc.write_to_formatted_file tf
       (fun fmt ->
           fprintf fmt "\\documentclass[a4paper]{article}@.";
@@ -34,8 +36,24 @@ let generate_tex tf tmpl1 tmpl2 l =
           List.iter
             (fun (i,_) ->
                fprintf fmt "@\n %i" i;
-               minipage fmt i tmpl1;
-               minipage fmt i tmpl2;
+               minipage fmt 0.5 i tmpl1 sep suf;
+               minipage fmt 0.5 i tmpl2 sep suf;
+               fprintf fmt "@\n \\vspace{3cm}@\n"
+            ) l ;
+          fprintf fmt "@]@\n\\end{document}@.")
+
+let generate_tex_cairo tf tmpl1 tmpl2 tmpl3 l =
+    Misc.write_to_formatted_file tf
+      (fun fmt ->
+          fprintf fmt "\\documentclass[a4paper]{article}@.";
+          fprintf fmt "\\usepackage[]{graphicx}@.";
+          fprintf fmt "@[<hov 2>\\begin{document}@.";
+          List.iter
+            (fun (i,_) ->
+               fprintf fmt "@\n %i" i;
+               minipage fmt 0.3 i tmpl1 "-" ".mps";
+               minipage fmt 0.3 i tmpl2 "-" ".mps";
+               minipage fmt 0.3 i tmpl3 "-" ".pdf";
                fprintf fmt "@\n \\vspace{3cm}@\n"
             ) l ;
           fprintf fmt "@]@\n\\end{document}@.")

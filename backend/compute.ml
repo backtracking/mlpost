@@ -35,7 +35,8 @@ let memoize f fname memoize =
             try 
               f arg.node 
             with exn -> 
-              Format.printf "Compute.%s raises : %s@.@?" fname (Printexc.to_string exn);
+              if debug then
+                Format.printf "Compute.%s raises : %s@.@?" fname (Printexc.to_string exn);
               raise exn
           in
           Hashtbl.add memoize arg.tag result;

@@ -47,7 +47,16 @@ let sprintf s =
   Format.kfprintf 
     (fun _ -> Format.pp_print_flush fmt (); Buffer.contents buf) fmt s
 
-  
+(*Filename.generic_quote*)
+let generic_quote whatquote quotequote s =
+  let l = String.length s in
+  let b = Buffer.create (l + 20) in
+  for i = 0 to l - 1 do
+    if s.[i] = whatquote
+    then Buffer.add_string b quotequote
+    else Buffer.add_char b  s.[i]
+  done;
+  Buffer.contents b  
 
 
 

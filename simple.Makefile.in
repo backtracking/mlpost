@@ -144,13 +144,13 @@ handbook: $(CMXA) handbookgraphs.ml
 	./handbook.exe
 	make -C test manual
 	make -C test/manual mpost
-	$(PSVIEWER) test/testmanual.ps
+	$(PDFVIEWER) test/testmanual.pdf
 
 handbook.byte: $(CMA) handbookgraphs.ml
 	ocaml unix.cma $(CMA) handbookgraphs.ml
 	make -C test manual
 	make -C test/manual mpost
-	$(PSVIEWER) test/testmanual.ps
+	$(PDFVIEWER) test/testmanual.pdf
 
 other: $(CMXA) othergraphs.ml
 	$(OCAMLOPT) -o othergraphs.exe unix.cmxa $(CMXA) othergraphs.ml

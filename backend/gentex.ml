@@ -56,7 +56,7 @@ let create prelude = function
     let file = open_out latex in
     Printf.fprintf file "%t" format;
     close_out file;
-    let exit_status = Sys.command (sprintf "%s %s > /dev/null" com_latex latex) in
+    let exit_status = Sys.command (sprintf "%s -halt-on-error %s > gentex_dev_null.log" com_latex latex) in
     if exit_status <> 0 then failwith (sprintf "Error with : %s %s" com_latex latex);
     let dvi = genfile_name^".dvi" in
     let saved = Saved_device.load_file true dvi in

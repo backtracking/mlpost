@@ -16,3 +16,7 @@ let dump_pdf () = Queue.iter (fun (_,fname,fig) -> emit_pdf (fname^".pdf") fig) 
 let dump_pdfs fname = 
   let figs = List.rev (Queue.fold (fun l (_,_,x) ->  x::l) [] Metapost.figures) in
   emit_pdfs (fname^".pdf") figs
+
+let generate_pdfs pdffile figs = List.iter 
+  (fun (i,fig) -> emit_pdf ~msg_error:100. 
+     (Printf.sprintf "%s-%i.pdf" pdffile i) fig) figs

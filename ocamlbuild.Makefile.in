@@ -49,14 +49,14 @@ TOOL= tool.byte
 endif
 
 ifeq "$(TERM)" "dumb"
-DISPLAY= -classic-display
+OCAMLBUILD_DISPLAY= -classic-display
 else
-DISPLAY=
+OCAMLBUILD_DISPLAY=
 endif
 
 DTYPES = -tag dtypes
 
-OCAMLBUILD := ocamlbuild -no-links $(DTYPES) -tag cairo_@CAIRO@ $(DISPLAY)
+OCAMLBUILD := ocamlbuild -no-links $(DTYPES) -tag cairo_@CAIRO@ $(OCAMLBUILD_DISPLAY)
 BUILD := _build/
 
 CMA := mlpost.cma
@@ -115,7 +115,7 @@ handbook: handbookgraphs.ml
 	$(BUILD)/handbookgraphs.native
 	make -C test manual
 	make -C test/manual mpost
-	$(PSVIEWER) test/testmanual.ps
+	$(PDFVIEWER) test/testmanual.pdf
 
 handbook.byte: handbookgraphs.ml
 	$(OCAMLBUILD) handbookgraphs.byte

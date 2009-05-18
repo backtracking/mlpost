@@ -18,7 +18,7 @@ let rec one_to_one2 f acc a b =
 
 let inter_depth = ref 15
 let debug = false
-let info = true
+let info = false
 
 type abscissa = float
 

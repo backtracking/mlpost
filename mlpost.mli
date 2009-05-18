@@ -1850,6 +1850,13 @@ module Metapost : sig
     ?eps:bool ->
     (int * Command.t) list -> unit
 
+  val generate :
+    string ->
+    ?prelude:string ->
+    ?pdf:bool ->
+    ?eps:bool ->
+    (int * Command.t) list -> unit
+
   val emit : string -> Command.t -> unit
   val dump : ?prelude:string -> ?pdf:bool -> ?eps:bool -> string -> unit
     (** [dump ?prelude ?pdf f] builds a Metapost file [f.mp] for all figures,
@@ -1878,7 +1885,10 @@ module Metapost : sig
 end
 
 module Generate : sig
-  val generate_tex : string -> string -> string -> (int * 'a) list -> unit
+  val generate_tex : ?pdf:bool -> string -> string -> string -> (int * 'a) list -> unit
+
+  val generate_tex_cairo : string -> string -> string -> string -> (int * 'a) list -> unit
+
 end
 
 module Cairost : sig
@@ -1887,7 +1897,8 @@ module Cairost : sig
 
   val float_of_num : Num.t -> float
 
-  val emit_pdf : string -> Command.t -> unit
+  val emit_pdf : ?msg_error:float -> string -> Command.t -> unit
+    (* The optional argument set the replacement the figure by the text of the exception in a paragraph of width msg_error *)
   val emit_ps : string -> Command.t -> unit
   val emit_png : string -> Command.t -> unit
   val emit_svg : string -> Command.t -> unit
@@ -1897,6 +1908,9 @@ module Cairost : sig
   val dump_pdf : unit -> unit
   val dump_pdfs : string -> unit
     (** Use the figures recorded by the function emit of metapost *)
+
+  val generate_pdfs : string ->
+    (int * Command.t) list -> unit
 
   include Cairost_sig.S
 

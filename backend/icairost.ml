@@ -18,9 +18,24 @@ let rec iter_after f after = function
   | [a] -> f a
   | a::l -> f a; after a;iter_after f after l
 
-let emit_gen create next_page figs = 
+let error_replace_by_tex msg_error f arg = 
+  match msg_error with
+  | None -> f arg
+  | Some w -> try f arg with exn -> 
+      let msg = sprintf "Error : %s" (Printexc.to_string exn) in
+      let msg = Misc.generic_quote '_' "\\_" msg in
+      printf "%s@." msg;
+      f (Types.mkCDrawPic (Types.mkPITex (sprintf 
+"\\begin{minipage}{%f pt}
+%s
+\\end{minipage}
+" w  msg)))
+
+
+
+let emit_gen ?msg_error create next_page figs = 
   (*Format.printf "Fig : %a" Print.command fig;*)
-  let figs = LookForTeX.commandl figs in
+  let figs = LookForTeX.commandl_error (error_replace_by_tex msg_error) figs in
   let ({x=xmin;y=ymin},{x=xmax;y=ymax}) = Point_lib.list_min_max Picture_lib.bounding_box figs in
   let height = ymax -. ymin in
   let width = xmax -. xmin in
@@ -31,7 +46,7 @@ let emit_gen create next_page figs =
 
 let dumb_next_page _ _ = assert false
 
-let emit_pdf fname fig = emit_gen (create Cairo_pdf.surface_create_for_channel fname) dumb_next_page [fig]
+let emit_pdf ?msg_error fname fig = emit_gen ?msg_error (create Cairo_pdf.surface_create_for_channel fname) dumb_next_page [fig]
 let emit_ps fname fig = emit_gen (create Cairo_ps.surface_create_for_channel fname) dumb_next_page [fig]
 let emit_svg fname fig = emit_gen (create Cairo_svg.surface_create_for_channel fname) dumb_next_page [fig]
 let emit_png fname fig = emit_gen 
@@ -44,6 +59,10 @@ let emit_png fname fig = emit_gen
      Cairo.surface_finish surf;
      Cairo_png.surface_write_to_file surf fname) dumb_next_page [fig]
 
-let emit_cairo gencr (fig:Command.t) = emit_gen (fun draw height width -> draw (gencr height width)) dumb_next_page [fig]
+let emit_cairo gencr (fig:Command.t) = emit_gen 
+  (fun draw height width -> draw (gencr height width)) 
+  dumb_next_page [fig]
 
-let emit_pdfs fname figs = emit_gen (create Cairo_pdf.surface_create_for_channel fname) (fun cr _ -> Cairo.show_page cr) figs
+let emit_pdfs fname figs = emit_gen 
+  (create Cairo_pdf.surface_create_for_channel fname) 
+  (fun cr _ -> Cairo.show_page cr) figs

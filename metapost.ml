@@ -299,12 +299,29 @@ let dump_tex ?prelude f =
   fprintf fmt "\\end{document}@.";
   close_out c
 
-let dump ?prelude ?(pdf=false) ?eps bn = 
+let generate_aux bn ?prelude ?(pdf=false) ?eps figl =
   let f = bn ^ ".mp" in
-  let figl = Queue.fold (fun l (i,_,f) -> (i,f) :: l) [] figures in
   generate_mp f ?prelude ?eps figl;
   let out = Sys.command (sprintf "mpost -interaction=\"nonstopmode\" %s end" f) in
-  if out <> 0 then exit 1;
+  if out <> 0 then exit 1
+
+let generate bn ?prelude ?(pdf=false) ?eps figl =
+  generate_aux bn ?prelude ~pdf ?eps figl;
+  let suf = if pdf then ".mps" else ".1" in
+  let sep = if pdf then "-" else "." in
+  List.iter 
+    (fun (i,_) -> 
+       let si = string_of_int i in
+       printf "mv %s" (bn ^ "." ^ si);
+      Sys.rename (bn ^ "." ^ si) (bn ^ sep ^ si ^ suf))
+    figl
+  
+
+
+
+let dump ?prelude ?(pdf=false) ?eps bn = 
+  let figl = Queue.fold (fun l (i,_,f) -> (i,f) :: l) [] figures in
+  generate_aux bn ?prelude ~pdf ?eps figl;
   let suf = if pdf then ".mps" else ".1" in
   Queue.iter 
     (fun (i,s,_) -> 

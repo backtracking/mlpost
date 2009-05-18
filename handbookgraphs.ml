@@ -37,7 +37,7 @@ let l1 = z0::z1::z2::z3::z4::[]
 let labels1 =
   seq [H.dotlabels ~pos:`Top ["0";"2";"4"] (map_bp [z0;z2;z4]);
        dotlabel ~pos:`Left (tex "3") (bpp z3);
-       dotlabel ~pos:`Right (tex "1") (bpp z1) ]
+       dotlabel ~pos:`Lowright (tex "1") (bpp z1) ]
 
 let draw3 = 3, seq [ draw (path ~style:jCurve  l1); labels1 ]
 
@@ -154,7 +154,7 @@ let draw17 =
   let a, b = Num.inch (0.7), Num.inch (0.5) in
   let z0 = p (0.,0.) in
   let z1 = pt (a, zero) and z3 = pt (neg a, zero) in
-  let z2 = pt (zero, b) and z4 = pt (zero, neg a) in
+  let z2 = pt (zero, b) and z4 = pt (zero, neg b) in
     17, seq [draw (pathp ~cycle:jCurve [z1;z2;z3;z4]);
 	 draw (pathp ~style:jLine [z1; z0; z2]);
 	 label ~pos:`Top (tex "a") (segment 0.5 z0 z1);
@@ -256,11 +256,22 @@ let figs =
     draw10a; draw10b; draw10c] @ draw11 
   @ [draw17; draw18; draw21; draw22; draw40]
 
-let mpostfile = "test/testmanual.mp"
-let texfile = "test/testmanual.tex"
+let mpostfile = "testmanual"
+let cairostfile = "testmanual_cairo"
+let texfile = "testmanual.tex"
 
 let _ =
-  Metapost.generate_mp mpostfile figs;
-  Generate.generate_tex texfile "manual/manual" "testmanual" figs
+  Sys.chdir "test";
+  if Cairost.supported then
+    begin
+      Metapost.generate mpostfile ~pdf:true figs;
+      Cairost.generate_pdfs cairostfile figs;
+      Generate.generate_tex_cairo texfile "manual/manual" "testmanual" "testmanual_cairo" figs;
+    end
+  else
+    begin
+      Metapost.generate mpostfile ~pdf:true figs;
+      Generate.generate_tex ~pdf:true texfile "manual/manual" "testmanual" figs;
+    end
 
 

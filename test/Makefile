@@ -1,8 +1,8 @@
 manual: testmanual.mp
-	mpost testmanual.mp end
-	make -C manual
-	latex testmanual.tex
-	dvips testmanual.dvi -o testmanual.ps
+	#mpost testmanual.mp end
+	make -C manual mps
+	pdflatex testmanual.tex
+	#dvips testmanual.dvi -o testmanual.ps
 
 other: othergraphs.mp
 	mpost othergraphs.mp end
@@ -28,5 +28,6 @@ clean:
 	make -C manual clean
 	make -C othergraphs clean
 	rm -f testmanual.*
+	rm -f testmanual_cairo.*
 	rm -f tests.*
 	rm -f othergraphs.*
