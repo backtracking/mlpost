@@ -36,10 +36,7 @@ type path_ = {pl : spline list;
 type path = | Point of point
             | Path of path_
 
-
-
-let pt_f fmt p =
-  Format.fprintf fmt "{@[ %.20g,@ %.20g @]}" p.x p.y
+let pt_f fmt p = Format.fprintf fmt "{@[ %.20g,@ %.20g @]}" p.x p.y
 
 let print_spline fmt pt =
   Format.fprintf fmt "@[%f|%f { %a,@ %a,@ %a,@ %a }@]@." 
@@ -129,19 +126,20 @@ let add_end_spline p sb sc d =
   match p with
   | Point p -> create p sb sc d
   | Path p ->
-      Path (with_last (fun mb a smax -> create_with_offset smax a sb sc d) p)
+      Path (with_last (fun _ a smax -> create_with_offset smax a sb sc d) p)
 
 
 let f4 f a b c d = f (f a b) (f c d)
 
 let cubic a b c d t =
-  t*.(t*.(t*.(d +. 3.*.(b-.c) -. a)+.3.*.(c -. (2.*.b) +. a))+.3.*.(b -. a))+.a
+  t*.(t*.(t*.(d +. 3.*.(b -. c) -. a) +. 3. *. (c -. (2. *. b) +. a)) 
+      +. 3. *. (b -. a)) +. a
     (*  ((t^3)*(d - (3*c) + (3*b) - a)) + (3*(t^2)*(c - (2*b) + a)) + (3*t*(b - a)) + a*)
     (*  d*.(t**3.)+.3.*.c*.(t**2.)*.(1.-.t)+.3.*.b*.(t**1.)*.(1.-.t)**2.+.a*.(1.-.t)**3.*)
 
 let cubic_point s t =
-  {x=cubic s.sa.x s.sb.x s.sc.x s.sd.x t;
-   y=cubic s.sa.y s.sb.y s.sc.y s.sd.y t;}
+  { x=cubic s.sa.x s.sb.x s.sc.x s.sd.x t;
+    y=cubic s.sa.y s.sb.y s.sc.y s.sd.y t;}
 
 let cubic_point_s s t = cubic_point s (_01_of_s s t)
 
@@ -149,21 +147,31 @@ let abscissa_to_point p0 t =
   match p0 with
     | Path p ->
         let rec aux = function
-          |[] -> invalid_arg "abscissa_to_point : the abscissa given is greater than max_abscissa" 
+          |[] -> 
+              invalid_arg 
+              "abscissa_to_point : the abscissa given is greater than max_abscissa" 
           | a::l when a.smax >= t -> cubic_point_s a t
-          | _::l -> aux l in
+          | _::l -> aux l 
+        in
         if min_abscissa p0 > t then 
           invalid_arg "abscissa_to_point : the abscissa given is smaller than min_abscissa"
         else aux p.pl
     | Point p when t = 0. -> p
-    | Point _ -> invalid_arg "abscissa_to_point : a point has only the abscissa 0."
+    | Point _ -> 
+        invalid_arg "abscissa_to_point : a point has only the abscissa 0."
 
 
 let direction_of_abscissa_aux s t = 
-  (*Format.printf "s = %a; t = %f@." print_spline s t;*)
+  (* An expression as polynomial:
+    short but lots of point operations
+    (d-3*c+3*b-a)*t^2+(2*c-4*b+2*a)*t+b-a *) 
+(*
+  t */ (t */ (s.sd -/ 3. */ (s.sc +/ s.sb) -/ s.sa) +/ 
+  2. */ (s.sc +/ s.sa -/ 2. */ s.sb)) +/ s.sb -/ s.sa
+*)
+(* This expression is longer, but has less operations on points: *)
   (t**2.) */ s.sd +/ (((2. *. t) -. (3. *. (t**2.)))) */ s.sc +/ 
   ((1. -. (4. *. t)+.(3. *. (t**2.)))) */ s.sb +/ (-.((1. -. t)**2.)) */ s.sa
-(* le // 3 est pour la comp avec metapost *)
 
 let direction_of_abscissa p0 t = 
   match p0 with
@@ -176,30 +184,29 @@ let direction_of_abscissa p0 t =
         if min_abscissa p0 > t then 
           invalid_arg "direction_of_abscissa : the abscissa given is smaller than min_abscissa"
         else aux p.pl
-        
 
-let extremum conv l a b c d =
-  let test s l = if s>=0. && s<=1. then (conv s)::l else l in
+let extremum a b c d =
+  let test s l = if s>=0. && s<=1. then s::l else l in
   let sol delta = (delta -. (2.*.b) +. a +. c)/.(a -. d +. (3.*.(c -. b))) in
   let delta = ((b*.b) -. (c*.(b +. a -. c)) +. (d*.(a -. b)))**0.5 in
   match compare delta 0. with
     | x when x<0 -> []
-    | 0 -> test (sol 0.) l
-    | _ -> test (sol delta) (test (sol (-.delta)) l)
+    | 0 -> test (sol 0.) []
+    | _ -> test (sol delta) (test (sol (-.delta)) [])
 
-let remarquable conv l a b c d = 0.::1.::(extremum conv l a b c d)
+let remarquable a b c d = 0.::1.::(extremum a b c d)
 
-(*let extremum_point p = List.fold_left (fun s -> extremum s_of_01) p
-
-  let remarquable_point p = List.fold_left (fun l s -> s.smin::(s.smax::(extremum s_of_01 l s))) p
-*)
+let apply_x f s = f s.sa.x s.sb.x s.sc.x s.sd.x
+let apply_y f s = f s.sa.y s.sb.y s.sc.y s.sd.y
 (** simple intersection *)
+(*
 let give_bound s =
-  let x_max = f4 max s.sa.x s.sb.x s.sc.x s.sd.x in
-  let y_max = f4 max s.sa.y s.sb.y s.sc.y s.sd.y in
-  let x_min = f4 min s.sa.x s.sb.x s.sc.x s.sd.x in
-  let y_min = f4 min s.sa.y s.sb.y s.sc.y s.sd.y in
+  let x_max = apply_x (f4 max) s in
+  let y_max = apply_y (f4 max) s in
+  let x_min = apply_x (f4 min) s in
+  let y_min = apply_y (f4 min) s in
   (x_min,y_min,x_max,y_max)
+*)
     
 let list_min_max f p = 
   List.fold_left (fun (x_min,y_min,x_max,y_max) s ->
@@ -208,22 +215,23 @@ let list_min_max f p =
                      max x_max sx_max,max y_max sy_max))
     (infinity,infinity,neg_infinity,neg_infinity) p
 
+(*
 let unprecise_bounding_box = function
   | Path s -> 
       let (x_min,y_min,x_max,y_max) = 
         list_min_max give_bound s.pl in
       ({x=x_min;y=y_min},{x=x_max;y=y_max})
   | Point s -> (s,s)
+*)
 
 let give_bound_precise s =
-      let x_remarq = List.map (cubic s.sa.x s.sb.x s.sc.x s.sd.x) (remarquable id [] s.sa.x s.sb.x s.sc.x s.sd.x) in
-      let y_remarq = List.map (cubic s.sa.y s.sb.y s.sc.y s.sd.y) (remarquable id [] s.sa.y s.sb.y s.sc.y s.sd.y) in
+      let x_remarq = List.map (apply_x cubic s) (apply_x remarquable s) in
+      let y_remarq = List.map (apply_y cubic s) (apply_y remarquable s) in
       let x_max = List.fold_left max neg_infinity x_remarq in
       let y_max = List.fold_left max neg_infinity y_remarq in
       let x_min = List.fold_left min infinity x_remarq in
       let y_min = List.fold_left min infinity y_remarq in
       (x_min,y_min,x_max,y_max)
-
     
 let bounding_box = function
   | Path s ->
@@ -235,17 +243,22 @@ let bounding_box = function
 let test_in amin amax bmin bmax =
   (amin <= bmax && bmin <= amax)
     
+(*
 let is_intersect a b = 
   let (ax_min,ay_min,ax_max,ay_max) = give_bound a in
   let (bx_min,by_min,bx_max,by_max) = give_bound b in
   test_in ax_min ax_max bx_min bx_max &&
     test_in ay_min ay_max by_min by_max
+*)
     
 let is_intersect_precise a b =
   let (ax_min,ay_min,ax_max,ay_max) = give_bound_precise a in
   let (bx_min,by_min,bx_max,by_max) = give_bound_precise b in
   test_in ax_min ax_max bx_min bx_max &&
     test_in ay_min ay_max by_min by_max
+
+let give_bound = give_bound_precise
+let is_intersect  = is_intersect_precise
 
 
 let bisect a =

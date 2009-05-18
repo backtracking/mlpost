@@ -1,4 +1,6 @@
-manual: testmanual.mp
+manual: testmanual.pdf
+
+testmanual.pdf: testmanual.tex
 	#mpost testmanual.mp end
 	make -C manual mps
 	pdflatex testmanual.tex
@@ -28,6 +30,6 @@ clean:
 	make -C manual clean
 	make -C othergraphs clean
 	rm -f testmanual.*
-	rm -f testmanual_cairo.*
-	rm -f tests.*
+	rm -f testmanual_cairo-*.*
+	rm -f tests.* *.mps *.pdf
 	rm -f othergraphs.*

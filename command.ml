@@ -34,7 +34,8 @@ let draw ?color ?pen ?dashed t =
      for each command in the output file *)
     mkCDraw t color pen dashed
 
-let draw_arrow ?color ?pen ?dashed t = mkCDrawArrow t color pen dashed
+let draw_arrow ?color ?pen ?dashed t = 
+  mkCDrawArrow t color pen dashed
 
 let fill ?color t = mkCFill t color
 
@@ -56,9 +57,3 @@ let externalimage filename spec = mkCExternalImage filename spec
 let iterl f l = seq (List.map f l)
 
 let nop = mkCSeq []
-
-(*
-let logo =
-  [ draw_box ~fill: Color.yellow
-      (Box.circle (PTPair (F 0., F 0.)) (PITex "Mlpost")) ]
-*)
