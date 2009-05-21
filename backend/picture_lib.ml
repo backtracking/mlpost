@@ -48,8 +48,13 @@ let tex t = {fcl = Tex t;
 let fill_path p c = {fcl = Fill_path (p,c);
                      fb = Spline_lib.Epure.of_path p;
                      fi = IntEmpty}
+
+let ecart_of_pen = function
+  | None -> {x=0.5;y=0.5}
+  | Some pen -> Point_lib.transform pen {x=0.5;y=0.5}
+
 let stroke_path p c pen d = {fcl= Stroke_path (p,c,pen,d);
-                             fb = Spline_lib.Epure.of_path p;
+                             fb = Spline_lib.Epure.of_path ~ecart:(ecart_of_pen pen) p;
                              fi = IntEmpty}
 
 let draw_point p = stroke_path (Spline_lib.create_point p) None (Some (Matrix.scale diameter_of_a_dot)) None
@@ -168,7 +173,7 @@ struct
     Cairo.save cr;
     inversey cr height;
     Cairo.set_line_width cr default_line_size;
-    (*Cairo.set_line_cap cr Cairo.LINE_CAP_ROUND;*)
+    Cairo.set_line_cap cr Cairo.LINE_CAP_ROUND;
     draw_aux cr p.fcl;
     (*Spline_lib.Epure.draw cr p.fb;*)
     Cairo.restore cr

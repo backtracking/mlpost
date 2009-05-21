@@ -1578,7 +1578,7 @@ struct
     | Path _ as path -> 
         draw_path cr path;
         Cairo.save cr;
-        Matrix.set cr pen;
+        (*Matrix.set*) Matrix.transform cr pen;
         Cairo.stroke cr;
         Cairo.restore cr;
     | Point p ->
@@ -1599,31 +1599,36 @@ end
 module Epure =
 struct
   (* A rendre plus performant ou pas*)
-  type t = spline list list
+  (* le point correspond à un écart à prendre autour de la bounding box *)
+  type t = (spline list * point) list
   let print fmt p = 
     Format.fprintf fmt "@[[%a]" 
-      (fun fmt -> List.iter (List.iter (fun e -> Format.fprintf fmt "%a;" print_spline e))) p
+      (fun fmt -> List.iter (List.iter (fun (e,f) -> Format.fprintf fmt "%a[%a];" print_spline e P.print f))) p
   let empty = []
-  let create = function
-    |Path p -> [p.pl]
-    |Point p -> [match of_bounding_box (p,p) with Path p -> p.pl | Point _ -> assert false]
+  let create ?(ecart=P.zero) = function
+    |Path p -> [p.pl,ecart]
+    |Point p -> [(match of_bounding_box (p,p) with Path p -> p.pl | Point _ -> assert false), ecart]
   let of_path = create
   let union x y = List.rev_append x y
-  let transform t x = List.map (fun x -> transform_aux t x) x
+  let transform t x = List.map (fun (x,f) -> transform_aux t x,P.transform t f) x
   let bounding_box sl =
     let (x_min,y_min,x_max,y_max) = 
-      list_min_max (list_min_max give_bound_precise) sl in
+      list_min_max (fun (e,f) -> 
+                      let (x_min,y_min,x_max,y_max)=
+                        list_min_max give_bound_precise e in
+                      let p1,p2 = ({x=x_min;y=y_min}-/f,{x=x_max;y=y_max}+/f) in
+                      (p1.x,p1.y,p2.x,p2.y)) sl in
     ({x=x_min;y=y_min},{x=x_max;y=y_max})
   let of_bounding_box l = create (of_bounding_box l)
 
-  let draw cr p = List.iter (List.iter 
+  let draw cr p = List.iter (fun (e,_) -> List.iter 
                                (function 
                                     s -> 
                                       Cairo.move_to cr s.sa.x s.sa.y ;
                                       Cairo.curve_to cr 
                                         s.sb.x s.sb.y 
                                         s.sc.x s.sc.y 
-                                        s.sd.x s.sd.y)) p;
+                                        s.sd.x s.sd.y) e) p;
     Cairo.stroke cr
 end
 

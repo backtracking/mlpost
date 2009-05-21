@@ -83,8 +83,8 @@ module Epure :
 sig
   type t
   val empty : t
-  val create : path -> t
-  val of_path : path -> t
+  val create : ?ecart:point -> path -> t
+  val of_path : ?ecart:point -> path -> t
   val union : t -> t -> t
   val transform : Matrix.t -> t -> t
   val bounding_box : t -> point * point
