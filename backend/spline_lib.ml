@@ -199,14 +199,12 @@ let remarquable a b c d = 0.::1.::(extremum a b c d)
 let apply_x f s = f s.sa.x s.sb.x s.sc.x s.sd.x
 let apply_y f s = f s.sa.y s.sb.y s.sc.y s.sd.y
 (** simple intersection *)
-(*
 let give_bound s =
   let x_max = apply_x (f4 max) s in
   let y_max = apply_y (f4 max) s in
   let x_min = apply_x (f4 min) s in
   let y_min = apply_y (f4 min) s in
   (x_min,y_min,x_max,y_max)
-*)
     
 let list_min_max f p = 
   List.fold_left (fun (x_min,y_min,x_max,y_max) s ->
@@ -215,14 +213,12 @@ let list_min_max f p =
                      max x_max sx_max,max y_max sy_max))
     (infinity,infinity,neg_infinity,neg_infinity) p
 
-(*
 let unprecise_bounding_box = function
   | Path s -> 
       let (x_min,y_min,x_max,y_max) = 
         list_min_max give_bound s.pl in
       ({x=x_min;y=y_min},{x=x_max;y=y_max})
   | Point s -> (s,s)
-*)
 
 let give_bound_precise s =
       let x_remarq = List.map (apply_x cubic s) (apply_x remarquable s) in
@@ -243,22 +239,17 @@ let bounding_box = function
 let test_in amin amax bmin bmax =
   (amin <= bmax && bmin <= amax)
     
-(*
 let is_intersect a b = 
   let (ax_min,ay_min,ax_max,ay_max) = give_bound a in
   let (bx_min,by_min,bx_max,by_max) = give_bound b in
   test_in ax_min ax_max bx_min bx_max &&
     test_in ay_min ay_max by_min by_max
-*)
     
 let is_intersect_precise a b =
   let (ax_min,ay_min,ax_max,ay_max) = give_bound_precise a in
   let (bx_min,by_min,bx_max,by_max) = give_bound_precise b in
   test_in ax_min ax_max bx_min bx_max &&
     test_in ay_min ay_max by_min by_max
-
-let give_bound = give_bound_precise
-let is_intersect  = is_intersect_precise
 
 
 let bisect a =

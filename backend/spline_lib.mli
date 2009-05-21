@@ -65,7 +65,7 @@ val subpath : path -> abscissa -> abscissa -> path
 val direction_of_abscissa : path -> abscissa -> point
 val abscissa_to_point : path -> abscissa -> point
 val bounding_box : path -> point * point
-(* val unprecise_bounding_box : path -> point * point *)
+val unprecise_bounding_box : path -> point * point
 val printf : Format.formatter -> path -> unit
 val dist_min_point : path -> point -> abscissa
 val dist_min_path : path -> path -> abscissa * abscissa
