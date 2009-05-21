@@ -441,7 +441,8 @@ let append ap0 sb sc bp0 =
   Path {pl=aux ap.pl;cycle=false}
     | _ -> raise (Not_implemented "autre cas de append") (* TODO *)
 
-let reverse = function 
+let reverse x = 
+    match x with
   | Path p as p0 ->
       let conv = 
         let max = max_abscissa p0 in
@@ -452,7 +453,7 @@ let reverse = function
         | [] -> acc
         | ({sa=sa;sd=sd;smin=smin;smax=smax} as a)::l -> 
             aux ({a with sa=sd;sd=sa;
-                    smin=conv smin; smax=conv smax}::acc) l in
+                    smin=conv smax; smax=conv smin}::acc) l in
       Path {p with pl = aux [] p.pl}
   | Point _ as p -> p
 
@@ -497,13 +498,11 @@ let split p0 t =
 let subpath p t1 t2 = fst (split (snd (split p t1)) t2)
 
 let cut_before a b = 
-  if debug then
-    Format.printf "Spline_lib.cut_before : a = %a; b = %a" print a print b;
-  fst (split a (fst (one_intersection a b)))
+  snd (split b (fst (one_intersection b a)))
+
 let cut_after a b = 
-  if debug then
-    Format.printf "Spline_lib.cut_after : a = %a; b = %a" print a print b;
-  reverse (fst (split a (fst (one_intersection (reverse a) b))))
+  let b = reverse b in
+  reverse (snd (split b (fst (one_intersection b a)))) 
 
 let dicho_split x = assert false
 

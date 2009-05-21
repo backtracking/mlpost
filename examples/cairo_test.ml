@@ -52,6 +52,13 @@ let tg p t = draw (pathp ~style:jLine [point t p;add (point t p) (direction t p)
 
 let test = seq ((draw path_test)::(List.map (tg path_test) [0.;0.264543;0.5;0.785651;1.;1.3528;1.5;1.8653;2.;]))
 
+let some_cut = 
+  let p = Point.p (10.,10.) in
+  let p1 = path [0., 0.; 50.,50.] in
+  let p2 = path [0., 50.; 50.,0.] in
+  let p3 = cut_after p1 p2 in
+  seq [ draw p1; draw p3; draw (Path.shift p p2) ]
+
 let w0 = 0.,0.
 let w1 = -50.,50.
 let w2 = 0.,100.
@@ -67,20 +74,13 @@ let labels2 =
 let circle = seq [draw (Path.scale (bp 100.) Path.halfcircle);draw (Path.scale (bp 50.) Path.quartercircle)]
 
 let to_export =     
-  [ (*"other27", other27;
+  [ "other27", other27;
     "handbook3", handbook3;
-    "ribbon", ribbon;*)
+    "ribbon", ribbon;
     "test", test;
-(*    "circle", circle;*)
+    "circle", circle;
+    "somecut", some_cut;
   ]
 
-let _ = 
-  List.iter (fun (name,fig) -> (*Cairost.emit_pdf (name^".pdf") fig;*) Metapost.emit name fig) to_export
-(*  ;Cairost.emit_pdfs "cairo_test.pdf" (List.map snd to_export)*)
+let _ = List.iter (fun (name,fig) -> Metapost.emit name fig) to_export
 
-
-(*let _ =
-  let north_east = Picture.north_east (Picture.make handbook3) in
-  let x,y = Point.xpart north_east, Point.ypart north_east in
-  Format.printf "@.north_east of circle : (%f,%f)@." (Cairost.float_of_num x) (Cairost.float_of_num y)
-*)
