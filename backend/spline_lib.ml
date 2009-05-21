@@ -281,95 +281,100 @@ type graph = {gt1 : int;
 
 exception Found of float*float
 
-let one_intersection_aux () a b =
-  if a=b then () else
-    let nmax = 2.**(float_of_int (!inter_depth+1)) in
-    let f_from_i s x = s_of_01 s ((float_of_int x)*.(1./.nmax)) in
-    let rec aux a b t1 t2 dt= function
-      | 0 -> 
-          if is_intersect a b 
-          then raise (Found (f_from_i a (t1+(dt/2)), f_from_i b (t2+(dt/2)))) 
-          else ()
-      | n -> let n = n-1 in
-	let dt = dt/2 in
+let intersect_fold f acc a b =
+  let rec aux acc a b t1 t2 dt = function
+    | 0 ->
+        if is_intersect a b then f (t1 + (dt/2), t2 + (dt/2)) acc
+        else acc
+    | n ->
         if is_intersect a b then
-          let (af,al) = bisect a in
-          let (bf,bl) = bisect b in
-          (* As Knuth said that doesn't find the first in the lexicographic order see §550 of metafont comment *)
-          aux af bf t1 t2 dt n;
-          aux af bl t1 (t2+dt) dt n;
-          aux al bf (t1+dt) t2 dt n;
-          aux al bl (t1+dt) (t2+dt) dt n in
-    try 
-      aux a b 0 0 (int_of_float nmax) !inter_depth
-    with
-        Found _ as res -> raise res
+          let n = n - 1 and dt = dt / 2 in
+          let a1,a2 = bisect a and b1,b2 = bisect b in
+          let acc = aux acc a1 b1 t1 t2 dt n in
+          let acc = aux acc a1 b2 t1 (t2+dt) dt n in
+          let acc = aux acc a2 b1 (t1+dt) t2 dt n in
+          let acc = aux acc a2 b2 (t1+dt) (t2+dt) dt n in
+          acc
+        else acc
+  in
+  let nmax = int_of_float (2.**(float_of_int (!inter_depth+1))) in
+  aux acc a b 0 0 nmax !inter_depth
+
+let one_intersection_aux a b =
+  let nmax = 2.**(float_of_int (!inter_depth+1)) in
+  let f_from_i s x = s_of_01 s ((float_of_int x)*.(1./.nmax)) in
+  intersect_fold 
+    (fun (x,y) () -> raise (Found (f_from_i a x,f_from_i b y))) 
+    () a b
 
 let one_intersection a b = 
   match a,b with
     | Path a,Path b ->
         (try
-          one_to_one2 one_intersection_aux () a.pl b.pl;
+          one_to_one2 (fun () -> one_intersection_aux) () a.pl b.pl;
            if debug then
-             (Format.printf "one_intersection : Not_found use 0.,0.@.@?";
-              0.,0.)
-           else
-             raise Not_found
-        with
-            Found (t1,t2) -> (t1,t2))
-    | _ -> if debug then
-             Format.printf "one_intersection : Not_found not two path@.@?";
+             (* debugging changes behaviour here - is this intended? *)
+             (Format.printf "one_intersection : Not_found use 0.,0.@."; 0.,0.)
+           else raise Not_found
+        with Found (t1,t2) -> (t1,t2))
+    | _ -> 
+        if debug then Format.printf "one_intersection : Not_found not two paths@.";
         raise Not_found
 
 let intersection_aux acc a b =
   if a=b then [] else
-    let rec aux a b l t1 t2 dt= function
-      | 0 -> if is_intersect a b then (t1+(dt/2),t2+(dt/2))::l else l
-      | n -> 
-          if debug then
-            (Format.printf "%a" print_spline a;
-	     Format.printf "%a" print_spline b);
-          if is_intersect a b then
-            let n = n-1 in
-	    let dt = dt/2 in
-            let (af,al) = bisect a in
-            let (bf,bl) = bisect b in
-            let l = aux af bf l t1 t2 dt n in
-            let l = aux af bl l t1 (t2+dt) dt n in
-            let l = aux al bf l (t1+dt) t2 dt n in
-            let l = aux al bl l (t1+dt) (t2+dt) dt n in
-            l
-          else l in
-    let rem_noise delta mdelta = function | [] -> [] | noisy ->
-      let graph = List.map (fun (t1,t2) -> {gt1= t1;gt2=t2;gedge = [];taken = false;gseenx=false;gseeny=false}) noisy in
-      let link sel msel seen = 
-        let sorted = List.fast_sort (fun x y -> compare (sel x) (sel y)) graph in
-        let rec pass bef = function
-          |[] -> ()
-          |e::l -> match ((sel e) - (sel bef) <= delta),abs ((msel e) - (msel bef)) <=mdelta, seen e with
-              | false, _, false -> pass e l
-              | false, _, true -> ()
-              | true, true, false -> bef.gedge<-e::bef.gedge;
-                  e.gedge<-bef::e.gedge;
-                  pass e l
-              | true, false, false -> pass e l; pass bef l
-              | true, false, true -> pass bef l
-              | true, true, true -> bef.gedge<-e::bef.gedge;
-                  e.gedge<-bef::e.gedge in
-        pass (List.hd sorted) (List.tl sorted) in
-      link (fun x -> x.gt1)  (fun x -> x.gt2) (fun x -> x.gseenx);
-      link (fun x -> x.gt2) (fun x -> x.gt1) (fun x -> x.gseeny);
-      let rec connexe (((t1,t2),n) as t12n) e = 
-        if e.taken then t12n
-        else (e.taken <- true;
+    let rem_noise delta mdelta = function 
+      | [] -> [] 
+      | noisy ->
+          let graph = 
+            List.map 
+            (fun (t1,t2) -> 
+              {gt1 = t1;gt2 = t2; gedge = [];
+               taken = false; gseenx = false; gseeny = false}) noisy 
+          in
+          let link sel msel seen = 
+            let sorted = 
+              List.fast_sort (fun x y -> compare (sel x) (sel y)) graph in
+            let rec pass bef = function
+              |[] -> ()
+              |e::l -> 
+                  match ((sel e) - (sel bef) <= delta),
+                        abs ((msel e) - (msel bef)) <=mdelta, 
+                        seen e 
+                  with
+                  | false, _, false -> pass e l
+                  | false, _, true -> ()
+                  | true, true, false -> 
+                      bef.gedge<-e::bef.gedge;
+                      e.gedge<-bef::e.gedge;
+                      pass e l
+                  | true, false, false -> pass e l; pass bef l
+                  | true, false, true -> pass bef l
+                  | true, true, true -> 
+                      bef.gedge<-e::bef.gedge;
+                      e.gedge<-bef::e.gedge 
+            in
+            pass (List.hd sorted) (List.tl sorted) 
+          in
+          link (fun x -> x.gt1)  (fun x -> x.gt2) (fun x -> x.gseenx);
+          link (fun x -> x.gt2) (fun x -> x.gt1) (fun x -> x.gseeny);
+          let rec connexe (((t1,t2),n) as t12n) e = 
+            if e.taken then t12n
+            else begin 
+              e.taken <- true;
               let np = n+.1. in
               let t12n = ((t1*.(n/.np)+.(float_of_int e.gt1)/.np,
                            t2*.(n/.np)+.(float_of_int e.gt2)/.np),np) in
-              List.fold_left connexe t12n e.gedge) in
-      List.fold_left (fun l e -> if e.taken then l 
-                      else (fst (connexe ((0.,0.),0.) e))::l) [] graph in
+              List.fold_left connexe t12n e.gedge 
+              end
+          in
+          List.fold_left 
+            (fun l e -> 
+              if e.taken then l else (fst (connexe ((0.,0.),0.) e))::l) 
+            [] graph 
+     in
     let nmax = 2.**(float_of_int (!inter_depth+1)) in
-    let l = aux a b [] 0 0 (int_of_float nmax) !inter_depth in
+    let l = intersect_fold (fun x acc -> x::acc) [] a b in
     (*if !debug then(
       Format.printf "@[";
       List.iter (fun (x,y) -> Format.printf "@[(%i,%i)@]" x y) l;
@@ -378,7 +383,7 @@ let intersection_aux acc a b =
     let mdelta = 16* !inter_depth in
     let l = rem_noise delta mdelta l in
     let f_from_i s x = s_of_01 s (x*.(1./.nmax)) in
-    let res = List.fold_left (fun acc (x,y) -> (f_from_i a x,f_from_i b y)::acc) acc l in
+    let res = List.rev_map (fun (x,y) -> (f_from_i a x,f_from_i b y)) l in
     if debug then
       Format.printf "@[%a@]@." (fun fmt -> List.iter (pt_f fmt))
         (List.map (fun (t1,t2) -> (cubic_point a t1) -/ (cubic_point b t2)) res);
