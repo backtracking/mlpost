@@ -7,10 +7,10 @@ testmanual.pdf: testmanual.tex
 	#dvips testmanual.dvi -o testmanual.ps
 
 other: othergraphs.mp
-	mpost othergraphs.mp end
-	make -C othergraphs
-	latex othergraphs.tex
-	dvips othergraphs.dvi -o othergraphs.ps
+	#mpost othergraphs.mp end
+	make -C othergraphs mps
+	pdflatex othergraphs.tex
+	#dvips othergraphs.dvi -o othergraphs.ps
 
 tests: tests.dvi
 	dvips tests.dvi -o tests.ps

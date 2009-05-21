@@ -1,5 +1,8 @@
 mpost:
 	mpost mpost.mp end
 
+mps : mpost
+	./convert_to_mps.sh
+
 clean:
-	rm -f mpost.[0-9]* mpost.log mpost.mpx
+	rm -f manual.[0-9]* manual.[0-9] *.mps manual.log manual.mpx

@@ -48,11 +48,11 @@ else
 TOOL= tool.byte
 endif
 
-ifeq "$(TERM)" "dumb"
+#ifeq "$(TERM)" "dumb"
 OCAMLBUILD_DISPLAY= -classic-display
-else
-OCAMLBUILD_DISPLAY=
-endif
+#else
+#OCAMLBUILD_DISPLAY=
+#endif
 
 DTYPES = -tag dtypes
 
@@ -129,7 +129,7 @@ other: othergraphs.ml
 	$(BUILD)/othergraphs.native
 	make -C test other
 	make -C test/othergraphs mpost
-	$(PSVIEWER) test/othergraphs.ps
+	$(PDFVIEWER) test/othergraphs.pdf
 
 other.byte: othergraphs.ml
 	$(OCAMLBUILD) othergraphs.byte

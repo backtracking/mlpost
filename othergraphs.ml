@@ -191,11 +191,28 @@ let figs =
   [ d1; d2; d4; d5; d7; d12; d20; d21; d22; d23; 60, d60; 111, d111; 
     d130; d140; d149; d195; 267,d267 ]
 
-let mpostfile = "test/othergraphs.mp"
-let texfile = "test/othergraphs.tex"
+let mpostfile = "othergraphs"
+let cairostfile = "testother_cairo"
+let texfile = "othergraphs.tex"
 
+(*
 let _ =
     Metapost.generate_mp mpostfile figs;
-    Generate.generate_tex texfile "othergraphs/mpost" "othergraphs" figs
+    Generate.generate_tex texfile "othergraphs/mpost" "othergraph" figs
+*)
 
+let _ =
+  Sys.chdir "test";
+  if Cairost.supported then
+    begin
+      Metapost.generate mpostfile ~pdf:true figs;
+      Cairost.generate_pdfs cairostfile figs;
+      Generate.generate_tex_cairo texfile "othergraphs/mpost" "othergraphs"
+      "testother_cairo" figs;
+    end
+  else
+    begin
+      Metapost.generate mpostfile ~pdf:true figs;
+      Generate.generate_tex ~pdf:true texfile "othergraphs/other" "testother" figs;
+    end
 
