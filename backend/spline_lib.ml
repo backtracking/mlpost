@@ -1609,7 +1609,7 @@ struct
     |Point p -> [(match of_bounding_box (p,p) with Path p -> p.pl | Point _ -> assert false), ecart]
   let of_path = create
   let union x y = List.rev_append x y
-  let transform t x = List.map (fun (x,f) -> transform_aux t x,P.transform t f) x
+  let transform t x = List.map (fun (x,f) -> transform_aux t x, f) x
   let bounding_box sl =
     let (x_min,y_min,x_max,y_max) = 
       list_min_max (fun (e,f) -> 
