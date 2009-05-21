@@ -272,13 +272,6 @@ let bisect a =
   let c = {c with sa = middle c.sa c.sb} in
   (b,c)
 
-type graph = {gt1 : int;
-              gt2 : int;
-              mutable gedge : graph list;
-              mutable taken : bool;
-              mutable gseenx : bool;
-              mutable gseeny : bool}
-
 exception Found of float*float
 
 let intersect_fold f acc a b =
@@ -321,68 +314,35 @@ let one_intersection a b =
         if debug then Format.printf "one_intersection : Not_found not two paths@.";
         raise Not_found
 
+module UF = Unionfind
+
 let intersection_aux acc a b =
   if a=b then [] else
     let rem_noise delta mdelta = function 
       | [] -> [] 
       | noisy ->
-          let graph = 
-            List.map 
-            (fun (t1,t2) -> 
-              {gt1 = t1;gt2 = t2; gedge = [];
-               taken = false; gseenx = false; gseeny = false}) noisy 
-          in
-          let link sel msel seen = 
+          let uf = UF.init noisy in
+          let link sel msel = 
             let sorted = 
-              List.fast_sort (fun x y -> compare (sel x) (sel y)) graph in
+              List.fast_sort (fun x y -> compare (sel x) (sel y)) noisy in
             let rec pass bef = function
               |[] -> ()
               |e::l -> 
-                  match ((sel e) - (sel bef) <= delta),
-                        abs ((msel e) - (msel bef)) <=mdelta, 
-                        seen e 
-                  with
-                  | false, _, false -> pass e l
-                  | false, _, true -> ()
-                  | true, true, false -> 
-                      bef.gedge<-e::bef.gedge;
-                      e.gedge<-bef::e.gedge;
-                      pass e l
-                  | true, false, false -> pass e l; pass bef l
-                  | true, false, true -> pass bef l
-                  | true, true, true -> 
-                      bef.gedge<-e::bef.gedge;
-                      e.gedge<-bef::e.gedge 
+                  if sel e - sel bef <= delta then
+                    if abs (msel e - msel bef) <=mdelta then begin
+                      UF.union e bef uf; pass e l
+                    end else begin pass e l; pass bef l end
+                  else pass e l
             in
             pass (List.hd sorted) (List.tl sorted) 
           in
-          link (fun x -> x.gt1)  (fun x -> x.gt2) (fun x -> x.gseenx);
-          link (fun x -> x.gt2) (fun x -> x.gt1) (fun x -> x.gseeny);
-          let rec connexe (((t1,t2),n) as t12n) e = 
-            if e.taken then t12n
-            else begin 
-              e.taken <- true;
-              let np = n+.1. in
-              let t12n = ((t1*.(n/.np)+.(float_of_int e.gt1)/.np,
-                           t2*.(n/.np)+.(float_of_int e.gt2)/.np),np) in
-              List.fold_left connexe t12n e.gedge 
-              end
-          in
-          List.fold_left 
-            (fun l e -> 
-              if e.taken then l else (fst (connexe ((0.,0.),0.) e))::l) 
-            [] graph 
+          link fst snd; link snd fst;
+          UF.fold_classes (fun x acc -> x :: acc) [] uf
      in
     let nmax = 2.**(float_of_int (!inter_depth+1)) in
     let l = intersect_fold (fun x acc -> x::acc) [] a b in
-    (*if !debug then(
-      Format.printf "@[";
-      List.iter (fun (x,y) -> Format.printf "@[(%i,%i)@]" x y) l;
-      Format.printf "@]@.");*)
-    let delta = 2* !inter_depth in
-    let mdelta = 16* !inter_depth in
-    let l = rem_noise delta mdelta l in
-    let f_from_i s x = s_of_01 s (x*.(1./.nmax)) in
+    let l = rem_noise (2 * !inter_depth) (16 * !inter_depth) l in
+    let f_from_i s x = s_of_01 s (x *. (1./.nmax)) in
     let res = List.rev_map (fun (x,y) -> (f_from_i a x,f_from_i b y)) l in
     if debug then
       Format.printf "@[%a@]@." (fun fmt -> List.iter (pt_f fmt))
@@ -1602,11 +1562,22 @@ struct
   type t = (spline list * point) list
   let print fmt p = 
     Format.fprintf fmt "@[[%a]" 
-      (fun fmt -> List.iter (List.iter (fun (e,f) -> Format.fprintf fmt "%a[%a];" print_spline e P.print f))) p
+      (fun fmt -> 
+        List.iter 
+          (List.iter 
+            (fun (e,f) -> 
+              Format.fprintf fmt "%a[%a];" print_spline e P.print f))) p
   let empty = []
   let create ?(ecart=P.zero) = function
     |Path p -> [p.pl,ecart]
-    |Point p -> [(match of_bounding_box (p,p) with Path p -> p.pl | Point _ -> assert false), ecart]
+    |Point p -> 
+        let x = 
+          match of_bounding_box (p,p) with 
+          | Path p -> p.pl 
+          | Point _ -> assert false
+        in
+        [x, ecart]
+
   let of_path = create
   let union x y = List.rev_append x y
   let transform t x = List.map (fun (x,f) -> transform_aux t x, f) x
@@ -1621,14 +1592,13 @@ struct
   let of_bounding_box l = create (of_bounding_box l)
 
   let draw cr p = List.iter (fun (e,_) -> List.iter 
-                               (function 
-                                    s -> 
+                               (fun s -> 
                                       Cairo.move_to cr s.sa.x s.sa.y ;
                                       Cairo.curve_to cr 
                                         s.sb.x s.sb.y 
                                         s.sc.x s.sc.y 
                                         s.sd.x s.sd.y) e) p;
-    Cairo.stroke cr
+                    Cairo.stroke cr
 end
 
 
