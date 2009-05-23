@@ -101,10 +101,11 @@ let last_point = function
   | Path p -> (List.hd (List.rev p.pl)).sa
   | Point p -> p
 
-let with_last f p = 
+let with_last f p acc = 
   let rec aux = function
     | [] -> assert false
-    | [{sc=sc; sd = sd; smax = smax} as e] -> [ e; f sc sd smax]
+    | [{sc=sc; sd = sd; smax = smax} as e] -> 
+        e :: (f sc sd smax) :: acc
     | a::l -> a::(aux l) 
   in
   {p with pl = aux p.pl}
@@ -114,19 +115,19 @@ let add_end p c d =
   | Point p -> create p c c d
   | Path p ->
       Path (with_last 
-        (fun mb a smax -> create_with_offset smax a (2. */ a -/ mb) c d) p)
+        (fun mb a smax -> create_with_offset smax a (2. */ a -/ mb) c d) p [])
 
 let add_end_line p d =
   match p with
   | Point p -> create_line p d
   | Path p ->
-      Path (with_last (fun mb a smax -> create_with_offset smax a a d d) p)
+      Path (with_last (fun mb a smax -> create_with_offset smax a a d d) p [])
 
 let add_end_spline p sb sc d =
   match p with
   | Point p -> create p sb sc d
   | Path p ->
-      Path (with_last (fun _ a smax -> create_with_offset smax a sb sc d) p)
+      Path (with_last (fun _ a smax -> create_with_offset smax a sb sc d) p [])
 
 
 let f4 f a b c d = f (f a b) (f c d)
@@ -338,7 +339,7 @@ let intersection_aux acc a b =
           in
           link fst snd; link snd fst;
           UF.fold_classes (fun x acc -> x :: acc) [] uf
-     in
+    in
     let nmax = 2.**(float_of_int (!inter_depth+1)) in
     let l = intersect_fold (fun x acc -> x::acc) [] a b in
     let l = rem_noise (2 * !inter_depth) (16 * !inter_depth) l in
@@ -346,9 +347,9 @@ let intersection_aux acc a b =
     let res = List.rev_map (fun (x,y) -> (f_from_i a x,f_from_i b y)) l in
     if debug then
       Format.printf "@[%a@]@." (fun fmt -> List.iter (pt_f fmt))
-        (List.map (fun (t1,t2) -> (cubic_point a t1) -/ (cubic_point b t2)) res);
+        (List.map (fun (t1,t2) -> 
+          (cubic_point a t1) -/ (cubic_point b t2)) res);
     res
-
 
 let intersection a b = 
   match a,b with
@@ -369,37 +370,39 @@ let union_conv ap bp =
   let diff = max-.min in
   (fun x -> x +. diff)
  
-(*
-let union ap bp = 
-  let conv = union_conv ap bp in
-  {pl=List.map (function {smin=smin;smax=smax} as b -> 
-                  {b with smin=conv smin;smax=conv smax}) bp.pl;cycle=false}
-*)
 let append_conv ap bp = 
   let union_conv = union_conv ap bp in
-  (fun x -> (union_conv x)+.1.)
+  (fun x -> union_conv x +. 1.)
 
 let ext_list = function
   | [] -> assert false
   | a::l -> a,l
 
 let append ap0 sb sc bp0 = 
-  match ap0, bp0 with
-    | Path ap,Path bp ->
-  let conv = append_conv ap0 bp0 in
-  let fbpconv,bpconv = 
-    ext_list (List.map (function {smin=smin;smax=smax} as b -> 
-                          {b with smin=(conv smin)+.1.;smax=(conv smax)+.1.})
-                bp.pl) in
-  let rec aux = function
-    |[] -> assert false
-    |[{smax=smin;sd=sa} as a] -> 
-       a::{smin=smin;smax=smin+.1.;
-           sa=sa;sb=sb;sc=sc;sd=fbpconv.sa;start=false}::
-         {fbpconv with start=false}::bpconv
-    |a::l -> a::(aux l) in
-  Path {pl=aux ap.pl;cycle=false}
-    | _ -> raise (Not_implemented "autre cas de append") (* TODO *)
+  match bp0 with
+  | Path bp ->
+      let conv = append_conv ap0 bp0 in
+        let l = 
+          List.map 
+            (fun b -> {b with smin=(conv b.smin)+.1.;smax=(conv b.smax)+.1.})
+            bp.pl
+        in
+        let fbpconv,bpconv = ext_list l in
+        begin match ap0 with
+        | Path ap ->
+            let spl =
+              with_last
+                (fun _ sa smin -> create_with_offset smin sa sb sc fbpconv.sa)
+                ap bpconv
+           in Path {spl with cycle = false}
+        | Point p1 ->
+            Path { bp with 
+                  pl = ( create_spline ~start:true p1 sb sc fbpconv.sa)::bp.pl }
+        end
+  | Point p2 ->
+      match ap0 with
+      | Point p1 -> create p1 sb sc p2
+      | Path p -> add_end ap0 sc p2
 
 let reverse x = 
     match x with
@@ -585,7 +588,7 @@ let buildcycle p1 p2 = not_implemented ("buildcycle")
 let close = function
   | Path p1 (* TODO: tester si il est fermé*) ->
       Path {p1 with cycle = true}
-  | Point _ -> invalid_arg ("This path is not closed")
+  | Point _ -> invalid_arg ("This path cannot be closed")
 
 let of_bounding_box ({x=x_min;y=y_min},{x=x_max;y=y_max}) =
   let dl = {x=x_min;y=y_min} in
@@ -1452,7 +1455,8 @@ struct
     | Cons (pa,JLine,p) -> add_end_line (to_path_simple pa) p
     | Cons (pa,JControls(c1,c2),p) -> add_end_spline (to_path_simple pa) c1 c2 p
     | Start_Path p -> Path {pl=p;cycle=false}
-    | Append_Path (p1,JControls(c1,c2),p2) -> append (to_path_simple p1) c1 c2 (Path {pl=p2;cycle=false})
+    | Append_Path (p1,JControls(c1,c2),p2) -> 
+        append (to_path_simple p1) c1 c2 (Path {pl=p2;cycle=false})
     | (Cons(pa,JCurve _,p)) -> add_end_line (to_path_simple pa) p (* Faux*)
     |p -> Format.printf "not implemented %a@." print p; not_implemented "to_path"
 
