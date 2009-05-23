@@ -3,6 +3,14 @@ exception Not_implemented of string
 
 let not_implemented s = raise (Not_implemented s)
 
+module Error = struct
+  let max_absc f = 
+    invalid_arg (f^": the abscissa given is greater than max_abscissa")
+  let min_absc f =
+    invalid_arg (f^": the abscissa given is smaller than min_abscissa")
+  let absc_point f = invalid_arg (f^": a point has only the abscissa 0.")
+  let dir_point f = invalid_arg (f^": a point has no direction.")
+end
 module P = Point_lib
 type point = P.point
 
@@ -129,14 +137,15 @@ let add_end_spline p sb sc d =
   | Path p ->
       Path (with_last (fun _ a smax -> create_with_offset smax a sb sc d) p [])
 
-
 let f4 f a b c d = f (f a b) (f c d)
 
 let cubic a b c d t =
   t*.(t*.(t*.(d +. 3.*.(b -. c) -. a) +. 3. *. (c -. (2. *. b) +. a)) 
       +. 3. *. (b -. a)) +. a
-    (*  ((t^3)*(d - (3*c) + (3*b) - a)) + (3*(t^2)*(c - (2*b) + a)) + (3*t*(b - a)) + a*)
-    (*  d*.(t**3.)+.3.*.c*.(t**2.)*.(1.-.t)+.3.*.b*.(t**1.)*.(1.-.t)**2.+.a*.(1.-.t)**3.*)
+    (*  ((t^3)*(d - (3*c) + (3*b) - a)) + (3*(t^2)*(c - (2*b) + a)) + 
+     *  (3*t*(b - a)) + a*)
+    (*  d *. (t**3.) +. 3. *. c *. (t**2.) *. (1. -. t) +. 3. *. b *. (t**1.)
+     *  *.(1. -. t)**2. +. a *. (1. -. t)**3.*)
 
 let cubic_point s t =
   { x=cubic s.sa.x s.sb.x s.sc.x s.sd.x t;
@@ -148,19 +157,14 @@ let abscissa_to_point p0 t =
   match p0 with
     | Path p ->
         let rec aux = function
-          |[] -> 
-              invalid_arg 
-              "abscissa_to_point : the abscissa given is greater than max_abscissa" 
+          |[] -> Error.max_absc "abscissa_to_point"
           | a::l when a.smax >= t -> cubic_point_s a t
           | _::l -> aux l 
         in
-        if min_abscissa p0 > t then 
-          invalid_arg "abscissa_to_point : the abscissa given is smaller than min_abscissa"
+        if min_abscissa p0 > t then Error.min_absc "abscissa_to_point"
         else aux p.pl
     | Point p when t = 0. -> p
-    | Point _ -> 
-        invalid_arg "abscissa_to_point : a point has only the abscissa 0."
-
+    | Point _ -> Error.absc_point "abscissa_to_point"
 
 let direction_of_abscissa_aux s t = 
   (* An expression as polynomial:
@@ -176,14 +180,14 @@ let direction_of_abscissa_aux s t =
 
 let direction_of_abscissa p0 t = 
   match p0 with
-    | Point _ -> invalid_arg "direction_of_abscissa : a point has no direction."
+    | Point _ -> Error.dir_point "direction_of_abscissa"
     | Path p ->  
         let rec aux = function
-          |[] -> invalid_arg "direction_of_abscissa : the abscissa given is greater than max_abscissa" 
+          |[] -> Error.max_absc "direction_of_abscissa"
           | a::_ when a.smax >= t -> direction_of_abscissa_aux a (_01_of_s a t)
-          | _::l -> aux l in
-        if min_abscissa p0 > t then 
-          invalid_arg "direction_of_abscissa : the abscissa given is smaller than min_abscissa"
+          | _::l -> aux l 
+        in
+        if min_abscissa p0 > t then Error.min_absc "direction_of_abscissa"
         else aux p.pl
 
 let extremum a b c d =
@@ -312,7 +316,8 @@ let one_intersection a b =
            else raise Not_found
         with Found (t1,t2) -> (t1,t2))
     | _ -> 
-        if debug then Format.printf "one_intersection : Not_found not two paths@.";
+        if debug then 
+          Format.printf "one_intersection : Not_found not two paths@.";
         raise Not_found
 
 module UF = Unionfind
@@ -420,7 +425,8 @@ let reverse x =
       Path {p with pl = aux [] p.pl}
   | Point _ as p -> p
 
-(*left ((t^3)*(d + (3*(b - c)) - a)) + ((t^2)*(d - (3*b) + (2*a))) + (t*((2*c) - b - a)) + b *)
+(*left ((t^3)*(d + (3*(b - c)) - a)) + 
+ *     ((t^2)*(d - (3*b) + (2*a))) + (t*((2*c) - b - a)) + b *)
 (*right 3*d - c *)
 let cast_path_to_point p = function
   | Path {pl=[];} -> Point p
@@ -434,7 +440,8 @@ let split_aux s t l =
     let _1t0 = 1.-.t0 in
     let b1 = t0 */ s.sb +/ _1t0 */ s.sa in
     let c1 = 
-      (t0*.t0) */ s.sc +/ (2.*.t0*._1t0) */ s.sb +/ (_1t0*._1t0) */ s.sa in
+      (t0 *. t0) */ s.sc +/ (2. *. t0 *. _1t0) */ s.sb +/ (_1t0 *. _1t0) */ s.sa
+    in
     let d1 = cubic_point s t0 in
     let a2 = d1 in
     let c2 = _1t0 */ s.sc +/ t0 */ s.sd in
@@ -447,16 +454,15 @@ let split p0 t =
   match p0 with
     | Path p ->
         let rec aux = function
-          |[] -> invalid_arg "split : the abscissa given is greater than max_abscissa" 
+          |[] -> Error.max_absc "split"
           | a::l when a.smax > t -> split_aux a t l
           | a::l -> let (p1,p2) = aux l in (a::p1,p2) in
-        if min_abscissa p0 > t then 
-          invalid_arg "split : the abscissa given is smaller than min_abscissa"
+        if min_abscissa p0 > t then Error.min_absc "split"
         else 
           let (p1,p2) = aux p.pl in
           (cast_path_to_point (List.hd p.pl).sa (Path {pl=p1;cycle = false}),p2)
     | Point _ when t = 0. -> p0,p0
-    | Point _ -> invalid_arg "split : a point can be split only at 0."
+    | Point _ -> Error.absc_point "split"
       
 let subpath p t1 t2 = fst (split (snd (split p t1)) t2)
 
