@@ -1,6 +1,7 @@
 let diameter_of_a_dot = 3.
 let default_line_size = 0.5
 
+module MP = Cairo_metapath
 open Types
 open Point_lib
 exception Not_implemented of string
@@ -145,16 +146,16 @@ struct
         Cairo.save cr;
         color_option cr c;
         dash cr d;
-        Spline_lib.ToCairo.stroke cr ?pen path;
+        MP.ToCairo.stroke cr ?pen path;
         Cairo.restore cr
     | Fill_path (path,c)-> 
         Cairo.save cr;
         color_option cr c;
-        Spline_lib.ToCairo.fill cr path;
+        MP.ToCairo.fill cr path;
         Cairo.restore cr
     | Clip (com,p) -> 
         Cairo.save cr;
-        Spline_lib.ToCairo.draw_path cr p;
+        MP.ToCairo.draw_path cr p;
         Cairo.clip cr;
         draw_aux cr com;
         Cairo.restore cr

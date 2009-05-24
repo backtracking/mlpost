@@ -22,6 +22,7 @@ module P = Point_lib
 module M = Matrix
 module S = Spline_lib
 module Pi = Picture_lib
+module MP = Cairo_metapath
 
 let debug = false
 
@@ -167,54 +168,52 @@ and knot k =
         let d1 = direction d1 in
         let p = point p in
         let d2 = direction d2 in
-        d1,Spline_lib.Metapath.knot p,d2
+        d1,Cairo_metapath.knot p,d2
 
 and joint dl j dr = 
   match j.Hashcons.node with
-  | JLine -> Spline_lib.Metapath.line_joint
-  | JCurve -> Spline_lib.Metapath.curve_joint dl dr
-  | JCurveNoInflex -> Spline_lib.Metapath.curve_no_inflex_joint dl dr
-  | JTension (a,b) -> Spline_lib.Metapath.tension_joint dl a b dr
+  | JLine -> MP.line_joint
+  | JCurve -> MP.curve_joint dl dr
+  | JCurveNoInflex -> MP.curve_no_inflex_joint dl dr
+  | JTension (a,b) -> MP.tension_joint dl a b dr
   | JControls (p1,p2) ->
       let p1 = point p1 in
       let p2 = point p2 in
-      Spline_lib.Metapath.controls_joint p1 p2
+      MP.controls_joint p1 p2
 and direction d = 
   match d.Hashcons.node with
   | Vec p -> 
       let p = point p in
-      Spline_lib.Metapath.vec_direction p
-  | Curl f -> Spline_lib.Metapath.curl_direction f
-  | NoDir  -> Spline_lib.Metapath.no_direction
+      MP.vec_direction p
+  | Curl f -> MP.curl_direction f
+  | NoDir  -> MP.no_direction
 and metapath' = function
   | MPAConcat (pa,j,p) ->
       let pdl,p,pdr = metapath p in
       let dl,pa,dr = knot pa in
       let j = joint pdr j dl in
-      pdl,Spline_lib.Metapath.concat p j pa,dr
+      pdl,MP.concat p j pa,dr
   | MPAAppend (p1,j,p2) ->
       let p1dl,p1,p1dr = metapath p1 in
       let p2dl,p2,p2dr = metapath p2 in
       let j = joint p1dr j p2dl in
-      p1dl,Spline_lib.Metapath.append p1 j p2,p2dr
+      p1dl,MP.append p1 j p2,p2dr
   | MPAKnot k -> 
       let dl,p,dr = knot k in
-      dl,Spline_lib.Metapath.start p, dr
+      dl,MP.start p, dr
   | MPAofPA p -> 
-      Spline_lib.Metapath.no_direction,
-      Spline_lib.Metapath.from_path (path p),
-      Spline_lib.Metapath.no_direction
+      MP.no_direction, MP.from_path (path p), MP.no_direction
 
 and metapath p = memoize metapath' "metapath" metapath_memoize p
 and path' = function
   | PAofMPA p -> 
       let _,mp,_ = (metapath p) in
-      Spline_lib.Metapath.to_path mp
+      MP.to_path mp
   | MPACycle (d,j,p) ->
       let d = direction d in
       let dl,p,_ = metapath p in
       let j = joint d j dl in
-      Spline_lib.Metapath.cycle j p
+      MP.cycle j p
   | PATransformed (p,tr) ->
       let p = path p in
       let tr = transform tr in
@@ -245,10 +244,10 @@ and path' = function
                                   {P.x = pmax.P.x; y = pmax.P.y};
                                   {P.x = pmax.P.x; y = pmin.P.y}])
                           
-  | PAUnitSquare -> Spline_lib.Approx.unitsquare 1.
-  | PAQuarterCircle -> Spline_lib.Approx.quartercircle 1.
-  | PAHalfCircle -> Spline_lib.Approx.halfcirle 1.
-  | PAFullCircle -> Spline_lib.Approx.fullcircle 1.
+  | PAUnitSquare -> MP.Approx.unitsquare 1.
+  | PAQuarterCircle -> MP.Approx.quartercircle 1.
+  | PAHalfCircle -> MP.Approx.halfcirle 1.
+  | PAFullCircle -> MP.Approx.fullcircle 1.
 and path p = (*Format.printf "path : %a@.@?" Print.path p;*) memoize path' "path" path_memoize p
 and picture' = function
   | PITransformed (p,tr) ->

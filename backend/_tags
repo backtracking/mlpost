@@ -6,6 +6,7 @@
 
 <*dvicairo.*> or <spline.*> or <*spline_lib.*> or <gentex.*> : pkg_cairo
 <icairost.*> or <matrix.*> or <point_lib.*> or <picture_lib.*> : pkg_cairo
+<cairo_metapath.*> : pkg_cairo
 
 
 <*.cmx> : for-pack(Mlpost)

@@ -1,6 +1,17 @@
 type point = Point_lib.point
-type path
 type abscissa = float
+type spline = {sa : point;
+               sb : point;
+               sc : point;
+               sd : point;
+               smin : abscissa;
+               smax : abscissa;
+               start : bool}
+type path_ = {pl : spline list;
+             cycle : bool}
+
+type path = | Point of point
+            | Path of path_
 
 val inter_depth : int ref
 
@@ -27,7 +38,9 @@ val add_end : path -> point -> point -> path
   (** add_end p a b return the path p with one more spline at the end.*)
   
 val add_end_line : path -> point -> path
+val add_end_spline : path -> point -> point -> point -> path
 
+val append : path -> point -> point -> path -> path
 
 val reverse : path -> path
   (** reverse p return the path p reversed *)
@@ -78,6 +91,7 @@ val buildcycle : path -> path -> path
 val of_bounding_box : point * point -> path
 
 val print : Format.formatter -> path -> unit
+val print_splines : Format.formatter -> spline list -> unit
 
 module Epure :
 sig
@@ -91,56 +105,4 @@ sig
   val of_bounding_box : point * point -> t
   val draw : Cairo.t -> t -> unit
 end
-
-module Approx :
-  sig
-    val lineto : point list -> path
-    val fullcircle : float -> path
-      (** fullcircle l is the circle of diameter l centered on (0, 0) *)
-    val halfcirle : float -> path
-      (** halfcircle l is the upper half of a fullcircle of diameter l *)
-    val quartercircle : float -> path
-      (** quartercircle l is the first quadrant of a circle of diameter l *)
-    val unitsquare : float -> path
-      (** unitsquare l : the path (0,0)--(l,0)--(l,l)--(0,l)--cycle *)
-  end
-
-module ToCairo :
-  sig
-    type pen = Matrix.t
-    val stroke : Cairo.t -> ?pen:pen -> path -> unit
-    val fill : Cairo.t -> path -> unit
-    val draw_path : Cairo.t -> path -> unit
-  end
-
-module Metapath :
- sig
-   type t
-
-   type joint
-   type knot
-   type direction
-   val knot : point -> knot
-   
-   val vec_direction : point -> direction
-   val curl_direction : float -> direction
-   val no_direction : direction
-   
-   val line_joint : joint
-   val curve_joint : direction -> direction -> joint
-   val curve_no_inflex_joint : direction -> direction -> joint
-   val tension_joint : direction -> float -> float -> direction -> joint
-   val controls_joint : point -> point -> joint
-   
-   val start : knot -> t
-   val concat : t -> joint -> knot -> t
-   val append : t -> joint -> t -> t
-   val cycle : joint -> t -> path
-
-   val to_path : t -> path
-   val from_path : path -> t
- end
-
-
-     
 
