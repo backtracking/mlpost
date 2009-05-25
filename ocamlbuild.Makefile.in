@@ -48,11 +48,11 @@ else
 TOOL= tool.byte
 endif
 
-#ifeq "$(TERM)" "dumb"
+ifeq "$(TERM)" "dumb"
 OCAMLBUILD_DISPLAY= -classic-display
-#else
-#OCAMLBUILD_DISPLAY=
-#endif
+else
+OCAMLBUILD_DISPLAY=
+endif
 
 DTYPES = -tag dtypes
 
