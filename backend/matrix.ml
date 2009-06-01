@@ -30,4 +30,5 @@ let set = Cairo.set_matrix
 
 
 let print fmt m = 
-  Format.fprintf fmt "[|[|%f;%f|];[|%f;%f|];[|%f;%f|]|]" m.xx m.xy m.yx m.yy m.x0 m.y0
+  Format.fprintf fmt "[|[|%f;%f|];[|%f;%f|];[|%f;%f|]|]" 
+    m.xx m.xy m.yx m.yy m.x0 m.y0

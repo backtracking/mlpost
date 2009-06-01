@@ -41,3 +41,8 @@ let list_min_max f =
                     {x=min x_min sx_min;y=min y_min sy_min},
                      {x=max x_max sx_max;y=max y_max sy_max})
     ({x=infinity;y=infinity},{x=neg_infinity;y=neg_infinity})
+
+let sign f = 
+  if f = 0. then 0. 
+  else if f < 0. then -1. else 1.
+let sign { x=x; y = y} = { x = sign x; y = sign y}
