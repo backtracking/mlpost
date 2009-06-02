@@ -49,6 +49,8 @@ let verbose = ref false
 let native = ref false
 let libdir = ref Version.libdir
 let cairo = ref false
+let depend = ref false
+let dumpable = ref false
 
 let version () =
   print_string Version.version;
@@ -59,6 +61,23 @@ let add_ccopt x = ccopt := !ccopt ^ " " ^ x
 let add_execopt x = execopt := !execopt ^ " " ^ x
 
 let notcairo = Version.includecairo = ""
+
+let give_lib () =
+  if Version.includecairo = "" then [] 
+  else Version.cairolibs
+
+let get_include_compile s = 
+  let aux = function
+    | "cmxa" -> List.map (fun (x,y) -> x^y^".cmxa") (give_lib ())
+    | "cma" -> List.map (fun (x,y) -> x^y^".cma") (give_lib ())
+    | "dir" -> List.map fst (give_lib ())
+    | "file" -> List.map snd (give_lib ())
+    | _ -> assert false in
+  print_string (String.concat "\n" (aux s))
+
+let nocairo () =
+  print_string "Mlpost has not been compiled with cairo";
+  exit 1
 
 let spec = Arg.align
   ([ "-pdf", Set pdf, " Generate .mps files (default)";
@@ -76,10 +95,14 @@ let spec = Arg.align
     "-execopt", String add_execopt,
     "\"<options>\" Pass <options> to the compiled program";
     "-version", Unit version, " Print Mlpost version and exit";
-    "-libdir", String ((:=) libdir), " Set path for mlpost.cma"
+    "-libdir", String ((:=) libdir), " Set path for mlpost.cma";
+    "-depend", Set depend, " output dependency lines in a format suitable for the make(1) utility";
+    "-dumpable", Set dumpable, " output one name of dumpable file by line";
+    "-get-include-compile", Symbol (["cmxa";"cma";"dir";"file"],get_include_compile), " output the library which are needed by mlpost"
   ]@
-  if notcairo then [] else
-  ["-cairo" , Set cairo, " Use the experimental cairo backend instead of metapost"])
+  if notcairo 
+  then ["-cairo" , Unit nocairo, " Mlpost has not been compiled with the cairo backend"]
+  else ["-cairo" , Set cairo, " Use the experimental cairo backend instead of metapost"])
 
 let () = 
   Arg.parse spec add_file "Usage: mlpost [options] files..."
@@ -146,7 +169,13 @@ let compile f =
     | None -> ""
     | Some f -> sprintf "~prelude:%S" (Metapost_tool.read_prelude_from_tex_file f)
   in
-  if !cairo then
+  if !depend then
+    Printf.fprintf cout 
+      "\nlet () = Mlpost.Metapost.depend \"%s\" \n" bn
+  else if !dumpable then
+    Printf.fprintf cout 
+      "\nlet () = Mlpost.Metapost.dumpable () \n"
+  else if !cairo then
     begin
       if not (!xpdf) then 
         Printf.fprintf cout 
@@ -181,7 +210,8 @@ let compile f =
       let args = 
         if Version.includecairo = "" then args else
           let includecairos = 
-            String.concat "," Version.cairolibs in
+            let cairolibs = List.map (fun (x,y) -> x^y) Version.cairolibs in
+            String.concat "," cairolibs in
           args@[sprintf "-lib bigarray -libs %s"
             includecairos] in
       let args =

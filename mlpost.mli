@@ -1882,6 +1882,9 @@ module Metapost : sig
   val emit_slideshow : string -> Command.t list -> unit
   (** emit the list of figures as a slideshow, using the [slideshow] function.*)
 
+  val dumpable : unit -> unit
+  val depend : string -> unit
+
 end
 
 module Generate : sig

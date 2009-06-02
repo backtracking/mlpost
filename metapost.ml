@@ -344,3 +344,16 @@ let slideshow l k =
 let emit_slideshow s l = 
   let l = slideshow l 0 in
   List.iter (fun (i,fig) -> emit (s^(string_of_int i)) fig) l
+
+
+let emited () = Queue.fold (fun l (i,n,f) -> (i,n,f) :: l) [] figures
+
+let dumpable () =
+  Queue.iter (fun (_,s,_) -> Printf.printf "%s\n" s) figures
+
+let depend myname =
+  Queue.iter (fun (_,s,_) -> Printf.printf "%s.fmlpost " s) figures;
+  Printf.printf " : %s.cmlpost\n" myname
+  
+  
+  
