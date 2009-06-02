@@ -76,7 +76,7 @@ let get_include_compile s =
   print_string (String.concat "\n" (aux s))
 
 let nocairo () =
-  print_string "Mlpost has not been compiled with cairo";
+  print_string "Mlpost has not been compiled with cairo\n";
   exit 1
 
 let spec = Arg.align
@@ -212,11 +212,12 @@ let compile f =
           let includecairos = 
             let cairolibs = List.map (fun (x,y) -> x^y) Version.cairolibs in
             String.concat "," cairolibs in
-          args@[sprintf "-lib bigarray -libs %s"
-            includecairos] in
+          let iI = String.concat  ","
+            (List.map (fun (x,_) -> "-I,"^x) Version.cairolibs) in
+          args@[sprintf "-lflags %s -lib bigarray -libs %s" iI includecairos] in
       let args =
         args@["-lib mlpost";
-          Filename.chop_extension mlf2 ^ ext; !ccopt;"--"; !execopt]
+           !ccopt;Filename.chop_extension mlf2 ^ ext;"--"; !execopt]
       in
       ocamlbuild args;
       Sys.remove mlf2
