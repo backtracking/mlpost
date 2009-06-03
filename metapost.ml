@@ -216,8 +216,8 @@ let print i fmt c =
   (* resetting is actually not needed; variables other than 
      x,y are not local to figures *)
 (*   Compile.reset (); *)
-  let () = Duplicate.command c in
-  let c = Compile.command c in
+  let () = Duplicate.commandpic c in
+  let c = Compile.commandpic_cmd c in
   fprintf fmt "@[beginfig(%d)@\n  @[%a@] endfig;@]@." i command c
 
 let print_prelude ?(eps=false) s fmt () =

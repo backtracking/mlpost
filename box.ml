@@ -165,8 +165,7 @@ let rec draw ?(debug=false) b =
   let contents_cmd = match b.desc with
     | Emp ->
 	Command.nop
-    | Pic pic -> 
-	Command.draw_pic pic
+    | Pic pic -> pic
     | Grp (a, _) -> 
 	Command.iter 0 (Array.length a - 1) (fun i -> draw ~debug a.(i))
   in
@@ -195,7 +194,7 @@ let round_rect_ w h =
   w, h, Shapes.round_rect w h rx rx
 let patatoid_ w h = 
   let p = Shapes.patatoid w h in
-  let pic = Picture.make (Command.draw p) in
+  let pic = Command.draw p in
   Picture.width pic, Picture.height pic, p
 
 let from_style = function

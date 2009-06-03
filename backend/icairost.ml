@@ -25,7 +25,7 @@ let error_replace_by_tex msg_error f arg =
       let msg = sprintf "Error : %s" (Printexc.to_string exn) in
       let msg = Misc.generic_quote '_' "\\_" msg in
       printf "%s@." msg;
-      f (Types.mkCDrawPic (Types.mkPITex (sprintf 
+      f (Types.mkPicture (Types.mkPITex (sprintf 
 "\\begin{minipage}{%f pt}
 %s
 \\end{minipage}
@@ -35,7 +35,7 @@ let error_replace_by_tex msg_error f arg =
 
 let emit_gen ?msg_error create next_page figs = 
   (*Format.printf "Fig : %a" Print.command fig;*)
-  let figs = LookForTeX.commandl_error (error_replace_by_tex msg_error) figs in
+  let figs = LookForTeX.commandpicl_error (error_replace_by_tex msg_error) figs in
   let ({x=xmin;y=ymin},{x=xmax;y=ymax}) = Point_lib.list_min_max Picture_lib.bounding_box figs in
   let height = ymax -. ymin in
   let width = xmax -. xmin in

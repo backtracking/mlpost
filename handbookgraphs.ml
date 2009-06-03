@@ -214,18 +214,18 @@ let draw22 =
   let a = Path.scale (cm 2.) fullcircle in
   let aa = Path.scale (cm 2.) halfcircle in
   let b = Path.shift (pt (zero, Num.cm 1.)) a in
-  let pa = make (label (tex "$A$") (pt (zero, Num.cm (-0.5)))) in
-  let pb= make (label (tex "$B$") (pt (zero, Num.cm 1.5))) in  
+  let pa = label (tex "$A$") (pt (zero, Num.cm (-0.5))) in
+  let pb= label (tex "$B$") (pt (zero, Num.cm 1.5)) in  
   let ab = build_cycle [aa; b] in
-  let pic = make
+  let pic = 
     (seq [fill ~color:(Color.gray 0.7) a;
 	  fill ~color:(Color.gray 0.7) b;
           fill ~color:(Color.gray 0.4) ab;
-          fill ~color:Color.white (bbox pa); draw_pic pa;
-          fill ~color:Color.white (bbox pb); draw_pic pb;
+          fill ~color:Color.white (bbox pa); pa;
+          fill ~color:Color.white (bbox pb); pb;
           label ~pos:`Left (tex "$U$") (p ~scale:Num.cm (-1.,0.5)); ])
   in
-    22, seq [draw_pic pic; draw (bbox pic)]
+    22, seq [pic; draw (bbox pic)]
 
 let draw40 =
   let k1 = knot ~r:(curl 0.) ~scale:Num.pt (0.,0.) in
@@ -244,11 +244,10 @@ let draw40 =
       (fun i ->
         draw (Path.shift (p ~scale:Num.pt (0., float_of_int i *. 10.)) p2))
   in
-  let pic = Picture.make cmd in
   let pth = 
     Path.scale (Num.pt 72.) (Path.shift (p (0.5, 0.5)) fullcircle) in
-  let pic' = Picture.clip pic pth in
-    40, seq [ draw_pic pic'; draw pth]
+  let pic' = Picture.clip cmd pth in
+    40, seq [pic'; draw pth]
 
 let figs = 
   [ draw1; draw3; draw4a; draw4b;draw5; 

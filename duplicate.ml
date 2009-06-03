@@ -108,7 +108,7 @@ and point' = function
   | PTSub (p1,p2) -> point p1; point p2
   | PTMult (f,p) -> num f; point p
   | PTRotated (f,p) -> point p
-  | PTPicCorner (pic, corner) -> picture pic
+  | PTPicCorner (pic, corner) -> commandpic pic
   | PTTransformed (p,tr) ->
       point p ; transform tr
 and point p = 
@@ -144,17 +144,16 @@ and path' = function
   | PACutBefore (p1,p2) -> path p1; path p2
   | PABuildCycle pl -> List.iter path pl
   | PASub (f1, f2, p) -> num f1; num f2; path p
-  | PABBox p -> picture p
+  | PABBox p -> commandpic p
   | PAUnitSquare | PAQuarterCircle | PAHalfCircle | PAFullCircle -> ()
 and path p = 
 (*   Format.printf "%a@." Print.path p; *)
   if test_and_incr_path p then () else path' p.node
 
 and picture' = function
-    | PITransformed (p,tr) -> transform tr; picture p
+    | PITransformed (p,tr) -> transform tr; commandpic p
     | PITex s -> ()
-    | PIMake c -> command c
-    | PIClip (pic,pth) -> picture pic; path pth
+    | PIClip (pic,pth) -> commandpic pic; path pth
 and picture p = 
   if test_and_incr_pic p then () else picture' p.node
 
@@ -171,11 +170,9 @@ and command c =
       path p; option_count pen pe; option_count dash dsh
   | CDrawArrow (p, color, pe, dsh) ->
       path p; option_count pen pe; option_count dash dsh
-  | CDrawPic p -> picture p
   | CFill (p, c) -> path p
-  | CSeq l -> List.iter command l
-  | CDotLabel (pic, pos, pt) -> picture pic; point pt
-  | CLabel (pic, pos ,pt) -> picture pic; point pt
+  | CDotLabel (pic, pos, pt) -> commandpic pic; point pt
+  | CLabel (pic, pos ,pt) -> commandpic pic; point pt
   | CExternalImage _ -> ()
 and pen p = 
   match p.Hashcons.node with
@@ -193,4 +190,10 @@ and dash d =
 and dash_pattern o = 
   match o.Hashcons.node with
   | On f | Off f -> num f
+
+and commandpic p = 
+  match p.node with
+  | Picture p -> picture p
+  | Command c -> command c
+  | Seq l -> List.iter commandpic l
     

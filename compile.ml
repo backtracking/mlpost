@@ -123,7 +123,7 @@ and point' = function
       let p1,c1 = point p in
         C.PTRotated (f,p1), c1
   | PTPicCorner (pic, corner) ->
-      let pic, code = picture pic in
+      let pic, code = commandpic_pic pic in
         C.PTPicCorner (pic, corner) , code
   | PTTransformed (p,tr) ->
       let p, c1 = point p in
@@ -230,7 +230,7 @@ and path' = function
         | _ -> assert false
       end
   | PABBox p ->
-      let p, code = picture p in
+      let p, code = commandpic_pic p in
       C.PABBox p, code
   | PAUnitSquare -> C.PAUnitSquare, nop
   | PAQuarterCircle -> C.PAQuarterCircle, nop
@@ -253,14 +253,11 @@ and path_save p =
 and picture' = function
   | PITransformed (p,tr) ->
       let tr, c1 = transform tr in
-      let pic, c2 = picture p in
+      let pic, c2 = commandpic_pic p in
       C.PITransformed (pic,tr), c1 ++ c2
   | PITex s -> C.PITex s, nop
-  | PIMake c -> 
-      let pn = Name.picture () in
-      C.PIName pn, C.CDefPic (pn, command c)
   | PIClip (pic,pth) -> 
-      let pic, c1 = picture_save pic in
+      let pic, c1 = commandpic_pic_save pic in
       let pth, c2 = path pth in
       let pn = Name.picture () in
       (* slight redundance here *)
@@ -278,6 +275,28 @@ and picture_save pic =
     let () = D.PicM.add picture_names pic x in
     let pic', code = picture' pic.node in
     C.PIName x, code ++ C.CSimplePic (x,pic')
+
+and commandpic_pic pc =
+  match pc.Hashcons.node with
+  | Picture p -> picture p
+  | Command c ->
+      let pn = Name.picture () in
+      C.PIName pn, C.CDefPic (pn, command c)
+  | Seq l ->
+      let pn = Name.picture () in
+      C.PIName pn, C.CDefPic (pn, C.CSeq (List.map commandpic_cmd l))
+and commandpic_pic_save pc = 
+  match pc.Hashcons.node with
+  | Picture p -> picture_save p
+  | _ -> commandpic_pic pc
+
+and commandpic_cmd pc = 
+  match pc.Hashcons.node with
+  | Picture p ->
+      let p, code = picture p in
+      C.CSeq [code; C.CDrawPic p]
+  | Command c -> command c
+  | Seq l -> C.CSeq (List.map commandpic_cmd l)
 
 and transform t = 
   match t.Hashcons.node with
@@ -357,20 +376,20 @@ and command c =
       let pe, c2 = (option_compile pen) pe in
       let dsh, c3 = (option_compile dash) dsh in
       C.CSeq [c1; c2; c3; C.CDrawArrow (p, color, pe, dsh)]
+(*
   | CDrawPic p ->
       let p, code = picture p in
       C.CSeq [code; C.CDrawPic p]
+*)
   | CFill (p, c) ->
       let p, code = path p in
       C.CSeq [code; C.CFill (p, c)]
-  | CSeq l ->
-      C.CSeq (List.map command l)
   | CDotLabel (pic, pos, pt) -> 
-      let pic, c1 = picture pic in
+      let pic, c1 = commandpic_pic pic in
       let pt, c2 = point pt in
         c1 ++ c2 ++ C.CDotLabel (pic,pos,pt)
   | CLabel (pic, pos ,pt) -> 
-      let pic, c1 = picture pic in
+      let pic, c1 = commandpic_pic pic in
       let pt, c2 = point pt in
       c1 ++ c2 ++ C.CLabel (pic,pos,pt)
   | CExternalImage (filename,spec) -> 

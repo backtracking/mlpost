@@ -186,7 +186,7 @@ let d5 =
   seq [ Box.draw bl; box_arrow ~sep:(bp 5.) b1 b2; ]
 
 
-let tree1 () = pic (Picture.make (draw (random_tree (1 + Random.int 5))))
+let tree1 () = pic (draw (random_tree (1 + Random.int 5)))
 
 let rec random_tree2 = function
   | 1 -> leaf (tree1 ())
@@ -216,13 +216,12 @@ let d3 =
   Command.draw p ~dashed:pat
 
 
-let pic = Picture.make cheno011
 
 let d4 = 
-  seq [draw_pic pic;
+  seq [cheno011;
    iter 1 5 
      (fun i -> 
-	draw_pic (Picture.transform [T.rotated (10. *. float i)] pic))
+	Picture.transform [T.rotated (10. *. float i)] cheno011)
   ]
 
 let d7 =
@@ -231,7 +230,7 @@ let d7 =
   let pbox = pathp ~style:jLine ~cycle:jLine
     [Picture.ulcorner pic; Picture.urcorner pic; 
      Picture.lrcorner pic; Picture.llcorner pic] in
-    seq [Command.draw_pic pic;
+    seq [pic;
      Command.draw (Picture.bbox pic);
      Command.draw pbox;
      Command.dotlabel ~pos:`Left (Picture.tex "ulcorner") (Picture.ulcorner pic);
@@ -250,7 +249,7 @@ let rec right_split n pic =
 
 let d11 =
   let p1 = Picture.transform [Transform.rotated 90.] (Picture.tex "recursion") in
-    Command.draw_pic (right_split 4 p1)
+    right_split 4 p1
 
 let rec sierpinski p n =
   if n = 0 then p else
@@ -261,7 +260,7 @@ let rec sierpinski p n =
 
 let d12 = 
   let p1 = Picture.tex "A" in
-    Command.draw_pic (sierpinski p1 7)
+    sierpinski p1 7
 
 
 (** plots *)
@@ -417,8 +416,7 @@ let farey n =
     aux [ quartercircle 0.0 0.5 0.5 90.0; 
 	  quartercircle 1.0 0.5 0.5 180.0] 
       0 1 1 1 in
-  let pic = Picture.make (Command.seq l) in
-  Picture.scale (Num.bp 30.0) pic
+  Picture.scale (Num.bp 30.0) (Command.seq l)
       
   
 let why_platform =
@@ -554,7 +552,7 @@ let figs = [
   d7; 
   (* recursion *)
   d11; d12 ; 
-  Command.draw_pic (farey 17);
+  farey 17;
   (* other *)
   florence; Box.draw shapes1; Box.draw shapes2; 
   d14; d13;

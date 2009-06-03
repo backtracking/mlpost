@@ -155,7 +155,7 @@ and point' = function
       let p1 = point p in
       P.rotated f p1
   | PTPicCorner (pic, corner) ->
-      let p = picture pic in
+      let p = commandpic pic in
       point_of_position 0. (Picture_lib.bounding_box p) corner
   | PTTransformed (p,tr) ->
       let p = point p in
@@ -236,7 +236,7 @@ and path' = function
       let p = path p in
       Spline_lib.subpath p f1 f2
   | PABBox p ->
-      let p = picture p in
+      let p = commandpic p in
       let pmin,pmax = Picture_lib.bounding_box p in
       Spline_lib.close 
         (Spline_lib.create_lines [{P.x = pmin.P.x; y = pmin.P.y};
@@ -252,15 +252,14 @@ and path p = (*Format.printf "path : %a@.@?" Print.path p;*) memoize path' "path
 and picture' = function
   | PITransformed (p,tr) ->
       let tr = transform tr in
-      let pic = picture p in
+      let pic = commandpic p in
       Picture_lib.transform tr pic
   | PITex s -> 
       (* With lookfortex we never pass this point *)
       let tex = List.hd (Gentex.create !prelude [s]) in
       Picture_lib.tex tex
-  | PIMake c -> command c
   | PIClip (pic,pth) ->
-      let pic = picture pic in
+      let pic = commandpic pic in
       let pth = path pth in
       Picture_lib.clip pic pth
 
@@ -278,6 +277,19 @@ and transform t =
   | TRZscaled p -> Matrix.zscaled (point p)
   | TRReflect (p1,p2) -> Matrix.reflect (point p1) (point p2)
   | TRRotateAround (p,f) -> Matrix.rotate_around (point p) f
+
+and commandpic p =
+  match p.Hashcons.node with
+  | Picture p -> picture p
+  | Command c -> command c
+  | Seq l ->
+      begin match l with
+      | [] -> Picture_lib.empty
+      | [x] -> commandpic x
+      | (x::r) -> 
+          List.fold_left 
+          (fun acc c -> Picture_lib.on_top acc (commandpic c)) (commandpic x) r
+      end
 
 and dash d = 
     match d.Hashcons.node with
@@ -306,22 +318,13 @@ and command' = function
       let dsh = (option_compile dash) dsh in
       Picture_lib.stroke_path p c pe dsh
   | CDrawArrow (p, color, pe, dsh) -> (*TODO*) command (mkCDraw p color pe dsh)
-  | CDrawPic p -> picture p
   | CFill (p, c) -> 
       let p = path p in
       Picture_lib.fill_path p c
-  | CSeq l ->
-      begin match l with
-      | [] -> Picture_lib.empty
-      | [x] -> command x
-      | (x::r) -> 
-          List.fold_left 
-          (fun acc c -> Picture_lib.on_top acc (command c)) (command x) r
-      end
   | CDotLabel (pic, pos, pt) -> 
       Picture_lib.on_top (Picture_lib.draw_point (point pt)) (command (mkCLabel pic pos pt))
   | CLabel (pic, pos ,pt) -> 
-      let pic = picture pic in
+      let pic = commandpic pic in
       let pt = point pt in
       let mm = (Picture_lib.bounding_box pic) in
       let anchor = anchor_of_position pos in

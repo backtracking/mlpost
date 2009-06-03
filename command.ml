@@ -22,38 +22,42 @@ type hposition = Types.hposition
 type vposition = Types.vposition
 type position = Types.position
 
-type t = command
+type t = commandpic
 
-let label ?(pos=`Center) pic point = mkCLabel pic pos point
+let label ?(pos=`Center) pic point = 
+  mkCommand (mkCLabel pic pos point)
 (* replace later *)
-let dotlabel ?(pos=`Center) pic point = mkCDotLabel pic pos point
+let dotlabel ?(pos=`Center) pic point = 
+  mkCommand (mkCDotLabel pic pos point)
 
 let draw ?color ?pen ?dashed t = 
   (* We don't use a default to avoid the output of 
      ... withcolor (0.00red+0.00green+0.00blue) withpen .... 
      for each command in the output file *)
-    mkCDraw t color pen dashed
+    mkCommand (mkCDraw t color pen dashed)
 
 let draw_arrow ?color ?pen ?dashed t = 
-  mkCDrawArrow t color pen dashed
+  mkCommand (mkCDrawArrow t color pen dashed)
 
-let fill ?color t = mkCFill t color
+let fill ?color t = 
+  mkCommand (mkCFill t color)
 
-let seq l = mkCSeq l
+let seq l = mkSeq l
 
 let iter from until f = 
   let l = Misc.fold_from_to (fun acc i -> f i :: acc) [] from until in
   seq (List.rev l)
 
-let draw_pic p = mkCDrawPic p
+let draw_pic p = p
 
-let append c1 c2 = mkCSeq [c1; c2]
+let append c1 c2 = seq [c1; c2]
 let (++) = append
 
-let externalimage filename spec = mkCExternalImage filename spec
+let externalimage filename spec = 
+  mkCommand (mkCExternalImage filename spec)
 
 (* syntactic sugar *)
 
 let iterl f l = seq (List.map f l)
 
-let nop = mkCSeq []
+let nop = seq []

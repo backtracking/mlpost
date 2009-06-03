@@ -710,7 +710,7 @@ and Picture : sig
 
   (** Pictures are a powerful way to reuse and modify parts of a figure *)
 
-  type t
+  type t = Command.t
     (** The abstract type of pictures *)
 
   val make : Command.t -> t

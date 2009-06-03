@@ -50,7 +50,7 @@ and num = num_node hash_consed
 
 and point_node = private
   | PTPair of num * num
-  | PTPicCorner of picture * corner
+  | PTPicCorner of commandpic * corner
   | PTPointOf of num * path
   | PTDirectionOf of num * path
   | PTAdd of point * point
@@ -109,7 +109,7 @@ and path_node = private
   | PACutBefore of path * path
   | PABuildCycle of path list
   | PASub of num * num * path
-  | PABBox of picture
+  | PABBox of commandpic
 
 and path = path_node hash_consed
 
@@ -125,14 +125,6 @@ and transform_node = private
   | TRRotateAround of point * float
 
 and transform = transform_node hash_consed
-
-and picture_node = private
-  | PITex of string
-  | PIMake of command
-  | PITransformed of picture * transform
-  | PIClip of picture * path
-
-and picture = picture_node hash_consed
 
 and dash_node = private
   | DEvenly
@@ -151,15 +143,27 @@ and pen_node = private
 
 and pen = pen_node hash_consed
 
+and picture_node = private
+  | PITex of string
+  | PITransformed of commandpic * transform
+  | PIClip of commandpic * path
+
+and picture = picture_node hash_consed
+
 and command_node = private
   | CDraw of path * color option * pen option * dash option
   | CDrawArrow of path * color option * pen option * dash option
-  | CDrawPic of picture
   | CFill of path * color option
-  | CLabel of picture * position * point
-  | CDotLabel of picture * position * point
-  | CSeq of command list
+  | CLabel of commandpic * position * point
+  | CDotLabel of commandpic * position * point
   | CExternalImage of string * spec_image
+
+and commandpic_node = private
+  | Picture of picture
+  | Command of command
+  | Seq of commandpic list
+
+and commandpic = commandpic_node hash_consed
 
 and spec_image =
   [ `None
@@ -176,70 +180,42 @@ and command = command_node hash_consed
 (* num *)
 
 val mkF: float -> num
-
 val mkNAdd : num -> num -> num
-
 val mkNSub : num -> num -> num
-
 val mkNMult : num -> num -> num
-
 val mkNDiv : num -> num -> num
-
 val mkNMax : num -> num -> num
-
 val mkNMin : num -> num -> num
-
 val mkNGMean : num -> num -> num
-
 val mkNXPart : point -> num
-
 val mkNYPart : point -> num
-
 val mkNLength : path -> num
 
 (* point *)
-
 val mkPTPair : num -> num -> point
-
 val mkPTAdd : point -> point -> point
-
 val mkPTSub : point -> point -> point
-
 val mkPTMult : num -> point -> point
-
 val mkPTRotated : float -> point -> point
-
 val mkPTTransformed : point -> transform -> point
-
 val mkPTPointOf : num -> path -> point
 val mkPTDirectionOf : num -> path -> point
-
-val mkPTPicCorner : picture -> corner -> point
+val mkPTPicCorner : commandpic -> corner -> point
 
 (* transform *)
 
 val mkTRScaled :  num -> transform
-
 val mkTRXscaled :  num -> transform
-
 val mkTRYscaled :  num -> transform
-
 val mkTRZscaled :  point -> transform
-
 val mkTRRotated : float -> transform
-
 val mkTRShifted : point -> transform
-
 val mkTRSlanted : num -> transform
-
 val mkTRReflect : point -> point -> transform
-
 val mkTRRotateAround : point -> float -> transform
 
 (* knot *)
-
 val mkKnot : direction -> point -> direction -> knot
-
 
 (* metapath *)
 
@@ -266,7 +242,7 @@ val mkPACutAfter : path -> path -> path
 val mkPACutBefore : path -> path -> path
 val mkPABuildCycle : path list -> path
 val mkPASub : num -> num -> path -> path
-val mkPABBox : picture -> path
+val mkPABBox : commandpic -> path
 
 (* joint *)
 val mkJCurve : joint
@@ -285,20 +261,22 @@ val mkCurl : float -> direction
 (* picture *)
 
 val mkPITex : string -> picture
-val mkPIMake : command -> picture
-val mkPITransformed : picture -> transform -> picture
-val mkPIClip : picture -> path -> picture
+val mkPITransformed : commandpic -> transform -> picture
+val mkPIClip : commandpic -> path -> picture
 
 (* command *)
 
 val mkCDraw: path -> color option -> pen option -> dash option -> command
 val mkCDrawArrow: path -> color option -> pen option -> dash option -> command
-val mkCDrawPic: picture -> command
 val mkCFill: path -> color option -> command
-val mkCLabel: picture -> position -> point -> command
-val mkCDotLabel: picture -> position -> point -> command
-val mkCSeq: command list -> command
+val mkCLabel: commandpic -> position -> point -> command
+val mkCDotLabel: commandpic -> position -> point -> command
 val mkCExternalImage : string -> spec_image -> command
+
+(* commandpic *)
+val mkPicture : picture -> commandpic
+val mkCommand : command -> commandpic
+val mkSeq : commandpic list -> commandpic
 
 (* dash *)
 

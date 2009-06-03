@@ -16,11 +16,11 @@
 
 open Types
 
-type t = picture
+type t = commandpic
 
-let tex s = mkPITex s
-let make l = mkPIMake l
-let empty = mkPIMake (mkCSeq [])
+let tex s = mkPicture (mkPITex s)
+let make l = l
+let empty = mkSeq []
 let bbox pic = mkPABBox pic
 
 let ulcorner pic = mkPTPicCorner pic `Upleft
@@ -42,7 +42,9 @@ let corner_bbox ?(dx=Num.zero) ?(dy=Num.zero) pic =
      Point.sub (Point.add (lrcorner pic) pdx) pdy;
      Point.add (Point.add (urcorner pic) pdx) pdy]
 
-let transform trl p = List.fold_left mkPITransformed p trl 
+let transform trl p = 
+  List.fold_left 
+    (fun acc tr -> mkPicture (mkPITransformed acc tr)) p trl 
 
 let ctr pic = Point.segment 0.5 (llcorner pic) (urcorner pic)
 
@@ -62,12 +64,13 @@ let place_bot_left p pic = place llcorner pic p
 let place_bot_right p pic = place lrcorner pic p
 
 let beside p1 p2 = 
-  make (mkCSeq [mkCDrawPic p1; mkCDrawPic (place_up_left (urcorner p1) p2)])
+  mkSeq [p1; place_up_left (urcorner p1) p2]
 
 let below p1 p2 =
-  make (mkCSeq [mkCDrawPic p1; mkCDrawPic (place_up_left (llcorner p1) p2)])
+  mkSeq [p1; place_up_left (llcorner p1) p2]
 
-let clip pic pth = mkPIClip pic pth
+let clip pic pth = 
+  mkPicture (mkPIClip pic pth)
 
 let width p = Point.xpart (Point.sub (urcorner p) (ulcorner p))
 

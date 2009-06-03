@@ -38,7 +38,7 @@ and point' acc = function
   | PTAdd (p1,p2) |PTSub (p1,p2) -> point (point acc p1) p2
   | PTMult (f,p) -> point (num acc f) p
   | PTRotated (_,p) -> point acc p
-  | PTPicCorner (pic,_) -> picture acc pic
+  | PTPicCorner (pic,_) -> commandpic acc pic
   | PTTransformed (p,tr) -> point (transform acc tr) p
 and point acc = memoize point' point_memoize acc
 and knot acc k = 
@@ -65,7 +65,7 @@ and path' acc = function
   | PATransformed (p,tr) -> path (transform acc tr) p
   | PACutAfter (p1,p2) |PACutBefore (p1,p2) -> path (path acc p1) p2
   | PASub (f1,f2,p) -> num (num (path acc p) f1) f2
-  | PABBox p -> picture acc p
+  | PABBox p -> commandpic acc p
   | PABuildCycle p -> List.fold_left path acc p
   | PAUnitSquare | PAQuarterCircle | PAHalfCircle | PAFullCircle -> acc
 and path acc = memoize path' path_memoize acc
@@ -77,10 +77,9 @@ and picture acc arg =
       Not_found -> 
         Hashtbl.add picture_memoize arg.tag ();
         match arg.node with
-          | PITransformed (p,tr) -> picture (transform acc tr) p
+          | PITransformed (p,tr) -> commandpic (transform acc tr) p
           | PITex tex -> (arg,tex)::acc
-          | PIMake c -> command acc c
-          | PIClip (pic,pth) -> picture (path acc pth) pic
+          | PIClip (pic,pth) -> commandpic (path acc pth) pic
 and transform acc t =
   match t.Hashcons.node with
     | TRRotated _ -> acc
@@ -99,10 +98,8 @@ and dash_pattern acc o =
 and command' acc = function
   | CDraw (p, _, pe, dsh) | CDrawArrow (p, _, pe, dsh)
       -> path ((option_compile pen) ((option_compile dash) acc dsh) pe) p
-  | CDrawPic p ->  picture acc p
   | CFill (p,_) -> path acc p
-  | CSeq l -> List.fold_left command acc l
-  | CDotLabel (pic,_,pt) | CLabel (pic,_,pt) -> picture (point acc pt) pic
+  | CDotLabel (pic,_,pt) | CLabel (pic,_,pt) -> commandpic (point acc pt) pic
   | CExternalImage _ -> acc
 and pen acc p = 
   match p.Hashcons.node with
@@ -111,6 +108,12 @@ and pen acc p =
     | PenTransformed (p,tr) -> pen (transform acc tr) p
 
 and command acc = memoize command' command_memoize acc
+
+and commandpic acc p =
+  match p.Hashcons.node with
+  | Picture p -> picture acc p
+  | Command c -> command acc c
+  | Seq l -> List.fold_left commandpic acc l
 
 let compile_tex l =
   let tags,texs = List.split l in
@@ -123,6 +126,7 @@ let ct_aux f = fun arg -> compile_tex (f [] arg)
 let ct_auxl f = fun argl -> compile_tex (List.fold_left f [] argl)
 
 let commandl arg = ct_auxl command arg; List.map Compute.command arg
+let commandpicl arg = ct_auxl commandpic arg; List.map Compute.commandpic arg
 let numl arg = ct_auxl num arg; List.map Compute.num arg
 let pointl arg = ct_auxl point arg; List.map Compute.point arg
 let pathl arg = ct_auxl path arg; List.map Compute.path arg
@@ -130,6 +134,7 @@ let metapathl arg = ct_auxl metapath arg; List.map Compute.metapath arg
 let picturel arg = ct_auxl picture arg; List.map Compute.picture arg
 
 let commandl_error ferror arg = ct_auxl command arg; List.map (ferror Compute.command) arg
+let commandpicl_error ferror arg = ct_auxl commandpic arg; List.map (ferror Compute.commandpic) arg
 let numl_error ferror arg = ct_auxl num arg; List.map (ferror Compute.num) arg
 let pointl_error ferror  arg = ct_auxl point arg; List.map (ferror Compute.point) arg
 let pathl_error ferror  arg = ct_auxl path arg; List.map (ferror Compute.path) arg

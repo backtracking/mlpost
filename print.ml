@@ -48,7 +48,7 @@ let rec num fmt n =
 and point fmt p = 
   match p.Hashcons.node with
   | PTPair (n1,n2) -> fprintf fmt "(%a,%a)" num n1 num n2
-  | PTPicCorner (p,pc) -> fprintf fmt "%a(%a)" position pc picture p
+  | PTPicCorner (p,pc) -> fprintf fmt "%a(%a)" position pc commandpic p
   | PTAdd (p1,p2) -> fprintf fmt "(%a + %a)" point p1 point p2
   | PTSub (p1,p2) -> fprintf fmt "(%a - %a)" point p1 point p2
   | PTMult (n,p) -> fprintf fmt "(%a * %a)" num n point p
@@ -56,9 +56,8 @@ and point fmt p =
 and picture fmt p = 
   match p.Hashcons.node with
   | PITex s -> fprintf fmt "tex(%s)" s
-  | PIMake _ -> ()
   | PITransformed (p,tr) -> 
-      fprintf fmt "%a transformed %a" picture p transform tr
+      fprintf fmt "%a transformed %a" commandpic p transform tr
   | PIClip _ -> ()
 
 and transform fmt t = 
@@ -95,7 +94,7 @@ and path fmt p =
   | PACutBefore (p1,p2) -> fprintf fmt "(cutbefore %a by %a)" path p1 path p2
   | PABuildCycle pl -> fprintf fmt "(buildcycle %a)" (Misc.print_list Misc.semicolon path) pl
   | PASub (f1, f2, p) ->  fprintf fmt "(sub %a from %a to %a)" path p num f1 num f2
-  | PABBox p -> fprintf fmt "(bbox %a)" picture p
+  | PABBox p -> fprintf fmt "(bbox %a)" commandpic p
   | PAUnitSquare -> fprintf fmt "unitsquare"
   | PAQuarterCircle -> fprintf fmt "quartercircle"
   | PAHalfCircle -> fprintf fmt "halfcircle"
@@ -108,18 +107,16 @@ and joint fmt j =
   | JTension (a,b) -> fprintf fmt "..tension(%f,%f).." a b
   | JControls (p1,p2) -> fprintf fmt "..%a..%a.." point p1 point p2
 
-let rec command fmt c = 
+and command fmt c = 
   match c.Hashcons.node with 
   | CDraw (p,c,pe,d) ->
       fprintf fmt "draw (%a,%a,%a,%a);" 
       path p option_color c option_pen pe option_dash d
   | CDrawArrow _ -> assert false
-  | CDrawPic p -> fprintf fmt "draw_pic (%a);@ " picture p
   | CFill _ -> assert false
   | CLabel _ -> assert false
   | CDotLabel (pic,pos,pt) ->
-      fprintf fmt "dotlabel%a(%a,%a)" position pos picture pic point pt
-  | CSeq l -> Misc.print_list Misc.space command fmt l
+      fprintf fmt "dotlabel%a(%a,%a)" position pos commandpic pic point pt
   | CExternalImage (f,spec) -> fprintf fmt "externalimage %s@ " f
 and color fmt (c:Types.color) = 
   let mode,color = match c with
@@ -134,6 +131,12 @@ and color fmt (c:Types.color) =
   | CMYK (c,m,y,k) ->
       fprintf fmt "(%f, %f, %f, %f, %a)" c m y k pmode mode
   | Gray f -> fprintf fmt "(%f * white, %a)" f pmode mode
+
+and commandpic fmt c = 
+  match c.Hashcons.node with
+  | Picture p -> picture fmt p
+  | Command c -> command fmt c
+  | Seq l -> Misc.print_list Misc.space commandpic fmt l
 and pen fmt x =
   match x.Hashcons.node with
   | PenCircle -> assert false
