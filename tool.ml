@@ -63,13 +63,15 @@ let add_execopt x = execopt := !execopt ^ " " ^ x
 let notcairo = Version.includecairo = ""
 
 let give_lib () =
-  if Version.includecairo = "" then [] 
-  else Version.cairolibs
+  if notcairo then ["","unix"] 
+  else ("","unix")::("","bigarray")::Version.cairolibs
 
 let get_include_compile s = 
   let aux = function
-    | "cmxa" -> List.map (fun (x,y) -> x^y^".cmxa") (give_lib ())
-    | "cma" -> List.map (fun (x,y) -> x^y^".cma") (give_lib ())
+    | "cmxa" -> List.map (fun (x,y) -> Filename.concat x (y^".cmxa")) 
+        (give_lib ())
+    | "cma" -> List.map (fun (x,y) -> Filename.concat x (y^".cma")) 
+        (give_lib ())
     | "dir" -> List.map fst (give_lib ())
     | "file" -> List.map snd (give_lib ())
     | _ -> assert false in
@@ -154,6 +156,7 @@ let temp_file_name prefix suffix =
     prefix ^ string_of_int !i ^ suffix
   end
 
+
 let compile f =
   let bn = Filename.chop_extension f in
   let mlf, cout = Filename.open_temp_file "mlpost" ".ml" in
@@ -208,9 +211,9 @@ let compile f =
           args@[sprintf "-cflags -I,%s -lflags -I,%s"
             Version.libdir Version.libdir] in
       let args = 
-        if Version.includecairo = "" then args else
+        if notcairo then args else
           let includecairos = 
-            let cairolibs = List.map (fun (x,y) -> x^y) Version.cairolibs in
+            let cairolibs = List.map (fun (x,y) -> Filename.concat x y) Version.cairolibs in
             String.concat "," cairolibs in
           let iI = String.concat  ","
             (List.map (fun (x,_) -> "-I,"^x) Version.cairolibs) in
@@ -224,17 +227,18 @@ let compile f =
     with Command_failed out -> 
       Sys.remove mlf2;
       exit out
-  end else
+  end else begin
     if !native then
       let cairo_args = if notcairo then [] 
       else [Version.includecairo; "bigarray.cmxa"; "cairo.cmxa"; "bitstring.cmxa"] in
       ocamlopt ([!ccopt; "-I"; !libdir;"unix.cmxa"] @ cairo_args @ 
-        ["mlpost.cmxa"; mlf]) !execopt
+                  ["mlpost.cmxa"; mlf]) !execopt
     else
       let cairo_args = if notcairo then [] 
       else [Version.includecairo; "bigarray.cma"; "cairo.cma"; "bitstring.cma"] in
       ocaml ([!ccopt; "-I"; !libdir;"unix.cma"] @ cairo_args @
-               ["mlpost.cma"; mlf]) !execopt;
+               ["mlpost.cma"; mlf]) !execopt
+  end;
 
   Sys.remove mlf;
   if !xpdf then begin

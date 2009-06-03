@@ -2,4 +2,4 @@ description = "OCaml interface to Mlpost"
 version = "@MLPOSTVERSION@"
 archive(byte) = "mlpost.cma"
 archive(native) = "mlpost.cmxa"
-
+requires = "@METAREQUIRESPACKAGE@"

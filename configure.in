@@ -249,9 +249,11 @@ fi
 if test -n "$OCAMLBUILD" -a -n "$CAIROLIB" -a -n "$BITSTRINGLIB"; then
    CAIRO=yes
    INCLUDECAIRO="-I $CAIROLIB -I $BITSTRINGLIB"
+   METAREQUIRESPACKAGE="unix cairo bitstring"
 else
    CAIRO=no
    INCLUDECAIRO=""
+   METAREQUIRESPACKAGE="unix"
 fi
 
 #TEMPORAIRE
@@ -319,6 +321,7 @@ AC_SUBST(OBJEXT)
 AC_SUBST(LIBDIR)
 AC_SUBST(MLPOSTVERSION)
 AC_SUBST(TODAY)
+AC_SUBST(METAREQUIRESPACKAGE)
 
 echo "---------------------------------------------------"
 echo -n "  native code compilation: "

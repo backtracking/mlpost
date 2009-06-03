@@ -3,7 +3,7 @@ let date = "@TODAY@"
 let ocamlopt = "@OCAMLOPT@"
 let libdir = "@LIBDIR@"
 let includecairo = "@INCLUDECAIRO@"
-let cairolibs = ["@CAIROLIB@","cairo";"@BITSTRINGLIB@","bitstring"]
+let cairolibs = ["@CAIROLIB@","/cairo";"@BITSTRINGLIB@","/bitstring"]
 
 
 
