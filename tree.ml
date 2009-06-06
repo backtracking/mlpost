@@ -134,7 +134,7 @@ let cpath ?style ?outd ?ind ?sep a b =
   strip ?sep (cut_before (Box.bpath a) p)
 
 let box_arrow ?color ?pen ?dashed ?style ?outd ?ind ?sep a b =   
-  draw_arrow ?color ?pen ?dashed (cpath ?style ?outd ?ind ?sep a b)
+  Arrow.simple ?color ?pen ?dashed (cpath ?style ?outd ?ind ?sep a b)
 
 let box_line ?color ?pen ?dashed ?style ?outd ?ind ?sep a b =   
   draw ?color ?pen ?dashed (cpath ?style ?outd ?ind ?sep a b)
@@ -144,7 +144,7 @@ let arc astyle estyle ?stroke ?pen ?sep b1 b2 =
   and x2,y2 = let p = Box.north b2 in Point.xpart p, Point.ypart p in
   let boxdraw, linedraw  = match astyle with 
     | Directed -> 
-	box_arrow ?color:stroke ?pen ?sep, draw_arrow ?color:stroke ?pen
+	box_arrow ?color:stroke ?pen ?sep, Arrow.simple ?color:stroke ?pen
     | Undirected -> 
 	box_line ?color:stroke ?pen ?sep, draw ?color:stroke ?pen 
   in

@@ -185,7 +185,7 @@ let d267 =
 	       knotp ~r:(vec (dir (-. angle))) (Box.ctr b)] [jCurve])) 
   in
     seq [Box.draw a; Box.draw b;
-   draw_arrow (path 45. a b); draw_arrow (path (-135.) b a)]
+   Arrow.simple (path 45. a b); Arrow.simple (path (-135.) b a)]
 
 let figs = 
   [ d1; d2; d4; d5; d7; d12; d20; d21; d22; d23; 60, d60; 111, d111; 

@@ -24,11 +24,12 @@ let dotlabels ?(pos=`Center) ls lp =
   seq (List.map2 (fun s p -> dotlabel ~pos:pos (Picture.tex s) p) ls lp)
 
 let draw_simple_arrow ?color ?pen ?dashed ?style ?outd ?ind a b =
-  draw_arrow ?color ?pen ?dashed (Arrow.simple ?style ?outd ?ind a b)
+  Arrow.simple ?color ?pen ?dashed 
+    (Arrow.simple_point_point ?style ?outd ?ind a b)
 
 let draw_label_arrow ?color ?pen ?dashed ?style ?outd ?ind ?pos lab a b =
-  let p = Arrow.simple ?style ?outd ?ind a b in
-  draw_arrow ?color ?pen ?dashed p ++
+  let p = Arrow.simple_point_point ?style ?outd ?ind a b in
+  Arrow.simple ?color ?pen ?dashed p ++
   label ?pos lab (Path.point 0.5 p)
 
 let draw_labelbox_arrow ?color ?pen ?dashed ?style ?outd ?ind ?pos lab a b =
@@ -36,7 +37,7 @@ let draw_labelbox_arrow ?color ?pen ?dashed ?style ?outd ?ind ?pos lab a b =
     (Picture.make (Box.draw lab)) a b
 
 let box_arrow ?color ?pen ?dashed ?style ?outd ?ind ?sep a b =   
-  draw_arrow ?color ?pen ?dashed (Box.cpath ?style ?outd ?ind ?sep a b)
+  Arrow.simple ?color ?pen ?dashed (Box.cpath ?style ?outd ?ind ?sep a b)
 
 let box_line ?color ?pen ?dashed ?style ?outd ?ind ?sep a b =   
   draw ?color ?pen ?dashed (Box.cpath ?style ?outd ?ind ?sep a b)
@@ -48,7 +49,7 @@ let box_label_line ?color ?pen ?dashed ?style ?outd ?ind ?sep ?pos lab a b =
 
 let box_label_arrow ?color ?pen ?dashed ?style ?outd ?ind ?sep ?pos lab a b =
   let p = Box.cpath ?style ?outd ?ind ?sep a b in
-  draw_arrow ?color ?pen ?dashed p ++
+  Arrow.simple ?color ?pen ?dashed p ++
   label ?pos lab (Path.point 0.5 p)
 
 (* TODO unify all these functions *)

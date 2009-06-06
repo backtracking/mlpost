@@ -168,8 +168,6 @@ and command c =
   match c.node with
   | CDraw (p, color, pe, dsh) ->
       path p; option_count pen pe; option_count dash dsh
-  | CDrawArrow (p, color, pe, dsh) ->
-      path p; option_count pen pe; option_count dash dsh
   | CFill (p, c) -> path p
   | CDotLabel (pic, pos, pt) -> commandpic pic; point pt
   | CLabel (pic, pos ,pt) -> commandpic pic; point pt

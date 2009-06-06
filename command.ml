@@ -36,9 +36,6 @@ let draw ?color ?pen ?dashed t =
      for each command in the output file *)
     mkCommand (mkCDraw t color pen dashed)
 
-let draw_arrow ?color ?pen ?dashed t = 
-  mkCommand (mkCDrawArrow t color pen dashed)
-
 let fill ?color t = 
   mkCommand (mkCFill t color)
 

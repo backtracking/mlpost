@@ -371,11 +371,6 @@ and command c =
       let pe, c2 = (option_compile pen) pe in
       let dsh, c3 = (option_compile dash) dsh in
       C.CSeq [c1; c2; c3; C.CDraw (p, color, pe, dsh)]
-  | CDrawArrow (p, color, pe, dsh) ->
-      let p, c1 = path p in
-      let pe, c2 = (option_compile pen) pe in
-      let dsh, c3 = (option_compile dash) dsh in
-      C.CSeq [c1; c2; c3; C.CDrawArrow (p, color, pe, dsh)]
 (*
   | CDrawPic p ->
       let p, code = picture p in

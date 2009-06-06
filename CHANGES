@@ -7,6 +7,7 @@ o new optional argument sep to strip both ends of a path; used in
 * mlpost tool: -pdf now the default; use -ps to produce .1 files
 * Arrow.draw: ~pos becomes ~anchor, new ~pos is point on path
 * Arrow.draw2 becomes Arrow.point_to_point
+* Command.draw_arrow becomes Arrow.simple
 
 version 0.6, February 4th, 2009
 -------------------------

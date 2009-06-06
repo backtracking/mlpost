@@ -152,7 +152,6 @@ and picture = picture_node hash_consed
 
 and command_node = private
   | CDraw of path * color option * pen option * dash option
-  | CDrawArrow of path * color option * pen option * dash option
   | CFill of path * color option
   | CLabel of commandpic * position * point
   | CDotLabel of commandpic * position * point
@@ -267,7 +266,6 @@ val mkPIClip : commandpic -> path -> picture
 (* command *)
 
 val mkCDraw: path -> color option -> pen option -> dash option -> command
-val mkCDrawArrow: path -> color option -> pen option -> dash option -> command
 val mkCFill: path -> color option -> command
 val mkCLabel: commandpic -> position -> point -> command
 val mkCDotLabel: commandpic -> position -> point -> command

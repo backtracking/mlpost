@@ -153,7 +153,6 @@ and picture = picture_node hash_consed
 
 and command_node =
   | CDraw of path * color option * pen option * dash option
-  | CDrawArrow of path * color option * pen option * dash option
   | CFill of path * color option
   | CLabel of commandpic * position * point
   | CDotLabel of commandpic * position * point
@@ -307,8 +306,6 @@ let hash_spec_image = Hashtbl.hash
 let command = function
   | CDraw(pa,c,p,d) ->
       combine4 43 pa.hkey (hash_opt hash_color c) (hash_opt hash_color p) (hash_opt hash_key d)
-  | CDrawArrow(pa,c,p,d) ->
-      combine4 44 pa.hkey (hash_opt hash_color c) (hash_opt hash_color p) (hash_opt hash_key d)
   | CFill(p,c) -> combine2 46 p.hkey (hash_color c)
   | CLabel(pic,pos,poi) -> combine3 47 pic.hkey (hash_position pos) poi.hkey
   | CDotLabel(pic,pos,poi) -> 
@@ -494,8 +491,7 @@ let eq_direction_node d1 d2 =
   
 let eq_command_node c1 c2 =
   match c1,c2 with
-  | CDraw(p1,c1,pen1,d1), CDraw(p2,c2,pen2,d2) 
-  | CDrawArrow(p1,c1,pen1,d1), CDrawArrow(p2,c2,pen2,d2) ->
+  | CDraw(p1,c1,pen1,d1), CDraw(p2,c2,pen2,d2) ->
       eq_hashcons p1 p2 && 
 	eq_opt eq_color c1 c2 &&
 	eq_opt eq_hashcons pen1 pen2 &&
@@ -689,7 +685,6 @@ let hashcommand_table = HashCommand.create 257;;
 let hashcommand = HashCommand.hashcons hashcommand_table
 
 let mkCDraw x y z t = hashcommand (CDraw(x,y,z,t))
-let mkCDrawArrow x y z t = hashcommand (CDrawArrow(x,y,z,t))
 let mkCFill x y = hashcommand (CFill(x,y))
 let mkCLabel x y z = hashcommand (CLabel(x,y,z))
 let mkCDotLabel x y z = hashcommand (CDotLabel(x,y,z))

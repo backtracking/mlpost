@@ -829,9 +829,11 @@ and Command : sig
 	@param pen the pen used to draw the path; default is {!Pen.default}
 	@param dashed if given, the path is drawn using that dash_style. *)
 
+(*
   val draw_arrow : ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> Path.t -> t
     (** Draw a path with an arrow head; the optional arguments 
 	are the same as for {!draw} *)
+*)
 
   val fill : ?color:Color.t -> Path.t -> t
     (** Fill a contour given by a closed path 
@@ -1249,64 +1251,6 @@ and Box : sig
   val xscale : Num.t -> t -> t
 end
 
-(*
-module Arrow : sig
-  (** The Beginning of a module for building arrows. Actually, an arrow is just
-    a path. Use {!Command.draw_arrow} to draw arrows. *)
-
-  val simple : ?style:Path.joint -> ?outd:Path.direction -> 
-               ?ind:Path.direction -> Point.t -> Point.t -> Path.t
-  (** A simple arrow between two points. You can choose ingoing and outgoing
-    directions. *)
-
-  (** {2 Heads} *)
-
-  type head = Point.t -> Point.t -> Command.t
-  (** A head is simply a function which takes a point and a normalized
-    direction and return a command which draws the head. *)
-
-  val no_head : head
-  (** The empty head, meaning there is no head at all. *)
-
-  val simple_head :
-    ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> ?angle:float ->
-    ?size:Num.t -> head
-  (** A simple head with two straight lines.
-  @param color the color of the head; default is black
-  @param pen the pen used to draw the head; default is {!Pen.default}
-  @param dashed if given, the head is drawn using that dash_style
-  @param angle the angle between the two lines in degrees, default is 60 degrees
-  @param size the length of the two lines, default is 4bp *)
-
-  (** {2 Drawing} *)
-
-  val draw : 
-    ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
-    ?foot:head ->
-    ?head:head ->
-    Point.t -> Point.t -> Command.t
-  (** Draw a complex arrow between two points.
-  @param style the joint style used for all joints in the path
-  @param outd the direction of the beginning of the arrow, for curved arrows
-  @param ind the direction of the end of the arrow, for curved arrows
-  @param foot the style used for the arrow head at the beginning of the arrow
-  (default is {!no_head})
-  @param head the style used for the arrow head at the end of the arrow
-  (default is {!simple_head}) *)
-
-  val draw_thick :
-    ?style:Path.joint ->
-    ?boxed:bool ->
-   ?line_color:Color.t ->
-    ?fill_color:Color.t ->
-    ?outd:Path.direction ->
-    ?ind:Path.direction ->
-    ?width:Num.t ->
-    ?head_length:Num.t ->
-    ?head_width:Num.t -> Point.t -> Point.t -> Command.t
-end
-*)
-
 module Arrow : sig
   (** Draw simple or complex arrows. *)
 
@@ -1326,6 +1270,9 @@ module Arrow : sig
       or if you need to place more than one label, you cannot do it directly
       using the [draw] commands. First draw the arrow, then use functions such
       as {!Command.label}. *)
+
+  val simple : 
+    ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> Path.t -> Command.t
 
   val draw: ?kind: kind -> ?tex: string -> ?pos: float ->
     ?anchor: Command.position -> Path.t ->

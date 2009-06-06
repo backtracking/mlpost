@@ -112,7 +112,6 @@ and command fmt c =
   | CDraw (p,c,pe,d) ->
       fprintf fmt "draw (%a,%a,%a,%a);" 
       path p option_color c option_pen pe option_dash d
-  | CDrawArrow _ -> assert false
   | CFill _ -> assert false
   | CLabel _ -> assert false
   | CDotLabel (pic,pos,pt) ->

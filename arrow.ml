@@ -185,9 +185,10 @@ let point_to_box ?kind ?tex ?pos ?anchor ?outd ?ind a b =
 
 open Path
 
-let simple ?style ?outd ?ind a b =
+let simple_point_point ?style ?outd ?ind a b =
   let r,l = outd, ind in
   pathk ?style [knotp ?r a; knotp ?l b]
+
 
 let normalize p =
   Point.scale (Num.divn (Num.bp 1.) (Point.length p)) p
@@ -198,7 +199,7 @@ let thick_path ?style ?outd ?ind ?(width = Num.bp 10.)
     ?(head_length = Num.multf 2. width)
     ?(head_width = head_length)
     a b =
-  let path = simple ?style ?outd ?ind a b in
+  let path = simple_point_point ?style ?outd ?ind a b in
   let a_dir = normalize (Path.direction 0. path) in
   let a_normal = Point.rotate 90. a_dir in
   let a1 = Point.add (Point.scale (Num.divf width 2.) a_normal) a in
@@ -253,3 +254,11 @@ let draw_thick ?style ?(boxed=true) ?line_color ?fill_color ?outd ?ind ?width
       | Some c -> Command.fill ~color:c p
   in
   Command.append fill_cmd draw_cmd
+
+let simple ?color ?pen ?dashed p =
+  let kind = 
+    add_head 
+      ~head:(head_triangle_full ?color) 
+      (add_line ?dashed ?color ?pen empty) in
+  draw ~kind p
+

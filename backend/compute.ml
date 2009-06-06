@@ -321,7 +321,6 @@ and command' = function
       let pe = (option_compile pen) pe in
       let dsh = (option_compile dash) dsh in
       Picture_lib.stroke_path p c pe dsh
-  | CDrawArrow (p, color, pe, dsh) -> (*TODO*) command (mkCDraw p color pe dsh)
   | CFill (p, c) -> 
       let p = path p in
       Picture_lib.fill_path p c
