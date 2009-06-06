@@ -41,11 +41,10 @@
   - foncteur WithBox pour faciliter l'accès aux boîtes nommées
   - clipping
   - exposer toutes les options possibles / imaginables dans l'interface
+    (pour les fonctions d'alignement)
 
 * Arrow :
   - rajouter draw_box_box, draw_point_box, draw_box_point ou d'autres noms
-
-* des Box pourraient avoir des noms par defaut -> Box.get : box -> box -> box
 
 * fusionner Picture et Box ??
 
