@@ -1190,6 +1190,11 @@ and Box : sig
 	raises [Invalid_argument] otherwise. The behavior is not specified
 	if [b] contains several sub-boxes with name [n]. *)
 
+  val sub : t -> t -> t
+  (** [sub b1 b2] returns the sub-box of [b] which has the same name as [b1], 
+     if any, and raises [Invalid_argument] otherwise. The behavior is not
+     specified if [b] contains several sub-boxes with the name of [b1]. *)
+
   val elts : t -> t array
     (** [elts b] returns the sub-boxes of [b]; returns the empty array for
         the empty box or a box containing a picture. *)
@@ -1203,7 +1208,7 @@ and Box : sig
   val set_stroke : Color.t -> t -> t
   val clear_stroke : t -> t
 
-  val get_name : t -> string option
+  val get_name : t -> string
   val set_name : string -> t -> t
 
   val get_pen : t -> Pen.t option

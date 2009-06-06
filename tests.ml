@@ -181,8 +181,8 @@ let d5 =
   let t1 = rand_tree "1" 5 in
   let t2 = rand_tree "2" 6 in
   let bl = Box.hbox ~padding:(Num.cm 2.) [ box t1; box t2] in
-  let b1 = nth 0 (get "1" bl) in
-  let b2 = nth 0 (nth 0 (nth 1 (get "2" bl))) in
+  let b1 = nth 0 (sub t1 bl) in
+  let b2 = nth 0 (nth 0 (nth 1 (sub t2 bl))) in
   seq [ Box.draw bl; box_arrow ~sep:(bp 5.) b1 b2; ]
 
 

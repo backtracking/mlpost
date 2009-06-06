@@ -38,7 +38,7 @@ let print_dom fmt m =
   Format.fprintf fmt "}@]"
 
 type t = {
-  name : string option;
+  name : string;
   width : Num.t;
   height : Num.t;
   ctr : Point.t;
@@ -147,11 +147,8 @@ let rec draw ?(debug=false) b =
       let rect = Path.shift b.ctr (Shapes.rectangle b.width b.height) in
       Command.seq 
 	[Command.draw ~color:Color.red ~dashed:Dash.evenly rect;
-	 match b.name with
-	   | None -> Command.draw ~color:Color.red (Path.pathp [b.ctr])
-	   | Some n -> 
-	       Command.label ~pos:`Center (Picture.tex ("\\tiny " ^ n))
-		 (north_west b)]
+         Command.label ~pos:`Center 
+           (Picture.tex ("\\tiny " ^ b.name)) (north_west b)]
     else 
       Command.nop
   in
@@ -186,10 +183,16 @@ let make_contour s ?(dx=margin) ?(dy=margin) w h c =
 
 let no_drawing _ = Command.nop
 
+let fresh_name = 
+  let x = ref 1 in
+  let s = "__anonbox" in
+  (fun () ->  incr x; s ^ (string_of_int !x))
+
 let mkbox ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black) 
           ?pen ?fill ?(pre_draw=no_drawing) ?(post_draw=no_drawing)
           w h c desc =
   let w,h,s = make_contour style ?dx ?dy w h c in
+  let name = match name with | None -> fresh_name () | Some s -> s in
   { desc = desc;
     name = name; stroke = stroke; pen = pen; fill = fill;
     width = w; height = h; ctr = c; contour = s;
@@ -204,10 +207,8 @@ let merge_maps =
   let add_one m b =
     let m = match b.desc with
       | Emp | Pic _ -> m
-      | Grp (_, m') -> Smap.fold Smap.add m' m
-    in
-    match b.name with Some n -> Smap.add n b m | None -> m
-  in
+      | Grp (_, m') -> Smap.fold Smap.add m' m in
+    Smap.add b.name b m in
   List.fold_left add_one Smap.empty
 
 let box ?style ?dx ?dy ?name ?stroke ?pen ?fill b =
@@ -292,7 +293,7 @@ let elts b = match b.desc with
 let elts_list b = Array.to_list (elts b)
 
 let get n b = 
-  if b.name = Some n then b else match b.desc with
+  if b.name = n then b else match b.desc with
     | Emp -> invalid_arg "Box.get: empty box"
     | Pic _ -> invalid_arg "Box.get: picture box"
     | Grp (_, m) -> 
@@ -301,6 +302,8 @@ let get n b =
 	with Not_found -> 
 	  invalid_arg 
 	    (Misc.sprintf "Box.get: no sub-box %s out of %a" n print_dom m)
+            
+let sub b1 b2 = get b1.name b2
 
 let get_fill b = b.fill
 let set_fill c b = { b with fill = Some c } 
@@ -309,7 +312,7 @@ let get_stroke b = b.stroke
 let set_stroke s b = {b with stroke = Some s } 
 let clear_stroke b = { b with stroke = None }
 let get_name b = b.name
-let set_name name b = {b with name = Some name}
+let set_name name b = {b with name = name}
 
 let set_post_draw f b = {b with post_draw = f}
 let set_pre_draw f b = {b with pre_draw = f}
