@@ -1092,10 +1092,14 @@ and Box : sig
   (** {2 Boxes alignment} *)
 
 (*  val pad_boxes : ?pos:Command.position -> t list -> t list
-    (** put around each box a box which can include all the box and position them according to the given position inside this big box
+    (** put around each box a box which can include all the box and position 
+     * them according to the given position inside this big box
     *)
 *)
-  val hbox : ?padding:Num.t -> ?pos:Command.vposition -> ?style:style -> 
+
+  val halign : ?pos:Command.vposition -> Num.t -> t list -> t list
+  val valign : ?pos:Command.hposition -> Num.t -> t list -> t list
+  val hbox : ?padding:Num.t -> ?pos:Command.position -> ?style:style -> 
     t list box_creator
       (** aligns the given boxes horizontally and returns a box containing
 	  these boxes as sub-components. Leave the first box at its place.
@@ -1105,7 +1109,7 @@ and Box : sig
 	  [`Center]
       *)
 
-  val vbox : ?padding:Num.t -> ?pos:Command.hposition -> ?style:style -> 
+  val vbox : ?padding:Num.t -> ?pos:Command.position -> ?style:style -> 
     t list box_creator
       (** aligns the given boxes vertically and returns a box containing
 	  these boxes as sub-components. Leave the first box at its place.
@@ -1135,16 +1139,20 @@ and Box : sig
     int -> int -> (int -> int -> t) -> t 
     (** similar to [tabular], but using a matrix defined with a function *)
 
-  val hblock : ?pos:Command.vposition -> ?name:string -> 
+  val hplace : ?padding:Num.t -> ?pos:Command.position -> 
+               ?min_width:Num.t -> ?same_width:bool -> t list -> t list
+  val vplace : ?padding:Num.t -> ?pos:Command.position -> 
+               ?min_height:Num.t -> ?same_height:bool -> t list -> t list
+  val hblock : ?pos:Command.position -> ?name:string -> 
                ?min_width:Num.t -> ?same_width:bool -> t list -> t
     (** [hblock bl] aligns the boxes of [bl] horizontally and surround
 	them with new rectangular boxes of the same height; all these new
 	boxes are packed together into the returned box.
         @param min_width minimum width of all boxes; default is zero
-        @param same_width if [true], all boxes are of same width, and at least of
-        [min_width]; default is false*)
+        @param same_width if [true], all boxes are of same width, 
+               and at least of [min_width]; default is false*)
 
-  val vblock : ?pos:Command.hposition -> ?name:string -> 
+  val vblock : ?pos:Command.position -> ?name:string -> 
                ?min_height:Num.t -> ?same_height:bool -> t list -> t
     (** similar to [hblock], with vertical alignment.
         @param min_height minimum height of all boxes; default is zero

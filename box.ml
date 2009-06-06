@@ -113,19 +113,6 @@ let shift pt p = transform [Transform.shifted pt] p
 let yscale n p = transform [Transform.yscaled n] p
 let xscale n p = transform [Transform.xscaled n] p
 
-(*
-let rec shift pt b = 
-  { b with 
-    ctr = Point.shift pt b.ctr; 
-    contour = Path.shift pt b.contour;
-    desc = shift_desc pt b.desc }
-    
-and shift_desc pt = function
-  | Emp -> Emp
-  | Pic pic -> Pic (Picture.shift pt pic)
-  | Grp (a, m) -> Grp (Array.map (shift pt) a, Smap.map (shift pt) m)
-*)
-
 let center pt x = shift (Point.sub pt x.ctr) x
 
 
@@ -135,22 +122,6 @@ let border pos b =
   | `Bot -> ypart (ctr b) -/ height b /./ 2.
   | `Left -> xpart (ctr b) -/ width b /./ 2.
   | `Right -> xpart (ctr b) +/ width b /./ 2.
-
-let diffy pos a b =
-  (* calculate the vertical difference between two boxes, taking either the
-   * center, the top or the bottom as reference  *)
-  let diffc = ypart (Point.sub (ctr a) (ctr b)) in
-  match pos with
-  | `Center -> diffc 
-  | (`Top | `Bot) as x -> border x a -/ border x b
-
-let diffx pos a b =
-  (* calculate the horizontal difference between two boxes, taking either the
-   * center, the top or the bottom as reference  *)
-  let diffc = xpart (Point.sub (ctr a) (ctr b)) in
-  match pos with
-  | `Center -> diffc 
-  | (`Left | `Right) as x -> border x a -/ border x b
 
 let rec draw ?(debug=false) b = 
   let path_cmd = match b.stroke, b.pen with
@@ -171,8 +142,11 @@ let rec draw ?(debug=false) b =
   in
   let debug_cmd = 
     if debug then 
+      (* TODO maybe we should better draw the rectangle [w,h] 
+         instead of the contour *)
+      let rect = Path.shift b.ctr (Shapes.rectangle b.width b.height) in
       Command.seq 
-	[Command.draw ~color:Color.red ~dashed:Dash.evenly b.contour;
+	[Command.draw ~color:Color.red ~dashed:Dash.evenly rect;
 	 match b.name with
 	   | None -> Command.draw ~color:Color.red (Path.pathp [b.ctr])
 	   | Some n -> 
@@ -221,12 +195,6 @@ let mkbox ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black)
     width = w; height = h; ctr = c; contour = s;
     post_draw = post_draw; pre_draw = pre_draw }
 
-let modify_box w h c b = 
-  { b with stroke = Some Color.black; width = w; height = h;
-           ctr = c; 
-           contour = Path.shift c (Shapes.rectangle w h)
-  }
-
 let pic ?style ?dx ?dy ?name ?stroke ?pen ?fill pic =
   let c = Picture.ctr pic in
   mkbox ?style ?dx ?dy ?name ?stroke ?pen ?fill 
@@ -249,76 +217,6 @@ let box ?style ?dx ?dy ?name ?stroke ?pen ?fill b =
 let path ?style ?dx ?dy ?name ?(stroke=None) ?pen ?fill p = 
   pic ?style ?dx ?dy ?name ~stroke ?pen ?fill (Picture.make (Command.draw p))
 
-let horizontal ?(padding=Num.zero) ?(pos=`Center) pl =
-  try
-    let refb = List.hd pl in
-    let refc = ctr refb and refw = width refb in
-    let rec make_new acc x = function
-      | [] -> List.rev acc, x -/ padding
-      | p :: pl ->
-          let diffy = diffy pos refb p in
-          let offsetx = x +/ width p /./ 2. in
-          let b = shift (Point.pt (offsetx -/ xpart (ctr p), diffy)) p in
-          make_new (b::acc) (x +/ width p +/ padding) pl
-    in
-    let l, x = make_new [] (xpart refc -/ refw /./ 2.) pl in
-    let x = x  -/ xpart refc +/ refw /./ 2. in
-    let hmax = Num.fold_max height Num.zero pl in
-    let cy = 
-      match pos with
-      | `Center -> ypart refc
-      | `Top -> border `Top  refb -/ hmax /./ 2.
-      | `Bot -> border `Bot  refb +/ hmax /./ 2.
-    in
-    let mycenter = Point.pt (border `Left refb +/ x /./ 2.,  cy) in     
-    l, x, hmax, mycenter
-  with Failure "hd" -> [], Num.zero, Num.zero, Point.origin
-
-let vertical ?(padding=Num.zero) ?(pos=`Center) pl =
-  try
-    let refb = List.hd pl in
-    let refc = ctr refb and refh = height refb in
-    let rec make_new acc y = function
-      | [] -> List.rev acc, y +/ padding
-      | p :: pl ->
-          let diffx = diffx pos refb p in
-          let offsety = y -/ height p /./ 2. in
-          let b = shift (Point.pt (diffx, offsety -/ ypart (ctr p))) p in
-          make_new (b::acc) (y -/ height p -/ padding) pl 
-    in
-    let wmax = Num.fold_max width Num.zero pl in
-    let l,y = make_new [] (ypart refc +/ refh /./ 2.) pl in
-    let y = y -/ ypart refc -/ refh /./ 2. in
-    let cx = 
-      match pos with
-      | `Center -> xpart refc
-      | `Left -> border `Left refb +/ wmax /./ 2.
-      | `Right -> border `Right refb -/ wmax /./ 2.
-    in
-    let mycenter = Point.pt (cx, border `Top refb +/ y /./ 2.) in
-    l, wmax, Num.neg y, mycenter
-  with Failure "hd" -> [],Num.zero, Num.zero, Point.origin
-
-let align_boxes f ?padding ?pos ?style 
-  ?(dx=Num.zero) ?(dy=Num.zero) ?name ?(stroke=None) ?pen ?fill bl =
-  let bl, w, h , c = f ?padding ?pos bl in
-  mkbox ?style ~dx ~dy ?name ~stroke ?pen ?fill w h c 
-    (Grp (Array.of_list bl, merge_maps bl))
-
-let hbox ?padding ?pos = align_boxes horizontal ?padding ?pos
-let vbox ?padding ?pos = align_boxes vertical ?padding ?pos
-
-(*let pad_boxes ?(pos=`Center) pl =
-    try
-      let refb = List.hd pl in
-      let refc = ctr refb and refh = height refb 
-			  and refw = width refb in
-      let wmax = Num.fold_max width Num.zero pl in
-      let hmax = Num.fold_max height Num.zero pl in
-      let make_new p = modify_box wmax hmax refc (box (center refc p)) in
-	List.map make_new pl
-    with Failure "hd" -> []
-*)
 let empty ?(width=Num.zero) ?(height=Num.zero) ?style ?name ?(stroke=None) 
           ?pen ?fill () =
   mkbox ?style ?name ~dx:zero ~dy:zero ~stroke ?pen ?fill 
@@ -429,43 +327,147 @@ let shadow b =
 let get_pen b = b.pen
 let set_pen p b = { b with pen = Some p }
 
-(* place the box [b] inside the rectangular region defined by the corner
-   corner [corner,x,y], width [w] and height [h], 
-   according to alignment [pos] *)
-let place_box corner pos x y w h b =
-  let xl = (* x-coordinate of the left border *)
-    match corner with
-    | `Upleft | `Lowleft | `Left -> x
-    | `Center | `Top | `Bot -> x -/ w /./ 2.
-    | `Right | `Upright | `Lowright -> x -/ w
-  in
-  let xb = 
+let set_height h b = { b with height = h }
+let set_width w b = { b with width = w }
+let set_contour c b = { b with contour = c }
+
+(* new box primitives *)
+
+let ycoord pos a = 
+  (* get the vertical position of a box, using a either Top, Bot or the
+     center as reference *)
+  match pos with
+  | `Center -> ypart (ctr a)
+  | (`Top | `Bot) as x -> border x a
+let xcoord pos a = 
+  (* get the horizontal position of a box, using a either Left, Right or the
+     center as reference *)
+  match pos with
+  | `Center -> xpart (ctr a)
+  | (`Left | `Right) as x -> border x a
+
+let box_fold f acc l = 
+  let _, l = 
+  List.fold_left 
+    (fun (acc,l) b -> let acc, b = f acc b in acc, b::l) (acc,[]) l in
+  List.rev l
+
+let halign ?(pos=`Center) y l = 
+  List.map (fun b -> shift (Point.pt (zero, y -/ ycoord pos b)) b) l
+
+let set_height_aligned pos h b = 
+  let nc = 
     match pos with
-    | `Upleft | `Lowleft | `Left -> xl +/ width b /./ 2.
-    | `Center | `Top | `Bot -> xl +/ w /./ 2.
-    | `Right | `Upright | `Lowright -> xl +/ w -/ width b /./ 2.
-  in
-  let yu = (* coordinate of the upper border *)
-    match corner with
-    | `Center | `Left | `Right -> y -/ h /./ 2.
-    | `Top | `Upright | `Upleft -> y 
-    | `Bot | `Lowleft | `Lowright -> y -/ h
-  in
-  let yb = match pos with
-    | `Top | `Upright | `Upleft -> y -/ height b /./ 2.
-    | `Center | `Left | `Right -> yu -/ h /./ 2.
-    | `Bot | `Lowleft | `Lowright -> y -/ h +/ height b /./ 2.
-  in
-    center (Point.pt (xb, yb)) b
+    | `Center -> ypart b.ctr
+    | `Top -> ypart b.ctr +/ (b.height -/ h) /./ 2.
+    | `Bot -> ypart b.ctr -/ (b.height -/ h) /./ 2. in
+  { b with height = h; ctr = Point.pt (xpart b.ctr, nc) }
 
-let place_box pos x y w h b = place_box `Upleft pos x y w h b
+let set_width_aligned pos w b = 
+  let nc = 
+    match pos with
+    | `Center -> xpart b.ctr
+    | `Left -> xpart b.ctr -/ (b.width -/ w) /./ 2.
+    | `Right -> xpart b.ctr +/ (b.width -/ w) /./ 2. in
+  { b with width = w; ctr = Point.pt (nc, ypart b.ctr) }
 
-let tabularl ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?(pos=`Center) pll =
-  if pll = [] then invalid_arg "Box.tabular: empty list";
-  let len = List.length (List.hd pll) in
-  if List.exists (fun l -> List.length l <> len) pll then 
-    invalid_arg "Box.tabular: lists have different lengths";
-  let dx = hpadding and dy = vpadding in
+let valign ?(pos=`Center) x l = 
+  List.map (fun b -> shift (Point.pt (x -/ xcoord pos b, zero)) b) l
+
+let extractv pos = 
+  match pos with
+  | `Upleft | `Top | `Upright -> `Top
+  | `Left | `Center | `Right -> `Center
+  | `Lowleft | `Bot | `Lowright -> `Bot
+
+let extracth pos = 
+  match pos with
+  | `Upleft | `Left | `Lowleft -> `Left
+  | `Top | `Center | `Bot -> `Center
+  | `Upright | `Right | `Lowright -> `Right
+
+let max_height l = Num.fold_max height Num.zero l 
+let max_width l = Num.fold_max width Num.zero l 
+
+let hplace ?(padding=zero) ?(pos=`Center) 
+           ?(min_width=zero) ?(same_width=false) l =
+  if l = [] then [] else
+  let min_width =
+    if same_width then Num.maxn (max_width l) min_width else min_width in
+  let l = 
+    List.map 
+      (fun b -> 
+        set_width_aligned (extracth pos) (Num.maxn min_width b.width) b) l in
+  let refb = List.hd l in
+  let refc = ctr refb and refw = width refb in
+  box_fold
+    (fun x p -> 
+      x+/ p.width +/ padding, 
+      center (Point.pt (x +/ p.width /./ 2., ypart p.ctr)) p)
+    (xpart refc -/ refw /./ 2.) l
+
+let vplace ?(padding=zero) ?(pos=`Center) 
+           ?(min_height=zero) ?(same_height=false) l =
+  if l = [] then [] else
+  let min_height =
+    if same_height then Num.maxn (max_height l) min_height else min_height in
+  let l = 
+    List.map (fun b ->
+      set_height_aligned (extractv pos) (Num.maxn min_height b.height) b) l in
+  let refb = List.hd l in
+  let refc = ctr refb and refh = height refb in
+  box_fold
+    (fun y p ->
+      y -/ p.height -/ padding,
+      center (Point.pt (xpart p.ctr, y -/ p.height /./ 2.)) p)
+    (ypart refc +/ refh /./ 2.) l
+
+let hbox' ?padding ?(pos=`Center) ?min_width ?same_width l =
+  match l with
+  | [] -> []
+  | _ ->
+      let y = ypart (corner pos (List.hd l)) in
+      halign ~pos:(extractv pos) y
+        (hplace ?padding ~pos:(extracth pos) ?min_width ?same_width l)
+
+let vbox' ?padding ?(pos=`Center) ?min_height ?same_height l =
+  match l with
+  | [] -> []
+  | _ ->
+      let x = xpart (corner pos (List.hd l)) in
+      valign ~pos:(extracth pos) x
+        (vplace ?padding ~pos:(extractv pos) ?min_height ?same_height l)
+
+let hequalize h l = List.map (set_height h) l
+let wequalize w l = List.map (set_width w) l
+
+let hbox ?padding ?pos ?style ?dx ?dy ?name ?stroke ?pen ?fill l = 
+  group ?style ?dx ?dy ?name ?stroke ?pen ?fill (hbox' ?padding ?pos l)
+
+let vbox ?padding ?pos ?style ?dx ?dy ?name ?stroke ?pen ?fill l = 
+  group ?style ?dx ?dy ?name ?stroke ?pen ?fill (vbox' ?padding ?pos l)
+
+let modify_box ?stroke ?pen b = 
+  let s = 
+    match stroke with
+    | None -> Some Color.black
+    | Some x -> x in
+  { b with stroke = s;
+           pen = pen;
+           contour = Path.shift b.ctr (Shapes.rectangle b.width b.height) }
+
+let hblock ?(pos=`Center) ?name ?min_width ?same_width pl = 
+  group ?name 
+    (List.map modify_box (hbox' ~pos ?min_width ?same_width
+      (List.map (set_height_aligned (extractv pos) (max_height pl)) pl)))
+
+let vblock ?(pos=`Center) ?name ?min_height ?same_height pl =
+  group ?name 
+    (List.map modify_box 
+      (vbox' ~pos ?min_height ?same_height
+        (List.map (set_width_aligned (extracth pos) (max_width pl)) pl)))
+
+let tabularl ?hpadding ?vpadding ?(pos=`Center) pll =
   (* we first compute the widths of columns and heights of rows *)
   let hmaxl = List.map (Num.fold_max height Num.zero) pll in
   let rec calc_wmax pll = match pll with 
@@ -480,32 +482,19 @@ let tabularl ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?(pos=`Center) pll =
 	(Num.fold_max width Num.zero cols) :: (calc_wmax qll)
   in
   let wmaxl = calc_wmax pll in
-  let tw = List.fold_left (fun a w -> a +/ w +/ dx) Num.zero wmaxl -/ dx in
-  let tw_2 = tw /./ 2. in
-  let th = List.fold_left (fun a h -> a +/ h +/ dy) Num.zero hmaxl -/ dy in
-  let c = Point.pt (tw_2, Num.neg (th /./ 2.)) in
-    (* make a single row with upper left corner [x,y] and height [hrow] *)
-  let rec make_row x y hrow wmaxl pl = 
-    match pl, wmaxl with
-      | [], [] -> []
-      | [], _ | _, [] -> assert false
-      | p :: ql, wrow :: wl ->
-	  let b = place_box pos x y wrow hrow p in
-	    b :: make_row (x +/ wrow +/ dx) y hrow wl ql
-  in
-    (* make all rows, with upper left corner [0,y] *)
-  let rec make_array hmaxl y pll = 
-    match pll, hmaxl with
-      | [], [] -> []
-      | [], _ | _, [] -> assert false
-      | row :: qll, hrow :: hl -> 
-	  let brow = 
-	    let c = Point.pt (tw_2, y -/ hrow /./ 2.) in
-	      group_rect tw hrow c (make_row Num.zero y hrow wmaxl row)
-	  in
-	    brow :: make_array hl (y -/ hrow -/ dy) qll
-  in
-  group_rect tw th c (make_array hmaxl Num.zero pll)
+  (* adapt the width of each column *)
+  let pll = 
+    List.map (fun r-> 
+      List.map2 (fun cell w -> 
+        set_width_aligned (extracth pos) w cell) r wmaxl) pll in
+  (* adapt the height of each row *)
+  let pll = 
+    List.map2 (fun h l -> 
+      List.map (fun cell -> set_height_aligned (extractv pos) h cell) l) 
+      hmaxl pll in
+  vbox ~pos ?padding:vpadding 
+    (List.map 
+      (fun r -> hbox ?padding:hpadding ~pos r) pll)
 
 let tabular ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?pos m =
   let pll = Array.to_list (Array.map Array.to_list m) in
@@ -515,45 +504,22 @@ let tabulari ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?pos w h f =
   let m = Array.init h (fun j -> Array.init w (fun i -> f i j)) in
   tabular ~hpadding ~vpadding ?pos m
 
-(* blocks *)
-let gridl ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?(pos=`Center) 
-    ?stroke ?pen pll =
+let gridl ?hpadding ?vpadding ?(pos=`Center) ?stroke ?pen pll =
   let hmax = Num.fold_max (Num.fold_max height Num.zero) Num.zero pll in
   let wmax = Num.fold_max (Num.fold_max width Num.zero) Num.zero pll in
-  let tw = 
-    (match pll with [] -> 0. | a::_ -> float (List.length a)) *./ wmax in
-  let tw_2 = tw /./ 2. in
-  let th = (float (List.length pll)) *./ hmax in
-  let c = Point.pt (tw_2, Num.neg (th /./ 2.)) in
-  (* make a single row with upper left corner [x,y] *)
-  let rec make_row x y = function
-    | [] -> []
-    | p :: ql -> 
-	let b = place_box pos x y wmax hmax p in
-	let b' = modify_box wmax hmax b.ctr b in
-	let b' = match stroke with
-	  | None -> b'
-	  | Some None -> clear_stroke b'
-	  | Some (Some s) -> set_stroke s b'
-	in
-	let b' = match pen with
-	  | None -> b'
-	  | Some p -> set_pen p b'
-	in
-	b' :: make_row (x +/ wmax +/ hpadding) y ql
-  in
-  (* make all rows, with upper left corner [0,y] *)
-  let rec make_array y pll =
-    match pll with
-      | [] -> []
-      | row :: qll -> 
-	  let brow = 
-	    let c = Point.pt (tw_2, y -/ hmax /./ 2.) in
-	    group_rect tw hmax c (make_row Num.zero y row)
-	  in
-	  brow :: make_array (y -/ hmax -/ vpadding) qll
-  in
-  group_rect tw th c (make_array Num.zero pll)
+  let pll = 
+    List.map (fun l ->
+      List.map (fun c -> 
+        set_height_aligned (extractv pos) hmax
+          (set_width_aligned (extracth pos) wmax c)) l) pll in
+  let pll = 
+    vbox' ~pos ?padding:vpadding 
+      (List.map 
+        (fun r -> 
+          group (List.map (modify_box ?stroke ?pen) 
+                  (hbox' ?padding:hpadding ~pos r)))
+        pll) in
+  group pll
 
 let grid ?hpadding ?vpadding ?pos ?stroke ?pen m =
   let pll = Array.to_list (Array.map Array.to_list m) in 
@@ -562,70 +528,6 @@ let grid ?hpadding ?vpadding ?pos ?stroke ?pen m =
 let gridi ?hpadding ?vpadding ?pos ?stroke ?pen w h f =
   let m = Array.init h (fun j -> Array.init w (fun i -> f i j)) in
   grid ?hpadding ?vpadding ?pos ?stroke ?pen m
-
-
-let hblock ?(pos=`Center) ?name ?(min_width=Num.zero) ?(same_width=false) pl =
-  let hmax = Num.fold_max height Num.zero pl in
-  let min_width = 
-    if same_width then
-      let wmax = Num.fold_max width Num.zero pl in
-      Num.maxn wmax min_width
-    else min_width
-  in
-  let hmax_2 = hmax /./ 2. in
-  let rec make_new acc x = function
-    | [] -> 
-	List.rev acc, x
-    | p :: pl ->
-        let wp = width p and hp = height p in
-        let wp = Num.maxn min_width wp in
-        let y = match pos with
-          | `Center -> hmax_2
-          | `Top -> hmax -/ hp /./ 2.
-          | `Bot -> hp /./ 2.
-        in
-	let xc = x +/ wp /./ 2. in
-        let c = Point.pt (xc, y) in 
-        let b = center c p in
-        let nc = Point.pt (xc, hmax_2) in
-        let b = modify_box wp hmax nc b in
-        make_new (b::acc) (x +/ wp) pl
-  in
-  let l,x = make_new [] Num.zero pl in
-  let mycenter = Point.pt (x /./ 2., hmax_2) in     
-  group_rect ?name x hmax mycenter l
-
-let vblock ?(pos=`Center) ?name ?(min_height=Num.zero) ?(same_height=false) pl =
-  let wmax = Num.fold_max width Num.zero pl in
-  let min_height =
-    if same_height then
-      let hmax = Num.fold_max height Num.zero pl in
-      Num.maxn hmax min_height
-    else min_height
-  in
-  let wmax_2 = wmax /./ 2. in
-  let rec make_new acc y = function
-    | [] -> 
-	List.rev acc, y
-    | p :: pl ->
-        let wp = width p and hp = height p in
-        let hp = Num.maxn hp min_height in
-        let x = match pos with
-          | `Center -> wmax_2
-          | `Right -> wmax -/ wp /./ 2.
-          | `Left ->  wp /./ 2.
-        in
-	let yc = y -/ hp /./ 2. in
-        let c = Point.pt (x, yc) in 
-        let b = center c p in
-        let nc = Point.pt (wmax_2, yc) in
-        let b = modify_box wmax hp nc b in
-        make_new (b::acc) (y -/ hp) pl
-  in
-  let l,y = make_new [] Num.zero pl in
-  let mycenter = Point.pt (wmax_2, y /./ 2.) in
-  group_rect ?name wmax (Num.neg y) mycenter l
-
 open Path
 
 let strip ?sep p = match sep with

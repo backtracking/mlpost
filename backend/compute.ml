@@ -16,6 +16,10 @@
 
 let default_labeloffset = 3.5 (* should be 2. but not enough*)
 
+let pi = 3.1415926535897932384626433832795029
+let pi_div_180 = pi /. 180.0
+let deg2rad f = pi_div_180 *. f 
+
 open Types
 open Hashcons
 module P = Point_lib
@@ -24,7 +28,7 @@ module S = Spline_lib
 module Pi = Picture_lib
 module MP = Cairo_metapath
 
-let debug = false
+let debug = true
 
 let memoize f fname memoize =
   fun arg -> 
@@ -266,7 +270,7 @@ and picture' = function
 and picture p = memoize picture' "picture" picture_memoize p
 and transform t = 
   match t.Hashcons.node with
-  | TRRotated f -> Matrix.rotation f
+  | TRRotated f -> Matrix.rotation (deg2rad f)
   | TRScaled f -> Matrix.scale (num f)
   | TRSlanted f -> Matrix.slanted (num f)
   | TRXscaled f -> Matrix.xscaled (num f)

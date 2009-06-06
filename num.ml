@@ -34,9 +34,7 @@ let mm f = mkF (2.83464 *. f)
 let inch f = mkF (72. *. f)
 
 let pi = 3.1415926535897932384626433832795029
-
 let pi_div_180 = pi /. 180.0
-
 let deg2rad f = pi_div_180 *. f 
 
 let is_zero f = abs_float f < 0.0001
