@@ -136,12 +136,12 @@ and point' = function
       let f2 = num f2 in 
       {P.x=f1;y=f2}
   | PTPointOf (f,p) -> 
-      let f = num f in
       let p = path p in
+      let f = Spline_lib.abscissa_of_metapost p (num f) in
       Spline_lib.abscissa_to_point p f
   | PTDirectionOf (f,p) -> 
-      let f = num f in
       let p = path p in
+      let f = Spline_lib.abscissa_of_metapost p (num f) in
       Spline_lib.direction_of_abscissa p f
   | PTAdd (p1,p2) -> 
       let p1 = point p1 in
@@ -235,9 +235,9 @@ and path' = function
       (* TODO *) assert false
 (*       Spline_lib.buildcycle npl *)
   | PASub (f1, f2, p) ->
-      let f1 = num f1 in
-      let f2 = num f2 in
       let p = path p in
+      let f1 = Spline_lib.abscissa_of_metapost p (num f1) in
+      let f2 = Spline_lib.abscissa_of_metapost p (num f2) in
       Spline_lib.subpath p f1 f2
   | PABBox p ->
       let p = commandpic p in

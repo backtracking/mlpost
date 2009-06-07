@@ -58,6 +58,15 @@ let generic_quote whatquote quotequote s =
   done;
   Buffer.contents b  
 
+let generic_quote_list lwqq s =
+  let l = String.length s in
+  let b = Buffer.create (l + 20) in
+  for i = 0 to l - 1 do
+    if List.mem_assoc s.[i] lwqq
+    then Buffer.add_string b (List.assoc s.[i] lwqq)
+    else Buffer.add_char b s.[i]
+  done;
+  Buffer.contents b  
 
 
 (* persistent queues *)

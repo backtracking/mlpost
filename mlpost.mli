@@ -807,6 +807,12 @@ and Picture : sig
   val xscale : Num.t -> t -> t
   val spin : float -> t -> t
 
+  type escaped = [`Backslash|`Underscore]
+
+  val escape_latex : escaped list -> string -> string
+
+  val escape_all : string -> string
+
 end
 
 and Command : sig

@@ -6,8 +6,10 @@ let not_implemented s = raise (Not_implemented s)
 module Error = struct
   let max_absc f = 
     invalid_arg (f^": the abscissa given is greater than max_abscissa")
-  let min_absc f =
-    invalid_arg (f^": the abscissa given is smaller than min_abscissa")
+  let min_absc ?value f =
+    let value = match value with | None -> "" 
+      | Some f -> ": "^(string_of_float f) in
+    invalid_arg (f^": the abscissa given is smaller than min_abscissa"^value)
   let absc_point f = invalid_arg (f^": a point has only the abscissa 0.")
   let dir_point f = invalid_arg (f^": a point has no direction.")
 end
@@ -166,6 +168,32 @@ let abscissa_to_point p0 t =
     | Point p when t = 0. -> p
     | Point _ -> Error.absc_point "abscissa_to_point"
 
+let metapost_of_abscissa p0 t = 
+  match p0 with
+    | Path p ->
+        let rec aux s = function
+          |[] -> Error.max_absc "metapost_of_abscissa"
+          | a::l when a.smax >= t -> s+.(_01_of_s a t)
+          | _::l -> aux (s+.1.) l 
+        in
+        if min_abscissa p0 > t then Error.min_absc "metapost_of_abscissa"
+        else aux 0. p.pl
+    | Point p when t = 0. -> 0.
+    | Point _ -> Error.absc_point "metapost_of_abscissa"
+
+let abscissa_of_metapost p0 t = 
+  match p0 with
+    | Path p ->
+        let rec aux t = function
+          |[] -> Error.max_absc "abscissa_of_metapost"
+          | a::l when 1. >= t -> s_of_01 a t
+          | _::l -> aux (t-.1.) l 
+        in
+        if 0. > t then Error.min_absc ~value:t "abscissa_of_metapost"
+        else aux t p.pl
+    | Point p when t = 0. -> 0.
+    | Point _ -> Error.absc_point "abscissa_of_metapost"
+
 let direction_of_abscissa_aux s t = 
   (* An expression as polynomial:
     short but lots of point operations
@@ -312,8 +340,8 @@ let one_intersection a b =
           one_to_one2 (fun () -> one_intersection_aux) () a.pl b.pl;
            if debug then
              (* debugging changes behaviour here - is this intended? *)
-             (Format.printf "one_intersection : Not_found use 0.,0.@."; 0.,0.)
-           else raise Not_found
+             Format.printf "one_intersection : Not_found@.";
+           raise Not_found
         with Found (t1,t2) -> (t1,t2))
     | _ -> 
         if debug then 
@@ -467,11 +495,14 @@ let split p0 t =
 let subpath p t1 t2 = fst (split (snd (split p t1)) t2)
 
 let cut_before a b = 
-  snd (split b (fst (one_intersection b a)))
+  try snd (split b (fst (one_intersection b a)))
+  with Not_found -> b
 
 let cut_after a b = 
-  let b = reverse b in
-  reverse (snd (split b (fst (one_intersection b a)))) 
+  try
+    let b = reverse b in
+    reverse (snd (split b (fst (one_intersection b a)))) 
+  with Not_found -> b
 
 let dicho_split x = assert false
 

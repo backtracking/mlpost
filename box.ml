@@ -185,7 +185,7 @@ let no_drawing _ = Command.nop
 
 let fresh_name = 
   let x = ref 1 in
-  let s = "__anonbox" in
+  let s = "\\_\\_anonbox" in
   (fun () ->  incr x; s ^ (string_of_int !x))
 
 let mkbox ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black) 

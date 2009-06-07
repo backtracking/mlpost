@@ -23,7 +23,7 @@ let error_replace_by_tex msg_error f arg =
   | None -> f arg
   | Some w -> try f arg with exn -> 
       let msg = sprintf "Error : %s" (Printexc.to_string exn) in
-      let msg = Misc.generic_quote '_' "\\_" msg in
+      let msg = Picture.escape_all msg in
       printf "%s@." msg;
       f (Types.mkPicture (Types.mkPITex (sprintf 
 "\\begin{minipage}{%f pt}

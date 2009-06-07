@@ -31,7 +31,7 @@ val close : path -> path
 
 val min_abscissa : path -> abscissa
 val max_abscissa : path -> abscissa
-val length : path -> abscissa
+val length : path -> float
 (** It's not the real length of the path *)  
 
 val add_end : path -> point -> point -> path
@@ -92,6 +92,9 @@ val of_bounding_box : point * point -> path
 
 val print : Format.formatter -> path -> unit
 val print_splines : Format.formatter -> spline list -> unit
+
+val abscissa_of_metapost : path -> float -> abscissa
+val metapost_of_abscissa : path -> abscissa -> float
 
 module Epure :
 sig

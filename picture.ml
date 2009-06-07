@@ -92,3 +92,17 @@ let corner pos x =
   | `Center -> ctr x
   | `Top -> north x
   | `Bot -> south x
+
+type escaped = 
+    [`Backslash
+    |`Underscore]
+
+let rec escaped_to_list acc = function
+  | [] -> acc
+  | `Underscore::l -> escaped_to_list (('_',"\\_")::acc) l
+  | `Backslash::l -> escaped_to_list (('\\',"\\backslash")::acc) l
+
+let escape_latex l = Misc.generic_quote_list (escaped_to_list [] l)
+
+let escape_all = escape_latex [`Backslash;`Underscore]
+
