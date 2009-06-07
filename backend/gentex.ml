@@ -18,7 +18,7 @@ let tempdir prefix suffix f =
   let dirname = create_dir () in
   let workdir_bak = Sys.getcwd () in
   Sys.chdir dirname;
-  let res = f () in
+  let res = f dirname in
   Sys.chdir workdir_bak;
   Array.iter (fun x -> Sys.remove (Filename.concat dirname x)) (Sys.readdir dirname);
   Unix.rmdir dirname;
@@ -51,13 +51,13 @@ let create prelude = function
 (fun fmt -> List.iter (Printf.fprintf fmt
 "\\mpxshipout
 %s\\stopmpxshipout")) texs in
-  let todo () = 
+  let todo pwd = 
     let latex = genfile_name^".tex" in
     let file = open_out latex in
     Printf.fprintf file "%t" format;
     close_out file;
     let exit_status = Sys.command (sprintf "%s -halt-on-error %s > gentex_dev_null.log" com_latex latex) in
-    if exit_status <> 0 then failwith (sprintf "Error with : %s %s" com_latex latex);
+    if exit_status <> 0 then failwith (sprintf "Error with : %s : %s %s log in gentex.log" pwd com_latex latex);
     let dvi = genfile_name^".dvi" in
     let saved = Saved_device.load_file true dvi in
     List.map (fun x -> {tex = x;trans= Matrix.identity}) (Dev_save.separe_pages saved) in
