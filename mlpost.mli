@@ -1222,6 +1222,14 @@ and Box : sig
   val get_pen : t -> Pen.t option
   val set_pen : Pen.t -> t -> t
 
+  val set_height : Command.vposition -> Num.t -> t -> t
+  val set_width : Command.hposition -> Num.t -> t -> t
+  val set_size : Command.position -> width:Num.t -> height:Num.t -> t -> t
+
+  val same_height : ?pos:Command.vposition -> t list -> t list
+  val same_width : ?pos:Command.hposition -> t list -> t list
+  val same_size : ?pos:Command.position -> t list -> t list
+
   (** {2 Misc.} *)
 
   val shadow : t -> t

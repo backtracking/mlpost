@@ -330,8 +330,6 @@ let shadow b =
 let get_pen b = b.pen
 let set_pen p b = { b with pen = Some p }
 
-let set_height h b = { b with height = h }
-let set_width w b = { b with width = w }
 let set_contour c b = { b with contour = c }
 
 (* new box primitives *)
@@ -358,7 +356,7 @@ let box_fold f acc l =
 let halign ?(pos=`Center) y l = 
   List.map (fun b -> shift (Point.pt (zero, y -/ ycoord pos b)) b) l
 
-let set_height_aligned pos h b = 
+let set_height pos h b = 
   let nc = 
     match pos with
     | `Center -> ypart b.ctr
@@ -366,7 +364,7 @@ let set_height_aligned pos h b =
     | `Bot -> ypart b.ctr -/ (b.height -/ h) /./ 2. in
   { b with height = h; ctr = Point.pt (xpart b.ctr, nc) }
 
-let set_width_aligned pos w b = 
+let set_width pos w b = 
   let nc = 
     match pos with
     | `Center -> xpart b.ctr
@@ -389,8 +387,18 @@ let extracth pos =
   | `Top | `Center | `Bot -> `Center
   | `Upright | `Right | `Lowright -> `Right
 
+let set_size pos ~width ~height b = 
+  set_height (extractv pos) height (set_width (extracth pos) width b)
+
+
 let max_height l = Num.fold_max height Num.zero l 
 let max_width l = Num.fold_max width Num.zero l 
+
+let same_size ?(pos=`Center) bl = 
+  List.map (set_size pos ~width:(max_width bl) ~height:(max_height bl)) bl
+
+let same_height ?(pos=`Center) bl = List.map (set_height pos (max_height bl)) bl
+let same_width ?(pos=`Center) bl = List.map (set_width pos (max_width bl)) bl
 
 let hplace ?(padding=zero) ?(pos=`Center) 
            ?(min_width=zero) ?(same_width=false) l =
@@ -399,8 +407,7 @@ let hplace ?(padding=zero) ?(pos=`Center)
     if same_width then Num.maxn (max_width l) min_width else min_width in
   let l = 
     List.map 
-      (fun b -> 
-        set_width_aligned (extracth pos) (Num.maxn min_width b.width) b) l in
+      (fun b -> set_width (extracth pos) (Num.maxn min_width b.width) b) l in
   let refb = List.hd l in
   let refc = ctr refb and refw = width refb in
   box_fold
@@ -416,7 +423,7 @@ let vplace ?(padding=zero) ?(pos=`Center)
     if same_height then Num.maxn (max_height l) min_height else min_height in
   let l = 
     List.map (fun b ->
-      set_height_aligned (extractv pos) (Num.maxn min_height b.height) b) l in
+      set_height (extractv pos) (Num.maxn min_height b.height) b) l in
   let refb = List.hd l in
   let refc = ctr refb and refh = height refb in
   box_fold
@@ -462,13 +469,13 @@ let modify_box ?stroke ?pen b =
 let hblock ?(pos=`Center) ?name ?min_width ?same_width pl = 
   group ?name 
     (List.map modify_box (hbox' ~pos ?min_width ?same_width
-      (List.map (set_height_aligned (extractv pos) (max_height pl)) pl)))
+      (List.map (set_height (extractv pos) (max_height pl)) pl)))
 
 let vblock ?(pos=`Center) ?name ?min_height ?same_height pl =
   group ?name 
     (List.map modify_box 
       (vbox' ~pos ?min_height ?same_height
-        (List.map (set_width_aligned (extracth pos) (max_width pl)) pl)))
+        (List.map (set_width (extracth pos) (max_width pl)) pl)))
 
 let tabularl ?hpadding ?vpadding ?(pos=`Center) pll =
   (* we first compute the widths of columns and heights of rows *)
@@ -488,12 +495,11 @@ let tabularl ?hpadding ?vpadding ?(pos=`Center) pll =
   (* adapt the width of each column *)
   let pll = 
     List.map (fun r-> 
-      List.map2 (fun cell w -> 
-        set_width_aligned (extracth pos) w cell) r wmaxl) pll in
+      List.map2 (fun cell w -> set_width (extracth pos) w cell) r wmaxl) pll in
   (* adapt the height of each row *)
   let pll = 
     List.map2 (fun h l -> 
-      List.map (fun cell -> set_height_aligned (extractv pos) h cell) l) 
+      List.map (fun cell -> set_height (extractv pos) h cell) l) 
       hmaxl pll in
   vbox ~pos ?padding:vpadding 
     (List.map 
@@ -513,8 +519,8 @@ let gridl ?hpadding ?vpadding ?(pos=`Center) ?stroke ?pen pll =
   let pll = 
     List.map (fun l ->
       List.map (fun c -> 
-        set_height_aligned (extractv pos) hmax
-          (set_width_aligned (extracth pos) wmax c)) l) pll in
+        set_height (extractv pos) hmax
+          (set_width (extracth pos) wmax c)) l) pll in
   let pll = 
     vbox' ~pos ?padding:vpadding 
       (List.map 
