@@ -30,6 +30,13 @@ type style =
   | Custom of (Num.t -> Num.t -> Num.t * Num.t * Path.t)
 
 let margin = Num.bp 2.
+let fresh_name_prefix = "__anonbox"
+let is_anon_name s = 
+  let rec aux = function
+    | -1 -> true
+    | n -> fresh_name_prefix.[n] = s.[n] && aux (n-1) in
+  (String.length s > String.length fresh_name_prefix)
+    && aux ((String.length fresh_name_prefix) -1)
 
 module Smap = Map.Make(String)
 
@@ -148,8 +155,10 @@ let rec draw ?(debug=false) b =
       let rect = Path.shift b.ctr (Shapes.rectangle b.width b.height) in
       Command.seq 
 	[Command.draw ~color:Color.red ~dashed:Dash.evenly rect;
+         if is_anon_name b.name then Command.nop 
+         else
          Command.label ~pos:`Center 
-           (Picture.tex ("\\tiny " ^ b.name)) (north_west b)]
+           (Picture.tex ("\\tiny " ^ (Picture.escape_all b.name))) (north_west b)]
     else 
       Command.nop
   in
@@ -190,7 +199,7 @@ let no_drawing _ = Command.nop
 
 let fresh_name = 
   let x = ref 1 in
-  let s = "\\_\\_anonbox" in
+  let s = fresh_name_prefix in
   (fun () ->  incr x; s ^ (string_of_int !x))
 
 let mkbox ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black) 

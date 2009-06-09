@@ -1,5 +1,5 @@
 let diameter_of_a_dot = 3.
-let default_line_size = 0.5
+let default_line_size = 1.
 
 module MP = Cairo_metapath
 open Types
@@ -31,7 +31,7 @@ type commands =
   | Transform of transform * commands
   | OnTop of commands list
   | Tex of tex
-  | Stroke_path of path * color option * pen option * dash option
+  | Stroke_path of path * color option * pen * dash option
   | Fill_path of path * color option
   | Clip of commands  * path
   | ExternalImage of string * float * float
@@ -50,15 +50,14 @@ let fill_path p c = {fcl = Fill_path (p,c);
                      fb = Spline_lib.Epure.of_path p;
                      fi = IntEmpty}
 
-let ecart_of_pen = function
-  | None -> {x=0.5;y=0.5}
-  | Some pen -> Point_lib.transform pen {x=0.5;y=0.5}
+let ecart_of_pen pen = 
+  Spline_lib.transform pen (Cairo_metapath.Approx.fullcircle default_line_size)
 
 let stroke_path p c pen d = {fcl= Stroke_path (p,c,pen,d);
                              fb = Spline_lib.Epure.of_path ~ecart:(ecart_of_pen pen) p;
                              fi = IntEmpty}
 
-let draw_point p = stroke_path (Spline_lib.create_point p) None (Some (Matrix.scale diameter_of_a_dot)) None
+let draw_point p = stroke_path (Spline_lib.create_point p) None (Matrix.scale diameter_of_a_dot) None
 
 let clip p path = {fcl= Clip (p.fcl,path);
                    fb = Spline_lib.Epure.of_path path; 
@@ -142,11 +141,11 @@ struct
         inversey cr (max+.min);
         Gentex.draw cr t;
         Cairo.restore cr
-    | Stroke_path (path,c,pen,d) ->
+    | Stroke_path(path,c,pen,d) ->
         Cairo.save cr;
         color_option cr c;
         dash cr d;
-        MP.ToCairo.stroke cr ?pen path;
+        MP.ToCairo.stroke cr pen path;
         Cairo.restore cr
     | Fill_path (path,c)-> 
         Cairo.save cr;

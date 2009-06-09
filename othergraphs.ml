@@ -187,6 +187,15 @@ let d267 =
     seq [Box.draw a; Box.draw b;
    Arrow.simple (path 45. a b); Arrow.simple (path (-135.) b a)]
 
+let min = -1.
+let max = 1.
+
+let b = (cycle ~style:jLine (path ~style:jLine [(min,min);(max,min);(max,max);(min,max)]))
+
+(* Pour avoir une echelle *)
+let embed (id,p) = 
+  id,seq [p;draw b;fill ~color:Color.white b]
+
 let figs = 
   [ d1; d2; d4; d5; d7; d12; d20; d21; d22; d23; 60, d60; 111, d111; 
     d130; d140; d149; d195; 267,d267 ]

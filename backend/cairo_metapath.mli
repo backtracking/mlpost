@@ -40,7 +40,7 @@ module Approx :
 module ToCairo :
   sig
     type pen = Matrix.t
-    val stroke : Cairo.t -> ?pen:pen -> Spline_lib.path -> unit
+    val stroke : Cairo.t -> pen -> Spline_lib.path -> unit
     val fill : Cairo.t -> Spline_lib.path -> unit
     val draw_path : Cairo.t -> Spline_lib.path -> unit
   end

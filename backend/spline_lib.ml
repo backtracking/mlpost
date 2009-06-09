@@ -339,7 +339,6 @@ let one_intersection a b =
         (try
           one_to_one2 (fun () -> one_intersection_aux) () a.pl b.pl;
            if debug then
-             (* debugging changes behaviour here - is this intended? *)
              Format.printf "one_intersection : Not_found@.";
            raise Not_found
         with Found (t1,t2) -> (t1,t2))
@@ -635,7 +634,8 @@ module Epure =
 struct
   (* A rendre plus performant ou pas*)
   (* le point correspond à un écart à prendre autour de la bounding box *)
-  type t = (spline list * point) list
+  type pen = path
+  type t = (spline list * pen) list
   let print fmt p = 
     Format.fprintf fmt "@[[%a]" 
       (fun fmt -> 
@@ -644,7 +644,7 @@ struct
             (fun (e,f) -> 
               Format.fprintf fmt "%a[%a];" print_spline e P.print f))) p
   let empty = []
-  let create ?(ecart=P.zero) = function
+  let create ?(ecart=Point P.zero) = function
     |Path p -> [p.pl,ecart]
     |Point p -> 
         let x = 
@@ -656,13 +656,15 @@ struct
 
   let of_path = create
   let union x y = List.rev_append x y
-  let transform t x = List.map (fun (x,f) -> transform_aux t x, f) x
+
+  let transform t x = List.map (fun (x,f) -> transform_aux t x, transform (Matrix.remove_translation t) f) x
   let bounding_box sl =
     let (x_min,y_min,x_max,y_max) = 
       list_min_max (fun (e,f) -> 
                       let (x_min,y_min,x_max,y_max)=
                         list_min_max give_bound_precise e in
-                      let p1,p2 = ({x=x_min;y=y_min}-/f,{x=x_max;y=y_max}+/f) in
+                      let pen_min,pen_max = bounding_box f in
+                      let p1,p2 = ({x=x_min;y=y_min}+/pen_min,{x=x_max;y=y_max}+/pen_max) in
                       (p1.x,p1.y,p2.x,p2.y)) sl in
     ({x=x_min;y=y_min},{x=x_max;y=y_max})
   let of_bounding_box l = create (of_bounding_box l)

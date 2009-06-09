@@ -15,7 +15,7 @@ type commands =
   | Transform of transform * commands
   | OnTop of commands list
   | Tex of tex
-  | Stroke_path of path * color option * pen option * dash option 
+  | Stroke_path of path * color option * pen * dash option 
   | Fill_path of path * color option
   | Clip of commands  * path
   | ExternalImage of string * float * float
@@ -28,7 +28,7 @@ val content : t -> commands
 
 val tex : Gentex.t -> t
 val fill_path : path -> color option -> t
-val stroke_path : path -> color option -> pen option -> dash option -> t
+val stroke_path : path -> color option -> pen -> dash option -> t
 val draw_point : point -> t
 val clip : t -> path -> t
 val external_image : string -> 

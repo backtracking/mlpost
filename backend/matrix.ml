@@ -28,6 +28,7 @@ let identity = init_identity
 let transform = Cairo.transform
 let set = Cairo.set_matrix
 
+let remove_translation t = { t with x0 = 0.; y0 = 0.}
 
 let print fmt m = 
   Format.fprintf fmt "[|[|%f;%f|];[|%f;%f|];[|%f;%f|]|]" 

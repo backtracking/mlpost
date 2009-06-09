@@ -13,8 +13,13 @@
 (*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                  *)
 (*                                                                        *)
 (**************************************************************************)
+module P = Point_lib
+module M = Matrix
 
-let default_labeloffset = 3.5 (* should be 2. but not enough*)
+let default_labeloffset = 3.5 (* should be 3. but not enough*)
+let default_pen = M.scale 0.5
+let bbox_offset = {P.x=2.;P.y=2.}
+
 
 let pi = 3.1415926535897932384626433832795029
 let pi_div_180 = pi /. 180.0
@@ -22,8 +27,7 @@ let deg2rad f = pi_div_180 *. f
 
 open Types
 open Hashcons
-module P = Point_lib
-module M = Matrix
+
 module S = Spline_lib
 module Pi = Picture_lib
 module MP = Cairo_metapath
@@ -53,6 +57,10 @@ let nop = Picture_lib.empty
 let option_compile f = function
   | None -> None
   | Some obj -> Some (f obj)
+
+let option_def_compile def f = function
+  | None -> def
+  | Some obj -> f obj
 
 let middle x y = (x/.2.)+.(y/.2.)
 
@@ -242,6 +250,7 @@ and path' = function
   | PABBox p ->
       let p = commandpic p in
       let pmin,pmax = Picture_lib.bounding_box p in
+      let pmin,pmax = P.sub pmin bbox_offset,P.add pmax bbox_offset in
       Spline_lib.close 
         (Spline_lib.create_lines [{P.x = pmin.P.x; y = pmin.P.y};
                                   {P.x = pmin.P.x; y = pmax.P.y};
@@ -318,7 +327,7 @@ and dash_pattern o =
 and command' = function
   | CDraw (p, c, pe, dsh) ->
       let p = path p in
-      let pe = (option_compile pen) pe in
+      let pe = (option_def_compile default_pen pen) pe in
       let dsh = (option_compile dash) dsh in
       Picture_lib.stroke_path p c pe dsh
   | CFill (p, c) -> 

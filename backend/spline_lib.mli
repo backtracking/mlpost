@@ -98,10 +98,11 @@ val metapost_of_abscissa : path -> abscissa -> float
 
 module Epure :
 sig
+  type pen = path
   type t
   val empty : t
-  val create : ?ecart:point -> path -> t
-  val of_path : ?ecart:point -> path -> t
+  val create : ?ecart:pen -> path -> t
+  val of_path : ?ecart:pen -> path -> t
   val union : t -> t -> t
   val transform : Matrix.t -> t -> t
   val bounding_box : t -> point * point

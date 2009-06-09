@@ -212,11 +212,11 @@ let solve_choices p q n deltaxyk deltak psik =
         (* Reduce to simple case of straight line and return 302 *)
         let lt = abs_float tq and rt = abs_float tp in
         let tmp = P.sign deltaxyk.(0) in
-        let fx p t = 
-          let d = if t = tunity then deltaxyk.(0) else deltaxyk.(0) +/ tmp in
-            Explicit (p.coord +/ (d // (3. *. t)) ) in
-        p.right <- fx p rt;
-        q.left <- fx q lt
+        let fx p t f = 
+          let d = if t = tunity then deltaxyk.(0) +/ tmp else deltaxyk.(0) in
+            Explicit (f p.coord (d // (3. *. t)) ) in
+        p.right <- fx p rt (+/);
+        q.left <- fx q lt (-/);
     | {link=t} as s -> 
         let thetak = Array.make (n+2) 0. in
         let uu = Array.make (n+1) 0. in
@@ -368,9 +368,10 @@ let make_choices knots =
                psik.(k) <- psi);
             fill_array (k+1) t
       in fill_array 0 p);
-     (*Format.printf "deltaxyk : %a@." (print_array P.print) deltaxyk;
-     Format.printf "deltak : %a@." (print_array print_float) deltak;
-     Format.printf "psik : %a@." (print_array print_float) psik;*)
+     if debug then
+       (Format.printf "deltaxyk : %a@." (print_array P.print) deltaxyk;
+        Format.printf "deltak : %a@." (print_array print_float) deltak;
+        Format.printf "psik : %a@." (print_array print_float) psik);
      (*Remove open types at the breakpoints 282*)
      (match q with
        | {left=Open t} -> q.left <- Curl (t,1.) (* TODO cas bizarre *)
@@ -469,8 +470,10 @@ let path_to_meta nknot l =
                 | _ -> ());
            end
    end;
-   if debug then
-     Format.printf "@[before : @[%a@];@.middle : @[%a@]@]@." print meta print_kpath knots;
+   if info then
+     Format.printf "@[before (cycle:%b) : @[%a@]@]@." (cycle<>None) print meta;
+   if debug then 
+     Format.printf "@[middle : @[%a@]@]@." print_kpath knots;
    make_choices knots;
    if debug then
      Format.printf "@[after : @[%a@]@]@." print_kpath knots;
@@ -583,7 +586,7 @@ struct
         if p.S.cycle then Cairo.close_path cr
     | S.Point _ -> failwith "Metapost fail in that case what should I do???"
 
-  let stroke cr ?(pen=Matrix.identity) = function
+  let stroke cr pen = function
     | S.Path _ as path -> 
         draw_path cr path;
         Cairo.save cr;
