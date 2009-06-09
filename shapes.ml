@@ -74,6 +74,15 @@ let ellipse rx ry =
   let joints = [mkJControls r2 t1; mkJControls t2 l1; mkJControls l2 b1] in
   cycle ~dir:(mkVec up) 
     ~style:(mkJControls b2 r1) (jointpathk knots joints)
+
+let round_box width height = 
+  let w = width /./ 2. and h = height /./ 2. in
+  let mw = neg w and mh = neg h in
+  let dx = h /./ 5. and dy = h /./ 5. in
+  let style = jCurveNoInflex in
+  Path.pathn ~cycle:style ~style 
+  [ mw -/ dx, zero; zero, mh -/ dy;
+    w +/ dx, zero; zero, h +/ dy;]
       
 (*
 let arc_ellipse_path ?(close=false) rx ry theta1 theta2 =

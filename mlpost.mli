@@ -969,6 +969,7 @@ and Box : sig
     | RoundRect
     | Patatoid
     | Ellipse
+    | RoundBox
     | Custom of (Num.t -> Num.t -> Num.t * Num.t * Path.t)
 
   type 'a box_creator = 
@@ -1037,6 +1038,8 @@ and Box : sig
 	containing the picture [pic]. It may happen that the content 
 	overlaps with the box.
     @img patatoid.png *)
+
+  val round_box : t box_creator
 
 (***
   val round_rect_gen : ?dx:Num.t -> ?dy:Num.t -> ?rx:Num.t -> ?ry:Num.t -> 

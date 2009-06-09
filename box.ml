@@ -26,6 +26,7 @@ type style =
   | RoundRect
   | Patatoid
   | Ellipse
+  | RoundBox
   | Custom of (Num.t -> Num.t -> Num.t * Num.t * Path.t)
 
 let margin = Num.bp 2.
@@ -163,6 +164,9 @@ let ellipse_ w h = w, h, Shapes.ellipse w h
 let round_rect_ w h = 
   let rx = (minn w h) /./ 10. in
   w, h, Shapes.round_rect w h rx rx
+
+let round_box_ w h = 
+  w, h, Shapes.round_box w h
 let patatoid_ w h = 
   let p = Shapes.patatoid w h in
   let pic = Command.draw p in
@@ -174,6 +178,7 @@ let from_style = function
   | RoundRect -> round_rect_
   | Patatoid -> patatoid_
   | Ellipse -> ellipse_
+  | RoundBox -> round_box_
   | Custom f -> f
 
 let make_contour s ?(dx=margin) ?(dy=margin) w h c =
@@ -273,6 +278,7 @@ let circle = box ~style:Circle
 let ellipse = box ~style:Ellipse
 let round_rect = box ~style:RoundRect
 let patatoid = box ~style:Patatoid
+let round_box = box ~style:RoundBox
 
 let tex ?style ?dx ?dy ?name ?(stroke=None) ?pen ?fill s = 
   pic ?style ?dx ?dy ?name ~stroke ?pen ?fill (Picture.tex s)
