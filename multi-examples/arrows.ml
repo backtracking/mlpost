@@ -55,6 +55,11 @@ let () =
   (* Some arrows with multiple serial lines *)
   emit (Arrow.point_to_point ~kind: serial_lines a d);
   emit (Arrow.point_to_point ~kind: serial_lines ~outd: right c b);
+  (* Some "implies" *)
+  emit (Arrow.point_to_point ~kind: Arrow.implies a d);
+  emit (Arrow.point_to_point ~kind: Arrow.implies ~outd: right c b);
+  emit (Arrow.point_to_point ~kind: Arrow.implies ~outd: up ~ind: up a b);
+
   (* A straight thick arrow *)
   emit (Arrow.draw_thick a d);
   emit (Arrow.draw_thick b c);

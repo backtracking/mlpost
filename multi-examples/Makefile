@@ -17,7 +17,7 @@ HTML = $(BUILD)examples.html
 all:
 	$(OCAMLBUILD) $(MLFILES:.ml=.htmlpart)
 	echo "<html><head><title>Mlpost Examples</title></head>" > $(HTML)
-	echo "<body>\n<h1>Mlpost Examples</h1>" >> $(HTML)
+	echo "<body><h1>Mlpost Examples</h1>" >> $(HTML)
 	cat $(BUILD)*.htmlpart >> $(HTML)
 	echo "</body></html>" >> $(HTML)
 

@@ -1290,6 +1290,10 @@ module Arrow : sig
 
   val simple : 
     ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> Path.t -> Command.t
+    (** Draw a simple arrow following the given path.
+        @param color the color of the arrow
+        @param pen the pen to use to draw the body of the arrow
+        @param dashed the dash pattern to use to draw the body of the arrow *)
 
   val draw: ?kind: kind -> ?tex: string -> ?pos: float ->
     ?anchor: Command.position -> Path.t ->
@@ -1348,9 +1352,21 @@ module Arrow : sig
   val triangle_full: kind
     (** A simple arrow with a triangular head filled with black. *)
 
+  val implies: kind
+    (** An arrow made of two parallel lines and a classic head. *)
+
   (** {2 Heads} *)
 
-  type head = Point.t -> Point.t -> Command.t * Path.t
+  type head_description
+    (** The type of head descriptions (see [make_head] and [head] below). *)
+
+  val make_head: ?cut: Path.t -> Command.t -> head_description
+    (** Head description constructor. The command parameter is used to draw
+        the head.
+        @param cut a path that can be used to cut the arrow body lines
+        (only used by heads and feet, not by belts) *)
+
+  type head = Point.t -> Point.t -> head_description
     (** If [h] is a head, [h p d] returns [c, p] where [c] is a command that can
         be used to draw the head at point [p] with direction [d], and [p] is a
         path that can be used to cut the arrow lines. [d] is normalized before
@@ -1395,7 +1411,7 @@ module Arrow : sig
         @param to_point from [0.] (foot of the arrow) to [1.] (head of the
           arrow), the line will end at this point
         @param dist the distance between the path of the arrow and this line
-          (may be negative) *)
+          (positive values are on the right of the arrows) *)
 
   val add_head: ?head: head -> kind -> kind
     (** Add a head at the end of the arrow.

@@ -44,7 +44,17 @@ type line = {
   dist: Num.t;
 }
 
-type head = Point.t -> Point.t -> Command.t * Path.t
+type head_description = {
+  hd_command: Command.t;
+  hd_cut: Types.path option;
+}
+
+let make_head ?cut command = {
+  hd_command = command;
+  hd_cut = cut;
+}
+
+type head = Point.t -> Point.t -> head_description
 
 type belt = {
   clip: bool;
@@ -85,19 +95,19 @@ let head_classic_points ?(angle = 60.) ?(size = Num.bp 4.) p dir =
 let head_classic ?color ?pen ?dashed ?angle ?size p dir =
   let a, b = head_classic_points ?angle ?size p dir in
   let path = Path.pathp ~style: Path.jLine [a; p; b] in
-  Command.draw ?color ?pen ?dashed path, path
+  make_head ~cut: path (Command.draw ?color ?pen ?dashed path)
 
 let head_triangle ?color ?pen ?dashed ?angle ?size p dir =
   let a, b = head_classic_points ?angle ?size p dir in
   let path = Path.pathp ~style: Path.jLine ~cycle: Path.jLine [a; p; b] in
-  let clipping_path = Path.pathp ~style: Path.jLine [a; b] in
-  Command.draw ?color ?pen ?dashed path, clipping_path
+  let cut = Path.pathp ~style: Path.jLine [a; b] in
+  make_head ~cut (Command.draw ?color ?pen ?dashed path)
 
 let head_triangle_full ?color ?angle ?size p dir =
   let a, b = head_classic_points ?angle ?size p dir in
   let path = Path.pathp ~style: Path.jLine ~cycle: Path.jLine [a; p; b] in
-  let clipping_path = Path.pathp ~style: Path.jLine [a; b] in
-  Command.fill ?color path, clipping_path
+  let cut = Path.pathp ~style: Path.jLine [a; b] in
+  make_head ~cut (Command.fill ?color path)
 
 let add_belt ?(clip = false) ?(rev = false) ?(point = 0.5)
     ?(head = fun x -> head_classic x) kind =
@@ -112,15 +122,24 @@ let add_head ?head kind = add_belt ~clip: true ~point: 1. ?head kind
 
 let add_foot ?head kind = add_belt ~clip: true ~rev: true ~point: 0. ?head kind
 
+let parallel_path path dist =
+  (* TODO: true parallelism (right now its a bad approximation which only works
+     well for straight arrows, or slightly curved arrow with a small dist) *)
+  let d = direction_on_path 0.5 path in
+  let d = Point.rotate 90. d in
+  let d = normalize d in
+  let d = Point.mult dist d in
+  Path.shift d path
+
 (* Compute the path of a line along an arrow path.
    Return the line (unchanged) and the computed path. *)
 let make_arrow_line path line =
-  (* TODO: use line.dist *)
   let path =
     if line.from_point <> 0. || line.to_point <> 1. then
       subpath_01 line.from_point line.to_point path
     else path
   in
+  let path = parallel_path path line.dist in
   line, path
 
 (* Compute the command and the clipping path of a belt along an arrow path.
@@ -129,15 +148,17 @@ let make_arrow_belt path belt =
   let p = point_on_path belt.point path in
   let d = normalize (direction_on_path belt.point path) in
   let d = if belt.rev then neg d else d in
-  let command, clipping_path = belt.head p d in
-  belt, command, clipping_path
+  let hd = belt.head p d in
+  belt, hd.hd_command, hd.hd_cut
 
 (* Clip a line with a belt clipping path if needed. *)
 let clip_line_with_belt (line, line_path) (belt, _, clipping_path) =
   let cut =
-    if belt.clip then
-      (if belt.rev then Path.cut_before else Path.cut_after) clipping_path
-    else fun x -> x
+    match belt.clip, clipping_path with
+      | true, Some clipping_path ->
+          (if belt.rev then Path.cut_before else Path.cut_after) clipping_path
+      | false, _ | true, None ->
+          fun x -> x
   in
   line, cut line_path
 
@@ -148,6 +169,11 @@ let draw_line (line, line_path) =
 let classic = add_head (add_line empty)
 let triangle = add_head ~head: head_triangle (add_line empty)
 let triangle_full = add_head ~head: head_triangle_full (add_line empty)
+let implies =
+  add_head
+    (add_line ~dist: (Num.cm 0.035)
+       (add_line ~dist: (Num.cm (-0.035))
+          empty))
 
 let draw ?(kind = triangle_full) ?tex ?(pos = 0.5) ?anchor path =
   let lines, belts = kind.lines, kind.belts in
