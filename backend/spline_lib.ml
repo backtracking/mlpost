@@ -218,16 +218,28 @@ let direction_of_abscissa p0 t =
         if min_abscissa p0 > t then Error.min_absc "direction_of_abscissa"
         else aux p.pl
 
+
+
 let extremum a b c d =
+  let eqa = 3.*.(d -. a +. (3.*.(b -. c))) in
+  let eqb = 2.*.(c +. a -. (2.*.b)) in
+  let eqc = b -. a in
   let test s l = if s>=0. && s<=1. then s::l else l in
-  let sol delta = (delta -. (2.*.b) +. a +. c)/.(a -. d +. (3.*.(c -. b))) in
-  let delta = ((b*.b) -. (c*.(b +. a -. c)) +. (d*.(a -. b)))**0.5 in
+  if eqa = 0. then test (-. eqc /. eqb) [] else
+(*  let sol delta = (delta -. (2.*.b) +. a +. c)/.(a -. d +. (3.*.(c -. b))) in
+  let delta = ((b*.b) -. (c*.(b +. a -. c)) +. (d*.(a -. b))) in*)
+  let sol delta = (delta +. eqb) /. (-.2.*.eqa) in
+  let delta = eqb*.eqb -. 4.*.eqa*.eqc in
   match compare delta 0. with
     | x when x<0 -> []
     | 0 -> test (sol 0.) []
-    | _ -> test (sol delta) (test (sol (-.delta)) [])
+    | _ -> 
+        let delta = delta**0.5 in
+        test (sol delta) (test (sol (-.delta)) [])
 
-let remarquable a b c d = 0.::1.::(extremum a b c d)
+let remarquable a b c d = 
+  let res = 0.::1.::(extremum a b c d) in
+  Format.printf "remarquable : %a@." (fun fmt -> List.iter (Format.printf "%f;")) res; res
 
 let apply_x f s = f s.sa.x s.sb.x s.sc.x s.sd.x
 let apply_y f s = f s.sa.y s.sb.y s.sc.y s.sd.y
@@ -629,6 +641,9 @@ let of_bounding_box ({x=x_min;y=y_min},{x=x_max;y=y_max}) =
   close (create_lines [ul;ur;dr;dl;ul])
 
 let length p = max_abscissa p -. min_abscissa p
+let metapost_length = function
+  | Point _ -> 0.
+  | Path p -> float_of_int (List.length p.pl)
 
 module Epure =
 struct
@@ -664,7 +679,9 @@ struct
                       let (x_min,y_min,x_max,y_max)=
                         list_min_max give_bound_precise e in
                       let pen_min,pen_max = bounding_box f in
+                      Format.printf "pen : %a,%a@." P.print pen_min P.print pen_max;
                       let p1,p2 = ({x=x_min;y=y_min}+/pen_min,{x=x_max;y=y_max}+/pen_max) in
+                       Format.printf "p1,p2 : %a,%a@." P.print p1 P.print p2;
                       (p1.x,p1.y,p2.x,p2.y)) sl in
     ({x=x_min;y=y_min},{x=x_max;y=y_max})
   let of_bounding_box l = create (of_bounding_box l)

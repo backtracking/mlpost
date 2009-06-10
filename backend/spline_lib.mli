@@ -32,6 +32,7 @@ val close : path -> path
 val min_abscissa : path -> abscissa
 val max_abscissa : path -> abscissa
 val length : path -> float
+val metapost_length : path -> float
 (** It's not the real length of the path *)  
 
 val add_end : path -> point -> point -> path

@@ -312,8 +312,7 @@ let generate bn ?prelude ?(pdf=false) ?eps figl =
   List.iter 
     (fun (i,_) -> 
        let si = string_of_int i in
-       printf "mv %s" (bn ^ "." ^ si);
-      Sys.rename (bn ^ "." ^ si) (bn ^ sep ^ si ^ suf))
+       Sys.rename (bn ^ "." ^ si) (bn ^ sep ^ si ^ suf))
     figl
   
 

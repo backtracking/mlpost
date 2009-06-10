@@ -10,7 +10,7 @@ let not_implemented s = raise (Not_implemented s)
 let square x = x *. x
 
 let debug = false
-let info = false
+let info = debug || false
 
 type point = P.point
 type direction =
@@ -514,7 +514,9 @@ let no_direction = DNo
 
 let start k = Start k
   
-let line_joint = JLine
+let line_joint = (*JLine but metafont defined -- as a macro for*) 
+  JCurve(curl_direction 1.,curl_direction 1.)
+
 let curve_joint dir1 dir2 = JCurve(dir1,dir2)
 let curve_no_inflex_joint dir1 dir2 = JCurveNoInflex(dir1,dir2)
 let tension_joint dir1 f1 f2 dir2 = JTension (dir1,f1,f2,dir2)

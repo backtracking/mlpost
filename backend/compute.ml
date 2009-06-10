@@ -136,7 +136,7 @@ let rec num' = function
         sqrt (n1*.n1+.n2*.n2)
   | NLength p ->
       let p = path p in
-      Spline_lib.length p
+      Spline_lib.metapost_length p
 and num n = memoize num' "num" num_memoize n
 and point' = function
   | PTPair (f1,f2) -> 
@@ -165,7 +165,7 @@ and point' = function
         P.mult f p1
   | PTRotated (f,p) ->
       let p1 = point p in
-      P.rotated f p1
+      P.rotated (deg2rad f) p1
   | PTPicCorner (pic, corner) ->
       let p = commandpic pic in
       point_of_position 0. (Picture_lib.bounding_box p) corner
@@ -289,7 +289,7 @@ and transform t =
       Matrix.translation p
   | TRZscaled p -> Matrix.zscaled (point p)
   | TRReflect (p1,p2) -> Matrix.reflect (point p1) (point p2)
-  | TRRotateAround (p,f) -> Matrix.rotate_around (point p) f
+  | TRRotateAround (p,f) -> Matrix.rotate_around (point p) (deg2rad f)
 
 and commandpic p =
   match p.Hashcons.node with

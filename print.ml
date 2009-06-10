@@ -43,7 +43,9 @@ let rec num fmt n =
   | NMult(n1,n2) -> fprintf fmt "(%a * %a)" num n1 num n2
   | NDiv(n1,n2) -> fprintf fmt "(%a / %a)" num n1 num n2
   | NMax(n1,n2) -> fprintf fmt "max(%a,%a)" num n1 num n2
-  | _ -> assert false
+  | NMin(n1,n2) -> fprintf fmt "min(%a,%a)" num n1 num n2
+  | NLength p -> fprintf fmt "length %a" path p
+  | NGMean (n1,n2) -> fprintf fmt "mean(%a,%a)" num n1 num n2
 
 and point fmt p = 
   match p.Hashcons.node with
@@ -112,7 +114,8 @@ and command fmt c =
   | CDraw (p,c,pe,d) ->
       fprintf fmt "draw (%a,%a,%a,%a);" 
       path p option_color c option_pen pe option_dash d
-  | CFill _ -> assert false
+  | CFill (p,c) -> fprintf fmt "fill (%a,%a);" 
+      path p option_color c
   | CLabel _ -> assert false
   | CDotLabel (pic,pos,pt) ->
       fprintf fmt "dotlabel%a(%a,%a)" position pos commandpic pic point pt
@@ -138,7 +141,7 @@ and commandpic fmt c =
   | Seq l -> Misc.print_list Misc.space commandpic fmt l
 and pen fmt x =
   match x.Hashcons.node with
-  | PenCircle -> assert false
+  | PenCircle -> fprintf fmt "PenCircle"
   | PenSquare -> assert false
   | PenFromPath p -> assert false
   | PenTransformed (p,trl) -> fprintf fmt "(%a,%a)" pen p transform trl

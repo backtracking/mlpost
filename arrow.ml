@@ -217,8 +217,8 @@ let simple_point_point ?style ?outd ?ind a b =
   pathk ?style [knotp ?r a; knotp ?l b]
 
 
-let normalize p =
-  Point.scale (Num.divn (Num.bp 1.) (Point.length p)) p
+(*let normalize p =
+  Point.scale (Num.divn (Num.bp 1.) (Point.length p)) p*)
 
 let neg = Point.scale (Num.bp (-1.))
 
