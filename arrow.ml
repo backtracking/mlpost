@@ -174,6 +174,7 @@ let implies =
     (add_line ~dist: (Num.cm 0.035)
        (add_line ~dist: (Num.cm (-0.035))
           empty))
+let iff = add_foot implies
 
 let draw ?(kind = triangle_full) ?tex ?(pos = 0.5) ?anchor path =
   let lines, belts = kind.lines, kind.belts in

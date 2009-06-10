@@ -1355,6 +1355,10 @@ module Arrow : sig
   val implies: kind
     (** An arrow made of two parallel lines and a classic head. *)
 
+  val iff: kind
+    (** An arrow made of two parallel lines, a classic head and a classic
+        foot. *)
+
   (** {2 Heads} *)
 
   type head_description
