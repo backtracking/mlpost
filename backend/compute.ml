@@ -98,8 +98,15 @@ let command_memoize = Hashtbl.create 50
 let prelude = ref ""
 let set_prelude = (:=) prelude
 
+let float_to_metapost f = 
+      (* Compatibility with metapost *)
+      if f = infinity then 4095.99998 (* cf mpman *)
+      else if f > 4095. then 4095.
+      else if abs_float f < 0.0001 then 0.
+      else f
+
 let rec num' = function
-  | F f -> f
+  | F f -> float_to_metapost f
   | NXPart p -> 
       let p = point p in
       p.P.x
@@ -180,7 +187,8 @@ and knot k =
         let d1 = direction d1 in
         let p = point p in
         let d2 = direction d2 in
-        d1,Cairo_metapath.knot p,d2
+        let d1,d2 = MP.equalize_dir (d1,d2) in
+        d1,MP.knot p,d2
 
 and joint dl j dr = 
   match j.Hashcons.node with
@@ -197,7 +205,7 @@ and direction d =
   | Vec p -> 
       let p = point p in
       MP.vec_direction p
-  | Curl f -> MP.curl_direction f
+  | Curl f -> MP.curl_direction (float_to_metapost f)
   | NoDir  -> MP.no_direction
 and metapath' = function
   | MPAConcat (pa,j,p) ->
@@ -224,7 +232,7 @@ and path' = function
   | MPACycle (d,j,p) ->
       let d = direction d in
       let dl,p,_ = metapath p in
-      let j = joint d j dl in
+      let j = joint dl j d in
       MP.cycle j p
   | PATransformed (p,tr) ->
       let p = path p in

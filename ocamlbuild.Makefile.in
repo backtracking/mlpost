@@ -110,11 +110,13 @@ tests.byte: tests.ml
 	make -C test tests
 	$(PSVIEWER) test/tests.ps
 
-handbook: handbookgraphs.ml
+handbook.pdf : handbookgraphs.ml
 	$(OCAMLBUILD) handbookgraphs.native
 	$(BUILD)/handbookgraphs.native
 	make -C test manual
 	make -C test/manual mpost
+
+handbook: handbook.pdf
 	$(PDFVIEWER) test/testmanual.pdf
 
 handbook.byte: handbookgraphs.ml
@@ -124,11 +126,13 @@ handbook.byte: handbookgraphs.ml
 	make -C test/manual mpost
 	$(PSVIEWER) test/testmanual.ps
 
-other: othergraphs.ml
+other.pdf: othergraphs.ml
 	$(OCAMLBUILD) othergraphs.native
 	$(BUILD)/othergraphs.native
 	make -C test other
 	make -C test/othergraphs mpost
+
+other: other.pdf
 	$(PDFVIEWER) test/othergraphs.pdf
 
 other.byte: othergraphs.ml

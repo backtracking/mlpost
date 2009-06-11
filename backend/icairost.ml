@@ -36,7 +36,10 @@ let error_replace_by_tex msg_error f arg =
 let emit_gen ?msg_error create next_page figs = 
   (*Format.printf "Fig : %a@." Print.commandpic (List.hd figs);*)
   let figs = LookForTeX.commandpicl_error (error_replace_by_tex msg_error) figs in
-  let ({x=xmin;y=ymin},{x=xmax;y=ymax}) = Point_lib.list_min_max Picture_lib.bounding_box figs in
+  let (min,max) = Point_lib.list_min_max Picture_lib.bounding_box figs in
+  let ({x=xmin;y=ymin},{x=xmax;y=ymax}) = min,max in
+  (*Point_lib.sub min Compute.bbox_offset,
+    Point_lib.add max Compute.bbox_offset in*)
   let height = ymax -. ymin in
   let width = xmax -. xmin in
   let figs = List.map (fun fig -> Picture_lib.shift fig (-.xmin) (-.ymin)) figs in

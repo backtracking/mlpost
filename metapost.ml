@@ -135,6 +135,7 @@ and joint fmt = function
 and direction fmt = function
   | C.NoDir -> ()
   | C.Vec p -> fprintf fmt "{%a}" point p
+      (* Why there is not the same thing than in Num?*)
   | C.Curl f -> fprintf fmt "{curl %a}" float f
 
 and knot fmt (d1,p,d2) = fprintf fmt "%a%a%a" direction d1 point p direction d2

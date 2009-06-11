@@ -11,8 +11,8 @@ let translation p = init_translate p.x p.y
 let xy_translation x y = init_translate x y
 let rotation = init_rotate
 let scale f = init_scale f f
-let xscaled f = init_scale f 0.
-let yscaled f = init_scale 0. f
+let xscaled f = init_scale f 1.
+let yscaled f = init_scale 1. f
 
 let slanted f = linear 1. f 0. 1.
 let zscaled p = linear p.x (0. -. p.y) p.y p.x

@@ -204,9 +204,9 @@ let draw21 =
   let mp d pt = knot ~r:(vec d) ~scale:cm pt in
   let kl = [mp down (-1.,0.); mp right (0.,-1.); mp up (1.,0.)] in
   let path = pathk kl in
-  let r = vec (p (-.1., -.2.)) in
+  let r = p (-.1., -.2.) in
   let fillp = cycle ~dir:(vec up)
-      (concat path (knot ~r ~scale:cm (0.,0.))) in
+      (concat path (mp r (0.,0.))) in
   let fullp = cycle (concat path (mp left (0.,1.))) in
     21, seq [fill fillp; draw fullp]
 
@@ -249,13 +249,22 @@ let draw40 =
   let pic' = Picture.clip cmd pth in
     40, seq [pic'; draw pth]
 
-let figs = 
+let min = -100.
+let max = 100.
+
+let b = (cycle ~style:jLine (path  ~style:jLine [(min,min);(max,min);(max,max);(min,max)]))
+
+(* Pour avoir une echelle *)
+let embed (id,p) = 
+  id,seq [draw b;p]
+
+let figs = (*List.map embed*)
   [ draw1; draw3; draw4a; draw4b;draw5; 
     draw6; draw7; draw8; draw9a; draw9b;
     draw10a; draw10b; draw10c] @ draw11 
   @ [draw17; draw18; draw21; draw22; draw40]
 
-let mpostfile = "testmanual"
+let mpostfile = "testmanualMP"
 let cairostfile = "testmanual_cairo"
 let texfile = "testmanual.tex"
 
@@ -265,12 +274,12 @@ let _ =
     begin
       Metapost.generate mpostfile ~pdf:true figs;
       Cairost.generate_pdfs cairostfile figs;
-      Generate.generate_tex_cairo texfile "manual/manual" "testmanual" "testmanual_cairo" figs;
+      Generate.generate_tex_cairo texfile "manual/manual" "testmanualMP" "testmanual_cairo" figs;
     end
   else
     begin
       Metapost.generate mpostfile ~pdf:true figs;
-      Generate.generate_tex ~pdf:true texfile "manual/manual" "testmanual" figs;
+      Generate.generate_tex ~pdf:true texfile "manual/manual" "testmanualMP" figs;
     end
 
 

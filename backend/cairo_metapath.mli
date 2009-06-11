@@ -4,11 +4,19 @@ type t
 type joint
 type knot
 type direction
+
+val print : Format.formatter -> t -> unit
+val print_joint : Format.formatter -> joint -> unit
+val print_dir : Format.formatter -> direction -> unit
+val print_knot : Format.formatter -> knot -> unit
+
 val knot : point -> knot
 
 val vec_direction : point -> direction
 val curl_direction : float -> direction
 val no_direction : direction
+
+val equalize_dir : direction * direction -> direction * direction
 
 val line_joint : joint
 val curve_joint : direction -> direction -> joint

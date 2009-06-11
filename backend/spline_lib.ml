@@ -221,15 +221,19 @@ let direction_of_abscissa p0 t =
 
 
 let extremum a b c d =
-  let eqa = 3.*.(d -. a +. (3.*.(b -. c))) in
+  let eqa = d -. a +. (3.*.(b -. c)) in
   let eqb = 2.*.(c +. a -. (2.*.b)) in
   let eqc = b -. a in
+  (*Format.printf "eqa : %f; eqb : %f; eqc : %f@." eqa eqb eqc;*)
   let test s l = if s>=0. && s<=1. then s::l else l in
-  if eqa = 0. then test (-. eqc /. eqb) [] else
-(*  let sol delta = (delta -. (2.*.b) +. a +. c)/.(a -. d +. (3.*.(c -. b))) in
-  let delta = ((b*.b) -. (c*.(b +. a -. c)) +. (d*.(a -. b))) in*)
+  if eqa = 0. then if eqb = 0. then []
+  else test (-. eqc /. eqb) [] 
+  else
+  (*let sol delta = (delta -. (2.*.b) +. a +. c)/.(a -. d +. (3.*.(c -. b))) in*)
+  (*let delta = ((b*.b) -. (c*.(b +. a -. c)) +. (d*.(a -. b))) in*)
   let sol delta = (delta +. eqb) /. (-.2.*.eqa) in
-  let delta = eqb*.eqb -. 4.*.eqa*.eqc in
+  let delta = (eqb*.eqb) -. (4.*.eqa*.eqc) in
+  (*Format.printf "delta2 : %f; delta : %f@." delta2 delta;*)
   match compare delta 0. with
     | x when x<0 -> []
     | 0 -> test (sol 0.) []
@@ -239,7 +243,8 @@ let extremum a b c d =
 
 let remarquable a b c d = 
   let res = 0.::1.::(extremum a b c d) in
-  Format.printf "remarquable : %a@." (fun fmt -> List.iter (Format.printf "%f;")) res; res
+  (*Format.printf "remarquable : %a@." (fun fmt -> List.iter (Format.printf "%f;")) res;*)
+    res
 
 let apply_x f s = f s.sa.x s.sb.x s.sc.x s.sd.x
 let apply_y f s = f s.sa.y s.sb.y s.sc.y s.sd.y
@@ -266,6 +271,7 @@ let unprecise_bounding_box = function
   | Point s -> (s,s)
 
 let give_bound_precise s =
+  (*Format.printf "precise : %a@." print_spline s;*)
       let x_remarq = List.map (apply_x cubic s) (apply_x remarquable s) in
       let y_remarq = List.map (apply_y cubic s) (apply_y remarquable s) in
       let x_max = List.fold_left max neg_infinity x_remarq in
@@ -458,8 +464,8 @@ let reverse x =
         (fun x -> sum -. x) in
       let rec aux acc = function
         | [] -> acc
-        | ({sa=sa;sd=sd;smin=smin;smax=smax} as a)::l -> 
-            aux ({a with sa=sd;sd=sa;
+        | ({sa=sa;sb=sb;sc=sc;sd=sd;smin=smin;smax=smax} as a)::l -> 
+            aux ({a with sa=sd;sb=sc;sc=sb;sd=sa;
                     smin=conv smax; smax=conv smin}::acc) l in
       Path {p with pl = aux [] p.pl}
   | Point _ as p -> p
@@ -470,6 +476,9 @@ let reverse x =
 let cast_path_to_point p = function
   | Path {pl=[];} -> Point p
   | x -> x
+(*
+(((t0*tt)^3)*(d + (3*(b - c)) - a)) + (3*((((t0*tt)^2)*(c + a - (2*b))) + (t0*tt*(b - a)))) + a
+*)
 
 let split_aux s t l = 
   if t = s.smax then ([s],cast_path_to_point s.sd (Path {pl=l;cycle=false}))
@@ -487,7 +496,7 @@ let split_aux s t l =
     let b2 = 
       (_1t0*._1t0) */ s.sb +/ (2.*._1t0*.t0) */ s.sc +/ (t0*.t0) */ s.sd in
     ([{s with sb = b1;sd = d1;sc = c1;smax = t}],
-     Path {pl={s with sa = a2;sb = b2;sc = c2;smin = t}::l;cycle=false})
+     Path {pl={s with sa = a2;sb = b2;sc = c2;smin = t;start=true}::l;cycle=false})
 
 let split p0 t = 
   match p0 with
@@ -506,7 +515,11 @@ let split p0 t =
 let subpath p t1 t2 = fst (split (snd (split p t1)) t2)
 
 let cut_before a b = 
-  try snd (split b (fst (one_intersection b a)))
+  try 
+    let t = (fst (one_intersection b a)) in
+    let res = snd (split b t) in
+(*    Format.printf "t : %f@.point %a@.b : %a@.res : %a@." t P.print (abscissa_to_point b t) print b print res;*)
+    res
   with Not_found -> b
 
 let cut_after a b = 
@@ -679,9 +692,9 @@ struct
                       let (x_min,y_min,x_max,y_max)=
                         list_min_max give_bound_precise e in
                       let pen_min,pen_max = bounding_box f in
-                      Format.printf "pen : %a,%a@." P.print pen_min P.print pen_max;
+                      (*Format.printf "pen : %a,%a@." P.print pen_min P.print pen_max;*)
                       let p1,p2 = ({x=x_min;y=y_min}+/pen_min,{x=x_max;y=y_max}+/pen_max) in
-                       Format.printf "p1,p2 : %a,%a@." P.print p1 P.print p2;
+                       (*Format.printf "p1,p2 : %a,%a@." P.print p1 P.print p2;*)
                       (p1.x,p1.y,p2.x,p2.y)) sl in
     ({x=x_min;y=y_min},{x=x_max;y=y_max})
   let of_bounding_box l = create (of_bounding_box l)

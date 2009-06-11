@@ -42,7 +42,7 @@ let rec print_dir fmt = function
 and print_knot = Point_lib.print
 and print_joint fmt = function
   | JLine -> fprintf fmt "JLine"
-  | JCurve _ -> fprintf fmt "JCurve"
+  | JCurve (d1,d2) -> fprintf fmt "JCurve(%a,%a)" print_dir d1 print_dir d2
   | JCurveNoInflex _ -> fprintf fmt "JCurveNoInflex"
   | JTension (_,f1,f2,_) -> fprintf fmt "JTension (%f,%f)" f1 f2
   | JControls (p1,p2) -> 
@@ -84,7 +84,7 @@ let velocity st ct sf cf t =
     (* 3(1+1/2(√5 - 1))ct + 1/2(3-√5)cf *)
     3. *. (1. +. 0.5 *. ((sqrt 5.) -. 1.) *. ct +. 
     0.5 *. (3. -. (sqrt 5.)) *. cf) in
-  min ((t *. num) /. denom) 4.
+  min ((num /. t) /. denom) 4.
 
 let calc_value dk1 dk art alt uk1 =
   (* Calculate the values aa = Ak /Bk , bb = Dk /Ck , 
@@ -93,14 +93,15 @@ let calc_value dk1 dk art alt uk1 =
   let aa = 1./.(3.*.art -. 1.) in
   let bb = 1./.(3.*.alt -. 1.) in
   let cc = 1.-.(uk1*.aa) in
-  let dd = dk*.(3.-.1./.art) in
-  let ee = dk1*.(3.-.1./.alt) in
+  let dd = dk*.(3.-.(1./.art)) in
+  let ee = dk1*.(3.-.(1./.alt)) in
   aa,bb,cc,dd,ee
     
 let calc_ff cc dd ee art alt =
   (* Calculate the ratio ff = Ck /(Ck + Bk - uk-1 Ak ) 289 *)
-  if alt < art then ee /. (ee +. cc *. dd *. square (alt /. art))
-  else ee /. (ee *. square (art /. alt) +. cc *. dd)
+  if alt < art then ee /. (ee +. cc *. dd *. (alt /. art)**2.)
+  else let ee = ee *. (art /. alt)**2. in
+    ee /. (ee +. cc *. dd)
 
 type path_type = 
   | Endpoint
@@ -155,7 +156,7 @@ let print_kpath fmt p =
         P.print q.coord
         print_path_type q.right
         (fun fmt q -> 
-           if p!=q 
+           if q!=p && q!=dumb_link
            then aux fmt q
            else fprintf fmt "...") q.link in
   aux fmt p
@@ -173,8 +174,8 @@ let sincos =
 
 let set_controls p q at af rtension ltension deltaxy =
   (* procedure set controls (p, q : pointer ; k : integer ) 299 *)
-  let st,ct = sincos at in
-  let sf,cf = sincos af in
+  let st,ct = at in
+  let sf,cf = af in
   let rr = velocity st ct sf cf (abs_float rtension) in
   let ss = velocity sf cf st ct (abs_float ltension) in
   let rr, ss =
@@ -206,7 +207,8 @@ let solve_choices p q n deltaxyk deltak psik =
     | {right = Given (rt,rp);link={left=Given (lt,lq)}} -> 
         (* Reduce to simple case of two givens and return 301 *)
         let aa = n_arg deltaxyk.(0) in
-        let at = rp -. aa in let af = lq -. aa in
+        let at = sincos (rp -. aa) in 
+        let saf,caf = sincos (lq -. aa) in let af = -.saf,caf in
         set_controls p q at af rt lt deltaxyk.(0)
     | {right = Curl (tp,cp);link={left=Curl (tq,cq)}} -> 
         (* Reduce to simple case of straight line and return 302 *)
@@ -258,6 +260,8 @@ let solve_choices p q n deltaxyk deltak psik =
               let alt = abs_float (tension t.left) in
               let aa,bb,cc,dd,ee = 
                 calc_value deltak.(k-1) deltak.(k) art alt uu.(k-1) in
+              let art = abs_float (tension s.right) in
+              let alt = abs_float (tension s.left) in
               let ff = calc_ff cc dd ee art alt in
               uu.(k)<- ff*.bb;
               (* Calculate the values of vk and wk 290 *)
@@ -294,8 +298,8 @@ let solve_choices p q n deltaxyk deltak psik =
         (let rec aux k = function
            | _ when k = n -> ()
            | {right=rt;link={left=lt} as t} as s ->
-               let at = thetak.(k) in
-               let af = -.psik.(k+1) -. thetak.(k+1) in
+               let at = sincos thetak.(k) in
+               let af = sincos (-.psik.(k+1) -. thetak.(k+1)) in
                set_controls s t at af (tension rt) (tension lt) deltaxyk.(k);
                aux (k+1) t
          in aux 0 p)
@@ -383,6 +387,8 @@ let make_choices knots =
            then p.right <- Curl (t,1.)
            else p.right <- Given (t,n_arg del)
         | _ -> ());
+     (*Format.printf "@[remove : p = @[%a@];@,q = @[%a@]@]@."
+       print_one_kpath p print_one_kpath q;*)
      (* an auxiliary function *)
        solve_choices p q n deltaxyk deltak psik;
      if q!=h then aux q
@@ -430,7 +436,13 @@ let path_to_meta nknot l =
   aux aknot l;
   aknot
                    
+let print_option f fmt = function
+  | None -> Format.fprintf fmt "None"
+  | Some e -> f fmt e
+
  let kmeta_to_path ?cycle meta = 
+   if info then
+     Format.printf "@[before (cycle:%a) : @[%a@]@]@." (print_option print_joint) cycle print meta;
    let rec to_knots aknot = function
      | Start p -> 
          aknot.coord <- p;
@@ -446,7 +458,7 @@ let path_to_meta nknot l =
          let aknot2 = path_to_meta aknot p2 in 
          aknot2.left<- left_of_join aknot2.coord join;
          let nknot = 
-           mk_kpath ~right:(right_of_join aknot2.coord join) ~link:aknot () in
+           mk_kpath ~right:(right_of_join aknot2.coord join) ~link:aknot2 () in
          to_knots nknot p1 in
    let lknots = mk_kpath ~right:Endpoint () in
    let knots = to_knots lknots meta in
@@ -470,8 +482,6 @@ let path_to_meta nknot l =
                 | _ -> ());
            end
    end;
-   if info then
-     Format.printf "@[before (cycle:%b) : @[%a@]@]@." (cycle<>None) print meta;
    if debug then 
      Format.printf "@[middle : @[%a@]@]@." print_kpath knots;
    make_choices knots;
@@ -511,6 +521,13 @@ let knot p = p
 let vec_direction p = DVec p
 let curl_direction f = DCurl f
 let no_direction = DNo
+
+let equalize_dir = function
+  (* Faut-il égaliser l'un avec l'autre *et* l'autre avec l'un? *)
+  (*Put the pre-join direction information into node q 879 *)
+    | DNo, ((DVec p) as y) -> y,y
+    | c -> c
+    
 
 let start k = Start k
   
@@ -590,12 +607,14 @@ struct
 
   let stroke cr pen = function
     | S.Path _ as path -> 
+        (*Format.printf "stroke : %a@." S.print path;*)
         draw_path cr path;
         Cairo.save cr;
         (*Matrix.set*) Matrix.transform cr pen;
         Cairo.stroke cr;
         Cairo.restore cr;
     | S.Point p ->
+        (*Format.printf "stroke : %a@." S.print path;*)
         Cairo.save cr;
         Matrix.transform cr (Matrix.translation p);
         Matrix.transform cr pen;

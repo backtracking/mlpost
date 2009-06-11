@@ -65,6 +65,7 @@ and picture fmt p =
 and transform fmt t = 
   match t.Hashcons.node with
     | TRShifted p -> fprintf fmt "shifted %a" point p
+    | TRYscaled f ->  fprintf fmt "yscaled %a" num f
     | _ -> fprintf fmt "something"
 
 and knot fmt k =
@@ -116,7 +117,8 @@ and command fmt c =
       path p option_color c option_pen pe option_dash d
   | CFill (p,c) -> fprintf fmt "fill (%a,%a);" 
       path p option_color c
-  | CLabel _ -> assert false
+  | CLabel (pic,pos,pt) -> 
+      fprintf fmt "label%a(%a,%a)" position pos commandpic pic point pt
   | CDotLabel (pic,pos,pt) ->
       fprintf fmt "dotlabel%a(%a,%a)" position pos commandpic pic point pt
   | CExternalImage (f,spec) -> fprintf fmt "externalimage %s@ " f
