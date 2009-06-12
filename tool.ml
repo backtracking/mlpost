@@ -112,37 +112,27 @@ let () =
 
 exception Command_failed of int
 
-let command' s =
-  let () = if !verbose then Format.eprintf "%s@." s in
-  let out = Sys.command s in
-  if out <> 0 then begin
-    eprintf "mlpost: the following command failed:@\n%s@." s;
-    raise (Command_failed out)
-  end
+let command' ?inv ?outv ?verbose s =
+  let s, _ = Misc.call_cmd ?inv ?outv ?verbose s in
+  if s <> 0 then raise (Command_failed s)
 
-let command s = 
-  try
-    command' s
-  with Command_failed out -> exit out
+let command ?inv ?outv ?verbose s = 
+  try command' ?inv ?outv ?verbose s with Command_failed s -> exit s
 
 let ocaml args execopt =
   let cmd = "ocaml " ^ String.concat " " args ^ " " ^ execopt in
-  let () = if !verbose then Format.eprintf "%s@." cmd in
-  let out = Sys.command cmd in
-  if out <> 0 then exit 1
+  command ~outv:true ~verbose:!verbose cmd
 
 let ocamlopt args execopt =
   let exe = Filename.temp_file "mlpost" ".exe" in
   let cmd = Version.ocamlopt^" -o " ^ exe ^ " " ^ String.concat " " args in
   let () = if !verbose then Format.eprintf "%s@." cmd in
-  let out = Sys.command cmd in
-  if out <> 0 then exit 2;
-  let out = Sys.command (exe ^ " " ^ execopt) in
-  if out <> 0 then exit 1
+  command ~verbose:!verbose cmd;
+  command ~outv:true ~verbose:!verbose (exe ^ " " ^ execopt)
 
 let ocamlbuild args =
   let args = if !classic_display then "-classic-display" :: args else args in
-  command' ("ocamlbuild " ^ String.concat " " args)
+  command' ~outv:true ~verbose:!verbose ("ocamlbuild " ^ String.concat " " args)
 
 (** Return an unused file name which in the same directory as the prefix. *)
 let temp_file_name prefix suffix =
@@ -168,9 +158,11 @@ let compile f =
   end;
   let pdf = if !pdf || !xpdf then "~pdf:true" else "" in
   let eps = if !eps then "~eps:true" else "" in
+  let verb = if !verbose then "~verbose:true" else "" in
   let prelude = match !latex_file with
     | None -> ""
-    | Some f -> sprintf "~prelude:%S" (Metapost_tool.read_prelude_from_tex_file f)
+    | Some f -> 
+        sprintf "~prelude:%S" (Metapost_tool.read_prelude_from_tex_file f)
   in
   if !depend then
     Printf.fprintf cout 
@@ -190,7 +182,8 @@ let compile f =
   else
     begin
       Printf.fprintf cout 
-        "\nlet () = Mlpost.Metapost.dump %s %s %s \"%s\"\n" prelude pdf eps bn;
+        "\nlet () = Mlpost.Metapost.dump %s %s %s %s \"%s\"\n" 
+          prelude pdf eps verb bn;
 
       if !xpdf then 
         Printf.fprintf cout 
@@ -202,7 +195,7 @@ let compile f =
   if !use_ocamlbuild then begin
     (* Ocamlbuild cannot compile a file which is in /tmp *)
     let mlf2 = temp_file_name bn ".ml" in
-    command ("cp " ^ mlf ^ " " ^ mlf2);
+    command ~verbose:!verbose ("cp " ^ mlf ^ " " ^ mlf2);
     let ext = if !native then ".native" else ".byte" in
     try
       let args = ["-lib unix"] in
@@ -252,17 +245,6 @@ let compile f =
       ignore (Sys.command "xpdf -remote mlpost -reload")
     else
       ignore (Sys.command "setsid xpdf -remote mlpost _mlpost.pdf &")
-(*     ignore (Sys.command "if fuser _mlpost.pdf > /dev/null 2>&1 ; then setsid xpdf -remote mlpost -reload ; else setsid xpdf -remote mlpost _mlpost.pdf; fi") *)
-(*     ignore (Sys.command "xpdf -remote mlpost -reload") *)
-(*     match Unix.fork () with *)
-(*       | 0 -> *)
-(*           begin match Unix.fork () with *)
-(*             | 0 -> *)
-(* 		Unix.execvp "setsid" [|"setsid"; "xpdf";"-remote"; "mlpost"; "_mlpost.pdf"|] *)
-(*             | _ -> exit 0 *)
-(*           end *)
-(*       | id -> *)
-(*           ignore (Unix.waitpid [] id); exit 0 *)
   end
 
 let () = Queue.iter compile files

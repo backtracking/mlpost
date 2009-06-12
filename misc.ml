@@ -68,6 +68,19 @@ let generic_quote_list lwqq s =
   done;
   Buffer.contents b  
 
+let call_cmd ?(inv=false) ?(outv=false) ?(verbose=false) cmd =
+  if inv || verbose then Printf.printf "+ %s\n" cmd;
+  let inc = Unix.open_process_in cmd in  
+  let buf = Buffer.create 16 in                       
+  (try
+     while true do
+       Buffer.add_channel buf inc 1
+     done
+   with End_of_file -> ());
+  let status = Unix.close_process_in inc in
+  let outp = Buffer.contents buf in
+  if outv || verbose then Printf.printf "%s" outp;
+  (match status with | Unix.WEXITED n -> n | _ -> exit 1), outp
 
 (* persistent queues *)
 module Q = struct

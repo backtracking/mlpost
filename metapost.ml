@@ -202,16 +202,22 @@ and command fmt  = function
   | C.CClip (pic,pth) -> fprintf fmt "clip %s to %a;@\n" pic path pth
   | C.CExternalImage (filename, spec) ->
       match spec with
-        | `Exact (h,w) -> fprintf fmt "externalfigure \"%s\" xyscaled (%a,%a);@\n" filename num w num h
-        | ((`None as spec)| (`Height _ as spec)| (`Width _ as spec)|(`Inside _ as spec)) -> 
+        | `Exact (h,w) -> 
+            fprintf fmt "externalfigure \"%s\" xyscaled (%a,%a);@\n" 
+              filename num w num h
+        | ((`None as spec) | (`Height _ as spec)| 
+          (`Width _ as spec)| (`Inside _ as spec)) -> 
             let fh,fw = externalimage_dimension filename in
-            let printext h w = fprintf fmt "externalfigure \"%s\" xyscaled (%a,%a);@\n" filename num w num h in
+            let printext h w = 
+              fprintf fmt "externalfigure \"%s\" xyscaled (%a,%a);@\n" 
+                filename num w num h in
               match spec with
                 | `None -> printext (C.F fh) (C.F fw)
                 | `Height h -> printext h (C.NMult (C.F (fw/.fh),h))
                 | `Width w -> printext (C.NMult (C.F (fh/.fw),w)) w
-                | `Inside (h,w) -> let w = C.NMin (C.NMult (h,C.F (fw/.fh)),w) in
-                      printext (C.NMult (C.F (fh/.fw),w)) w
+                | `Inside (h,w) -> 
+                    let w = C.NMin (C.NMult (h,C.F (fw/.fh)),w) in
+                    printext (C.NMult (C.F (fh/.fw),w)) w
 
 let print i fmt c =
   (* resetting is actually not needed; variables other than 
@@ -300,14 +306,31 @@ let dump_tex ?prelude f =
   fprintf fmt "\\end{document}@.";
   close_out c
 
-let generate_aux bn ?prelude ?(pdf=false) ?eps figl =
+let print_latex_error s = 
+  if Sys.file_exists "mpxerr.tex" then begin
+    Printf.printf 
+      "############################################################\n";
+    Printf.printf 
+      "LaTeX has found an error in your file. Here is its output:\n";
+    ignore (Misc.call_cmd ~outv:true 
+              "latex -interaction=nonstopmode mpxerr.tex")
+  end else ()
+
+let generate_aux bn ?prelude ?(pdf=false) ?eps ?(verbose=false) figl =
   let f = bn ^ ".mp" in
   generate_mp f ?prelude ?eps figl;
-  let out = Sys.command (sprintf "mpost -interaction=\"nonstopmode\" %s end" f) in
-  if out <> 0 then exit 1
+  let s,outp = 
+    Misc.call_cmd ~verbose
+      (sprintf "mpost -interaction=\"nonstopmode\" %s end" f) in
+  if s <> 0 then print_latex_error outp;
+  ignore (Misc.call_cmd ~verbose 
+    (Printf.sprintf 
+      "rm -f mpxerr.log mpxerr.tex mpxerr.aux mpxerr.dvi %s.mp %s.mpx %s.log"
+      bn bn bn));
+  if s <> 0 then exit 1
 
-let generate bn ?prelude ?(pdf=false) ?eps figl =
-  generate_aux bn ?prelude ~pdf ?eps figl;
+let generate bn ?prelude ?(pdf=false) ?eps ?verbose figl =
+  generate_aux bn ?prelude ~pdf ?eps ?verbose figl;
   let suf = if pdf then ".mps" else ".1" in
   let sep = if pdf then "-" else "." in
   List.iter 
@@ -315,18 +338,17 @@ let generate bn ?prelude ?(pdf=false) ?eps figl =
        let si = string_of_int i in
        Sys.rename (bn ^ "." ^ si) (bn ^ sep ^ si ^ suf))
     figl
-  
 
 
-
-let dump ?prelude ?(pdf=false) ?eps bn = 
+let dump ?prelude ?(pdf=false) ?eps ?(verbose=false) bn = 
   let figl = Queue.fold (fun l (i,_,f) -> (i,f) :: l) [] figures in
-  generate_aux bn ?prelude ~pdf ?eps figl;
+  generate_aux bn ?prelude ~pdf ?eps ~verbose figl;
   let suf = if pdf then ".mps" else ".1" in
   Queue.iter 
     (fun (i,s,_) -> 
-      Sys.rename (bn ^ "." ^ string_of_int i) (s ^ suf))
-    figures
+      let e = s ^ suf in
+      if verbose then Printf.printf "saving result in %s\n" e;
+      Sys.rename (bn ^ "." ^ string_of_int i) e) figures
 
 let slideshow l k = 
   let l = List.map Picture.make l in

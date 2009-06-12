@@ -3,6 +3,7 @@
 <mlpost.mli> : pkg_cairo
 
 <cairost.*> or <mlpost.mlpack>: pkg_cairo
+<tool.*>: use_unix
 
 <test*> : use_unix, pkg_bitstring, pkg_cairo, use_cairo_bigarray
 <handbookgraphs.*> : use_unix, pkg_bitstring, pkg_cairo, use_cairo_bigarray
