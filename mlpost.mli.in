@@ -1912,7 +1912,7 @@ module Cairost : sig
   val generate_pdfs : string ->
     (int * Command.t) list -> unit
 
-  type cairo_t = Cairo.t
+  type cairo_t @MLPOSTMLI_CAIRO_T@
 
   val emit_cairo : (float -> float -> cairo_t) -> Command.t -> unit
 
