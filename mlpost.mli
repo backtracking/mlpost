@@ -1912,6 +1912,8 @@ module Cairost : sig
   val generate_pdfs : string ->
     (int * Command.t) list -> unit
 
-  include Cairost_sig.S
+  type cairo_t = Cairo.t
+
+  val emit_cairo : (float -> float -> cairo_t) -> Command.t -> unit
 
 end

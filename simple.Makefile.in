@@ -81,7 +81,7 @@ OTHERCMX := $(OTHERCMO:.cmo=.cmx)
 
 $(HANDBOOKCMX) $(OTHERCMX): $(CMXA)
 
-GENERATED = scan_prelude.ml gui/glexer.ml cairost_sig.ml cairost.ml
+GENERATED = scan_prelude.ml gui/glexer.ml cairost.ml
 
 byte: $(CMA)
 opt: $(CMXA)
@@ -108,9 +108,6 @@ tool.byte: $(TOOLCMO)
 
 tool.opt: $(TOOLCMX)
 	$(OCAMLOPT) -o $@ unix.cmxa $^
-
-cairost_sig.ml : cairost_sig_no.ml
-	cp -f $^ $@
 
 cairost.ml : cairost_no.ml
 	cp -f $^ $@

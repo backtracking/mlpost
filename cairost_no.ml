@@ -13,3 +13,7 @@ let dump_pdf _ = failwith "Cairost.dump_pdf : not supported"
 let dump_pdfs _ = failwith "Cairost.dump_pdfs : not supported"
 
 let generate_pdfs _ _ = failwith "Cairost.generate_pdfs : not supported"
+
+type cairo_t = unit
+
+let emit_cairo  _ _ = failwith "Cairost.emit_cairo : not supported"

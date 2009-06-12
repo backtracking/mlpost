@@ -33,7 +33,8 @@ let generic_quote whatquote quotequote s =
 
 let _ = dispatch begin function
   | Before_options -> 
-      Options.include_dirs := ["backend";"gui"];
+      Options.include_dirs := "backend"::"gui"::!Options.include_dirs;
+      Options.exclude_dirs := "presentations"::"papers"::"examples"::!Options.exclude_dirs;
       Options.ocamldoc := S[A"ocamldoc"]
   | Before_rules ->
       tagcairo := Ocamlbuild_pack.Configuration.has_tag "cairo_yes";
@@ -44,11 +45,9 @@ let _ = dispatch begin function
          (fun _ _ -> cp (file^yesno^ext) (file^ext)) in
        if !tagcairo
        then (yesnofile_rule "cairost" "_yes" ".ml";
-             yesnofile_rule "cairost_sig" "_yes" ".ml";
              yesnofile_rule "mlpost" "_yes" ".mlpack";
             ) (*temporaire*)
        else (yesnofile_rule "cairost" "_no" ".ml";
-             yesnofile_rule "cairost_sig" "_no" ".ml";
              yesnofile_rule "mlpost" "_no" ".mlpack";
             );
 
@@ -132,7 +131,8 @@ let _ = dispatch begin function
 
        List.iter begin function pkg,dir,file ->
          ocaml_lib ~extern:true ~tag_name:("pkg_"^pkg) ~dir file;
-	 flag ["ocaml"; "pack";  "pkg_"^pkg] & S[A"-I"; P dir];
+	 flag ["ocaml"; "pack"; "pkg_"^pkg] & S[A"-I"; P dir];
+	 flag ["ocaml"; "doc"; "pkg_"^pkg ] & S[A"-I"; P dir];
        end (if !tagcairo then packages_cairo@packages else packages);
 
 

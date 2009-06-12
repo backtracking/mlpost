@@ -250,10 +250,12 @@ if test -n "$OCAMLBUILD" -a -n "$CAIROLIB" -a -n "$BITSTRINGLIB"; then
    CAIRO=yes
    INCLUDECAIRO="-I $CAIROLIB -I $BITSTRINGLIB"
    METAREQUIRESPACKAGE="unix cairo bitstring"
+   MLPOSTMLI_CAIRO_T="= Cairo.t"
 else
    CAIRO=no
    INCLUDECAIRO=""
    METAREQUIRESPACKAGE="unix"
+   MLPOST_MLI_CAIRO_T=""
 fi
 
 #TEMPORAIRE
@@ -312,6 +314,7 @@ AC_SUBST(INCLUDEGTK2)
 AC_SUBST(LABLGTK2LIB)
 AC_SUBST(CAIRO)
 AC_SUBST(CAIROLIB)
+AC_SUBST(MLPOSTMLI_CAIRO_T)
 AC_SUBST(INCLUDECAIRO)
 AC_SUBST(BITSTRINGLIB)
 AC_SUBST(OCAMLWIN32)
@@ -331,9 +334,10 @@ echo "---------------------------------------------------"
 
 # Finally create the Makefile from Makefile.in
 
-AC_OUTPUT(META version.ml simple.Makefile ocamlbuild.Makefile Makefile myocamlbuild.ml)
+AC_OUTPUT(META version.ml simple.Makefile ocamlbuild.Makefile Makefile myocamlbuild.ml mlpost.mli)
 chmod a-w $MAKEFILE
 chmod a-w Makefile
 chmod a-w myocamlbuild.ml
 chmod a-w META
 chmod a-w version.ml
+chmod a-w mlpost.mli

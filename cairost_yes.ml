@@ -10,7 +10,10 @@ let emit_png = emit_png
 let emit_svg = emit_svg
 let emit_pdfs = emit_pdfs
 
-let emit_cairo : (float -> float -> Cairo.t) -> Command.t -> unit = emit_cairo
+type cairo_t = Cairo.t
+
+let emit_cairo = emit_cairo
+(*let emit_cairo = fun x -> ()*)
 
 let dump_pdf () = Queue.iter (fun (_,fname,fig) -> emit_pdf (fname^".pdf") fig) Metapost.figures
 let dump_pdfs fname = 
