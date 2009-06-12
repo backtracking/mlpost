@@ -503,7 +503,7 @@ let kto_path ?cycle = function
  | mp -> 
      let res = S.Path { S.pl = kmeta_to_path ?cycle mp; cycle = cycle <> None} in
      if info then
-       Format.printf "@[end : @[%a@]@]@." S.printf res;
+       Format.printf "@[end : @[%a@]@]@." S.print res;
      res
 
 let rec to_path_simple = function

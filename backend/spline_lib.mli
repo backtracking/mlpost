@@ -13,6 +13,9 @@ type path_ = {pl : spline list;
 type path = | Point of point
             | Path of path_
 
+val is_closed : path -> bool
+val is_a_point : path -> point option
+
 val inter_depth : int ref
 
 val create : point -> point -> point -> point -> path
@@ -80,7 +83,7 @@ val direction_of_abscissa : path -> abscissa -> point
 val abscissa_to_point : path -> abscissa -> point
 val bounding_box : path -> point * point
 val unprecise_bounding_box : path -> point * point
-val printf : Format.formatter -> path -> unit
+
 val dist_min_point : path -> point -> abscissa
 val dist_min_path : path -> path -> abscissa * abscissa
 

@@ -29,7 +29,7 @@ let init l =
   List.iter 
     (fun ((a,b) as x) ->
       let t = float_of_int a, float_of_int b in
-       let rec cell = { c = 0; data = t; father = cell } in 
+       let rec cell = { c = 1; data = t; father = cell } in 
        H.add h x cell) 
     l;
   h

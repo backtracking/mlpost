@@ -6,6 +6,7 @@ type point = t
 
 let add a b = {x = a.x+.b.x; y = a.y+.b.y}
 let sub a b = {x = a.x-.b.x; y = a.y-.b.y}
+let opp a = {x = -.a.x; y = -.a.y}
 let mult c a = {x = a.x*.c; y = a.y*.c}
 let div a c = {x = a.x/.c; y = a.y/.c}
 

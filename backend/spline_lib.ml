@@ -46,6 +46,14 @@ type path_ = {pl : spline list;
 type path = | Point of point
             | Path of path_
 
+let is_closed = function 
+  | Point _ -> false
+  | Path p -> p.cycle
+
+let is_a_point = function
+  | Point p -> Some p
+  | Path _ -> None
+
 let pt_f fmt p = Format.fprintf fmt "{@[ %.20g,@ %.20g @]}" p.x p.y
 
 let print_spline fmt pt =
@@ -392,6 +400,10 @@ let intersection_aux acc a b =
     in
     let nmax = 2.**(float_of_int (!inter_depth+1)) in
     let l = intersect_fold (fun x acc -> x::acc) [] a b in
+    if debug then
+      Format.printf "@[%a@]@." (fun fmt ->
+                                  List.iter (fun (f1,f2) -> Format.fprintf fmt "%i,%i" f1 f2)
+                               ) l;
     let l = rem_noise (2 * !inter_depth) (16 * !inter_depth) l in
     let f_from_i s x = s_of_01 s (x *. (1./.nmax)) in
     let res = List.rev_map (fun (x,y) -> (f_from_i a x,f_from_i b y)) l in
@@ -399,7 +411,7 @@ let intersection_aux acc a b =
       Format.printf "@[%a@]@." (fun fmt -> List.iter (pt_f fmt))
         (List.map (fun (t1,t2) -> 
           (cubic_point a t1) -/ (cubic_point b t2)) res);
-    res
+    res@acc
 
 let intersection a b = 
   match a,b with

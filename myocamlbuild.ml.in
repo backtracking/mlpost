@@ -45,9 +45,11 @@ let _ = dispatch begin function
          (fun _ _ -> cp (file^yesno^ext) (file^ext)) in
        if !tagcairo
        then (yesnofile_rule "cairost" "_yes" ".ml";
+             yesnofile_rule "concrete" "_yes" ".ml";
              yesnofile_rule "mlpost" "_yes" ".mlpack";
             ) (*temporaire*)
        else (yesnofile_rule "cairost" "_no" ".ml";
+             yesnofile_rule "concrete" "_no" ".ml";
              yesnofile_rule "mlpost" "_no" ".mlpack";
             );
 

@@ -1891,11 +1891,114 @@ module Generate : sig
 
 end
 
+module Concrete : sig
+  val supported : bool
+    
+  module CPoint : sig
+    type t = {x:float; y:float}
+        
+    val add : t -> t -> t
+    val sub : t -> t -> t
+    val opp : t -> t
+    val mult : float -> t -> t
+    val div : t -> float -> t
+      
+    module Infix :
+    sig
+      val (+/) : t -> t -> t
+        (** alias for {!Concrete.CPoint.add} *)
+
+      val (-/) : t -> t -> t
+        (** alias for {!Concrete.CPoint.sub} *)
+
+      val ( */) : float -> t -> t
+        (** alias for {!Concrete.CPoint.mult} *)
+
+      val ( //) : t -> float -> t
+        (** alias for {!Concrete.CPoint.div} *)
+
+    end
+
+    val print : Format.formatter -> t -> unit
+  end
+
+  module CPath : sig
+    (* A path is a succession of splines *)
+    type t
+    type abscissa = float
+    type point = CPoint.t
+        
+    val length : t -> float
+    val is_closed : t -> bool
+    val is_a_point : t -> point option
+
+    val intersection : t -> t -> (abscissa * abscissa) list
+      (** intersection p1 p2 return a list of pair of abscissa. In each
+          pairs (a1,a2), a1 (resp. a2) is the abscissa in p1 (resp. p2) of
+          one intersection point between p1 and p2. Additionnal point of
+          intersection (two point for only one real intersection) can
+          appear in degenerate case. *)
+      
+    val one_intersection : t -> t -> (abscissa * abscissa)
+      (** one_intersection p1 p2 return one of the intersections
+          between p1 and p2 or raise Not_found if none exists*)
+      
+      
+    val reverse : t -> t
+      (** reverse p return the path p reversed *)
+      
+    val iter : (point -> point -> point -> point -> unit) -> t -> unit
+      (** iter on all the splines of a path: iter f p applies f
+          successively to the splines of p with : 
+          - the start point of the spline as first argument 
+          - the control point of the start point as second argument 
+          - the control point of the end point as third argument 
+          - the end point as fourth argument *)
+      
+    val fold_left : ('a -> point -> point -> point -> point -> 'a) 
+      -> 'a -> t -> 'a
+      (** fold on all the splines of a path *)
+      
+    val cut_before : t -> t -> t
+    val cut_after : t -> t -> t
+      (** remove the part of a path before the first intersection 
+          or after the last*)
+      
+    val split : t -> abscissa -> t * t
+    val subpath : t -> abscissa -> abscissa -> t
+        
+    val direction_of_abscissa : t -> abscissa -> point
+    val point_of_abscissa : t -> abscissa -> point
+      
+    val bounding_box : t -> point * point
+      
+    val dist_min_point : t -> point -> abscissa
+    val dist_min_path : t -> t -> abscissa * abscissa
+      
+    val print : Format.formatter -> t -> unit
+  end
+
+  (** {2 Compute the concrete value} *)
+  val float_of_num : Num.t -> float
+    (** The value of a num in bp *)
+
+  val cpoint_of_point : Point.t -> CPoint.t
+    
+  val cpath_of_path : Path.t -> CPath.t
+    
+  (** {2 Simple functions for the opposite operations} *)
+    
+  val num_of_float : float -> Num.t
+    (** exactly Num.bp *)
+  
+  val point_of_cpoint : CPoint.t -> Point.t
+  val path_of_cpath : CPath.t -> Path.t
+    
+end
+  
 module Cairost : sig
 
   val supported : bool
-
-  val float_of_num : Num.t -> float
 
   val emit_pdf : ?msg_error:float -> string -> Command.t -> unit
     (* The optional argument set the replacement the figure by the text of the exception in a paragraph of width msg_error *)

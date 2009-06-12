@@ -17,7 +17,7 @@
 (* Extended arrows. *)
 
 let normalize p =
-  Point.scale (Num.divn (Num.bp 1.) (Point.length p)) p
+  Point.scale (Num.divn Num.one (Point.length p)) p
 
 let neg = Point.scale (Num.bp (-1.))
 

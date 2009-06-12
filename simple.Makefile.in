@@ -67,7 +67,7 @@ CMO := misc.cmo name.cmo compiled_types.cmo print.cmo hashcons.cmo types.cmo \
        dash.cmo pen.cmo command.cmo shapes.cmo \
 	box.cmo arrow.cmo helpers.cmo diag.cmo tree.cmo \
 	radar.cmo plot.cmo hist.cmo legend.cmo \
-       scan_prelude.cmo metapost_tool.cmo metapost.cmo generate.cmo cairost.cmo
+       scan_prelude.cmo metapost_tool.cmo metapost.cmo generate.cmo cairost.cmo concrete.cmo
 CMX := $(CMO:.cmo=.cmx)
 
 CMA := mlpost.cma
@@ -81,7 +81,7 @@ OTHERCMX := $(OTHERCMO:.cmo=.cmx)
 
 $(HANDBOOKCMX) $(OTHERCMX): $(CMXA)
 
-GENERATED = scan_prelude.ml gui/glexer.ml cairost.ml
+GENERATED = scan_prelude.ml gui/glexer.ml concrete.ml cairost.ml
 
 byte: $(CMA)
 opt: $(CMXA)
@@ -110,6 +110,9 @@ tool.opt: $(TOOLCMX)
 	$(OCAMLOPT) -o $@ unix.cmxa $^
 
 cairost.ml : cairost_no.ml
+	cp -f $^ $@
+
+concrete.ml : concrete_no.ml
 	cp -f $^ $@
 
 tests: $(CMXA) tests.ml
@@ -360,7 +363,7 @@ ocamlwizard:
 # Makefile is rebuilt whenever Makefile.in or configure.in is modified
 ######################################################################
 
-Makefile META version.ml: simple.Makefile.in META.in version.ml.in config.status
+Makefile META version.ml: simple.Makefile.in META.in version.ml.in config.status mlpost.mli.in
 	./config.status
 
 config.status: configure

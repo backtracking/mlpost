@@ -2,8 +2,6 @@ let supported = true
 
 open Icairost
 
-let float_of_num = LookForTeX.num
-
 let emit_pdf = emit_pdf
 let emit_ps = emit_ps
 let emit_png = emit_png
