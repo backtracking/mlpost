@@ -466,11 +466,15 @@ let vbox' ?padding ?(pos=`Center) ?min_height ?same_height l =
 let hequalize h l = List.map (set_height h) l
 let wequalize w l = List.map (set_width w) l
 
-let hbox ?padding ?pos ?style ?dx ?dy ?name ?stroke ?pen ?fill l = 
-  group ?style ?dx ?dy ?name ?stroke ?pen ?fill (hbox' ?padding ?pos l)
+let hbox ?padding ?pos ?style ?min_width ?same_width ?dx ?dy 
+         ?name ?stroke ?pen ?fill l = 
+  group ?style ?dx ?dy ?name ?stroke ?pen ?fill 
+    (hbox' ?padding ?pos ?min_width ?same_width l)
 
-let vbox ?padding ?pos ?style ?dx ?dy ?name ?stroke ?pen ?fill l = 
-  group ?style ?dx ?dy ?name ?stroke ?pen ?fill (vbox' ?padding ?pos l)
+let vbox ?padding ?pos ?style ?min_height ?same_height ?dx ?dy 
+         ?name ?stroke ?pen ?fill l = 
+  group ?style ?dx ?dy ?name ?stroke ?pen ?fill 
+    (vbox' ?padding ?pos ?min_height ?same_height l)
 
 let modify_box ?stroke ?pen b = 
   let s = 
@@ -481,18 +485,22 @@ let modify_box ?stroke ?pen b =
            pen = pen;
            contour = Path.shift b.ctr (Shapes.rectangle b.width b.height) }
 
-let hblock ?(pos=`Center) ?name ?min_width ?same_width pl = 
+let hblock ?padding ?(pos=`Center) ?name ?stroke ?pen 
+           ?min_width ?same_width pl = 
   group ?name 
-    (List.map modify_box (hbox' ~pos ?min_width ?same_width
-      (List.map (set_height (extractv pos) (max_height pl)) pl)))
+    (List.map (modify_box ?stroke ?pen) 
+      (hbox' ?padding ~pos ?min_width ?same_width
+        (List.map (set_height (extractv pos) (max_height pl)) pl)))
 
-let vblock ?(pos=`Center) ?name ?min_height ?same_height pl =
+let vblock ?padding ?(pos=`Center) ?name ?stroke ?pen 
+           ?min_height ?same_height pl =
   group ?name 
-    (List.map modify_box 
+    (List.map (modify_box ?stroke ?pen) 
       (vbox' ~pos ?min_height ?same_height
         (List.map (set_width (extracth pos) (max_width pl)) pl)))
 
-let tabularl ?hpadding ?vpadding ?(pos=`Center) pll =
+let tabularl ?hpadding ?vpadding ?(pos=`Center) ?style ?name 
+             ?stroke ?pen ?fill pll =
   (* we first compute the widths of columns and heights of rows *)
   let hmaxl = List.map (Num.fold_max height Num.zero) pll in
   let rec calc_wmax pll = match pll with 
@@ -516,17 +524,19 @@ let tabularl ?hpadding ?vpadding ?(pos=`Center) pll =
     List.map2 (fun h l -> 
       List.map (fun cell -> set_height (extractv pos) h cell) l) 
       hmaxl pll in
-  vbox ~pos ?padding:vpadding 
+  vbox ?padding:vpadding ~pos ?style ?name ?stroke ?pen ?fill
     (List.map 
       (fun r -> hbox ?padding:hpadding ~pos r) pll)
 
-let tabular ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?pos m =
+let tabular ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?pos ?style 
+            ?name ?stroke ?pen ?fill m =
   let pll = Array.to_list (Array.map Array.to_list m) in
-  tabularl ~hpadding ~vpadding ?pos pll
+  tabularl ~hpadding ~vpadding ?pos ?style ?name ?stroke ?pen ?fill pll
 
-let tabulari ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?pos w h f =
+let tabulari ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?pos ?style 
+             ?name ?stroke ?pen ?fill w h f =
   let m = Array.init h (fun j -> Array.init w (fun i -> f i j)) in
-  tabular ~hpadding ~vpadding ?pos m
+  tabular ~hpadding ~vpadding ?pos ?style ?name ?stroke ?pen ?fill m
 
 let gridl ?hpadding ?vpadding ?(pos=`Center) ?stroke ?pen pll =
   let hmax = Num.fold_max (Num.fold_max height Num.zero) Num.zero pll in

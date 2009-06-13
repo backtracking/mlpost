@@ -1110,8 +1110,9 @@ and Box : sig
 
   val halign : ?pos:Command.vposition -> Num.t -> t list -> t list
   val valign : ?pos:Command.hposition -> Num.t -> t list -> t list
-  val hbox : ?padding:Num.t -> ?pos:Command.position -> ?style:style -> 
-    t list box_creator
+  val hbox : ?padding:Num.t -> ?pos:Command.position -> ?style:style ->
+             ?min_width:Num.t -> ?same_width:bool ->
+               t list box_creator
       (** aligns the given boxes horizontally and returns a box containing
 	  these boxes as sub-components. Leave the first box at its place.
 	  @param padding horizontal padding used to separate the boxes; 
@@ -1121,6 +1122,7 @@ and Box : sig
       *)
 
   val vbox : ?padding:Num.t -> ?pos:Command.position -> ?style:style -> 
+             ?min_height:Num.t -> ?same_height:bool ->
     t list box_creator
       (** aligns the given boxes vertically and returns a box containing
 	  these boxes as sub-components. Leave the first box at its place.
@@ -1130,6 +1132,8 @@ and Box : sig
 
   val tabular : 
     ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
+    ?style:style -> ?name:string -> ?stroke:Color.t option -> 
+    ?pen:Pen.t -> ?fill:Color.t ->
     t array array -> t
     (** aligns the given boxes both vertically and horizontally and returns
 	a box containing all these boxes (with rows as first sub-components,
@@ -1142,11 +1146,15 @@ and Box : sig
 
   val tabularl : 
     ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
+    ?style:style -> ?name:string -> ?stroke:Color.t option -> 
+    ?pen:Pen.t -> ?fill:Color.t ->
     t list list -> t
     (** similar to [tabular], but using lists instead of arrays *)
 
   val tabulari : 
     ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
+    ?style:style -> ?name:string -> ?stroke:Color.t option -> 
+    ?pen:Pen.t -> ?fill:Color.t ->
     int -> int -> (int -> int -> t) -> t 
     (** similar to [tabular], but using a matrix defined with a function *)
 
@@ -1154,7 +1162,8 @@ and Box : sig
                ?min_width:Num.t -> ?same_width:bool -> t list -> t list
   val vplace : ?padding:Num.t -> ?pos:Command.position -> 
                ?min_height:Num.t -> ?same_height:bool -> t list -> t list
-  val hblock : ?pos:Command.position -> ?name:string -> 
+  val hblock : ?padding:Num.t -> ?pos:Command.position -> ?name:string -> 
+               ?stroke:Color.t option -> ?pen:Pen.t -> 
                ?min_width:Num.t -> ?same_width:bool -> t list -> t
     (** [hblock bl] aligns the boxes of [bl] horizontally and surround
 	them with new rectangular boxes of the same height; all these new
@@ -1163,7 +1172,8 @@ and Box : sig
         @param same_width if [true], all boxes are of same width, 
                and at least of [min_width]; default is false*)
 
-  val vblock : ?pos:Command.position -> ?name:string -> 
+  val vblock : ?padding:Num.t -> ?pos:Command.position -> ?name:string -> 
+               ?stroke:Color.t option -> ?pen:Pen.t -> 
                ?min_height:Num.t -> ?same_height:bool -> t list -> t
     (** similar to [hblock], with vertical alignment.
         @param min_height minimum height of all boxes; default is zero
