@@ -76,4 +76,5 @@ let fold_classes f acc h =
       let r = find_aux v in
       let d = r.data in
       if Hashtbl.mem seen d then acc
-      else f r.data acc) h acc
+      else (Hashtbl.add seen d () ;f d acc)
+    ) h acc

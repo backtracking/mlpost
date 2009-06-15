@@ -387,13 +387,13 @@ let intersection_aux acc a b =
             let rec pass bef = function
               |[] -> ()
               |e::l -> 
-                  if sel e - sel bef <= delta then
-                    if abs (msel e - msel bef) <=mdelta then begin
-                      UF.union e bef uf; pass e l
-                    end else begin pass e l; pass bef l end
-                  else pass e l
+                 if sel bef - sel e <= delta then
+                   (if abs (msel e - msel bef) <= mdelta
+                    then UF.union e bef uf;
+                    pass bef l)
+                 else ()
             in
-            pass (List.hd sorted) (List.tl sorted) 
+            ignore (List.fold_left (fun acc bef -> pass bef acc;bef::acc) [] sorted)
           in
           link fst snd; link snd fst;
           UF.fold_classes (fun x acc -> x :: acc) [] uf
