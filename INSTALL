@@ -1,10 +1,10 @@
 Dependencies:
 * You need Objective Caml 3.08.0 or higher to compile Mlpost.
-* To use Mlpost, you need metafun (debian: context)
+* To use Mlpost, you need metafun (package context in debian)
 * For the html version of the examples, you need caml2html, version 1.3.0 or
   higher.
 * One example needs the tex chess fonts to work (package tex-chess in debian)
-* For external images, you need imagemagick (identify)
+* For external images, you need imagemagick
 
 
 1. Configure with 
