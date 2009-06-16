@@ -1,14 +1,8 @@
-
 1) BUGS
 (des erreurs ou des TODOs très importantes)
 ==========
-* un "faux bug" : 
-  la sortie standard metapost "written output.1" a l'air de venir de mlpost
-  solution: supprimer la sortie standard pour mpost
-
 * installation des fichiers Latex pour inclusion d'images
 * images et sortie postscript ?
-
 * Probleme d'alignement avec slideshow + externalimage
 
 2) TODO
@@ -18,19 +12,13 @@
 * ranger le module Helpers
 * les fonctions de scale : pourquoi prennent-elles des Num.t, et non pas de
   float ?
-* -v n'agit pas encore sur tout
 * uniformiser les ulcorners, les "north_west", les `Upleft, les points qui
         indiquent une direction
 * Box.group, align etc prennent des listes, Box.elts renvoie un tableau ?
-* compiler "parse" dans examples/ par ocamlbuild
-
-
 
 3) FEATURES
 (choses qui n'existent pas encore dans mlpost)
 ===========================
-
-* intersection entre deux segments, chemins, ...
 
 * refaire Diag : 
     - pouvoir mettre n'importe quelle boîte
@@ -41,8 +29,6 @@
 * Box : 
   - foncteur WithBox pour faciliter l'accès aux boîtes nommées
   - clipping
-  - exposer toutes les options possibles / imaginables dans l'interface
-    (pour les fonctions d'alignement)
 
 * Arrow :
   - rajouter draw_box_box, draw_point_box, draw_box_point ou d'autres noms
@@ -50,9 +36,6 @@
 * fusionner Picture et Box ??
 
 * TODO BACKEND
-  - quelques soucis au niveau de chemins un peu compliqués
-  - épaisseur de traits
-  - les flêches metapost
   - build-cycle
   - Transformations sur les pens
 
