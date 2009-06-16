@@ -6,7 +6,7 @@ testmanual.pdf: testmanual.tex
 	pdflatex testmanual.tex
 	#dvips testmanual.dvi -o testmanual.ps
 
-other: othergraphs.mp
+other: othergraphs.tex
 	#mpost othergraphs.mp end
 	make -C othergraphs mps
 	pdflatex othergraphs.tex

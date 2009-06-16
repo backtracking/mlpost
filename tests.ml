@@ -547,7 +547,7 @@ let figs = [
   why_platform;d2;
   block2;
   vblock1;
-  d6; d5; yannick Box.Rect; yannick Box.Patatoid; d1;  proval;
+  yannick Box.Rect; yannick Box.Patatoid; d1;  proval;
   d2sq; d2hsq; d2s; d2c; cheno011; d3; d4;
   d7; 
   (* recursion *)
@@ -555,7 +555,8 @@ let figs = [
   farey 17;
   (* other *)
   florence; Box.draw shapes1; Box.draw shapes2; 
-  d14; d13;
+  d14; d13; d5; 
+(*   d6 *)
 ] 
 
 let figs =
