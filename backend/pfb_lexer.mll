@@ -42,12 +42,13 @@ and shortcut_token = parse
   | _ {eprintf "During middle parsing@.";failwith ""} 
 
 and charstring_token = parse
-  | '/' (ident as id) [^'{']* '{' [^'}']* '}' [^'\n']* '\n' 
-      {incr_linenum lexbuf;
-       NAME_CHARSTRING id}
-  | '\n' {charstring_token lexbuf}
-  | "end" {end_token lexbuf}
-  | _ {eprintf "During charstring parsing@."; failwith ""} 
+  | '/' (ident as id) [^'{''\n']* '{' [^'}']* '}' [^'\n']* '\n' 
+      {incr_linenum lexbuf; NAME_CHARSTRING id}
+  | '/' (ident as id) [^'\n']* '\n' 
+      {incr_linenum lexbuf; NAME_CHARSTRING id}
+  | "end" [^'\n']* '\n' {end_token lexbuf}
+  | [^'\n']* '\n' {incr_linenum lexbuf;charstring_token lexbuf}
+  | _ {Printf.eprintf "During charstring parsing@."; failwith ""} 
 
 and end_token = parse
   | _* eof {state:=Header; DUMB}
@@ -60,9 +61,10 @@ and enc_token = parse
   | ' '* '\n' {incr_linenum lexbuf; enc_token lexbuf}
   | ']' _* eof {DUMB}
 {
-let pfb_human_token x = match !state with
-  |Header -> header_token x
-  |Encoding -> encoding_token x
-  |Charstring -> charstring_token x
+let pfb_human_token x = 
+  match !state with
+    |Header -> header_token x
+    |Encoding -> encoding_token x
+    |Charstring -> charstring_token x
 
 }

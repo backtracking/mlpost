@@ -12,6 +12,9 @@ let emit_pdfs s c = failwith "Cairost.emit_pdfs: not supported"
 let dump_pdf _ = failwith "Cairost.dump_pdf : not supported"
 let dump_pdfs _ = failwith "Cairost.dump_pdfs : not supported"
 
+let set_prelude _ = failwith "Cairost.set_prelude : not supported"
+let set_t1disasm _ = failwith "Cairost.set_t1disasm : not supported"
+
 let generate_pdfs _ _ = failwith "Cairost.generate_pdfs : not supported"
 
 type cairo_t = unit

@@ -396,6 +396,7 @@ let make_choices knots =
       
 let tension_of = function
   | JTension (_,t1,t2,_) -> (t1,t2)
+  | JCurveNoInflex (_,_) -> (-1.,-1.)
   | _ -> (1.,1.)
       
 let direction t = function

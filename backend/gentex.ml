@@ -2,7 +2,7 @@ open Printf
 open Point_lib
 let com_latex = "latex"
 let genfile_name = "gentex"
-let default_prelude = "\\documentclass{article}\n\\begin{document}"
+let default_prelude = "\\documentclass{article}\n"
 
 let _ = Random.self_init ()
 
@@ -36,6 +36,7 @@ let create prelude = function
   | texs ->
   let format fmt = Printf.fprintf fmt
     "%s
+\\begin{document}
 \\gdef\\mpxshipout{\\shipout\\hbox\\bgroup%%
   \\setbox0=\\hbox\\bgroup}%%
 \\gdef\\stopmpxshipout{\\egroup  \\dimen0=\\ht0 \\advance\\dimen0\\dp0

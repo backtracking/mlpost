@@ -39,7 +39,7 @@ let print_font_map ff font =
 
 
 let kwhich = "kpsewhich"
-let t1disasm = "t1disasm"
+let t1disasm = ref None (*"t1disasm"*)
 let which_fonts_table = "pdftex.map"
 
 let memoize f nb =
@@ -72,30 +72,39 @@ let find_file = memoize find_file_aux 30
 
 module HString = Hashtbl
 
+let open_pfb_decrypted filename =
+  match !t1disasm with
+    | None -> 
+        let buf = T1disasm.open_decr filename in
+        (*Buffer.output_buffer stdout buf;*)
+        Lexing.from_string (Buffer.contents buf), fun () -> ()
+    | Some t1disasm ->
+        let temp_fn = Filename.temp_file "pfb_human" "" in
+        let exit_status =
+          Sys.command
+            (sprintf "%s %s > %s" t1disasm filename temp_fn) in
+        if exit_status <> 0 then Dvi.dvi_error "pfb_human generation failed"
+        else
+          let file = open_in temp_fn in
+          Lexing.from_channel file,(fun () -> Sys.remove temp_fn)
+
 let load_pfb_aux filename =
   if !info then
     printf "Loading font from %s...@?" filename;
-  let temp_fn = Filename.temp_file "pfb_human" "" in
-  let exit_status =
-    Sys.command
-      (sprintf "%s %s > %s" t1disasm filename temp_fn) in
-  if exit_status <> 0 then Dvi.dvi_error "pfb_human generation failed"
-  else
-    let file = open_in temp_fn in
-    let lexbuf = Lexing.from_channel file in
-    try
-      let encoding_table, charstring = Pfb_parser.pfb_human_main Pfb_lexer.pfb_human_token lexbuf in
-      let charstring_table = Hashtbl.create 700 in
-      let count = ref 0 in
-      List.iter (fun x -> Hashtbl.add charstring_table x !count;incr(count)) charstring;
-      if !info then printf "done@.";
-      Sys.remove temp_fn;
-      encoding_table,charstring_table
-    with
-        (Parsing.Parse_error |Failure _) as a->
-          let p_start = Lexing.lexeme_start_p lexbuf in
-          let p_end = Lexing.lexeme_end_p lexbuf in
-          eprintf "file %s, line %i, characters %i-%i : %s parse_error state : %s@." temp_fn p_start.Lexing.pos_lnum p_start.Lexing.pos_bol p_end.Lexing.pos_bol (Lexing.lexeme lexbuf) (match !Pfb_lexer.state with |Pfb_lexer.Header -> "header" | Pfb_lexer.Encoding -> "encoding" | Pfb_lexer.Charstring -> "charstring") ; raise a
+  let lexbuf,do_done = open_pfb_decrypted filename in
+  try
+    let encoding_table, charstring = Pfb_parser.pfb_human_main Pfb_lexer.pfb_human_token lexbuf in
+    let charstring_table = Hashtbl.create 700 in
+    let count = ref 0 in
+    List.iter (fun x -> Hashtbl.add charstring_table x !count;incr(count)) charstring;
+    if !info then printf "done@.";
+    do_done ();
+    encoding_table,charstring_table
+  with
+      (Parsing.Parse_error |Failure _) as a->
+        let p_start = Lexing.lexeme_start_p lexbuf in
+        let p_end = Lexing.lexeme_end_p lexbuf in
+        eprintf "line %i, characters %i-%i : %s parse_error state : %s@." p_start.Lexing.pos_lnum p_start.Lexing.pos_bol p_end.Lexing.pos_bol (Lexing.lexeme lexbuf) (match !Pfb_lexer.state with |Pfb_lexer.Header -> "header" | Pfb_lexer.Encoding -> "encoding" | Pfb_lexer.Charstring -> "charstring") ; raise a
 
 let load_pfb = memoize load_pfb_aux 15
 

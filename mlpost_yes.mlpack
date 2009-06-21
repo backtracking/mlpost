@@ -21,7 +21,9 @@ Generate
 Radar
 Hist
 Legend
+
 Cairost
+Metapost_tool
 Concrete
 Print
 
@@ -35,6 +37,7 @@ Icairost
 Picture_lib
 Spline_lib
 Fonts
+T1disasm
 Tfm
 Dvi
 Dvicairo

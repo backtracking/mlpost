@@ -49,6 +49,7 @@ let verbose = ref false
 let native = ref false
 let libdir = ref Version.libdir
 let cairo = ref false
+let t1disasm = ref None
 let depend = ref false
 let dumpable = ref false
 
@@ -103,8 +104,11 @@ let spec = Arg.align
     "-get-include-compile", Symbol (["cmxa";"cma";"dir";"file"],get_include_compile), " output the library which are needed by mlpost"
   ]@
   if notcairo 
-  then ["-cairo" , Unit nocairo, " Mlpost has not been compiled with the cairo backend"]
-  else ["-cairo" , Set cairo, " Use the experimental cairo backend instead of metapost"])
+  then ["-cairo" , Unit nocairo, " Mlpost has not been compiled with the cairo backend";
+        "-t1disasm" , Unit nocairo, " Mlpost has not been compiled with the cairo backend";
+       ]
+  else ["-cairo" , Set cairo, " Use the experimental cairo backend instead of metapost";
+        "-t1disasm" , String (fun s -> t1disasm := Some s), " Set the program used to decrypt type1 font, only with cairo (default built-in one)"])
 
 let () = 
   Arg.parse spec add_file "Usage: mlpost [options] files..."
@@ -150,20 +154,21 @@ let temp_file_name prefix suffix =
 let compile f =
   let bn = Filename.chop_extension f in
   let mlf, cout = Filename.open_temp_file "mlpost" ".ml" in
+  (if !cairo then (
+     (match !t1disasm with
+        | None -> ()
+        | Some f -> 
+            Printf.fprintf cout "let _ = Mlpost.Cairost.set_t1disasm (Some %S)\n" f);
+     (match !latex_file with
+        | None -> ()
+        | Some f -> 
+            Printf.fprintf cout "let _ = Mlpost.Cairost.set_prelude %S\n" f)));
   Printf.fprintf cout "# 1 \"%s\"\n" f;
   begin 
     let cin = open_in f in
     try while true do output_char cout (input_char cin) done
     with End_of_file -> ()
   end;
-  let pdf = if !pdf || !xpdf then "~pdf:true" else "" in
-  let eps = if !eps then "~eps:true" else "" in
-  let verb = if !verbose then "~verbose:true" else "" in
-  let prelude = match !latex_file with
-    | None -> ""
-    | Some f -> 
-        sprintf "~prelude:%S" (Metapost_tool.read_prelude_from_tex_file f)
-  in
   if !depend then
     Printf.fprintf cout 
       "\nlet () = Mlpost.Metapost.depend \"%s\" \n" bn
@@ -181,6 +186,14 @@ let compile f =
     end
   else
     begin
+      let pdf = if !pdf || !xpdf then "~pdf:true" else "" in
+      let eps = if !eps then "~eps:true" else "" in
+      let verb = if !verbose then "~verbose:true" else "" in
+      let prelude = match !latex_file with
+        | None -> ""
+        | Some f -> 
+            sprintf "~prelude:%S" (Metapost_tool.read_prelude_from_tex_file f)
+      in
       Printf.fprintf cout 
         "\nlet () = Mlpost.Metapost.dump %s %s %s %s \"%s\"\n" 
           prelude pdf eps verb bn;
