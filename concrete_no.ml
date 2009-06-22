@@ -35,9 +35,9 @@ struct
   type abscissa = float
   type point = CPoint.t
       
-  let length = not_supported "length"
-  let is_closed = not_supported "is_closed"
-  let is_a_point = not_supported "is_a_point"
+  let length _ = not_supported "length"
+  let is_closed _ = not_supported "is_closed"
+  let is_a_point _ = not_supported "is_a_point"
     
   let intersection p1 p2 = not_supported "intersection"
 
@@ -67,9 +67,9 @@ struct
     
 end
 
-let float_of_num = not_supported "float_of_num"
-let cpoint_of_point = not_supported "cpoint_of_point"
-let cpath_of_path = not_supported "cpath_of_path"
+let float_of_num _ = not_supported "float_of_num"
+let cpoint_of_point _ = not_supported "cpoint_of_point"
+let cpath_of_path _ = not_supported "cpath_of_path"
 
 
 let num_of_float f = not_supported "num_of_float"

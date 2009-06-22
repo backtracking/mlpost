@@ -547,7 +547,7 @@ let figs = [
   why_platform;d2;
   block2;
   vblock1;
-  yannick Box.Rect; yannick Box.Patatoid; d1;  proval;
+  yannick Box.Rect; yannick Box.Patatoid; yannick Box.Patatoid2; d1;  proval;
   d2sq; d2hsq; d2s; d2c; cheno011; d3; d4;
   d7; 
   (* recursion *)

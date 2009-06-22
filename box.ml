@@ -25,6 +25,7 @@ type style =
   | Circle
   | RoundRect
   | Patatoid
+  | Patatoid2
   | Ellipse
   | RoundBox
   | Custom of (Num.t -> Num.t -> Num.t * Num.t * Path.t)
@@ -176,8 +177,14 @@ let round_rect_ w h =
 
 let round_box_ w h = 
   w, h, Shapes.round_box w h
+
 let patatoid_ w h = 
   let p = Shapes.patatoid w h in
+  let pic = Command.draw p in
+  Picture.width pic, Picture.height pic, p
+
+let patatoid2_ w h = 
+  let p = Shapes.patatoid2 w h in
   let pic = Command.draw p in
   Picture.width pic, Picture.height pic, p
 
@@ -186,6 +193,7 @@ let from_style = function
   | Circle -> circ_
   | RoundRect -> round_rect_
   | Patatoid -> patatoid_
+  | Patatoid2 -> patatoid2_
   | Ellipse -> ellipse_
   | RoundBox -> round_box_
   | Custom f -> f
@@ -287,6 +295,7 @@ let circle = box ~style:Circle
 let ellipse = box ~style:Ellipse
 let round_rect = box ~style:RoundRect
 let patatoid = box ~style:Patatoid
+let patatoid2 = box ~style:Patatoid2
 let round_box = box ~style:RoundBox
 
 let tex ?style ?dx ?dy ?name ?(stroke=None) ?pen ?fill s = 

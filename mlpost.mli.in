@@ -930,7 +930,13 @@ module rec Shapes : sig
     *)
 
   val circle : Num.t -> Path.t
+
   val patatoid : Num.t -> Num.t -> Path.t
+    (** See {!Box.patatoid}. *)
+
+  val patatoid2 : Num.t -> Num.t -> Path.t
+    (** See {!Box.patatoid2}. *)
+
 (*
   val arc_ellipse :
     ?fill:Color.t -> ?stroke:Color.t -> ?thickness:float -> ?close:bool ->
@@ -968,6 +974,7 @@ and Box : sig
     | Circle
     | RoundRect
     | Patatoid
+    | Patatoid2
     | Ellipse
     | RoundBox
     | Custom of (Num.t -> Num.t -> Num.t * Num.t * Path.t)
@@ -1038,6 +1045,11 @@ and Box : sig
 	containing the picture [pic]. It may happen that the content 
 	overlaps with the box.
     @img patatoid.png *)
+
+  val patatoid2 : t box_creator
+    (** [patatoid2 pic] creates an undefined, vaguely rectangular box 
+	containing the picture [pic], which is guaranteed to be fully
+        contained in the patatoid. *)
 
   val round_box : t box_creator
 

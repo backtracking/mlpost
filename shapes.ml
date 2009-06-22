@@ -101,7 +101,6 @@ let rectangle width height =
   let mh = neg h in
   Path.pathn ~cycle:jLine ~style:jLine [ w, mh; w, h; mw, h; mw, mh]
     
-
 let patatoid width height = 
   let wmin,wmax = -0.5 *./ width, 0.5 *./ width in
   let hmin,hmax = -0.5 *./ height, 0.5 *./ height in
@@ -114,5 +113,39 @@ let patatoid width height =
   let c = segment (Random.float 1.) ur ul in
   let d = segment (Random.float 1.) ul ll in
   pathp ~cycle:jCurve [a;b;c;d]
+
+let patatoid2 width height = 
+  let wmin,wmax = -0.5 *./ width, 0.5 *./ width in
+  let hmin,hmax = -0.5 *./ height, 0.5 *./ height in
+  let ll = pt (wmin,hmin) in
+  let lr = pt (wmax,hmin) in
+  let ur = pt (wmax,hmax) in
+  let ul = pt (wmin, hmax) in
+  let f cl cr x y p =
+    let d = pt (bp x, bp y) in
+    let r = Point.rotate (Random.float 60. -. 30.) d in
+    let l = Point.sub Point.origin r in
+    let r = Point.scale ((Random.float 1. +. 0.5) *./ cl) r in
+    let l = Point.scale ((Random.float 1. +. 0.5) *./ cr) l in
+    (Point.shift p l, Point.shift p r)
+  in
+  let c = 0.25 in
+  let ch = c *./ width in
+  let cv = c *./ height in
+  let l1, r1 = f ch cv 1. 1. ul in
+  let l2, r2 = f cv ch 1. (-1.) ur in
+  let l3, r3 = f ch cv (-1.) (-1.) lr in
+  let l4, r4 = f cv ch (-1.) 1. ll in
+  let path = jointpathp [
+    ul;
+    ur;
+    lr;
+    ll;
+  ] [
+    jControls r1 l2;
+    jControls r2 l3;
+    jControls r3 l4;
+  ] in
+  cycle ~style: (jControls r4 l1) path
 
 let circle d = Path.scale d Path.fullcircle
