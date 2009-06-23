@@ -100,7 +100,7 @@ mlpost.cmx: mlpost.cmi
 mlpost.cmx: $(CMX)
 	$(OCAMLOPT) $(INCLUDES) -pack -o $@ $(CMX)
 
-TOOLCMO= version.cmo scan_prelude.cmo metapost_tool.cmo tool.cmo
+TOOLCMO= version.cmo scan_prelude.cmo metapost_tool.cmo misc.cmo tool.cmo
 TOOLCMX := $(TOOLCMO:.cmo=.cmx)
 
 tool.byte: $(TOOLCMO)

@@ -14,6 +14,8 @@
 (*                                                                        *)
 (**************************************************************************)
 
+open Path
+
 (* Extended arrows. *)
 
 let normalize p =
@@ -210,7 +212,6 @@ let point_to_box ?kind ?tex ?pos ?anchor ?outd ?ind a b =
 (*                                 To be sorted                                *)
 (*******************************************************************************)
 
-open Path
 
 let simple_point_point ?style ?outd ?ind a b =
   let r,l = outd, ind in

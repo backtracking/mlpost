@@ -2,6 +2,7 @@
 o - changes in behaviour, new features
 * - incompatible changes in the interface
 
+* add Point.draw and Path.draw (alias of Command.draw) which can mask Command.draw in case of an open Point after an open Command.
 o new optional argument sep to strip both ends of a path; used in
   Tree, Box.cpath, and Helpers
 * mlpost tool: -pdf now the default; use -ps to produce .1 files

@@ -168,7 +168,7 @@ let hist ~cumul width height padding fill perspective scalex scaley ?histlabel ?
   let hb = move_hbox cumul cpt scalex fcth in
   let persp = if perspective then draw_perspect nop (box_perspect scalex hb l) else nop in
   let labels = match histlabel with | None -> nop | Some lab -> (box_labels lab hb l) in
-    persp ++ draw  hb ++ labels 
+    persp ++ Box.draw  hb ++ labels 
     ++ (match hlabel with | None -> nop | Some hlab -> (hist_labels hlab hb)) 
 
 

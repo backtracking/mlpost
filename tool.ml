@@ -52,6 +52,9 @@ let cairo = ref false
 let t1disasm = ref None
 let depend = ref false
 let dumpable = ref false
+let compile_name = ref None
+let dont_execute = ref false
+let add_nothing = ref false
 
 let version () =
   print_string Version.version;
@@ -101,14 +104,17 @@ let spec = Arg.align
     "-libdir", String ((:=) libdir), " Set path for mlpost.cma";
     "-depend", Set depend, " output dependency lines in a format suitable for the make(1) utility";
     "-dumpable", Set dumpable, " output one name of dumpable file by line";
-    "-get-include-compile", Symbol (["cmxa";"cma";"dir";"file"],get_include_compile), " output the library which are needed by mlpost"
+    "-get-include-compile", Symbol (["cmxa";"cma";"dir";"file"],get_include_compile), " output the library which are needed by mlpost";
+    "-compile-name", String (fun s -> compile_name := Some s), " Keep the compile version of the .ml file";
+    "-dont-execute", Set dont_execute, " Don't execute the mlfile";
+    "-add-nothing", Set add_nothing, " Add nothing to the file"
   ]@
   if notcairo 
   then ["-cairo" , Unit nocairo, " Mlpost has not been compiled with the cairo backend";
         "-t1disasm" , Unit nocairo, " Mlpost has not been compiled with the cairo backend";
        ]
   else ["-cairo" , Set cairo, " Use the experimental cairo backend instead of metapost";
-        "-t1disasm" , String (fun s -> t1disasm := Some s), " Set the program used to decrypt type1 font, only with cairo (default built-in one)"])
+        "-t1disasm" , String (fun s -> t1disasm := Some s), " Set the program used to decrypt PostScript Type 1 font, only with cairo (default built-in one)"])
 
 let () = 
   Arg.parse spec add_file "Usage: mlpost [options] files..."
@@ -124,15 +130,34 @@ let command ?inv ?outv ?verbose s =
   try command' ?inv ?outv ?verbose s with Command_failed s -> exit s
 
 let ocaml args execopt =
-  let cmd = "ocaml " ^ String.concat " " args ^ " " ^ execopt in
-  command ~outv:true ~verbose:!verbose cmd
+  let cmd = "ocaml" ^ String.concat " " args ^ " " ^ execopt in
+  match !compile_name with
+    | None when not !dont_execute -> 
+        command ~outv:true ~verbose:!verbose cmd
+    | _ -> 
+        let s = match !compile_name with 
+          | None -> Filename.temp_file "mlpost" ".exe"
+          | Some s -> "./"^s in
+        let cmd = "ocamlc" ^ String.concat " " args ^ " -o " ^ s in
+        command ~outv:true ~verbose:!verbose cmd;
+        if not !dont_execute then
+          command ~outv:true ~verbose:!verbose (s ^ " " ^ execopt);
+        match !compile_name with 
+          | None -> Sys.remove s 
+          | Some s -> ()
 
-let ocamlopt args execopt =
-  let exe = Filename.temp_file "mlpost" ".exe" in
+let ocamlopt bn args execopt =
+  let exe = match !compile_name with 
+          | None -> Filename.temp_file "mlpost" ".exe"
+          | Some s -> "./"^s in
   let cmd = Version.ocamlopt^" -o " ^ exe ^ " " ^ String.concat " " args in
   let () = if !verbose then Format.eprintf "%s@." cmd in
   command ~verbose:!verbose cmd;
-  command ~outv:true ~verbose:!verbose (exe ^ " " ^ execopt)
+  if not !dont_execute then
+    command ~outv:true ~verbose:!verbose (exe ^ " " ^ execopt);
+  match !compile_name with
+    | None -> Sys.remove exe
+    | Some s -> ()
 
 let ocamlbuild args =
   let args = if !classic_display then "-classic-display" :: args else args in
@@ -150,10 +175,8 @@ let temp_file_name prefix suffix =
     prefix ^ string_of_int !i ^ suffix
   end
 
-
-let compile f =
-  let bn = Filename.chop_extension f in
-  let mlf, cout = Filename.open_temp_file "mlpost" ".ml" in
+let add_to_the_file bn f =
+  let mlf,cout = Filename.open_temp_file "mlpost" ".ml" in
   (if !cairo then (
      (match !t1disasm with
         | None -> ()
@@ -203,12 +226,23 @@ let compile f =
           "\nlet () = Mlpost.Metapost.dump_tex %s \"_mlpost\"\n" prelude
     end;
   close_out cout;
+  mlf, (fun () -> Sys.remove mlf)
 
+let fun_u_u () = ()
 
+let compile f =
+  let bn = Filename.chop_extension f in
+  let mlf,remove_mlf = 
+    if !add_nothing 
+    then f,fun_u_u
+    else add_to_the_file bn f in
   if !use_ocamlbuild then begin
     (* Ocamlbuild cannot compile a file which is in /tmp *)
-    let mlf2 = temp_file_name bn ".ml" in
-    command ~verbose:!verbose ("cp " ^ mlf ^ " " ^ mlf2);
+    let mlf2,remove_mlf2 = if !add_nothing then mlf,fun_u_u
+      else
+        let mlf2 = temp_file_name bn ".ml" in
+        command ~verbose:!verbose ("cp " ^ mlf ^ " " ^ mlf2);
+        mlf2,fun () -> Sys.remove mlf2 in
     let ext = if !native then ".native" else ".byte" in
     try
       let args = ["-lib unix"] in
@@ -226,18 +260,19 @@ let compile f =
           args@[sprintf "-lflags %s -lib bigarray -libs %s" iI includecairos] in
       let args =
         args@["-lib mlpost";
-           !ccopt;Filename.chop_extension mlf2 ^ ext;"--"; !execopt]
+           !ccopt;Filename.chop_extension mlf2 ^ ext]@
+        (if !dont_execute then [] else ["--"; !execopt])
       in
       ocamlbuild args;
-      Sys.remove mlf2
+      remove_mlf2 ()
     with Command_failed out -> 
-      Sys.remove mlf2;
+      remove_mlf2 ();
       exit out
   end else begin
     if !native then
       let cairo_args = if notcairo then [] 
       else [Version.includecairo; "bigarray.cmxa"; "cairo.cmxa"; "bitstring.cmxa"] in
-      ocamlopt ([!ccopt; "-I"; !libdir;"unix.cmxa"] @ cairo_args @ 
+      ocamlopt bn ([!ccopt; "-I"; !libdir;"unix.cmxa"] @ cairo_args @ 
                   ["mlpost.cmxa"; mlf]) !execopt
     else
       let cairo_args = if notcairo then [] 
@@ -246,7 +281,7 @@ let compile f =
                ["mlpost.cma"; mlf]) !execopt
   end;
 
-  Sys.remove mlf;
+  remove_mlf ();
   if !xpdf then begin
     if not (!cairo) then
       begin

@@ -195,6 +195,11 @@ and Point : sig
   (** Same as [p], but builds a list of points *)
   val ptlist : ?scale:(float -> Num.t) -> (float * float) list -> t list
 
+  val draw : ?color:Color.t -> ?pen:Pen.t -> t -> Command.t
+    (** Draw a point
+	@param color the color of the point; default is black
+	@param pen the pen used to draw the pen; default is {!Pen.default}*)
+
 end
     
 and MetaPath : sig
@@ -506,6 +511,7 @@ and Path : sig
   val unitsquare: t
 
   (** {2 Conversions} *)
+
   type metapath = MetaPath.t
   (** Compute the control point of the path 
       for a good looking result according to the constraint
@@ -525,6 +531,12 @@ and Path : sig
 
   val smart_path : ?style:joint -> orientation list -> Point.t -> Point.t -> t
 
+  val draw : ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> t -> Command.t
+    (** Draw a path 
+	@param color the color of the path; default is black
+	@param pen the pen used to draw the path; default is {!Pen.default}
+	@param dashed if given, the path is drawn using that dash_style. *)
+
 end
 
 and Pen : sig
@@ -537,7 +549,7 @@ and Pen : sig
     (** Apply a transformation to pens *)
   val default : t
     (** The default pen; it corresponds to 
-      [Pen.scale (Num.bp 0.5) (Pen.circle ())] *)
+      [Pen.scale (Num.bp 0.5) Pen.circle] *)
   val circle : t
     (** A circular pen of diameter 1 bp *)
   val square : t
@@ -968,7 +980,6 @@ and Box : sig
 
   (** {2 Creating boxes} *)
 
-  (** {2 Styles } *)
   type style = 
     | Rect
     | Circle
@@ -1085,7 +1096,11 @@ and Box : sig
   val south_east : t -> Point.t
   (** @img south_east.png *)
 
-  val corner : Command.position -> t -> Point.t
+  type vposition = [ |Command.vposition | `Custom of t -> Num.t]
+  type hposition = [ |Command.hposition | `Custom of t -> Num.t]
+  type position  = [ |Command.position | `Custom of t -> Point.t]
+
+  val corner : position -> t -> Point.t
 
   (** {2 Operators} *)
 
@@ -1120,8 +1135,8 @@ and Box : sig
     *)
 *)
 
-  val halign : ?pos:Command.vposition -> Num.t -> t list -> t list
-  val valign : ?pos:Command.hposition -> Num.t -> t list -> t list
+  val halign : ?pos:vposition -> Num.t -> t list -> t list
+  val valign : ?pos:hposition -> Num.t -> t list -> t list
   val hbox : ?padding:Num.t -> ?pos:Command.position -> ?style:style ->
              ?min_width:Num.t -> ?same_width:bool ->
                t list box_creator
@@ -1249,6 +1264,12 @@ and Box : sig
 
   val set_height : Command.vposition -> Num.t -> t -> t
   val set_width : Command.hposition -> Num.t -> t -> t
+
+  val set_height2 : vposition -> Num.t -> vposition -> Num.t -> t -> t
+    (** set_height2 `Top y1 `Bot y2 b return the box b with its height and center chosen such as the ordinate of the top (because of `Top) of the box is at y1 and the ordinate of its bottom is at y2*)
+
+  val set_width2 : hposition -> Num.t -> hposition -> Num.t-> t -> t
+
   val set_size : Command.position -> width:Num.t -> height:Num.t -> t -> t
 
   val same_height : ?pos:Command.vposition -> t list -> t list

@@ -17,11 +17,11 @@
 open Mlpost
 open Command
 open Picture
-open Path
 module H = Helpers
 open Num
 open Num.Infix
 open Point
+open Path
 module MP = MetaPath
 
 let draw1 = 1, seq [ draw 
@@ -258,11 +258,11 @@ let b = (cycle ~style:jLine (path  ~style:jLine [(min,min);(max,min);(max,max);(
 let embed (id,p) = 
   id,seq [draw b;p]
 
-let figs = (*List.map embed*) [draw9b]
-  (*[ draw1; draw3; draw4a; draw4b;draw5; 
+let figs = (*List.map embed*)
+  [ draw1; draw3; draw4a; draw4b;draw5; 
     draw6; draw7; draw8; draw9a; draw9b;
     draw10a; draw10b; draw10c] @ draw11 
-  @ [draw17; draw18; draw21; draw22; draw40]*)
+  @ [draw17; draw18; draw21; draw22; draw40]
 
 let mpostfile = "testmanualMP"
 let cairostfile = "testmanual_cairo"

@@ -185,8 +185,8 @@ if test "$OCAMLFIND" == "yes"; then
 fi
 
 case $OCAMLVERSION in
-  3.08|3.09*)
-        echo "Your ocaml is too old. I can't compile the backend cairo without ocamlbuild"
+  3.08|3.09|3.10.0|3.10.1*)
+        echo "Your ocaml is too old (or too buggy 3.10.0, 3.10.1). I can't compile the backend cairo without ocamlbuild"
         MAKEFILE=simple.Makefile;;
   *)
         AC_CHECK_PROG(OCAMLBUILD,ocamlbuild,yes,no)

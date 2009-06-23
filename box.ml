@@ -84,8 +84,13 @@ let north_east x = build_point (east x) (north x)
 let south_west x = build_point (west x) (south x)
 let south_east x = build_point (east x) (south x)
 
+type vposition = [ |Command.vposition | `Custom of t -> Num.t]
+type hposition = [ |Command.hposition | `Custom of t -> Num.t]
+type position  = [ |Command.position | `Custom of t -> Point.t]
+
 let corner pos x = 
   match pos with
+  | `Custom c -> c x
   | `Upleft -> north_west x
   | `Upright -> north_east x
   | `Lowleft -> south_west x
@@ -96,6 +101,15 @@ let corner pos x =
   | `Top -> north x
   | `Bot -> south x
 
+let cornerh pos x =
+  match pos with
+  | `Custom c -> c x
+  | #Command.position as pos -> xpart (corner pos x)
+
+let cornerv pos x =
+  match pos with
+  | `Custom c -> c x
+  | #Command.position as pos -> ypart (corner pos x)
 
 let rec transform t b = 
   let tr = Point.transform t in
@@ -362,12 +376,15 @@ let ycoord pos a =
   (* get the vertical position of a box, using a either Top, Bot or the
      center as reference *)
   match pos with
+  | `Custom c -> c a
   | `Center -> ypart (ctr a)
   | (`Top | `Bot) as x -> border x a
+
 let xcoord pos a = 
   (* get the horizontal position of a box, using a either Left, Right or the
      center as reference *)
   match pos with
+  | `Custom c -> c a
   | `Center -> xpart (ctr a)
   | (`Left | `Right) as x -> border x a
 
@@ -395,6 +412,25 @@ let set_width pos w b =
     | `Left -> xpart b.ctr -/ (b.width -/ w) /./ 2.
     | `Right -> xpart b.ctr +/ (b.width -/ w) /./ 2. in
   { b with width = w; ctr = Point.pt (nc, ypart b.ctr) }
+
+let set_gen2 mycorner chgp pos1 y1 pos2 y2 b = 
+  let pos1 = mycorner pos1 b in
+  let pos2 = mycorner pos2 b in
+  let conv x = 
+    let a = (y1 -/ y2) // (pos1 -/ pos2) in
+    let b = ((y2 */ pos1) -/ (y1 */ pos2)) // (pos1 -/ pos2) in
+    a */ x +/ b in
+  let h = conv b.height in
+  let ctr = chgp conv b.ctr in
+  { b with height = h; ctr = ctr }
+
+let set_height2 pos1 y1 pos2 y2 b = set_gen2 cornerv 
+  (fun conv p -> Point.pt (xpart p, conv (ypart p)))
+  pos1 y1 pos2 y2 b
+
+let set_width2 pos1 y1 pos2 y2 b = set_gen2 cornerh
+  (fun conv p -> Point.pt (conv (xpart p),ypart p))
+  pos1 y1 pos2 y2 b
 
 let valign ?(pos=`Center) x l = 
   List.map (fun b -> shift (Point.pt (x -/ xcoord pos b, zero)) b) l
