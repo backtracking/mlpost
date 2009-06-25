@@ -16,23 +16,22 @@
 \maketitle
 
 We present \mlpost, an \ocaml\ library for drawing diagrams. Because
-of the possibility to include arbitrary \LaTeX\ text in the figures
-and to include the resulting figure in \LaTeX\ documents, we believe
+of the possibility to include arbitrary \LaTeX\ text in figures
+and the resulting figure in \LaTeX\ documents, we believe
 it is particularly suited for the scientific community and ML
-programmers. Contrary to other tools with similar features and scope,
+programmers. Unlike other tools with similar features and scope,
 like \metapost\ or \tikz, \mlpost\ is {\em not} a stand-alone
 language, but a library for the modern \ocaml\ programming language.
-This greatly eases the construction of figures which result from a
+This greatly eases the construction of figures resulting from a
 computation or figures which are intended to illustrate the run of an
 algorithm.
 
-Initially based on a the \metapost\ tool to do the actual
+Initially based on the \metapost\ tool to do the actual
 computations, treatment of \LaTeX\ snippets and drawing, \mlpost\ has
-grown into a fullblown implementation of Bézier curves and interprets
-results of \LaTeX\ runs by itself. It now uses the {\tt Cairo} library
+grown into a full-blown implementation of Bézier curves and interprets
+results of \LaTeX\ runs by itself, using the {\tt Cairo} library
 to draw objects. It supports output in PDF, Postscript, SVG,
-and even to X11 windows, via the {\tt GTK+} interface {\tt
-  LablGTK}. Mlpost is freely distributed at \url{http://mlpost.lri.fr}.
+and even to X11 windows. Mlpost is freely distributed at \url{http://mlpost.lri.fr}.
 
 %TODO decide what we want to show
 The demo, if accepted, will show many examples from lectures, PhD
