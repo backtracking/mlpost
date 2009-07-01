@@ -1,7 +1,7 @@
 open Mlpost
+open Point
 open Path
 open Command
-open Point
 open Dash
 
 (*parse <<togglescript>> *)
@@ -137,7 +137,7 @@ let cheno14 =
   seq [draw cercle;
        draw rectangle ~dashed:evenly;
        draw p ~dashed:(Dash.scaled 0.3 withdots);
-       draw_arrow (cut_before cercle (cut_after rectangle p)) ]
+       Arrow.draw (cut_before cercle (cut_after rectangle p)) ]
 (*parse >> *)
 
 let _ = 
