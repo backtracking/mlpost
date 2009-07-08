@@ -55,7 +55,7 @@ let _ = dispatch begin function
 
          (**doc *)
          rule "generation of the documentation" ~prod:"doc/index.html" 
-           ~deps:["mlpost.docdir/index.html";"img/stamp"]
+           ~deps:["mlpost.docdir/html.stamp";"img/stamp"]
            (fun _ _ -> Cmd(Sh "rm -rf doc && cp -r mlpost.docdir doc && cp -r img doc"));
 
          flag ["ocaml"; "compile"; "use_ocamldoc"] & S[A"-I"; A "+ocamldoc"];
