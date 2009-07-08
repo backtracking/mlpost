@@ -27,22 +27,24 @@ let externalimage_dimension filename : float * float =
 
 let name = pp_print_string
 
-let piccorner fmt = function
-  | `Upleft  -> fprintf fmt "ulcorner"
-  | `Upright -> fprintf fmt "urcorner"
-  | `Lowleft -> fprintf fmt "llcorner"
-  | `Lowright -> fprintf fmt "lrcorner"
+let piccorner fmt p = 
+  match corner_reduce p with
+  | `NorthWest  -> fprintf fmt "ulcorner"
+  | `NorthEast -> fprintf fmt "urcorner"
+  | `SouthWest -> fprintf fmt "llcorner"
+  | `SouthEast -> fprintf fmt "lrcorner"
 
-let position fmt = function
+let position fmt p = 
+  match pos_reduce p with
   | `Center  -> fprintf fmt ""
-  | `Left   -> fprintf fmt ".lft"
-  | `Right  -> fprintf fmt ".rt"
-  | `Top    -> fprintf fmt ".top"
-  | `Bot    -> fprintf fmt ".bot"
-  | `Upleft  -> fprintf fmt ".ulft"
-  | `Upright -> fprintf fmt ".urt"
-  | `Lowleft -> fprintf fmt ".llft"
-  | `Lowright -> fprintf fmt ".lrt"
+  | `West   -> fprintf fmt ".lft"
+  | `East  -> fprintf fmt ".rt"
+  | `North    -> fprintf fmt ".top"
+  | `South    -> fprintf fmt ".bot"
+  | `NorthWest  -> fprintf fmt ".ulft"
+  | `NorthEast -> fprintf fmt ".urt"
+  | `SouthWest -> fprintf fmt ".llft"
+  | `SouthEast -> fprintf fmt ".lrt"
 
 let rec num fmt = function
   | C.F f ->

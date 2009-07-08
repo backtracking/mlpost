@@ -35,17 +35,17 @@ let z4 = 30.,50.
 let l1 = z0::z1::z2::z3::z4::[]
 
 let labels1 =
-  seq [H.dotlabels ~pos:`Top ["0";"2";"4"] (map_bp [z0;z2;z4]);
-       dotlabel ~pos:`Left (tex "3") (bpp z3);
-       dotlabel ~pos:`Lowright (tex "1") (bpp z1) ]
+  seq [H.dotlabels ~pos:`North ["0";"2";"4"] (map_bp [z0;z2;z4]);
+       dotlabel ~pos:`West (tex "3") (bpp z3);
+       dotlabel ~pos:`SouthEast (tex "1") (bpp z1) ]
 
 let draw3 = 3, seq [ draw (path ~style:jCurve  l1); labels1 ]
 
 let draw4a, draw4b = 
   let labels = 
-    seq [ H.dotlabels ~pos:`Top ["2";"4"] (map_bp [z2;z4]);
-          H.dotlabels ~pos:`Left ["0";"3"] (map_bp [z0;z3]);
-          dotlabel ~pos:`Lowright (tex "1") (bpp z1) ]
+    seq [ H.dotlabels ~pos:`North ["2";"4"] (map_bp [z2;z4]);
+          H.dotlabels ~pos:`West ["0";"3"] (map_bp [z0;z3]);
+          dotlabel ~pos:`SouthEast (tex "1") (bpp z1) ]
   in
   (104, seq [ draw (path ~cycle:jCurve l1); labels]) ,
     (204, 
@@ -101,7 +101,7 @@ let draw8 = 8,
 let z0 = (-1., 0.)
 let z1 = (0., 0.2)
 let z2 = ( 1., 0.)
-let labels9 = H.dotlabels ~pos:`Bot ["0";"1";"2"] (map_in [z0;z1;z2])
+let labels9 = H.dotlabels ~pos:`South ["0";"1";"2"] (map_in [z0;z1;z2])
 let z0 = knot ~r:(vec up) ~scale:inch z0
 let z1 = knot ~r:(vec right) ~scale:inch z1
 let z2 = knot ~r:(vec down) ~scale:inch z2
@@ -115,7 +115,7 @@ let z1 = (u (-3.)),u 2.
 let z2 = (u 3.),u 2.
 let z3 = (u 5.),u 0.
 let l1 = [z0;z1;z2;z3]
-let labels10 = H.dotlabels ~pos:`Bot ["0";"1";"2";"3"] (map_in l1)
+let labels10 = H.dotlabels ~pos:`South ["0";"1";"2";"3"] (map_in l1)
 
 let draw10a = 110, seq [draw (path ~scale:inch l1); labels10 ] 
 
@@ -144,7 +144,7 @@ let pat c = [ knot ~r:(curl c) ~scale:inch z0 ;
 
 let draw11 =
   let numbers = [111; 211; 311; 411] in
-  let labels11 = H.dotlabels ~pos:`Right ["0";"1";"2"] (map_in [z0;z1;z2]) in
+  let labels11 = H.dotlabels ~pos:`East ["0";"1";"2"] (map_in [z0;z1;z2]) in
     List.map2
       (fun c n -> n,
          seq [draw (pathk (pat c) ); labels11  ] )
@@ -157,9 +157,9 @@ let draw17 =
   let z2 = pt (zero, b) and z4 = pt (zero, neg b) in
     17, seq [draw (pathp ~cycle:jCurve [z1;z2;z3;z4]);
 	 draw (pathp ~style:jLine [z1; z0; z2]);
-	 label ~pos:`Top (tex "a") (segment 0.5 z0 z1);
-	 label ~pos:`Left (tex "b") (segment 0.5 z0 z2);
-	 dotlabel ~pos:`Bot (tex "(0,0)") z0
+	 label ~pos:`North (tex "a") (segment 0.5 z0 z1);
+	 label ~pos:`West (tex "b") (segment 0.5 z0 z2);
+	 dotlabel ~pos:`South (tex "(0,0)") z0
 	]
 
 let draw18 =
@@ -171,9 +171,9 @@ let draw18 =
 	MP.concat ~style:jCurve (pg (n-1)) (MP.knot ~scale:u (f, sqrt f)) in
     18, seq [draw (pathn ~style:jLine [(zero,u 2.); (zero,zero); (u 4.,zero)]);
 	 draw ~pen (MP.to_path (pg 8));
-	 label ~pos:`Lowright (tex "$ \\sqrt x$") (pt (u 3., u (sqrt 3.)));
-	 label ~pos:`Bot (tex "$x$") (pt (u 2., zero));
-	 label ~pos:`Lowleft (tex "$y$") (pt (zero, u 1.))]
+	 label ~pos:`SouthEast (tex "$ \\sqrt x$") (pt (u 3., u (sqrt 3.)));
+	 label ~pos:`South (tex "$x$") (pt (u 2., zero));
+	 label ~pos:`SouthWest (tex "$y$") (pt (zero, u 1.))]
 	 
 let draw19 =
   let ux, uy = Num.inch 0.01, Num.inch 0.6 in
@@ -187,9 +187,9 @@ let draw19 =
 	  (knotn (k *./ ux, 2. /. (1. +. (cos (Num.deg2rad k))) *./ uy)) in
     19, [draw (pathn ~style:jLine [(zero,duy); (zero,zero); (dux,zero)]);
 	 draw ~pen (pg 8);
-	 label ~pos:`Bot (tex "axe $x$") (pt (60.*./ux, zero));
-	 label ~pos:`Left axey (pt (zero, 2.*./uy));
-	 label ~pos:`Left (tex "$\\displaystyle y={2\\over1+\\cos x}$")
+	 label ~pos:`South (tex "axe $x$") (pt (60.*./ux, zero));
+	 label ~pos:`West axey (pt (zero, 2.*./uy));
+	 label ~pos:`West (tex "$\\displaystyle y={2\\over1+\\cos x}$")
 	   (pt (dux, duy))]
 
 (** Cette version de draw21 est assez cool mais ne marche pas car la largeur du trait
@@ -223,7 +223,7 @@ let draw22 =
           fill ~color:(Color.gray 0.4) ab;
           fill ~color:Color.white (bbox pa); pa;
           fill ~color:Color.white (bbox pb); pb;
-          label ~pos:`Left (tex "$U$") (p ~scale:Num.cm (-1.,0.5)); ])
+          label ~pos:`West (tex "$U$") (p ~scale:Num.cm (-1.,0.5)); ])
   in
     22, seq [pic; draw (bbox pic)]
 

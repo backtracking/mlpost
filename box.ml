@@ -91,15 +91,17 @@ type position  = [ |Command.position | `Custom of t -> Point.t]
 let corner pos x = 
   match pos with
   | `Custom c -> c x
-  | `Upleft -> north_west x
-  | `Upright -> north_east x
-  | `Lowleft -> south_west x
-  | `Lowright -> south_east x
-  | `Left -> west x
-  | `Right -> east x
-  | `Center -> ctr x
-  | `Top -> north x
-  | `Bot -> south x
+  | #Types.position as other ->
+    match Types.pos_reduce other with
+    | `NorthWest -> north_west x
+    | `NorthEast -> north_east x
+    | `SouthWest -> south_west x
+    | `SouthEast -> south_east x
+    | `West -> west x
+    | `East -> east x
+    | `Center -> ctr x
+    | `North -> north x
+    | `South -> south x
 
 let cornerh pos x =
   match pos with
@@ -141,10 +143,10 @@ let center pt x = shift (Point.sub pt x.ctr) x
 
 let border pos b = 
   match pos with
-  | `Top -> ypart (ctr b) +/ height b /./ 2.
-  | `Bot -> ypart (ctr b) -/ height b /./ 2.
-  | `Left -> xpart (ctr b) -/ width b /./ 2.
-  | `Right -> xpart (ctr b) +/ width b /./ 2.
+  | `North -> ypart (ctr b) +/ height b /./ 2.
+  | `South -> ypart (ctr b) -/ height b /./ 2.
+  | `West -> xpart (ctr b) -/ width b /./ 2.
+  | `East -> xpart (ctr b) +/ width b /./ 2.
 
 let rec draw ?(debug=false) b = 
   let path_cmd = match b.stroke, b.pen with
@@ -377,16 +379,20 @@ let ycoord pos a =
      center as reference *)
   match pos with
   | `Custom c -> c a
-  | `Center -> ypart (ctr a)
-  | (`Top | `Bot) as x -> border x a
+  | #Types.vposition as p ->
+      match vreduce p with
+      | `Center -> ypart (ctr a)
+      | (`North | `South) as x -> border x a
 
 let xcoord pos a = 
   (* get the horizontal position of a box, using a either Left, Right or the
      center as reference *)
   match pos with
   | `Custom c -> c a
-  | `Center -> xpart (ctr a)
-  | (`Left | `Right) as x -> border x a
+  | #Types.hposition as p ->
+      match hreduce p with
+      | `Center -> xpart (ctr a)
+      | (`West | `East) as x -> border x a
 
 let box_fold f acc l = 
   let _, l = 
@@ -394,23 +400,23 @@ let box_fold f acc l =
     (fun (acc,l) b -> let acc, b = f acc b in acc, b::l) (acc,[]) l in
   List.rev l
 
-let halign ?(pos=`Center) y l = 
+let halign ?(pos : vposition =`Center) y l = 
   List.map (fun b -> shift (Point.pt (zero, y -/ ycoord pos b)) b) l
 
 let set_height pos h b = 
   let nc = 
-    match pos with
+    match vreduce pos with
     | `Center -> ypart b.ctr
-    | `Top -> ypart b.ctr +/ (b.height -/ h) /./ 2.
-    | `Bot -> ypart b.ctr -/ (b.height -/ h) /./ 2. in
+    | `North -> ypart b.ctr +/ (b.height -/ h) /./ 2.
+    | `South -> ypart b.ctr -/ (b.height -/ h) /./ 2. in
   { b with height = h; ctr = Point.pt (xpart b.ctr, nc) }
 
 let set_width pos w b = 
   let nc = 
-    match pos with
+    match hreduce pos with
     | `Center -> xpart b.ctr
-    | `Left -> xpart b.ctr -/ (b.width -/ w) /./ 2.
-    | `Right -> xpart b.ctr +/ (b.width -/ w) /./ 2. in
+    | `West -> xpart b.ctr -/ (b.width -/ w) /./ 2.
+    | `East -> xpart b.ctr +/ (b.width -/ w) /./ 2. in
   { b with width = w; ctr = Point.pt (nc, ypart b.ctr) }
 
 let set_gen2 mycorner chgp pos1 y1 pos2 y2 b = 
@@ -436,16 +442,16 @@ let valign ?(pos=`Center) x l =
   List.map (fun b -> shift (Point.pt (x -/ xcoord pos b, zero)) b) l
 
 let extractv pos = 
-  match pos with
-  | `Upleft | `Top | `Upright -> `Top
-  | `Left | `Center | `Right -> `Center
-  | `Lowleft | `Bot | `Lowright -> `Bot
+  match pos_reduce pos with
+  | `NorthWest | `North | `NorthEast -> `North
+  | `West | `Center | `East -> `Center
+  | `SouthWest | `South | `SouthEast -> `South
 
 let extracth pos = 
-  match pos with
-  | `Upleft | `Left | `Lowleft -> `Left
-  | `Top | `Center | `Bot -> `Center
-  | `Upright | `Right | `Lowright -> `Right
+  match pos_reduce pos with
+  | `NorthWest | `West | `SouthWest -> `West
+  | `North | `Center | `South -> `Center
+  | `NorthEast | `East | `SouthEast -> `East
 
 let set_size pos ~width ~height b = 
   set_height (extractv pos) height (set_width (extracth pos) width b)

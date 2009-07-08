@@ -25,10 +25,19 @@ type color =
 
 type name = string
 
-type corner = [ | `Upleft | `Upright | `Lowleft | `Lowright ]
+type corner =  [ 
+  | `NorthWest | `NorthEast | `SouthWest | `SouthEast 
+  | `Upleft | `Upright | `Lowleft | `Lowright (** deprecated *)
+]
 
-type hposition = [`Center | `Left | `Right]
-type vposition = [`Center | `Top | `Bot]
+type hposition = [
+  `Center | `West | `East
+  | `Left | `Right (** deprecated *)
+]
+type vposition = [
+  `Center | `North | `South
+  | `Top | `Bot (** deprecated *)
+]
 type position = [ | hposition | vposition | corner ]
 
 open Hashcons
@@ -296,3 +305,13 @@ val mkPenTransformed: pen -> transform -> pen
 val mkOn : num -> on_off
 val mkOff : num -> on_off
 
+val pos_reduce :
+  position -> 
+    [ `Center | `North | `South | `Center | `West | `East | 
+    `NorthWest | `NorthEast | `SouthWest | `SouthEast ]
+
+val corner_reduce :
+  corner -> [ `NorthWest | `NorthEast | `SouthWest | `SouthEast ]
+
+val vreduce : vposition -> [ `Center | `North | `South ]
+val hreduce : hposition -> [ `Center | `East | `West ]

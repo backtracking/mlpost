@@ -104,8 +104,8 @@ let box_perspect scale hb l =
 
 (* Gère la position du label pour qu'elle soit cohérente *)
 let label_direction poslab x = match poslab with
-  | `Top -> if x < 0. then (`Bot,Box.south) else (`Top,Box.north)
-  | `Bot -> if x < 0. then (`Top,Box.south) else (`Bot,Box.north)
+  | `North -> if x < 0. then (`South,Box.south) else (`South,Box.north)
+  | `South -> if x < 0. then (`North,Box.south) else (`South,Box.north)
   | `Center -> (`Center,Box.ctr)
   | _ -> failwith "Case not considered"
 
@@ -143,7 +143,7 @@ let box_labels lab hb l =
 let hist_labels hlab hb =
   let rec mk_labels acc i hlab =
     match hlab with 
-      |x::res -> mk_labels (acc ++ (Command.label ~pos:`Bot x) 
+      |x::res -> mk_labels (acc ++ (Command.label ~pos:`South x) 
 		     (Box.south (Box.nth i hb))) (i+1) res
       |[]-> acc 
   in mk_labels nop 0 hlab
@@ -160,7 +160,7 @@ let hist ~cumul width height padding fill perspective scalex scaley ?histlabel ?
 	 consvbox (b::boxs) (res, Q.push c cq)
   in
   let rec fct_hist boxs =function
-    |[],_ -> hbox ~pos:`Bot ~padding:padding (List.rev boxs)
+    |[],_ -> hbox ~pos:`South ~padding:padding (List.rev boxs)
     |x::res,collist -> let lavbox,listcol = consvbox [] (x,collist) in
 	fct_hist (lavbox::boxs) (res, if cumul then collist else listcol)
   in

@@ -893,19 +893,21 @@ and Command : sig
 
   (** {2 Labels} *)
 
-  (** Positions; useful to place labels *)
-  type hposition = [`Center | `Left | `Right]
-  type vposition = [`Center | `Top | `Bot]
+  type hposition = [ | `Center | `West | `East | `Left | `Right ]
+  type vposition = [ `Center | `North | `South | `Top | `Bot ]
   type position = [
   | hposition 
   | vposition 
-  | `Upleft
-  | `Upright
-  | `Lowleft
-  | `Lowright
+  | `NorthWest | `NorthEast | `SouthWest | `SouthEast
+  | `Upleft | `Upright | `Lowleft | `Lowright 
   ]
+  (** Positions - they are used at many places in Mlpost to indicate a direction
+   or position.
+   The constructors 
+     [`Left;`Right;`Bot;`Top;`Upright; `Upleft; Lowright; `Lowleft] are
+     deprecated. *)
 
-  (** [label ~pos:`Left pic p] puts picture [pic] at the left of point [p] *)
+  (** [label ~pos:`West pic p] puts picture [pic] at the left of the point [p] *)
   val label : ?pos:position -> Picture.t -> Point.t -> t
 
   (** Works like [label], but puts a dot at point [p] as well *)
@@ -1266,7 +1268,9 @@ and Box : sig
   val set_width : Command.hposition -> Num.t -> t -> t
 
   val set_height2 : vposition -> Num.t -> vposition -> Num.t -> t -> t
-    (** set_height2 `Top y1 `Bot y2 b return the box b with its height and center chosen such as the ordinate of the top (because of `Top) of the box is at y1 and the ordinate of its bottom is at y2*)
+    (** set_height2 `North y1 `South y2 b return the box b with its height and
+     center chosen such as the ordinate of the top (because of `North) of the
+     box is at y1 and the ordinate of its south is at y2*)
 
   val set_width2 : hposition -> Num.t -> hposition -> Num.t-> t -> t
 
@@ -1745,7 +1749,7 @@ module Hist : sig
     ?perspective: bool ->
     ?hcaption:Picture.t ->
     ?vcaption:Picture.t ->
-    ?histlabel:[> `Bot | `Center | `Top ] * Picture.t labels ->
+    ?histlabel:[> Command.vposition ] * Picture.t labels ->
     ?vlabel:Plot.labels ->
     ?hlabel:Picture.t list -> 
     float list -> Command.t
@@ -1773,7 +1777,7 @@ module Hist : sig
     ?perspective: bool ->
     ?hcaption:Picture.t ->
     ?vcaption:Picture.t ->
-    ?histlabel:[> `Bot | `Center | `Top ] * Picture.t list labels ->
+    ?histlabel:[> Command.vposition ] * Picture.t list labels ->
     ?vlabel:Plot.labels ->
     ?hlabel:Picture.t list ->
     float list list -> Command.t
@@ -1790,7 +1794,7 @@ module Hist : sig
     ?perspective: bool ->
     ?hcaption:Picture.t ->
     ?vcaption:Picture.t ->
-    ?histlabel:[> `Bot | `Center | `Top ] * Picture.t list labels ->
+    ?histlabel:[> Command.vposition ] * Picture.t list labels ->
     ?vlabel:Plot.labels ->
     ?hlabel:Picture.t list -> 
     float list list -> Command.t

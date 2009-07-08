@@ -72,10 +72,10 @@ let draw_label pt lab radius =
   let angl = (acos (x /. (sqrt (x*.x +. y*.y))))*.180./.pi in
   let angle = if y<0. then 360.-.angl else angl in
   let placement = 
-    if ((angle>315. && angle<360.) || (angle>=0. && angle<=45.)) then `Right
-    else if (angle>45. && angle<=135.) then `Top
-    else if (angle>135. && angle<=225.) then `Left
-    else `Bot
+    if ((angle>315. && angle<360.) || (angle>=0. && angle<=45.)) then `East
+    else if (angle>45. && angle<=135.) then `North
+    else if (angle>135. && angle<=225.) then `West
+    else `South
   in
     Command.label ~pos:placement (Picture.tex lab) (Point.pt (multf x radius, multf y radius))
 

@@ -22,16 +22,17 @@ let option_print pr fmt = function
   | None -> ()
   | Some x -> pr fmt x
 
-let position fmt = function
+let position fmt p = 
+  match pos_reduce p with
   | `Center  -> fprintf fmt ""
-  | `Left   -> fprintf fmt ".lft"
-  | `Right  -> fprintf fmt ".rt"
-  | `Top    -> fprintf fmt ".top"
-  | `Bot    -> fprintf fmt ".bot"
-  | `Upleft  -> fprintf fmt ".ulft"
-  | `Upright -> fprintf fmt ".urt"
-  | `Lowleft -> fprintf fmt ".llft"
-  | `Lowright -> fprintf fmt ".lrt"
+  | `West   -> fprintf fmt ".lft"
+  | `East  -> fprintf fmt ".rt"
+  | `North    -> fprintf fmt ".top"
+  | `South    -> fprintf fmt ".bot"
+  | `NorthWest  -> fprintf fmt ".ulft"
+  | `NorthEast -> fprintf fmt ".urt"
+  | `SouthWest -> fprintf fmt ".llft"
+  | `SouthEast -> fprintf fmt ".lrt"
 
 let rec num fmt n = 
   match n.Hashcons.node with
@@ -50,7 +51,8 @@ let rec num fmt n =
 and point fmt p = 
   match p.Hashcons.node with
   | PTPair (n1,n2) -> fprintf fmt "(%a,%a)" num n1 num n2
-  | PTPicCorner (p,pc) -> fprintf fmt "%a(%a)" position pc commandpic p
+  | PTPicCorner (p,pc) -> 
+      fprintf fmt "%a(%a)" position (pc :> position) commandpic p
   | PTAdd (p1,p2) -> fprintf fmt "(%a + %a)" point p1 point p2
   | PTSub (p1,p2) -> fprintf fmt "(%a - %a)" point p1 point p2
   | PTMult (n,p) -> fprintf fmt "(%a * %a)" num n point p

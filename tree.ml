@@ -232,7 +232,7 @@ module Simple = struct
     
   let node ?(ls=Num.bp 12.) ?(cs=Num.bp 5.) ?(arrow_style=Directed)
       ?(edge_style=Straight) ?stroke ?pen ?sep s l = 
-    let l = Box.hbox ~padding:cs ~pos:`Top l in 
+    let l = Box.hbox ~padding:cs ~pos:`North l in 
     let tree = Box.vbox ~padding:ls [s;l] in
     Box.set_post_draw 
       (fun tree -> 

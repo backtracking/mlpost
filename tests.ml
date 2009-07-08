@@ -77,12 +77,12 @@ let vblock1 =
   draw (vblock [tex "A"; tex "B"; tex "c"; tex "toto"])
 
 let hbox1 = 
-  draw (hbox ~pos:`Top [tex "."; tex "B"; tex "c"; tex "toto"])
+  draw (hbox ~pos:`North [tex "."; tex "B"; tex "c"; tex "toto"])
 
 let hbox2 = 
   let s b = Box.shift (Point.p (100.,100.)) b in
   let stroke = Some Color.red in
-  let b = vbox ~stroke ~pos:`Left [tex "A"; s (tex "Bx") ; tex "c"; tex "toto"] in
+  let b = vbox ~stroke ~pos:`West [tex "A"; s (tex "Bx") ; tex "c"; tex "toto"] in
   let t = hbox ~stroke [b;b;b] in
   draw (vbox [t;s t;t])
 
@@ -106,7 +106,7 @@ let d1 =
       ~color:Color.red
       (Path.shift (1. ++ 1.) (bpath a));
     draw_label_arrow ~color:Color.orange ~pen 
-      ~pos:`Upright (Picture.tex "foo") (west a) (south_east b);
+      ~pos:`NorthEast (Picture.tex "foo") (west a) (south_east b);
     box_arrow ~color:Color.blue a b;
   ]
 
@@ -115,10 +115,10 @@ open Box
 let d2 =
   let tex = tex ~stroke:(Some Color.black) in
   let b = 
-    hbox ~padding:(bp 10.) ~pos:`Top ~stroke:(Some Color.red) ~dx:(bp 2.)
+    hbox ~padding:(bp 10.) ~pos:`North ~stroke:(Some Color.red) ~dx:(bp 2.)
       ~dy:(bp 2.)
-      [vbox ~padding:(bp 4.) ~pos:`Right [tex "A"; tex "BC"; tex "D"];
-       vbox ~padding:(bp 4.) ~pos:`Left [tex "E"; tex "FGH"]]
+      [vbox ~padding:(bp 4.) ~pos:`East [tex "A"; tex "BC"; tex "D"];
+       vbox ~padding:(bp 4.) ~pos:`West [tex "E"; tex "FGH"]]
   in
   seq [draw ~debug:false b;
    box_arrow (nth 1 (nth 0 b)) (nth 0 (nth 1 b))]
@@ -128,8 +128,8 @@ let proval =
   let pen = Pen.rotate 40. (Pen.yscale (bp 0.5) Pen.square) in
   let check = jointpath [-1.2,1.2; 0., -2. ; 2., 2. ; 5., 5.] [jLine ; jCurve; jCurve] in
     seq [ fill ~color:(Color.gray 0.2) (Path.scale (Num.bp f) fullcircle) ;
-      label ~pos:`Left (Picture.tex "Pr") (Point.p (f /. (-4.),0.)) ;
-      label ~pos:`Right (Picture.tex "al") (Point.p (f /. 4.,0.)) ;
+      label ~pos:`West (Picture.tex "Pr") (Point.p (f /. (-4.),0.)) ;
+      label ~pos:`East (Picture.tex "al") (Point.p (f /. 4.,0.)) ;
       Command.draw ~color:Color.green ~pen check;]
 
 open Tree
@@ -204,8 +204,8 @@ let cheno011 =
    seq (List.map
 	   (fun (pos, l, i) -> 
 	     Command.dotlabel ~pos (Picture.tex l) (point i p))
-	   [`Bot, "0", 0.;  `Upleft, "1", 1. ;
-	    `Lowleft, "2", 2. ;  `Top, "3", 3. ; `Left, "4", 4. ]);
+	   [`South, "0", 0.;  `NorthEast, "1", 1. ;
+	    `SouthWest, "2", 2. ;  `North, "3", 3. ; `West, "4", 4. ]);
    Command.draw ~pen (subpath 1.3 3.2 p)]
 
 open Dash
@@ -233,10 +233,10 @@ let d7 =
     seq [pic;
      Command.draw (Picture.bbox pic);
      Command.draw pbox;
-     Command.dotlabel ~pos:`Left (Picture.tex "ulcorner") (Picture.ulcorner pic);
-     Command.dotlabel ~pos:`Left (Picture.tex "llcorner") (Picture.llcorner pic);
-     Command.dotlabel ~pos:`Right (Picture.tex "urcorner") (Picture.urcorner pic);
-     Command.dotlabel ~pos:`Right (Picture.tex "lrcorner") (Picture.lrcorner pic);
+     Command.dotlabel ~pos:`West (Picture.tex "ulcorner") (Picture.ulcorner pic);
+     Command.dotlabel ~pos:`West (Picture.tex "llcorner") (Picture.llcorner pic);
+     Command.dotlabel ~pos:`East (Picture.tex "urcorner") (Picture.urcorner pic);
+     Command.dotlabel ~pos:`East (Picture.tex "lrcorner") (Picture.lrcorner pic);
     ]
     
 let half pic = Picture.transform [Transform.scaled (bp 0.5)] pic
@@ -328,7 +328,7 @@ let f3 i =
 let flab i = (Picture.transform
 		[Transform.scaled (bp 1.7)]
 		(Picture.tex (Printf.sprintf "$f_{\\omega_%d}$" i)),
-	      `Top, 19)
+	      `North, 19)
 	
 let instants = 
   let pen = Pen.scale (bp 2.5) Pen.default in

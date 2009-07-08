@@ -65,27 +65,28 @@ let option_def_compile def f = function
 let middle x y = (x/.2.)+.(y/.2.)
 
 let point_of_position ecart
-  ({ P.x = xmin; y = ymin}, { P.x = xmax; y = ymax}) = 
-    function
-      | `Top -> {P.x=middle xmin xmax; y=ymax+.ecart}
-      | `Bot -> {P.x=middle xmin xmax; y=ymin-.ecart}
-      | `Left -> {P.x=xmin-.ecart; y=middle ymin ymax}
-      | `Right -> {P.x=xmax+.ecart; y=middle ymin ymax}
-      | `Upleft -> {P.x=xmin-.ecart;y=ymax+.ecart}
-      | `Upright -> {P.x=xmax+.ecart;y=ymax+.ecart}
-      | `Lowleft -> {P.x=xmin-.ecart;y=ymin-.ecart}
-      | `Lowright -> {P.x=xmax+.ecart;y=ymin-.ecart}
-      | `Center -> {P.x = middle xmin xmax; P.y = middle ymin ymax }
+  ({ P.x = xmin; y = ymin}, { P.x = xmax; y = ymax}) pos = 
+    match pos_reduce pos with
+    | `North -> {P.x=middle xmin xmax; y=ymax+.ecart}
+    | `South -> {P.x=middle xmin xmax; y=ymin-.ecart}
+    | `West -> {P.x=xmin-.ecart; y=middle ymin ymax}
+    | `East -> {P.x=xmax+.ecart; y=middle ymin ymax}
+    | `NorthWest -> {P.x=xmin-.ecart;y=ymax+.ecart}
+    | `NorthEast -> {P.x=xmax+.ecart;y=ymax+.ecart}
+    | `SouthWest -> {P.x=xmin-.ecart;y=ymin-.ecart}
+    | `SouthEast -> {P.x=xmax+.ecart;y=ymin-.ecart}
+    | `Center -> {P.x = middle xmin xmax; P.y = middle ymin ymax }
 
-let anchor_of_position = function
-  | `Top -> `Bot
-  | `Bot -> `Top
-  | `Left -> `Right
-  | `Right -> `Left
-  | `Upleft -> `Lowright
-  | `Upright -> `Lowleft
-  | `Lowleft -> `Upright
-  | `Lowright -> `Upleft
+let anchor_of_position pos = 
+  match pos_reduce pos with
+  | `North -> `South
+  | `South -> `North
+  | `West -> `East
+  | `East -> `West
+  | `NorthWest -> `SouthEast
+  | `NorthEast -> `SouthWest
+  | `SouthWest -> `NorthEast
+  | `SouthEast -> `NorthWest
   | `Center -> `Center
 
 let num_memoize = Hashtbl.create 50
@@ -175,7 +176,7 @@ and point' = function
       P.rotated (deg2rad f) p1
   | PTPicCorner (pic, corner) ->
       let p = commandpic pic in
-      point_of_position 0. (Picture_lib.bounding_box p) corner
+      point_of_position 0. (Picture_lib.bounding_box p) (corner :> position)
   | PTTransformed (p,tr) ->
       let p = point p in
       let tr = transform tr in

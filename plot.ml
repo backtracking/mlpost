@@ -99,7 +99,7 @@ let draw_axes ?(hpen=Pen.default) ?(vpen=Pen.default)
 	    | Some pic -> Picture.height pic
 	in
 	let h_caption_height = Picture.height labl in
-	Command.label ~pos:`Lowleft labl 
+	Command.label ~pos:`SouthWest labl 
 	  (Point.pt (num_of_int w */ sx,
 		     Num.zero -/ hlabels_height  -/
  		       (bp 0.5) */ h_caption_height ))
@@ -115,7 +115,7 @@ let draw_axes ?(hpen=Pen.default) ?(vpen=Pen.default)
 	     | Some pic -> Picture.width pic
 	in
 	let v_caption_width = Picture.width rot_labl in
-	Command.label ~pos:`Lowleft rot_labl
+	Command.label ~pos:`SouthWest rot_labl
       	  (Point.pt ( Num.zero -/ vlabels_width -/  (bp 0.5)  
  		      */ v_caption_width, 
 		      num_of_int h */ sy))		
@@ -132,7 +132,7 @@ let draw_axes ?(hpen=Pen.default) ?(vpen=Pen.default)
   in
   let horizontal i =
     let x = num_of_int i */ sx in
-      seq [ labelcmd `Bot (Point.pt (x,maxd)) i hlabel; 
+      seq [ labelcmd `South (Point.pt (x,maxd)) i hlabel; 
             ticks_cmd (fun f -> pathn [x,maxd; x, maxd +/ (sy */ f)]);
             if closed then
               ticks_cmd (fun f -> pathn [x,maxu; x, maxu -/ sy */f])
@@ -140,7 +140,7 @@ let draw_axes ?(hpen=Pen.default) ?(vpen=Pen.default)
   in
   let vertical i =
     let y = num_of_int i */ sy in
-      seq [labelcmd `Left (Point.pt (maxl, y)) i vlabel; 
+      seq [labelcmd `South (Point.pt (maxl, y)) i vlabel; 
            ticks_cmd (fun f ->  pathn [maxl,y; maxl +/ sx */ f,y]);
             if closed then
               ticks_cmd (fun f -> pathn [maxr,y; maxr -/ sy */ f, y])

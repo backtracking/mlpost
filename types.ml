@@ -26,10 +26,21 @@ type color =
 
 type name = string
 
-type corner = [ | `Upleft | `Upright | `Lowleft | `Lowright ]
+type corner =  [ 
+  | `NorthWest | `NorthEast | `SouthWest | `SouthEast 
+  | `Upleft | `Upright | `Lowleft | `Lowright (** deprecated *)
+]
 
-type hposition = [`Center | `Left | `Right]
-type vposition = [`Center | `Top | `Bot]
+type hposition = [
+  `Center | `West | `East
+  | `Left | `Right (** deprecated *)
+]
+type vposition = [
+  `Center | `North | `South
+  | `Top | `Bot (** deprecated *)
+]
+
+
 type position = [ | hposition | vposition | corner ]
 
 open Hashcons
@@ -746,3 +757,23 @@ let hashon_off = HashOnOff.hashcons hashon_off_table
 let mkOn n = hashon_off (On n)
 let mkOff n = hashon_off (Off n)
 
+let hreduce = function
+  | `Center -> `Center
+  | `Left | `West -> `West
+  | `Right | `East -> `East
+
+let vreduce = function
+  | `Center -> `Center
+  | `Top | `North -> `North
+  | `Bot | `South -> `South
+
+let corner_reduce = function
+  | `Upleft | `NorthWest -> `NorthWest
+  | `Upright | `NorthEast -> `NorthEast
+  | `Lowleft | `SouthWest -> `SouthWest
+  | `Lowright | `SouthEast -> `SouthEast
+
+let pos_reduce = function
+  | #hposition as p -> hreduce p
+  | #vposition as p -> vreduce p
+  | #corner as p -> corner_reduce p

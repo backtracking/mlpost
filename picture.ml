@@ -23,10 +23,10 @@ let make l = l
 let empty = mkSeq []
 let bbox pic = mkPABBox pic
 
-let ulcorner pic = mkPTPicCorner pic `Upleft
-let llcorner pic = mkPTPicCorner pic `Lowleft
-let urcorner pic = mkPTPicCorner pic `Upright
-let lrcorner pic = mkPTPicCorner pic `Lowright
+let ulcorner pic = mkPTPicCorner pic `NorthWest
+let llcorner pic = mkPTPicCorner pic `SouthWest
+let urcorner pic = mkPTPicCorner pic `NorthEast
+let lrcorner pic = mkPTPicCorner pic `SouthEast
 
 let north_west = ulcorner
 let south_west = llcorner
@@ -82,16 +82,16 @@ let west p = Point.segment 0.5 (south_west p) (north_west p)
 let east p = Point.segment 0.5 (north_east p) (south_east p)
 
 let corner pos x = 
-  match pos with
-  | `Upleft -> north_west x
-  | `Upright -> north_east x
-  | `Lowleft -> south_west x
-  | `Lowright -> south_east x
-  | `Left -> west x
-  | `Right -> east x
+  match pos_reduce pos with
+  | `NorthWest -> north_west x
+  | `NorthEast -> north_east x
+  | `SouthWest -> south_west x
+  | `SouthEast -> south_east x
+  | `West -> west x
+  | `East -> east x
   | `Center -> ctr x
-  | `Top -> north x
-  | `Bot -> south x
+  | `North -> north x
+  | `South -> south x
 
 type escaped = 
     [`Backslash
