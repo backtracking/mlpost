@@ -103,11 +103,11 @@ let box_perspect scale hb l =
 
 
 (* Gère la position du label pour qu'elle soit cohérente *)
-let label_direction poslab x = match poslab with
+let label_direction poslab x = 
+  match Types.vreduce poslab with
   | `North -> if x < 0. then (`South,Box.south) else (`South,Box.north)
   | `South -> if x < 0. then (`North,Box.south) else (`South,Box.north)
   | `Center -> (`Center,Box.ctr)
-  | _ -> failwith "Case not considered"
 
 let rec mk_labels2 acc poslab i j hb l l2= 
   match l,l2 with

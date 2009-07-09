@@ -1749,7 +1749,7 @@ module Hist : sig
     ?perspective: bool ->
     ?hcaption:Picture.t ->
     ?vcaption:Picture.t ->
-    ?histlabel:[> Command.vposition ] * Picture.t labels ->
+    ?histlabel:Command.vposition * Picture.t labels ->
     ?vlabel:Plot.labels ->
     ?hlabel:Picture.t list -> 
     float list -> Command.t
@@ -1777,7 +1777,7 @@ module Hist : sig
     ?perspective: bool ->
     ?hcaption:Picture.t ->
     ?vcaption:Picture.t ->
-    ?histlabel:[> Command.vposition ] * Picture.t list labels ->
+    ?histlabel:Command.vposition * Picture.t list labels ->
     ?vlabel:Plot.labels ->
     ?hlabel:Picture.t list ->
     float list list -> Command.t
@@ -1794,7 +1794,7 @@ module Hist : sig
     ?perspective: bool ->
     ?hcaption:Picture.t ->
     ?vcaption:Picture.t ->
-    ?histlabel:[> Command.vposition ] * Picture.t list labels ->
+    ?histlabel:Command.vposition * Picture.t list labels ->
     ?vlabel:Plot.labels ->
     ?hlabel:Picture.t list -> 
     float list list -> Command.t
