@@ -2,13 +2,17 @@
 o - changes in behaviour, new features
 * - incompatible changes in the interface
 
-* add Point.draw and Path.draw (alias of Command.draw) which can mask Command.draw in case of an open Point after an open Command.
+o new position constructors `North, `South etc intended to replace `Top, `Bot
+  etc, but the old variants are still there
 o new optional argument sep to strip both ends of a path; used in
   Tree, Box.cpath, and Helpers
+* add Point.draw and Path.draw (alias of Command.draw) which can mask 
+  Command.draw in case of an open Point after an open Command.
 * mlpost tool: -pdf now the default; use -ps to produce .1 files
 * Arrow.draw: ~pos becomes ~anchor, new ~pos is point on path
 * Arrow.draw2 becomes Arrow.point_to_point
 * Command.draw_arrow becomes Arrow.simple
+o new backend using Cairo
 
 version 0.6, February 4th, 2009
 -------------------------
