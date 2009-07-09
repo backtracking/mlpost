@@ -226,7 +226,6 @@ FILES = *.ml *.mli *.mll *.in configure .depend \
 BACKENDFILES = backend/*ml backend/*mly backend/*mll backend/*mli backend/_tags
 EXFILES = examples/Makefile examples/*.ml examples/all.template\
 	  examples/index.html examples/parse.mll examples/README examples/automaton4.tex
-DOCFILES = doc/Makefile doc/*.ml doc/all.template\ doc/
 LATEXFILES = latex/*sty latex/*tex latex/README
 
 export: export-source export-www export-examples export-doc
@@ -242,8 +241,7 @@ source:
 	cp $(BACKENDFILES) export/$(EXPORTDIR)/backend
 	mkdir -p export/$(EXPORTDIR)/examples
 	cp $(EXFILES) export/$(EXPORTDIR)/examples
-	mkdir -p export/$(EXPORTDIR)/doc
-	cp $(DOCFILES) export/$(EXPORTDIR)/doc
+	cp -r customdoc export/$(EXPORTDIR)/
 	mkdir -p export/$(EXPORTDIR)/latex
 	cp $(LATEXFILES) export/$(EXPORTDIR)/latex
 	cd export ; tar cf $(TAR) $(EXPORTDIR) ; gzip -f --best $(TAR)
