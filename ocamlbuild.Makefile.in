@@ -143,7 +143,7 @@ other.byte: othergraphs.ml
 	$(PSVIEWER) test/othergraphs.ps
 
 .PHONY: check-examples examples
-SUBDIRMLPOST:=../$(BUILD)tool.native -ccopt "-I ../ " -v -ps
+SUBDIRMLPOST:=../$(BUILD)tool.native -ccopt "-I ../$(BUILD)" -v -ps
 MAKEEXAMPLES=make -C examples MLPOST='$(SUBDIRMLPOST)'
 
 check-examples: mlpost.cma tool.opt
@@ -211,6 +211,12 @@ install-opt:
 	mkdir -p $(BINDIR)
 	cp -f $(BUILD)tool.native $(BINDIR)/mlpost
 	cp -f mlpost.1 $(MANDIR)/man1
+
+uninstall:
+	rm -f $(LIBDIR)/mlpost.cmo $(LIBDIR)/mlpost.cmi $(LIBDIR)/META 
+	rm -f $(LIBDIR)/mlpost$(LIBEXT) $(LIBDIR)/mlpost.cmx $(LIBDIR)/$(CMA) $(LIBDIR)/$(CMXA)
+	rm -f $(BINDIR)/mlpost
+	rm -f $(MANDIR)/mlpost
 
 # export
 ########
