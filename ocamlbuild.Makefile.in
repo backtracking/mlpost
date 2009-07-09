@@ -221,9 +221,9 @@ TAR=$(EXPORTDIR).tar
 WWW = /users/www-perso/projets/mlpost
 FTP = $(WWW)/download
 
-FILES = *.ml *.mli *.mll \
-	Makefile.in configure configure.in .depend \
-	README.txt INSTALL LICENSE CHANGES FAQ META.in version.ml.in mlpost.1
+FILES = *.ml *.mli *.mll *.in configure .depend \
+	README.txt INSTALL LICENSE CHANGES FAQ mlpost.1 _tags *.mlpack mlpost.odocl
+BACKENDFILES = backend/*ml backend/*mly backend/*mll backend/*mli backend/_tags
 EXFILES = examples/Makefile examples/*.ml examples/all.template\
 	  examples/index.html examples/parse.mll examples/README examples/automaton4.tex
 DOCFILES = doc/Makefile doc/*.ml doc/all.template\ doc/
@@ -238,6 +238,8 @@ export-source: source
 source: 
 	mkdir -p export/$(EXPORTDIR)
 	cp $(FILES) export/$(EXPORTDIR)
+	mkdir -p export/$(EXPORTDIR)/backend
+	cp $(BACKENDFILES) export/$(EXPORTDIR)/backend
 	mkdir -p export/$(EXPORTDIR)/examples
 	cp $(EXFILES) export/$(EXPORTDIR)/examples
 	mkdir -p export/$(EXPORTDIR)/doc

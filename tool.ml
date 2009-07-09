@@ -56,15 +56,17 @@ let compile_name = ref None
 let dont_execute = ref false
 let add_nothing = ref false
 
+let notcairo = Version.includecairo = ""
+
 let version () =
-  print_string Version.version;
-  print_newline ();
+  Format.printf "mlpost %s compiled at %s@." Version.version Version.date;
+  Format.printf "searching for mlpost.cm(a|xa) in %s@." Version.libdir;
+  if not notcairo then 
+    Format.printf "additional directories are %s@." Version.includecairo;
   exit 0
 
 let add_ccopt x = ccopt := !ccopt ^ " " ^ x
 let add_execopt x = execopt := !execopt ^ " " ^ x
-
-let notcairo = Version.includecairo = ""
 
 let give_lib () =
   if notcairo then ["","unix"] 
