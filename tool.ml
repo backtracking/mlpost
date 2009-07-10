@@ -59,6 +59,9 @@ let add_nothing = ref false
 let notcairo = Version.includecairo = ""
 
 let version () =
+  (* The first line of the output should be the version number, and only the
+   * version number! *)
+  Format.printf "%s@." Version.version;
   Format.printf "mlpost %s compiled at %s@." Version.version Version.date;
   Format.printf "searching for mlpost.cm(a|xa) in %s@." Version.libdir;
   if not notcairo then 
