@@ -232,6 +232,7 @@ FTP = $(WWW)/download
 FILES = *.ml *.mli *.mll *.in configure .depend \
 	README.txt INSTALL LICENSE CHANGES FAQ mlpost.1 _tags *.mlpack mlpost.odocl
 BACKENDFILES = backend/*ml backend/*mly backend/*mll backend/*mli backend/_tags
+GUIFILES = gui/*.mll gui/*.ml gui/_tags 
 EXFILES = examples/Makefile examples/*.ml examples/all.template\
 	  examples/index.html examples/parse.mll examples/README examples/automaton4.tex
 LATEXFILES = latex/*sty latex/*tex latex/README
@@ -247,6 +248,8 @@ source:
 	cp $(FILES) export/$(EXPORTDIR)
 	mkdir -p export/$(EXPORTDIR)/backend
 	cp $(BACKENDFILES) export/$(EXPORTDIR)/backend
+	mkdir -p export/$(EXPORTDIR)/gui
+	cp $(GUIFILES) export/$(EXPORTDIR)/gui
 	mkdir -p export/$(EXPORTDIR)/examples
 	cp $(EXFILES) export/$(EXPORTDIR)/examples
 	cp -r customdoc export/$(EXPORTDIR)/
