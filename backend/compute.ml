@@ -1,7 +1,7 @@
 (**************************************************************************)
 (*                                                                        *)
 (*  Copyright (C) Johannes Kanig, Stephane Lescuyer                       *)
-(*  and Jean-Christophe Filliatre                                         *)
+(*  Jean-Christophe Filliatre, Romain Bardou and Francois Bobot           *)
 (*                                                                        *)
 (*  This software is free software; you can redistribute it and/or        *)
 (*  modify it under the terms of the GNU Library General Public           *)
@@ -13,6 +13,7 @@
 (*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                  *)
 (*                                                                        *)
 (**************************************************************************)
+
 module P = Point_lib
 module M = Matrix
 
