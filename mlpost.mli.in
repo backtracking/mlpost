@@ -1139,7 +1139,7 @@ and Box : sig
 
   val halign : ?pos:vposition -> Num.t -> t list -> t list
   val valign : ?pos:hposition -> Num.t -> t list -> t list
-  val hbox : ?padding:Num.t -> ?pos:Command.position -> ?style:style ->
+  val hbox : ?padding:Num.t -> ?pos:position -> ?style:style ->
              ?min_width:Num.t -> ?same_width:bool ->
                t list box_creator
       (** aligns the given boxes horizontally and returns a box containing
@@ -1150,7 +1150,7 @@ and Box : sig
 	  [`Center]
       *)
 
-  val vbox : ?padding:Num.t -> ?pos:Command.position -> ?style:style -> 
+  val vbox : ?padding:Num.t -> ?pos:position -> ?style:style -> 
              ?min_height:Num.t -> ?same_height:bool ->
     t list box_creator
       (** aligns the given boxes vertically and returns a box containing
@@ -1187,9 +1187,9 @@ and Box : sig
     int -> int -> (int -> int -> t) -> t 
     (** similar to [tabular], but using a matrix defined with a function *)
 
-  val hplace : ?padding:Num.t -> ?pos:Command.position -> 
+  val hplace : ?padding:Num.t -> ?pos:position -> 
                ?min_width:Num.t -> ?same_width:bool -> t list -> t list
-  val vplace : ?padding:Num.t -> ?pos:Command.position -> 
+  val vplace : ?padding:Num.t -> ?pos:position -> 
                ?min_height:Num.t -> ?same_height:bool -> t list -> t list
   val hblock : ?padding:Num.t -> ?pos:Command.position -> ?name:string -> 
                ?stroke:Color.t option -> ?pen:Pen.t -> 
@@ -1249,6 +1249,15 @@ and Box : sig
     (** [elts b] returns the sub-boxes of [b]; returns the empty array for
         the empty box or a box containing a picture. *)
 
+  (** {2 Specials Points} *)
+    
+  val setp : string -> Point.t -> t -> t
+    
+  val getp : string -> t -> Point.t
+  val getpx : string -> t -> Num.t
+  val getpy : string -> t -> Num.t
+
+
   (** {2 Box properties} *)
 
   val get_fill : t -> Color.t option
@@ -1276,9 +1285,9 @@ and Box : sig
 
   val set_size : Command.position -> width:Num.t -> height:Num.t -> t -> t
 
-  val same_height : ?pos:Command.vposition -> t list -> t list
-  val same_width : ?pos:Command.hposition -> t list -> t list
-  val same_size : ?pos:Command.position -> t list -> t list
+  val same_height : ?pos:vposition -> t list -> t list
+  val same_width : ?pos:hposition -> t list -> t list
+  val same_size : ?pos:position -> t list -> t list
 
   (** {2 Misc.} *)
 

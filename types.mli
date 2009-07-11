@@ -30,6 +30,10 @@ type corner =  [
   | `Upleft | `Upright | `Lowleft | `Lowright (** deprecated *)
 ]
 
+type corner_red =  [ 
+  | `NorthWest | `NorthEast | `SouthWest | `SouthEast 
+]
+
 type hposition = [
   `Center | `West | `East
   | `Left | `Right (** deprecated *)
@@ -38,7 +42,14 @@ type vposition = [
   `Center | `North | `South
   | `Top | `Bot (** deprecated *)
 ]
+type hposition_red = [
+  `Center | `West | `East
+]
+type vposition_red = [
+  `Center | `North | `South
+]
 type position = [ | hposition | vposition | corner ]
+type position_red = [ | hposition_red | vposition_red | corner_red ]
 
 open Hashcons
 
@@ -306,12 +317,10 @@ val mkOn : num -> on_off
 val mkOff : num -> on_off
 
 val pos_reduce :
-  position -> 
-    [ `Center | `North | `South | `Center | `West | `East | 
-    `NorthWest | `NorthEast | `SouthWest | `SouthEast ]
+  position -> position_red
 
 val corner_reduce :
-  corner -> [ `NorthWest | `NorthEast | `SouthWest | `SouthEast ]
+  corner -> corner_red
 
-val vreduce : vposition -> [ `Center | `North | `South ]
-val hreduce : hposition -> [ `Center | `East | `West ]
+val vreduce : vposition -> vposition_red
+val hreduce : hposition -> hposition_red

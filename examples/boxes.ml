@@ -74,9 +74,44 @@ let hierarchy =
   draw b
 (*parse >> *)
 
+module P = Point
+open Num.Infix
+
+let (|>) x f = f x
+
+let draw_point t = Point.draw ~pen:(Pen.scale (bp 4.) Pen.default) ~color:(Color.red) t
+
+(* align verticalement le barycentre [(west,5);(east,2)] *)
+let custom =
+  let two = Num.bp 2. in
+  let five = Num.bp 5. in
+  let tex = tex ~dx:two ~dy:two in
+  let a = tex "recursively enumerable languages" in
+  let b = tex "context sensitive" in
+  let c = tex "context free" in
+  let add_point t = 
+    let w = corner `West t in
+    let e = corner `East t in
+    let p = P.mult (one // (two +/ five)) (P.add (P.mult five w) (P.mult two e)) in
+    setp "something" p t in
+  let a = add_point a in
+  let b = add_point b in
+  let c = add_point c in
+  let points = [a;b;c]
+    |> List.map (getp "something")
+    |> List.map draw_point
+    |> Command.seq  in
+  (*(*Example de débuggage quand on a le nouveau backend*)
+    List.iter fun p -> let {Concrete.CPoint.x=x;y=y} = Concrete.cpoint_of_point (getp "something" p) in
+             Format.printf "x = %f; y = %f@." x y) [a;b;c];*)
+  Command.seq [
+    points;
+  Box.draw (vbox ~pos:(`Custom (getp "something")) [a;b;c])]
+  
 
 let () = Metapost.emit "simple" simple
 let () = Metapost.emit "f1" f1
 let () = Metapost.emit "f2" f2
 let () = Metapost.emit "traffic" traffic
 let () = Metapost.emit "hierarchy" hierarchy
+let () = Metapost.emit "custom" custom

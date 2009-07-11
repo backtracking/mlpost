@@ -1,5 +1,5 @@
 # all files that are generated from boxes.ml
-BOXPNGFILES := simple.png f1.png f2.png traffic.png hierarchy.png
+BOXPNGFILES := simple.png f1.png f2.png traffic.png hierarchy.png custom.png
 BOXOUTFILES := $(BOXPNGFILES:.png=.1)
 
 # all files that are generated from paths.ml

@@ -31,6 +31,10 @@ type corner =  [
   | `Upleft | `Upright | `Lowleft | `Lowright (** deprecated *)
 ]
 
+type corner_red =  [ 
+  | `NorthWest | `NorthEast | `SouthWest | `SouthEast 
+]
+
 type hposition = [
   `Center | `West | `East
   | `Left | `Right (** deprecated *)
@@ -40,8 +44,16 @@ type vposition = [
   | `Top | `Bot (** deprecated *)
 ]
 
+type hposition_red = [
+  `Center | `West | `East
+]
+type vposition_red = [
+  `Center | `North | `South
+]
+
 
 type position = [ | hposition | vposition | corner ]
+type position_red = [ | hposition_red | vposition_red | corner_red ]
 
 open Hashcons
 

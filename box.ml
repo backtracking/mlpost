@@ -86,7 +86,22 @@ let south_east x = build_point (east x) (south x)
 
 type vposition = [ |Command.vposition | `Custom of t -> Num.t]
 type hposition = [ |Command.hposition | `Custom of t -> Num.t]
+type vposition_red = [ |Types.vposition_red | `Custom of t -> Num.t]
+type hposition_red = [ |Types.hposition_red | `Custom of t -> Num.t]
 type position  = [ |Command.position | `Custom of t -> Point.t]
+type position_red  = [ |Types.position_red | `Custom of t -> Point.t]
+
+let hreduce = function
+  | `Custom c -> `Custom c
+  | #Command.hposition as p -> (hreduce p:> hposition_red)
+
+let vreduce = function
+  | `Custom c -> `Custom c
+  | #Command.vposition as p -> (vreduce p:> vposition_red)
+
+let pos_reduce = function
+  | `Custom c -> `Custom c
+  | #Command.position as p -> (pos_reduce p:> position_red)
 
 let corner pos x = 
   match pos with
@@ -377,20 +392,20 @@ let set_contour c b = { b with contour = c }
 let ycoord pos a = 
   (* get the vertical position of a box, using a either Top, Bot or the
      center as reference *)
-  match pos with
+  match vreduce pos with
   | `Custom c -> c a
-  | #Types.vposition as p ->
-      match vreduce p with
+  | #Types.vposition_red as p ->
+      match p with
       | `Center -> ypart (ctr a)
       | (`North | `South) as x -> border x a
 
 let xcoord pos a = 
   (* get the horizontal position of a box, using a either Left, Right or the
      center as reference *)
-  match pos with
+  match hreduce pos with
   | `Custom c -> c a
-  | #Types.hposition as p ->
-      match hreduce p with
+  | #Types.hposition_red as p ->
+      match p with
       | `Center -> xpart (ctr a)
       | (`West | `East) as x -> border x a
 
@@ -408,7 +423,10 @@ let set_height pos h b =
     match vreduce pos with
     | `Center -> ypart b.ctr
     | `North -> ypart b.ctr +/ (b.height -/ h) /./ 2.
-    | `South -> ypart b.ctr -/ (b.height -/ h) /./ 2. in
+    | `South -> ypart b.ctr -/ (b.height -/ h) /./ 2. 
+    | `Custom c -> let n = c b in
+      n +/ ((ypart b.ctr -/ n) */ (h // b.height))
+  in
   { b with height = h; ctr = Point.pt (xpart b.ctr, nc) }
 
 let set_width pos w b = 
@@ -416,7 +434,9 @@ let set_width pos w b =
     match hreduce pos with
     | `Center -> xpart b.ctr
     | `West -> xpart b.ctr -/ (b.width -/ w) /./ 2.
-    | `East -> xpart b.ctr +/ (b.width -/ w) /./ 2. in
+    | `East -> xpart b.ctr +/ (b.width -/ w) /./ 2. 
+    | `Custom c -> let n = c b in
+      n +/ ((xpart b.ctr -/ n) */ (w // b.width)) in
   { b with width = w; ctr = Point.pt (nc, ypart b.ctr) }
 
 let set_gen2 mycorner chgp pos1 y1 pos2 y2 b = 
@@ -446,12 +466,14 @@ let extractv pos =
   | `NorthWest | `North | `NorthEast -> `North
   | `West | `Center | `East -> `Center
   | `SouthWest | `South | `SouthEast -> `South
+  | `Custom c -> `Custom (fun t -> ypart (c t))
 
 let extracth pos = 
   match pos_reduce pos with
   | `NorthWest | `West | `SouthWest -> `West
   | `North | `Center | `South -> `Center
   | `NorthEast | `East | `SouthEast -> `East
+  | `Custom c -> `Custom (fun t -> xpart (c t))
 
 let set_size pos ~width ~height b = 
   set_height (extractv pos) height (set_width (extracth pos) width b)
@@ -504,7 +526,7 @@ let hbox' ?padding ?(pos=`Center) ?min_width ?same_width l =
   | _ ->
       let y = ypart (corner pos (List.hd l)) in
       halign ~pos:(extractv pos) y
-        (hplace ?padding ~pos:(extracth pos) ?min_width ?same_width l)
+        (hplace ?padding ~pos:pos ?min_width ?same_width l)
 
 let vbox' ?padding ?(pos=`Center) ?min_height ?same_height l =
   match l with
@@ -512,7 +534,7 @@ let vbox' ?padding ?(pos=`Center) ?min_height ?same_height l =
   | _ ->
       let x = xpart (corner pos (List.hd l)) in
       valign ~pos:(extracth pos) x
-        (vplace ?padding ~pos:(extractv pos) ?min_height ?same_height l)
+        (vplace ?padding ~pos ?min_height ?same_height l)
 
 let hequalize h l = List.map (set_height h) l
 let wequalize w l = List.map (set_width w) l
@@ -613,7 +635,8 @@ let grid ?hpadding ?vpadding ?pos ?stroke ?pen m =
 let gridi ?hpadding ?vpadding ?pos ?stroke ?pen w h f =
   let m = Array.init h (fun j -> Array.init w (fun i -> f i j)) in
   grid ?hpadding ?vpadding ?pos ?stroke ?pen m
-open Path
+
+module P = Path
 
 let strip ?sep p = match sep with
   | None -> p
@@ -621,18 +644,18 @@ let strip ?sep p = match sep with
 
 let cpath ?style ?outd ?ind ?sep a b =
   let r,l = outd, ind in
-  let p = pathk ?style [knotp ?r (ctr a); knotp ?l (ctr b)] in
-  strip ?sep (cut_after (bpath b) (cut_before (bpath a) p))
+  let p = P.pathk ?style [P.knotp ?r (ctr a); P.knotp ?l (ctr b)] in
+  strip ?sep (P.cut_after (bpath b) (P.cut_before (bpath a) p))
 
 let cpath_left ?style ?outd ?ind a b =
   let r,l = outd, ind in
-  let p = pathk ?style [knotp ?r (ctr a); knotp ?l b] in
-  cut_before (bpath a) p
+  let p = P.pathk ?style [P.knotp ?r (ctr a); P.knotp ?l b] in
+  P.cut_before (bpath a) p
 
 let cpath_right ?style ?outd ?ind a b =
   let r,l = outd, ind in
-  let p = pathk ?style [knotp ?r a; knotp ?l (ctr b)] in
-  cut_after (bpath b) p
+  let p = P.pathk ?style [P.knotp ?r a; P.knotp ?l (ctr b)] in
+  P.cut_after (bpath b) p
 
 (* (* Deleted because of circular dependency with the Arrow module.
 It did not seem to be used anyway. *)
@@ -644,3 +667,17 @@ let thick_arrow ?style ?(boxed=true) ?line_color ?fill_color ?outd ?ind ?width
   Arrow.draw_thick ?style ~boxed ?line_color ?fill_color ?outd ?ind ?width
     ?head_length ?head_width pa pb
 *)
+
+(* Specials Points *)
+let setp name pt box = 
+  let add_smap m = Smap.add name (shift pt (empty ~name ())) m in
+  {box with
+                          desc =
+    match box.desc with
+      | Emp -> Grp ([|box|], add_smap Smap.empty)
+      | Pic _ -> Grp ([|box|], add_smap Smap.empty)
+      | Grp (l,m) -> Grp (l, add_smap m)}
+
+let getp name box = ctr (get name box)
+let getpx name box = xpart (getp name box)
+let getpy name box = ypart (getp name box)
