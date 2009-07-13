@@ -1427,9 +1427,8 @@ module Arrow : sig
         (only used by heads and feet, not by belts) *)
 
   type head = Point.t -> Point.t -> head_description
-    (** If [h] is a head, [h p d] returns [c, p] where [c] is a command that can
-        be used to draw the head at point [p] with direction [d], and [p] is a
-        path that can be used to cut the arrow lines. [d] is normalized before
+    (** If [h] is a head, [h p d] returns a head description used to draw the
+        head at point [p] with direction [d]. Direction [d] is normalized before
         being given to the function. *)
 
   val head_classic : ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
