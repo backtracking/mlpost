@@ -2,6 +2,7 @@
 o - changes in behaviour, new features
 * - incompatible changes in the interface
 
+o new function Tree.nodel to add labels to tree edges
 o new position constructors `North, `South etc intended to replace `Top, `Bot
   etc, but the old variants are still there
 o new optional argument sep to strip both ends of a path; used in
