@@ -1609,6 +1609,12 @@ module Tree : sig
         The default value is 0.2.
 	Optional arguments are the same as in [leaf]. *)
 
+  val nodel : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
+             ?edge_style:edge_style -> ?stroke:Color.t -> ?pen:Pen.t ->
+             ?sep:Num.t ->
+             Box.t -> (t * (Command.position * Picture.t)) list -> t
+    (** Similar to [node] but with labels on edges. *)
+
   val bin  : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
              ?edge_style:edge_style -> ?stroke:Color.t -> ?pen:Pen.t ->
              ?sep:Num.t ->
