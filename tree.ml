@@ -32,7 +32,8 @@ type 'a positionedtree = ('a * Num.t * Num.t) tree
 let movetree (Node((label,x,y),subtrees)) dx =
   Node((label,((+/) x dx),y),subtrees)
 
-let moveextend (e:extend) (x:Num.t) :(extend)= List.map (fun (p,q) -> (((+/) p x),((+/) q x))) e
+let moveextend (e:extend) (x:Num.t) : extend = 
+  List.map (fun (p,q) -> (((+/) p x),((+/) q x))) e
 
 let rec merge a1 a2 = match a1,a2 with
   |[],rt -> rt
@@ -41,7 +42,7 @@ let rec merge a1 a2 = match a1,a2 with
 
 let mergelist l = List.fold_right merge l []
 
-let rec fit cs (a1:extend) (a2: extend) :Num.t = match a1,a2 with
+let rec fit cs (a1:extend) (a2: extend) : Num.t = match a1,a2 with
   |(_,r)::t1,(l,_)::t2 -> maxn (fit cs t1 t2) ((+/) ((-/) r l) cs)
   |_ -> bp 0.
 
@@ -97,11 +98,13 @@ type node_info = {
   stroke:Color.t option; 
   pen: Pen.t option;
   sep: Num.t option;
+  lab: (Command.position * Picture.t) list option;
 }
 
 let dummy_info = 
   { ls = zero; cs = zero; arrow_style = Directed; 
-    edge_style = Straight; stroke = None; pen = None; sep = None }
+    edge_style = Straight; stroke = None; pen = None; sep = None;
+    lab = None }
 
 let design tree = 
   let rec designaux (Node((b,ni) as label, subtrees)) = 
@@ -139,7 +142,7 @@ let box_arrow ?color ?pen ?dashed ?style ?outd ?ind ?sep a b =
 let box_line ?color ?pen ?dashed ?style ?outd ?ind ?sep a b =   
   draw ?color ?pen ?dashed (cpath ?style ?outd ?ind ?sep a b)
 
-let arc astyle estyle ?stroke ?pen ?sep b1 b2 =
+let arc astyle estyle ?stroke ?pen ?sep ?lab b1 b2 =
   let x1,y1 = let p = Box.ctr b1 in Point.xpart p, Point.ypart p 
   and x2,y2 = let p = Box.north b2 in Point.xpart p, Point.ypart p in
   let boxdraw, linedraw  = match astyle with 
@@ -148,8 +151,15 @@ let arc astyle estyle ?stroke ?pen ?sep b1 b2 =
     | Undirected -> 
 	box_line ?color:stroke ?pen ?sep, draw ?color:stroke ?pen 
   in
+  let drawlab b1 b2 = function
+    | None -> 
+	nop
+    | Some (pos, lab) -> 
+	let p = Box.cpath b1 b2 in label ~pos lab (Path.point 0.5 p)
+  in
     match estyle with
-      | Straight -> boxdraw ~style:jLine b1 b2
+      | Straight -> 
+	  boxdraw ~style:jLine b1 b2 ++ drawlab b1 b2 lab
       | Curve -> 
 	  let p1, p2 = Box.ctr b1, Box.ctr b2 in
 	  let corner = Point.pt (x2-/(x2-/x1) /./ 4.,(y1+/y2) /./ 2.) in
@@ -197,7 +207,12 @@ let leaf b = Node ((b, dummy_info), [])
 
 let node ?(ls=bp 20.) ?(cs=bp 3.) ?(arrow_style=Directed)
       ?(edge_style=Straight) ?stroke ?pen ?sep b l = 
-  Node ((b, {ls = ls; cs = cs; arrow_style = arrow_style; edge_style = edge_style; stroke = stroke; pen = pen; sep = sep}), l)
+  Node ((b, {ls = ls; cs = cs; arrow_style = arrow_style; edge_style = edge_style; stroke = stroke; pen = pen; sep = sep; lab = None}), l)
+
+let nodel ?(ls=bp 20.) ?(cs=bp 3.) ?(arrow_style=Directed)
+      ?(edge_style=Straight) ?stroke ?pen ?sep b l = 
+  Node ((b, {ls = ls; cs = cs; arrow_style = arrow_style; edge_style = edge_style; stroke = stroke; pen = pen; sep = sep; lab = Some (List.map snd l)}), 
+       List.map fst l)
 
 let bin ?ls ?cs ?arrow_style ?edge_style ?stroke ?pen ?sep s x y = 
   node ?ls ?cs ?arrow_style ?edge_style ?stroke ?pen ?sep s [x;y]
@@ -212,12 +227,19 @@ let to_box t : Box.t =
       Box.group [Box.center (Point.pt (x', y')) b;
 		 Box.group (List.map (draw x' y2) tl)]
     in
-    Box.set_post_draw 
-      (fun tree -> 
-	 (Command.iterl 
+    let draw_arcs tree = match ni.lab with
+      | None -> 
+	  Command.iterl 
 	    (fun child -> arc ?stroke ?pen ?sep ni.arrow_style ni.edge_style 
-               (root tree) (root child)) (children tree)))
-      b
+              (root tree) (root child)) 
+	    (children tree)
+      | Some lab -> 
+	  Command.iterl 
+	    (fun (child, lab) -> arc ?stroke ?pen ?sep ~lab 
+	      ni.arrow_style ni.edge_style (root tree) (root child)) 
+	    (List.combine (children tree) lab)
+    in
+    Box.set_post_draw draw_arcs b
   in
   draw zero zero (design t)
 
