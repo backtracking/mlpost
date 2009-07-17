@@ -140,7 +140,7 @@ let draw_axes ?(hpen=Pen.default) ?(vpen=Pen.default)
   in
   let vertical i =
     let y = num_of_int i */ sy in
-      seq [labelcmd `South (Point.pt (maxl, y)) i vlabel; 
+      seq [labelcmd `Left (Point.pt (maxl, y)) i vlabel; 
            ticks_cmd (fun f ->  pathn [maxl,y; maxl +/ sx */ f,y]);
             if closed then
               ticks_cmd (fun f -> pathn [maxr,y; maxr -/ sy */ f, y])

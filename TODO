@@ -12,8 +12,6 @@
 * ranger le module Helpers
 * les fonctions de scale : pourquoi prennent-elles des Num.t, et non pas de
   float ?
-* uniformiser les ulcorners, les "north_west", les `Upleft, les points qui
-        indiquent une direction
 * Box.group, align etc prennent des listes, Box.elts renvoie un tableau ?
 
 3) FEATURES
