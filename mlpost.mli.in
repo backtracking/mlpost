@@ -894,18 +894,17 @@ and Command : sig
   (** {2 Labels} *)
 
   type hposition = [ | `Center | `West | `East | `Left | `Right ]
-  type vposition = [ `Center | `North | `South | `Top | `Bot ]
+  type vposition = [ `Center | `North | `South | `Top | `Bot | `Bottom ]
   type position = [
   | hposition 
   | vposition 
-  | `NorthWest | `NorthEast | `SouthWest | `SouthEast
+  | `Northwest | `Northeast | `Southwest | `Southeast
+  | `Upperleft | `Upperright | `Lowerleft | `Lowerright 
+  | `Topleft | `Topright | `Bottomleft | `Bottomright
   | `Upleft | `Upright | `Lowleft | `Lowright 
   ]
   (** Positions - they are used at many places in Mlpost to indicate a direction
-   or position.
-   The constructors 
-     [`Left;`Right;`Bot;`Top;`Upright; `Upleft; Lowright; `Lowleft] are
-     deprecated. *)
+   or position.  *)
 
   (** [label ~pos:`West pic p] puts picture [pic] at the left of the point [p] *)
   val label : ?pos:position -> Picture.t -> Point.t -> t
@@ -1139,6 +1138,7 @@ and Box : sig
 
   val halign : ?pos:vposition -> Num.t -> t list -> t list
   val valign : ?pos:hposition -> Num.t -> t list -> t list
+
   val hbox : ?padding:Num.t -> ?pos:position -> ?style:style ->
              ?min_width:Num.t -> ?same_width:bool ->
                t list box_creator
@@ -1150,6 +1150,13 @@ and Box : sig
 	  [`Center]
       *)
 
+  val hbox_list : 
+    ?padding:Num.t -> ?pos:position -> 
+    ?min_width:Num.t -> ?same_width:bool -> t list -> t list
+    (* as hbox, but does not group the resulting boxes into a surrounding
+       box *)
+
+
   val vbox : ?padding:Num.t -> ?pos:position -> ?style:style -> 
              ?min_height:Num.t -> ?same_height:bool ->
     t list box_creator
@@ -1158,6 +1165,12 @@ and Box : sig
 	  @param padding vertical padding used to separate the boxes
 	  @param pos used to determine the way boxes are aligned
       *)
+
+  val vbox_list : 
+    ?padding:Num.t -> ?pos:position -> 
+    ?min_height:Num.t -> ?same_height:bool -> t list -> t list
+    (* as vbox_list, but does not group the resulting boxes into a surrounding
+       box *)
 
   val tabular : 
     ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->

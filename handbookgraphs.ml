@@ -37,7 +37,7 @@ let l1 = z0::z1::z2::z3::z4::[]
 let labels1 =
   seq [H.dotlabels ~pos:`North ["0";"2";"4"] (map_bp [z0;z2;z4]);
        dotlabel ~pos:`West (tex "3") (bpp z3);
-       dotlabel ~pos:`SouthEast (tex "1") (bpp z1) ]
+       dotlabel ~pos:`Southeast (tex "1") (bpp z1) ]
 
 let draw3 = 3, seq [ draw (path ~style:jCurve  l1); labels1 ]
 
@@ -45,7 +45,7 @@ let draw4a, draw4b =
   let labels = 
     seq [ H.dotlabels ~pos:`North ["2";"4"] (map_bp [z2;z4]);
           H.dotlabels ~pos:`West ["0";"3"] (map_bp [z0;z3]);
-          dotlabel ~pos:`SouthEast (tex "1") (bpp z1) ]
+          dotlabel ~pos:`Southeast (tex "1") (bpp z1) ]
   in
   (104, seq [ draw (path ~cycle:jCurve l1); labels]) ,
     (204, 
@@ -171,9 +171,9 @@ let draw18 =
 	MP.concat ~style:jCurve (pg (n-1)) (MP.knot ~scale:u (f, sqrt f)) in
     18, seq [draw (pathn ~style:jLine [(zero,u 2.); (zero,zero); (u 4.,zero)]);
 	 draw ~pen (MP.to_path (pg 8));
-	 label ~pos:`SouthEast (tex "$ \\sqrt x$") (pt (u 3., u (sqrt 3.)));
+	 label ~pos:`Southeast (tex "$ \\sqrt x$") (pt (u 3., u (sqrt 3.)));
 	 label ~pos:`South (tex "$x$") (pt (u 2., zero));
-	 label ~pos:`SouthWest (tex "$y$") (pt (zero, u 1.))]
+	 label ~pos:`Southwest (tex "$y$") (pt (zero, u 1.))]
 	 
 let draw19 =
   let ux, uy = Num.inch 0.01, Num.inch 0.6 in

@@ -106,7 +106,7 @@ let d1 =
       ~color:Color.red
       (Path.shift (1. ++ 1.) (bpath a));
     draw_label_arrow ~color:Color.orange ~pen 
-      ~pos:`NorthEast (Picture.tex "foo") (west a) (south_east b);
+      ~pos:`Northeast (Picture.tex "foo") (west a) (south_east b);
     box_arrow ~color:Color.blue a b;
   ]
 
@@ -204,8 +204,8 @@ let cheno011 =
    seq (List.map
 	   (fun (pos, l, i) -> 
 	     Command.dotlabel ~pos (Picture.tex l) (point i p))
-	   [`South, "0", 0.;  `NorthEast, "1", 1. ;
-	    `SouthWest, "2", 2. ;  `North, "3", 3. ; `West, "4", 4. ]);
+	   [`South, "0", 0.;  `Northeast, "1", 1. ;
+	    `Southwest, "2", 2. ;  `North, "3", 3. ; `West, "4", 4. ]);
    Command.draw ~pen (subpath 1.3 3.2 p)]
 
 open Dash

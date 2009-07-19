@@ -108,10 +108,10 @@ let corner pos x =
   | `Custom c -> c x
   | #Types.position as other ->
     match Types.pos_reduce other with
-    | `NorthWest -> north_west x
-    | `NorthEast -> north_east x
-    | `SouthWest -> south_west x
-    | `SouthEast -> south_east x
+    | `Northwest -> north_west x
+    | `Northeast -> north_east x
+    | `Southwest -> south_west x
+    | `Southeast -> south_east x
     | `West -> west x
     | `East -> east x
     | `Center -> ctr x
@@ -463,16 +463,16 @@ let valign ?(pos=`Center) x l =
 
 let extractv pos = 
   match pos_reduce pos with
-  | `NorthWest | `North | `NorthEast -> `North
+  | `Northwest | `North | `Northeast -> `North
   | `West | `Center | `East -> `Center
-  | `SouthWest | `South | `SouthEast -> `South
+  | `Southwest | `South | `Southeast -> `South
   | `Custom c -> `Custom (fun t -> ypart (c t))
 
 let extracth pos = 
   match pos_reduce pos with
-  | `NorthWest | `West | `SouthWest -> `West
+  | `Northwest | `West | `Southwest -> `West
   | `North | `Center | `South -> `Center
-  | `NorthEast | `East | `SouthEast -> `East
+  | `Northeast | `East | `Southeast -> `East
   | `Custom c -> `Custom (fun t -> xpart (c t))
 
 let set_size pos ~width ~height b = 
@@ -520,7 +520,7 @@ let vplace ?(padding=zero) ?(pos=`Center)
       center (Point.pt (xpart p.ctr, y -/ p.height /./ 2.)) p)
     (ypart refc +/ refh /./ 2.) l
 
-let hbox' ?padding ?(pos=`Center) ?min_width ?same_width l =
+let hbox_list ?padding ?(pos=`Center) ?min_width ?same_width l =
   match l with
   | [] -> []
   | _ ->
@@ -528,7 +528,7 @@ let hbox' ?padding ?(pos=`Center) ?min_width ?same_width l =
       halign ~pos:(extractv pos) y
         (hplace ?padding ~pos:pos ?min_width ?same_width l)
 
-let vbox' ?padding ?(pos=`Center) ?min_height ?same_height l =
+let vbox_list ?padding ?(pos=`Center) ?min_height ?same_height l =
   match l with
   | [] -> []
   | _ ->
@@ -542,12 +542,12 @@ let wequalize w l = List.map (set_width w) l
 let hbox ?padding ?pos ?style ?min_width ?same_width ?dx ?dy 
          ?name ?stroke ?pen ?fill l = 
   group ?style ?dx ?dy ?name ?stroke ?pen ?fill 
-    (hbox' ?padding ?pos ?min_width ?same_width l)
+    (hbox_list ?padding ?pos ?min_width ?same_width l)
 
 let vbox ?padding ?pos ?style ?min_height ?same_height ?dx ?dy 
          ?name ?stroke ?pen ?fill l = 
   group ?style ?dx ?dy ?name ?stroke ?pen ?fill 
-    (vbox' ?padding ?pos ?min_height ?same_height l)
+    (vbox_list ?padding ?pos ?min_height ?same_height l)
 
 let modify_box ?stroke ?pen b = 
   let s = 
@@ -562,14 +562,14 @@ let hblock ?padding ?(pos=`Center) ?name ?stroke ?pen
            ?min_width ?same_width pl = 
   group ?name 
     (List.map (modify_box ?stroke ?pen) 
-      (hbox' ?padding ~pos ?min_width ?same_width
+      (hbox_list ?padding ~pos ?min_width ?same_width
         (List.map (set_height (extractv pos) (max_height pl)) pl)))
 
 let vblock ?padding ?(pos=`Center) ?name ?stroke ?pen 
            ?min_height ?same_height pl =
   group ?name 
     (List.map (modify_box ?stroke ?pen) 
-      (vbox' ~pos ?min_height ?same_height
+      (vbox_list ~pos ?min_height ?same_height
         (List.map (set_width (extracth pos) (max_width pl)) pl)))
 
 let tabularl ?hpadding ?vpadding ?(pos=`Center) ?style ?name 
@@ -620,11 +620,11 @@ let gridl ?hpadding ?vpadding ?(pos=`Center) ?stroke ?pen pll =
         set_height (extractv pos) hmax
           (set_width (extracth pos) wmax c)) l) pll in
   let pll = 
-    vbox' ~pos ?padding:vpadding 
+    vbox_list ~pos ?padding:vpadding 
       (List.map 
         (fun r -> 
           group (List.map (modify_box ?stroke ?pen) 
-                  (hbox' ?padding:hpadding ~pos r)))
+                  (hbox_list ?padding:hpadding ~pos r)))
         pll) in
   group pll
 
@@ -671,9 +671,9 @@ let thick_arrow ?style ?(boxed=true) ?line_color ?fill_color ?outd ?ind ?width
 (* Specials Points *)
 let setp name pt box = 
   let add_smap m = Smap.add name (shift pt (empty ~name ())) m in
-  {box with
-                          desc =
-    match box.desc with
+  { box with
+    desc =
+      match box.desc with
       | Emp -> Grp ([|box|], add_smap Smap.empty)
       | Pic _ -> Grp ([|box|], add_smap Smap.empty)
       | Grp (l,m) -> Grp (l, add_smap m)}

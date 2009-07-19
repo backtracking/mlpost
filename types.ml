@@ -27,30 +27,30 @@ type color =
 type name = string
 
 type corner =  [ 
-  | `NorthWest | `NorthEast | `SouthWest | `SouthEast 
-  | `Upleft | `Upright | `Lowleft | `Lowright (** deprecated *)
+  | `Northwest | `Northeast | `Southwest | `Southeast 
+  | `Upleft | `Upright | `Lowleft | `Lowright 
+  | `Upperleft | `Upperright | `Lowerleft | `Lowerright 
+  | `Topleft | `Topright | `Bottomleft | `Bottomright
 ]
 
 type corner_red =  [ 
-  | `NorthWest | `NorthEast | `SouthWest | `SouthEast 
+  | `Northwest | `Northeast | `Southwest | `Southeast 
 ]
 
 type hposition = [
   `Center | `West | `East
-  | `Left | `Right (** deprecated *)
+  | `Left | `Right
 ]
 type vposition = [
   `Center | `North | `South
-  | `Top | `Bot (** deprecated *)
+  | `Top | `Bot (** deprecated *) | `Bottom
 ]
-
 type hposition_red = [
   `Center | `West | `East
 ]
 type vposition_red = [
   `Center | `North | `South
 ]
-
 
 type position = [ | hposition | vposition | corner ]
 type position_red = [ | hposition_red | vposition_red | corner_red ]
@@ -777,13 +777,13 @@ let hreduce = function
 let vreduce = function
   | `Center -> `Center
   | `Top | `North -> `North
-  | `Bot | `South -> `South
+  | `Bot | `Bottom | `South -> `South
 
 let corner_reduce = function
-  | `Upleft | `NorthWest -> `NorthWest
-  | `Upright | `NorthEast -> `NorthEast
-  | `Lowleft | `SouthWest -> `SouthWest
-  | `Lowright | `SouthEast -> `SouthEast
+  | `Upleft | `Upperleft | `Topleft | `Northwest -> `Northwest
+  | `Upright | `Upperright | `Topright | `Northeast -> `Northeast
+  | `Lowleft | `Lowerleft | `Bottomleft | `Southwest -> `Southwest
+  | `Lowright | `Lowerright | `Bottomright | `Southeast -> `Southeast
 
 let pos_reduce = function
   | #hposition as p -> hreduce p

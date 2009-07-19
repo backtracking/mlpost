@@ -29,10 +29,10 @@ let position fmt p =
   | `East  -> fprintf fmt ".rt"
   | `North    -> fprintf fmt ".top"
   | `South    -> fprintf fmt ".bot"
-  | `NorthWest  -> fprintf fmt ".ulft"
-  | `NorthEast -> fprintf fmt ".urt"
-  | `SouthWest -> fprintf fmt ".llft"
-  | `SouthEast -> fprintf fmt ".lrt"
+  | `Northwest  -> fprintf fmt ".ulft"
+  | `Northeast -> fprintf fmt ".urt"
+  | `Southwest -> fprintf fmt ".llft"
+  | `Southeast -> fprintf fmt ".lrt"
 
 let rec num fmt n = 
   match n.Hashcons.node with

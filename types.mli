@@ -26,21 +26,23 @@ type color =
 type name = string
 
 type corner =  [ 
-  | `NorthWest | `NorthEast | `SouthWest | `SouthEast 
-  | `Upleft | `Upright | `Lowleft | `Lowright (** deprecated *)
+  | `Northwest | `Northeast | `Southwest | `Southeast 
+  | `Upleft | `Upright | `Lowleft | `Lowright 
+  | `Upperleft | `Upperright | `Lowerleft | `Lowerright 
+  | `Topleft | `Topright | `Bottomleft | `Bottomright
 ]
 
 type corner_red =  [ 
-  | `NorthWest | `NorthEast | `SouthWest | `SouthEast 
+  | `Northwest | `Northeast | `Southwest | `Southeast 
 ]
 
 type hposition = [
   `Center | `West | `East
-  | `Left | `Right (** deprecated *)
+  | `Left | `Right
 ]
 type vposition = [
   `Center | `North | `South
-  | `Top | `Bot (** deprecated *)
+  | `Top | `Bot (** deprecated *) | `Bottom
 ]
 type hposition_red = [
   `Center | `West | `East

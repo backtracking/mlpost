@@ -99,7 +99,7 @@ let draw_axes ?(hpen=Pen.default) ?(vpen=Pen.default)
 	    | Some pic -> Picture.height pic
 	in
 	let h_caption_height = Picture.height labl in
-	Command.label ~pos:`SouthWest labl 
+	Command.label ~pos:`Southwest labl 
 	  (Point.pt (num_of_int w */ sx,
 		     Num.zero -/ hlabels_height  -/
  		       (bp 0.5) */ h_caption_height ))
@@ -115,7 +115,7 @@ let draw_axes ?(hpen=Pen.default) ?(vpen=Pen.default)
 	     | Some pic -> Picture.width pic
 	in
 	let v_caption_width = Picture.width rot_labl in
-	Command.label ~pos:`SouthWest rot_labl
+	Command.label ~pos:`Southwest rot_labl
       	  (Point.pt ( Num.zero -/ vlabels_width -/  (bp 0.5)  
  		      */ v_caption_width, 
 		      num_of_int h */ sy))		

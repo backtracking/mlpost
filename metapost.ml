@@ -29,10 +29,10 @@ let name = pp_print_string
 
 let piccorner fmt p = 
   match corner_reduce p with
-  | `NorthWest  -> fprintf fmt "ulcorner"
-  | `NorthEast -> fprintf fmt "urcorner"
-  | `SouthWest -> fprintf fmt "llcorner"
-  | `SouthEast -> fprintf fmt "lrcorner"
+  | `Northwest  -> fprintf fmt "ulcorner"
+  | `Northeast -> fprintf fmt "urcorner"
+  | `Southwest -> fprintf fmt "llcorner"
+  | `Southeast -> fprintf fmt "lrcorner"
 
 let position fmt p = 
   match pos_reduce p with
@@ -41,10 +41,10 @@ let position fmt p =
   | `East  -> fprintf fmt ".rt"
   | `North    -> fprintf fmt ".top"
   | `South    -> fprintf fmt ".bot"
-  | `NorthWest  -> fprintf fmt ".ulft"
-  | `NorthEast -> fprintf fmt ".urt"
-  | `SouthWest -> fprintf fmt ".llft"
-  | `SouthEast -> fprintf fmt ".lrt"
+  | `Northwest  -> fprintf fmt ".ulft"
+  | `Northeast -> fprintf fmt ".urt"
+  | `Southwest -> fprintf fmt ".llft"
+  | `Southeast -> fprintf fmt ".lrt"
 
 let rec num fmt = function
   | C.F f ->

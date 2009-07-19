@@ -72,10 +72,10 @@ let point_of_position ecart
     | `South -> {P.x=middle xmin xmax; y=ymin-.ecart}
     | `West -> {P.x=xmin-.ecart; y=middle ymin ymax}
     | `East -> {P.x=xmax+.ecart; y=middle ymin ymax}
-    | `NorthWest -> {P.x=xmin-.ecart;y=ymax+.ecart}
-    | `NorthEast -> {P.x=xmax+.ecart;y=ymax+.ecart}
-    | `SouthWest -> {P.x=xmin-.ecart;y=ymin-.ecart}
-    | `SouthEast -> {P.x=xmax+.ecart;y=ymin-.ecart}
+    | `Northwest -> {P.x=xmin-.ecart;y=ymax+.ecart}
+    | `Northeast -> {P.x=xmax+.ecart;y=ymax+.ecart}
+    | `Southwest -> {P.x=xmin-.ecart;y=ymin-.ecart}
+    | `Southeast -> {P.x=xmax+.ecart;y=ymin-.ecart}
     | `Center -> {P.x = middle xmin xmax; P.y = middle ymin ymax }
 
 let anchor_of_position pos = 
@@ -84,10 +84,10 @@ let anchor_of_position pos =
   | `South -> `North
   | `West -> `East
   | `East -> `West
-  | `NorthWest -> `SouthEast
-  | `NorthEast -> `SouthWest
-  | `SouthWest -> `NorthEast
-  | `SouthEast -> `NorthWest
+  | `Northwest -> `Southeast
+  | `Northeast -> `Southwest
+  | `Southwest -> `Northeast
+  | `Southeast -> `Northwest
   | `Center -> `Center
 
 let num_memoize = Hashtbl.create 50
