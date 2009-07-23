@@ -1626,7 +1626,8 @@ module Tree : sig
              ?edge_style:edge_style -> ?stroke:Color.t -> ?pen:Pen.t ->
              ?sep:Num.t ->
              Box.t -> (t * (Command.position * Picture.t)) list -> t
-    (** Similar to [node] but with labels on edges. *)
+    (** Similar to [node] but with labels on edges. 
+        Labels are taken into account only when [edge_style] is [Straight]. *)
 
   val bin  : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
              ?edge_style:edge_style -> ?stroke:Color.t -> ?pen:Pen.t ->

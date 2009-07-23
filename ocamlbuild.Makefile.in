@@ -278,7 +278,7 @@ doc:
 # 	make -C customdoc
 
 export-doc: doc
-	cp -r doc/*.html doc/*.png doc/style.css $(WWW)/doc
+	cp -r doc/*.html doc/img/*.png doc/style.css $(WWW)/doc
 
 export-www: www/version.prehtml
 	make -C www
