@@ -1,11 +1,13 @@
 Dependencies:
 * You need Objective Caml 3.08.0 or higher to compile Mlpost.
+* You need Objective Caml 3.10.2 or higher to compile Mlpost with cairo
+  support; You also need the libraries bitstring, lablgtk2 and cairo.
+  check the output of ./configure to see if cairo has been selected.
 * To use Mlpost, you need metafun (package context in debian)
 * For the html version of the examples, you need caml2html, version 1.3.0 or
   higher.
 * One example needs the tex chess fonts to work (package tex-chess in debian)
 * For external images, you need imagemagick
-
 
 1. Configure with 
 
@@ -31,7 +33,7 @@ If you want to specify the directory where the binary (mlpost) will be installed
 It installs the library in Ocaml's standard library and the tool "mlpost"
 in /usr/local/bin (or any other directory specified with ./configure --bindir).
 
-4 (not always needed)
+4 (optional)
   copy the files from the latex subdirectory at a place where latex can find
   it (see the README in that directory)
 

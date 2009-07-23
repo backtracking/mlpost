@@ -1,22 +1,41 @@
-
 o - changes in behaviour, new features
 * - incompatible changes in the interface
 
-o new function Tree.nodel to add labels to tree edges
-o new position constructors `North, `South etc intended to replace `Top, `Bot
-  etc, but the old variants are still there
-o new optional argument sep to strip both ends of a path; used in
-  Tree, Box.cpath, and Helpers
+version 0.7, July 23rd, 2009
+----------------------------
 * add Point.draw and Path.draw (alias of Command.draw) which can mask 
-  Command.draw in case of an open Point after an open Command.
-* mlpost tool: -pdf now the default; use -ps to produce .1 files
-* Arrow.draw: ~pos becomes ~anchor, new ~pos is point on path
-* Arrow.draw2 becomes Arrow.point_to_point
+  Command.draw in case of an open Point after an open Command
 * Command.draw_arrow becomes Arrow.simple
-o new backend using Cairo
+* Arrow.draw: ~pos becomes ~anchor, new ~pos is point on path
+* Arrow.draw: now gives the same result by default as Arrow.simple (former
+  Command.draw_arrow)
+* Arrow.draw2 becomes Arrow.point_to_point
+* Mlpost tool: -pdf now the default; use -ps to produce .1 files
+* Mlpost tool: erases all generated intermediate files on success
+o New experimental backend using Cairo; it permits output in PS, PDF, SVG and
+  X11; use it with commandline option -cairo. It is intended to deliver the
+  same results as the old metapost backend. Please send a bug report if it is
+  not the case
+o A module Concrete which permits to compute concrete values of mlpost
+  objects, e.g. the float value corresponding to an object of type Num.t , 
+  the concrete point { x : float; y : float } corresponding to a Point.t, and
+  so on
+o A better tree drawing algorithm (module Tree)
+o new function Tree.nodel to add labels to tree edges
+o "Smart" paths to construct a path by giving only a sequence of directions
+  (module Path)
+o Histograms and Radar diagrams (modules Hist and Radar)
+o The type Picture.t now is equal to the type Command.t 
+  (no more conversion needed)
+o module Box: each box has a name by default; use Box.sub to retrieve a box
+  with the same name inside another
+o New optional argument sep of Path.strip to strip both ends of a path; used
+  in Tree, Box.cpath, and Helpers
+o New position constructors `North, `South, `Upperleft to improve upon `Top, `Bot
+  etc, but the old variants are still there
 
 version 0.6, February 4th, 2009
--------------------------
+-------------------------------
 * "open Mlpost" is not added to input files any more -
   users have to add by themselves
 * the type Command.figure becomes Command.t
@@ -32,7 +51,7 @@ version 0.5, Octobre 20, 2008 (first public release)
 o new option -native to use native compilation, useful for complicated pictures
 
 version 0.3
---------------------
+-----------
 o new module Pos to place lists, arrays, trees
 * Num.f function removed
 o new commandline arguments -v, -eps
