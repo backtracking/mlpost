@@ -69,7 +69,11 @@ let generic_quote_list lwqq s =
   Buffer.contents b  
 
 let call_cmd ?(inv=false) ?(outv=false) ?(verbose=false) cmd =
-  if inv || verbose then Printf.printf "+ %s\n" cmd;
+  (* inv = true -> print command line
+   * outv = true -> print command output
+   * verbose = true -> both 
+   *)
+  if inv || verbose then Format.printf "+ %s@." cmd;
   let inc = Unix.open_process_in cmd in  
   let buf = Buffer.create 16 in                       
   (try
@@ -79,7 +83,7 @@ let call_cmd ?(inv=false) ?(outv=false) ?(verbose=false) cmd =
    with End_of_file -> ());
   let status = Unix.close_process_in inc in
   let outp = Buffer.contents buf in
-  if outv || verbose then Printf.printf "%s" outp;
+  if outv || verbose then Format.printf "%s@." outp;
   (match status with | Unix.WEXITED n -> n | _ -> exit 1), outp
 
 (* persistent queues *)

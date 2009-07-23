@@ -54,6 +54,7 @@ let depend = ref false
 let dumpable = ref false
 let compile_name = ref None
 let dont_execute = ref false
+let dont_clean = ref false
 let add_nothing = ref false
 
 let notcairo = Version.includecairo = ""
@@ -112,6 +113,7 @@ let spec = Arg.align
     "-get-include-compile", Symbol (["cmxa";"cma";"dir";"file"],get_include_compile), " output the library which are needed by mlpost";
     "-compile-name", String (fun s -> compile_name := Some s), " Keep the compile version of the .ml file";
     "-dont-execute", Set dont_execute, " Don't execute the mlfile";
+    "-dont-clean", Set dont_clean, " Don't remove intermediate files";
     "-add-nothing", Set add_nothing, " Add nothing to the file"
   ]@
   if notcairo 
@@ -127,28 +129,28 @@ let () =
 
 exception Command_failed of int
 
-let command' ?inv ?outv ?verbose s =
-  let s, _ = Misc.call_cmd ?inv ?outv ?verbose s in
+let command' ?inv ?outv s =
+  let s, _ = Misc.call_cmd ?inv ?outv ~verbose:!verbose s in
   if s <> 0 then raise (Command_failed s)
 
-let command ?inv ?outv ?verbose s = 
-  try command' ?inv ?outv ?verbose s with Command_failed s -> exit s
+let command ?inv ?outv s = 
+  try command' ?inv ?outv s with Command_failed s -> exit s
 
 let ocaml args execopt =
   let cmd = "ocaml" ^ String.concat " " args ^ " " ^ execopt in
   match !compile_name with
     | None when not !dont_execute -> 
-        command ~outv:true ~verbose:!verbose cmd
+        command ~outv:true cmd
     | _ -> 
         let s = match !compile_name with 
           | None -> Filename.temp_file "mlpost" ".exe"
           | Some s -> "./"^s in
         let cmd = "ocamlc" ^ String.concat " " args ^ " -o " ^ s in
-        command ~outv:true ~verbose:!verbose cmd;
+        command ~outv:true cmd;
         if not !dont_execute then
-          command ~outv:true ~verbose:!verbose (s ^ " " ^ execopt);
+          command ~outv:true (s ^ " " ^ execopt);
         match !compile_name with 
-          | None -> Sys.remove s 
+          | None -> if !dont_clean then () else Sys.remove s 
           | Some s -> ()
 
 let ocamlopt bn args execopt =
@@ -156,17 +158,16 @@ let ocamlopt bn args execopt =
           | None -> Filename.temp_file "mlpost" ".exe"
           | Some s -> "./"^s in
   let cmd = Version.ocamlopt^" -o " ^ exe ^ " " ^ String.concat " " args in
-  let () = if !verbose then Format.eprintf "%s@." cmd in
-  command ~verbose:!verbose cmd;
+  command cmd;
   if not !dont_execute then
-    command ~outv:true ~verbose:!verbose (exe ^ " " ^ execopt);
+    command ~outv:true (exe ^ " " ^ execopt);
   match !compile_name with
-    | None -> Sys.remove exe
+    | None -> if !dont_clean then () else Sys.remove exe
     | Some s -> ()
 
 let ocamlbuild args =
   let args = if !classic_display then "-classic-display" :: args else args in
-  command' ~outv:true ~verbose:!verbose ("ocamlbuild " ^ String.concat " " args)
+  command' ~outv:true ("ocamlbuild " ^ String.concat " " args)
 
 (** Return an unused file name which in the same directory as the prefix. *)
 let temp_file_name prefix suffix =
@@ -217,21 +218,22 @@ let add_to_the_file bn f =
       let pdf = if !pdf || !xpdf then "~pdf:true" else "" in
       let eps = if !eps then "~eps:true" else "" in
       let verb = if !verbose then "~verbose:true" else "" in
+      let clean = if !dont_clean then "~clean:false" else "" in
       let prelude = match !latex_file with
         | None -> ""
         | Some f -> 
             sprintf "~prelude:%S" (Metapost_tool.read_prelude_from_tex_file f)
       in
       Printf.fprintf cout 
-        "\nlet () = Mlpost.Metapost.dump %s %s %s %s \"%s\"\n" 
-          prelude pdf eps verb bn;
+        "\nlet () = Mlpost.Metapost.dump %s %s %s %s %s \"%s\"\n" 
+          prelude pdf eps verb clean bn;
 
       if !xpdf then 
         Printf.fprintf cout 
           "\nlet () = Mlpost.Metapost.dump_tex %s \"_mlpost\"\n" prelude
     end;
   close_out cout;
-  mlf, (fun () -> Sys.remove mlf)
+  mlf, (fun () -> if !dont_clean then () else Sys.remove mlf)
 
 let fun_u_u () = ()
 
@@ -246,8 +248,8 @@ let compile f =
     let mlf2,remove_mlf2 = if !add_nothing then mlf,fun_u_u
       else
         let mlf2 = temp_file_name bn ".ml" in
-        command ~verbose:!verbose ("cp " ^ mlf ^ " " ^ mlf2);
-        mlf2,fun () -> Sys.remove mlf2 in
+        command ("cp " ^ mlf ^ " " ^ mlf2);
+        mlf2,fun () -> if !dont_clean then () else Sys.remove mlf2 in
     let ext = if !native then ".native" else ".byte" in
     try
       let args = ["-lib unix"] in

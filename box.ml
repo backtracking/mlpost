@@ -147,9 +147,20 @@ and transform_desc t = function
   | Grp (a , m ) ->
       Grp (Array.map (transform t) a, Smap.map (transform t) m)
 
+let rec shift pt b = 
+  { b with ctr = Point.shift pt b.ctr;
+    contour = Path.shift pt b.contour;
+    desc = shift_desc pt b.desc;
+  }
+and shift_desc pt = function
+  | Emp -> Emp
+  | Pic p -> Pic (Picture.shift pt p)
+  | Grp (a,m) ->
+      let s = shift pt in
+      Grp (Array.map s a, Smap.map s m)
+
 let scale f p = transform [Transform.scaled f] p
 let rotate f p = transform [Transform.rotated f] p
-let shift pt p = transform [Transform.shifted pt] p
 let yscale n p = transform [Transform.yscaled n] p
 let xscale n p = transform [Transform.xscaled n] p
 
@@ -458,7 +469,7 @@ let set_width2 pos1 y1 pos2 y2 b = set_gen2 cornerh
   (fun conv p -> Point.pt (conv (xpart p),ypart p))
   pos1 y1 pos2 y2 b
 
-let valign ?(pos=`Center) x l = 
+let valign ?(pos=`Center) x l =
   List.map (fun b -> shift (Point.pt (x -/ xcoord pos b, zero)) b) l
 
 let extractv pos = 
@@ -533,8 +544,8 @@ let vbox_list ?padding ?(pos=`Center) ?min_height ?same_height l =
   | [] -> []
   | _ ->
       let x = xpart (corner pos (List.hd l)) in
-      valign ~pos:(extracth pos) x
-        (vplace ?padding ~pos ?min_height ?same_height l)
+      let l = vplace ?padding ~pos ?min_height ?same_height l in
+      valign ~pos:(extracth pos) x l
 
 let hequalize h l = List.map (set_height h) l
 let wequalize w l = List.map (set_width w) l
