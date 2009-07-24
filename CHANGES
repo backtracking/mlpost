@@ -1,6 +1,10 @@
 o - changes in behaviour, new features
 * - incompatible changes in the interface
 
+version 0.7.1, July 24th, 2009
+------------------------------
+o Fix for Performance bug when shifting boxes
+
 version 0.7, July 23rd, 2009
 ----------------------------
 * add Point.draw and Path.draw (alias of Command.draw) which can mask 
