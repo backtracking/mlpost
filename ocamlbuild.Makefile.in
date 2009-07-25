@@ -229,12 +229,16 @@ TAR=$(EXPORTDIR).tar
 WWW = /users/www-perso/projets/mlpost
 FTP = $(WWW)/download
 
-FILES = *.ml *.mli *.mll *.in configure .depend \
-	README.txt INSTALL LICENSE CHANGES FAQ mlpost.1 _tags *.mlpack mlpost.odocl
+FILES := $(wildcard *.ml) $(wildcard *.mli) $(wildcard *.mll) \
+	 $(wildcard *.in) configure README.txt INSTALL LICENSE CHANGES FAQ \
+	 mlpost.1 _tags *.mlpack mlpost.odocl
 BACKENDFILES = backend/*ml backend/*mly backend/*mll backend/*mli backend/_tags
+GENERATEDSOURCEFILES = mlpost.mli version.ml myocamlbuild.ml
 GUIFILES = gui/*.mll gui/*.ml gui/_tags 
 EXFILES = examples/Makefile examples/*.ml examples/all.template\
 	  examples/index.html examples/parse.mll examples/README examples/automaton4.tex
+CUSTOMDOCFILES = customdoc/all.template customdoc/img_doc.ml customdoc/img.ml \
+		 customdoc/Makefile customdoc/_tags
 LATEXFILES = latex/*sty latex/*tex latex/README
 
 export: export-source export-www export-examples export-doc
@@ -245,14 +249,15 @@ export-source: source
 
 source: 
 	mkdir -p export/$(EXPORTDIR)
-	cp $(FILES) export/$(EXPORTDIR)
+	cp $(filter-out $(GENERATEDSOURCEFILES), $(FILES)) export/$(EXPORTDIR)
 	mkdir -p export/$(EXPORTDIR)/backend
 	cp $(BACKENDFILES) export/$(EXPORTDIR)/backend
 	mkdir -p export/$(EXPORTDIR)/gui
 	cp $(GUIFILES) export/$(EXPORTDIR)/gui
 	mkdir -p export/$(EXPORTDIR)/examples
 	cp $(EXFILES) export/$(EXPORTDIR)/examples
-	cp -r customdoc export/$(EXPORTDIR)/
+	mkdir -p export/$(EXPORTDIR)/customdoc
+	cp $(CUSTOMDOCFILES) export/$(EXPORTDIR)/customdoc
 	mkdir -p export/$(EXPORTDIR)/latex
 	cp $(LATEXFILES) export/$(EXPORTDIR)/latex
 	cd export ; tar cf $(TAR) $(EXPORTDIR) ; gzip -f --best $(TAR)
