@@ -158,7 +158,7 @@ let ocamlopt bn args execopt =
           | None -> Filename.temp_file "mlpost" ".exe"
           | Some s -> "./"^s in
   let cmd = Version.ocamlopt^" -o " ^ exe ^ " " ^ String.concat " " args in
-  command cmd;
+  command ~outv:true cmd;
   if not !dont_execute then
     command ~outv:true (exe ^ " " ^ execopt);
   match !compile_name with

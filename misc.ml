@@ -83,7 +83,7 @@ let call_cmd ?(inv=false) ?(outv=false) ?(verbose=false) cmd =
    with End_of_file -> ());
   let status = Unix.close_process_in inc in
   let outp = Buffer.contents buf in
-  if outv || verbose then Format.printf "%s@." outp;
+  if outv || verbose then Format.printf "%s@?" outp;
   (match status with | Unix.WEXITED n -> n | _ -> exit 1), outp
 
 (* persistent queues *)
