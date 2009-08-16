@@ -110,8 +110,8 @@ let spec = Arg.align
     "-libdir", String ((:=) libdir), " Set path for mlpost.cma";
     "-depend", Set depend, " output dependency lines in a format suitable for the make(1) utility";
     "-dumpable", Set dumpable, " output one name of dumpable file by line";
-    "-get-include-compile", Symbol (["cmxa";"cma";"dir";"file"],get_include_compile), " output the library which are needed by mlpost";
-    "-compile-name", String (fun s -> compile_name := Some s), " Keep the compile version of the .ml file";
+    "-get-include-compile", Symbol (["cmxa";"cma";"dir";"file"],get_include_compile), " Output the libraries which are needed by the library Mlpost";
+    "-compile-name <compile-name>", String (fun s -> compile_name := Some s), " Keep the compiled version of the .ml file";
     "-dont-execute", Set dont_execute, " Don't execute the mlfile";
     "-dont-clean", Set dont_clean, " Don't remove intermediate files";
     "-add-nothing", Set add_nothing, " Add nothing to the file"

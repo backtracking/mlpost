@@ -1,5 +1,5 @@
 .\"                                      Hey, EMACS: -*- nroff -*-
-.TH MLPOST 1 "February 2009"
+.TH MLPOST 1 "August 2009"
 .\" Please adjust this date whenever revising the manpage.
 .SH NAME
 mlpost \- wrapper around OCaml and Metapost for the Mlpost library
@@ -12,7 +12,10 @@ mlpost \- wrapper around OCaml and Metapost for the Mlpost library
 .SH OPTIONS
 .TP
 .B \-pdf
-Generate .mps files
+Generate .mps files (default)
+.TP
+.B \-ps
+Generate .1 files
 .TP
 .B \-latex <main.tex>
 Scan the LaTeX prelude
@@ -21,13 +24,17 @@ Scan the LaTeX prelude
 Generate encapsulated postscript files
 .TP
 .B \-xpdf
-WYSIWYG mode using xpdf
+WYSIWYG mode using xpdf remote server (the name of the remote server
+is "mlpost")
 .TP
 .B \-v
 Be a bit more verbose
 .TP
 .B \-ocamlbuild
 Use ocamlbuild to compile
+.TP
+.B \-classic-display   
+Call Ocamlbuild with -classic-display
 .TP
 .B \-native
 Compile to native code
@@ -38,6 +45,55 @@ Pass <options> to the Ocaml compiler
 .B \-execopt "<options>"
 Pass <options> to the compiled program
 .TP
+.B \-version
+Print Mlpost version and exit
+.TP
+.B \-libdir
+Set path for mlpost.cma
+.TP
+.B \-depend
+output dependency lines in a format suitable for the make(1) utility
+.TP
+.B \-dumpable
+output one name of dumpable file by line. So it print all the figures
+which will be created by the .ml file.
+.TP
+.B \-get-include-compile {cmxa|cma|dir|file}
+output the libraries which are needed by the library Mlpost if you want not to use the mlpost tool :
+.IP
+        \- cmxa print the needed cmxa file (opt version)
+        \- cma print the needed cma file (byte version)
+        \- dir print the directories needed to be include
+        \- file print the file name inside this directory without 
+extension
+
+.TP
+.B \-compile-name <compile-name>
+Keep the compiled version of the .ml file and name it <compile-name>. 
+.TP
+.B \-dont-execute
+Don't execute the mlfile. So mlpost generates no figures. With this
+option you can check that a file compile without wasting time to
+generate the figures. The options -dont-execute and -compile-name
+can be used in conjunction to
+create a program which generates some figures according to some command
+line options.
+.TP
+.B \-dont-clean
+Don't remove intermediates files. The metapost backend use some
+intermediates files which are removed without this option.
+.TP
+.B -add-nothing
+Add nothing to the file. Without this option mlpost add to the file a
+command which use metapost or the cairo backend in order to create the figures.
+.TP
+.B \-cairo
+Use the experimental cairo backend instead of metapost
+.TP
+.B \-t1disasm
+Set the program used to decrypt PostScript Type 1 font, only with
+cairo (default built-in one). This option will disappear soon.
+.TP
 .B \-help, \-\-help
 Display the list of options
 .SH SEE ALSO
@@ -47,9 +103,11 @@ Display the list of options
 .br
 .SH AUTHOR
 Mlpost was written by Romain Bardou,
+François Bobot,
 Johannes Kanig, Stéphane Lescuyer and
 Jean-Christophe Filliâtre.
 .PP
-This manual page was written by Stéphane Glondu <steph@glondu.net>
+This manual page was written by Stéphane Glondu <steph@glondu.net> and
+completed by the Mlpost authors
 for the Debian project (but may be used by others).
 
