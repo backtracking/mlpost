@@ -24,7 +24,7 @@ install-byte:
 	mkdir -p $(LIBDIR)
 	cp -f $(BUILD)mlpost.cmo $(BUILD)mlpost.cmi META $(BUILD)$(CMA) "$(LIBDIR)"
 	mkdir -p $(BINDIR)
-	cp -f tool.byte $(BINDIR)/mlpost
+	cp -f $(BUILD)tool.byte $(BINDIR)/mlpost
 	cp -f mlpost.1 $(MANDIR)/man1
 
 install-opt:
