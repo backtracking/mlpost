@@ -159,39 +159,30 @@ let radar color lmax l skeleton pen fill stl radius =
 
 
 
-let init ?radius ?scale ?style ?pen l=
- let radius = match radius with
-    |None -> bp 100.
-    |Some i -> i
-  in
+let default_radius = bp (100.)
+let default_style = [(Dash.pattern [Dash.on (bp 1.);Dash.off (bp 0.)])]
+let default_pen = Pen.scale (bp 0.5) Pen.circle
+
+let init radius ?scale l=
   let ticks_size = divf (multf 3. radius) 100. in
   let lesmax = match scale with
     |None -> maxlist l
-    |Some l -> l 
-  in
+    |Some l -> l in
   let skeleton =
     match l with
       |x::_ -> empty_radar_coords (List.length x)
-      |[] -> failwith "No data"
-  in
-  let style = 
-    match style with
-      |Some i -> i
-      |None -> [(Dash.pattern [Dash.on (bp 1.);Dash.off (bp 0.)])]
-  in
-  let pen = 
-    match pen with
-      |Some i -> i
-      |None -> (Pen.scale (bp 0.5) Pen.circle)
-  in
-    radius,pen,style,ticks_size,lesmax,skeleton
+      |[] -> failwith "No data" in
+  ticks_size,lesmax,skeleton
   
 
   
 (* Fabrique des radars empilés *)
-let stack ?radius ?(color=[black]) ?pen ?style ?(ticks=1.) ?label ?scale l =
+let stack ?(radius=default_radius)
+          ?(color=[black]) 
+          ?(pen=default_pen)
+          ?(style=default_style) ?(ticks=1.) ?label ?scale l =
   
-  let radius,pen,style,ticks_size,lesmax,skeleton = init ?radius ?scale ?style ?pen l in
+  let ticks_size,lesmax,skeleton = init radius ?scale l in
     
   let rec radar_list col stl maxi li skltn acc = match li,col,stl with
     |x::res,cq,sq ->
@@ -205,9 +196,13 @@ let stack ?radius ?(color=[black]) ?pen ?style ?(ticks=1.) ?label ?scale l =
 
 
 (* Fabrique des radars comparatifs, renvoie la liste de Pictures représentant chaque radar *)
-let compare ?radius ?(color=[black]) ?(fill=false) ?pen ?style ?(ticks=1.) ?label ?scale l =
+let compare ?(radius=default_radius)
+            ?(color=[black]) 
+            ?(fill=false) 
+            ?(pen=default_pen) 
+            ?(style=default_style) ?(ticks=1.) ?label ?scale l =
   
-  let radius,pen,style,ticks_size,lesmax,skeleton = init ?radius ?scale ?style ?pen l in
+  let ticks_size,lesmax,skeleton = init radius ?scale l in
 
   let rec build_pictures skltn col stl maxi li tcks acc = match li,col,stl with
     |x::res,cq,sq -> 
