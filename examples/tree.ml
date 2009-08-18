@@ -4,7 +4,6 @@ open Tree
 
 (*parse <<togglescript>> *)
 
-let tex = tex ~stroke:(Some Color.black) 
 (*parse <<tree1 *)
 let tree1 =
   let node s = node (tex s) in
@@ -57,6 +56,20 @@ let tree7 =
      (node "1" [node "2" [node "3" [leaf "4"]; leaf "5"]; 
 		node "3" [node "6" [leaf "8"; node "6" [leaf "8"; leaf "9"]]; 
 			  node "7" [leaf "10"]]])
+(*parse >> <<tree8 *)
+let stern_brocot h =
+  let frac (a,b) = tex (Format.sprintf "$\\frac{%d}{%d}$" a b) in
+  let rec make ((a,b) as lo) ((c,d) as hi) h =
+    let r = a+c, b+d in
+    if h = 1 then
+      leaf (frac r)
+    else
+      node ~arrow_style:Undirected (frac r) [make lo r (h-1); make r hi (h-1)]
+  in
+  make (0,1) (1,0) h
+
+let tree8 = draw (stern_brocot 5)
+
 (*parse >> *)
 
 let _ = 
@@ -68,4 +81,5 @@ let _ =
     "tree5", tree5;
     "tree6", tree6;
     "tree7", tree7;
+    "tree8", tree8;
   ]

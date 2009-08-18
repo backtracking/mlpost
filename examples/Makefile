@@ -17,7 +17,7 @@ MISCOUTFILES := $(MISCPNGFILES:.png=.1)
 
 # all files that are generated from tree.ml
 TREEPNGFILES := tree1.png tree2.png tree3.png tree4.png tree5.png \
-                tree6.png tree7.png
+                tree6.png tree7.png tree8.png
 TREEOUTFILES := $(TREEPNGFILES:.png=.1)
 
 # all files that are generated from labels.ml
