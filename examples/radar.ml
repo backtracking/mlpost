@@ -10,8 +10,8 @@ open Box
 (*parse <<radar1 *)
 let radar1 =
   let pic = 
-    Radar.stack 
-      ~pen:(Pen.scale (bp 3.) Pen.circle) 
+    Radar.stack ~radius:(bp 50.) 
+      ~pen:(Pen.scale (bp 1.5) Pen.circle) 
       ~color:[blue;red;green]
       ~label:["first";"second";"third";"fourth";"fifth"] 
       [[3.;4.;5.;6.;4.];
@@ -23,8 +23,8 @@ let radar1 =
 (*parse >> <<radar2 *)
 let radar2 =
   let pics = 
-    Radar.compare
-      ~pen:(Pen.scale (bp 1.5) Pen.circle) 
+    Radar.compare ~radius:(bp 20.) 
+      ~pen:(Pen.scale (bp 0.5) Pen.circle) 
       ~color:[lightblue;lightred;lightgreen] ~fill:true
       [[3.;4.;5.;6.;4.];
        [6.;5.;2.;1.;1.];

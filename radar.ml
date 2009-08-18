@@ -141,18 +141,18 @@ let list_coord lmax l skeleton =
     fct lmax l skeleton []
 
 (* Fabrique un radar associé au squelette de radar passé en paramètre *)
-let radar color lmax l skeleton track fill stl radius= 
+let radar color lmax l skeleton pen fill stl radius = 
   let coords = scale_radius radius (list_coord lmax l skeleton) in
   let rec dots acc f c = match c with
     |x::res -> 
        let col = if f then Color.black else color in
-       let cmd = draw ~pen:(Pen.scale (bp 5.) Pen.circle) ~color:col (pathn [x]) in
+       let cmd = draw ~pen:(Pen.scale (bp 3.) pen) ~color:col (pathn [x]) in
 	 dots (cmd++acc) f res
     |[]->acc
   in 
   let dots_cmd = dots nop fill coords in
   let clr = if fill then Color.black else color in
-  let path_cmd = draw (pathn ~style:jLine ~cycle:jLine coords) ~pen:track ~color:clr ~dashed:stl in
+  let path_cmd = draw (pathn ~style:jLine ~cycle:jLine coords) ~pen ~color:clr ~dashed:stl in
   let path_filled = if fill then (Command.fill ~color:color (pathn ~style:jLine ~cycle:jLine coords)) else nop 
   in
     path_filled++path_cmd++dots_cmd

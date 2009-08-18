@@ -1,6 +1,8 @@
 o - changes in behaviour, new features
 * - incompatible changes in the interface
 
+o Radar: fixed size of bullets
+
 version 0.7.1, July 24th, 2009
 ------------------------------
 o Fix for Performance bug when shifting boxes
