@@ -1,6 +1,7 @@
 open Mlpost
 open Box
 open Tree
+let sprintf = Format.sprintf
 
 (*parse <<togglescript>> *)
 
@@ -58,7 +59,7 @@ let tree7 =
 			  node "7" [leaf "10"]]])
 (*parse >> <<tree8 *)
 let stern_brocot h =
-  let frac (a,b) = tex (Format.sprintf "$\\frac{%d}{%d}$" a b) in
+  let frac (a,b) = tex (sprintf "$\\frac{%d}{%d}$" a b) in
   let rec make ((a,b) as lo) ((c,d) as hi) h =
     let r = a+c, b+d in
     if h = 1 then
@@ -69,7 +70,28 @@ let stern_brocot h =
   make (0,1) (1,0) h
 
 let tree8 = draw (stern_brocot 5)
+(*parse >> <<tree9 *)
 
+let texint n = tex (sprintf "$F_{%d}$" n)
+let rec fib = function
+  | 0 | 1 as n -> leaf (texint n)
+  | n -> node ~arrow_style:Undirected (texint n) [fib (n-1); fib (n-2)]
+
+let tree9 = draw (fib 5)
+
+(*parse >> <<tree10 *)
+type t = | Node of int * t list
+
+let rec bin = function
+  | 0 -> Node (0, [])
+  | n -> 
+      let (Node (_,l) as t) = bin (n-1) in
+      Node (n, t :: l)
+
+let rec trans (Node (n,l)) = 
+  node ~arrow_style:Undirected (tex (sprintf "${2^{%d}}$" n)) (List.map trans l)
+
+let tree10 = draw (trans (bin 4))
 (*parse >> *)
 
 let _ = 
@@ -82,4 +104,6 @@ let _ =
     "tree6", tree6;
     "tree7", tree7;
     "tree8", tree8;
+    "tree9", tree9;
+    "tree10", tree10;
   ]

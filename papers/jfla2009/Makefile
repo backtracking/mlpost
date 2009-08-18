@@ -31,7 +31,7 @@ wc:
 	grep -iw frametitle slides.tex | wc -l
 
 %.mp: %.ml
-	../../tool.opt -ccopt "-I ../../" -pdf -latex main.tex $^
+	../../_build/tool.native -ccopt "-I ../../" -pdf -latex main.tex $^
 
 figmp.mps: figmp.mp
 	mpost figmp.mp end
