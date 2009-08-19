@@ -17,6 +17,7 @@
 open Path
 open Point
 open Num
+open Box
 open Command
 
 (*  puts labels at given points with given text *)
@@ -36,25 +37,29 @@ let draw_labelbox_arrow ?color ?pen ?dashed ?style ?outd ?ind ?pos lab a b =
   draw_label_arrow ?color ?pen ?dashed ?style ?outd ?ind ?pos 
     (Picture.make (Box.draw lab)) a b
 
-let box_arrow ?color ?pen ?dashed ?style ?outd ?ind ?sep a b =   
+let box_arrow ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep a b =   
+  let a, b = match within with | None -> a,b | Some x -> Box.sub a x, Box.sub b x in
   Arrow.simple ?color ?pen ?dashed (Box.cpath ?style ?outd ?ind ?sep a b)
 
-let box_line ?color ?pen ?dashed ?style ?outd ?ind ?sep a b =   
+let box_line ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep a b =   
+  let a, b = match within with | None -> a,b | Some x -> Box.sub a x, Box.sub b x in
   draw ?color ?pen ?dashed (Box.cpath ?style ?outd ?ind ?sep a b)
 
-let box_label_line ?color ?pen ?dashed ?style ?outd ?ind ?sep ?pos lab a b =
+let box_label_line ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep ?pos lab a b =
+  let a, b = match within with | None -> a,b | Some x -> Box.sub a x, Box.sub b x in
   let p = Box.cpath ?style ?outd ?ind ?sep a b in
   draw ?color ?pen ?dashed p ++
   label ?pos lab (Path.point 0.5 p)
 
-let box_label_arrow ?color ?pen ?dashed ?style ?outd ?ind ?sep ?pos lab a b =
+let box_label_arrow ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep ?pos lab a b =
+  let a, b = match within with | None -> a,b | Some x -> Box.sub a x, Box.sub b x in
   let p = Box.cpath ?style ?outd ?ind ?sep a b in
   Arrow.simple ?color ?pen ?dashed p ++
   label ?pos lab (Path.point 0.5 p)
 
 (* TODO unify all these functions *)
-let box_labelbox_arrow ?color ?pen ?dashed ?style ?outd ?ind ?sep ?pos lab a b =
-  box_label_arrow ?color ?pen ?dashed ?style ?outd ?ind ?sep ?pos 
+let box_labelbox_arrow ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep ?pos lab a b =
+  box_label_arrow ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep ?pos 
     (Picture.make (Box.draw lab)) a b
 
 (***

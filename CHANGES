@@ -2,6 +2,8 @@ o - changes in behaviour, new features
 * - incompatible changes in the interface
 
 o Radar: fixed size of bullets
+o Helpers: the functions for boxes have a new optional argument [within] to
+give a box in which the arguments will be searched
 
 version 0.7.1, July 24th, 2009
 ------------------------------

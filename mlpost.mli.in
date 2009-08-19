@@ -1543,29 +1543,34 @@ module Helpers : sig
     ?pos:Command.position -> Box.t -> 
     Point.t -> Point.t -> Command.t
   val box_arrow :
-    ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
+    ?within:Box.t -> ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction -> 
     ?sep:Num.t ->
     Box.t -> Box.t -> Command.t
+  (** Draw an arrow between two boxes. The options [pen], [dashed], [color]
+    change the drawing of the arrow. [outd] and [ind] specify the outgoing and
+    ingoing direction. [sep] specifies the distance of the arrow ends to both
+    boxes. If [within] is set, the boxes will be searched within the box
+    [within]. *)
   val box_line :
-    ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
+    ?within:Box.t -> ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction -> 
     ?sep:Num.t ->
     Box.t -> Box.t -> Command.t
   val box_label_arrow :
-    ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
+    ?within:Box.t -> ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
     ?sep:Num.t ->
     ?pos:Command.position -> Picture.t -> 
     Box.t -> Box.t -> Command.t
   val box_label_line :
-    ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
+    ?within:Box.t -> ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
     ?sep:Num.t ->
     ?pos:Command.position -> Picture.t -> 
     Box.t -> Box.t -> Command.t
   val box_labelbox_arrow :
-    ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
+    ?within:Box.t -> ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
     ?sep:Num.t ->
     ?pos:Command.position -> Box.t -> 
