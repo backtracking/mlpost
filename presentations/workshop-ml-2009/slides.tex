@@ -1,0 +1,148 @@
+% -*- coding : utf8 -*-
+%; whizzy -pdf
+\documentclass[nodefaultblocks]{beamer}
+\usepackage{beamerthemesplit}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{graphicx}
+
+\usepackage{pgf,pgfarrows,pgfnodes}
+\usepackage{tikz}
+%\usetikzlibrary{shapes}
+%\usetikzlibrary{arrows,snakes,backgrounds}
+%\usepackage{xy} 
+%\xyoption{all} 
+
+
+\newcommand{\ocaml}{OCaml}
+\newcommand{\metapost}{Metapost}
+
+
+\def \ybox #1{{\mbox { \strut #1}}}
+
+\usetheme{Madrid}
+\beamertemplatenavigationsymbolsempty
+
+\definecolor{yel}{rgb}{.9,.8,.4}
+\definecolor{mygray}{rgb}{0.85,0.85,0.85}
+
+\def \ebox #1{\colorbox{yel}{\mbox {\strut #1}}}
+\def \gbox #1{\colorbox{mygray}{\mbox {\strut #1}}}
+\def \goldbox #1{\colorbox{mygold}{\mbox {\strut #1}}}
+\def \magbox #1{\colorbox{mymagenta}{\mbox {\strut #1}}}
+\definecolor{mymagenta}{rgb}{1,0,1}
+\definecolor{mygold}{rgb}{1,.7,0.1}
+
+\definecolor{darkgray}{gray}{0.5}
+\definecolor{mygreen}{rgb}{0,0.5,0}
+\definecolor{myblue}{rgb}{0.1,0.1,0.8}
+\definecolor{royalblue}{rgb}{0.282,0.463,1.0}
+\def \blue #1{{\color{myblue} #1}}
+\def \green #1{{\color{mygreen} #1}}
+\def \red #1{{\color{red} #1}}
+\def \gray #1{{\color{darkgray} #1}}
+\def \toto{\only<-2>{white}\only<3->{black}}
+
+\newcommand{\colornodeboxstroke}[4]{%
+{\color{#1}\pgfnodebox{#2}[fill]{#3}{#4}{3pt}{3pt}}%
+\pgfnodebox{#2}[stroke]{#3}{#4}{3pt}{3pt}}
+
+
+
+\newcommand{\colornodebox}[4]{%
+{\color{#1}\pgfnodebox{#2}[fill]{#3}{#4}{2pt}{2pt}}%
+\pgfnodebox{#2}[virtual]{#3}{#4}{2pt}{2pt}}
+
+\newcommand{\fleche}[3]{%
+\begin{pgfscope}\pgfsetlinewidth{1.2pt}%
+\pgfsetendarrow{\pgfarrowtriangle{3pt}}%
+{\color{#1}\pgfnodeconnline{#2}{#3}}\end{pgfscope}}
+
+
+\definecolor{lred}{rgb}{1,0.8,0.6}
+\definecolor{lightgray}{rgb}{0.7,0.7,0.7}
+\definecolor{lightgreen}{rgb}{0.6,1,0.8}
+\definecolor{darkgreen}{rgb}{0,0.6,0}
+\definecolor{royalblue}{rgb}{0.25,0.41,0.88}
+
+\title{Title}
+\author{Author}
+\institute[Proval]{LRI, Proval INRIA Saclay - Île-de-France}
+
+\begin{document}
+
+\begin{frame}
+  
+\maketitle
+
+  \bigskip
+  \pgfimage[height=10mm]{upsudlogo}\hfill
+  \pgfimage[height=10mm]{cnrs-logo}\hfill
+   \pgfimage[height=10mm]{Logo-Proval}\hfill
+  \pgfimage[height=8mm]{inriafuturslogoshort}
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{Motivation}
+  how to make nice pictures
+  \begin{itemize}
+  \item with embedded \LaTeX\ snippets
+  \item scripted in a nice language
+  \item possibly resulting from computations
+  \end{itemize}
+  \begin{overprint}
+    \onslide<+>
+  \begin{center}
+  \bigskip
+  \includegraphics{fibtree.pdf}
+  \end{center}
+    \onslide<+>
+    \medskip
+    \begin{center}
+      \medskip
+     \begin{verbatim}
+  let texint n = tex (sprintf "$F_{%d}$" n)
+  let rec fib = function
+    | 0 | 1 as n -> leaf (texint n)
+    | n -> 
+        node ~arrow_style:Undirected (texint n) 
+           [fib (n-1); fib (n-2)]
+
+  let fibtree = draw (fib 6)
+
+      \end{verbatim}
+    \end{center}
+    \onslide<+>
+    \medskip
+    Alternatives: 
+    \begin{itemize}
+    \item dia, xfig
+    \item PGF/Tikz 
+    \item Metapost
+    \end{itemize}
+  \end{overprint}
+\end{frame}
+
+\begin{frame}{Our contribution}
+
+  Mlpost = \ocaml\ + \metapost
+
+  \bigskip
+  An \ocaml\ library with the same functionality as \metapost
+
+  \bigskip
+  \begin{itemize}
+  \item persistence (allows sharing) 
+  \item API favors relative placement
+  \item API uses optional/labeled arguments massively
+  \end{itemize}
+  
+\end{frame}
+
+
+
+
+\end{document}
+
