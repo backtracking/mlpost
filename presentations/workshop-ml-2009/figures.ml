@@ -57,6 +57,40 @@ let diag =
   let arrow x y = box_arrow ~sep:(bp 5.) (sub x v) (sub y v) in
   draw v ++ arrow a b ++ arrow ab c 
 
+let (|>) x f = f x
+
+let archi_backend = 
+  let rt s = round_rect (tex s) in
+  let sigma = tex "$\\Sigma$" in
+  let metapost = rt "Metapost"
+  and cairo = rt "Cairo"
+  and concrete = rt "Concrete"
+  and mp = rt ".mp"
+  and mps = rt ".1,.mps" in
+  let left = vbox [mp;metapost] in
+  let lsigma = sub sigma (Box.hbox [sub metapost left;sigma]) in
+  let left = round_rect ~dy:(bp 10.) ~dx:(bp 5.) (group [left;lsigma]) in
+  let right = vbox [concrete;cairo] in
+  let rsigma = sub sigma (Box.hbox [sub concrete right;sigma]) in
+  let right = group [right;rsigma] in
+  let center = hbox [left;right] in
+  let mlpost = tex "Mlpost" in
+  let mlpost = List.hd (same_width [mlpost;center]) in
+  let mlpost = round_rect mlpost in
+  let output = rt "output" in
+  let all = vbox [mlpost;center;output] in
+  let arrow (x,y) = box_arrow ~sep:(bp 5.) (sub x all) (sub y all) in
+  let arrows = [(mp,metapost);
+                (concrete,cairo);
+                (mlpost,concrete);
+                (concrete,mlpost);
+                (mlpost,mp);
+                (metapost,output);(cairo,output)]
+  |> List.map arrow
+  |> seq in
+  draw all ++ arrows
+
+
 (* Koda-Ruskey *)
 
 open Command
@@ -155,9 +189,11 @@ let gray_grid w f =
 	(sub i 0) (sub (i+1) 0)
   )
 
+
 let _ = 
   List.iter (fun (name,fig) -> Metapost.emit name fig)
   [ 
+    "archi_backend", archi_backend;
     "fibtree", fibtree;
     "hist", hist;
     "diag", diag;
