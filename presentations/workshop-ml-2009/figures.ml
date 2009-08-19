@@ -36,9 +36,32 @@ let rec trans (Node (n,l)) =
 
 let tree10 = draw (trans (bin 4))
 
+open Num
+open Color
+
+let hist =
+  Hist.stack ~fill:[lightred;lightblue;lightyellow;lightgreen]
+    [[4.;5.;5.;]; [8.;3.;1.]; [2.;8.;1.;4.]]
+
+open Helpers
+open Command
+open Box
+let hbox = hbox ~padding:(bp 30.)
+let vbox = vbox ~padding:(bp 30.)
+
+let diag =
+  let rt s = rect (tex s) in
+  let a = rt "A" and b = rt "B" and c = rt "C" in
+  let ab = round_rect ~dx:(bp 10.) ~dy:(bp 10.) (hbox [a;b]) in
+  let v = vbox [ab;c] in
+  let arrow x y = box_arrow ~sep:(bp 5.) (sub x v) (sub y v) in
+  draw v ++ arrow a b ++ arrow ab c 
+
 let _ = 
   List.iter (fun (name,fig) -> Metapost.emit name fig)
   [ 
     "fibtree", fibtree;
+    "hist", hist;
+    "diag", diag;
 (*     "tree10", tree10; *)
   ]

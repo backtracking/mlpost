@@ -5,12 +5,12 @@
 
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage[french]{babel}
 \usepackage{lmodern}
 \usepackage{graphicx}
 
 \usepackage{pgf,pgfarrows,pgfnodes}
 \usepackage{tikz}
+\usepackage{alltt}
 %\usetikzlibrary{shapes}
 %\usetikzlibrary{arrows,snakes,backgrounds}
 %\usepackage{xy} 
@@ -102,17 +102,18 @@
     \medskip
     \begin{center}
       \medskip
-     \begin{verbatim}
+     \begin{alltt}
+  open \alert{Mlpost}
+
   let texint n = tex (sprintf "$F_{%d}$" n)
+
   let rec fib = function
     | 0 | 1 as n -> leaf (texint n)
-    | n -> 
-        node ~arrow_style:Undirected (texint n) 
-           [fib (n-1); fib (n-2)]
+    | n -> node (texint n) [fib (n-1); fib (n-2)]
 
   let fibtree = draw (fib 6)
 
-      \end{verbatim}
+      \end{alltt}
     \end{center}
     \onslide<+>
     \medskip
@@ -125,23 +126,88 @@
   \end{overprint}
 \end{frame}
 
-\begin{frame}{Our contribution}
+\begin{frame}{Our contribution : Mlpost = \ocaml\ + \metapost}
 
-  Mlpost = \ocaml\ + \metapost
-
-  \bigskip
-  An \ocaml\ library with the same functionality as \metapost
-
-  \bigskip
+  \begin{columns}
+    \column{0.5\textwidth}
+  A stub of basic \metapost\ features
   \begin{itemize}
-  \item persistence (allows sharing) 
-  \item API favors relative placement
-  \item API uses optional/labeled arguments massively
+    \item embedded \LaTeX\ snippets
+      \item Bézier paths
   \end{itemize}
-  
+
+  \column{0.5\textwidth}
+  \includegraphics[width=\textwidth]{../../papers/jfla2009/architecture.mps}
+  \end{columns}
+  \bigskip
+  Additional features
+  \begin{itemize}
+    \item High-level libraries: boxes, trees, diagrams, radars, function plots
+  \item persistence (allows sharing) 
+  \item uses optional/labeled arguments massively
+  \end{itemize}
+
 \end{frame}
 
+\begin{frame}
+  \frametitle{Example 1: from a PhD thesis}
+  \includegraphics[width=0.6\textwidth]{../../papers/jfla2009/figures_flo/chrono2_1.mps}
+  \includegraphics[width=0.4\textwidth]{../../papers/jfla2009/figures_flo/automate_jfla.mps}
+\end{frame}
 
+\begin{frame}
+\frametitle{Example 2: for a math lecture}
+\begin{center}
+  \includegraphics[width=0.6\textwidth]{../../papers/jfla2009/ford.mps} 
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Example 3: The histogram library}
+\begin{columns}
+  \column{0.6\textwidth}
+\begin{verbatim}
+  Hist.stack 
+    ~fill:[lightred;lightblue;
+           lightyellow;lightgreen]
+    [[4.;5.;5.;]; 
+     [8.;3.;1.]; 
+     [2.;8.;1.;4.]]  
+\end{verbatim}
+  \column{0.4\textwidth}
+\begin{center}
+  \includegraphics{hist}
+\end{center}
+
+\end{columns}
+
+\end{frame}
+\begin{frame}
+\frametitle{Example 4: From a previous talk}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Example 5: Easy diagrams using boxes}
+\begin{columns}
+  \column{0.75\textwidth}
+\small
+\begin{verbatim}
+
+
+
+let diag =
+  let rt s = rect (tex s) in
+  let a = rt "A" and b = rt "B" and c = rt "C" in
+  let ab = round_rect (hbox [a;b]) in
+  let v = vbox [ab;c] in
+  let arrow x y = box_arrow (sub x v) (sub y v) in
+  draw v ++ arrow a b ++ arrow ab c 
+\end{verbatim}
+\column{0.25\textwidth}
+\includegraphics{diag}
+\end{columns}
+
+\end{frame}
 
 
 \end{document}
