@@ -11,6 +11,8 @@ open Num.Infix
 open Point
 open Box
 
+let draw_arrow = Arrow.simple
+
 (* Stéphane *)
 (** the old ugly version *)
 (* let graph_sqrt = *)
