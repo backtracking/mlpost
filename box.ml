@@ -31,23 +31,28 @@ type style =
   | Custom of (Num.t -> Num.t -> Num.t * Num.t * Path.t)
 
 let margin = Num.bp 2.
-let fresh_name_prefix = "__anonbox"
-let is_anon_name s = 
-  let rec aux = function
-    | -1 -> true
-    | n -> fresh_name_prefix.[n] = s.[n] && aux (n-1) in
-  (String.length s > String.length fresh_name_prefix)
-    && aux ((String.length fresh_name_prefix) -1)
 
-module Smap = Map.Make(String)
+
+module Name =
+struct
+  type t = 
+    | Internal of int
+    | Userdef of string
+  let compare = Pervasives.compare
+
+  let print fmt = function
+    | Internal i -> Format.pp_print_int fmt i
+    | Userdef s -> Format.pp_print_string fmt s
+end
+module NMap = Map.Make(Name)
 
 let print_dom fmt m =
   Format.fprintf fmt "@[{";
-  Smap.iter (fun k _ -> Format.fprintf fmt "%s;@ " k) m;
+  NMap.iter (fun k _ -> Format.fprintf fmt "%a;@ " Name.print k) m;
   Format.fprintf fmt "}@]"
 
 type t = {
-  name : string;
+  name : Name.t;
   width : Num.t;
   height : Num.t;
   ctr : Point.t;
@@ -63,7 +68,7 @@ type t = {
 and desc = 
   | Emp
   | Pic of Picture.t
-  | Grp of t array * t Smap.t
+  | Grp of t array * t NMap.t
 
 let width b = b.width
 let height b = b.height
@@ -145,7 +150,7 @@ and transform_desc t = function
   | Emp -> Emp
   | Pic p -> Pic (Picture.transform t p)
   | Grp (a , m ) ->
-      Grp (Array.map (transform t) a, Smap.map (transform t) m)
+      Grp (Array.map (transform t) a, NMap.map (transform t) m)
 
 let rec shift pt b = 
   { b with ctr = Point.shift pt b.ctr;
@@ -157,7 +162,7 @@ and shift_desc pt = function
   | Pic p -> Pic (Picture.shift pt p)
   | Grp (a,m) ->
       let s = shift pt in
-      Grp (Array.map s a, Smap.map s m)
+      Grp (Array.map s a, NMap.map s m)
 
 let scale f p = transform [Transform.scaled f] p
 let rotate f p = transform [Transform.rotated f] p
@@ -198,10 +203,11 @@ let rec draw ?(debug=false) b =
       let rect = Path.shift b.ctr (Shapes.rectangle b.width b.height) in
       Command.seq 
 	[Command.draw ~color:Color.red ~dashed:Dash.evenly rect;
-         if is_anon_name b.name then Command.nop 
-         else
-         Command.label ~pos:`Center 
-           (Picture.tex ("\\tiny " ^ (Picture.escape_all b.name))) (north_west b)]
+          match b.name with
+          | Name.Internal _ -> Command.nop
+          | Name.Userdef s -> 
+              Command.label ~pos:`Center 
+              (Picture.tex ("\\tiny " ^ (Picture.escape_all s))) (north_west b)]
     else 
       Command.nop
   in
@@ -249,14 +255,16 @@ let no_drawing _ = Command.nop
 
 let fresh_name = 
   let x = ref 1 in
-  let s = fresh_name_prefix in
-  (fun () ->  incr x; s ^ (string_of_int !x))
+  (fun () ->  incr x; Name.Internal (!x) )
 
 let mkbox ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black) 
           ?pen ?fill ?(pre_draw=no_drawing) ?(post_draw=no_drawing)
           w h c desc =
   let w,h,s = make_contour style ?dx ?dy w h c in
-  let name = match name with | None -> fresh_name () | Some s -> s in
+  let name = 
+    match name with 
+    | None -> fresh_name () 
+    | Some s -> Name.Userdef s in
   { desc = desc;
     name = name; stroke = stroke; pen = pen; fill = fill;
     width = w; height = h; ctr = c; contour = s;
@@ -271,9 +279,9 @@ let merge_maps =
   let add_one m b =
     let m = match b.desc with
       | Emp | Pic _ -> m
-      | Grp (_, m') -> Smap.fold Smap.add m' m in
-    Smap.add b.name b m in
-  List.fold_left add_one Smap.empty
+      | Grp (_, m') -> NMap.fold NMap.add m' m in
+    NMap.add b.name b m in
+  List.fold_left add_one NMap.empty
 
 let box ?style ?dx ?dy ?name ?stroke ?pen ?fill b =
   mkbox ?style ?dx ?dy ?name ?stroke ?pen ?fill 
@@ -358,18 +366,20 @@ let elts b = match b.desc with
 
 let elts_list b = Array.to_list (elts b)
 
-let get n b = 
+let get' n b = 
   if b.name = n then b else match b.desc with
     | Emp -> invalid_arg "Box.get: empty box"
     | Pic _ -> invalid_arg "Box.get: picture box"
     | Grp (_, m) -> 
 	try 
-	  Smap.find n m 
+	  NMap.find n m 
 	with Not_found -> 
 	  invalid_arg 
-	    (Misc.sprintf "Box.get: no sub-box %s out of %a" n print_dom m)
+	    (Misc.sprintf "Box.get: no sub-box %a out of %a" 
+              Name.print n print_dom m)
             
-let sub b1 b2 = get b1.name b2
+let get n b = get' (Name.Userdef n) b
+let sub b1 b2 = get' b1.name b2
 
 let get_fill b = b.fill
 let set_fill c b = { b with fill = Some c } 
@@ -377,8 +387,12 @@ let set_fill c b = { b with fill = Some c }
 let get_stroke b = b.stroke
 let set_stroke s b = {b with stroke = Some s } 
 let clear_stroke b = { b with stroke = None }
-let get_name b = b.name
-let set_name name b = {b with name = name}
+let get_name b = 
+  match b.name with
+  | Name.Internal _ -> None
+  | Name.Userdef s -> Some s
+
+let set_name name b = {b with name = Name.Userdef name}
 
 let set_post_draw f b = {b with post_draw = f}
 let set_pre_draw f b = {b with pre_draw = f}
@@ -684,12 +698,12 @@ let thick_arrow ?style ?(boxed=true) ?line_color ?fill_color ?outd ?ind ?width
 
 (* Specials Points *)
 let setp name pt box = 
-  let add_smap m = Smap.add name (shift pt (empty ~name ())) m in
+  let add_smap m = NMap.add (Name.Userdef name) (shift pt (empty ~name ())) m in
   { box with
     desc =
       match box.desc with
-      | Emp -> Grp ([|box|], add_smap Smap.empty)
-      | Pic _ -> Grp ([|box|], add_smap Smap.empty)
+      | Emp -> Grp ([|box|], add_smap NMap.empty)
+      | Pic _ -> Grp ([|box|], add_smap NMap.empty)
       | Grp (l,m) -> Grp (l, add_smap m)}
 
 let getp name box = ctr (get name box)
