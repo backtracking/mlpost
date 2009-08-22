@@ -270,9 +270,9 @@ let mkbox ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black)
     width = w; height = h; ctr = c; contour = s;
     post_draw = post_draw; pre_draw = pre_draw }
 
-let pic ?style ?dx ?dy ?name ?stroke ?pen ?fill pic =
+let pic ?style ?dx ?dy ?name ?(stroke=None) ?pen ?fill pic =
   let c = Picture.ctr pic in
-  mkbox ?style ?dx ?dy ?name ?stroke ?pen ?fill 
+  mkbox ?style ?dx ?dy ?name ~stroke ?pen ?fill 
         (Picture.width pic) (Picture.height pic) c (Pic pic)
 
 let merge_maps =

@@ -1614,9 +1614,7 @@ module Tree : sig
 
   (** {2 Creation} *)
   val leaf : Box.t -> t
-    (** [leaf label] creates a leaf with label [label]. 
-	@param style a [node_style] describing how the leaf should be drawn
-	@param fill if present, this color is used to fill the leaf *)
+    (** [leaf b] creates a leaf with Box [b]. *)
 
   val node : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
              ?edge_style:edge_style -> ?stroke:Color.t -> ?pen:Pen.t ->
@@ -1656,11 +1654,28 @@ module Tree : sig
     val leaf : Box.t -> t
     val node : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
       ?edge_style:edge_style -> ?stroke:Color.t -> ?pen:Pen.t -> ?sep:Num.t ->
+      ?valign:Command.position -> ?halign:Command.position ->
       Box.t -> t list -> t
+    (** a simple tree placement algorithm: align all subtrees horizontally , and
+     place the parent node above.
+        Default arrow_style is [Directed].
+	Default edge_style is [Straight].
+	@param ls (level sep): vertical distance between levels.
+        The default value is 1.0. A negative value draws the tree upward.
+	@param cs (children sep): horizontal distance between siblings.
+        The default value is 0.2.
+      @param halign change alignment of children (default: [`Top])
+      @param valign change alignment of parent node wrt. children 
+               (default: [`Children])
+    *)
+
     val bin  : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
       ?edge_style:edge_style -> ?stroke:Color.t -> ?pen:Pen.t -> ?sep:Num.t ->
       Box.t -> t -> t -> t
+      (* [bin t1 t2] is the same as [node [t1;t2] ] *)
+
     val to_box : t -> Box.t
+
     val draw : ?debug:bool -> t -> Command.t
   end
 

@@ -207,11 +207,15 @@ let leaf b = Node ((b, dummy_info), [])
 
 let node ?(ls=bp 20.) ?(cs=bp 3.) ?(arrow_style=Directed)
       ?(edge_style=Straight) ?stroke ?pen ?sep b l = 
-  Node ((b, {ls = ls; cs = cs; arrow_style = arrow_style; edge_style = edge_style; stroke = stroke; pen = pen; sep = sep; lab = None}), l)
+  Node ((b, {ls = ls; cs = cs; arrow_style = arrow_style; 
+             edge_style = edge_style; stroke = stroke; 
+             pen = pen; sep = sep; lab = None}), l)
 
 let nodel ?(ls=bp 20.) ?(cs=bp 3.) ?(arrow_style=Directed)
       ?(edge_style=Straight) ?stroke ?pen ?sep b l = 
-  Node ((b, {ls = ls; cs = cs; arrow_style = arrow_style; edge_style = edge_style; stroke = stroke; pen = pen; sep = sep; lab = Some (List.map snd l)}), 
+  Node ((b, { ls = ls; cs = cs; arrow_style = arrow_style; 
+              edge_style = edge_style; stroke = stroke; pen = pen; 
+              sep = sep; lab = Some (List.map snd l)}), 
        List.map fst l)
 
 let bin ?ls ?cs ?arrow_style ?edge_style ?stroke ?pen ?sep s x y = 
@@ -253,9 +257,10 @@ module Simple = struct
   let leaf s = Box.group [s]
     
   let node ?(ls=Num.bp 12.) ?(cs=Num.bp 5.) ?(arrow_style=Directed)
-      ?(edge_style=Straight) ?stroke ?pen ?sep s l = 
-    let l = Box.hbox ~padding:cs ~pos:`North l in 
-    let tree = Box.vbox ~padding:ls [s;l] in
+      ?(edge_style=Straight) ?stroke ?pen ?sep 
+      ?(valign=`Center) ?(halign=`North) s l = 
+    let l = Box.hbox ~padding:cs ~pos:halign l in 
+    let tree = Box.vbox ~padding:ls ~pos:valign [s;l] in
     Box.set_post_draw 
       (fun tree -> 
 	 (Command.iterl 

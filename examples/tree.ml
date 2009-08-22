@@ -80,7 +80,7 @@ let rec fib = function
 let tree9 = draw (fib 5)
 
 (*parse >> <<tree10 *)
-type t = | Node of int * t list
+type 'a t = | Node of 'a * 'a t list
 
 let rec bin = function
   | 0 -> Node (0, [])
@@ -92,6 +92,26 @@ let rec trans (Node (n,l)) =
   node ~arrow_style:Undirected (tex (sprintf "${2^{%d}}$" n)) (List.map trans l)
 
 let tree10 = draw (trans (bin 4))
+(*parse >> <<tree11 *)
+open Tree.Simple
+open Num
+
+let point = 
+  let pen = Pen.scale (bp 2.) (Pen.circle) in
+  Box.pic ~dx:zero ~dy:zero (Path.draw ~pen (Path.pathp [Point.origin]))
+
+(* We use the type defined in the previous example *) 
+let rec bin = function
+  | 0 -> Node (point, [])
+  | n -> 
+      let (Node (p,l) as t) = bin (n-1) in
+      Node (p, t :: l)
+
+let rec to_tree (Node (b,l)) = 
+  node ~arrow_style:Undirected ~valign:`Right b (List.map to_tree l)
+
+
+let tree11 = draw (to_tree (bin 5))
 (*parse >> *)
 
 let _ = 
@@ -106,4 +126,5 @@ let _ =
     "tree8", tree8;
     "tree9", tree9;
     "tree10", tree10;
+    "tree11", tree11;
   ]

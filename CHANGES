@@ -4,8 +4,9 @@ o - changes in behaviour, new features
 o Radar: fixed size of bullets
 o Helpers: the functions for boxes have a new optional argument [within] to
   give a box in which the arguments will be searched
-o Box: new functions set_{post,pre}_draw
-* Box: get_name now returns a string option
+o Box: new functions [set_{post,pre}_draw]
+* Box: [get_name] now returns a string option
+o Tree.Simple: alignment options for [node]
 
 version 0.7.1, July 24th, 2009
 ------------------------------
