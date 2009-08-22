@@ -383,6 +383,9 @@ let set_name name b = {b with name = name}
 let set_post_draw f b = {b with post_draw = f}
 let set_pre_draw f b = {b with pre_draw = f}
 
+let clear_post_draw b = {b with post_draw = no_drawing }
+let clear_pre_draw b = {b with pre_draw = no_drawing }
+
 let shadow b = 
   let shadow b = 
     let shad i =

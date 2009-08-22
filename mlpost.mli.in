@@ -1302,6 +1302,11 @@ and Box : sig
   val same_width : ?pos:hposition -> t list -> t list
   val same_size : ?pos:position -> t list -> t list
 
+  val set_post_draw : (t -> Command.t) -> t -> t
+  val clear_post_draw : t -> t
+  val set_pre_draw : (t -> Command.t) -> t -> t
+  val clear_pre_draw : t -> t
+
   (** {2 Misc.} *)
 
   val shadow : t -> t
