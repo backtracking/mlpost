@@ -789,3 +789,15 @@ let pos_reduce = function
   | #hposition as p -> hreduce p
   | #vposition as p -> vreduce p
   | #corner as p -> corner_reduce p
+
+let opposite_position (x: position): position =
+  match pos_reduce x with
+    | `Center -> `Center
+    | `West -> `East
+    | `East -> `West
+    | `North -> `South
+    | `South -> `North
+    | `Northwest -> `Southeast
+    | `Northeast -> `Southwest
+    | `Southwest -> `Northeast
+    | `Southeast -> `Northwest

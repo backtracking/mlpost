@@ -1103,6 +1103,10 @@ and Box : sig
 
   val corner : position -> t -> Point.t
 
+  val opposite_position : position -> position
+    (** Return the opposite position of a position (west for east, southeast
+        for northwest, center for center, ...). *)
+
   (** {2 Operators} *)
 
   val height : t -> Num.t
@@ -1241,6 +1245,29 @@ and Box : sig
     ?stroke:Color.t option -> ?pen:Pen.t ->
     int -> int -> (int -> int -> t) -> t
     (** similar to [gridi], but using a matrix defined with a function *)
+
+  val place :
+    position -> ?pos: position -> ?padding: Num.t -> t -> t -> t
+    (** Place a box relatively to another box.
+
+        [place `East a] is a function which places a box
+        at the east of [a]. Thus, [place `East a b] returns a copy of [b] placed
+        at the east of [a].
+
+        [place posa ~pos: posb ~padding a b] returns a box [c] which is
+        obtained by moving [b] to place the [posa] point of [a] on top of the
+        [posb] point of [b], and then padding the result by [padding] in
+        direction [posa].
+
+        Default value of [posb] is the opposite direction of [posa].
+        Default value of [padding] is zero.
+
+        The padding argument multiplies a unit vector which goes from the center
+        of [a] to the corner of [a] indicated by [posa]. This effectively places
+        point [posa] of [a] at exactly [padding] units of point [posb] of [b],
+        in direction [posa].
+        It also means that for diagonal directions, the actual direction will
+        change according to the width / height ratio of [a]. *)
 
   (** {2 Sub-boxes accessors} *)
 

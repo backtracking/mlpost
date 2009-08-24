@@ -326,3 +326,5 @@ val corner_reduce :
 
 val vreduce : vposition -> vposition_red
 val hreduce : hposition -> hposition_red
+
+val opposite_position : position -> position

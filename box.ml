@@ -709,3 +709,22 @@ let setp name pt box =
 let getp name box = ctr (get name box)
 let getpx name box = xpart (getp name box)
 let getpy name box = ypart (getp name box)
+
+(* placement *)
+
+let opposite_position: position -> position = function
+  | #Types.position as x -> (Types.opposite_position x :> position)
+  | `Custom f -> `Custom (fun b -> Point.sub (ctr b) (f b))
+
+(* this normalize does not produce any division by zero *)
+let normalize p =
+  Point.scale (Num.divn Num.one (Num.addn (Point.length p) (Num.bp 0.00001))) p
+
+let place posa ?(pos = opposite_position posa) ?padding a b =
+  let pa = corner posa a in
+  let pb = corner pos b in
+  let c = shift (Point.sub pa pb) b in
+  match padding with
+    | None -> c
+    | Some padding ->
+        shift (Point.mult padding (normalize (Point.sub pa (ctr a)))) c
