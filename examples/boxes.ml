@@ -72,8 +72,8 @@ let hierarchy =
       ] ] ]
   in
   draw b
-(*parse >> *)
 
+(*parse >> <<custom *)
 module P = Point
 open Num.Infix
 
@@ -109,7 +109,7 @@ let custom =
   Box.draw (vbox ~pos:(`Custom (getp "something")) [a;b;c])]
   
 
-(*parse <<place>> *)
+(*parse >> <<place *)
 
 let place =
   let b = rect (empty ~width: (cm 3.) ~height: (cm 1.5) ()) in
@@ -127,6 +127,8 @@ let place =
     make "northeast" `Northeast;
   ] in
   Command.seq (List.map Box.draw boxes)
+
+(*parse >> *)
 
 let () = Metapost.emit "simple" simple
 let () = Metapost.emit "f1" f1

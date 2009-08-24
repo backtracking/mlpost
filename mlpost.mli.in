@@ -1259,7 +1259,8 @@ and Box : sig
         [posb] point of [b], and then padding the result by [padding] in
         direction [posa].
 
-        Default value of [posb] is the opposite direction of [posa].
+        Default value of [posb] is the opposite direction of [posa] wrt. the
+        center (see {!opposite_position}).
         Default value of [padding] is zero.
 
         The padding argument multiplies a unit vector which goes from the center
