@@ -109,9 +109,29 @@ let custom =
   Box.draw (vbox ~pos:(`Custom (getp "something")) [a;b;c])]
   
 
+(*parse <<place>> *)
+
+let place =
+  let b = rect (empty ~width: (cm 3.) ~height: (cm 1.5) ()) in
+  let make t pos = rect (Box.place pos ~padding: (cm 1.) b (tex t)) in
+  let boxes = [
+    b;
+    make "center" `Center;
+    make "south" `South;
+    make "north" `North;
+    make "east" `East;
+    make "west" `West;
+    make "southwest" `Southwest;
+    make "southeast" `Southeast;
+    make "northwest" `Northwest;
+    make "northeast" `Northeast;
+  ] in
+  Command.seq (List.map Box.draw boxes)
+
 let () = Metapost.emit "simple" simple
 let () = Metapost.emit "f1" f1
 let () = Metapost.emit "f2" f2
 let () = Metapost.emit "traffic" traffic
 let () = Metapost.emit "hierarchy" hierarchy
 let () = Metapost.emit "custom" custom
+let () = Metapost.emit "place" place
