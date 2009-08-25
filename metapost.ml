@@ -63,6 +63,7 @@ let rec num fmt = function
   | C.NGMean (f1, f2) -> fprintf fmt "(%a@ ++@ %a)" num f1 num f2
   | C.NName n -> pp_print_string fmt n
   | C.NLength p -> fprintf fmt "length (%a)" path p
+  | C.NIfnullthenelse (n,n1,n2) -> fprintf fmt "(if (%a = 0): %a else: %a fi)" num n num n1 num n2
 
 and float fmt f = num fmt (C.F f)
 

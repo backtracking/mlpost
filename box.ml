@@ -710,15 +710,34 @@ let getp name box = ctr (get name box)
 let getpx name box = xpart (getp name box)
 let getpy name box = ypart (getp name box)
 
+(*let place_relative_to
+    ?(same_height=false)
+    ?(pos=`Center)
+    ?pos2
+    ?(offset=Num.zero)
+    ?(orientation)
+    box1 box2 =
+  let pos = pos_reduce pos in
+  let pos2 = match pos2 with
+    | None -> inverse_pos pos
+    | Some s -> pos_reduce s in
+  let [box1;box2] = 
+    if same_height 
+    then same_height [box1;box2]
+    else [box1;box2] in
+  let point1 = corner pos box1 in
+  let point2 = corner pos box2 in
+  let orient = match orient with
+    | None -> Point.normalize (Point.sub point1 (ctr box1))
+    | Some s -> pos_reduce s in
+  let vec = normalize 
+*)
+
 (* placement *)
 
 let opposite_position: position -> position = function
   | #Types.position as x -> (Types.opposite_position x :> position)
   | `Custom f -> `Custom (fun b -> Point.sub (ctr b) (f b))
-
-(* this normalize does not produce any division by zero *)
-let normalize p =
-  Point.scale (Num.divn Num.one (Num.addn (Point.length p) (Num.bp 0.00001))) p
 
 let place posa ?(pos = opposite_position posa) ?padding a b =
   let pa = corner posa a in
@@ -728,3 +747,4 @@ let place posa ?(pos = opposite_position posa) ?padding a b =
     | None -> c
     | Some padding ->
         shift (Point.mult padding (normalize (Point.sub pa (ctr a)))) c
+

@@ -113,9 +113,12 @@ let custom =
 
 let place =
   let b = rect (empty ~width: (cm 3.) ~height: (cm 1.5) ()) in
-  let make t pos = rect (Box.place pos ~padding: (cm 1.) b (tex t)) in
+  let make t pos = 
+    let aux pad = (Box.draw (Box.place pos b ?padding:pad (rect (tex t)))) in
+    aux None ++ aux (Some (cm 1.2))
+  in
   let boxes = [
-    b;
+    Box.draw b;
     make "center" `Center;
     make "south" `South;
     make "north" `North;
@@ -125,8 +128,9 @@ let place =
     make "southeast" `Southeast;
     make "northwest" `Northwest;
     make "northeast" `Northeast;
+    make "custom" (`Custom (fun b -> Point.add (Point.scale (bp 0.5) (ctr b)) (Point.scale (bp 0.5) (corner `Southeast b))))
   ] in
-  Command.seq (List.map Box.draw boxes)
+  Command.seq boxes
 
 (*parse >> *)
 

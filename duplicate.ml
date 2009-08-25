@@ -98,6 +98,8 @@ let rec num' = function
   | NMin (n1,n2) 
   | NGMean (n1,n2) -> num n1; num n2
   | NLength p -> path p
+  | NIfnullthenelse (n,n1,n2) -> num n; num n1; num n2
+
 and num n =
   if test_and_incr_num n then () else num' n.node
 

@@ -146,6 +146,10 @@ let rec num' = function
   | NLength p ->
       let p = path p in
       Spline_lib.metapost_length p
+  | NIfnullthenelse (n,n1,n2) -> 
+      let n = num n in
+      if n = 0. then num n1 else num n2
+
 and num n = memoize num' "num" num_memoize n
 and point' = function
   | PTPair (f1,f2) -> 

@@ -123,9 +123,6 @@ let p ?(scale=Num.bp) pr =
 
 let length p = gmean (xpart p) (ypart p)
 
-let p ?(scale=Num.bp) pr =
-  pt (pmap scale pr)
-
 let origin = p (0.,0.)
 
 
@@ -152,3 +149,7 @@ let draw ?color ?pen t =
      ... withcolor (0.00red+0.00green+0.00blue) withpen .... 
      for each command in the output file *)
     mkCommand (mkCDraw (mkPAofMPA (mkMPAKnot (mkKnot mkNoDir t mkNoDir))) color pen None)
+
+let normalize p = 
+  let l = (length p) in
+  scale (if_null l zero  (Num.divn Num.one l)) p

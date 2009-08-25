@@ -18,8 +18,8 @@ open Path
 
 (* Extended arrows. *)
 
-let normalize p =
-  Point.scale (Num.divn Num.one (Point.length p)) p
+let normalize = Point.normalize
+
 
 let neg = Point.scale (Num.bp (-1.))
 

@@ -42,3 +42,6 @@ let fig2 ((l1,l2) as arg) =
 let _ = List.iter (fun (f,n) -> Metapost.emit n f)
   [fig2 (for_joint Pa.jLine),"jLine";
    fig2 (for_joint Pa.jCurve),"jCurve"]
+
+let _ = Cairost.emit_svg "concrete.svg" (fig2 (for_joint Pa.jCurve))
+let _ = Cairost.emit_ps "concrete.ps" (fig2 (for_joint Pa.jCurve))

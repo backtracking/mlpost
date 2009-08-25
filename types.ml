@@ -69,6 +69,7 @@ type num_node =
   | NMin of num * num
   | NGMean of num * num
   | NLength of path
+  | NIfnullthenelse of num * num * num
 
 and num = num_node hash_consed
 
@@ -224,6 +225,8 @@ let num = function
   | NMin(n,m) -> combine2 9 n.hkey m.hkey
   | NGMean(n,m) -> combine2 10 n.hkey m.hkey
   | NLength p -> combine 11 p.hkey
+  | NIfnullthenelse (n,n1,n2) -> combine3 12 n.hkey n1.hkey n2.hkey
+
 
 let point = function
   | PTPair(n,m) -> combine2 12 n.hkey m.hkey
@@ -558,6 +561,7 @@ let mkNGMean n1 n2 = hashnum (NGMean(n1,n2))
 let mkNXPart p = hashnum (NXPart p)
 let mkNYPart p = hashnum (NYPart p)
 let mkNLength p = hashnum (NLength p)
+let mkNIfnullthenelse p n1 n2 = hashnum (NIfnullthenelse (p,n1,n2))
 
 (* point *)
 
@@ -790,7 +794,7 @@ let pos_reduce = function
   | #vposition as p -> vreduce p
   | #corner as p -> corner_reduce p
 
-let opposite_position (x: position): position =
+let opposite_position (x: position): position_red =
   match pos_reduce x with
     | `Center -> `Center
     | `West -> `East
@@ -801,3 +805,4 @@ let opposite_position (x: position): position =
     | `Northeast -> `Southwest
     | `Southwest -> `Northeast
     | `Southeast -> `Northwest
+

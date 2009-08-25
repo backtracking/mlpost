@@ -56,6 +56,9 @@ module rec Num : sig
   val gmean : t -> t -> t
   (** the geometric mean of two nums : sqrt(a * a + b * b) *)
 
+  val if_null : t -> t -> t -> t
+    (** if_null n n1 n2 is equal to n1 if n is null, n2 othewise *)
+
   (** {3 Infix operators}  *)
 
   module Infix : sig

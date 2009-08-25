@@ -47,6 +47,8 @@ let rec num' acc = function
   | NDiv (n1,n2) | NMax (n1,n2) | NMin (n1,n2)
   | NGMean (n1,n2) -> num (num acc n1) n2
   | NLength p -> path acc p
+  | NIfnullthenelse (n,n1,n2) -> num (num (num acc n) n1) n2
+
 and num acc = memoize num' num_memoize acc
 and point' acc = function
   | PTPair (f1,f2) -> num (num acc f1) f2

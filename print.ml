@@ -47,6 +47,7 @@ let rec num fmt n =
   | NMin(n1,n2) -> fprintf fmt "min(%a,%a)" num n1 num n2
   | NLength p -> fprintf fmt "length %a" path p
   | NGMean (n1,n2) -> fprintf fmt "mean(%a,%a)" num n1 num n2
+  | NIfnullthenelse (n,n1,n2) -> fprintf fmt "(if %a = 0 then %a else %a)" num n num n1 num n2
 
 and point fmt p = 
   match p.Hashcons.node with

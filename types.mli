@@ -67,6 +67,7 @@ type num_node = private
   | NMin of num * num
   | NGMean of num * num
   | NLength of path
+  | NIfnullthenelse of num * num * num
 
 and num = num_node hash_consed
 
@@ -211,6 +212,7 @@ val mkNGMean : num -> num -> num
 val mkNXPart : point -> num
 val mkNYPart : point -> num
 val mkNLength : path -> num
+val mkNIfnullthenelse : num -> num -> num -> num
 
 (* point *)
 val mkPTPair : num -> num -> point
@@ -327,4 +329,4 @@ val corner_reduce :
 val vreduce : vposition -> vposition_red
 val hreduce : hposition -> hposition_red
 
-val opposite_position : position -> position
+val opposite_position : position -> position_red

@@ -27,6 +27,7 @@ type num =
   | NGMean of num * num
   | NName of name
   | NLength of path
+  | NIfnullthenelse of num * num * num
 
 and point =
   | PTPair of num * num

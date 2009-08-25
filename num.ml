@@ -89,6 +89,12 @@ let gmean x y =
 
 let fold_max f = List.fold_left (fun w p -> maxn w (f p))
 
+let if_null n n1 n2 =
+  match n.node with
+    | F f  when is_zero f -> n1
+    | F f  -> n2
+    | _ -> mkNIfnullthenelse n n1 n2
+
 (*
 let bpn n = n
 let ptn n = multn (F 0.99626) n
