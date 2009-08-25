@@ -1,6 +1,7 @@
 open Mlpost
 open Box
 open Tree
+open Color
 let sprintf = Format.sprintf
 
 let stern_brocot h =
@@ -60,26 +61,31 @@ let diag =
 let (|>) x f = f x
 
 let archi_backend = 
-  let rt s = round_rect (tex s) in
+  let sep = bp 5. and dx = bp 5. and dy = bp 10. in
+  let rt ?fill s = round_rect ?fill (tex s) in
   let sigma = tex "$\\Sigma$" in
-  let metapost = rt "Metapost"
-  and cairo = rt "Cairo"
-  and concrete = rt "Concrete"
-  and mp = rt ".mp"
-  and mps = rt ".1,.mps" in
+  let metapost = rt ~fill:lightred "Metapost"
+  and cairo = rt ~fill:lightred "Cairo" 
+  and concrete = rt ~fill:lightred "Concrete"
+  and mp = rt ~fill:lightred ".mp" in
   let left = vbox [mp;metapost] in
   let lsigma = sub sigma (Box.hbox [sub metapost left;sigma]) in
-  let left = round_rect ~dy:(bp 10.) ~dx:(bp 5.) (group [left;lsigma]) in
+  let left = round_rect ~dy ~dx ~fill:lightgreen 
+                 (group [left;lsigma]) in
   let right = vbox [concrete;cairo] in
   let rsigma = sub sigma (Box.hbox [sub concrete right;sigma]) in
   let right = group [right;rsigma] in
   let center = hbox [left;right] in
   let mlpost = tex "Mlpost" in
   let mlpost = List.hd (same_width [mlpost;center]) in
-  let mlpost = round_rect mlpost in
-  let output = rt "output" in
+  let mlpost = round_rect ~fill:lightblue mlpost in
+  let output = rt ~fill:lightgray "output" in
+  let img = 
+    Box.scale (bp 0.5) 
+      (round_rect ~fill:lightyellow ~dy ~dx (Tree.to_box (fib 3))) in
   let all = vbox [mlpost;center;output] in
-  let arrow (x,y) = box_arrow ~sep:(bp 5.) (sub x all) (sub y all) in
+  let img = Box.place `East ~padding:(bp 30.) (sub output all) img in
+  let arrow (x,y) = box_arrow ~sep (sub x all) (sub y all) in
   let arrows = [(mp,metapost);
                 (concrete,cairo);
                 (mlpost,concrete);
@@ -88,7 +94,7 @@ let archi_backend =
                 (metapost,output);(cairo,output)]
   |> List.map arrow
   |> seq in
-  draw all ++ arrows
+  draw all ++ arrows ++ draw img ++ box_arrow ~sep (sub output all) img
 
 
 (* Koda-Ruskey *)
