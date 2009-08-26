@@ -104,7 +104,7 @@
      \begin{alltt}
   open \alert{Mlpost}
 
-  let texint n = tex (sprintf "$F_{%d}$" n)
+  let texint n = tex (sprintf "$F_\{%d\}$" n)
 
   let rec fib = function
     | 0 | 1 as n -> leaf (texint n)
@@ -210,7 +210,7 @@ let diag =
 \frametitle{Example 4: From a previous talk}
 
 \begin{center}
-\includegraphics{gray_f0}
+\includegraphics[width=\textwidth]{gray_f0}
 \end{center}
 \end{frame}
 
