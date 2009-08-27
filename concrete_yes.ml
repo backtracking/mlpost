@@ -17,6 +17,17 @@
 # 2 "concrete_yes.ml"
 let supported = true
 
+let set_prelude filename = 
+  Compute.set_prelude (Metapost_tool.read_prelude_from_tex_file filename)
+
+let set_t1disasm opt = Fonts.t1disasm := opt
+
+let set_prelude2 prelude =
+  match prelude with
+    | None -> Compute.set_prelude ""
+    | Some p -> Compute.set_prelude p
+
+
 type cnum = float
 
 module CPoint = Point_lib

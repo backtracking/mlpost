@@ -13,7 +13,7 @@
 (*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                  *)
 (*                                                                        *)
 (**************************************************************************)
-
+# 16 "mlpost.mli.in"
 (** This is Mlpost *)
 
 (** {2 Interfaces to basic Metapost datatypes} *)
@@ -2028,7 +2028,7 @@ end
 
 module Concrete : sig
   val supported : bool
-    
+
   module CPoint : sig
     type t = {x:float; y:float}
         
@@ -2129,6 +2129,18 @@ module Concrete : sig
   val point_of_cpoint : CPoint.t -> Point.t
   val path_of_cpath : CPath.t -> Path.t
     
+    (** {2 Some options (the mlpost tool take care of them) *)
+  val set_prelude : string -> unit
+    (** set_prelude filename use the prelude of the file filename 
+        for compilation of the tex snippets *)
+
+  val set_prelude2 : string option -> unit
+    (** set_prelude prelude use this prelude 
+        for compilation of the tex snippets *)
+
+  val set_t1disasm : string option -> unit
+    (** Deprecated in a next release *)
+
 end
   
 module Cairost : sig

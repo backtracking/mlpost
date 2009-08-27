@@ -29,16 +29,6 @@ type cairo_t = Cairo.t
 let emit_cairo = emit_cairo
 (*let emit_cairo = fun x -> ()*)
 
-let set_prelude filename = 
-  Compute.set_prelude (Metapost_tool.read_prelude_from_tex_file filename)
-
-let set_t1disasm opt = Fonts.t1disasm := opt
-
-let set_prelude2 prelude =
-  match prelude with
-    | None -> ()
-    | Some p -> Compute.set_prelude p
-
 let dump_pdf () = 
   Queue.iter (fun (_,fname,fig) -> emit_pdf (fname^".pdf") fig) Metapost.figures
 

@@ -187,11 +187,11 @@ let add_to_the_file bn f =
      (match !t1disasm with
         | None -> ()
         | Some f -> 
-            Printf.fprintf cout "let _ = Mlpost.Cairost.set_t1disasm (Some %S)\n" f);
+            Printf.fprintf cout "let _ = Mlpost.Concrete.set_t1disasm (Some %S)\n" f);
      (match !latex_file with
         | None -> ()
         | Some f -> 
-            Printf.fprintf cout "let _ = Mlpost.Cairost.set_prelude %S\n" f)));
+            Printf.fprintf cout "let _ = Mlpost.Concrete.set_prelude %S\n" f)));
   Printf.fprintf cout "# 1 \"%s\"\n" f;
   begin 
     let cin = open_in f in

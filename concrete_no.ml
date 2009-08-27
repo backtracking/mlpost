@@ -19,6 +19,12 @@ let supported = false
 
 let not_supported s = failwith ("Concrete."^s^" : not supported")
 
+let set_prelude filename = not_supported "set_prelude"
+
+let set_t1disasm opt = not_supported "set_t1disasm"
+
+let set_prelude2 prelude = not_supported "set_prelude2"
+
 module CPoint = 
 struct
   let not_supported s = failwith ("Concrete.Cpoint."^s^" : not supported")
