@@ -24,7 +24,6 @@ let _ = Random.self_init ()
 
 let debug = false
 
-
 let tempdir prefix suffix f =
   let rec create_dir () =
     try
@@ -46,6 +45,9 @@ type t = {tex : Dev_save.t;
 
 module Saved_device = Dviinterp.Interp(Dev_save.Dev_save)
 module Cairo_device = Dev_save.Dev_load(Dvicairo.Cairo_device)
+
+let set_verbosity b = 
+  Saved_device.set_verbosity b
 
 let create prelude = function
   | [] -> []

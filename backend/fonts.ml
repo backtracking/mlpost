@@ -35,7 +35,9 @@ type t =
     }
 
 let debug = ref false
-let info = ref true
+let info = ref false
+
+let set_verbosity b = info := b
 
 let print_float ff = fprintf ff "%f"
 let print_string ff = fprintf ff "%s"

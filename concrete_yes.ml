@@ -17,6 +17,8 @@
 # 2 "concrete_yes.ml"
 let supported = true
 
+let set_verbosity b = Compute.set_verbosity b
+
 let set_prelude filename = 
   Compute.set_prelude (Metapost_tool.read_prelude_from_tex_file filename)
 

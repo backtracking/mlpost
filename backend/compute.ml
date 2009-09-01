@@ -100,6 +100,9 @@ let command_memoize = Hashtbl.create 50
 let prelude = ref ""
 let set_prelude = (:=) prelude
 
+let set_verbosity b =
+  Gentex.set_verbosity b
+
 let float_to_metapost f = 
       (* Compatibility with metapost *)
       if f = infinity then 4095.99998 (* cf mpman *)

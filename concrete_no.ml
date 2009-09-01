@@ -19,6 +19,8 @@ let supported = false
 
 let not_supported s = failwith ("Concrete."^s^" : not supported")
 
+let set_verbosity b = not_supported "set_verbosity"
+
 let set_prelude filename = not_supported "set_prelude"
 
 let set_t1disasm opt = not_supported "set_t1disasm"

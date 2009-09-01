@@ -18,19 +18,31 @@ headers:
 # installation
 ##############
 
-install: install-$(OCAMLBEST) 
+install: install-$(OCAMLBEST) install-bin
 
+
+ifeq "$(OCAMLFIND)" "no"
 install-byte:
 	mkdir -p $(LIBDIR)
-	cp -f $(BUILD)mlpost.cmo $(BUILD)mlpost.cmi META $(BUILD)$(CMA) "$(LIBDIR)"
-	mkdir -p $(BINDIR)
-	cp -f $(BUILD)tool.byte $(BINDIR)/mlpost
-	cp -f mlpost.1 $(MANDIR)/man1
+	cp -f $(BUILD)mlpost.cmi META $(BUILD)$(CMA) "$(LIBDIR)"
 
 install-opt:
 	mkdir -p $(LIBDIR)
-	cp -f $(BUILD)mlpost.cmo $(BUILD)mlpost.cmi META $(BUILD)$(CMA) "$(LIBDIR)"
-	cp -f $(BUILD)mlpost$(LIBEXT) $(BUILD)mlpost.cmx $(BUILD)$(CMXA) "$(LIBDIR)"
+	cp -f $(BUILD)mlpost.cmi META $(BUILD)$(CMA) "$(LIBDIR)"
+	cp -f $(BUILD)$(CMXA) "$(LIBDIR)"
+else
+DESTDIR=-destdir $(LIBDIR:/mlpost=)
+
+install-byte:
+	ocamlfind remove $(DESTDIR) mlpost
+	ocamlfind install $(DESTDIR) mlpost $(BUILD)mlpost.cmi META $(BUILD)$(CMA)
+
+install-opt:
+	ocamlfind remove $(DESTDIR) mlpost
+	ocamlfind install $(DESTDIR) mlpost $(BUILD)mlpost$(LIBEXT) $(BUILD)mlpost.cmi META $(BUILD)$(CMXA) $(BUILD)$(CMA)
+endif
+
+install-bin:
 	mkdir -p $(BINDIR)
 	cp -f $(BUILD)tool.native $(BINDIR)/mlpost
 	cp -f mlpost.1 $(MANDIR)/man1

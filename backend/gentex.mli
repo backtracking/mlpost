@@ -14,6 +14,8 @@
 (*                                                                        *)
 (**************************************************************************)
 
+val set_verbosity : bool -> unit
+
 type t
 val draw : Cairo.t -> t -> unit
 val create : string -> string list -> t list

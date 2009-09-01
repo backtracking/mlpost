@@ -61,11 +61,6 @@ else
 fi
 
 
-if test "$LIBDIR" = ""; then
-        LIBDIR=$OCAMLLIB/mlpost
-fi
-echo "Mlpost library will be installed in: $LIBDIR"
-
 #Set FORPACK and abort if ocaml version is < 3.08
 case $OCAMLVERSION in
   0.*|1.*|2.*|3.00*|3.01*|3.02*|3.03*|3.04*|3.05*|3.06*|3.07*)
@@ -183,6 +178,16 @@ if test "$OCAMLFIND" == "yes"; then
    echo "ocamlfind : $OCAMLFINDLIB, ocamlc : $OCAMLLIB"
    fi
 fi
+
+if test "$LIBDIR" = ""; then
+   if test "$OCAMLFIND" == "yes"; then
+        LIBDIR=$(ocamlfind printconf destdir)/mlpost
+   else
+        LIBDIR=$OCAMLLIB/mlpost
+   fi
+fi
+echo "Mlpost library will be installed in: $LIBDIR"
+
 
 case $OCAMLVERSION in
   3.08|3.09|3.10.0|3.10.1*)
@@ -309,6 +314,7 @@ AC_SUBST(BASICOFLAGS)
 #(not used) AC_SUBST(OCAMLLIB)
 AC_SUBST(OCAMLWEB)
 AC_SUBST(OCAMLBUILD)
+AC_SUBST(OCAMLFIND)
 AC_SUBST(LABLGTK2)
 AC_SUBST(INCLUDEGTK2)
 AC_SUBST(LABLGTK2LIB)
@@ -327,6 +333,7 @@ AC_SUBST(TODAY)
 AC_SUBST(METAREQUIRESPACKAGE)
 
 echo "---------------------------------------------------"
+echo "  Mlpost library will be installed in: $LIBDIR"
 echo -n "  native code compilation: "
 if test "$OCAMLBEST" == "opt"; then echo "yes"; else echo "no"; fi
 echo "  Cairo support          : "$CAIRO

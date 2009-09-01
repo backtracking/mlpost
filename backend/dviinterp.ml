@@ -43,6 +43,11 @@ module type dev =
 
 module Interp (Dev : dev) =
 struct
+  let verbose = ref false
+  let set_verbosity b =
+    verbose := b;
+    Fonts.set_verbosity b
+
   let debug = ref false
   let unsome = function None -> assert false | Some x -> x
   let current_font = ref Int32.zero
@@ -172,7 +177,7 @@ struct
     List.iter (fun p -> 
                  if !debug then
 		   printf "#### Starting New Page ####@."
-                 else printf ".";
+                 else if !verbose then printf ".";
 		interp_page fonts p)
       doc.pages;
     Dev.end_document (unsome !dev)
@@ -180,9 +185,11 @@ struct
 
   let load_file arg file =
     let doc = Dvi.read_file file in
-    printf "Dvi file parsing and interpretation :@.@?";
+    if !verbose then
+      printf "Dvi file parsing and interpretation :@.@?";
     let res = load_doc arg doc in
-    printf " done@.@?";
+    if !verbose then
+      printf " done@.@?";
     res
 
 end

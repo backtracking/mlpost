@@ -191,7 +191,10 @@ let add_to_the_file bn f =
      (match !latex_file with
         | None -> ()
         | Some f -> 
-            Printf.fprintf cout "let _ = Mlpost.Concrete.set_prelude %S\n" f)));
+            Printf.fprintf cout "let _ = Mlpost.Concrete.set_prelude %S\n" f);
+       (if !verbose then
+         Printf.fprintf cout "let _ = Mlpost.Concrete.set_verbosity true\n")
+   ));
   Printf.fprintf cout "# 1 \"%s\"\n" f;
   begin 
     let cin = open_in f in

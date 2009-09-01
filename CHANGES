@@ -1,6 +1,8 @@
 o - changes in behaviour, new features
 * - incompatible changes in the interface
 
+o ocamlfind remove/install is used if ocamlfind is present
+o The backend Concrete output informations only with the verbose option
 o Radar: fixed size of bullets
 o Helpers: the functions for boxes have a new optional argument [within] to
   give a box in which the arguments will be searched
