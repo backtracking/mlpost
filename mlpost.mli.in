@@ -1712,6 +1712,29 @@ module Tree : sig
 
 end
 
+module Tree_adv : sig
+  type 'a t = Node of 'a * 'a t list
+  val gen_place : 
+    width:('a -> Num.t) ->
+    height:('a -> Num.t) ->
+    set_pos:(Point.t -> 'a -> 'b) -> (Box.t t -> Box.t) -> 'a t -> 'b t
+
+  val place :
+      width:('a -> Num.t) ->
+      height:('a -> Num.t) ->
+      set_pos:(Point.t -> 'a -> 'b) -> ?ls:Num.t -> ?cs:Num.t ->
+      ?valign:Box.position -> ?halign:Box.position -> 'a t -> 'b t
+
+  val draw : ('a -> Box.t) -> 'a t ->  Command.t
+
+  val map : ('a -> 'b) -> 'a t -> 'b t
+  val fold : ('a -> 'b -> 'a) -> 'a -> 'b t -> 'a
+  val gen_draw_arrows : 
+     'c -> style:(Point.t -> Point.t -> 'c) ->
+     corner:(Box.position -> 'a -> Point.t) -> 'a t -> 'c t
+
+end
+
 module Diag : sig
 
   (** Diagrams. *)

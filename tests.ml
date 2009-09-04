@@ -28,6 +28,28 @@ let shift x y = transform [Transform.shifted (x ++ y)]
 
 let () = Random.init 1234
 
+open Tree_adv
+
+let rec bin = function
+  | 0 -> Node (0, [])
+  | n -> 
+      let (Node (_,l) as t) = bin (n-1) in
+      Node (n, t :: l)
+let to_box n = Box.tex (sprintf "${2^{%d}}$" n), n
+let t = map to_box (bin 4)
+
+let t = place ~width:(fun (z,_) -> Box.width z) 
+              ~height:(fun (z,_) -> Box.height z)
+              ~set_pos:(fun p (z,n) -> Box.center p z, n) t
+
+let adv_fig = 
+  let (++) = Command.(++) in
+  draw fst t ++ 
+  (fold (++) Command.nop 
+    (gen_draw_arrows Command.nop
+      ~style:(fun a b -> Helpers.draw_simple_arrow a b) 
+      ~corner:(fun d (z,_) -> Box.corner d z) t))
+
 open Tree
 open Box
 
@@ -534,7 +556,9 @@ let grid_with_padding_2 =
   seq [Box.draw b; Box.draw (shift (Point.pt (bp 5., bp 5.)) b)]
 
 let figs = [
-  grid_with_padding;
+(*   grid_with_padding; *)
+  adv_fig;
+(*
   grid_with_padding_2;
   rotatedbox;
   assia_schema;
@@ -556,6 +580,7 @@ let figs = [
   (* other *)
   florence; Box.draw shapes1; Box.draw shapes2; 
   d14; d13; d5; 
+*)
 (*   d6 *)
 ] 
 
