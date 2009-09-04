@@ -78,7 +78,7 @@ let rec num' = function
       let p,c = path p in
       C.NLength p, c
   | NIfnullthenelse (n,n1,n2) -> 
-      let n,c = num n1 in
+      let n,c = num n in
       let n1,c1 = num n1 in
       let n2,c2 = num n2 in
       C.NIfnullthenelse (n,n1,n2), c ++ c1 ++ c2
