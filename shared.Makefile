@@ -29,7 +29,7 @@ install-byte:
 install-opt:
 	mkdir -p $(LIBDIR)
 	cp -f $(BUILD)mlpost.cmi META $(BUILD)$(CMA) "$(LIBDIR)"
-	cp -f $(BUILD)$(CMXA) "$(LIBDIR)"
+	cp -f $(BUILD)mlpost.a $(BUILD)$(CMXA) "$(LIBDIR)"
 else
 DESTDIR=-destdir $(LIBDIR:/mlpost=)
 
