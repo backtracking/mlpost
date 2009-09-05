@@ -1713,11 +1713,47 @@ module Tree : sig
 end
 
 module Tree_adv : sig
+
   type 'a t = Node of 'a * 'a t list
-  val gen_place : 
+
+    (** {2} Useful functions *)
+
+  val map : ('a -> 'b) -> 'a t -> 'b t
+
+  val map2 : ('a -> 'b -> 'c) -> 'a t -> 'b t -> 'c t
+
+  val root_map : ('a option -> 'a -> 'b) -> 'a t -> 'b t
+    (** root_map f t
+	f is called with each pair father node.
+	A tree is constructed with the result.
+	f None r is called once with the root r *)
+
+  val map_children : ('a -> 'a list -> 'b) -> 'a t -> 'b t
+    (** map_children f t
+	f is called with each pair node children.
+	A tree is constructed with the result.*)
+
+  val fold : ('a -> 'b -> 'a) -> 'a -> 'b t -> 'a
+    (** prefix *)
+
+  val combine : 'a t -> 'b t -> ('a * 'b) t
+
+  val split : ('a * 'b) t -> 'a t * 'b t
+
+  val filter : ('a -> bool) -> 'a t -> 'a t
+    (** filter f t
+	If for a node n of t f n is false then it doesn't appear in the result as well as its descendants. If f is false for the root node, invalid_argument is raised *)
+
+  val filter_option : ('a -> 'a option) -> 'a t -> 'a t
+
+    (** {2} Functions for placement *)
+
+  val gen_place :
     width:('a -> Num.t) ->
     height:('a -> Num.t) ->
     set_pos:(Point.t -> 'a -> 'b) -> (Box.t t -> Box.t) -> 'a t -> 'b t
+    (** gen_place ~width ~height ~set_pos place_box t
+	place_box t2 should return a box where all the box of t2 appear. *)
 
   val place :
       width:('a -> Num.t) ->
@@ -1725,14 +1761,51 @@ module Tree_adv : sig
       set_pos:(Point.t -> 'a -> 'b) -> ?ls:Num.t -> ?cs:Num.t ->
       ?valign:Box.position -> ?halign:Box.position -> 'a t -> 'b t
 
-  val draw : ('a -> Box.t) -> 'a t ->  Command.t
-
-  val map : ('a -> 'b) -> 'a t -> 'b t
-  val fold : ('a -> 'b -> 'a) -> 'a -> 'b t -> 'a
   val gen_draw_arrows : 
      'c -> style:(Point.t -> Point.t -> 'c) ->
      corner:(Box.position -> 'a -> Point.t) -> 'a t -> 'c t
 
+  (** Simple functions *)
+  val draw : ('a -> Box.t) -> 'a t ->  Command.t
+
+    (** Tools for creating its own type *)
+  (*val wrap_whs_box :
+    ('a -> Box.t) ->
+    ('a -> Box.t -> 'b) ->
+    ( width:('a -> Num.t) ->
+      height:('a -> Num.t) -> 
+      set_pos:(Types.point -> 'a -> 'b) -> 'c) 
+    -> 'c*)
+    (** wrap_whs_box give_box mod_box f returns f where its arguments width height and set_pos have been set *)
+
+  val wrap_corner_box :
+    ('a -> Box.t) ->
+    ( corner : (Box.position -> 'a -> Point.t) -> 'c)
+    -> 'c
+    (** wrap_corner_box give_box f returns f where its argument corner has been set *)
+
+  (** Tools for tree overlay aware *)
+  module Overlays :
+  sig
+        type interval = | Bet of int * int (** [|a,b|] *)
+			| Bef of int       (** ]|-oo,a|] *)
+			| Aft of int       (** [|a,+oo|[ *)
+			| Nev              (** emptyset *)
+			| Alw              (** N *)
+
+	val in_interval : int -> interval -> bool
+	val min_interval : int -> interval -> int
+	val max_interval : int -> interval -> int
+	val min_tree : ('a -> interval) -> 'a t -> int
+	val max_tree : ('a -> interval) -> 'a t -> int
+
+	type 'a spec = (interval * 'a) list
+	val assoq : int -> 'a spec -> 'a
+	val max : ('a -> Num.t) -> ('b * 'a) list -> Num.t
+	  (** for width and height *)
+	(*val set_pos : ('f -> 'g -> 'h) -> 'f -> ('i * 'g) list -> ('i * 'h) list*)
+	val set_pos : (Point.t -> 'a -> 'b) -> Point.t -> 'a spec -> 'b spec
+  end
 end
 
 module Diag : sig
