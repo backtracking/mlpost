@@ -1716,7 +1716,7 @@ module Tree_adv : sig
 
   type 'a t = Node of 'a * 'a t list
 
-    (** {2} Useful functions *)
+    (** {2 Useful functions} *)
 
   val map : ('a -> 'b) -> 'a t -> 'b t
 
@@ -1746,7 +1746,7 @@ module Tree_adv : sig
 
   val filter_option : ('a -> 'a option) -> 'a t -> 'a t
 
-    (** {2} Functions for placement *)
+    (** {2 Functions for placement} *)
 
   val gen_place :
     width:('a -> Num.t) ->
@@ -1787,9 +1787,9 @@ module Tree_adv : sig
   (** Tools for tree overlay aware *)
   module Overlays :
   sig
-        type interval = | Bet of int * int (** [|a,b|] *)
-			| Bef of int       (** ]|-oo,a|] *)
-			| Aft of int       (** [|a,+oo|[ *)
+        type interval = | Bet of int * int (** \[|a,b|\] *)
+			| Bef of int       (** \]|-oo,a|\] *)
+			| Aft of int       (** \[|a,+oo|\[ *)
 			| Nev              (** emptyset *)
 			| Alw              (** N *)
 
@@ -2225,7 +2225,7 @@ module Concrete : sig
   val point_of_cpoint : CPoint.t -> Point.t
   val path_of_cpath : CPath.t -> Path.t
     
-    (** {2 Some options (the mlpost tool take care of them) *)
+    (** {2 Some options (the mlpost tool take care of them)} *)
   val set_verbosity : bool -> unit
 
   val set_prelude : string -> unit
