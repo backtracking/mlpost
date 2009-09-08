@@ -79,29 +79,29 @@ and color fmt = function
       (* 1 is the "normal" mode *)
 
 and point fmt = function
-  | C.PTPair (m,n) -> fprintf fmt "(%a,%a)" num m num n
-  | C.PTPicCorner (pic, d) -> fprintf fmt "(%a %a)" piccorner d picture pic
-  | C.PTAdd (p1, p2) -> fprintf fmt "(%a + %a)" point p1 point p2
-  | C.PTSub (p1, p2) -> fprintf fmt "(%a - %a)" point p1 point p2
-  | C.PTMult (f, p) -> fprintf fmt "(%a * %a)" num f point p
-  | C.PTRotated (f, p) ->  fprintf fmt "(%a rotated %a)" point p float f
-  | C.PTPointOf (f, p) -> fprintf fmt "(point %a of (%a))" num f path p
+  | C.PTPair (m,n) -> fprintf fmt "(%a,@ %a)" num m num n
+  | C.PTPicCorner (pic, d) -> fprintf fmt "(%a@ %a)" piccorner d picture pic
+  | C.PTAdd (p1, p2) -> fprintf fmt "(%a +@ %a)" point p1 point p2
+  | C.PTSub (p1, p2) -> fprintf fmt "(%a -@ %a)" point p1 point p2
+  | C.PTMult (f, p) -> fprintf fmt "(%a *@ %a)" num f point p
+  | C.PTRotated (f, p) ->  fprintf fmt "(%a rotated@ %a)" point p float f
+  | C.PTPointOf (f, p) -> fprintf fmt "(point %a@ of (%a))" num f path p
   | C.PTDirectionOf (f, p) ->
-      fprintf fmt "(direction %a of (%a))" num f path p
-  | C.PTTransformed (p,tr) -> fprintf fmt "((%a) %a)" point p transform tr
+      fprintf fmt "(direction %a@ of (%a))" num f path p
+  | C.PTTransformed (p,tr) -> fprintf fmt "((%a)@ %a)" point p transform tr
   | C.PTName pn -> pp_print_string fmt pn
 
 and transform fmt = function
-  | C.TRScaled a -> fprintf fmt "scaled %a" num a
-  | C.TRShifted a -> fprintf fmt "shifted %a" point a
-  | C.TRRotated a -> fprintf fmt "rotated %a" float a
-  | C.TRSlanted a -> fprintf fmt "slanted %a" num a
-  | C.TRXscaled a -> fprintf fmt "xscaled %a" num a
-  | C.TRYscaled a -> fprintf fmt "yscaled %a" num a
-  | C.TRZscaled a -> fprintf fmt "zscaled %a" point a
+  | C.TRScaled a -> fprintf fmt "scaled %a@," num a
+  | C.TRShifted a -> fprintf fmt "shifted %a@," point a
+  | C.TRRotated a -> fprintf fmt "rotated %a@," float a
+  | C.TRSlanted a -> fprintf fmt "slanted %a@," num a
+  | C.TRXscaled a -> fprintf fmt "xscaled %a@," num a
+  | C.TRYscaled a -> fprintf fmt "yscaled %a@," num a
+  | C.TRZscaled a -> fprintf fmt "zscaled %a@," point a
   | C.TRReflect (p1,p2) -> 
-      fprintf fmt "reflectedabout (%a,%a)" point p1 point p2
-  | C.TRRotateAround (p,f) -> fprintf fmt "rotatedaround(%a,%a)" point p float f
+      fprintf fmt "reflectedabout (%a,@ %a)@," point p1 point p2
+  | C.TRRotateAround (p,f) -> fprintf fmt "rotatedaround(%a,@ %a)@," point p float f
 
 and picture fmt = function
   | C.PITex s -> fprintf fmt "btex %s etex" s
