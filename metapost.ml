@@ -54,67 +54,67 @@ let rec num fmt = function
       else fprintf fmt "%g" f
   | C.NXPart p -> fprintf fmt "xpart %a" point p
   | C.NYPart p -> fprintf fmt "ypart %a" point p
-  | C.NAdd (f1, f2) -> fprintf fmt "(%a +@ %a)" num f1 num f2
-  | C.NSub (f1, f2) -> fprintf fmt "(%a -@ %a)" num f1 num f2
-  | C.NMult (f1, f2) -> fprintf fmt "(%a *@ %a)" num f1 num f2
-  | C.NDiv (f1, f2) -> fprintf fmt "(%a /@ %a)" num f1 num f2
-  | C.NMax (f1, f2) -> fprintf fmt "max(@ %a,@ %a)" num f1 num f2
-  | C.NMin (f1, f2) -> fprintf fmt "min(@ %a,@ %a)" num f1 num f2
-  | C.NGMean (f1, f2) -> fprintf fmt "(%a@ ++@ %a)" num f1 num f2
+  | C.NAdd (f1, f2) -> fprintf fmt "(%a +@ %a@,)" num f1 num f2
+  | C.NSub (f1, f2) -> fprintf fmt "(%a -@ %a@,)" num f1 num f2
+  | C.NMult (f1, f2) -> fprintf fmt "(%a *@ %a@,)" num f1 num f2
+  | C.NDiv (f1, f2) -> fprintf fmt "(%a /@ %a@,)" num f1 num f2
+  | C.NMax (f1, f2) -> fprintf fmt "max(@ %a,@ %a@,)" num f1 num f2
+  | C.NMin (f1, f2) -> fprintf fmt "min(@ %a,@ %a@,)" num f1 num f2
+  | C.NGMean (f1, f2) -> fprintf fmt "(%a@ ++@ %a@,)" num f1 num f2
   | C.NName n -> pp_print_string fmt n
-  | C.NLength p -> fprintf fmt "length (%a)" path p
+  | C.NLength p -> fprintf fmt "length (%a@,)" path p
   | C.NIfnullthenelse (n,n1,n2) -> fprintf fmt "(if (%a = 0): %a else: %a fi)" num n num n1 num n2
 
 and float fmt f = num fmt (C.F f)
 
 and scolor fmt = function
-  | RGB (r,g,b) -> fprintf fmt "(%a, %a , %a)" float r float g float b
+  | RGB (r,g,b) -> fprintf fmt "(%a, %a , %a@,)" float r float g float b
   | CMYK (c,m,y,k) ->
-      fprintf fmt "(%a, %a, %a, %a)" float c float m float y float k
+      fprintf fmt "(%a, %a, %a, %a@,)" float c float m float y float k
   | Gray f -> fprintf fmt "%a * white" float f
 
 and color fmt = function
   | OPAQUE c -> scolor fmt c
-  | TRANSPARENT (f,c) -> fprintf fmt "transparent (1,%a,%a)" float f scolor c
+  | TRANSPARENT (f,c) -> fprintf fmt "transparent (1,%a,%a@,)" float f scolor c
       (* 1 is the "normal" mode *)
 
 and point fmt = function
-  | C.PTPair (m,n) -> fprintf fmt "(%a,%a)" num m num n
-  | C.PTPicCorner (pic, d) -> fprintf fmt "(%a %a)" piccorner d picture pic
-  | C.PTAdd (p1, p2) -> fprintf fmt "(%a + %a)" point p1 point p2
-  | C.PTSub (p1, p2) -> fprintf fmt "(%a - %a)" point p1 point p2
-  | C.PTMult (f, p) -> fprintf fmt "(%a * %a)" num f point p
-  | C.PTRotated (f, p) ->  fprintf fmt "(%a rotated %a)" point p float f
-  | C.PTPointOf (f, p) -> fprintf fmt "(point %a of (%a))" num f path p
+  | C.PTPair (m,n) -> fprintf fmt "(%a,@ %a@,)" num m num n
+  | C.PTPicCorner (pic, d) -> fprintf fmt "(%a@ %a@,)" piccorner d picture pic
+  | C.PTAdd (p1, p2) -> fprintf fmt "(%a +@ %a@,)" point p1 point p2
+  | C.PTSub (p1, p2) -> fprintf fmt "(%a -@ %a@,)" point p1 point p2
+  | C.PTMult (f, p) -> fprintf fmt "(%a *@ %a@,)" num f point p
+  | C.PTRotated (f, p) ->  fprintf fmt "(%a rotated@ %a@,)" point p float f
+  | C.PTPointOf (f, p) -> fprintf fmt "(point %a@ of (%a))" num f path p
   | C.PTDirectionOf (f, p) ->
-      fprintf fmt "(direction %a of (%a))" num f path p
-  | C.PTTransformed (p,tr) -> fprintf fmt "((%a) %a)" point p transform tr
+      fprintf fmt "(direction %a@ of (%a))" num f path p
+  | C.PTTransformed (p,tr) -> fprintf fmt "((%a)@ %a@,)" point p transform tr
   | C.PTName pn -> pp_print_string fmt pn
 
 and transform fmt = function
-  | C.TRScaled a -> fprintf fmt "scaled %a" num a
-  | C.TRShifted a -> fprintf fmt "shifted %a" point a
-  | C.TRRotated a -> fprintf fmt "rotated %a" float a
-  | C.TRSlanted a -> fprintf fmt "slanted %a" num a
-  | C.TRXscaled a -> fprintf fmt "xscaled %a" num a
-  | C.TRYscaled a -> fprintf fmt "yscaled %a" num a
-  | C.TRZscaled a -> fprintf fmt "zscaled %a" point a
+  | C.TRScaled a -> fprintf fmt "scaled %a@," num a
+  | C.TRShifted a -> fprintf fmt "shifted %a@," point a
+  | C.TRRotated a -> fprintf fmt "rotated %a@," float a
+  | C.TRSlanted a -> fprintf fmt "slanted %a@," num a
+  | C.TRXscaled a -> fprintf fmt "xscaled %a@," num a
+  | C.TRYscaled a -> fprintf fmt "yscaled %a@," num a
+  | C.TRZscaled a -> fprintf fmt "zscaled %a@," point a
   | C.TRReflect (p1,p2) -> 
-      fprintf fmt "reflectedabout (%a,%a)" point p1 point p2
-  | C.TRRotateAround (p,f) -> fprintf fmt "rotatedaround(%a,%a)" point p float f
+      fprintf fmt "reflectedabout (%a,@ %a)@," point p1 point p2
+  | C.TRRotateAround (p,f) -> fprintf fmt "rotatedaround(%a,@ %a)@," point p float f
 
 and picture fmt = function
   | C.PITex s -> fprintf fmt "btex %s etex" s
-  | C.PITransformed (p, tr) -> fprintf fmt "((%a) %a)" picture p transform tr
+  | C.PITransformed (p, tr) -> fprintf fmt "((%a) %a@,)" picture p transform tr
   | C.PIName n -> pp_print_string fmt n
 
 and path fmt = function
-    C.PAScope p -> fprintf fmt "(%a)" path p
+    C.PAScope p -> fprintf fmt "(%a@,)" path p
   | C.PAFullCircle -> fprintf fmt "fullcircle"
   | C.PAHalfCircle -> fprintf fmt "halfcircle"
   | C.PAQuarterCircle -> fprintf fmt "quartercircle"
   | C.PAUnitSquare -> fprintf fmt "unitsquare"
-  | C.PATransformed (p,tr) -> fprintf fmt "((%a) %a)" path p transform tr
+  | C.PATransformed (p,tr) -> fprintf fmt "((%a) %a@,)" path p transform tr
   | C.PAAppend (p1,j,p2) -> fprintf fmt "%a %a@ %a" path p1 joint j path p2
   | C.PACycle (d,j,p) -> fprintf fmt "%a %a %acycle" path p joint j direction d
   | C.PAConcat (k,j,p) -> fprintf fmt "%a %a@ %a" path p joint j knot k
@@ -122,7 +122,7 @@ and path fmt = function
   | C.PACutAfter (p1, p2) -> fprintf fmt "%a cutafter (%a)@ " path p2 path p1
   | C.PACutBefore (p1, p2) -> fprintf fmt "%a cutbefore (%a)@ " path p2 path p1
   | C.PABuildCycle l ->
-      fprintf fmt "buildcycle(%a)" (Misc.print_list comma path) l
+      fprintf fmt "buildcycle(%a@,)" (Misc.print_list comma path) l
   | C.PASub (f1, f2, p) ->
       fprintf fmt "subpath(%a,%a) of %a" num f1 num f2 name p
   | C.PABBox p -> fprintf fmt "bbox %a" picture p
@@ -160,7 +160,7 @@ and dash fmt = function
 and pen fmt = function
   | C.PenCircle -> fprintf fmt "pencircle"
   | C.PenSquare -> fprintf fmt "pensquare"
-  | C.PenFromPath p -> fprintf fmt "makepen (%a)" path p
+  | C.PenFromPath p -> fprintf fmt "makepen (%a@,)" path p
   | C.PenTransformed (p,tr) -> fprintf fmt "%a %a" pen p transform tr
 
 and command fmt  = function

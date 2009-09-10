@@ -1285,7 +1285,7 @@ and Box : sig
 	if [b] contains several sub-boxes with name [n]. *)
 
   val sub : t -> t -> t
-  (** [sub b1 b2] returns the sub-box of [b] which has the same name as [b1], 
+  (** [sub b1 b] returns the sub-box of [b] which has the same name as [b1], 
      if any, and raises [Invalid_argument] otherwise. The behavior is not
      specified if [b] contains several sub-boxes with the name of [b1]. *)
 

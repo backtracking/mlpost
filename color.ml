@@ -28,7 +28,7 @@ type t = Types.color =
 let red = OPAQUE (RGB (1.0,0.0,0.0))
 let lightred = OPAQUE (RGB (1.0,0.5,0.5))
 let blue = OPAQUE (RGB (0.0,0.0,1.0))
-let lightblue = OPAQUE (RGB (0.5,0.5,1.0))
+let lightblue = OPAQUE (RGB (0.68,0.85,0.90))
 let green = OPAQUE (RGB (0.0,1.0,0.0))
 let lightgreen = OPAQUE (RGB (0.5,1.0,0.5))
 let orange = OPAQUE (RGB (1.0,0.4,0.0))
