@@ -1744,7 +1744,7 @@ module Tree_adv : sig
     (** filter f t
 	If for a node n of t f n is false then it doesn't appear in the result as well as its descendants. If f is false for the root node, invalid_argument is raised *)
 
-  val filter_option : ('a -> 'a option) -> 'a t -> 'a t
+  val filter_option : ('a -> 'b option) -> 'a t -> 'b t
 
     (** {2 Functions for placement} *)
 

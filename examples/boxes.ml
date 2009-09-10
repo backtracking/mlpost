@@ -132,6 +132,45 @@ let place =
   ] in
   Command.seq boxes
 
+(*parse >> <<place_circle *)
+
+let mod_float a b = 
+   a -. b *. floor (a /. b)
+
+let place_around ?(auto_inverse=false) r arc n f =
+  let up = P.pt (zero,r) in
+  let turn arc b = 
+    let b = if auto_inverse && arc > 90. && arc < 270. then 
+      Box.rotate 180. b else b in
+    let b = Box.center up b in
+    let t = Transform.rotate_around P.origin arc in
+    Box.transform [t] b in
+  let rec aux acc = function
+    | x when x=n -> acc
+    | n -> 
+        let a = (float_of_int n)*.arc in
+        let a = mod_float a 360. in
+        aux (turn a (f n)::acc) (n+1) in
+  aux [] 0
+
+let place_circle_ ?auto_inverse r n f =
+    let arc = 360./.(float_of_int n) in
+    place_around ?auto_inverse r arc n f
+
+let place_circle =
+  let yop d i = Box.circle (Box.tex (Printf.sprintf "$%i_{%02d}$" d i)) in
+  let rec aux acc = function
+    | 0 -> acc
+    | i -> 
+        let n = (float_of_int (i*10))**0.8 in
+        let r = cm (2.8*.n/.15.) in
+        let n = int_of_float n in
+        aux (Box.draw (Box.group (place_circle_ 
+                                ~auto_inverse:true
+                                r n (yop i)))::acc) (i-1) in
+  Command.seq (aux [] 3)
+
+
 (*parse >> *)
 
 let () = Metapost.emit "simple" simple
@@ -141,3 +180,4 @@ let () = Metapost.emit "traffic" traffic
 let () = Metapost.emit "hierarchy" hierarchy
 let () = Metapost.emit "custom" custom
 let () = Metapost.emit "place" place
+let () = Metapost.emit "place_circle" place_circle

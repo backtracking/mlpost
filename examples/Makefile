@@ -1,6 +1,6 @@
 # all files that are generated from boxes.ml
 BOXPNGFILES := simple.png f1.png f2.png traffic.png hierarchy.png custom.png\
-		place.png
+		place.png place_circle.png
 BOXOUTFILES := $(BOXPNGFILES:.png=.1)
 
 # all files that are generated from paths.ml
@@ -19,7 +19,7 @@ MISCOUTFILES := $(MISCPNGFILES:.png=.1)
 # all files that are generated from tree.ml
 TREEPNGFILES := tree1.png tree2.png tree3.png tree4.png tree5.png \
                 tree6.png tree7.png tree8.png tree9.png tree10.png \
-		tree11.png
+		tree11.png tree_adv0.png tree_adv1.png tree_adv2.png
 TREEOUTFILES := $(TREEPNGFILES:.png=.1)
 
 # all files that are generated from labels.ml

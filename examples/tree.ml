@@ -112,6 +112,48 @@ let rec to_tree (Node (b,l)) =
 
 
 let tree11 = draw (to_tree (bin 5))
+
+(*parse >> <<tree_adv0 *)
+open Tree_adv
+open Tree_adv.Overlays
+
+let (++) = Command.(++)
+let rec to_tree = function
+  | Node (e,l) -> Tree.node e (List.map to_tree l)
+
+let node i e l = Node ([Aft i,tex e],l)
+
+let place_not_simple t =
+  let width = max Box.width in
+  let height = max Box.height in
+  let set_pos = set_pos Box.center in
+  let bplace t = Tree.to_box (to_tree t) in
+  gen_place ~width ~height ~set_pos bplace t
+
+let tree_adv_draw t i =
+  let keep e = try Some (assoq i e)
+  with Not_found ->  None in
+  let t = filter_option keep t in
+  let t_arrow = gen_draw_arrows Command.nop
+    ~style:Helpers.draw_simple_arrow
+    ~corner:Box.corner t in
+  (Tree_adv.draw (fun x -> x) t) ++
+    (fold (++) Command.nop t_arrow)
+
+let mytree_placed = 
+  let t = node 0 "A" 
+    [ node 0 "B" [node 0 "D" [];node 0 "E" []];
+      node 0 "C" [node 1 "F" [];node 2 "G" []]] in
+  place_not_simple t
+  
+
+
+let tree_adv0 = tree_adv_draw mytree_placed 0
+(*parse >> <<tree_adv1 *)
+let tree_adv1 = tree_adv_draw mytree_placed 1
+(*parse >> <<tree_adv2 *)
+let tree_adv2 = tree_adv_draw mytree_placed 2
+
 (*parse >> *)
 
 let _ = 
@@ -127,4 +169,7 @@ let _ =
     "tree9", tree9;
     "tree10", tree10;
     "tree11", tree11;
+    "tree_adv0", tree_adv0;
+    "tree_adv1", tree_adv1;
+    "tree_adv2", tree_adv2;
   ]
