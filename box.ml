@@ -218,7 +218,12 @@ let rect_ w h = w, h, Shapes.rectangle w h
 let circ_ w h = 
   let m = maxn w h in
   m, m, Shapes.circle m
-let ellipse_ w h = w, h, Shapes.ellipse w h
+
+let ellipse_ w h = 
+  let p = Shapes.ellipse w h in
+  let pic = Command.draw p in
+  Picture.width pic, Picture.height pic, p
+
 let round_rect_ w h = 
   let rx = (minn w h) /./ 10. in
   w, h, Shapes.round_rect w h rx rx
