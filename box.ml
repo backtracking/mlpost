@@ -183,7 +183,7 @@ let border pos b =
 let rec draw ?(debug=false) b = 
   let path_cmd = match b.stroke, b.pen with
     | None, _ -> Command.nop
-    | Some color, None -> Command.draw ~color b.contour
+    | Some color, None -> Command.draw ~color ~dashed:b.dash b.contour
     | Some color, Some pen -> 
         Command.draw ~pen ~color ~dashed:b.dash b.contour
   in
