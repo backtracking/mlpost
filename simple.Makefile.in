@@ -274,3 +274,4 @@ dist-clean distclean:: clean
 	$(OCAMLDEP) $(INCLUDES) *.ml *.mli gui/*.mli gui/*.ml > .depend
 
 include .depend
+include shared.Makefile
