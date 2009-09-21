@@ -1321,8 +1321,9 @@ and Box : sig
   val set_height : Command.vposition -> Num.t -> t -> t
   val set_width : Command.hposition -> Num.t -> t -> t
 
-  val get_dash : t -> Dash.t
+  val get_dash : t -> Dash.t option
   val set_dash : Dash.t -> t -> t
+  val clear_dash : t -> t
 
   val set_height2 : vposition -> Num.t -> vposition -> Num.t -> t -> t
     (** set_height2 `North y1 `South y2 b return the box b with its height and

@@ -61,7 +61,7 @@ type t = {
   fill : Color.t option;
   contour : Path.t; 
   desc : desc;
-  dash : Dash.t;
+  dash : Dash.t option;
   post_draw : t -> Command.t ;
   pre_draw : t -> Command.t
 }
@@ -183,9 +183,9 @@ let border pos b =
 let rec draw ?(debug=false) b = 
   let path_cmd = match b.stroke, b.pen with
     | None, _ -> Command.nop
-    | Some color, None -> Command.draw ~color ~dashed:b.dash b.contour
+    | Some color, None -> Command.draw ~color ?dashed:b.dash b.contour
     | Some color, Some pen -> 
-        Command.draw ~pen ~color ~dashed:b.dash b.contour
+        Command.draw ~pen ~color ?dashed:b.dash b.contour
   in
   let fill_cmd = match b.fill with
     | None -> Command.nop
@@ -263,9 +263,8 @@ let no_drawing _ = Command.nop
 let fresh_name = 
   let x = ref 1 in
   (fun () ->  incr x; Name.Internal (!x) )
-
 let mkbox ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black) 
-          ?pen ?(dash=Dash.evenly) ?fill ?(pre_draw=no_drawing) ?(post_draw=no_drawing)
+          ?pen ?dash ?fill ?(pre_draw=no_drawing) ?(post_draw=no_drawing)
           w h c desc =
   let w,h,s = make_contour style ?dx ?dy w h c in
   let name = 
@@ -402,7 +401,8 @@ let get_name b =
   | Name.Userdef s -> Some s
 
 let get_dash b = b.dash
-let set_dash d b = {b with dash = d }
+let set_dash d b = {b with dash = Some d }
+let clear_dash b = {b with dash = None }
 
 let set_name name b = {b with name = Name.Userdef name}
 
@@ -591,10 +591,9 @@ let vbox ?padding ?pos ?style ?min_height ?same_height ?dx ?dy
 
 let modify_box ?stroke ?pen ?dash b = 
   let s = match stroke with | None -> Some Color.black | Some x -> x in
-  let d = match dash with | None -> b.dash | Some d -> d in
   { b with stroke = s;
            pen = pen;
-           dash = d;
+           dash = dash;
            contour = Path.shift b.ctr (Shapes.rectangle b.width b.height) }
 
 let hblock ?padding ?(pos=`Center) ?name ?stroke ?pen ?dash
