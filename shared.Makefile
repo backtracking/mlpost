@@ -44,7 +44,7 @@ endif
 
 install-bin:
 	mkdir -p $(BINDIR)
-	cp -f $(BUILD)tool.native $(BINDIR)/mlpost
+	cp -f $(BUILD)$(TOOL) $(BINDIR)/mlpost
 	cp -f mlpost.1 $(MANDIR)/man1
 
 uninstall:
