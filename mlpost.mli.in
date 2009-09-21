@@ -996,7 +996,8 @@ and Box : sig
 
   type 'a box_creator = 
     ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 
-    ?stroke:Color.t option -> ?pen:Pen.t -> ?fill:Color.t -> 'a -> t
+    ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> 
+    ?fill:Color.t -> 'a -> t
     (** All functions used to create boxes take the following optional
 	parameters : [dx] (resp. [dy]) is the horizontal
 	(resp. vertical) padding between the box border and its
@@ -1010,12 +1011,12 @@ and Box : sig
 
   val empty : 
     ?width:Num.t -> ?height:Num.t -> ?style:style -> ?name:string -> 
-    ?stroke:Color.t option -> ?pen:Pen.t -> ?fill:Color.t -> unit -> t
+    ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> ?fill:Color.t -> unit -> t
     (** the empty box *)
 
   val empty_from_box : 
     ?style:style -> ?name:string -> 
-    ?stroke:Color.t option -> ?pen:Pen.t -> ?fill:Color.t -> t -> t
+    ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> ?fill:Color.t -> t -> t
     (** the empty box with the same position and dimension as the box *)
 
   val pic : ?style:style -> Picture.t box_creator
@@ -1182,7 +1183,7 @@ and Box : sig
   val tabular : 
     ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
     ?style:style -> ?name:string -> ?stroke:Color.t option -> 
-    ?pen:Pen.t -> ?fill:Color.t ->
+    ?pen:Pen.t -> ?dash:Dash.t -> ?fill:Color.t ->
     t array array -> t
     (** aligns the given boxes both vertically and horizontally and returns
 	a box containing all these boxes (with rows as first sub-components,
@@ -1196,14 +1197,14 @@ and Box : sig
   val tabularl : 
     ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
     ?style:style -> ?name:string -> ?stroke:Color.t option -> 
-    ?pen:Pen.t -> ?fill:Color.t ->
+    ?pen:Pen.t -> ?dash:Dash.t -> ?fill:Color.t ->
     t list list -> t
     (** similar to [tabular], but using lists instead of arrays *)
 
   val tabulari : 
     ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
     ?style:style -> ?name:string -> ?stroke:Color.t option -> 
-    ?pen:Pen.t -> ?fill:Color.t ->
+    ?pen:Pen.t -> ?dash:Dash.t -> ?fill:Color.t ->
     int -> int -> (int -> int -> t) -> t 
     (** similar to [tabular], but using a matrix defined with a function *)
 
@@ -1212,7 +1213,7 @@ and Box : sig
   val vplace : ?padding:Num.t -> ?pos:position -> 
                ?min_height:Num.t -> ?same_height:bool -> t list -> t list
   val hblock : ?padding:Num.t -> ?pos:Command.position -> ?name:string -> 
-               ?stroke:Color.t option -> ?pen:Pen.t -> 
+               ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> 
                ?min_width:Num.t -> ?same_width:bool -> t list -> t
     (** [hblock bl] aligns the boxes of [bl] horizontally and surround
 	them with new rectangular boxes of the same height; all these new
@@ -1222,7 +1223,7 @@ and Box : sig
                and at least of [min_width]; default is false*)
 
   val vblock : ?padding:Num.t -> ?pos:Command.position -> ?name:string -> 
-               ?stroke:Color.t option -> ?pen:Pen.t -> 
+               ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> 
                ?min_height:Num.t -> ?same_height:bool -> t list -> t
     (** similar to [hblock], with vertical alignment.
         @param min_height minimum height of all boxes; default is zero
@@ -1231,7 +1232,7 @@ and Box : sig
 
   val grid : 
     ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position -> 
-    ?stroke:Color.t option -> ?pen:Pen.t ->
+    ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> 
     t array array -> t
     (** Aligns the given boxes in a way that is similar to [hblock] and [vblock]:
 	boxes are aligned in a grid where all cells have the same size. Each one 
@@ -1239,13 +1240,13 @@ and Box : sig
 	
   val gridl : 
     ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position -> 
-    ?stroke:Color.t option -> ?pen:Pen.t ->
+    ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> 
     t list list -> t
     (** similar to [grid], but using lists instead of arrays *)
     
   val gridi : 
     ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position -> 
-    ?stroke:Color.t option -> ?pen:Pen.t ->
+    ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> 
     int -> int -> (int -> int -> t) -> t
     (** similar to [gridi], but using a matrix defined with a function *)
 
@@ -1319,6 +1320,9 @@ and Box : sig
 
   val set_height : Command.vposition -> Num.t -> t -> t
   val set_width : Command.hposition -> Num.t -> t -> t
+
+  val get_dash : t -> Dash.t
+  val set_dash : Dash.t -> t -> t
 
   val set_height2 : vposition -> Num.t -> vposition -> Num.t -> t -> t
     (** set_height2 `North y1 `South y2 b return the box b with its height and

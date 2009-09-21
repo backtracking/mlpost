@@ -61,6 +61,7 @@ type t = {
   fill : Color.t option;
   contour : Path.t; 
   desc : desc;
+  dash : Dash.t;
   post_draw : t -> Command.t ;
   pre_draw : t -> Command.t
 }
@@ -183,7 +184,8 @@ let rec draw ?(debug=false) b =
   let path_cmd = match b.stroke, b.pen with
     | None, _ -> Command.nop
     | Some color, None -> Command.draw ~color b.contour
-    | Some color, Some pen -> Command.draw ~pen ~color b.contour
+    | Some color, Some pen -> 
+        Command.draw ~pen ~color ~dashed:b.dash b.contour
   in
   let fill_cmd = match b.fill with
     | None -> Command.nop
@@ -263,21 +265,21 @@ let fresh_name =
   (fun () ->  incr x; Name.Internal (!x) )
 
 let mkbox ?(style=Rect) ?dx ?dy ?name ?(stroke=Some Color.black) 
-          ?pen ?fill ?(pre_draw=no_drawing) ?(post_draw=no_drawing)
+          ?pen ?(dash=Dash.evenly) ?fill ?(pre_draw=no_drawing) ?(post_draw=no_drawing)
           w h c desc =
   let w,h,s = make_contour style ?dx ?dy w h c in
   let name = 
     match name with 
     | None -> fresh_name () 
     | Some s -> Name.Userdef s in
-  { desc = desc;
-    name = name; stroke = stroke; pen = pen; fill = fill;
-    width = w; height = h; ctr = c; contour = s;
-    post_draw = post_draw; pre_draw = pre_draw }
+  { desc = desc; name = name; stroke = stroke; pen = pen; 
+    fill = fill; dash = dash; width = w; height = h; 
+    ctr = c; contour = s; post_draw = post_draw; 
+    pre_draw = pre_draw }
 
-let pic ?style ?dx ?dy ?name ?(stroke=None) ?pen ?fill pic =
+let pic ?style ?dx ?dy ?name ?(stroke=None) ?pen ?dash ?fill pic =
   let c = Picture.ctr pic in
-  mkbox ?style ?dx ?dy ?name ~stroke ?pen ?fill 
+  mkbox ?style ?dx ?dy ?name ~stroke ?pen ?dash ?fill 
         (Picture.width pic) (Picture.height pic) c (Pic pic)
 
 let merge_maps =
@@ -288,33 +290,34 @@ let merge_maps =
     NMap.add b.name b m in
   List.fold_left add_one NMap.empty
 
-let box ?style ?dx ?dy ?name ?stroke ?pen ?fill b =
-  mkbox ?style ?dx ?dy ?name ?stroke ?pen ?fill 
+let box ?style ?dx ?dy ?name ?stroke ?pen ?dash ?fill b =
+  mkbox ?style ?dx ?dy ?name ?stroke ?pen ?dash ?fill 
   (width b) (height b) (ctr b) (Grp ([|b|], merge_maps [b] ))
 
-let path ?style ?dx ?dy ?name ?(stroke=None) ?pen ?fill p = 
-  pic ?style ?dx ?dy ?name ~stroke ?pen ?fill (Picture.make (Command.draw p))
+let path ?style ?dx ?dy ?name ?(stroke=None) ?pen ?dash ?fill p = 
+  pic ?style ?dx ?dy ?name ~stroke ?pen ?dash ?fill (Picture.make (Command.draw p))
 
 let empty ?(width=Num.zero) ?(height=Num.zero) ?style ?name ?(stroke=None) 
-          ?pen ?fill () =
-  mkbox ?style ?name ~dx:zero ~dy:zero ~stroke ?pen ?fill 
+          ?pen ?dash ?fill () =
+  mkbox ?style ?name ~dx:zero ~dy:zero ~stroke ?pen ?dash ?fill 
     width height Point.origin Emp
 
-let empty_from_box ?style ?name ?(stroke=None) ?pen ?fill box =
-  mkbox ?style ?name ~stroke ?pen ?fill 
+let empty_from_box ?style ?name ?(stroke=None) ?pen ?dash ?fill box =
+  mkbox ?style ?name ~stroke ?pen ?dash ?fill 
     (width box) (height box) (ctr box) Emp
     
 
 (* groups the given boxes in a new box *)
 let group ?style ?(dx=Num.zero) ?(dy=Num.zero) 
-  ?name ?(stroke=None) ?pen ?fill bl =
+  ?name ?(stroke=None) ?pen ?dash ?fill bl =
     let xmin b = xpart (south_west b) in
     let xmax b = xpart (north_east b) in
     let ymin b = ypart (south_west b) in
     let ymax b = ypart (north_east b) in
     match bl with
-    | [] -> empty ~width:dx ~height:dy ?style ?name ~stroke ?pen ?fill ()
-    | [b] -> box ?style ~dx ~dy ?name ~stroke ?pen ?fill b
+    | [] -> empty ~width:dx ~height:dy ?style 
+                  ?name ~stroke ?pen ?dash ?fill ()
+    | [b] -> box ?style ~dx ~dy ?name ~stroke ?pen ?dash ?fill b
     | b::r ->
         let xmin,xmax,ymin,ymax = 
           List.fold_left 
@@ -328,7 +331,7 @@ let group ?style ?(dx=Num.zero) ?(dy=Num.zero)
         let w = xmax -/ xmin in
         let h = ymax -/ ymin in
         let c = Point.pt (xmin +/ w /./ 2., ymin +/ h /./ 2.) in
-        mkbox ?style ~dx ~dy ?name ~stroke ?pen ?fill w h c 
+        mkbox ?style ~dx ~dy ?name ~stroke ?pen ?dash ?fill w h c 
           (Grp (Array.of_list bl, merge_maps bl))
 
 let group_array ?name ?stroke ?fill ?dx ?dy ba =
@@ -343,7 +346,8 @@ let group_rect ?name ?(stroke=None) w h c bl =
 
 type 'a box_creator = 
   ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 
-  ?stroke:Color.t option -> ?pen:Pen.t -> ?fill:Color.t -> 'a -> t
+  ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> 
+  ?fill:Color.t -> 'a -> t
 
 let rect = box ~style:Rect
 let circle = box ~style:Circle
@@ -353,8 +357,8 @@ let patatoid = box ~style:Patatoid
 let patatoid2 = box ~style:Patatoid2
 let round_box = box ~style:RoundBox
 
-let tex ?style ?dx ?dy ?name ?(stroke=None) ?pen ?fill s = 
-  pic ?style ?dx ?dy ?name ~stroke ?pen ?fill (Picture.tex s)
+let tex ?style ?dx ?dy ?name ?(stroke=None) ?pen ?dash ?fill s = 
+  pic ?style ?dx ?dy ?name ~stroke ?pen ?dash ?fill (Picture.tex s)
 
 let nth i b = match b.desc with
   | Grp (a, _ ) -> 
@@ -396,6 +400,9 @@ let get_name b =
   match b.name with
   | Name.Internal _ -> None
   | Name.Userdef s -> Some s
+
+let get_dash b = b.dash
+let set_dash d b = {b with dash = d }
 
 let set_name name b = {b with name = Name.Userdef name}
 
@@ -573,40 +580,39 @@ let hequalize h l = List.map (set_height h) l
 let wequalize w l = List.map (set_width w) l
 
 let hbox ?padding ?pos ?style ?min_width ?same_width ?dx ?dy 
-         ?name ?stroke ?pen ?fill l = 
-  group ?style ?dx ?dy ?name ?stroke ?pen ?fill 
+         ?name ?stroke ?pen ?dash ?fill l = 
+  group ?style ?dx ?dy ?name ?stroke ?pen ?dash ?fill 
     (hbox_list ?padding ?pos ?min_width ?same_width l)
 
 let vbox ?padding ?pos ?style ?min_height ?same_height ?dx ?dy 
-         ?name ?stroke ?pen ?fill l = 
-  group ?style ?dx ?dy ?name ?stroke ?pen ?fill 
+         ?name ?stroke ?pen ?dash ?fill l = 
+  group ?style ?dx ?dy ?name ?stroke ?pen ?dash ?fill 
     (vbox_list ?padding ?pos ?min_height ?same_height l)
 
-let modify_box ?stroke ?pen b = 
-  let s = 
-    match stroke with
-    | None -> Some Color.black
-    | Some x -> x in
+let modify_box ?stroke ?pen ?dash b = 
+  let s = match stroke with | None -> Some Color.black | Some x -> x in
+  let d = match dash with | None -> b.dash | Some d -> d in
   { b with stroke = s;
            pen = pen;
+           dash = d;
            contour = Path.shift b.ctr (Shapes.rectangle b.width b.height) }
 
-let hblock ?padding ?(pos=`Center) ?name ?stroke ?pen 
+let hblock ?padding ?(pos=`Center) ?name ?stroke ?pen ?dash
            ?min_width ?same_width pl = 
   group ?name 
-    (List.map (modify_box ?stroke ?pen) 
+    (List.map (modify_box ?stroke ?pen ?dash) 
       (hbox_list ?padding ~pos ?min_width ?same_width
         (List.map (set_height (extractv pos) (max_height pl)) pl)))
 
-let vblock ?padding ?(pos=`Center) ?name ?stroke ?pen 
+let vblock ?padding ?(pos=`Center) ?name ?stroke ?pen ?dash
            ?min_height ?same_height pl =
   group ?name 
-    (List.map (modify_box ?stroke ?pen) 
+    (List.map (modify_box ?stroke ?pen ?dash) 
       (vbox_list ~pos ?min_height ?same_height
         (List.map (set_width (extracth pos) (max_width pl)) pl)))
 
 let tabularl ?hpadding ?vpadding ?(pos=`Center) ?style ?name 
-             ?stroke ?pen ?fill pll =
+             ?stroke ?pen ?dash ?fill pll =
   (* we first compute the widths of columns and heights of rows *)
   let hmaxl = List.map (Num.fold_max height Num.zero) pll in
   let rec calc_wmax pll = match pll with 
@@ -630,21 +636,21 @@ let tabularl ?hpadding ?vpadding ?(pos=`Center) ?style ?name
     List.map2 (fun h l -> 
       List.map (fun cell -> set_height (extractv pos) h cell) l) 
       hmaxl pll in
-  vbox ?padding:vpadding ~pos ?style ?name ?stroke ?pen ?fill
+  vbox ?padding:vpadding ~pos ?style ?name ?stroke ?pen ?dash ?fill
     (List.map 
       (fun r -> hbox ?padding:hpadding ~pos r) pll)
 
 let tabular ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?pos ?style 
-            ?name ?stroke ?pen ?fill m =
+            ?name ?stroke ?pen ?dash ?fill m =
   let pll = Array.to_list (Array.map Array.to_list m) in
-  tabularl ~hpadding ~vpadding ?pos ?style ?name ?stroke ?pen ?fill pll
+  tabularl ~hpadding ~vpadding ?pos ?style ?name ?stroke ?pen ?dash ?fill pll
 
 let tabulari ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?pos ?style 
-             ?name ?stroke ?pen ?fill w h f =
+             ?name ?stroke ?pen ?dash ?fill w h f =
   let m = Array.init h (fun j -> Array.init w (fun i -> f i j)) in
-  tabular ~hpadding ~vpadding ?pos ?style ?name ?stroke ?pen ?fill m
+  tabular ~hpadding ~vpadding ?pos ?style ?name ?stroke ?pen ?dash ?fill m
 
-let gridl ?hpadding ?vpadding ?(pos=`Center) ?stroke ?pen pll =
+let gridl ?hpadding ?vpadding ?(pos=`Center) ?stroke ?pen ?dash pll =
   let hmax = Num.fold_max (Num.fold_max height Num.zero) Num.zero pll in
   let wmax = Num.fold_max (Num.fold_max width Num.zero) Num.zero pll in
   let pll = 
@@ -656,18 +662,18 @@ let gridl ?hpadding ?vpadding ?(pos=`Center) ?stroke ?pen pll =
     vbox_list ~pos ?padding:vpadding 
       (List.map 
         (fun r -> 
-          group (List.map (modify_box ?stroke ?pen) 
+          group (List.map (modify_box ?stroke ?pen ?dash) 
                   (hbox_list ?padding:hpadding ~pos r)))
         pll) in
   group pll
 
-let grid ?hpadding ?vpadding ?pos ?stroke ?pen m =
+let grid ?hpadding ?vpadding ?pos ?stroke ?pen ?dash m =
   let pll = Array.to_list (Array.map Array.to_list m) in 
-  gridl ?hpadding ?vpadding ?pos ?stroke ?pen pll
+  gridl ?hpadding ?vpadding ?pos ?stroke ?pen ?dash pll
 
-let gridi ?hpadding ?vpadding ?pos ?stroke ?pen w h f =
+let gridi ?hpadding ?vpadding ?pos ?stroke ?pen ?dash w h f =
   let m = Array.init h (fun j -> Array.init w (fun i -> f i j)) in
-  grid ?hpadding ?vpadding ?pos ?stroke ?pen m
+  grid ?hpadding ?vpadding ?pos ?stroke ?pen ?dash m
 
 module P = Path
 
