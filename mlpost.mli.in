@@ -171,6 +171,10 @@ and Point : sig
   (** Scales the Y coordinate of a point by a scalar *)
   val yscale : Num.t -> t -> t
 
+  (** Normalize the vector represented by the point.
+      The origin becomes the origin *)
+  val normalize : t -> t
+
   (** {2 Convenient constructors} *)
 
   (** The following functions build a point at a 
@@ -2267,6 +2271,6 @@ module Cairost : sig
 
   type cairo_t @MLPOSTMLI_CAIRO_T@
 
-  val emit_cairo : (float -> float -> cairo_t) -> Command.t -> unit
+  val emit_cairo : cairo_t -> float * float -> Command.t -> unit
 
 end

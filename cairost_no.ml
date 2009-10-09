@@ -34,4 +34,4 @@ let generate_pdfs _ _ = failwith "Cairost.generate_pdfs : not supported"
 
 type cairo_t = unit
 
-let emit_cairo  _ _ = failwith "Cairost.emit_cairo : not supported"
+let emit_cairo  _ _ _ = failwith "Cairost.emit_cairo : not supported"

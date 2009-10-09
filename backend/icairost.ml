@@ -78,9 +78,10 @@ let emit_png fname fig = emit_gen
      Cairo.surface_finish surf;
      Cairo_png.surface_write_to_file surf fname) dumb_next_page [fig]
 
-let emit_cairo gencr (fig:Command.t) = emit_gen 
-  (fun draw height width -> draw (gencr height width)) 
-  dumb_next_page [fig]
+let emit_cairo cairo (width,height) fig = 
+  (*Compute.clear (); LookForTeX.clear ();*)
+  let fig = LookForTeX.commandpic fig in
+  Picture_lib.ToCairo.draw cairo width height fig
 
 let emit_pdfs fname figs = emit_gen 
   (create Cairo_pdf.surface_create_for_channel fname) 

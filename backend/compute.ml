@@ -97,6 +97,14 @@ let path_memoize = Hashtbl.create 50
 let picture_memoize = Hashtbl.create 50
 let command_memoize = Hashtbl.create 50
 
+let clear () = 
+  Hashtbl.clear num_memoize;
+  Hashtbl.clear point_memoize;
+  Hashtbl.clear metapath_memoize;
+  Hashtbl.clear path_memoize;
+  Hashtbl.clear picture_memoize;
+  Hashtbl.clear command_memoize
+
 let prelude = ref ""
 let set_prelude = (:=) prelude
 
