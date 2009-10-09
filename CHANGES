@@ -3,7 +3,7 @@ o - changes in behaviour, new features
 
 version 0.7.2, October 9th, 2009
 --------------------------------
-* -classic-display is not an option of mlpost tool anymore (use -v instrad)
+* -classic-display is not an option of mlpost tool anymore (use -v instead)
 * Change in the signature of Cairost.emit_cairo
 o Fix the -compile-name option with ocamlbuild
 o ocamlfind remove/install is used if ocamlfind is present
