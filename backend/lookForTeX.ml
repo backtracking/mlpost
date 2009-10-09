@@ -26,6 +26,14 @@ let path_memoize = Hashtbl.create 50
 let picture_memoize = Hashtbl.create 50
 let command_memoize = Hashtbl.create 50
 
+let clear () = 
+  Hashtbl.clear num_memoize;
+  Hashtbl.clear point_memoize;
+  Hashtbl.clear metapath_memoize;
+  Hashtbl.clear path_memoize;
+  Hashtbl.clear picture_memoize;
+  Hashtbl.clear command_memoize
+
 let memoize f memoize =
   fun acc arg -> 
     try
@@ -160,6 +168,7 @@ let metapathl_error ferror  arg = ct_auxl metapath arg; List.map (ferror Compute
 let picturel_error ferror arg = ct_auxl picture arg; List.map (ferror Compute.picture) arg
 
 
+let commandpic arg = ct_aux commandpic arg; Compute.commandpic arg
 let command arg = ct_aux command arg; Compute.command arg
 let num arg = ct_aux num arg; Compute.num arg
 let point arg = ct_aux point arg; Compute.point arg

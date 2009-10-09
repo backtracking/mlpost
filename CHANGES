@@ -1,6 +1,8 @@
 o - changes in behaviour, new features
 * - incompatible changes in the interface
 
+* Change in the signature of Cairost.emit_cairo
+o Fix the -compile-name option with ocamlbuild
 o ocamlfind remove/install is used if ocamlfind is present
 o The backend Concrete output informations only with the verbose option
 o Radar: fixed size of bullets

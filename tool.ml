@@ -111,7 +111,7 @@ let spec = Arg.align
     "-depend", Set depend, " output dependency lines in a format suitable for the make(1) utility";
     "-dumpable", Set dumpable, " output one name of dumpable file by line";
     "-get-include-compile", Symbol (["cmxa";"cma";"dir";"file"],get_include_compile), " Output the libraries which are needed by the library Mlpost";
-    "-compile-name <compile-name>", String (fun s -> compile_name := Some s), " Keep the compiled version of the .ml file";
+    "-compile-name", String (fun s -> compile_name := Some s), "<compile-name> Keep the compiled version of the .ml file";
     "-dont-execute", Set dont_execute, " Don't execute the mlfile";
     "-dont-clean", Set dont_clean, " Don't remove intermediate files";
     "-add-nothing", Set add_nothing, " Add nothing to the file"
@@ -254,6 +254,7 @@ let compile f =
         command ("cp " ^ mlf ^ " " ^ mlf2);
         mlf2,fun () -> if !dont_clean then () else Sys.remove mlf2 in
     let ext = if !native then ".native" else ".byte" in
+    let exec_name = Filename.chop_extension mlf2 ^ ext in
     try
       let args = ["-lib unix"] in
       let args =
@@ -270,11 +271,14 @@ let compile f =
           args@[sprintf "-lflags %s -lib bigarray -libs %s" iI includecairos] in
       let args =
         args@["-lib mlpost";
-           !ccopt;Filename.chop_extension mlf2 ^ ext]@
+           !ccopt;exec_name]@
         (if !dont_execute then [] else ["--"; !execopt])
       in
       ocamlbuild args;
-      remove_mlf2 ()
+      remove_mlf2 ();
+      match !compile_name with
+        | None -> if !dont_clean then () else Sys.remove exec_name
+        | Some s -> command ("cp " ^ exec_name ^ " " ^ s)
     with Command_failed out -> 
       remove_mlf2 ();
       exit out
