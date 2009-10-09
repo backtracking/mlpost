@@ -2234,15 +2234,15 @@ module Concrete : sig
   val point_of_cpoint : CPoint.t -> Point.t
   val path_of_cpath : CPath.t -> Path.t
     
-    (** {2 Some options (the mlpost tool take care of them)} *)
+    (** {2 Some options (the mlpost tool takes care of them)} *)
   val set_verbosity : bool -> unit
 
   val set_prelude : string -> unit
-    (** set_prelude filename use the prelude of the file filename 
+    (** set_prelude filename uses the prelude of the file filename 
         for compilation of the tex snippets *)
 
   val set_prelude2 : string option -> unit
-    (** set_prelude prelude use this prelude 
+    (** set_prelude2 prelude uses this prelude 
         for compilation of the tex snippets *)
 
   val set_t1disasm : string option -> unit

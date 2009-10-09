@@ -188,13 +188,14 @@ if test "$LIBDIR" = ""; then
 fi
 echo "Mlpost library will be installed in: $LIBDIR"
 
-
 case $OCAMLVERSION in
   3.08|3.09|3.10.0|3.10.1*)
         echo "Your ocaml is too old (or too buggy 3.10.0, 3.10.1). I can't compile the backend cairo without ocamlbuild"
-        MAKEFILE=simple.Makefile;;
+        MAKEFILE=simple.Makefile
+        OCAMLBUILD=no;;
   *)
         AC_CHECK_PROG(OCAMLBUILD,ocamlbuild,yes,no)
+        OCAMLBUILD=no
         if test "$OCAMLBUILD" == "yes"; then
            OCAMLBUILDLIB=$(ocamlbuild -where)
            if test "$OCAMLBUILDLIB" != "${OCAMLLIB}/ocamlbuild"; then
@@ -251,7 +252,7 @@ else
     fi
 fi
 
-if test -n "$OCAMLBUILD" -a -n "$CAIROLIB" -a -n "$BITSTRINGLIB"; then
+if test "$OCAMLBUILD" == yes -a -n "$CAIROLIB" -a -n "$BITSTRINGLIB"; then
    CAIRO=yes
    INCLUDECAIRO="-I $CAIROLIB -I $BITSTRINGLIB"
    METAREQUIRESPACKAGE="unix cairo bitstring"
@@ -336,7 +337,7 @@ echo "---------------------------------------------------"
 echo "  Mlpost library will be installed in: $LIBDIR"
 echo -n "  native code compilation: "
 if test "$OCAMLBEST" == "opt"; then echo "yes"; else echo "no"; fi
-echo "  Cairo support          : "$CAIRO
+echo "  Cairo support in mlpost: "$CAIRO
 echo "---------------------------------------------------"
 
 # Finally create the Makefile from Makefile.in

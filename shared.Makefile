@@ -132,9 +132,9 @@ ocamlwizard:
 # Makefile is rebuilt whenever Makefile.in or configure.in is modified
 ######################################################################
 
-Makefile META version.ml mlpost.mli myocamlbuild.ml: Makefile.in ocamlbuild.Makefile.in META.in version.ml.in config.status myocamlbuild.ml.in mlpost.mli.in
+Makefile META version.ml mlpost.mli myocamlbuild.ml: Makefile.in ocamlbuild.Makefile.in simple.Makefile.in META.in version.ml.in config.status myocamlbuild.ml.in mlpost.mli.in
 	./config.status
-	chmod a-w mlpost.mli myocamlbuild.ml META Makefile ocamlbuild.Makefile version.ml
+	chmod a-w mlpost.mli myocamlbuild.ml META Makefile ocamlbuild.Makefile simple.Makefile version.ml
 
 config.status: configure
 	./config.status --recheck
