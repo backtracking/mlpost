@@ -41,7 +41,6 @@ let set_latex_file f =
   latex_file := Some f
 let xpdf = ref false
 let use_ocamlbuild = ref false
-let classic_display = ref false
 let ccopt = ref ""
 let execopt = ref ""
 let eps = ref false
@@ -99,8 +98,6 @@ let spec = Arg.align
     "-xpdf", Set xpdf, " wysiwyg mode using xpdf remote server";
     "-v", Set verbose, " be a bit more verbose";
     "-ocamlbuild", Set use_ocamlbuild, " Use ocamlbuild to compile";
-    "-classic-display", Set classic_display,
-    " Call Ocamlbuild with -classic-display";
     "-native", Set native, " Compile to native code";
     "-ccopt", String add_ccopt, 
     "\"<options>\" Pass <options> to the Ocaml compiler";
@@ -166,7 +163,7 @@ let ocamlopt bn args execopt =
     | Some s -> ()
 
 let ocamlbuild args =
-  let args = if !classic_display then "-classic-display" :: args else args in
+  let args = if !verbose then "-classic-display" :: args else " -quiet"::args in
   command' ~outv:true ("ocamlbuild " ^ String.concat " " args)
 
 (** Return an unused file name which in the same directory as the prefix. *)
@@ -270,7 +267,7 @@ let compile f =
             (List.map (fun (x,_) -> "-I,"^x) Version.cairolibs) in
           args@[sprintf "-lflags %s -lib bigarray -libs %s" iI includecairos] in
       let args =
-        args@["-lib mlpost";
+        args@["-no-links";"-lib mlpost";
            !ccopt;exec_name]@
         (if !dont_execute then [] else ["--"; !execopt])
       in
@@ -278,7 +275,7 @@ let compile f =
       remove_mlf2 ();
       match !compile_name with
         | None -> if !dont_clean then () else Sys.remove exec_name
-        | Some s -> command ("cp " ^ exec_name ^ " " ^ s)
+        | Some s -> command ("cp _build/" ^ exec_name ^ " " ^ s)
     with Command_failed out -> 
       remove_mlf2 ();
       exit out

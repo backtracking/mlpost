@@ -100,7 +100,9 @@ DOCFILES:=$(shell echo *.mli)
 DOCFILES:=$(filter-out types.mli, $(DOCFILES))
 
 export-doc: doc
-	cp -r doc/*.html doc/img/*.png doc/style.css $(WWW)/doc
+	mkdir -p $(WWW)/doc/img
+	cp doc/*.html doc/style.css $(WWW)/doc
+	cp doc/img/*.png $(WWW)/doc/img
 
 export-www: www/version.prehtml
 	make -C www
