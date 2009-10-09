@@ -1,6 +1,7 @@
 o - changes in behaviour, new features
 * - incompatible changes in the interface
 
+* -classic-display is not an option of mlpost tool anymore (use -v instrad)
 * Change in the signature of Cairost.emit_cairo
 o Fix the -compile-name option with ocamlbuild
 o ocamlfind remove/install is used if ocamlfind is present
