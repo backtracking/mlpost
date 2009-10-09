@@ -629,12 +629,19 @@ let tabularl ?hpadding ?vpadding ?(pos=`Center) ?style ?name
   (* adapt the width of each column *)
   let pll = 
     List.map (fun r-> 
-      List.map2 (fun cell w -> set_width (extracth pos) w cell) r wmaxl) pll in
+                try
+                   List.map2 (fun cell w -> set_width (extracth pos) w cell)r wmaxl
+                 with Invalid_argument _ -> invalid_arg "Box.tabularl: not a matrix")
+      pll
+  in
   (* adapt the height of each row *)
   let pll = 
-    List.map2 (fun h l -> 
-      List.map (fun cell -> set_height (extractv pos) h cell) l) 
-      hmaxl pll in
+    try
+      List.map2 (fun h l -> 
+                   List.map (fun cell -> set_height (extractv pos) h cell) l)
+        hmaxl pll 
+    with Invalid_argument _ -> invalid_arg "Box.tabularl: not a matrix"
+  in
   vbox ?padding:vpadding ~pos ?style ?name ?stroke ?pen ?dash ?fill
     (List.map 
       (fun r -> hbox ?padding:hpadding ~pos r) pll)
