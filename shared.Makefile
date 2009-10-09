@@ -64,7 +64,7 @@ FTP = $(WWW)/download
 
 FILES := $(wildcard *.ml) $(wildcard *.mli) $(wildcard *.mll) \
 	 $(wildcard *.in) configure README.txt INSTALL LICENSE CHANGES FAQ \
-	 mlpost.1 _tags *.mlpack mlpost.odocl
+	 shared.Makefile mlpost.1 _tags *.mlpack mlpost.odocl
 BACKENDFILES = backend/*ml backend/*mly backend/*mll backend/*mli backend/_tags
 GENERATEDSOURCEFILES = mlpost.mli version.ml myocamlbuild.ml
 GUIFILES = gui/*.mll gui/*.ml gui/_tags 
