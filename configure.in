@@ -195,7 +195,6 @@ case $OCAMLVERSION in
         OCAMLBUILD=no;;
   *)
         AC_CHECK_PROG(OCAMLBUILD,ocamlbuild,yes,no)
-        OCAMLBUILD=no
         if test "$OCAMLBUILD" == "yes"; then
            OCAMLBUILDLIB=$(ocamlbuild -where)
            if test "$OCAMLBUILDLIB" != "${OCAMLLIB}/ocamlbuild"; then
