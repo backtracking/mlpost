@@ -14,7 +14,7 @@
 (*                                                                        *)
 (**************************************************************************)
 
-type point = Point_lib.point
+type point = Point_lib.t
 type t
 
 type joint

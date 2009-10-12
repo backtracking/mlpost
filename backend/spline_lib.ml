@@ -30,7 +30,7 @@ module Error = struct
   let dir_point f = invalid_arg (f^": a point has no direction.")
 end
 module P = Point_lib
-type point = P.point
+type point = P.t
 
 let id x = x
 open Point_lib

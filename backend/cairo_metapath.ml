@@ -28,7 +28,7 @@ let square x = x *. x
 let debug = false
 let info = debug || false
 
-type point = P.point
+type point = P.t
 type direction =
   | DVec of point
   | DCurl of float
@@ -627,14 +627,14 @@ struct
         (*Format.printf "stroke : %a@." S.print path;*)
         draw_path cr path;
         Cairo.save cr;
-        (*Matrix.set*) Matrix.transform cr pen;
+        (*Matrix.set*) Cairo.transform cr pen;
         Cairo.stroke cr;
         Cairo.restore cr;
     | S.Point p ->
         (*Format.printf "stroke : %a@." S.print path;*)
         Cairo.save cr;
-        Matrix.transform cr (Matrix.translation p);
-        Matrix.transform cr pen;
+        Cairo.transform cr (Matrix.translation p);
+        Cairo.transform cr pen;
         draw_path cr (Approx.fullcircle 1.);
         Cairo.fill cr;
         Cairo.restore cr

@@ -14,11 +14,8 @@
 (*                                                                        *)
 (**************************************************************************)
 
-type t = Cairo.point = 
-    {x : float;
-     y : float}
-
-type point = t
+open Ctypes
+type t = point = { x : float; y : float }
 
 let add a b = {x = a.x+.b.x; y = a.y+.b.y}
 let sub a b = {x = a.x-.b.x; y = a.y-.b.y}
@@ -26,13 +23,21 @@ let opp a = {x = -.a.x; y = -.a.y}
 let mult c a = {x = a.x*.c; y = a.y*.c}
 let div a c = {x = a.x/.c; y = a.y/.c}
 
-let transform t p = Cairo.Matrix.transform_point t p
-let rotated f = transform (Cairo.Matrix.init_rotate f)
+let transform m p =
+  { x = m.xx *. p.x +. m.xy *. p.y +. m.x0;
+    y = m.yx *. p.x +. m.yy *. p.y +. m.y0;
+  }
+
+(* copied here from matrix.ml to avoid dependency *)
+let init_rotate a =
+  let s = sin a in
+  let c = cos a in
+  { xx = c; yx = s; xy = -.s; yy = c; x0 = 0.; y0 = 0. }
+
+let rotated f = transform (init_rotate f)
 
 let swapmx {x=x;y=y} = {x=y;y= -.x}
 let swapmy {x=x;y=y} = {x= -.y;y=x}
-
-let to_cairo_point x = x
 
 module Infix = 
 struct

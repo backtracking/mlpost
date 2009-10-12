@@ -26,7 +26,7 @@ let not_implemented s = raise (Not_implemented s)
 
 type transform = Matrix.t
 type num = float
-type point = Point_lib.point
+type point = Point_lib.t
 type dash = float * num list
 type pen = transform
 type color = Types.color
@@ -146,7 +146,7 @@ struct
     | Empty -> ()
     | Transform (m,t) -> 
         Cairo.save cr;
-        Matrix.transform cr m;
+        Cairo.transform cr m;
         (*Format.printf "Transform : %a@." Matrix.print m;*)
         draw_aux cr t;
         Cairo.restore cr
