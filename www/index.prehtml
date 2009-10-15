@@ -76,6 +76,18 @@ href="download/">Download-Bereich</a> heruntergeladen werden.
 Es gibt auch ein <a href="download/CHANGES">Changelog</a>.
 </#de> 
 
+<#fr>
+Un paquet debian est également disponible.
+</#fr>
+<#en>
+A Debian package is also available.
+</#en>
+<#de>
+Ein Debian-Paket ist ebenfalls verfügbar.
+</#de>
+
+sudo apt-get install mlpost
+
 <h3><#fr>Auteurs</#fr><#en>Authors</#en><#de>Autoren</#de></h3>
 
 <#fr>Mlpost est développé par</#fr>
