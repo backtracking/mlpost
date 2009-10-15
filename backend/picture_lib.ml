@@ -189,7 +189,9 @@ struct
     Cairo.save cr;
     inversey cr height;
     Cairo.set_line_width cr default_line_size;
+    (* Only elliptical pens use the stroke command *)
     Cairo.set_line_cap cr Cairo.LINE_CAP_ROUND;
+    Cairo.set_line_join cr Cairo.LINE_JOIN_ROUND;
     draw_aux cr p.fcl;
     (*Spline_lib.Epure.draw cr p.fb;*)
     Cairo.restore cr
