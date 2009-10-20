@@ -162,7 +162,8 @@ let ocamlopt bn args execopt =
     | None -> if !dont_clean then () else Sys.remove exe
     | Some s -> ()
 
-let ocamlbuild args =
+let ocamlbuild args execopt =
+  let args = if !dont_execute then args else args@["--"; execopt] in
   let args = if !verbose then "-classic-display" :: args else " -quiet"::args in
   command' ~outv:true ("ocamlbuild " ^ String.concat " " args)
 
@@ -268,13 +269,12 @@ let compile f =
           args@[sprintf "-lflags %s -lib bigarray -libs %s" iI includecairos] in
       let args =
         args@["-no-links";"-lib mlpost";
-           !ccopt;exec_name]@
-        (if !dont_execute then [] else ["--"; !execopt])
+           !ccopt;exec_name]
       in
-      ocamlbuild args;
+      ocamlbuild args !execopt;
       remove_mlf2 ();
       match !compile_name with
-        | None -> if !dont_clean then () else Sys.remove exec_name
+        | None -> ()
         | Some s -> command ("cp _build/" ^ exec_name ^ " " ^ s)
     with Command_failed out -> 
       remove_mlf2 ();

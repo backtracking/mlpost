@@ -1,6 +1,10 @@
 o - changes in behaviour, new features
 * - incompatible changes in the interface
 
+version 0.7.4, October 20th, 2009
+--------------------------------
+o Mlpost tool : Fix compilation with ocamlbuild
+
 version 0.7.3, October 13th, 2009
 --------------------------------
 o Fix installation without ocamlfind and without ocamlbuild
