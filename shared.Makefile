@@ -66,7 +66,7 @@ FILES := $(wildcard *.ml) $(wildcard *.mli) $(wildcard *.mll) \
 	 $(wildcard *.in) configure README.txt INSTALL LICENSE CHANGES FAQ \
 	 shared.Makefile mlpost.1 _tags *.mlpack mlpost.odocl
 BACKENDFILES = backend/*ml backend/*mly backend/*mll backend/*mli backend/_tags
-GENERATEDSOURCEFILES = mlpost.mli version.ml myocamlbuild.ml
+GENERATEDSOURCEFILES = mlpost.mli version.ml myocamlbuild.ml $(GENERATED)
 GUIFILES = gui/*.mll gui/*.ml gui/_tags 
 EXFILES = examples/Makefile examples/*.ml examples/all.template\
 	  examples/index.html examples/parse.mll examples/README examples/automaton4.tex
