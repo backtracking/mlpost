@@ -35,7 +35,7 @@
 AC_INIT(mlpost.mli.in)
 
 # The Version of Mlpost
-MLPOSTVERSION="0.7.3"
+MLPOSTVERSION="0.7.4"
 
 # The compilation date
 TODAY=`date`

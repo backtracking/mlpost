@@ -60,7 +60,7 @@ befinden sich in einem Hauptmodul Mlpost.  </#de>
 </p>
 
 <h3>Download</h3>
-
+<p>
 <#fr>
 La version courante est <#version> et peut être téléchargée
 <a href="download/">ici</a>.
@@ -75,7 +75,8 @@ Die aktuelle Version ist <#version> and kann im <a
 href="download/">Download-Bereich</a> heruntergeladen werden.
 Es gibt auch ein <a href="download/CHANGES">Changelog</a>.
 </#de> 
-
+</p>
+<p>
 <#fr>
 Un paquet debian est également disponible.
 </#fr>
@@ -87,7 +88,7 @@ Ein Debian-Paket ist ebenfalls verfügbar.
 </#de>
 
 sudo apt-get install mlpost
-
+</p>
 <h3><#fr>Auteurs</#fr><#en>Authors</#en><#de>Autoren</#de></h3>
 
 <#fr>Mlpost est développé par</#fr>
