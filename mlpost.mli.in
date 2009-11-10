@@ -2225,6 +2225,9 @@ module Concrete : sig
   val cpoint_of_point : Point.t -> CPoint.t
     
   val cpath_of_path : Path.t -> CPath.t
+
+  (** {2 Compute the baselines of a tex} *)
+  val baselines : string -> float list
     
   (** {2 Simple functions for the opposite operations} *)
     

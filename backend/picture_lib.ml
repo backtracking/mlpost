@@ -120,6 +120,10 @@ let transform m t = {fcl = Transform (m,t.fcl);
 let shift t w h = transform (Matrix.xy_translation w h) t
 let bounding_box t = Spline_lib.Epure.bounding_box t.fb
 
+let baseline p = match p.fcl with
+  | Tex tex -> Gentex.get_bases_pt tex
+  | _ -> []
+
 module ToCairo =
 struct
   let rec color cr = function

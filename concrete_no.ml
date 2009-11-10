@@ -100,3 +100,5 @@ let num_of_float f = not_supported "num_of_float"
 let point_of_cpoint p = not_supported "point_of_cpoint"
 
 let path_of_cpath p = not_supported "path_of_cpath"
+
+let baselines p = not_supported "baselines"

@@ -62,7 +62,8 @@ val transform : Matrix.t -> t -> t
 val shift : t -> float -> float -> t
 val bounding_box : t -> point * point
 
-
+(* Return the empty list if the picture is not directly a Tex *)
+val baseline : t -> float list
 
 
 module ToCairo :
