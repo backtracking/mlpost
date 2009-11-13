@@ -208,8 +208,12 @@ let add_to_the_file bn f =
   else if !cairo then
     begin
       if not (!xpdf) then 
-        Printf.fprintf cout 
-          "\nlet () = Mlpost.Cairost.dump_pdf () \n"
+        if !pdf then
+          Printf.fprintf cout 
+            "\nlet () = Mlpost.Cairost.dump_pdf () \n"
+        else
+          Printf.fprintf cout 
+            "\nlet () = Mlpost.Cairost.dump_ps () \n"
       else
         Printf.fprintf cout 
           "\nlet () = Mlpost.Cairost.dump_pdfs \"_mlpost\"\n"

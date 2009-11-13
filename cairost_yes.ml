@@ -39,3 +39,6 @@ let dump_pdfs fname =
 let generate_pdfs pdffile figs = List.iter 
   (fun (i,fig) -> emit_pdf ~msg_error:100. 
      (Printf.sprintf "%s-%i.pdf" pdffile i) fig) figs
+
+let dump_ps () = 
+  Queue.iter (fun (_,fname,fig) -> emit_ps (fname^".ps") fig) Metapost.figures
