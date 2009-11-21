@@ -317,7 +317,7 @@ let print_latex_error s =
       "LaTeX has found an error in your file. Here is its output:\n";
     ignore (Misc.call_cmd ~outv:true 
               "latex -interaction=nonstopmode mpxerr.tex")
-  end else ()
+  end else Printf.printf "%s\n" s
 
 let generate_aux bn ?prelude ?(pdf=false) ?eps ?(verbose=false) ?(clean=true) figl =
   let f = bn ^ ".mp" in
