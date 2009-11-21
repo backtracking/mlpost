@@ -658,10 +658,10 @@ let translate p t =
 
 let transform_aux t p = 
   List.map (function a ->
-              { a with sa=Cairo.Matrix.transform_point t a.sa;
-                  sb=Cairo.Matrix.transform_point t a.sb;
-                  sc=Cairo.Matrix.transform_point t a.sc;
-                  sd=Cairo.Matrix.transform_point t a.sd}) p
+              { a with sa=P.transform t a.sa;
+                  sb=P.transform t a.sb;
+                  sc=P.transform t a.sc;
+                  sd=P.transform t a.sd}) p
 
 let transform t = function
   | Path p -> Path {p with pl= transform_aux t p.pl}
