@@ -232,7 +232,7 @@ and path' = function
       let p', code = path_save p in
       begin
         match p' with
-        | C.PAName x -> C.PASub (f1,f2,x), c1 ++ c2
+        | C.PAName x -> C.PASub (f1,f2,x), c1 ++ c2 ++ code
         | _ -> assert false
       end
   | PABBox p ->
