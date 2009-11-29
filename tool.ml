@@ -55,7 +55,8 @@ let compile_name = ref None
 let dont_execute = ref false
 let dont_clean = ref false
 let add_nothing = ref false
-
+let mp = ref false
+let png = ref false
 let notcairo = Version.includecairo = ""
 
 let version () =
@@ -92,6 +93,8 @@ let nocairo () =
 
 let spec = Arg.align
   ([ "-pdf", Set pdf, " Generate .mps files (default)";
+     "-mp", Set mp, " Generate .mp";
+     "-png", Set png, " Generate .png";
     "-ps", Clear pdf, " Generate .1 files";
     "-latex", String set_latex_file, "<main.tex> Scan the LaTeX prelude";
     "-eps", Set eps, " Generate encapsulated postscript files";
@@ -208,7 +211,10 @@ let add_to_the_file bn f =
   else if !cairo then
     begin
       if not (!xpdf) then 
-        if !pdf then
+        if !png then
+          Printf.fprintf cout 
+            "\nlet () = Mlpost.Cairost.dump_png () \n"
+        else if !pdf then
           Printf.fprintf cout 
             "\nlet () = Mlpost.Cairost.dump_pdf () \n"
         else
@@ -229,6 +235,15 @@ let add_to_the_file bn f =
         | Some f -> 
             sprintf "~prelude:%S" (Metapost_tool.read_prelude_from_tex_file f)
       in
+      if !mp then
+        Printf.fprintf cout 
+        "\nlet () = Mlpost.Metapost.dump_mp %s \"%s\"\n" 
+          prelude bn
+      else if !png then
+      Printf.fprintf cout 
+        "\nlet () = Mlpost.Metapost.dump_png %s %s %s \"%s\"\n" 
+          prelude verb clean bn
+    else
       Printf.fprintf cout 
         "\nlet () = Mlpost.Metapost.dump %s %s %s %s %s \"%s\"\n" 
           prelude pdf eps verb clean bn;

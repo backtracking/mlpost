@@ -59,6 +59,13 @@ html: $(HTMLFILES)
 	latex $*
 	dvips -E $*.dvi -o
 
+%.pdf: %.mps all.template2
+	sed -e 's/all/$*/' all.template2 > $*.tex
+	pdflatex $*
+
+%.mps: %.1
+	cp $*.1 $*.mps
+
 automaton4.ps: automaton4.1 
 	latex automaton4.tex
 	dvips -E automaton4.dvi -o

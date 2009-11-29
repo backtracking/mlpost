@@ -66,7 +66,8 @@ let generate_mp fn ?(prelude=defaultprelude) ?eps l =
   Misc.write_to_formatted_file fn
     (fun fmt -> 
        print_prelude ?eps prelude fmt ();
-       List.iter (fun (i,f) -> print i fmt f) l)
+       List.iter (fun (i,f) -> print i fmt f) l;
+       fprintf fmt "end@.")
 
 (* batch processing *)
 
@@ -118,7 +119,7 @@ let generate_aux bn ?prelude ?(pdf=false) ?eps ?(verbose=false) ?(clean=true) fi
   generate_mp f ?prelude ?eps figl;
   let s,outp = 
     Misc.call_cmd ~verbose
-      (sprintf "mpost -interaction=\"nonstopmode\" %s end" f) in
+      (sprintf "mpost -interaction=\"nonstopmode\" %s" f) in
   if s <> 0 then print_latex_error outp;
   if clean then
     ignore (Misc.call_cmd ~verbose 
@@ -147,6 +148,40 @@ let dump ?prelude ?(pdf=false) ?eps ?(verbose=false) ?clean bn =
       let e = s ^ suf in
       if verbose then Printf.printf "saving result in %s\n" e;
       Sys.rename (bn ^ "." ^ string_of_int i) e) figures
+
+let dump_mp ?prelude bn = 
+  let figl = Queue.fold (fun l (i,_,f) -> (i,f) :: l) [] figures in
+  let f = bn ^ ".mp" in
+  generate_mp f ?prelude figl
+
+
+(** with mptopdf *)
+let dump_png ?prelude ?(verbose=false) ?(clean=true) bn = 
+  dump_mp ?prelude bn;
+  let s,outp = 
+    Misc.call_cmd ~verbose
+      (sprintf "mptopdf %s.mp" bn) in
+  if s <> 0 then print_latex_error outp;
+  if clean then
+    ignore (Misc.call_cmd ~verbose 
+      (Printf.sprintf 
+        "rm -f mpxerr.log mpxerr.tex mpxerr.aux mpxerr.dvi %s.mp %s.mpx %s.log"
+        bn bn bn));
+  if s <> 0 then exit 1;
+  Queue.iter 
+    (fun (i,s,_) -> 
+       let s,outp = 
+         Misc.call_cmd ~verbose
+           (sprintf "convert -density 600x600 \"%s-%i.pdf\" \"%s.png\"" bn i s) in
+       if clean then
+         ignore (Misc.call_cmd ~verbose 
+                   (Printf.sprintf 
+                      "rm -f %s-%i.pdf" bn i));
+       if s <> 0 then (
+         ignore (Misc.call_cmd ~verbose 
+                   (Printf.sprintf 
+                      "rm -f %s-*.pdf" bn));exit 1)
+    ) figures
 
 let slideshow l k = 
   let l = List.map Picture.make l in

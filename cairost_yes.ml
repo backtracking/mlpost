@@ -42,3 +42,6 @@ let generate_pdfs pdffile figs = List.iter
 
 let dump_ps () = 
   Queue.iter (fun (_,fname,fig) -> emit_ps (fname^".ps") fig) Metapost.figures
+
+let dump_png () = 
+  Queue.iter (fun (_,fname,fig) -> emit_png (fname^".png") fig) Metapost.figures

@@ -75,7 +75,6 @@ let emit_png fname fig = emit_gen
      let surf = Cairo.image_surface_create Cairo.FORMAT_ARGB32 ~width ~height in
      let cr = (Cairo.create surf) in
      draw cr;
-     Cairo.surface_finish surf;
      Cairo_png.surface_write_to_file surf fname) dumb_next_page [fig]
 
 let emit_cairo cairo (width,height) fig = 
