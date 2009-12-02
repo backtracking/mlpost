@@ -1,6 +1,11 @@
 o - changes in behaviour, new features
 * - incompatible changes in the interface
 
+current
+-------
+* Bitstring is now a required dependency
+o concrete computations are now available without the Cairo library
+
 version 0.7.4, October 20th, 2009
 --------------------------------
 o Mlpost tool : Fix compilation with ocamlbuild
