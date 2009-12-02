@@ -60,7 +60,7 @@ let emit_gen ?msg_error create next_page figs =
   let width = xmax -. xmin in
   let figs = List.map (fun fig -> Picture_lib.shift fig (-.xmin) (-.ymin)) figs in
   create (fun cr -> 
-            iter_after (Picture_lib.ToCairo.draw cr width height) (next_page cr) figs
+            iter_after (Draw.Picture.draw cr width height) (next_page cr) figs
          ) height width
 
 let dumb_next_page _ _ = assert false
@@ -80,7 +80,7 @@ let emit_png fname fig = emit_gen
 let emit_cairo cairo (width,height) fig = 
   (*Compute.clear (); LookForTeX.clear ();*)
   let fig = LookForTeX.commandpic fig in
-  Picture_lib.ToCairo.draw cairo width height fig
+  Draw.Picture.draw cairo width height fig
 
 let emit_pdfs fname figs = emit_gen 
   (create Cairo_pdf.surface_create_for_channel fname) 

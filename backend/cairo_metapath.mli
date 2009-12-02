@@ -60,11 +60,3 @@ module Approx :
     val unitsquare : float -> Spline_lib.path
       (** unitsquare l : the path (0,0)--(l,0)--(l,l)--(0,l)--cycle *)
   end
-
-module ToCairo :
-  sig
-    type pen = Matrix.t
-    val stroke : Cairo.t -> pen -> Spline_lib.path -> unit
-    val fill : Cairo.t -> Spline_lib.path -> unit
-    val draw_path : Cairo.t -> Spline_lib.path -> unit
-  end

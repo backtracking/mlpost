@@ -556,9 +556,8 @@ let grid_with_padding_2 =
   seq [Box.draw b; Box.draw (shift (Point.pt (bp 5., bp 5.)) b)]
 
 let figs = [
-(*   grid_with_padding; *)
+  grid_with_padding;
   adv_fig;
-(*
   grid_with_padding_2;
   rotatedbox;
   assia_schema;
@@ -580,7 +579,6 @@ let figs = [
   (* other *)
   florence; Box.draw shapes1; Box.draw shapes2; 
   d14; d13; d5; 
-*)
 (*   d6 *)
 ] 
 

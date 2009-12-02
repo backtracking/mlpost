@@ -17,6 +17,7 @@
 open Ctypes
 type t = point = { x : float; y : float }
 
+let zero = { x = 0. ; y = 0. }
 let add a b = {x = a.x+.b.x; y = a.y+.b.y}
 let sub a b = {x = a.x-.b.x; y = a.y-.b.y}
 let opp a = {x = -.a.x; y = -.a.y}
@@ -55,8 +56,6 @@ let print fmt x = Format.fprintf fmt "(%f,%f)" x.x x.y
 let norm2 p : float = p.x*.p.x+.p.y*.p.y
 let norm p = sqrt (norm2 p)
 
-let zero = {x=0.;y=0.}
-
 let list_min_max f = 
   List.fold_left (fun ({x=x_min;y=y_min},{x=x_max;y=y_max}) s ->
                     let ({x=sx_min;y=sy_min},{x=sx_max;y=sy_max}) = f s in
@@ -67,4 +66,6 @@ let list_min_max f =
 let sign f = 
   if f = 0. then 0. 
   else if f < 0. then -1. else 1.
+
 let sign { x=x; y = y} = { x = sign x; y = sign y}
+

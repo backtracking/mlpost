@@ -727,13 +727,5 @@ struct
     ({x=x_min;y=y_min},{x=x_max;y=y_max})
   let of_bounding_box l = create (of_bounding_box l)
 
-  let draw cr p = List.iter (fun (e,_) -> List.iter 
-                               (fun s -> 
-                                      Cairo.move_to cr s.sa.x s.sa.y ;
-                                      Cairo.curve_to cr 
-                                        s.sb.x s.sb.y 
-                                        s.sc.x s.sc.y 
-                                        s.sd.x s.sd.y) e) p;
-                    Cairo.stroke cr
 end
 

@@ -44,7 +44,6 @@ type t = {tex : Dev_save.t;
           trans : Matrix.t}
 
 module Saved_device = Dviinterp.Interp(Dev_save.Dev_save)
-module Cairo_device = Dev_save.Dev_load(Dvicairo.Cairo_device)
 
 let set_verbosity b = 
   Saved_device.set_verbosity b
@@ -106,11 +105,3 @@ let print fmt tex =
   let min,max = bounding_box tex in
   Format.fprintf fmt "[%a,%a]" print min print max
 
-let draw cr tex = 
-  Cairo.save cr;
-  Cairo.transform cr (Matrix.to_cairo tex.trans);
-  Cairo_device.replay false tex.tex 
-  {Dvicairo.pic = cr;new_page = (fun () -> assert false);
-   x_origin = 0.; y_origin = 0.};
-  Cairo.restore cr
-  (*;Format.printf "Gentex : %a@." print tex*)

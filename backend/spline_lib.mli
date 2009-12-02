@@ -119,7 +119,7 @@ val metapost_of_abscissa : path -> abscissa -> float
 module Epure :
 sig
   type pen = path
-  type t
+  type t = (spline list * pen) list
   val empty : t
   val create : ?ecart:pen -> path -> t
   val of_path : ?ecart:pen -> path -> t
@@ -127,6 +127,5 @@ sig
   val transform : Matrix.t -> t -> t
   val bounding_box : t -> point * point
   val of_bounding_box : point * point -> t
-  val draw : Cairo.t -> t -> unit
 end
 

@@ -20,11 +20,14 @@ open Command
 let cairopossible = "@CAIRO@" = "yes"
 let tagcairo = ref false
 
-let packages_cairo = ["cairo","@CAIROLIB@","cairo";
-                      "bitstring","@BITSTRINGLIB@","bitstring"]
+let packages_cairo = ["cairo","@CAIROLIB@","cairo"; 
+                      ]
+(*                       "bitstring","@BITSTRINGLIB@","bitstring"] *)
 
 let packages = ["lablgtk2","@LABLGTK2LIB@","lablgtk";
-                "lablgnomecanvas","@LABLGTK2LIB@","lablgnomecanvas"]
+                "lablgnomecanvas","@LABLGTK2LIB@","lablgnomecanvas";
+(*                 ] *)
+                      "bitstring","@BITSTRINGLIB@","bitstring"]
 
 let syntaxes = ["bitstring","@BITSTRINGLIB@",
                 "camlp4o -I @BITSTRINGLIB@ bitstring.cma bitstring_persistent.cma pa_bitstring.cmo"]
@@ -61,11 +64,13 @@ let _ = dispatch begin function
          (fun _ _ -> cp (file^yesno^ext) (file^ext)) in
        if !tagcairo
        then (yesnofile_rule "cairost" "_yes" ".ml";
-             yesnofile_rule "concrete" "_yes" ".ml";
+(*              yesnofile_rule "concrete" "_yes" ".ml"; *)
+             yesnofile_rule "backend/ctypes" "_yes" ".mli";
              yesnofile_rule "mlpost" "_yes" ".mlpack";
             ) (*temporaire*)
        else (yesnofile_rule "cairost" "_no" ".ml";
-             yesnofile_rule "concrete" "_no" ".ml";
+(*              yesnofile_rule "concrete" "_no" ".ml"; *)
+             yesnofile_rule "backend/ctypes" "_no" ".mli";
              yesnofile_rule "mlpost" "_no" ".mlpack";
             );
 

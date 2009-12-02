@@ -25,6 +25,7 @@ type path = Spline_lib.path
 
 type tex = Gentex.t
 
+type interactive
 type commands = 
     private
   | Empty
@@ -36,7 +37,9 @@ type commands =
   | Clip of commands  * path
   | ExternalImage of string * float * float
 
-type t
+type t = { fcl : commands;
+           fb : Spline_lib.Epure.t;
+           fi : interactive}
 
 type id = int
 
@@ -46,6 +49,8 @@ val tex : Gentex.t -> t
 val fill_path : path -> color option -> t
 val stroke_path : path -> color option -> pen -> dash option -> t
 val draw_point : point -> t
+val default_line_size : float
+
 val clip : t -> path -> t
 val external_image : string -> 
   [< `Exact of float * float
@@ -65,13 +70,6 @@ val bounding_box : t -> point * point
 (* Return the empty list if the picture is not directly a Tex *)
 val baseline : t -> float list
 
-
-module ToCairo :
-sig
-  val draw : Cairo.t -> float -> float -> t -> unit
-  val where : Cairo.t -> t -> float * float -> id list
-  val move : Cairo.t -> t -> id -> float * float -> float * float
-end
 
 
 module Dash :

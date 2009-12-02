@@ -2140,7 +2140,8 @@ module Concrete : sig
   val supported : bool
 
   module CPoint : sig
-    type t = {x:float; y:float}
+    type t = @MLPOSTMLI_CAIRO_POINT@
+      { x : float; y : float }
         
     val add : t -> t -> t
     val sub : t -> t -> t
@@ -2171,11 +2172,10 @@ module Concrete : sig
     (* A path is a succession of splines *)
     type t
     type abscissa = float
-    type point = CPoint.t
         
     val length : t -> float
     val is_closed : t -> bool
-    val is_a_point : t -> point option
+    val is_a_point : t -> CPoint.t option
 
     val intersection : t -> t -> (abscissa * abscissa) list
       (** intersection p1 p2 return a list of pair of abscissa. In each
@@ -2192,7 +2192,8 @@ module Concrete : sig
     val reverse : t -> t
       (** reverse p return the path p reversed *)
       
-    val iter : (point -> point -> point -> point -> unit) -> t -> unit
+    val iter : 
+      (CPoint.t -> CPoint.t -> CPoint.t -> CPoint.t -> unit) -> t -> unit
       (** iter on all the splines of a path: iter f p applies f
           successively to the splines of p with : 
           - the start point of the spline as first argument 
@@ -2200,8 +2201,8 @@ module Concrete : sig
           - the control point of the end point as third argument 
           - the end point as fourth argument *)
       
-    val fold_left : ('a -> point -> point -> point -> point -> 'a) 
-      -> 'a -> t -> 'a
+    val fold_left : 
+      ('a -> CPoint.t -> CPoint.t -> CPoint.t -> CPoint.t -> 'a) -> 'a -> t -> 'a
       (** fold on all the splines of a path *)
       
     val cut_before : t -> t -> t
@@ -2212,12 +2213,12 @@ module Concrete : sig
     val split : t -> abscissa -> t * t
     val subpath : t -> abscissa -> abscissa -> t
         
-    val direction_of_abscissa : t -> abscissa -> point
-    val point_of_abscissa : t -> abscissa -> point
+    val direction_of_abscissa : t -> abscissa -> CPoint.t
+    val point_of_abscissa : t -> abscissa -> CPoint.t
       
-    val bounding_box : t -> point * point
+    val bounding_box : t -> CPoint.t * CPoint.t
       
-    val dist_min_point : t -> point -> abscissa
+    val dist_min_point : t -> CPoint.t -> abscissa
     val dist_min_path : t -> t -> abscissa * abscissa
       
     val print : Format.formatter -> t -> unit

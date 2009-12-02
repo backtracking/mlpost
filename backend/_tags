@@ -14,6 +14,7 @@
 <picture_lib.*> : pkg_cairo
 <ctypes.*> : pkg_cairo
 <cairo_metapath.*> : pkg_cairo
+<draw.*> : pkg_cairo
 
 
 <*.cmx> : for-pack(Mlpost)
