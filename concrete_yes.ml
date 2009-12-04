@@ -14,6 +14,7 @@
 (*                                                                        *)
 (**************************************************************************)
 
+# 17 "concrete_yes.ml"
 let supported = true
 
 let set_verbosity b = Compute.set_verbosity b

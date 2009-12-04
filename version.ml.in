@@ -18,7 +18,7 @@ let version = "@MLPOSTVERSION@"
 let date = "@TODAY@"
 let ocamlopt = "@OCAMLOPT@"
 let libdir = "@LIBDIR@"
-let includecairo = "@INCLUDECAIRO@"
+let include_string = "@INCLUDELIBS@"
 let cairolibs = ["@CAIROLIB@","/cairo";"@BITSTRINGLIB@","/bitstring"]
 
 

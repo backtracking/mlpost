@@ -58,7 +58,7 @@ endif
 
 DTYPES = -tag dtypes
 
-OCAMLBUILD := ocamlbuild $(OBOPTS) -no-links $(DTYPES) -tag cairo_@CAIRO@ $(OCAMLBUILD_DISPLAY)
+OCAMLBUILD := ocamlbuild $(OBOPTS) -no-links $(DTYPES) -tag cairo_@CAIRO@ -tag concrete_@CONCRETE@ $(OCAMLBUILD_DISPLAY)
 
 BUILD := _build/
 

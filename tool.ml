@@ -57,7 +57,7 @@ let dont_clean = ref false
 let add_nothing = ref false
 let mp = ref false
 let png = ref false
-let notcairo = Version.includecairo = ""
+let notcairo = Version.include_string = ""
 
 let version () =
   (* The first line of the output should be the version number, and only the
@@ -66,7 +66,7 @@ let version () =
   Format.printf "mlpost %s compiled at %s@." Version.version Version.date;
   Format.printf "searching for mlpost.cm(a|xa) in %s@." Version.libdir;
   if not notcairo then 
-    Format.printf "additional directories are %s@." Version.includecairo;
+    Format.printf "additional directories are %s@." Version.include_string;
   exit 0
 
 let add_ccopt x = ccopt := !ccopt ^ " " ^ x
@@ -301,12 +301,12 @@ let compile f =
   end else begin
     if !native then
       let cairo_args = if notcairo then [] 
-      else [Version.includecairo; "bigarray.cmxa"; "cairo.cmxa"; "bitstring.cmxa"] in
+      else [Version.include_string; "bigarray.cmxa"; "cairo.cmxa"; "bitstring.cmxa"] in
       ocamlopt bn ([!ccopt; "-I"; !libdir;"unix.cmxa"] @ cairo_args @ 
                   ["mlpost.cmxa"; mlf]) !execopt
     else
       let cairo_args = if notcairo then [] 
-      else [Version.includecairo; "bigarray.cma"; "cairo.cma"; "bitstring.cma"] in
+      else [Version.include_string; "bigarray.cma"; "cairo.cma"; "bitstring.cma"] in
       ocaml ([!ccopt; "-I"; !libdir;"unix.cma"] @ cairo_args @
                ["mlpost.cma"; mlf]) !execopt
   end;

@@ -222,6 +222,6 @@ let _ =
   else
     begin
       Metapost.generate mpostfile ~pdf:true figs;
-      Generate.generate_tex ~pdf:true texfile "othergraphs/other" "testother" figs;
+      Generate.generate_tex ~pdf:true texfile "othergraphs/mpost" "othergraphs" figs;
     end
 

@@ -1,10 +1,17 @@
-o - changes in behaviour, new features
+o - changes in behaviour, new features, bugfixes
 * - incompatible changes in the interface
 
 current
 -------
-* Bitstring is now a required dependency
 o concrete computations are now available without the Cairo library
+o option -ps with -cairo
+o adding Concrete.baseline
+
+current stable
+--------------
+o fixed bug #411: correct definition of objects used in Path.subpath
+o metapost errors are printed (this should rarely occur)
+
 
 version 0.7.4, October 20th, 2009
 --------------------------------

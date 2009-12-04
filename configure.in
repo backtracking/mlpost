@@ -251,23 +251,34 @@ else
     fi
 fi
 
-if test "$OCAMLBUILD" == yes -a -n "$CAIROLIB" -a -n "$BITSTRINGLIB"; then
-   CAIRO=yes
-   INCLUDECAIRO="-I $CAIROLIB -I $BITSTRINGLIB"
-   METAREQUIRESPACKAGE="unix cairo bitstring"
-   MLPOSTMLI_CAIRO_T="= Cairo.t"
-   MLPOSTMLI_CAIRO_POINT="Cairo.point ="
+if test "$OCAMLBUILD" == yes -a -n "$BITSTRINGLIB"; then
+  if test -n "$CAIROLIB"; then
+    CAIRO=yes
+    CONCRETE=yes
+    INCLUDELIBS="-I $CAIROLIB -I $BITSTRINGLIB"
+    METAREQUIRESPACKAGE="unix cairo bitstring"
+    MLPOSTMLI_CAIRO_T="= Cairo.t"
+    MLPOSTMLI_CAIRO_POINT="Cairo.point ="
+  else
+    CAIRO=no
+    CONCRETE=yes
+    INCLUDELIBS="-I $BITSTRINGLIB"
+    METAREQUIRESPACKAGE="unix bitstring"
+    MLPOSTMLI_CAIRO_T=""
+    MLPOSTMLI_CAIRO_POINT=""
+  fi
 else
-   CAIRO=no
-   INCLUDECAIRO=""
-   METAREQUIRESPACKAGE="unix"
-   MLPOST_MLI_CAIRO_T=""
-   MLPOSTMLI_CAIRO_POINT=""
+  CAIRO=no
+  CONCRETE=no
+  INCLUDELIBS=""
+  METAREQUIRESPACKAGE="unix"
+  MLPOST_MLI_CAIRO_T=""
+  MLPOSTMLI_CAIRO_POINT=""
 fi
 
 #TEMPORAIRE
 #CAIRO=no
-#INCLUDECAIRO=""
+#INCLUDELIBS=""
 
 # checking for lablgtk2
 if test "$OCAMLFIND" == yes; then
@@ -321,10 +332,11 @@ AC_SUBST(LABLGTK2)
 AC_SUBST(INCLUDEGTK2)
 AC_SUBST(LABLGTK2LIB)
 AC_SUBST(CAIRO)
+AC_SUBST(CONCRETE)
 AC_SUBST(CAIROLIB)
 AC_SUBST(MLPOSTMLI_CAIRO_T)
 AC_SUBST(MLPOSTMLI_CAIRO_POINT)
-AC_SUBST(INCLUDECAIRO)
+AC_SUBST(INCLUDELIBS)
 AC_SUBST(BITSTRINGLIB)
 AC_SUBST(OCAMLWIN32)
 AC_SUBST(EXE)
@@ -339,6 +351,7 @@ echo "---------------------------------------------------"
 echo "  Mlpost library will be installed in: $LIBDIR"
 echo -n "  native code compilation: "
 if test "$OCAMLBEST" == "opt"; then echo "yes"; else echo "no"; fi
+echo "  Support for concrete computations in mlpost: "$CONCRETE
 echo "  Cairo support in mlpost: "$CAIRO
 echo "---------------------------------------------------"
 
