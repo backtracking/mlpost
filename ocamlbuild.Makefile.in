@@ -62,9 +62,9 @@ OCAMLBUILD := ocamlbuild $(OBOPTS) -no-links $(DTYPES) -tag cairo_@CAIRO@ -tag c
 
 BUILD := _build/
 
-CMA := mlpost.cma
-CMXA := mlpost.cmxa
-
+CMA := mlpost.cma mlpost_desc_options.cma mlpost_options.cma
+CMXA := mlpost.cmxa mlpost_desc_options.cmxa mlpost_options.cmxa
+OBJ := mlpost_desc_options$(LIBEXT) mlpost_options$(LIBEXT)
 
 ifeq "$(OCAMLBEST)" "opt"
 all: 

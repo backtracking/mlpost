@@ -20,26 +20,28 @@ headers:
 
 install: install-$(OCAMLBEST) install-bin
 
+BCMA = $(addprefix $(BUILD), $(CMA))
+BCMXA = $(addprefix $(BUILD), $(CMXA) $(OBJ))
 
 ifeq "$(OCAMLFIND)" "no"
 install-byte:
 	mkdir -p $(LIBDIR)
-	cp -f $(BUILD)mlpost.cmi META $(BUILD)$(CMA) "$(LIBDIR)"
+	cp -f $(BUILD)mlpost.cmi META $(BCMA) "$(LIBDIR)"
 
 install-opt:
 	mkdir -p $(LIBDIR)
-	cp -f $(BUILD)mlpost.cmi META $(BUILD)$(CMA) "$(LIBDIR)"
-	cp -f $(BUILD)mlpost$(LIBEXT) $(BUILD)$(CMXA) "$(LIBDIR)"
+	cp -f $(BUILD)mlpost.cmi META $(BCMA) "$(LIBDIR)"
+	cp -f $(BUILD)mlpost$(LIBEXT) $(BCMXA) "$(LIBDIR)"
 else
 DESTDIR=-destdir $(LIBDIR:/mlpost=)
 
 install-byte:
 	ocamlfind remove $(DESTDIR) mlpost
-	ocamlfind install $(DESTDIR) mlpost $(BUILD)mlpost.cmi META $(BUILD)$(CMA)
+	ocamlfind install $(DESTDIR) mlpost $(BUILD)mlpost.cmi META $(BCMA)
 
 install-opt:
 	ocamlfind remove $(DESTDIR) mlpost
-	ocamlfind install $(DESTDIR) mlpost $(BUILD)mlpost$(LIBEXT) $(BUILD)mlpost.cmi META $(BUILD)$(CMXA) $(BUILD)$(CMA)
+	ocamlfind install $(DESTDIR) mlpost $(BUILD)mlpost$(LIBEXT) $(BUILD)mlpost.cmi META $(BCMXA) $(BCMA)
 endif
 
 install-bin:
@@ -49,7 +51,7 @@ install-bin:
 
 uninstall:
 	rm -f $(LIBDIR)/mlpost.cmo $(LIBDIR)/mlpost.cmi $(LIBDIR)/META 
-	rm -f $(LIBDIR)/mlpost$(LIBEXT) $(LIBDIR)/mlpost.cmx $(LIBDIR)/$(CMA) $(LIBDIR)/$(CMXA)
+	rm -f $(LIBDIR)/mlpost$(LIBEXT) $(LIBDIR)/mlpost.cmx $(addprefix $(LIBDIR)/,$(CMA)) $(addprefix $(LIBDIR)/,$(CMXA))
 	rm -f $(BINDIR)/mlpost
 	rm -f $(MANDIR)/mlpost
 

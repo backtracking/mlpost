@@ -97,7 +97,7 @@ MISCTEXFILES:=$(MISCPNGFILES:.png=.tex)
 TREETEXFILES:=$(TREEPNGFILES:.png=.tex)
 LABELTEXFILES:=$(LABELPNGFILES:.png=.tex)
 clean:
-	rm -f *.aux *.dvi *.ps *.1 *.log $(PNGFILES) *.mp *.mpx
+	rm -f *.aux *.dvi *.ps *.1 *.log $(PNGFILES) *.mp *.mpx *.mps
 	rm -f $(BOXTEXFILES) $(PATHTEXFILES) $(MISCTEXFILES) $(TREETEXFILES)
 	rm -f $(LABELTEXFILES)
 	rm -f automaton1.tex automaton2.tex

@@ -1,4 +1,4 @@
-<*.cmx> and not <mlpost.cmx>: for-pack(Mlpost)
+<*.cmx> and not <mlpost.cmx> and not <desc_options.cmx> and not <options.cmx>: for-pack(Mlpost)
 
 <mlpost.mli> : pkg_cairo
 
