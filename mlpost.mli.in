@@ -18,9 +18,8 @@
 
 (** {2 Interfaces to basic Metapost datatypes} *)
 
+  (** Abstract numeric values *)
 module rec Num : sig
-
-  (** The Mlpost Num module *)
 
   (** Numerics are intended to be lengths in some unit. In addition, values of
     type {!Num.t} may actually be unknown to Mlpost. This is why there is no
@@ -62,6 +61,8 @@ module rec Num : sig
   (** {3 Infix operators}  *)
 
   module Infix : sig
+    (** Infix symbols for convenience *)
+
     val (+/) : t -> t -> t
     (** alias for {!Num.addn} *)
      
@@ -105,6 +106,7 @@ module rec Num : sig
   end
 end
 
+  (** Points in the plane *)
 and Point : sig
 
   (** The abstract type for points *)
@@ -209,13 +211,17 @@ and Point : sig
 
 end
     
+  (** MetaPaths: gradually build a path with constraints, get a real path at the
+     end. *)
 and MetaPath : sig
+
   (** MetaPaths are the objects used to describe lines, curves, and 
       more generally almost everything that is drawn with Mlpost. 
-      A path is defined by points and control points. A metapath is 
-      defined by point (knot) and constraints on the way the point are linked.
-      A metapath is an easy way to defined a path with only few point, 
-      afterward some heuristic are used to transforme it in a real path (of_metapath)*) 
+      A path ([Path.t]) is defined by points and control points. 
+      A metapath is defined by points (knots) and constraints on the links
+      between the points. A metapath is an easy way to define a path gradually
+      with only a few points, and apply heuristics afterwards to transform it
+      into a real path (using [of_metapath]). *)
 
   (** A [direction] is used to put constraints on metapaths:
       {ul {- [vec p] defines a direction by a point (interpreted as a vector)}
@@ -340,6 +346,7 @@ and MetaPath : sig
 
 end
 
+  (** Fixed Paths *)
 and Path : sig
 
   (** Paths are the objects used to describe lines, curves, and 
@@ -546,6 +553,7 @@ and Path : sig
 
 end
 
+  (** Pens: change the way lines are drawn in Mlpost *)
 and Pen : sig
   (** Pens are used to change the the way lines are drawn in Mlpost *)
 
@@ -572,6 +580,7 @@ and Pen : sig
   (** Shortcuts for transformations of pens *)
 end
 
+(** Dash patterns *)
 and Dash : sig
   (** This module permits to define dash patterns, that are used to draw lines
    in different styles *)
@@ -601,6 +610,7 @@ and Dash : sig
 
 end
 
+(** Definitions of many colors *)
 and Color : sig
 
   (** Colors *)
@@ -682,6 +692,7 @@ and Color : sig
         overview.*)
 end
 
+(** Apply linear transformations to objects in Mlpost *)
 and Transform : sig
 
   (** Transformations are an important way to modify objects in Mlpost.
@@ -725,6 +736,7 @@ and Transform : sig
     (** The identity transformation  *)
 end
 
+(** Functions to manipulate commands as if they were pictures  *)
 and Picture : sig
 
   (** Pictures are a powerful way to reuse and modify parts of a figure *)
@@ -737,13 +749,6 @@ and Picture : sig
 
   val tex : string -> t
    (** Take a string in Latex format and transform it into a picture *)
-
-(*
-  val currentpicture : t
-    (* Corresponds to the picture that has been drawn so far and can be used in
-      commands to manipulate it *)
-
-*)
 
   val transform : Transform.t -> t -> t
     (** Apply a transformation to a picture *)
@@ -834,6 +839,7 @@ and Picture : sig
 
 end
 
+(** Basic drawing commands *)
 and Command : sig
 
   (** General Commands to build figures *)
@@ -923,6 +929,7 @@ end
 
 (** {2 Advanced graphical components} *)
 
+(** Rectangles, Circles, etc. *)
 module rec Shapes : sig
 
 (** Various Basic Geometric Shapes *)
@@ -979,6 +986,8 @@ module rec Shapes : sig
 *)
 end
 
+(** A Box is a rectangle with some content and a (not necessarily rectangular)
+    frame. Boxes can be placed, aligned and modified.   *)
 and Box : sig
 
   (** Boxes *)
@@ -1382,6 +1391,7 @@ and Box : sig
   val xscale : Num.t -> t -> t
 end
 
+(** Draw arrows and build new forms of arrows. *)
 module Arrow : sig
   (** Draw simple or complex arrows. *)
 
@@ -1570,6 +1580,7 @@ end
 
 (** {2 Helpers and Extensions} *)
 
+(** A few helper functions *)
 module Helpers : sig
   val dotlabels :
     ?pos:Command.position -> string list -> Point.t list -> Command.t
@@ -1630,6 +1641,7 @@ module Helpers : sig
 end
 
 
+(** Create and draw trees *)
 module Tree : sig
 
   (** This module provides high-level means for creating and drawing Trees *)
@@ -1721,6 +1733,7 @@ module Tree : sig
 
 end
 
+(** EXPERIMENTAL: A new way of placing trees. *)
 module Tree_adv : sig
 
   type 'a t = Node of 'a * 'a t list
@@ -1817,6 +1830,7 @@ module Tree_adv : sig
   end
 end
 
+(** Create simple diagrams by placing objects in a table. Deprecated. *)
 module Diag : sig
 
   (** Diagrams. *)
@@ -1882,6 +1896,7 @@ module Diag : sig
 	@param pen The pen used for arrows *)
 end
 
+(** A simple and limited way of plotting functions. *)
 module Plot : sig
 
   (** Plots. *)
@@ -1922,6 +1937,7 @@ module Plot : sig
                     (int -> float) -> skeleton -> Command.t
 end
 
+(** Draw Bar diagrams (Histograms). *)
 module Hist : sig
 
   (** Histograms. *)
@@ -1994,6 +2010,7 @@ module Hist : sig
 
 end
 
+(** Radar diagrams. *)
 module Radar : sig
 
   (** This module draws radar diagrams.*)
@@ -2043,6 +2060,7 @@ module Radar : sig
     
 end
 
+(** Build a legend for diagrams. *)
 module Legend : sig
 
   val legend : 
@@ -2077,6 +2095,7 @@ module Misc : sig
 end
 (**/**)
 
+(** Functions to generate Metapost files *)
 module Metapost : sig
 
   val generate_mp :
@@ -2131,6 +2150,7 @@ module Metapost : sig
 
 end
 
+(** Helper functions to generate test TeX files *)
 module Generate : sig
   val generate_tex : ?pdf:bool -> string -> string -> string -> (int * 'a) list -> unit
 
@@ -2138,9 +2158,12 @@ module Generate : sig
 
 end
 
+(** Compute concrete values of numerics, points and paths; 
+   not always available *)
 module Concrete : sig
   val supported : bool
 
+  (** The module of concrete points *)
   module CPoint : sig
     type t = @MLPOSTMLI_CAIRO_POINT@
       { x : float; y : float }
@@ -2170,6 +2193,7 @@ module Concrete : sig
     val print : Format.formatter -> t -> unit
   end
 
+  (** Concrete Paths *)
   module CPath : sig
     (* A path is a succession of splines *)
     type t
@@ -2261,6 +2285,7 @@ module Concrete : sig
 
 end
   
+(** Use the Cairo backend to draw your figures; not always available *)
 module Cairost : sig
 
   val supported : bool

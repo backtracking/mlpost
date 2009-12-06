@@ -10,3 +10,4 @@ myocamlbuild.ml
 ocamlbuild.Makefile
 simple.Makefile
 version.ml
+doc
