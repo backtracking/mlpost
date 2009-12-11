@@ -54,7 +54,7 @@ let generic_quote whatquote quotequote s =
 
 let _ = dispatch begin function
   | Before_options -> 
-      Options.include_dirs := "backend"::"gui"::!Options.include_dirs;
+      Options.include_dirs := "concrete"::"dvi"::"backend"::"gui"::!Options.include_dirs;
       Options.exclude_dirs := "presentations"::"papers"::"examples"::!Options.exclude_dirs;
       Options.ocamldoc := S[A"ocamldoc"]
   | Before_rules ->
@@ -72,12 +72,12 @@ let _ = dispatch begin function
          (fun _ _ -> cp (file^yesno^ext) (file^ext)) in
        if !tagcairo then begin 
          yesnofile_rule "cairost" "_yes" ".ml";
-         yesnofile_rule "backend/ctypes" "_yes" ".mli";
+         yesnofile_rule "concrete/ctypes" "_yes" ".mli";
          yesnofile_rule "mlpost" "_cairo" ".mlpack";
          yesnofile_rule "concrete" "_yes" ".ml";
        end else begin 
          yesnofile_rule "cairost" "_no" ".ml";
-         yesnofile_rule "backend/ctypes" "_no" ".mli";
+         yesnofile_rule "concrete/ctypes" "_no" ".mli";
          if !tagconcrete then begin
            yesnofile_rule "concrete" "_yes" ".ml";
            yesnofile_rule "mlpost" "_concrete" ".mlpack";

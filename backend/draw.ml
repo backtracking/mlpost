@@ -69,7 +69,7 @@ struct
         Cairo.save cr;
         Cairo.transform cr (Matrix.translation p);
         Cairo.transform cr pen;
-        draw_path cr (Cairo_metapath.Approx.fullcircle 1.);
+        draw_path cr (Metapath_lib.Approx.fullcircle 1.);
         Cairo.fill cr;
         Cairo.restore cr
 

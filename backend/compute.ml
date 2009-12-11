@@ -31,7 +31,7 @@ open Hashcons
 
 module S = Spline_lib
 module Pi = Picture_lib
-module MP = Cairo_metapath
+module MP = Metapath_lib
 
 let debug = true
 

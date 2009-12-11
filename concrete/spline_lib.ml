@@ -76,7 +76,13 @@ let print_spline fmt pt =
   Format.fprintf fmt "@[%f|%f { %a,@ %a,@ %a,@ %a }@]@." 
     pt.smin pt.smax pt_f pt.sa pt_f pt.sb pt_f pt.sc pt_f pt.sd
 
-let print_splines = Misc.print_list Misc.semicolon print_spline
+let rec print_list sep prf fmt = function
+  | [] -> ()
+  | [x] -> prf fmt x
+  | (x::xs) -> prf fmt x; sep fmt (); print_list sep prf fmt xs
+let semicolon fmt () = Format.fprintf fmt ";@ "
+
+let print_splines = print_list semicolon print_spline
 
 let print fmt = function 
   | Point p -> fprintf fmt "@[Point %a@]" P.print p

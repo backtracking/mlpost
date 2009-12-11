@@ -17,7 +17,7 @@
 let diameter_of_a_dot = 3.
 let default_line_size = 1.
 
-module MP = Cairo_metapath
+module MP = Metapath_lib
 open Types
 open Point_lib
 type transform = Matrix.t
@@ -63,7 +63,7 @@ let fill_path p c = {fcl = Fill_path (p,c);
                      fi = IntEmpty}
 
 let ecart_of_pen pen = 
-  Spline_lib.transform pen (Cairo_metapath.Approx.fullcircle default_line_size)
+  Spline_lib.transform pen (MP.Approx.fullcircle default_line_size)
 
 let stroke_path p c pen d = {fcl= Stroke_path (p,c,pen,d);
                              fb = Spline_lib.Epure.of_path ~ecart:(ecart_of_pen pen) p;
