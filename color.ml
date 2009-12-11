@@ -25,20 +25,37 @@ type t = Types.color =
   |OPAQUE of scolor
   |TRANSPARENT of float * scolor
 
+let rgb8 r g b = OPAQUE (RGB ((float r)/.255., (float g)/.255., (float b)/.255.))
+let rgb8a r g b a = TRANSPARENT ((float a)/.255.,RGB ((float r)/.255., (float g)/.255., (float b)/.255.))
+let rgb_from_int i = 
+  let b = i land 0xFF in
+  let g = (i land 0xFF00) lsr 8 in
+  let r = (i land 0xFF0000) lsr 16 in
+  rgb8 r g b
+
 let red = OPAQUE (RGB (1.0,0.0,0.0))
 let lightred = OPAQUE (RGB (1.0,0.5,0.5))
 let blue = OPAQUE (RGB (0.0,0.0,1.0))
-let lightblue = OPAQUE (RGB (0.5,0.5,1.0))
-let green = OPAQUE (RGB (0.0,1.0,0.0))
-let lightgreen = OPAQUE (RGB (0.5,1.0,0.5))
-let orange = OPAQUE (RGB (1.0,0.4,0.0))
-let purple = OPAQUE (RGB (0.6,0.0,0.6))
+let lightblue = rgb_from_int 0xADD8E6
+let green = rgb_from_int 0x008000
+let lightgreen = rgb_from_int 0x90EE90
+let orange = rgb_from_int 0xFFA500
+let purple = rgb_from_int 0x7F007F
 let magenta = OPAQUE (RGB (1.0,0.0,1.0))
-let lightmagenta = OPAQUE (RGB (1.0,0.5,1.0))
 let cyan =  OPAQUE (RGB (0.0,1.0,1.0))
-let lightcyan =  OPAQUE (RGB (0.5,1.0,1.0))
+let lightcyan = rgb_from_int 0xE0FFFF
 let yellow = OPAQUE (RGB (1.0,1.0,0.0))
-let lightyellow = OPAQUE (RGB (1.0,1.0,0.5))
+let lightyellow = rgb_from_int 0xFFFFE0
+(* these colors do not correspond to neither X11 nor HTML colors - commented out
+ * *)
+(* let lightblue = OPAQUE (RGB (0.5,0.5,1.0)) *)
+(* let green = OPAQUE (RGB (0.0,1.0,0.0)) *)
+(* let lightgreen = OPAQUE (RGB (0.5,1.0,0.5)) *)
+(* let orange = OPAQUE (RGB (1.0,0.4,0.0)) *)
+(* let purple = OPAQUE (RGB (0.6,0.0,0.6)) *)
+(* let lightcyan =  OPAQUE (RGB (0.5,1.0,1.0)) *)
+(* let lightyellow = OPAQUE (RGB (1.0,1.0,0.5)) *)
+let lightmagenta = OPAQUE (RGB (1.0,0.5,1.0))
 let gray f = OPAQUE (Gray f)
 let white = gray 1.0
 let lightgray = gray 0.75
@@ -60,8 +77,6 @@ let transparent f = function
 
 let colors : (string, t) Hashtbl.t = Hashtbl.create 91
 let color n = Hashtbl.find colors n
-let rgb8 r g b = OPAQUE (RGB ((float r)/.255., (float g)/.255., (float b)/.255.))
-let rgb8a r g b a = TRANSPARENT ((float a)/.255.,RGB ((float r)/.255., (float g)/.255., (float b)/.255.))
 (** generated part *)
 let _ = Hashtbl.add colors "snow" (rgb8 255 250 250)
 let _ = Hashtbl.add colors "ghost" (rgb8 248 248 255)

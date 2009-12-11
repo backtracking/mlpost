@@ -6,6 +6,9 @@ current
 o concrete computations are now available without the Cairo library
 o option -ps with -cairo
 o adding Concrete.baseline
+o module Color: the definitions of the following colors have changed:
+  lightblue, green, lightgreen, orange, lightcyan, purple, lightyellow
+  These colors are now compatible to HTML/CSS and X11 definitions
 
 current stable
 --------------
