@@ -38,9 +38,7 @@ let subpath_01 f t p =
 (* Atoms *)
 
 type line = {
-  dashed: Types.dash option;
-  color: Types.color option;
-  pen: Types.pen option;
+  brush : Types.brush;
   from_point: float;
   to_point: float;
   dist: Num.t;
@@ -75,12 +73,11 @@ let empty = {
   belts = [];
 }
 
-let add_line ?dashed ?color ?pen ?(from_point = 0.) ?(to_point = 1.)
+let add_line ?brush ?dashed ?color ?pen ?(from_point = 0.) ?(to_point = 1.)
     ?(dist = Num.bp 0.) kind =
+  let brush = Types.mkBrushOpt brush color pen dashed in
   { kind with lines = {
-      dashed = dashed;
-      color = color;
-      pen = pen;
+      brush = brush;
       from_point = from_point;
       to_point = to_point;
       dist = dist;
@@ -94,16 +91,16 @@ let head_classic_points ?(angle = 60.) ?(size = Num.bp 4.) p dir =
   let b = Point.add p dir_b in
   a, b
 
-let head_classic ?color ?pen ?dashed ?angle ?size p dir =
+let head_classic ?color ?brush ?pen ?dashed ?angle ?size p dir =
   let a, b = head_classic_points ?angle ?size p dir in
   let path = Path.pathp ~style: Path.jLine [a; p; b] in
-  make_head ~cut: path (Command.draw ?color ?pen ?dashed path)
+  make_head ~cut: path (Command.draw ?color ?brush ?pen ?dashed path)
 
-let head_triangle ?color ?pen ?dashed ?angle ?size p dir =
+let head_triangle ?color ?brush ?pen ?dashed ?angle ?size p dir =
   let a, b = head_classic_points ?angle ?size p dir in
   let path = Path.pathp ~style: Path.jLine ~cycle: Path.jLine [a; p; b] in
   let cut = Path.pathp ~style: Path.jLine [a; b] in
-  make_head ~cut (Command.draw ?color ?pen ?dashed path)
+  make_head ~cut (Command.draw ?color ?brush ?pen ?dashed path)
 
 let head_triangle_full ?color ?angle ?size p dir =
   let a, b = head_classic_points ?angle ?size p dir in
@@ -166,7 +163,7 @@ let clip_line_with_belt (line, line_path) (belt, _, clipping_path) =
 
 (* Compute the command to draw a line. *)
 let draw_line (line, line_path) =
-  Command.draw ?color: line.color ?pen: line.pen ?dashed: line.dashed line_path
+  Command.draw ~brush:line.brush line_path
 
 let classic = add_head (add_line empty)
 let triangle = add_head ~head: head_triangle (add_line empty)
@@ -283,10 +280,10 @@ let draw_thick ?style ?(boxed=true) ?line_color ?fill_color ?outd ?ind ?width
   in
   Command.append fill_cmd draw_cmd
 
-let simple ?color ?pen ?dashed p =
+let simple ?color ?brush ?pen ?dashed p =
   let kind = 
     add_head 
       ~head:(head_triangle_full ?color) 
-      (add_line ?dashed ?color ?pen empty) in
+      (add_line ?dashed ?color ?brush ?pen empty) in
   draw ~kind p
 

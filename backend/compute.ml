@@ -334,6 +334,7 @@ and dash d =
   | DEvenly -> Picture_lib.Dash.line
   | DWithdots -> Picture_lib.Dash.dots
   | DScaled (f, d) -> 
+      let f = num f in
       let d = dash d in
       Picture_lib.Dash.scale f d
   | DShifted (p,d) ->
@@ -350,8 +351,9 @@ and dash_pattern o =
       | Off f -> Picture_lib.Dash.Off (num f)
 	
 and command' = function
-  | CDraw (p, c, pe, dsh) ->
+  | CDraw (p, b) ->
       let p = path p in
+      let {color = c; pen = pe; dash = dsh} = b.Hashcons.node in
       let pe = (option_def_compile default_pen pen) pe in
       let dsh = (option_compile dash) dsh in
       Picture_lib.stroke_path p c pe dsh

@@ -115,7 +115,8 @@ and joint fmt j =
 
 and command fmt c = 
   match c.Hashcons.node with 
-  | CDraw (p,c,pe,d) ->
+  | CDraw (p,b) ->
+      let {color = c; pen = pe; dash = d} = b.Hashcons.node in
       fprintf fmt "draw (%a,%a,%a,%a);" 
       path p option_color c option_pen pe option_dash d
   | CFill (p,c) -> fprintf fmt "fill (%a,%a);" 
@@ -155,7 +156,7 @@ and dash fmt x =
   match x.Hashcons.node with
   | DEvenly -> fprintf fmt "evenly"
   | DWithdots -> assert false
-  | DScaled (f,d) -> fprintf fmt "%a scaled %f" dash d f
+  | DScaled (f,d) -> fprintf fmt "%a scaled %a" dash d num f
   | DShifted (p,d) -> assert false
   | DPattern l -> assert false
 and option_pen fmt = option_print pen fmt

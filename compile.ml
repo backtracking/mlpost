@@ -350,8 +350,9 @@ and dash d =
   | DEvenly -> C.DEvenly, nop
   | DWithdots -> C.DWithdots, nop
   | DScaled (f, d) -> 
-      let d,c = dash d in
-        C.DScaled (f,d) , c
+      let f,c1 = num f in
+      let d,c2 = dash d in
+        C.DScaled (f,d) , c1 ++ c2
   | DShifted (p,d) ->
       let p, c1 = point p in
       let d, c2 = dash d in
@@ -372,8 +373,9 @@ and dash_pattern o =
 	
 and command c = 
     match c.Hashcons.node with 
-  | CDraw (p, color, pe, dsh) ->
+  | CDraw (p, b) ->
       let p, c1 = path p in
+      let {color = color; pen = pe; dash = dsh} = b.Hashcons.node in
       let pe, c2 = (option_compile pen) pe in
       let dsh, c3 = (option_compile dash) dsh in
       C.CSeq [c1; c2; c3; C.CDraw (p, color, pe, dsh)]

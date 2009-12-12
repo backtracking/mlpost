@@ -93,7 +93,7 @@ and picture =
 and dash =
   | DEvenly
   | DWithdots
-  | DScaled of float * dash
+  | DScaled of num * dash
   | DShifted of point * dash
   | DPattern of on_off list
 

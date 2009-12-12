@@ -168,12 +168,15 @@ and transform t =
   | TRRotateAround (p,f) -> point p
 and command c = 
   match c.node with
-  | CDraw (p, color, pe, dsh) ->
-      path p; option_count pen pe; option_count dash dsh
+  | CDraw (p, b) ->
+      path p; brush b
   | CFill (p, c) -> path p
   | CDotLabel (pic, pos, pt) -> commandpic pic; point pt
   | CLabel (pic, pos ,pt) -> commandpic pic; point pt
   | CExternalImage _ -> ()
+and brush b =
+  let b = b.Hashcons.node in
+  option_count pen b.pen; option_count dash b.dash
 and pen p = 
   match p.Hashcons.node with
   | PenCircle | PenSquare -> ()

@@ -144,11 +144,11 @@ let map_bp, map_in, map_cm, map_mm, map_pt =
   ptlist ~scale:Num.mm, 
   ptlist ~scale:Num.pt
 
-let draw ?color ?pen t = 
+let draw ?brush ?color ?pen t = 
   (* We don't use a default to avoid the output of 
      ... withcolor (0.00red+0.00green+0.00blue) withpen .... 
      for each command in the output file *)
-    mkCommand (mkCDraw (mkPAofMPA (mkMPAKnot (mkKnot mkNoDir t mkNoDir))) color pen None)
+    mkCommand (mkCDraw (mkPAofMPA (mkMPAKnot (mkKnot mkNoDir t mkNoDir))) (mkBrushOpt brush color pen None))
 
 let normalize p = 
   let l = (length p) in

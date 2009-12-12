@@ -65,7 +65,7 @@ check: byte $(OCAMLBEST) $(TOOL) $(TESTS) check-examples
 CMO := misc.cmo name.cmo compiled_types.cmo hashcons.cmo types.cmo \
 	print.cmo num.cmo point.cmo duplicate.cmo compile.cmo \
        transform.cmo color.cmo metaPath.cmo path.cmo picture.cmo \
-       dash.cmo pen.cmo command.cmo shapes.cmo \
+       dash.cmo pen.cmo brush.cmo command.cmo shapes.cmo \
 	box.cmo arrow.cmo helpers.cmo diag.cmo tree.cmo tree_adv.cmo \
 	radar.cmo plot.cmo hist.cmo legend.cmo \
        scan_prelude.cmo metapost_tool.cmo metapost.cmo generate.cmo cairost.cmo concrete.cmo

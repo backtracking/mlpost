@@ -152,7 +152,7 @@ and transform = transform_node hash_consed
 and dash_node = private
   | DEvenly
   | DWithdots
-  | DScaled of float * dash
+  | DScaled of num * dash
   | DShifted of point * dash
   | DPattern of on_off list
 
@@ -174,7 +174,7 @@ and picture_node = private
 and picture = picture_node hash_consed
 
 and command_node = private
-  | CDraw of path * color option * pen option * dash option
+  | CDraw of path * brush
   | CFill of path * color option
   | CLabel of commandpic * position * point
   | CDotLabel of commandpic * position * point
@@ -197,6 +197,11 @@ and spec_image =
 
 and command = command_node hash_consed
 
+and brush_node = {pen : pen option;
+                  dash : dash option;
+                  color : color option}
+
+and brush = brush_node hash_consed
 (* smart constructors *)
 
 (* num *)
@@ -289,7 +294,7 @@ val mkPIClip : commandpic -> path -> picture
 
 (* command *)
 
-val mkCDraw: path -> color option -> pen option -> dash option -> command
+val mkCDraw: path -> brush -> command
 val mkCFill: path -> color option -> command
 val mkCLabel: commandpic -> position -> point -> command
 val mkCDotLabel: commandpic -> position -> point -> command
@@ -304,7 +309,7 @@ val mkSeq : commandpic list -> commandpic
 
 val mkDEvenly: dash
 val mkDWithdots: dash
-val mkDScaled: float -> dash -> dash
+val mkDScaled: num -> dash -> dash
 val mkDShifted: point -> dash -> dash
 val mkDPattern: on_off list -> dash
 
@@ -314,6 +319,10 @@ val mkPenCircle: pen
 val mkPenSquare: pen
 val mkPenFromPath: path -> pen
 val mkPenTransformed: pen -> transform -> pen
+
+(* brush *)
+val mkBrush: color option -> pen option -> dash option -> brush
+val mkBrushOpt : brush option -> color option -> pen option -> dash option -> brush
 
 (* on_off *)
 

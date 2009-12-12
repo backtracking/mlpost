@@ -115,15 +115,16 @@ and transform acc t =
 and dash acc d =
   match d.Hashcons.node with
     | DEvenly | DWithdots -> acc
-    | DScaled (_,d) -> dash acc d
+    | DScaled (n,d) -> dash (num acc n) d
     | DShifted (p,d) -> point (dash acc d) p
     | DPattern l -> List.fold_left dash_pattern acc l
 and dash_pattern acc o =
   match o.Hashcons.node with
     | On f | Off f -> num acc f
 and command' acc = function
-  | CDraw (p, _, pe, dsh) 
-      -> path ((option_compile pen) ((option_compile dash) acc dsh) pe) p
+  | CDraw (p, b) -> 
+      let {color = _; pen = pe; dash = dsh} = b.Hashcons.node in
+      path ((option_compile pen) ((option_compile dash) acc dsh) pe) p
   | CFill (p,_) -> path acc p
   | CDotLabel (pic,_,pt) | CLabel (pic,_,pt) -> commandpic (point acc pt) pic
   | CExternalImage _ -> acc

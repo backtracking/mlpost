@@ -136,20 +136,20 @@ let cpath ?style ?outd ?ind ?sep a b =
   let p = pathk ?style [knotp ?r (Box.ctr a); knotp ?l (Box.north b)] in
   strip ?sep (cut_before (Box.bpath a) p)
 
-let box_arrow ?color ?pen ?dashed ?style ?outd ?ind ?sep a b =   
-  Arrow.simple ?color ?pen ?dashed (cpath ?style ?outd ?ind ?sep a b)
+let box_arrow ?color ?brush ?pen ?dashed ?style ?outd ?ind ?sep a b =   
+  Arrow.simple ?color ?brush ?pen ?dashed (cpath ?style ?outd ?ind ?sep a b)
 
-let box_line ?color ?pen ?dashed ?style ?outd ?ind ?sep a b =   
-  draw ?color ?pen ?dashed (cpath ?style ?outd ?ind ?sep a b)
+let box_line ?color ?brush ?pen ?dashed ?style ?outd ?ind ?sep a b =   
+  draw ?color ?brush ?pen ?dashed (cpath ?style ?outd ?ind ?sep a b)
 
-let arc astyle estyle ?stroke ?pen ?sep ?lab b1 b2 =
+let arc astyle estyle ?stroke ?brush ?pen ?sep ?lab b1 b2 =
   let x1,y1 = let p = Box.ctr b1 in Point.xpart p, Point.ypart p 
   and x2,y2 = let p = Box.north b2 in Point.xpart p, Point.ypart p in
   let boxdraw, linedraw  = match astyle with 
     | Directed -> 
-	box_arrow ?color:stroke ?pen ?sep, Arrow.simple ?color:stroke ?pen
+	box_arrow ?color:stroke ?brush ?pen ?sep, Arrow.simple ?color:stroke ?brush ?pen
     | Undirected -> 
-	box_line ?color:stroke ?pen ?sep, draw ?color:stroke ?pen 
+	box_line ?color:stroke ?brush ?pen ?sep, draw ?color:stroke ?brush ?pen 
   in
   let drawlab b1 b2 = function
     | None -> 
@@ -206,20 +206,20 @@ type t = (Box.t * node_info) tree
 let leaf b = Node ((b, dummy_info), [])
 
 let node ?(ls=bp 20.) ?(cs=bp 3.) ?(arrow_style=Directed)
-      ?(edge_style=Straight) ?stroke ?pen ?sep b l = 
+      ?(edge_style=Straight) ?stroke ?brush ?pen ?sep b l = 
   Node ((b, {ls = ls; cs = cs; arrow_style = arrow_style; 
              edge_style = edge_style; stroke = stroke; 
              pen = pen; sep = sep; lab = None}), l)
 
 let nodel ?(ls=bp 20.) ?(cs=bp 3.) ?(arrow_style=Directed)
-      ?(edge_style=Straight) ?stroke ?pen ?sep b l = 
+      ?(edge_style=Straight) ?stroke ?brush ?pen ?sep b l = 
   Node ((b, { ls = ls; cs = cs; arrow_style = arrow_style; 
               edge_style = edge_style; stroke = stroke; pen = pen; 
               sep = sep; lab = Some (List.map snd l)}), 
        List.map fst l)
 
-let bin ?ls ?cs ?arrow_style ?edge_style ?stroke ?pen ?sep s x y = 
-  node ?ls ?cs ?arrow_style ?edge_style ?stroke ?pen ?sep s [x;y]
+let bin ?ls ?cs ?arrow_style ?edge_style ?stroke ?brush ?pen ?sep s x y = 
+  node ?ls ?cs ?arrow_style ?edge_style ?stroke ?brush ?pen ?sep s [x;y]
 
 let to_box t : Box.t =
   let rec draw x y (Node (((b, ni), dx, dy), tl)) =
@@ -234,12 +234,12 @@ let to_box t : Box.t =
     let draw_arcs tree = match ni.lab with
       | None -> 
 	  Command.iterl 
-	    (fun child -> arc ?stroke ?pen ?sep ni.arrow_style ni.edge_style 
+	    (fun child -> arc ~brush:(Types.mkBrush stroke pen None) ?sep ni.arrow_style ni.edge_style 
               (root tree) (root child)) 
 	    (children tree)
       | Some lab -> 
 	  Command.iterl 
-	    (fun (child, lab) -> arc ?stroke ?pen ?sep ~lab 
+	    (fun (child, lab) -> arc ~brush:(Types.mkBrush stroke pen None) ?sep ~lab 
 	      ni.arrow_style ni.edge_style (root tree) (root child)) 
 	    (List.combine (children tree) lab)
     in
@@ -257,19 +257,19 @@ module Simple = struct
   let leaf s = Box.group [s]
     
   let node ?(ls=Num.bp 12.) ?(cs=Num.bp 5.) ?(arrow_style=Directed)
-      ?(edge_style=Straight) ?stroke ?pen ?sep 
+      ?(edge_style=Straight) ?stroke ?brush ?pen ?sep 
       ?(valign=`Center) ?(halign=`North) s l = 
     let l = Box.hbox ~padding:cs ~pos:halign l in 
     let tree = Box.vbox ~padding:ls ~pos:valign [s;l] in
     Box.set_post_draw 
       (fun tree -> 
 	 (Command.iterl 
-	    (fun child -> arc ?stroke ?pen ?sep arrow_style edge_style 
+	    (fun child -> arc ?stroke ?brush ?pen ?sep arrow_style edge_style 
                (root tree) (root child)) (children tree)))
       tree
       
-  let bin ?ls ?cs ?arrow_style ?edge_style ?stroke ?pen ?sep s x y = 
-    node ?ls ?cs ?arrow_style ?edge_style ?stroke ?pen ?sep s [x;y]
+  let bin ?ls ?cs ?arrow_style ?edge_style ?stroke ?brush ?pen ?sep s x y = 
+    node ?ls ?cs ?arrow_style ?edge_style ?stroke ?brush ?pen ?sep s [x;y]
 
   let to_box b = b
 

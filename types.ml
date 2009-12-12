@@ -154,7 +154,7 @@ and transform = transform_node hash_consed
 and dash_node =
   | DEvenly
   | DWithdots
-  | DScaled of float * dash
+  | DScaled of num * dash
   | DShifted of point * dash
   | DPattern of on_off list
 
@@ -176,7 +176,7 @@ and picture_node =
 and picture = picture_node hash_consed
 
 and command_node =
-  | CDraw of path * color option * pen option * dash option
+  | CDraw of path * brush
   | CFill of path * color option
   | CLabel of commandpic * position * point
   | CDotLabel of commandpic * position * point
@@ -197,6 +197,12 @@ and commandpic_node =
   | Seq of commandpic list
 
 and commandpic = commandpic_node hash_consed
+
+and brush_node = {pen : pen option;
+                  dash : dash option;
+                  color : color option}
+
+and brush = brush_node hash_consed
 
 let hash_float = Hashtbl.hash
 
@@ -330,13 +336,16 @@ let hash_position = Hashtbl.hash
 let hash_spec_image = Hashtbl.hash
 
 let command = function
-  | CDraw(pa,c,p,d) ->
-      combine4 43 pa.hkey (hash_opt hash_color c) (hash_opt hash_color p) (hash_opt hash_key d)
+  | CDraw(pa,b) ->
+      combine2 43 pa.hkey b.hkey
   | CFill(p,c) -> combine2 46 p.hkey (hash_color c)
   | CLabel(pic,pos,poi) -> combine3 47 pic.hkey (hash_position pos) poi.hkey
   | CDotLabel(pic,pos,poi) -> 
       combine3 48 pic.hkey (hash_position pos) poi.hkey
   | CExternalImage (filename,spec) -> combine2 52 (hash_string filename) (hash_spec_image spec)
+
+let brush b =
+  combine3 85 (hash_opt hash_color b.color) (hash_opt hash_key b.pen) (hash_opt hash_key b.dash)
 
 (** equality *)
 
@@ -378,12 +387,17 @@ let eq_dash_node d1 d2 =
   | DEvenly, DEvenly 
   | DWithdots, DWithdots -> true
   | DScaled(f1,d1), DScaled(f2,d2) ->
-      eq_float f1 f2 && eq_hashcons d1 d2
+      eq_hashcons f1 f2 && eq_hashcons d1 d2
   | DShifted(p1,d1), DShifted(p2,d2) ->
       eq_hashcons p1 p2 && eq_hashcons d1 d2
   | DPattern l1, DPattern l2 ->
       eq_hashcons_list l1 l2
   | _ -> false
+
+let eq_brush_node b1 b2 =
+  eq_opt eq_color b1.color b2.color &&
+    eq_opt eq_hashcons b1.pen b2.pen &&
+    eq_opt eq_hashcons b1.dash b2.dash
 
 let eq_on_off o1 o2 =
   match o1,o2 with
@@ -517,11 +531,8 @@ let eq_direction_node d1 d2 =
   
 let eq_command_node c1 c2 =
   match c1,c2 with
-  | CDraw(p1,c1,pen1,d1), CDraw(p2,c2,pen2,d2) ->
-      eq_hashcons p1 p2 && 
-	eq_opt eq_color c1 c2 &&
-	eq_opt eq_hashcons pen1 pen2 &&
-	eq_opt eq_hashcons d1 d2
+  | CDraw(p1,b1), CDraw(p2,b2) ->
+      eq_hashcons p1 p2 && eq_hashcons b1 b2
   | CFill(p1,c1), CFill(p2,c2) ->
       eq_hashcons p1 p2 && eq_opt eq_color c1 c2
   | CLabel(pic1,pos1,poi1), CLabel(pic2,pos2,poi2) 
@@ -711,7 +722,7 @@ module HashCommand =
 let hashcommand_table = HashCommand.create 257;;
 let hashcommand = HashCommand.hashcons hashcommand_table
 
-let mkCDraw x y z t = hashcommand (CDraw(x,y,z,t))
+let mkCDraw x y  = hashcommand (CDraw(x,y))
 let mkCFill x y = hashcommand (CFill(x,y))
 let mkCLabel x y z = hashcommand (CLabel(x,y,z))
 let mkCDotLabel x y z = hashcommand (CDotLabel(x,y,z))
@@ -759,6 +770,32 @@ let mkPenCircle = hashpen PenCircle
 let mkPenSquare = hashpen PenSquare
 let mkPenFromPath p = hashpen (PenFromPath p)
 let mkPenTransformed x y = hashpen (PenTransformed(x,y))
+
+(* brush *)
+module HashBrush = 
+  Hashcons.Make(struct type t = brush_node
+		       let equal = eq_brush_node
+		       let hash = unsigned brush end)
+
+let hashbrush_table = HashBrush.create 257;;
+let hashbrush = HashBrush.hashcons hashbrush_table
+
+let mkBrush c p d = hashbrush {pen = p;color=c;dash=d}
+
+let opt_def_node def = function
+  | None -> def
+  | Some s -> s.node
+
+let opt_def_map f def = function
+  | None -> def
+  | Some s -> f s
+
+let mkBrushOpt b c p d = 
+  let b = opt_def_node {color = None; pen = None; dash = None} b in
+  let b = opt_def_map (fun x -> {b with color = Some x}) b c in
+  let b = opt_def_map (fun x -> {b with pen = Some x}) b p in
+  let b = opt_def_map (fun x -> {b with dash = Some x}) b d in
+  hashbrush b
 
 (* on_off *)
 

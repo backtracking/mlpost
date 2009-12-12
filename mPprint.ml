@@ -147,7 +147,7 @@ and knot fmt (d1,p,d2) = fprintf fmt "%a%a%a" direction d1 point p direction d2
 and dash fmt = function
   | C.DEvenly -> fprintf fmt "evenly"
   | C.DWithdots -> fprintf fmt "withdots"
-  | C.DScaled (s, d) -> fprintf fmt "%a scaled %a" dash d float s
+  | C.DScaled (s, d) -> fprintf fmt "%a scaled %a" dash d num s
   | C.DShifted (p, d) -> fprintf fmt "%a shifted %a" dash d point p
   | C.DPattern l -> 
       fprintf fmt "dashpattern(";

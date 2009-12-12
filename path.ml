@@ -172,8 +172,8 @@ let smart_path ?style dirlist p1 p2 =
   in
   pathp ?style points
 
-let draw ?color ?pen ?dashed t = 
+let draw ?brush ?color ?pen ?dashed t = 
   (* We don't use a default to avoid the output of 
      ... withcolor (0.00red+0.00green+0.00blue) withpen .... 
      for each command in the output file *)
-    mkCommand (mkCDraw t color pen dashed)
+    mkCommand (mkCDraw t (mkBrushOpt brush color pen dashed))

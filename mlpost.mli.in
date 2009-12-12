@@ -204,7 +204,7 @@ and Point : sig
   (** Same as [p], but builds a list of points *)
   val ptlist : ?scale:(float -> Num.t) -> (float * float) list -> t list
 
-  val draw : ?color:Color.t -> ?pen:Pen.t -> t -> Command.t
+  val draw : ?brush:Brush.t -> ?color:Color.t -> ?pen:Pen.t -> t -> Command.t
     (** Draw a point
 	@param color the color of the point; default is black
 	@param pen the pen used to draw the pen; default is {!Pen.default}*)
@@ -545,14 +545,16 @@ and Path : sig
 
   val smart_path : ?style:joint -> orientation list -> Point.t -> Point.t -> t
 
-  val draw : ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> t -> Command.t
+  val draw : ?brush:Brush.t -> ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> t -> Command.t
     (** Draw a path 
+        @param brush the brush used to draw the path; the next argument redefined this one
 	@param color the color of the path; default is black
 	@param pen the pen used to draw the path; default is {!Pen.default}
 	@param dashed if given, the path is drawn using that dash_style. *)
 
 end
 
+(**/**)
   (** Pens: change the way lines are drawn in Mlpost *)
 and Pen : sig
   (** Pens are used to change the the way lines are drawn in Mlpost *)
@@ -607,6 +609,107 @@ and Dash : sig
     (** This function, together with the type [on_off]  permits to construct
      custom dash patterns, by giving a list of [on] / [off] constructors, with 
       corresponding lengths *)
+
+end
+(**/**)
+
+(** Brushes : change the way lines are drawn in Mlpost *)
+and Brush : sig
+
+  (** Pens: change the way lines look like in Mlpost *)
+  module Pen : sig
+    (** Pens are used to change the the way lines are drawn in Mlpost *)
+    
+    type t (**/**) = Pen.t (**/**)
+      (** The abstract type of pens *)
+      
+    val transform : Transform.t -> t -> t
+      (** Apply a transformation to pens *)
+    val default : t
+      (** The default pen; it corresponds to 
+      [Pen.scale (Num.bp 0.5) Pen.circle] *)
+    val circle : t
+    (** A circular pen of diameter 1 bp *)
+    val square : t
+      (** A pen in form of a square, of length 1 bp *)
+    val from_path : Path.t -> t
+      (** Construct a pen from a closed path *)
+      
+    val scale : Num.t -> t -> t
+    val rotate : float -> t -> t
+    val shift : Point.t -> t -> t
+    val yscale : Num.t -> t -> t
+    val xscale : Num.t -> t -> t
+      (** Shortcuts for transformations of pens *)
+  end
+    
+  (** Dash patterns *)
+  module Dash : sig
+    (** This module permits to define dash patterns, that are used to draw lines
+        in different styles *)
+    
+    type t (**/**) = Dash.t (**/**)
+      (** The abstract type of dash patterns *)
+      
+    val evenly : t
+      (** The pattern composed of evenly spaced dashes *)
+    val withdots : t
+      (** The pattern composed of evenly spaced dots *)
+      
+    val scaled : Num.t -> t -> t
+      (** Scale a dash pattern *)
+    val shifted : Point.t -> t -> t
+      (** Shift a dash pattern *)
+
+    type on_off 
+      
+    val on : Num.t -> on_off
+    val off : Num.t -> on_off
+      
+    val pattern : on_off list -> t
+      (** This function, together with the type [on_off]  permits to construct
+          custom dash patterns, by giving a list of [on] / [off] constructors, with 
+          corresponding lengths *)
+      
+  end
+
+  type t
+
+  val t : ?color:Color.t -> ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+
+  (** {2 Brushes with Predefined Colors} *)
+
+  (** {3 base colors} *)
+
+  val white : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+  val black : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+  val red : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+  val blue : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+  val green : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+  val cyan : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+  val yellow : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+  val magenta : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+    
+  (** {3 lighter colors} *)
+
+  val lightred : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+  val lightblue : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+  val lightgreen : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+  val lightcyan : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+  val lightyellow : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+  val lightmagenta : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+
+  (** {3 grays} *)
+
+  val gray : float -> ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+  val lightgray : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+  val mediumgray : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+  val darkgray : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+
+  (** {3 additional colors} *)
+
+  val orange : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+  val purple : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
 
 end
 
@@ -854,7 +957,7 @@ and Command : sig
 *)
   (** {2 Drawing Commands} *)
 
-  val draw : ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> Path.t -> t
+  val draw : ?brush:Brush.t -> ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> Path.t -> t
     (** Draw a path 
 	@param color the color of the path; default is black
 	@param pen the pen used to draw the path; default is {!Pen.default}
@@ -1413,7 +1516,7 @@ module Arrow : sig
       as {!Command.label}. *)
 
   val simple : 
-    ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> Path.t -> Command.t
+    ?color:Color.t -> ?brush:Brush.t -> ?pen:Pen.t -> ?dashed:Dash.t -> Path.t -> Command.t
     (** Draw a simple arrow following the given path.
         @param color the color of the arrow
         @param pen the pen to use to draw the body of the arrow
@@ -1499,7 +1602,7 @@ module Arrow : sig
         head at point [p] with direction [d]. Direction [d] is normalized before
         being given to the function. *)
 
-  val head_classic : ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
+  val head_classic : ?color:Color.t -> ?brush:Brush.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?angle:float -> ?size:Num.t -> head
   (** A simple head with two straight lines.
       @param color the color of the head; default is black
@@ -1509,7 +1612,7 @@ module Arrow : sig
         degrees
       @param size the length of the two lines, default is 4bp *)
 
-  val head_triangle : ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
+  val head_triangle : ?color:Color.t -> ?brush:Brush.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?angle:float -> ?size:Num.t -> head
   (** Same as [head_classic] except that the two lines are joined together
       to form a triangle. *)
@@ -1526,7 +1629,7 @@ module Arrow : sig
   val empty: kind
     (** The empty kind with no line nor head. *)
 
-  val add_line: ?dashed: Dash.t -> ?color: Color.t -> ?pen: Pen.t ->
+  val add_line: ?brush:Brush.t -> ?dashed: Dash.t -> ?color: Color.t -> ?pen: Pen.t ->
     ?from_point: float -> ?to_point: float -> ?dist: Num.t -> kind -> kind
     (** Add a line to a body. The line will be parallel to the path used
         to draw the arrow.
@@ -1669,7 +1772,8 @@ module Tree : sig
     (** [leaf b] creates a leaf with Box [b]. *)
 
   val node : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
-             ?edge_style:edge_style -> ?stroke:Color.t -> ?pen:Pen.t ->
+             ?edge_style:edge_style -> ?stroke:Color.t -> 
+             ?brush:Brush.t -> ?pen:Pen.t ->
              ?sep:Num.t ->
              Box.t -> t list -> t
     (** [node label children] creates a node with label [label] and a list
@@ -1683,14 +1787,16 @@ module Tree : sig
 	Optional arguments are the same as in [leaf]. *)
 
   val nodel : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
-             ?edge_style:edge_style -> ?stroke:Color.t -> ?pen:Pen.t ->
+             ?edge_style:edge_style -> ?stroke:Color.t -> 
+             ?brush:Brush.t -> ?pen:Pen.t ->
              ?sep:Num.t ->
              Box.t -> (t * (Command.position * Picture.t)) list -> t
     (** Similar to [node] but with labels on edges. 
         Labels are taken into account only when [edge_style] is [Straight]. *)
 
   val bin  : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
-             ?edge_style:edge_style -> ?stroke:Color.t -> ?pen:Pen.t ->
+             ?edge_style:edge_style -> ?stroke:Color.t -> 
+             ?brush:Brush.t -> ?pen:Pen.t ->
              ?sep:Num.t ->
              Box.t -> t -> t -> t
     (** [bin label l r] creates a binary node with label [label] and 
@@ -1705,7 +1811,8 @@ module Tree : sig
     type t
     val leaf : Box.t -> t
     val node : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
-      ?edge_style:edge_style -> ?stroke:Color.t -> ?pen:Pen.t -> ?sep:Num.t ->
+      ?edge_style:edge_style -> ?stroke:Color.t -> 
+      ?brush:Brush.t -> ?pen:Pen.t -> ?sep:Num.t ->
       ?valign:Command.position -> ?halign:Command.position ->
       Box.t -> t list -> t
     (** a simple tree placement algorithm: align all subtrees horizontally , and
@@ -1722,7 +1829,7 @@ module Tree : sig
     *)
 
     val bin  : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
-      ?edge_style:edge_style -> ?stroke:Color.t -> ?pen:Pen.t -> ?sep:Num.t ->
+      ?edge_style:edge_style -> ?stroke:Color.t -> ?brush:Brush.t -> ?pen:Pen.t -> ?sep:Num.t ->
       Box.t -> t -> t -> t
       (* [bin t1 t2] is the same as [node [t1;t2] ] *)
 
