@@ -14,7 +14,7 @@
 (*                                                                        *)
 (**************************************************************************)
 
-open Format
+open Dvi_util
 
 type preamble = {
   pre_version : int;
@@ -38,14 +38,6 @@ type postamble = {
 type postpostamble = {
   postamble_pointer : int32;
   post_post_version : int;
-}
-
-type font_def = {
-  checksum : int32;
-  scale_factor : int32;
-  design_size : int32;
-  area : string;
-  name : string;
 }
 
 type command =
@@ -74,19 +66,19 @@ type page = {
   commands : command list
 }
 
-module Int32Map = 
-  Map.Make(struct type t = int32 let compare = Int32.compare end)
-
 type t = {
   preamble : preamble;
   pages : page list;
   postamble : postamble;
   postpostamble : postpostamble;
-  font_map : font_def Int32Map.t
+  font_map : Fonts.font_def Int32Map.t
 }
 
+let fontmap d = d.font_map
+
 module Print = struct
-  let print_preamble fmt p =
+  open Format
+  let preamble fmt p =
     fprintf fmt "* Preamble :\n";
     fprintf fmt "\tversion number = %d\n" p.pre_version;
     fprintf fmt "\tnumerator/denominator = %ld/%ld\n" 
@@ -94,28 +86,21 @@ module Print = struct
     fprintf fmt "\tmagnification = %ld\n" p.pre_mag;
     fprintf fmt "\tcomment : %s\n" p.pre_text
 
-  let print_font k fmt f =
-    fprintf fmt "\tFont number %ld (%s in directory [%s]) :\n"
-      k f.name f.area;
-    fprintf fmt "\t Checksum = %lx\n" f.checksum;
-    fprintf fmt "\t Scale factor / Design size : %ld / %ld\n" 
-      f.scale_factor f.design_size
-
-  let print_page fmt 
+  let page fmt 
       {counters = c; previous = prev; commands = cmds} =
     fprintf fmt "* Page number :";
     Array.iter (fun c -> fprintf fmt "%ld;" c) c; fprintf fmt "\n";
     fprintf fmt "\tPrevious page can be found at %ld\n" prev;
     fprintf fmt "\t<list of commands skipped ...>"
       
-  let print_pages fmt =
-    List.iter (fun p -> fprintf fmt "%a\n" print_page p)
+  let pages fmt =
+    List.iter (fun p -> fprintf fmt "%a\n" page p)
 
-  let print_fonts fmt fonts =
+  let fonts fmt fonts =
     fprintf fmt "* Fonts defined in this file :\n";
-    Int32Map.iter (fun k f -> print_font k fmt f) fonts
+    Int32Map.iter (fun k f -> Fonts.Print.font k fmt f) fonts
 
-  let print_postamble fmt p =
+  let postamble fmt p =
     fprintf fmt "* Postamble :\n";
     fprintf fmt "\tlast page = %ld\n" p.last_page;
     fprintf fmt "\tnumerator/denominator = %ld/%ld\n" 
@@ -126,20 +111,18 @@ module Print = struct
     fprintf fmt "\tmaximum stack depth = %d\n"  p.post_stack;
     fprintf fmt "\ttotal # of pages = %d\n"  p.post_pages  
 
-  let print_postpostamble fmt p =
+  let postpostamble fmt p =
     fprintf fmt "* Postpostamble :\n";
     fprintf fmt "\tPostamble can be found at %ld.\n" p.postamble_pointer;
     fprintf fmt "\tDVI version : %d\n" p.post_post_version
       
-  let print_doc name fmt doc =
+  let doc name fmt doc =
     fprintf fmt "***********************\n";
     fprintf fmt "Reading DVI file : %s\n" name;
     fprintf fmt "%a%a%a%a%a"
-      print_preamble doc.preamble
-      print_pages doc.pages
-      print_fonts doc.font_map
-      print_postamble doc.postamble
-      print_postpostamble doc.postpostamble
+      preamble doc.preamble pages doc.pages
+      fonts doc.font_map postamble doc.postamble
+      postpostamble doc.postpostamble
 
 end
 
@@ -181,11 +164,11 @@ let font_def bits =
 	bits : -1 : bitstring
       } ->
 (* 	fprintf fmt " on est passé dans une déf de fonte %s\n" name; *)
-	{ checksum = checksum;
-	  scale_factor = scale;
-	  design_size = design;
-	  area = String.sub name 0 a;
-	  name = String.sub name a l;
+	{ Fonts.checksum = checksum;
+	  Fonts.scale_factor = scale;
+	  Fonts.design_size = design;
+	  Fonts.area = String.sub name 0 a;
+	  Fonts.name = String.sub name a l;
 	}, bits
     | { _ : -1 : bitstring } ->
 	dvi_error "Ill_formed font definition"
@@ -480,3 +463,6 @@ let get_height_cm doc =
 
 let get_width_cm doc =
   (get_conv doc) *. (Int32.to_float doc.postamble.post_width)
+
+let pages d = d.pages
+let commands p = p.commands

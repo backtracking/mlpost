@@ -15,7 +15,7 @@
 (**************************************************************************)
 
 open Format
-open Dvi
+open Dvi_util
 open Fonts
 open Tfm
 
@@ -82,7 +82,7 @@ struct
     Dev.fill_rect (unsome !dev) x (y -. h) w h
 
   let interp_command fm s = function  
-    | SetChar c -> 
+    | Dvi.SetChar c -> 
         if !debug then printf "Setting character %ld.@." c;
         let font = Int32Map.find !current_font fm in
         let idx = (Int32.to_int c) - font.metric.file_hdr.bc in
@@ -94,66 +94,67 @@ struct
 	  !current_font width;
         put_char s font c;
 	{s with h = Int32.add s.h width}
-    | SetRule(a, b) ->
+    | Dvi.SetRule(a, b) ->
         if !debug then printf "Setting rule (w=%ld, h=%ld).@." a b;
         put_rule s a b;
         {s with h = Int32.add s.h b}
-    | PutChar c -> 
+    | Dvi.PutChar c -> 
         if !debug then printf "Putting character %ld.@." c;
         put_char s (Int32Map.find !current_font fm) c;
         s
-    | PutRule(a, b) ->
+    | Dvi.PutRule(a, b) ->
         if !debug then printf "Putting rule (w=%ld, h=%ld).@." a b;
         put_rule s a b;
         s
-    | Push -> 
+    | Dvi.Push -> 
         if !debug then printf "Push current state.@.";
         Stack.push s stack; s
-    | Pop ->      
+    | Dvi.Pop ->      
         (try 
 	   if !debug then printf "Pop current state.@.";
 	   Stack.pop stack
          with Stack.Empty -> failwith "Empty stack !")
-    | Right b -> 
+    | Dvi.Right b -> 
         if !debug then printf "Moving right %ld.@." b;
         {s with h = Int32.add s.h b}
-    | Wdefault -> 
+    | Dvi.Wdefault -> 
         if !debug then printf "Moving right by the default W.@.";
         {s with h = Int32.add s.h s.w}
-    | W b -> 
+    | Dvi.W b -> 
         if !debug then printf "Moving right and changing W to %ld.@." b;
         {s with h = Int32.add s.h b; w = b}
-    | Xdefault -> 
+    | Dvi.Xdefault -> 
         if !debug then printf "Moving right by the default X.@.";
         {s with h = Int32.add s.h s.x}
-    | X b -> 
+    | Dvi.X b -> 
         if !debug then printf "Moving right and changing X to %ld.@." b;
         {s with h = Int32.add s.h b; x = b}
-    | Down a ->
+    | Dvi.Down a ->
         if !debug then printf "Moving down %ld.@." a;
         {s with v = Int32.add s.v a}
-    | Ydefault ->
+    | Dvi.Ydefault ->
         if !debug then printf "Moving down by the default Y.@.";
         {s with v = Int32.add s.v s.y}
-    | Y a -> 
+    | Dvi.Y a -> 
         if !debug then printf "Moving down and changing Y to %ld.@." a;
         {s with v = Int32.add s.v a; y = a}
-    | Zdefault ->
+    | Dvi.Zdefault ->
         if !debug then printf "Moving down by the default Z.@.";
         {s with v = Int32.add s.v s.z}
-    | Z a ->
+    | Dvi.Z a ->
         if !debug then printf "Moving down and changing Z to %ld.@." a;
         {s with v = Int32.add s.v a; z = a}
-    | FontNum f -> 
+    | Dvi.FontNum f -> 
         current_font := f;
         if !debug then printf "Font is now set to %ld@." f;
         s
-    | Special xxx ->
+    | Dvi.Special xxx ->
         if !debug then printf "Special command ignored : %s@." xxx;
         s
 	  
-  let interp_page fm {commands = cmds} =
-    ignore (List.fold_left (interp_command fm) (reset ()) (List.rev cmds))
+  let interp_page fm p =
+    ignore (List.fold_left (interp_command fm) (reset ()) 
+      (List.rev (Dvi.commands p)))
       
   (* type font_def = { *)
   (*   checksum : int32; *)
@@ -164,22 +165,22 @@ struct
   (* } *)
 
 
-  let load_fonts doc font_map =
+  let load_fonts font_map conv =
     Int32Map.fold (fun k fdef -> 
-		     Int32Map.add k (Fonts.load_font doc fdef)
+		     Int32Map.add k (Fonts.load_font fdef conv)
                   )
       font_map Int32Map.empty
 
   let load_doc arg doc =
     conv := Dvi.get_conv doc;
-    let fonts = load_fonts doc doc.font_map in
+    let fonts = load_fonts (Dvi.fontmap doc) !conv in
     dev := Some (Dev.new_document arg doc);
     List.iter (fun p -> 
                  if !debug then
 		   printf "#### Starting New Page ####@."
                  else if !verbose then printf ".";
 		interp_page fonts p)
-      doc.pages;
+      (Dvi.pages doc);
     Dev.end_document (unsome !dev)
 
 
