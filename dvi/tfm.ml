@@ -87,59 +87,56 @@ type t = {
 
 module Print = struct
   
-  let print_file_hdr fmt fh =
+  let file_hdr fmt fh =
     fprintf fmt "File header :\n";
     fprintf fmt " lf=%d; lh=%d; bc=%d; ec=%d;\n" fh.lf fh.lh fh.bc fh.ec;
     fprintf fmt " nw=%d; nh=%d; nd=%d; ni=%d;\n" fh.nw fh.nh fh.nh fh.ni;
     fprintf fmt " nl=%d; nk=%d; ne=%d; np=%d;\n" fh.nl fh.nk fh.ne fh.np
       
-  let print_wd fmt (wd : fix_word) =
+  let wd fmt (wd : fix_word) =
     pp_print_float fmt wd
 
-  let print_wds fmt a =
-    Array.iteri (fun i c -> fprintf fmt "  %d : %a\n" i print_wd c) a
+  let wds fmt a =
+    Array.iteri (fun i c -> fprintf fmt "  %d : %a\n" i wd c) a
 
-  let print_header fmt hdr =
+  let header fmt hdr =
     fprintf fmt " Header : Checksum = %lx; Design size = %a\n"
-      hdr.checksum print_wd hdr.design_size
+      hdr.checksum wd hdr.design_size
  
-  let print_info fmt info =
+  let info fmt info =
     fprintf fmt " Char : Width = %d, Height = %d, Depth = %d, Italic = %d\n"
       info.width_index info.height_index info.depth_index info.italic_index;
     fprintf fmt "  tag = %d; remainder = %d\n" info.tag info.info_remainder
 
-  let print_infos fmt infos =
-    Array.iter (fun c -> fprintf fmt "%a" print_info c) infos
+  let infos fmt infos =
+    Array.iter (fun c -> fprintf fmt "%a" info c) infos
 
-  let print_kern_cmd fmt kc =
+  let kern_cmd fmt kc =
     fprintf fmt " Lig Kern command : skip = %d, next = %d, op = %d, rem = %d\n"
       kc.skip_byte kc.next_char kc.op_byte kc.kern_remainder
 
-  let print_kern_cmds fmt kcs =
-    Array.iter (fun c -> fprintf fmt "%a" print_kern_cmd c) kcs
+  let kern_cmds fmt kcs =
+    Array.iter (fun c -> fprintf fmt "%a" kern_cmd c) kcs
 
-  let print_recipe fmt r =
+  let recipe fmt r =
     fprintf fmt " Recipe : top = %d, mid = %d, bot = %d, rep = %d\n"
       r.top r.mid r.bot r.rep
 
-  let print_recipes fmt rs =
-    Array.iter (fun c -> fprintf fmt "%a" print_recipe c) rs
+  let recipes fmt rs =
+    Array.iter (fun c -> fprintf fmt "%a" recipe c) rs
  
-  let print_body fmt body =
-    fprintf fmt "Body : \n%a\n" print_header body.header;
+  let body fmt body =
+    fprintf fmt "Body : \n%a\n" header body.header;
     fprintf fmt "%a Widths:\n%a Heights:\n%a Depths:\n%a Italic:\n%a"
-      print_infos body.char_info
-      print_wds body.width print_wds body.height
-      print_wds body.depth print_wds body.italic;
+      infos body.char_info wds body.width wds body.height
+      wds body.depth wds body.italic;
     fprintf fmt "%a Kerns:\n%a%a Params:\n%a"
-      print_kern_cmds body.lig_kern print_wds body.kern
-      print_recipes body.exten 
-      print_wds body.param
+      kern_cmds body.lig_kern wds body.kern recipes body.exten wds body.param
 
-  let print_tfm name fmt {file_hdr = fh; body = body} =
+  let tfm name fmt {file_hdr = fh; body = bdy} =
     fprintf fmt "***********************\n";
     fprintf fmt "Reading Tex Font Metrics file : %s\n" name;
-    fprintf fmt "%a%a" print_file_hdr fh print_body body
+    fprintf fmt "%a%a" file_hdr fh body bdy
 
 end
 
@@ -293,6 +290,6 @@ let read_file file =
   let bits = Bitstring.bitstring_of_file file in
   let fh, bits = file_hdr bits in
   if !debug then
-    Print.print_file_hdr std_formatter fh;
+    Print.file_hdr std_formatter fh;
   let body = body fh bits in
   { file_hdr = fh; body = body }

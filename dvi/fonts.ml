@@ -251,5 +251,5 @@ let load_font =
           Hashtbl.add memoize (doc_conv,fdef) result;
           result
 
-open Format
+let char_width t c = Metric.char_width t.metric c *. t.ratio
 

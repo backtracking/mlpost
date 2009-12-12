@@ -28,3 +28,5 @@ val t1disasm : string option ref
 module Print : sig
   val font : int32 -> Format.formatter -> font_def -> unit
 end
+
+val char_width : t -> int -> float

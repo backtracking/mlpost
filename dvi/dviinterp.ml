@@ -16,8 +16,6 @@
 
 open Format
 open Dvi_util
-open Fonts
-open Tfm
 
 type state = {
   h : int32;
@@ -85,10 +83,7 @@ struct
     | Dvi.SetChar c -> 
         if !debug then printf "Setting character %ld.@." c;
         let font = Int32Map.find !current_font fm in
-        let idx = (Int32.to_int c) - font.metric.file_hdr.bc in
-        let body = font.metric.body in
-        let info = body.char_info.(idx) in
-        let fwidth = body.width.(info.width_index) *. font.ratio in
+        let fwidth = Fonts.char_width font (Int32.to_int c) in
         let width = Int32.of_float fwidth in
 	if !debug then printf "Character found in font %ld. Width = %ld@." 
 	  !current_font width;
@@ -156,15 +151,6 @@ struct
     ignore (List.fold_left (interp_command fm) (reset ()) 
       (List.rev (Dvi.commands p)))
       
-  (* type font_def = { *)
-  (*   checksum : int32; *)
-  (*   scale_factor : int32; *)
-  (*   design_size : int32; *)
-  (*   area : string; *)
-  (*   name : string; *)
-  (* } *)
-
-
   let load_fonts font_map conv =
     Int32Map.fold (fun k fdef -> 
 		     Int32Map.add k (Fonts.load_font fdef conv)
