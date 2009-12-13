@@ -187,9 +187,10 @@ let ocamlbuild args exec_name =
   let args = if !verbose then "-classic-display" :: args else " -quiet"::args in
   command ~outv:true ("ocamlbuild " ^ String.concat " " args ^ exec_name);
   execute ~outv:true ("_build/"^exec_name);
-  match !compile_name with
+  (match !compile_name with
     | None -> ()
-    | Some s -> command ("cp _build/" ^ exec_name ^ " " ^ s)
+    | Some s -> command ("cp _build/" ^ exec_name ^ " " ^ s));
+  if !dont_clean then () else command "ocamlbuild -clean"
 
 let compile f =
   let bn = Filename.chop_extension f in
