@@ -20,7 +20,6 @@ open Mlpost_desc_options
 let call_cmd = Misc.call_cmd
  
 let () =
-  let verbose = !verbose in
   let user_opts = Queue.create () in
   let user_opt = ("--", Arg.Rest (fun s -> Queue.add s user_opts), "The option given to the program") in
 
@@ -38,8 +37,10 @@ let () =
   let prelude = match !latex_file with
     | None -> None
     | Some f -> Some (Metapost_tool.read_prelude_from_tex_file f) in
+  
+  let verbose = !verbose in
 
-  Concrete.set_verbosity verbose;
+  Command.set_verbosity verbose;
   Concrete.set_t1disasm !t1disasm;
   Concrete.set_prelude2 prelude;
 

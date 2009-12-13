@@ -17,8 +17,9 @@
 open Tfm
 open Fonts
 
-type command = | Rectangle of float * float * float * float (* x,y,w,h *)
-               | Glyph of Fonts.t * Int32.t * float * float
+type command = | Rectangle of Dviinterp.info*float * float * float * float (* x,y,w,h *)
+               | Glyph of Dviinterp.info*Fonts.t * Int32.t * float * float
+               | Specials of Dviinterp.info*string * float *float (* s,x,y *)
 
 type page = { c : command list;
               x_min : float;
@@ -34,23 +35,24 @@ let stroke = 0.05
 type t = {mutable pages : page list;
           doc : Dvi.t}
 
-let replay_page_aux trace fill_rect draw_char dev page =
-  List.iter (function |Rectangle (x,y,w,h) -> fill_rect dev x y w h
-               |Glyph (font,char,x,y) -> draw_char dev font char x y) page.c;
+let replay_page_aux trace fill_rect draw_char specials dev page =
+  List.iter (function |Rectangle (info,x,y,w,h) -> fill_rect dev info x y w h
+               |Glyph (info,font,char,x,y) -> draw_char dev info font char x y
+               |Specials (info,xxx,x,y) -> specials dev info xxx x y) page.c;
   if trace then 
     begin
       let h = page.y_max -. page.y_min in
       let w = page.x_max -. page.x_min in
       let msd x = x -. stroke/.2. in
-      fill_rect dev page.x_min (msd page.y_min) w stroke;
-      fill_rect dev (msd page.x_min) page.y_min stroke h;
-      fill_rect dev page.x_min (msd page.y_max) w stroke;
-      fill_rect dev (msd page.x_max) page.y_min stroke h
+      fill_rect dev Dviinterp.dumb_info page.x_min (msd page.y_min) w stroke;
+      fill_rect dev Dviinterp.dumb_info (msd page.x_min) page.y_min stroke h;
+      fill_rect dev Dviinterp.dumb_info page.x_min (msd page.y_max) w stroke;
+      fill_rect dev Dviinterp.dumb_info (msd page.x_max) page.y_min stroke h
     end
 
-let replay trace new_document new_page fill_rect draw_char end_document saved arg =
+let replay trace new_document new_page fill_rect draw_char specials end_document saved arg =
   let dev = new_document arg saved.doc in
-  List.iter (fun page -> new_page dev; replay_page_aux trace fill_rect draw_char dev page) saved.pages;
+  List.iter (fun page -> new_page dev; replay_page_aux trace fill_rect draw_char specials dev page) saved.pages;
   end_document dev
 
 let separe_pages saved =
@@ -67,7 +69,8 @@ let get_bases_first_page s = (List.hd s.pages).bases
 
 let nb_pages s = List.length s.pages
 
-module Dev_save =
+module Dev_save : Dviinterp.dev with type arg = bool
+ with type cooked = t =
 struct
   type arg = bool
   type cooked = t
@@ -111,14 +114,14 @@ struct
                          y_max = s.ty_max;
                          bases = s.tbases;
                         }
-          | true, (Rectangle (x,y,_,h))::l -> {c = List.rev l;
+          | true, (Rectangle (_,x,y,_,h))::l -> {c = List.rev l;
                                                x_min = 0.;
                                                y_min = y;
                                                x_max = x;
                                                y_max = y+.h;
                                                bases = s.tbases;
                                               }
-          | _ -> failwith "I thought there is always a vrule at the end, please report. thx"
+          | _ -> failwith "I thought there were always a vrule at the end, please report. thx"
         in
         s.tpages <- page::s.tpages;
         s.tc <- [];
@@ -129,8 +132,8 @@ struct
         s.tbases <- []
       end
 
-  let fill_rect s x y w h =
-    s.tc <- (Rectangle (x,y,w,h))::s.tc;
+  let fill_rect s info x y w h =
+    s.tc <- (Rectangle (info,x,y,w,h))::s.tc;
     if s.use_last_vrule then
       let xmin,xmax = x,x+.w(*min x (x+.w), max x (x+.w)*) in
       let ymin,ymax = y,y+.h(*min y (y+.h), max y (y+.h)*) in
@@ -141,8 +144,8 @@ struct
 
 
 
-  let draw_char s font char x y =
-    s.tc <- (Glyph (font,char,x,y))::s.tc;
+  let draw_char s info font char x y =
+    s.tc <- (Glyph (info,font,char,x,y))::s.tc;
     if not (List.mem y s.tbases) then s.tbases <- y::s.tbases;
     if s.use_last_vrule then
       let idx = (Int32.to_int char) - font.metric.file_hdr.bc in
@@ -156,6 +159,8 @@ struct
       s.tx_max <- max s.tx_max (x+.width);
       s.ty_max <- max s.ty_max (y+.height)
 
+  let specials s info xxx x y =
+    s.tc <- (Specials (info,xxx,x,y))::s.tc
 
   let end_document s =
     new_page s;
@@ -164,7 +169,7 @@ end
   
 module Dev_load (Dev : Dviinterp.dev) =
 struct
-  let replay trace = replay trace Dev.new_document Dev.new_page Dev.fill_rect Dev.draw_char Dev.end_document
+  let replay trace = replay trace Dev.new_document Dev.new_page Dev.fill_rect Dev.draw_char Dev.specials Dev.end_document
     
   let load_doc saved doc arg = 
     if get_doc saved = doc then replay false saved arg

@@ -14,7 +14,6 @@
 (*                                                                        *)
 (**************************************************************************)
 
-IFDEF CAIRO THEN
 let supported = true
 
 open Icairost
@@ -37,8 +36,7 @@ let dump_pdf () =
   Queue.iter (fun (_,fname,fig) -> emit_pdf (fname^".pdf") fig) Metapost.figures
 
 let dump_pdfs fname = 
-  let figs = 
-    List.rev (Queue.fold (fun l (_,_,x) ->  x::l) [] Metapost.figures) in
+  let figs = List.rev (Queue.fold (fun l (_,_,x) ->  x::l) [] Metapost.figures) in
   emit_pdfs (fname^".pdf") figs
 
 let generate_pdfs pdffile figs = List.iter 
@@ -50,33 +48,3 @@ let dump_ps () =
 
 let dump_png () = 
   Queue.iter (fun (_,fname,fig) -> emit_png (fname^".png") fig) Metapost.figures
-
-ELSE
-
-let supported = false
-
-let set_verbosity _ = failwith "Cairost.set_verbosity : not supported"
-
-let float_of_num n = failwith "Cairost.float_of_num : not supported"
-
-let emit_pdf ?msg_error s c = failwith "Cairost.emit_pdf: not supported"
-let emit_png s c = failwith "Cairost.emit_png: not supported"
-let emit_ps s c = failwith "Cairost.emit_ps: not supported"
-let emit_svg s c = failwith "Cairost.emit_svg: not supported"
-let emit_pdfs s c = failwith "Cairost.emit_pdfs: not supported"
-
-let dump_pdf _ = failwith "Cairost.dump_pdf : not supported"
-let dump_pdfs _ = failwith "Cairost.dump_pdfs : not supported"
-let dump_ps _ = failwith "Cairost.dump_ps : not supported"
-let dump_png _ = failwith "Cairost.dump_png : not supported"
-
-let set_prelude _ = failwith "Cairost.set_prelude : not supported"
-let set_t1disasm _ = failwith "Cairost.set_t1disasm : not supported"
-
-let generate_pdfs _ _ = failwith "Cairost.generate_pdfs : not supported"
-
-type cairo_t = unit
-
-let emit_cairo  _ _ _ = failwith "Cairost.emit_cairo : not supported"
-
-END

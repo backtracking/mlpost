@@ -843,3 +843,8 @@ let opposite_position (x: position): position_red =
     | `Southwest -> `Northeast
     | `Southeast -> `Northwest
 
+
+let q_verbosity = Queue.create ()
+let add_set_verbosity x = Queue.add x q_verbosity
+
+let set_verbosity b = Queue.iter (fun x -> x b) q_verbosity

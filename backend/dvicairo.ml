@@ -28,6 +28,7 @@ type multi_page_pic = {pic :Cairo.t;
 let point_of_cm cm = (0.3937 *. 72.) *. cm
 
 let debug = ref false
+let specials = ref false
 let info = ref false
 
 module Cairo_device (*: dev with type arg = multi_page_pic with type cooked = unit*) =
@@ -71,7 +72,21 @@ struct
   let new_page s = 
     s.arg.new_page ()
 
-  let fill_rect s x1 y1 w h = 
+  let set_source_color pic = function
+    | Dviinterp.RGB(r,g,b) -> 
+        if !debug then
+          printf "Use color RGB (%f,%f,%f)@." r g b;
+        Cairo.set_source_rgb pic r g b
+    | Dviinterp.Gray(g) -> 
+        if !debug then
+          printf "Use color Gray (%f)@." g;
+        Cairo.set_source_rgb pic g g g
+    | Dviinterp.CMYK _ -> failwith "dvicairo : I don't know how to convert CMYK to RGB and cairo doesn't support it"
+    | Dviinterp.HSB _ -> failwith "dvicairo : I'm lazy I haven't written this conversion"
+        (* http://en.wikipedia.org/wiki/HSL_and_HSV#Conversion_from_HSV_to_RGB *)
+
+
+  let fill_rect s dinfo x1 y1 w h = 
     let x1 = point_of_cm x1 +. s.arg.x_origin
     and y1 = point_of_cm y1 +. s.arg.y_origin
     and w = point_of_cm w
@@ -79,12 +94,12 @@ struct
     if !debug then
       printf "Draw a rectangle in (%f,%f) with w=%f h=%f@." x1 y1 w h;
     Cairo.save s.arg.pic;
-    Cairo.set_source_rgb s.arg.pic 0. 0. 0. ;
+    set_source_color s.arg.pic dinfo.Dviinterp.color;
     Cairo.rectangle s.arg.pic x1 y1 w h;
     Cairo.fill s.arg.pic;
     Cairo.restore s.arg.pic
 
-  let draw_char s font char x y = 
+  let draw_char s dinfo font char x y = 
     let f = fst (find_font font) in
     let char = font.Fonts.glyphs_enc (Int32.to_int char)
     and x = point_of_cm x +. s.arg.x_origin
@@ -99,7 +114,7 @@ struct
       end;
         
     Cairo.save s.arg.pic;
-    Cairo.set_source_rgb s.arg.pic 0. 0. 0. ;
+    set_source_color s.arg.pic dinfo.Dviinterp.color;
     Cairo.set_font_face s.arg.pic f ;
     Cairo.set_font_size s.arg.pic ratio;
     (* slant and extend *)
@@ -115,6 +130,10 @@ struct
          Cairo.glyph_y = y}|];
     Cairo.stroke s.arg.pic;
     Cairo.restore s.arg.pic
+
+  let specials s info xxx x y =
+    if !debug || !specials then
+      printf "specials : \"%s\" at (%f,%f)@." xxx x y
 
   let end_document s = 
     ()

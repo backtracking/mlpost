@@ -14,6 +14,9 @@
 (*                                                                        *)
 (**************************************************************************)
 
+val add_set_verbosity : (bool -> unit) -> unit
+val set_verbosity : bool -> unit
+
 type scolor = 
   | RGB of float * float * float
   | CMYK of float * float * float * float
@@ -339,3 +342,4 @@ val vreduce : vposition -> vposition_red
 val hreduce : hposition -> hposition_red
 
 val opposite_position : position -> position_red
+

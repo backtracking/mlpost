@@ -85,3 +85,7 @@ let emit_cairo cairo (width,height) fig =
 let emit_pdfs fname figs = emit_gen 
   (create Cairo_pdf.surface_create_for_channel fname) 
   (fun cr _ -> Cairo.show_page cr) figs
+
+
+let set_verbosity b =
+  Dvicairo.specials := b

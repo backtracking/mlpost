@@ -951,10 +951,6 @@ end
 (** Basic drawing commands *)
 and Command : sig
 
-  (** Set the verbosity of all mlpost *)
-  val set_verbosity : bool -> unit
-
-
   (** General Commands to build figures *)
 
   type t
@@ -1038,6 +1034,8 @@ and Command : sig
   (** Works like [label], but puts a dot at point [p] as well *)
   val dotlabel : ?pos:position -> Picture.t -> Point.t -> t
 
+  (** Set the verbosity of all mlpost *)
+  val set_verbosity : bool -> unit
 end
 
 (** {2 Advanced graphical components} *)
@@ -2282,14 +2280,8 @@ module Concrete : sig
 
   (** The module of concrete points *)
   module CPoint : sig
-
-    IFDEF CAIRO THEN
-    type t = Cairo.point =
+    type t = @MLPOSTMLI_CAIRO_POINT@
       { x : float; y : float }
-    ELSE
-    type t = 
-      { x : float; y : float }
-    END
         
     val add : t -> t -> t
     val sub : t -> t -> t
@@ -2413,6 +2405,8 @@ module Cairost : sig
 
   val supported : bool
 
+  val set_verbosity : bool -> unit
+
   val emit_pdf : ?msg_error:float -> string -> Command.t -> unit
     (* The optional argument set the replacement the figure by the text of the exception in a paragraph of width msg_error *)
   val emit_ps : string -> Command.t -> unit
@@ -2430,11 +2424,7 @@ module Cairost : sig
   val generate_pdfs : string ->
     (int * Command.t) list -> unit
 
-  IFDEF CAIRO THEN
-    type cairo_t = Cairo.t
-  ELSE
-    type cairo_t
-  END
+  type cairo_t @MLPOSTMLI_CAIRO_T@
 
   val emit_cairo : cairo_t -> float * float -> Command.t -> unit
 
