@@ -675,41 +675,47 @@ and Brush : sig
 
   type t
 
-  val t : ?color:Color.t -> ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+  val t : 
+    ?color:Color.t -> ?pen:Pen.t -> 
+    ?dash:Dash.t -> ?scale:Num.t -> 
+    ?brush:t ->
+    unit -> t
 
   (** {2 Brushes with Predefined Colors} *)
-
+  type brush_colored = 
+      ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> 
+    ?brush:t -> unit -> t
   (** {3 base colors} *)
 
-  val white : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
-  val black : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
-  val red : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
-  val blue : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
-  val green : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
-  val cyan : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
-  val yellow : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
-  val magenta : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+  val white : brush_colored
+  val black : brush_colored
+  val red : brush_colored
+  val blue : brush_colored
+  val green : brush_colored
+  val cyan : brush_colored
+  val yellow : brush_colored
+  val magenta : brush_colored
     
   (** {3 lighter colors} *)
 
-  val lightred : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
-  val lightblue : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
-  val lightgreen : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
-  val lightcyan : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
-  val lightyellow : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
-  val lightmagenta : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+  val lightred : brush_colored
+  val lightblue : brush_colored
+  val lightgreen : brush_colored
+  val lightcyan : brush_colored
+  val lightyellow : brush_colored
+  val lightmagenta : brush_colored
 
   (** {3 grays} *)
 
-  val gray : float -> ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
-  val lightgray : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
-  val mediumgray : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
-  val darkgray : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+  val gray : float -> brush_colored
+  val lightgray : brush_colored
+  val mediumgray : brush_colored
+  val darkgray : brush_colored
 
   (** {3 additional colors} *)
 
-  val orange : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
-  val purple : ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> unit -> t
+  val orange : brush_colored
+  val purple : brush_colored
 
 end
 

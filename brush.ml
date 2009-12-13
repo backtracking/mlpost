@@ -32,17 +32,19 @@ let opt_map f = function
   | None -> None
   | Some s -> Some (f s)
 
-let t color ?(pen) ?(dash) ?(scale) () = 
+let t color ?(pen) ?(dash) ?(scale) ?(brush) () = 
   match scale with
-    | None -> mkBrush color pen dash
+    | None -> mkBrushOpt brush color pen dash
     | Some s -> 
-        mkBrush color
+        mkBrushOpt brush color
           (Some (Pen.scale s (opt_def Pen.default pen)))
           (opt_map (Dash.scaled s) dash)
 
 
   (** {2 Predefined Colors} *)
-
+  type brush_colored = 
+      ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> 
+    ?brush:t -> unit -> t
   (** {3 base colors} *)
 
   let white = t (Some Color.white)
