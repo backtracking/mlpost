@@ -32,7 +32,7 @@
 
 # check for one particular file of the sources 
 # ADAPT THE FOLLOWING LINE TO YOUR SOURCES!
-AC_INIT(mlpost.mli.in)
+AC_INIT(mlpost.mli)
 
 # The Version of Mlpost
 MLPOSTVERSION="current"
@@ -257,23 +257,17 @@ if test "$OCAMLBUILD" == yes -a -n "$BITSTRINGLIB"; then
     CONCRETE=yes
     INCLUDELIBS="-I $CAIROLIB -I $BITSTRINGLIB"
     METAREQUIRESPACKAGE="unix cairo bitstring"
-    MLPOSTMLI_CAIRO_T="= Cairo.t"
-    MLPOSTMLI_CAIRO_POINT="Cairo.point ="
   else
     CAIRO=no
     CONCRETE=yes
     INCLUDELIBS="-I $BITSTRINGLIB"
     METAREQUIRESPACKAGE="unix bitstring"
-    MLPOSTMLI_CAIRO_T=""
-    MLPOSTMLI_CAIRO_POINT=""
   fi
 else
   CAIRO=no
   CONCRETE=no
   INCLUDELIBS=""
   METAREQUIRESPACKAGE="unix"
-  MLPOST_MLI_CAIRO_T=""
-  MLPOSTMLI_CAIRO_POINT=""
 fi
 
 #TEMPORAIRE
@@ -357,10 +351,9 @@ echo "---------------------------------------------------"
 
 # Finally create the Makefile from Makefile.in
 
-AC_OUTPUT(META version.ml simple.Makefile ocamlbuild.Makefile Makefile myocamlbuild.ml mlpost.mli)
+AC_OUTPUT(META version.ml simple.Makefile ocamlbuild.Makefile Makefile myocamlbuild.ml)
 chmod a-w $MAKEFILE
 chmod a-w Makefile
 chmod a-w myocamlbuild.ml
 chmod a-w META
 chmod a-w version.ml
-chmod a-w mlpost.mli

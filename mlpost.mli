@@ -2278,8 +2278,14 @@ module Concrete : sig
 
   (** The module of concrete points *)
   module CPoint : sig
-    type t = @MLPOSTMLI_CAIRO_POINT@
+
+    IFDEF CAIRO THEN
+    type t = Cairo.point =
       { x : float; y : float }
+    ELSE
+    type t = 
+      { x : float; y : float }
+    END
         
     val add : t -> t -> t
     val sub : t -> t -> t
@@ -2420,7 +2426,11 @@ module Cairost : sig
   val generate_pdfs : string ->
     (int * Command.t) list -> unit
 
-  type cairo_t @MLPOSTMLI_CAIRO_T@
+  IFDEF CAIRO THEN
+    type cairo_t = Cairo.t
+  ELSE
+    type cairo_t
+  END
 
   val emit_cairo : cairo_t -> float * float -> Command.t -> unit
 

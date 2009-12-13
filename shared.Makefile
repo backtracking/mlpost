@@ -10,7 +10,6 @@ wc:
 #########
 
 headers:
-	rm -f mlpost.mli
 	headache -c headache_config.txt -h header.txt \
 	 *.in README.txt *.mli *.ml *.mll backend/*.ml backend/*.ml[iyl] 
 	./config.status
@@ -68,7 +67,7 @@ FILES := $(wildcard *.ml) $(wildcard *.mli) $(wildcard *.mll) \
 	 $(wildcard *.in) configure README.txt INSTALL LICENSE CHANGES FAQ \
 	 shared.Makefile mlpost.1 _tags *.mlpack mlpost.odocl
 BACKENDFILES = backend/*ml backend/*mly backend/*mll backend/*mli backend/_tags
-GENERATEDSOURCEFILES = mlpost.mli version.ml myocamlbuild.ml $(GENERATED)
+GENERATEDSOURCEFILES = version.ml myocamlbuild.ml $(GENERATED)
 GUIFILES = gui/*.mll gui/*.ml gui/_tags 
 EXFILES = examples/Makefile examples/*.ml examples/all.template\
 	  examples/index.html examples/parse.mll examples/README examples/automaton4.tex
@@ -136,9 +135,9 @@ ocamlwizard:
 # Makefile is rebuilt whenever Makefile.in or configure.in is modified
 ######################################################################
 
-Makefile META version.ml mlpost.mli myocamlbuild.ml: Makefile.in ocamlbuild.Makefile.in simple.Makefile.in META.in version.ml.in config.status myocamlbuild.ml.in mlpost.mli.in
+Makefile META version.ml myocamlbuild.ml: Makefile.in ocamlbuild.Makefile.in simple.Makefile.in META.in version.ml.in config.status
 	./config.status
-	chmod a-w mlpost.mli myocamlbuild.ml META Makefile ocamlbuild.Makefile simple.Makefile version.ml
+	chmod a-w myocamlbuild.ml META Makefile ocamlbuild.Makefile simple.Makefile version.ml
 
 config.status: configure
 	./config.status --recheck

@@ -7,6 +7,7 @@
 <cairost.*> or <mlpost.mlpack>: pkg_cairo
 <tool.*>: use_unix
 
+<cairost.ml> or <concrete.ml> or <mlpost.mli>: camlp4o, syntax_macro
 <test*> : use_unix, pkg_bitstring, pkg_cairo, use_cairo_bigarray
 <handbookgraphs.*> : use_unix, pkg_bitstring, pkg_cairo, use_cairo_bigarray
 <othergraphs.*> : use_unix, pkg_bitstring, pkg_cairo, use_cairo_bigarray
