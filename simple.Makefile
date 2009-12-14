@@ -14,43 +14,6 @@
 #                                                                        #
 ##########################################################################
 
-# where to install the binaries
-prefix=@prefix@
-exec_prefix=@exec_prefix@
-BINDIR=@bindir@
-LIBDIR=@LIBDIR@
-OCAMLFIND=@OCAMLFIND@
-
-# where to install the man page
-MANDIR=@mandir@
-
-PSVIEWER=@PSVIEWER@
-PDFVIEWER=@PDFVIEWER@
-
-# other variables set by ./configure
-OCAMLC   = @OCAMLC@
-OCAMLOPT = @OCAMLOPT@		
-OCAMLDEP = @OCAMLDEP@
-OCAMLLEX = @OCAMLLEX@
-OCAMLYACC= @OCAMLYACC@
-#(not used) OCAMLLIB = @OCAMLLIB@
-OCAMLBEST= @OCAMLBEST@
-OCAMLVERSION = @OCAMLVERSION@
-OCAMLWEB = @OCAMLWEB@
-OCAMLWIN32 = @OCAMLWIN32@
-EXE = @EXE@
-LIBEXT = @LIBEXT@
-OBJEXT = @OBJEXT@
-
-INCLUDES = -I gui
-BFLAGS = -dtypes $(INCLUDES) -I +threads @INCLUDEGTK2@ 
-OFLAGS = @BASICOFLAGS@ -dtypes $(INCLUDES) @FORPACK@ -I +threads @INCLUDEGTK2@
-
-# main target
-#############
-
-NAME = mlpost
-MLPOSTVERSION=@MLPOSTVERSION@
 
 TESTS = handbookgraphs.cmx othergraphs.cmx tests.cmx
 TOOL = tool.$(OCAMLBEST)
@@ -265,4 +228,3 @@ dist-clean distclean:: clean
 	$(OCAMLDEP) $(INCLUDES) *.ml *.mli gui/*.mli gui/*.ml > .depend
 
 include .depend
-include shared.Makefile

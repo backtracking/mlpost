@@ -14,33 +14,6 @@
 #                                                                        #
 ##########################################################################
 
-# where to install the binaries
-prefix=@prefix@
-exec_prefix=@exec_prefix@
-BINDIR=@bindir@
-LIBDIR=@LIBDIR@
-OCAMLFIND=@OCAMLFIND@
-
-# other variables set by ./configure
-OCAMLC   = @OCAMLC@
-OCAMLOPT = @OCAMLOPT@
-OCAMLBEST= @OCAMLBEST@
-OCAMLVERSION = @OCAMLVERSION@
-OCAMLWEB = @OCAMLWEB@
-OCAMLWIN32 = @OCAMLWIN32@
-EXE = @EXE@
-LIBEXT = @LIBEXT@
-OBJEXT = @OBJEXT@
-
-# where to install the man page
-MANDIR=@mandir@
-
-PSVIEWER=@PSVIEWER@
-PDFVIEWER=@PDFVIEWER@
-
-NAME = mlpost
-MLPOSTVERSION=@MLPOSTVERSION@
-
 TESTS = handbookgraphs.cmx othergraphs.cmx tests.cmx
 
 ifeq "$(OCAMLBEST)" "opt"
@@ -58,7 +31,7 @@ endif
 
 DTYPES = -tag dtypes
 
-OCAMLBUILD := ocamlbuild $(OBOPTS) -no-links $(DTYPES) -tag cairo_@CAIRO@ -tag concrete_@CONCRETE@ $(OCAMLBUILD_DISPLAY)
+OCAMLBUILD := ocamlbuild $(OBOPTS) -no-links $(DTYPES) $(TAGS) $(OCAMLBUILD_DISPLAY)
 
 BUILD := _build/
 
@@ -185,8 +158,6 @@ doc:
 	rm -f doc
 	$(OCAMLBUILD) doc/index.html
 	ln -s _build/doc doc
-
-include shared.Makefile
 
 # clean
 #######

@@ -191,7 +191,6 @@ echo "Mlpost library will be installed in: $LIBDIR"
 case $OCAMLVERSION in
   3.08|3.09|3.10.0|3.10.1*)
         echo "Your ocaml is too old (or too buggy 3.10.0, 3.10.1). I can't compile the backend cairo without ocamlbuild"
-        MAKEFILE=simple.Makefile
         OCAMLBUILD=no;;
   *)
         AC_CHECK_PROG(OCAMLBUILD,ocamlbuild,yes,no)
@@ -201,16 +200,13 @@ case $OCAMLVERSION in
               OCAMLBUILD=no
               echo "ocamlbuild present but your ocamlbuild is not compatible with your ocamlc:"
               echo "ocamlbuild : $OCAMLBUILDLIB, ocamlc : $OCAMLLIB"
-              MAKEFILE=simple.Makefile
            else
               echo "ocamlbuild ok"
               OCAMLBUILD=yes
-              MAKEFILE=ocamlbuild.Makefile
            fi
         else
            OCAMLBUILD=no
            echo "With your version of ocaml you should have ocamlbuild in your path"
-           MAKEFILE=simple.Makefile
         fi;;
 esac
 
@@ -239,6 +235,7 @@ fi
 
 if test -n "$BITSTRINGLIB";then
    echo "ocamlfind found bitstring in $BITSTRINGLIB"
+   BITSTRING=yes
 else
     AC_CHECK_FILE($OCAMLLIB/bitstring/bitstring.cma,BITSTRING=yes,BITSTRING=no)
     if test "$BITSTRING" = yes; then
@@ -253,19 +250,16 @@ fi
 
 if test "$OCAMLBUILD" == yes -a -n "$BITSTRINGLIB"; then
   if test -n "$CAIROLIB"; then
-    CAIRO=yes
-    CONCRETE=yes
+    TAGS="-tags cairo_yes,concrete_yes"
     INCLUDELIBS="-I $CAIROLIB -I $BITSTRINGLIB"
     METAREQUIRESPACKAGE="unix cairo bitstring"
   else
-    CAIRO=no
-    CONCRETE=yes
+    TAGS="-tag concrete_yes"
     INCLUDELIBS="-I $BITSTRINGLIB"
     METAREQUIRESPACKAGE="unix bitstring"
   fi
 else
-  CAIRO=no
-  CONCRETE=no
+  TAGS=""
   INCLUDELIBS=""
   METAREQUIRESPACKAGE="unix"
 fi
@@ -325,11 +319,8 @@ AC_SUBST(OCAMLFIND)
 AC_SUBST(LABLGTK2)
 AC_SUBST(INCLUDEGTK2)
 AC_SUBST(LABLGTK2LIB)
-AC_SUBST(CAIRO)
-AC_SUBST(CONCRETE)
+AC_SUBST(TAGS)
 AC_SUBST(CAIROLIB)
-AC_SUBST(MLPOSTMLI_CAIRO_T)
-AC_SUBST(MLPOSTMLI_CAIRO_POINT)
 AC_SUBST(INCLUDELIBS)
 AC_SUBST(BITSTRINGLIB)
 AC_SUBST(OCAMLWIN32)
@@ -345,14 +336,13 @@ echo "---------------------------------------------------"
 echo "  Mlpost library will be installed in: $LIBDIR"
 echo -n "  native code compilation: "
 if test "$OCAMLBEST" == "opt"; then echo "yes"; else echo "no"; fi
-echo "  Support for concrete computations in mlpost: "$CONCRETE
+echo "  Support for concrete computations in mlpost: "$BITSTRING
 echo "  Cairo support in mlpost: "$CAIRO
 echo "---------------------------------------------------"
 
 # Finally create the Makefile from Makefile.in
 
-AC_OUTPUT(META version.ml simple.Makefile ocamlbuild.Makefile Makefile myocamlbuild.ml)
-chmod a-w $MAKEFILE
+AC_OUTPUT(META version.ml Makefile myocamlbuild.ml)
 chmod a-w Makefile
 chmod a-w myocamlbuild.ml
 chmod a-w META
