@@ -119,7 +119,7 @@ let float_to_metapost f =
       else f
 
 let rec num' = function
-  | F f -> float_to_metapost f
+  | F f -> (*float_to_metapost*) f
   | NXPart p -> 
       let p = point p in
       p.P.x

@@ -1,0 +1,5 @@
+description = "Library for Mlpost which use dot to place Box"
+version = "0.1"
+archive(byte) = "mlpost_dot.cma"
+archive(native) = "mlpost_dot.cmxa"
+requires = "mlpost"

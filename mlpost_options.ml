@@ -33,6 +33,8 @@ let () =
     then Sys.argv.(i) <- ""
     else Sys.argv.(i) <- Queue.pop user_opts
   done;
+  (* And reset the current of Arg *)
+  Arg.current := 0;
 
   let prelude = match !latex_file with
     | None -> None

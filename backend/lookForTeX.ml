@@ -169,6 +169,12 @@ let metapathl_error ferror  arg = ct_auxl metapath arg; List.map (ferror Compute
 let picturel_error ferror arg = ct_auxl picture arg; List.map (ferror Compute.picture) arg
 
 
+
+let compute_nums () =
+  let l = ref [] in
+  (fun n -> l:= num !l n),(fun () -> compile_tex !l;l:=[])
+
+
 let commandpic arg = ct_aux commandpic arg; Compute.commandpic arg
 let command arg = ct_aux command arg; Compute.command arg
 let num arg = ct_aux num arg; Compute.num arg
@@ -176,3 +182,4 @@ let point arg = ct_aux point arg; Compute.point arg
 let path arg = ct_aux path arg; Compute.path arg
 let metapath arg = ct_aux metapath arg; Compute.metapath arg
 let picture arg = ct_aux picture arg; Compute.picture arg
+

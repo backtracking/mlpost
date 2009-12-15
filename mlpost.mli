@@ -2374,6 +2374,7 @@ module Concrete : sig
 
   (** {2 Compute the concrete value} *)
   val float_of_num : Num.t -> float
+  val compute_nums : unit -> (Num.t -> unit) * (unit -> unit)
     (** The value of a num in bp *)
 
   val cpoint_of_point : Point.t -> CPoint.t

@@ -12,7 +12,7 @@ end
 module Make (B : Box) :
 sig
   type node      
-  type edge
+  type edge = node * node
 
   val mknode : B.abstract -> node
 

@@ -9,7 +9,7 @@ let parse_file f =
 
 module Pi = Picture
 
-let ip (x,y) = Point.bpp (float_of_int x,float_of_int y)
+let ip (x,y) = (*Format.printf "%i,%i@." x y;*) Point.bpp (float_of_int x,float_of_int y)
 
 let interp_node n = 
   let t = Pi.tex n.nname in
@@ -140,6 +140,9 @@ struct
 
 
   let place nodes edges =
+    let cadd,compute = Concrete.compute_nums () in
+    List.iter (fun n -> cadd (B.width n.fig);cadd (B.height n.fig)) nodes;
+    compute ();
     let nodes2 = List.map 
       (fun n -> node_name n.id,
          Concrete.float_of_num (B.width n.fig),

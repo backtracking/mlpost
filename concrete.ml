@@ -85,6 +85,7 @@ module CPath =
   end
 
 let float_of_num = LookForTeX.num
+let compute_nums = LookForTeX.compute_nums
 let cpoint_of_point = LookForTeX.point
 let cpath_of_path = LookForTeX.path
 
@@ -186,6 +187,7 @@ struct
 end
 
 let float_of_num _ = not_supported "float_of_num"
+let compute_nums _ = not_supported "compute_nums"
 let cpoint_of_point _ = not_supported "cpoint_of_point"
 let cpath_of_path _ = not_supported "cpath_of_path"
 
