@@ -13,7 +13,6 @@
 (*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                  *)
 (*                                                                        *)
 (**************************************************************************)
-# 16 "mlpost.mli.in"
 (** This is Mlpost *)
 
 (** {2 Interfaces to basic Metapost datatypes} *)
