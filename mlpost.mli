@@ -206,7 +206,7 @@ and Point : sig
   val draw : ?brush:Brush.t -> ?color:Color.t -> ?pen:Pen.t -> t -> Command.t
     (** Draw a point
 	@param color the color of the point; default is black
-	@param pen the pen used to draw the pen; default is {!Pen.default}*)
+	@param pen the pen used to draw the pen; default is [Brush.Pen.default]*)
 
 end
     
@@ -548,7 +548,7 @@ and Path : sig
     (** Draw a path 
         @param brush the brush used to draw the path; the next argument redefined this one
 	@param color the color of the path; default is black
-	@param pen the pen used to draw the path; default is {!Pen.default}
+	@param pen the pen used to draw the path; default is [Brush.Pen.default]
 	@param dashed if given, the path is drawn using that dash_style. *)
 
 end
@@ -969,7 +969,7 @@ and Command : sig
   val draw : ?brush:Brush.t -> ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> Path.t -> t
     (** Draw a path 
 	@param color the color of the path; default is black
-	@param pen the pen used to draw the path; default is {!Pen.default}
+	@param pen the pen used to draw the path; default is [Brush.Pen.default]
 	@param dashed if given, the path is drawn using that dash_style. *)
 
 (*
@@ -1130,7 +1130,7 @@ and Box : sig
 	can be used to retrieve it using [get] ; [stroke] is the color
 	used to draw the outline of the box ; when equal to [None],
 	the outline will not be drawn ; [pen] is the pen used to draw
-	the box's outline, if absent [Pen.default] is used ; 
+	the box's outline, if absent [Brush.Pen.default] is used ; 
 	[fill], if present, is the color used to fill the box.  
     *)
 
@@ -1263,13 +1263,14 @@ and Box : sig
 
   (** {2 Boxes alignment} *)
 
-(*  val pad_boxes : ?pos:Command.position -> t list -> t list
-    (** put around each box a box which can include all the box and position 
-     * them according to the given position inside this big box
-    *)
-*)
-
+  (** [halign ~pos y l] vertically moves the boxes in [l] such that the vertical
+     position given by [pos] is equal to [y]. The default value of [pos] is
+     `Center, so by default this function moves each box such that the y
+     coordinate of its center is [y]. 
+     @img halign.png *)
   val halign : ?pos:vposition -> Num.t -> t list -> t list
+
+  (** the vertical counterpart of [valign]. *)
   val valign : ?pos:hposition -> Num.t -> t list -> t list
 
   val hbox : ?padding:Num.t -> ?pos:position -> ?style:style ->
@@ -1281,12 +1282,13 @@ and Box : sig
 	  defaults to 0
 	  @param pos used to determine the way boxes are aligned; defaults to
 	  [`Center]
+      @img hbox.png
       *)
 
   val hbox_list : 
     ?padding:Num.t -> ?pos:position -> 
     ?min_width:Num.t -> ?same_width:bool -> t list -> t list
-    (* as hbox, but does not group the resulting boxes into a surrounding
+    (** as [hbox], but does not group the resulting boxes into a surrounding
        box *)
 
 
@@ -1335,8 +1337,17 @@ and Box : sig
 
   val hplace : ?padding:Num.t -> ?pos:position -> 
                ?min_width:Num.t -> ?same_width:bool -> t list -> t list
+    (** [hplace l] places the boxes of [l] horizontally, from left to right
+       following the order of list elements, without changing their vertical
+       position.
+       @param min_width minimum width of all boxes; default is zero
+       @param same_width if [true], all boxes are of same width, 
+               and at least of [min_width]; default is false
+       @img hplace.png
+               *)
   val vplace : ?padding:Num.t -> ?pos:position -> 
                ?min_height:Num.t -> ?same_height:bool -> t list -> t list
+    (** the vertical counterpart of [hplace] *)
   val hblock : ?padding:Num.t -> ?pos:Command.position -> ?name:string -> 
                ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> 
                ?min_width:Num.t -> ?same_width:bool -> t list -> t
@@ -1383,7 +1394,7 @@ and Box : sig
         at the east of [a]. Thus, [place `East a b] returns a copy of [b] placed
         at the east of [a].
 
-        [place posa ~pos: posb ~padding a b] returns a box [c] which is
+        [place posa ~pos: posb ~padding a b] returns a new box [c] which is
         obtained by moving [b] to place the [posa] point of [a] on top of the
         [posb] point of [b], and then padding the result by [padding] in
         direction [posa].
@@ -1396,7 +1407,7 @@ and Box : sig
         of [a] to the corner of [a] indicated by [posa]. This effectively places
         point [posa] of [a] at exactly [padding] units of point [posb] of [b],
         in direction [posa].
-        It also means that for diagonal directions, the actual direction will
+        This also means that for diagonal directions, the actual direction will
         change according to the width / height ratio of [a]. *)
 
   (** {2 Sub-boxes accessors} *)
@@ -1615,7 +1626,7 @@ module Arrow : sig
     ?angle:float -> ?size:Num.t -> head
   (** A simple head with two straight lines.
       @param color the color of the head; default is black
-      @param pen the pen used to draw the head; default is {!Pen.default}
+      @param pen the pen used to draw the head; default is [Brush.Pen.default]
       @param dashed if given, the head is drawn using that dash_style
       @param angle the angle between the two lines in degrees, default is 60
         degrees
@@ -1644,7 +1655,7 @@ module Arrow : sig
         to draw the arrow.
         @param dashed the dash style used to draw the line (default is plain)
         @param color the color of the line (default is black)
-        @param pen the pen used to draw the line (default is {!Pen.default})
+        @param pen the pen used to draw the line (default is [Brush.Pen.default])
         @param from_point from [0.] (foot of the arrow) to [1.] (head of the
           arrow), the line will start from this point
         @param to_point from [0.] (foot of the arrow) to [1.] (head of the
@@ -2283,13 +2294,11 @@ module Concrete : sig
   module CPoint : sig
 
     IFDEF CAIRO THEN
-    type t = Cairo.point =
-      { x : float; y : float }
+      type t = Cairo.point = { x : float; y : float }
     ELSE
-    type t = 
-      { x : float; y : float }
+      type t = { x : float; y : float }
     END
-        
+
     val add : t -> t -> t
     val sub : t -> t -> t
     val opp : t -> t

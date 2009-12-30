@@ -563,16 +563,16 @@ let vplace ?(padding=zero) ?(pos=`Center)
 let hbox_list ?padding ?(pos=`Center) ?min_width ?same_width l =
   match l with
   | [] -> []
-  | _ ->
-      let y = ypart (corner pos (List.hd l)) in
+  | hd::_ ->
+      let y = ypart (corner pos hd) in
       halign ~pos:(extractv pos) y
         (hplace ?padding ~pos:pos ?min_width ?same_width l)
 
 let vbox_list ?padding ?(pos=`Center) ?min_height ?same_height l =
   match l with
   | [] -> []
-  | _ ->
-      let x = xpart (corner pos (List.hd l)) in
+  | hd::_ ->
+      let x = xpart (corner pos hd) in
       let l = vplace ?padding ~pos ?min_height ?same_height l in
       valign ~pos:(extracth pos) x l
 

@@ -205,7 +205,7 @@ ocamlwizard:
 # Makefile is rebuilt whenever Makefile.in or configure.in is modified
 ######################################################################
 
-Makefile META version.ml myocamlbuild.ml: Makefile.in META.in version.ml.in config.status
+Makefile META version.ml myocamlbuild.ml: Makefile.in META.in version.ml.in config.status myocamlbuild.ml.in
 	./config.status
 	chmod a-w myocamlbuild.ml META Makefile version.ml
 

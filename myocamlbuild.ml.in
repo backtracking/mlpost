@@ -35,7 +35,8 @@ let img_doc_prod = ["circle";"rect";"ellipse";"round_rect";
                     "patatoid";"tex";"ctr";"north";"south";
                     "west";"east";"north_west";"south_west";
                     "north_east";"south_east";"width";"height";
-	            "shift";"center"]
+                    "shift";"center";"halign"; "hplace"; "hbox";
+                   ]
 
 (*Filename.generic_quote*)
 let generic_quote whatquote quotequote s =
@@ -154,7 +155,8 @@ let _ = dispatch begin function
       syntaxes;
 
       flag ["ocaml"; "pp"; "syntax_macro"] &
-        (S (A "Camlp4MacroParser.cmo":: (gen_def_string ())));
+      (S (A "-parser":: A "Camlp4MacroParser":: A"-printer":: A "o":: 
+        (gen_def_string ())));
 
    | _ -> ()
 end
