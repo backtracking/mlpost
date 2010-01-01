@@ -36,13 +36,16 @@ let gen_def_string () =
 let string_flatten l = List.fold_left (fun acc s -> acc ^ " " ^ s) "" l
 
 let syntaxes () = 
-  ["bitstring",
-     "camlp4o -I @BITSTRINGLIB@ bitstring.cma bitstring_persistent.cma pa_bitstring.cmo";
-   "mymacroparser", 
-     "./myocamlmacroparser.native " ^ string_flatten (gen_def_string ());
-   "macro",
-     "camlp4o Camlp4MacroParser.cmo " ^ string_flatten (gen_def_string ())
-  ]
+  let bitstring_entry = 
+    let cmd = "camlp4o -I @BITSTRINGLIB@ bitstring.cma \
+                bitstring_persistent.cma pa_bitstring.cmo" in
+     "bitstring", cmd, cmd in
+  let s = string_flatten (gen_def_string ()) in
+  let compile_cmd = "camlp4o Camlp4MacroParser.cmo " ^ s in
+  let doc_cmd = "./myocamlmacroparser.native " ^ s in
+  let mymacroparser_entry = "mymacroparser",compile_cmd, doc_cmd in
+  let macro_entry = "macro", compile_cmd, compile_cmd in
+  [ bitstring_entry ; mymacroparser_entry ; macro_entry ]
 
 let img_doc_prod = ["circle";"rect";"ellipse";"round_rect";
                     "patatoid";"tex";"ctr";"north";"south";
@@ -154,13 +157,12 @@ let _ = dispatch begin function
         flag ["ocaml"; "doc"; "pkg_"^pkg ] & S[A"-I"; P dir])
         (if !tagcairo then packages_cairo@packages else packages);
 
-
        (* Like -package but for extensions syntax. Morover -syntax is useless
        	* when linking. *)
-      List.iter (fun (syntax,pp) ->
+      List.iter (fun (syntax,pp, doc) ->
         flag ["ocaml"; "compile";  "syntax_"^syntax] & S[A"-pp"; A pp];
         flag ["ocaml"; "ocamldep"; "syntax_"^syntax] & S[A"-pp"; A pp];
-        flag ["ocaml"; "doc";      "syntax_"^syntax] & S[A"-pp"; A pp];)
+        flag ["ocaml"; "doc";      "syntax_"^syntax] & S[A"-pp"; A doc];)
       (syntaxes ());
    | _ -> ()
 end 
