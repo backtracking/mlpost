@@ -42,11 +42,16 @@ val create : point -> point -> point -> point -> path
       - point c as its control point *)
 
 val create_point : point -> path
+(** create a path consisting of a single point *)
 
 val create_line : point -> point -> path
+(** create a straight line between two points *)
+
 val create_lines : point list -> path
+(** create a straight line between two points *)
 
 val close : path -> path
+(** close a path *)
 
 val min_abscissa : path -> abscissa
 val max_abscissa : path -> abscissa

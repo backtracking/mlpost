@@ -31,7 +31,7 @@ endif
 
 DTYPES = -tag dtypes
 
-OCAMLBUILD := ocamlbuild $(OBOPTS) -no-links $(DTYPES) $(TAGS) $(OCAMLBUILD_DISPLAY)
+OCAMLBUILD := ocamlbuild $(OBOPTS) -no-links $(DTYPES) $(TAGS) $(OCAMLBUILD_DISPLAY) -classic-display -log "build.log"
 
 BUILD := _build/
 
