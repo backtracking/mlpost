@@ -16,11 +16,18 @@
   let linenr = ref 0
   let newline () = incr linenr
 
-  let error = 
-    Format.ksprintf 
+  let ksprintf k s =
+    let buf = Buffer.create 1024 in
+    let fmt = Format.formatter_of_buffer buf in
+    Format.kfprintf 
+      (fun _ -> Format.pp_print_flush fmt ();  k (Buffer.contents buf)) 
+      fmt s
+
+  let error s = 
+    ksprintf  
       (fun s -> 
-        let s = Format.sprintf "parse error on line %d: %s" !linenr s in
-        failwith s)
+        Format.eprintf "parse error on line %d: %s" !linenr s; (exit 1 : unit))
+      s
 
   let fn = ref None
   let args = 
@@ -34,41 +41,42 @@
 
 let alpha = [ 'A' - 'Z' 'a' - 'z' '0' - '9' ]
 let other = ( alpha | '_')
+let endif = "END" | "ENDIF"
 let blank = [ ' ' '\t' '\n' ]
 let uident =  alpha other*
 
 rule normal = parse
   | "IFDEF" blank* (uident as id) blank* "THEN" 
      { 
-       if def id then thenbranch lexbuf else skiptoelse lexbuf
+       (if def id then thenbranch lexbuf else skiptoelse lexbuf : unit)
      }
-  | ("ELSE" | "END" | "THEN" | "ENDIF" as s)
+  | ("ELSE" | "THEN" | endif as s)
     { error "unexpected token: %s" s }
   | eof { () }
   | _ as c { char c ; normal lexbuf }
 
 and thenbranch = parse
   | "ELSE" { skiptoend lexbuf }
-  | "END" | "ENDIF" { normal lexbuf }
-  | ("THEN" as s) { error "unexpected token in then branch: %s" s }
-  | eof { error "unexpected end of file %s" "" }
+  | endif { normal lexbuf }
+  | ("THEN" as s) { error "unexpected token: %s" s }
+  | eof { error "unexpected end of file" }
   | _ as c { char c; thenbranch lexbuf }
 
 and skiptoelse = parse
   | "ELSE" { elsebranch lexbuf }
-  | "END" | "ENDIF" { normal lexbuf }
-  | eof { error "unexpected end of file%s" "" }
+  | endif { normal lexbuf }
+  | eof { error "unexpected end of file" }
   | _ { skiptoelse lexbuf }
 
 and skiptoend = parse
-  | "END" | "ENDIF" { normal lexbuf }
-  | eof { error "unexpected end of file%s" "" }
+  | endif { normal lexbuf }
+  | eof { error "unexpected end of file" }
   | _ { skiptoend lexbuf }
 
 and elsebranch = parse
-  | "END" | "ENDIF" { normal lexbuf }
+  | endif { normal lexbuf }
   | ("ELSE" | "THEN" as s) { error "unexpected token: %s" s }
-  | eof { error "unexpected end of file%s" "" }
+  | eof { error "unexpected end of file" }
   | _ as c { char c; elsebranch lexbuf }
 
 {
