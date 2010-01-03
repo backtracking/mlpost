@@ -1263,21 +1263,38 @@ and Box : sig
 
   (** {2 Boxes alignment} *)
 
+  val halign : ?pos:vposition -> Num.t -> t list -> t list
   (** [halign ~pos y l] vertically moves the boxes in [l] such that the vertical
      position given by [pos] is equal to [y]. The default value of [pos] is
      `Center, so by default this function moves each box such that the y
-     coordinate of its center is [y]. 
+     coordinate of its center is [y]. The horizontal position of each box is
+     unchanged.
      @img halign.png *)
-  val halign : ?pos:vposition -> Num.t -> t list -> t list
 
-  (** the vertical counterpart of [valign]. *)
   val valign : ?pos:hposition -> Num.t -> t list -> t list
+  (** the vertical counterpart of [valign]. *)
+
+  val hplace : ?padding:Num.t -> ?pos:position -> 
+               ?min_width:Num.t -> ?same_width:bool -> t list -> t list
+    (** [hplace l] places the boxes of [l] horizontally, from left to right
+       following the order of list elements, without changing their vertical
+       position.
+       @param min_width minimum width of all boxes; default is zero
+       @param same_width if [true], all boxes are of same width, 
+               and at least of [min_width]; default is false
+       @img hplace.png
+               *)
+  val vplace : ?padding:Num.t -> ?pos:position -> 
+               ?min_height:Num.t -> ?same_height:bool -> t list -> t list
+    (** the vertical counterpart of [hplace] *)
 
   val hbox : ?padding:Num.t -> ?pos:position -> ?style:style ->
              ?min_width:Num.t -> ?same_width:bool ->
                t list box_creator
-      (** aligns the given boxes horizontally and returns a box containing
-	  these boxes as sub-components. Leave the first box at its place.
+      (** places the given boxes horizontally, aligning them horizontally, and
+          returns a box containing these boxes as sub-components. Leave the
+          first box at its place. [hbox l] actually gives the same result as 
+          [group (hplace (halign l))].
 	  @param padding horizontal padding used to separate the boxes; 
 	  defaults to 0
 	  @param pos used to determine the way boxes are aligned; defaults to
@@ -1289,7 +1306,8 @@ and Box : sig
     ?padding:Num.t -> ?pos:position -> 
     ?min_width:Num.t -> ?same_width:bool -> t list -> t list
     (** as [hbox], but does not group the resulting boxes into a surrounding
-       box *)
+        box; it returns the list of placed boxes instead. [hbox_list l] is equal
+        to [hplace (halign l)]. *)
 
 
   val vbox : ?padding:Num.t -> ?pos:position -> ?style:style -> 
@@ -1335,19 +1353,6 @@ and Box : sig
     int -> int -> (int -> int -> t) -> t 
     (** similar to [tabular], but using a matrix defined with a function *)
 
-  val hplace : ?padding:Num.t -> ?pos:position -> 
-               ?min_width:Num.t -> ?same_width:bool -> t list -> t list
-    (** [hplace l] places the boxes of [l] horizontally, from left to right
-       following the order of list elements, without changing their vertical
-       position.
-       @param min_width minimum width of all boxes; default is zero
-       @param same_width if [true], all boxes are of same width, 
-               and at least of [min_width]; default is false
-       @img hplace.png
-               *)
-  val vplace : ?padding:Num.t -> ?pos:position -> 
-               ?min_height:Num.t -> ?same_height:bool -> t list -> t list
-    (** the vertical counterpart of [hplace] *)
   val hblock : ?padding:Num.t -> ?pos:Command.position -> ?name:string -> 
                ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> 
                ?min_width:Num.t -> ?same_width:bool -> t list -> t

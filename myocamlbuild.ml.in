@@ -23,9 +23,14 @@ let tagconcrete = ref false
 
 let packages_cairo = ["cairo","@CAIROLIB@","cairo"; ]
 
-let packages = ["lablgtk2","@LABLGTK2LIB@","lablgtk";
-                "lablgnomecanvas","@LABLGTK2LIB@","lablgnomecanvas";
-                "bitstring","@BITSTRINGLIB@","bitstring"]
+let packages () = 
+  let acc = 
+    [ 
+      "lablgtk2","@LABLGTK2LIB@","lablgtk";
+      "lablgnomecanvas","@LABLGTK2LIB@","lablgnomecanvas"; ] in
+  if !tagconcrete then
+    ("bitstring","@BITSTRINGLIB@","bitstring") :: acc
+  else acc
 
 let gen_def_string () =
   let l = [] in
@@ -143,10 +148,8 @@ let _ = dispatch begin function
         ocaml_lib ~extern:true ~tag_name:("pkg_"^pkg) ~dir file;
         flag ["ocaml"; "pack"; "pkg_"^pkg] & S[A"-I"; P dir];
         flag ["ocaml"; "doc"; "pkg_"^pkg ] & S[A"-I"; P dir])
-        (if !tagcairo then packages_cairo@packages else packages);
+        (let p = packages () in if !tagcairo then packages_cairo@p else p);
 
-       (* Like -package but for extensions syntax. Morover -syntax is useless
-       	* when linking. *)
       List.iter (fun (syntax,pp, doc) ->
         flag ["ocaml"; "compile";  "syntax_"^syntax] & S[A"-pp"; A pp];
         flag ["ocaml"; "ocamldep"; "syntax_"^syntax] & S[A"-pp"; A pp];
