@@ -45,8 +45,6 @@ enddef ;
 vardef reset_extra_specials =
   enddef ;
 
-tracingchoices := 1;
-
 @\n";
   if eps then 
     fprintf fmt "prologues := 2;@\n"
