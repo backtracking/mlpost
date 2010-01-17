@@ -33,6 +33,14 @@ type font_def = {
   name : string;
 }
 
+let mk_font_def ~checksum ~scale_factor ~design_size ~area ~name = 
+  { checksum = checksum ;
+    scale_factor =  scale_factor ;
+    design_size = design_size ;
+    area = area ;
+    name = name 
+  }
+
 
 type t = 
     { tex_name : string;
@@ -49,6 +57,15 @@ type t =
 let debug = ref false
 let info = ref false
 
+let tex_name t = t.tex_name
+let glyphs_filename t = t.glyphs_filename
+let glyphs_enc t = t.glyphs_enc
+let ratio_cm t = t.ratio_cm
+let slant t = t.slant
+let extend t = t.extend
+let metric t = t.metric
+
+let scale t f = t.ratio_cm *. f
 let set_verbosity b = info := b
 
 module Print = struct
@@ -252,4 +269,11 @@ let load_font =
           result
 
 let char_width t c = Metric.char_width t.metric c *. t.ratio
+let char_height t c = Metric.char_height t.metric c *. t.ratio
+let char_depth t c = Metric.char_depth t.metric c *. t.ratio
+
+let char_dims t c = 
+  let a,b,c = Metric.char_dims t.metric c and f = t.ratio in
+  a *. f, b *. f, c *. f
+
 

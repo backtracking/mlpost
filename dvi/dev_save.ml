@@ -148,12 +148,7 @@ struct
     s.tc <- (Glyph (info,font,char,x,y))::s.tc;
     if not (List.mem y s.tbases) then s.tbases <- y::s.tbases;
     if s.use_last_vrule then
-      let idx = (Int32.to_int char) - font.metric.file_hdr.bc in
-      let body = font.metric.body in
-      let info = body.char_info.(idx) in
-      let width = body.width.(info.width_index) *. font.ratio_cm in
-      let height = body.height.(info.height_index) *. font.ratio_cm in
-      let depth = body.depth.(info.depth_index) *. font.ratio_cm in
+      let width,height,depth = Fonts.char_dims font (Int32.to_int char) in
       s.tx_min <- min s.tx_min x;
       s.ty_min <- min s.ty_min (y-.depth);
       s.tx_max <- max s.tx_max (x+.width);

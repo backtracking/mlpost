@@ -156,20 +156,15 @@ let add_font k font map =
 let font_def bits =
   bitmatch bits with
     | { checksum : 32 : bigendian; (* checksum of the TMF file *)
-	scale : 32 : bigendian;    (* scale factor *)
-	design : 32 : bigendian;   (* design size *)
+	scale_factor : 32 : bigendian;    (* scale factor *)
+	design_size : 32 : bigendian;   (* design size *)
 	a : 8;                     (* size of the area *)
 	l : 8;                     (* size of the filename *)
 	name : (a+l)*8 : string;   (* the full name w/ area *)
 	bits : -1 : bitstring
       } ->
-(* 	fprintf fmt " on est passé dans une déf de fonte %s\n" name; *)
-	{ Fonts.checksum = checksum;
-	  Fonts.scale_factor = scale;
-	  Fonts.design_size = design;
-	  Fonts.area = String.sub name 0 a;
-	  Fonts.name = String.sub name a l;
-	}, bits
+        Fonts.mk_font_def ~checksum ~scale_factor ~design_size
+          ~area:(String.sub name 0 a) ~name:(String.sub name a l), bits
     | { _ : -1 : bitstring } ->
 	dvi_error "Ill_formed font definition"
 

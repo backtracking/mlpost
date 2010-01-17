@@ -25,7 +25,8 @@ type multi_page_pic = {pic :Cairo.t;
              y_origin : float
            }
 
-let point_of_cm cm = (0.3937 *. 72.) *. cm
+let conversion = 0.3937 *. 72.
+let point_of_cm cm = conversion *. cm
 
 let debug = ref false
 let specials = ref false
@@ -44,19 +45,15 @@ struct
   let fonts_known = Hashtbl.create 30
 
   let find_font font = 
-    try
-      Hashtbl.find fonts_known font.Fonts.tex_name
+    let font_name = Fonts.tex_name font in
+    try Hashtbl.find fonts_known font_name
     with Not_found ->
-    (let font_name = font.Fonts.tex_name in
-    if !debug then
-      printf "Cairo : Loading font %s@." font_name;
-    let filename = font.Fonts.glyphs_filename in
-    if !debug then
-      printf "Trying to find font at %s...@." filename;
-    let face = Cairo_ft.new_face ft filename in
-    let f =Cairo_ft.font_face_create_for_ft_face face 0,face in
-    Hashtbl.add fonts_known font.Fonts.tex_name f;f)
-
+      if !debug then printf "Cairo : Loading font %s@." font_name;
+      let filename = Fonts.glyphs_filename font in
+      if !debug then printf "Trying to find font at %s...@." filename;
+      let face = Cairo_ft.new_face ft filename in
+      let f =Cairo_ft.font_face_create_for_ft_face face 0,face in
+      Hashtbl.add fonts_known font_name f;f
 
   let clean_up () = 
     Hashtbl.iter (fun _ (_,x) -> Cairo_ft.done_face x) fonts_known;
@@ -101,29 +98,32 @@ struct
 
   let draw_char s dinfo font char x y = 
     let f = fst (find_font font) in
-    let char = font.Fonts.glyphs_enc (Int32.to_int char)
+    let char = Fonts.glyphs_enc font (Int32.to_int char)
     and x = point_of_cm x +. s.arg.x_origin
     and y = point_of_cm y +. s.arg.y_origin
-    and ratio = point_of_cm font.Fonts.ratio_cm in
-    if !debug then
-      begin
-        try
-          printf "Draw the char %i(%c) of %s in (%f,%f) x%f@." char (Char.chr char) font.Fonts.tex_name x y ratio;
-        with _ ->           
-          printf "Draw the char %i of %s  in (%f,%f) x%f@." char  font.Fonts.tex_name x y ratio;
-      end;
+    and ratio = Fonts.scale font conversion in
+    if !debug then begin
+      let name = Fonts.tex_name font in
+      try
+        printf "Draw the char %i(%c) of %s in (%f,%f) x%f@." 
+          char (Char.chr char) name x y ratio;
+      with _ -> 
+        printf "Draw the char %i of %s  in (%f,%f) x%f@." char name x y ratio
+    end;
         
     Cairo.save s.arg.pic;
     set_source_color s.arg.pic dinfo.Dviinterp.color;
     Cairo.set_font_face s.arg.pic f ;
     Cairo.set_font_size s.arg.pic ratio;
     (* slant and extend *)
-    (match font.Fonts.slant with
-      | None -> ()
-      | Some a -> if !info then printf "slant of %f not used for %s@." a font.Fonts.tex_name);
-    (match font.Fonts.extend with
-      | None -> ()
-      | Some a -> if !info then printf "extend of %f not used for %s@." a font.Fonts.tex_name);
+    (match Fonts.slant font with
+      | Some a when !info -> 
+          printf "slant of %f not used for %s@." a (Fonts.tex_name font)
+      | Some _ | None -> ());
+    (match Fonts.extend font with
+      | Some a when !info -> 
+          printf "extend of %f not used for %s@." a (Fonts.tex_name font)
+      | Some _ | None -> ());
     Cairo.show_glyphs s.arg.pic 
       [|{Cairo.index = char;
          Cairo.glyph_x = x;
