@@ -109,7 +109,7 @@ let with_last f p acc =
   let rec aux = function
     | [] -> assert false
     | [e] -> 
-        let sc = Spline.right_point e and sd = Spline.right_control_point e in
+        let sd = Spline.right_point e and sc = Spline.right_control_point e in
         e :: (f sc sd (Spline.max e)) :: acc
     | a::l -> a::(aux l) 
   in
@@ -304,7 +304,7 @@ let split_aux s t l =
   | Spline.Min -> [],Path {pl=s::l;cycle=false}
   | Spline.Max -> 
       let p =
-        cast_path_to_point (Spline.right_control_point s) 
+        cast_path_to_point (Spline.right_point s) 
           (Path {pl=l;cycle=false}) in
       [s], p
   | Spline.InBetween (s1,s2) -> [s1], Path {pl = s2 :: l ; cycle = false }

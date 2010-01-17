@@ -46,8 +46,8 @@ type knot = point
 type t =
   | Start of knot
   | Cons of t * joint * knot
-  | Start_Path of S.spline list
-  | Append_Path of t * joint * (S.spline list)
+  | Start_Path of Spline.t list
+  | Append_Path of t * joint * (Spline.t list)
 
 
 open Format

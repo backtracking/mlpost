@@ -15,9 +15,8 @@
 (**************************************************************************)
 
 type point = Point_lib.t
-type spline = Spline.t 
 type abscissa = Spline.abscissa
-type path_ = {pl : spline list;
+type path_ = {pl : Spline.t list;
              cycle : bool}
 
 type path = | Point of point
@@ -108,7 +107,7 @@ val buildcycle : path -> path -> path
 val of_bounding_box : point * point -> path
 
 val print : Format.formatter -> path -> unit
-val print_splines : Format.formatter -> spline list -> unit
+val print_splines : Format.formatter -> Spline.t list -> unit
 
 val abscissa_of_metapost : path -> float -> abscissa
 val metapost_of_abscissa : path -> abscissa -> float
@@ -116,7 +115,7 @@ val metapost_of_abscissa : path -> abscissa -> float
 module Epure :
 sig
   type pen = path
-  type t = (spline list * pen) list
+  type t = (Spline.t list * pen) list
   val empty : t
   val create : ?ecart:pen -> path -> t
   val of_path : ?ecart:pen -> path -> t

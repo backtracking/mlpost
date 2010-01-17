@@ -49,9 +49,10 @@ let set_min_max fmin fmax b =
 let reverse conv {sa=sa;sb=sb;sc=sc;sd=sd;smin=smin;smax=smax} = 
   {sa=sd;sb=sc;sc=sb;sd=sa; smin=conv smax; smax=conv smin}
 
-let right_point t = t.sc
-let right_control_point t = t.sd
+let right_control_point t = t.sc
+let right_point t = t.sd
 let left_point t = t.sa 
+let left_control_point t = t.sb
 
 let cubic a b c d t =
   t*.(t*.(t*.(d +. 3.*.(b -. c) -. a) +. 3. *. (c -. (2. *. b) +. a)) 
