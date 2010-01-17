@@ -28,7 +28,7 @@ module Cairo_device = Dev_save.Dev_load(Dvicairo.Cairo_device)
 
 let draw_tex cr tex = 
   Cairo.save cr;
-  Cairo.transform cr (Matrix.to_cairo tex.Gentex.trans);
+  Cairo.transform cr tex.Gentex.trans;
   Cairo_device.replay false tex.Gentex.tex 
   {Dvicairo.pic = cr;new_page = (fun () -> assert false);
    x_origin = 0.; y_origin = 0.};

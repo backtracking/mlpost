@@ -15,7 +15,7 @@
 (**************************************************************************)
 
 open Ctypes
-
+type point = Ctypes.point
 type t = matrix
 
 (* specialized negation here to avoid dependency *)
