@@ -15,14 +15,8 @@
 (**************************************************************************)
 
 type point = Point_lib.t
-type abscissa = float
-type spline = {sa : point;
-               sb : point;
-               sc : point;
-               sd : point;
-               smin : abscissa;
-               smax : abscissa;
-               start : bool}
+type spline = Spline.t 
+type abscissa = Spline.abscissa
 type path_ = {pl : spline list;
              cycle : bool}
 
@@ -31,8 +25,6 @@ type path = | Point of point
 
 val is_closed : path -> bool
 val is_a_point : path -> point option
-
-val inter_depth : int ref
 
 val create : point -> point -> point -> point -> path
   (** create a b c d return a path with :
@@ -108,7 +100,7 @@ val unprecise_bounding_box : path -> point * point
 val dist_min_point : path -> point -> abscissa
 val dist_min_path : path -> path -> abscissa * abscissa
 
-val translate : path -> point -> path
+val translate : point -> path -> path
 val transform : Matrix.t -> path -> path
 
 val buildcycle : path -> path -> path

@@ -33,6 +33,7 @@ val sign : t -> t
 val middle : t -> t -> t
 
 val norm : t -> float
+val norm2 : t -> float
 
 val list_min_max : ('a -> t * t) -> 'a list -> t * t
 

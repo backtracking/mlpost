@@ -20,8 +20,9 @@ open Spline_lib
 let draw_spline cr p = 
   List.iter (fun (e,_) -> 
     List.iter (fun s -> 
-      Cairo.move_to cr s.sa.x s.sa.y ;
-      Cairo.curve_to cr s.sb.x s.sb.y s.sc.x s.sc.y s.sd.x s.sd.y) e) p;
+      let sa, sb, sc, sd = Spline.explode s in
+      Cairo.move_to cr sa.x sa.y ;
+      Cairo.curve_to cr sb.x sb.y sc.x sc.y sd.x sd.y) e) p;
   Cairo.stroke cr
 
 module Cairo_device = Dev_save.Dev_load(Dvicairo.Cairo_device)
@@ -39,22 +40,22 @@ module MetaPath =
 struct
   type pen = Matrix.t
 
+  let curve_to cr s = 
+    let _, sb, sc, sd = Spline.explode s in
+    Cairo.curve_to cr sb.x sb.y sc.x sc.y sd.x sd.y
+
   let draw_path cr = function
     | Path p ->
-       List.iter (function 
-                    | {start = true} as s -> 
-                        Cairo.move_to cr s.sa.x s.sa.y ;
-                        Cairo.curve_to cr 
-                          s.sb.x s.sb.y 
-                          s.sc.x s.sc.y 
-                          s.sd.x s.sd.y
-                    | s -> 
-                        Cairo.curve_to cr 
-                          s.sb.x s.sb.y 
-                          s.sc.x s.sc.y 
-                          s.sd.x s.sd.y) p.pl;
+        begin match p.pl with
+        | [] -> assert false
+        | (x::_) as l ->
+            let sa = Spline.left_point x in
+            Cairo.move_to cr sa.x sa.y;
+            List.iter (curve_to cr) l
+        end ;
         if p.cycle then Cairo.close_path cr
-    | Spline_lib.Point _ -> failwith "Metapost fail in that case what should I do???"
+    | Spline_lib.Point _ -> 
+        failwith "Metapost fail in that case what should I do???"
 
   let stroke cr pen = function
     | Path _ as path -> 

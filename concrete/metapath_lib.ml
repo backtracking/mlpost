@@ -437,13 +437,15 @@ let left_of_join p = function
 let path_to_meta nknot l =
   let rec aux aknot = function
   | [] -> assert false
-  | [{S.sa=sa;sb=sb;sc=sc;sd=sd}] ->
+  | [a] ->
+      let sa,sb,sc,sd = Spline.explode a in
       nknot.left <- Explicit sc;
       nknot.coord <- sd;
       aknot.link <- nknot ;
       aknot.right <- Explicit sb;
       aknot.coord <- sa; ()
-  | {S.sa=sa;sb=sb;sc=sc}::l -> 
+  | a::l -> 
+      let sa,sb,sc,_ = Spline.explode a in
       let nknot = mk_kpath ~left:(Explicit sc) () in
       aknot.link <- nknot;
       aknot.right <- Explicit sb;
@@ -508,12 +510,10 @@ let print_option f fmt = function
    | {right = Endpoint} -> []
    | {right = Explicit sb;coord = sa;
       link={left = Explicit sc;coord = sd} as s} ->
-       {S.sa = sa;sb = sb;sc = sc;sd = sd;
-        smin=smin;smax=smin+.1.;start=false}::
-         (if s==knots then [] else (aux (smin+.1.) s))
+        Spline.create ~min:smin ~max:(smin +. 1.) sa sb sc sd ::
+          (if s==knots then [] else (aux (smin+.1.) s))
    | _ -> assert false in
-    let l = aux 0. knots in
-    {(List.hd l) with S.start = true}::(List.tl l)
+   aux 0. knots
 
 let kto_path ?cycle = function
  | Start p -> S.Point p
