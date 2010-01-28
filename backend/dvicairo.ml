@@ -32,7 +32,7 @@ let debug = ref false
 let specials = ref false
 let info = ref false
 
-module Cairo_device (*: dev with type arg = multi_page_pic with type cooked = unit*) =
+module Cairo_device : dev with type arg = multi_page_pic with type cooked = unit =
 struct
   type arg = multi_page_pic
   type t = { arg : arg;
@@ -70,16 +70,16 @@ struct
     s.arg.new_page ()
 
   let set_source_color pic = function
-    | Dviinterp.RGB(r,g,b) -> 
+    | RGB(r,g,b) -> 
         if !debug then
           printf "Use color RGB (%f,%f,%f)@." r g b;
         Cairo.set_source_rgb pic r g b
-    | Dviinterp.Gray(g) -> 
+    | Gray(g) -> 
         if !debug then
           printf "Use color Gray (%f)@." g;
         Cairo.set_source_rgb pic g g g
-    | Dviinterp.CMYK _ -> failwith "dvicairo : I don't know how to convert CMYK to RGB and cairo doesn't support it"
-    | Dviinterp.HSB _ -> failwith "dvicairo : I'm lazy I haven't written this conversion"
+    | CMYK _ -> failwith "dvicairo : I don't know how to convert CMYK to RGB and cairo doesn't support it"
+    | HSB _ -> failwith "dvicairo : I'm lazy I haven't written this conversion"
         (* http://en.wikipedia.org/wiki/HSL_and_HSV#Conversion_from_HSV_to_RGB *)
 
 
