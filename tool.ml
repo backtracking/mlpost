@@ -18,8 +18,8 @@ open Format
 open Arg
 
 let use_ocamlbuild = ref false
-let ccopt = ref ""
-let execopt = ref ""
+let ccopt = ref " "
+let execopt = ref " "
 let verbose = Mlpost_desc_options.verbose
 let native = ref false
 let libdir = ref Version.libdir
@@ -54,8 +54,8 @@ let version () =
     Format.printf "additional directories are %s@." Version.include_string;
   exit 0
 
-let add_ccopt x = ccopt := !ccopt ^ " " ^ x
-let add_execopt x = execopt := !execopt ^ " " ^ x
+let add_ccopt x = ccopt := !ccopt ^ x ^ " "
+let add_execopt x = execopt := !execopt ^ x ^ " "
 
 let give_lib () =
   if notcairo then ["","unix"] 
