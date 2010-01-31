@@ -105,3 +105,7 @@ clean:
 	rm -f boxes.ml.html paths.ml.html misc.ml.html tree.ml.html label.ml.html
 	rm -f parse.ml *.cmx *.cmo *.cmi parse *.o
 	rm -f *.png *.dummy
+
+
+editor2 :
+	ocamlbuild editor2.native
