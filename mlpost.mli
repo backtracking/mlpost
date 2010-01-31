@@ -2380,8 +2380,8 @@ module Concrete : sig
       
     val bounding_box : t -> CPoint.t * CPoint.t
       
-    val dist_min_point : t -> CPoint.t -> abscissa
-    val dist_min_path : t -> t -> abscissa * abscissa
+    val dist_min_point : t -> CPoint.t -> float * abscissa
+    val dist_min_path : t -> t -> float * (abscissa * abscissa)
       
     val print : Format.formatter -> t -> unit
   end

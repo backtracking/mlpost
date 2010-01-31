@@ -271,24 +271,23 @@ let is_possible (axmin,aymin,axmax,aymax) (bxmin,bymin,bxmax,bymax) =
   | _    , false, true , false -> norm2 (axmax -. bxmin) 0.
   | false, false, false, false -> 0. 
 
-let dist_min_point {x=px;y=py} pmin s =
+let dist_min_point ({x=px;y=py} as p) s =
   (* TODO simplify *)
   let is_possible_at a = is_possible (bounding_box a) (px,py,px,py) in
   let nmax = 2.**(float_of_int (!inter_depth+1)) in
   let rec aux a ((min,_) as pmin) t1 dt = function
     | 0 -> 
         let t1 = float_of_int (t1 + dt/2) /. nmax in
-        let {x=apx;y=apy} = point_of s t1 in
-        let dist = norm2 (apx -. px) (apy -. py) in
+        let pt1 = point_of s t1 in
+        let dist = P.dist2 pt1 p in
         if dist < min then (dist, s_of_01 s t1) else pmin
     | n -> 
-        let n = n-1 in
         let dt = dt/2 in
         let (af,al) = bisect a in
         let dist_af = is_possible_at af in
         let dist_al = is_possible_at al in
         let doit ((min,_) as pmin) dist am t = 
-          if dist < min then aux am pmin t dt n else pmin 
+          if dist < min then aux am pmin t dt (n-1) else pmin 
         in
         if dist_af<dist_al then
           let pmin = doit pmin dist_af af t1 in
@@ -297,9 +296,10 @@ let dist_min_point {x=px;y=py} pmin s =
           let pmin = doit pmin dist_al al (t1+dt) in
           doit pmin dist_af af t1 
   in
+  let pmin = P.dist2 (left_point s) p, min s in
   aux s pmin 0 (int_of_float nmax) !inter_depth
     
-let dist_min_path pmin s1 s2 =
+let dist_min_spline s1 s2 =
   let is_possible_at a b = is_possible (bounding_box a) (bounding_box b) in
   let nmax = 2.**(float_of_int (!inter_depth+1)) in
   let rec aux a b ((min,_) as pmin) t1 t2 dt = function
@@ -321,6 +321,7 @@ let dist_min_path pmin s1 s2 =
                         dist, doit dist am bm t1 t2) l in
       let l = List.fast_sort (fun (da,_) (db,_) -> compare da db) l in
       List.fold_left (fun pmin (_,doit) -> doit pmin) pmin l in
+  let pmin = P.dist2 (left_point s1) (left_point s2), (min s1, min s2) in
   aux s1 s2 pmin 0 0 (int_of_float nmax) !inter_depth
 
 let translate t a = 

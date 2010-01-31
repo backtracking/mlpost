@@ -94,14 +94,17 @@ type split =
 val split : t -> abscissa -> split
 (** split a spline at the given abscissa *)
 
-val dist_min_point : point -> (float * float) -> t -> float * float
-(** compute the minimal distance of a point with a spline; return this distance
- * if it is smaller than the given distance *)
+val dist_min_point : point -> t -> float * float
+(** [dist_min_point p s] computes the minimal distance of [p] to [s], as well as
+    the abscissa which corresponds to this minimal distance; the return value is
+    [distance, abscissa].
+*)
 
-val dist_min_path : 
-  (float * (float * float)) -> t -> t -> float * (float * float)
-(** compute the minimal distance of two splines; return this distance
- if it is smaller than the given distance *)
+val dist_min_spline : t -> t -> float * (float * float)
+(** [dist_min_path p1 p2] computes the minimal distance of [p1] to [p2], as well as
+    the two abscissa which correspond to this minimal distance; the return value is
+    [distance, (abscissa_on_p1, abscissa_on_p2)].
+*)
 
 val translate : point -> t -> t
 (** translate all points of the spline *)

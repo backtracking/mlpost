@@ -340,26 +340,35 @@ let dicho_split x = assert false
 let dist_min_point p point = 
   match p with
     | Path p ->
-        let one = List.hd p.pl in
-        let l = 
-          Point_lib.norm2 (Spline.left_point one -/ point), 
-          Spline.min one in
-        snd (List.fold_left (Spline.dist_min_point point) l p.pl)
-    | Point p -> 0.
+        begin match p.pl with
+        | [] -> assert false
+        | x::xs ->
+            let m = Spline.dist_min_point point x in
+            List.fold_left (fun ((d1,_) as m1) x ->
+              let ((d2,_) as m2) = Spline.dist_min_point point x in
+              if d1 < d2 then m1 else m2) m xs
+        end
+    | Point p -> P.dist2 p point, 0.
 
 let dist_min_path p1 p2 = 
   match p1, p2 with
-    | Path p1, Path p2 ->
-        let one1 = (List.hd p1.pl) in 
-        let one2 = (List.hd p2.pl) in 
-        let n = 
-          Point_lib.norm2 (Spline.left_point one1 -/ Spline.left_point one2),
-          (Spline.min one1, Spline.min one2) 
-        in
-        snd (one_to_one2 Spline.dist_min_path n p1.pl p2.pl)
-    |Path _ as p1, Point p2 -> dist_min_point p1 p2,0.
-    |Point p1, (Path _ as p2) -> 0.,dist_min_point p2 p1
-    |Point _, Point _ -> 0.,0.
+    | Path p1, Path p2 -> 
+        begin match p1.pl, p2.pl with
+        | [], _ | _, [] -> assert false
+        | x::xs, y :: ys ->
+            let acc = Spline.dist_min_spline x y in
+            one_to_one2 (fun ((d1,_) as m1) a b ->
+              let (d2,_) as m2 = Spline.dist_min_spline a b in
+              if d1 < d2 then m1 else m2) acc xs ys
+        end
+    |Path _ as p1, Point p2 -> 
+        let d,a = dist_min_point p1 p2 in
+        d, (a, 0.)
+    |Point p1, (Path _ as p2) -> 
+        let d,a = dist_min_point p2 p1 in
+        d, (0., a)
+    |Point p1, Point p2 -> 
+        P.dist2 p1 p2, (0.,0.)
 
 let translate t p = 
   match p with

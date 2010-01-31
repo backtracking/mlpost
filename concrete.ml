@@ -75,10 +75,12 @@ module CPath =
     let bounding_box = S.bounding_box
 
     let dist_min_point path point =
-      S.metapost_of_abscissa path (S.dist_min_point path point)
+      let d, a = S.dist_min_point path point in
+      d, S.metapost_of_abscissa path (a)
 
     let dist_min_path path1 path2 =
-      c_metapost_of_abscissa path1 path2 (S.dist_min_path path1 path2)
+      let d, (a1, a2) = S.dist_min_path path1 path2 in
+      d, c_metapost_of_abscissa path1 path2 (a1,a2)
 
     let print = S.print
 

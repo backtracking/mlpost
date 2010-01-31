@@ -16,11 +16,13 @@
 
 type point = Point_lib.t
 type abscissa = Spline.abscissa
-type path_ = {pl : Spline.t list;
-             cycle : bool}
+type path_ = 
+  {pl : Spline.t list;
+   cycle : bool}
 
-type path = | Point of point
-            | Path of path_
+type path = 
+  | Point of point
+  | Path of path_
 
 val is_closed : path -> bool
 val is_a_point : path -> point option
@@ -96,8 +98,17 @@ val abscissa_to_point : path -> abscissa -> point
 val bounding_box : path -> point * point
 val unprecise_bounding_box : path -> point * point
 
-val dist_min_point : path -> point -> abscissa
-val dist_min_path : path -> path -> abscissa * abscissa
+val dist_min_point : path -> point -> float * abscissa
+(** [dist_min_point p s] computes the minimal distance of [p] to [s], as well as
+    the abscissa which corresponds to this minimal distance; the return value is
+    [distance, abscissa].
+*)
+
+val dist_min_path : path -> path -> float * (abscissa * abscissa)
+(** [dist_min_path p1 p2] computes the minimal distance of [p1] to [p2], as well as
+    the two abscissa which correspond to this minimal distance; the return value is
+    [distance, (abscissa_on_p1, abscissa_on_p2)].
+*)
 
 val translate : point -> path -> path
 val transform : Matrix.t -> path -> path
