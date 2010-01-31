@@ -34,7 +34,17 @@ let emit_cairo = emit_cairo
 (*let emit_cairo = fun x -> ()*)
 
 let dump_pdf () = 
-  Queue.iter (fun (_,fname,fig) -> emit_pdf (fname^".pdf") fig) Metapost.figures
+  Queue.iter (fun (_,fname,fig) -> 
+		let pdfname = (fname^".pdf") in
+		  try
+		    emit_pdf  pdfname fig
+		  with
+		    | Cairo.Error status -> 
+			Format.printf "An@ internal@ error@ occured@ during@ the generation@ of@ %s@ with@ Cairo :@ %s@."
+			  pdfname (Cairo.string_of_status status)
+		    | error -> Format.printf "An@ internal@ error@ occured@ during@ the@ generation@ of@ %s :@ %s@."
+			pdfname (Printexc.to_string error)
+	     ) Metapost.figures
 
 let dump_pdfs fname = 
   let figs = 

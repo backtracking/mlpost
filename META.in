@@ -3,3 +3,10 @@ version = "@MLPOSTVERSION@"
 archive(byte) = "mlpost.cma"
 archive(native) = "mlpost.cmxa"
 requires = "@METAREQUIRESPACKAGE@"
+
+package "options" (
+	version = "@MLPOSTVERSION@"
+	requires = "mlpost"
+	archive(byte) = "mlpost_desc_options.cma mlpost_options.cma"
+	archive(native) = "mlpost_desc_options.cmxa mlpost_options.cmxa"
+)

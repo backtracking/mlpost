@@ -85,7 +85,7 @@ let aotofcp ?arg s =
 
 let execopt cmd =
   let b = Buffer.create 30 in
-  bprintf b "%s %a -- %s" 
+  bprintf b "%s %a -- %s@?" 
     cmd
     (fun fmt -> Queue.iter (fprintf fmt "\"%s\" ")) options_for_compiled_prog
     !execopt;

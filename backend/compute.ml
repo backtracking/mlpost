@@ -141,7 +141,10 @@ let rec num' = function
   | NDiv (n1,n2) ->
       let n1 = num n1 in
       let n2 = num n2 in
-        n1/.n2
+	if n2 = 0. then
+	  failwith "Concrete : division by zero"
+	else
+          n1/.n2
   | NMax (n1,n2) ->
       let n1 = num n1 in
       let n2 = num n2 in
