@@ -38,7 +38,7 @@ type commands =
   | ExternalImage of string * float * float
 
 type t = { fcl : commands;
-           fb : Spline_lib.Epure.t;
+           fb : Spline_lib.Size.t;
            fi : interactive}
 
 type id = int

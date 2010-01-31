@@ -124,7 +124,6 @@ let spec = Arg.align
     "-get-include-compile", Symbol (["cmxa";"cma";"dir";"file"],get_include_compile), " Output the libraries which are needed by the library Mlpost";
     "-compile-name", String (fun s -> compile_name := Some s), "<compile-name> Keep the compiled version of the .ml file";
     "-dont-execute", Set dont_execute, " Don't execute the mlfile";
-    "-dont-clean", Set dont_clean, " Don't remove intermediate files";
     "-add-nothing", Set add_nothing, " Add nothing to the file (deprecated)"
   ]@(if notcairo 
      then ["-cairo" , Unit nocairo, " Mlpost has not been compiled with the cairo backend";

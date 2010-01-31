@@ -39,7 +39,7 @@ val create_line : point -> point -> path
 (** create a straight line between two points *)
 
 val create_lines : point list -> path
-(** create a straight line between two points *)
+(** create a path consisting of straight lines connecting the points in argument *)
 
 val close : path -> path
 (** close a path *)
@@ -112,13 +112,13 @@ val print_splines : Format.formatter -> Spline.t list -> unit
 val abscissa_of_metapost : path -> float -> abscissa
 val metapost_of_abscissa : path -> abscissa -> float
 
-module Epure :
+module Size :
 sig
   type pen = path
   type t = (Spline.t list * pen) list
   val empty : t
-  val create : ?ecart:pen -> path -> t
-  val of_path : ?ecart:pen -> path -> t
+  val create : ?base:pen -> path -> t
+  val of_path : ?base:pen -> path -> t
   val union : t -> t -> t
   val transform : Matrix.t -> t -> t
   val bounding_box : t -> point * point
