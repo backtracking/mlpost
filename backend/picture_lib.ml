@@ -165,7 +165,7 @@ let external_image filename spec =
    fb = S.of_bounding_box (P.zero,{P.x=width;y=height});
    fi = IntEmpty}
    
-let interative path id = {fcl = Empty;
+let interactive path id = {fcl = Empty;
                           fb = S.empty;
                           fi = Inter (path,id)}
 

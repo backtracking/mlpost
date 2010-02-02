@@ -55,7 +55,7 @@ val external_image : string ->
   | `Inside of float * float
   | `None
   | `Width of float ] -> t
-val interative : Spline_lib.path -> id -> t
+val interactive : Spline_lib.path -> id -> t
 
 val on_top : t -> t -> t
 
