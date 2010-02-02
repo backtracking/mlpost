@@ -34,8 +34,6 @@ type commands =
   | Clip of commands  * path
   | ExternalImage of string * float * float
 
-type size
-
 type t
 
 type id = int

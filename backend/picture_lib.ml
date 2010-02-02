@@ -17,7 +17,7 @@
 let diameter_of_a_dot = 3.
 let default_line_size = 1.
 
-module Size : sig
+module BoundingBox : sig
   type pen = Spline_lib.path
   type t
   (** The type of the approximation *)
@@ -80,7 +80,7 @@ end
 module MP = Metapath_lib
 open Types
 module P = Point_lib
-module S = Size
+module S = BoundingBox
 type transform = Matrix.t
 type num = float
 type dash = float * num list
@@ -97,7 +97,6 @@ type interactive =
   | IntOnTop of interactive * interactive
   | Inter of path * id
 
-type size = Size.t
 type commands = 
   | Empty
   | Transform of transform * commands
@@ -109,7 +108,7 @@ type commands =
   | ExternalImage of string * float * float
 
 and t = { fcl : commands;
-           fb : size;
+           fb : Size.t;
            fi : interactive}
 
 let content x = x.fcl
