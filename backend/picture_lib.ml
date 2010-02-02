@@ -108,7 +108,7 @@ type commands =
   | ExternalImage of string * float * float
 
 and t = { fcl : commands;
-           fb : Size.t;
+           fb : BoundingBox.t;
            fi : interactive}
 
 let content x = x.fcl
