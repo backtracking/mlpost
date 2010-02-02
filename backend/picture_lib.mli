@@ -14,25 +14,6 @@
 (*                                                                        *)
 (**************************************************************************)
 
-module Size :
-sig
-  (** A module to compute the approximate bounding box of a picture, using a
-   * list of paths, drawn with a certain path as pen  *)
-
-  type pen = Spline_lib.path
-  type t
-  (** The type of the approximation *)
-
-  val iter : (Spline.t -> unit) -> t -> unit
-  val empty : t
-  val create : ?base:pen -> Spline_lib.path -> t
-  val of_path : ?base:pen -> Spline_lib.path -> t
-  val union : t -> t -> t
-  val transform : Matrix.t -> t -> t
-  val bounding_box : t -> Point_lib.t * Point_lib.t
-  val of_bounding_box : Point_lib.t * Point_lib.t -> t
-end
-
 type transform = Matrix.t
 type num = float
 type dash = float * num list
@@ -53,8 +34,9 @@ type commands =
   | Clip of commands  * path
   | ExternalImage of string * float * float
 
+type size
 type t = { fcl : commands;
-           fb : Size.t;
+           fb : size;
            fi : interactive}
 
 type id = int

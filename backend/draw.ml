@@ -17,15 +17,6 @@
 open Point_lib
 module S = Spline_lib
 
-(*
-let draw_spline cr p = 
-  Picture_lib.Size.iter (fun s ->
-    let sa, sb, sc, sd = Spline.explode s in
-    Cairo.move_to cr sa.x sa.y ;
-    Cairo.curve_to cr sb.x sb.y sc.x sc.y sd.x sd.y) p;
-  Cairo.stroke cr
-
-*)
 module Cairo_device = Dev_save.Dev_load(Dvicairo.Cairo_device)
 
 let draw_tex cr tex = 
@@ -158,7 +149,6 @@ struct
     Cairo.set_line_cap cr Cairo.LINE_CAP_ROUND;
     Cairo.set_line_join cr Cairo.LINE_JOIN_ROUND;
     draw_aux cr p.fcl;
-    (*Spline_lib.Epure.draw cr p.fb;*)
     Cairo.restore cr
 
   let where cr t (x,y) = not_implemented "where"

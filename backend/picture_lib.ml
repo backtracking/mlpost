@@ -17,7 +17,20 @@
 let diameter_of_a_dot = 3.
 let default_line_size = 1.
 
-module Size =
+module Size : sig
+  type pen = Spline_lib.path
+  type t
+  (** The type of the approximation *)
+
+  val iter : (Spline.t -> unit) -> t -> unit
+  val empty : t
+  val create : ?base:pen -> Spline_lib.path -> t
+  val of_path : ?base:pen -> Spline_lib.path -> t
+  val union : t -> t -> t
+  val transform : Matrix.t -> t -> t
+  val bounding_box : t -> Point_lib.t * Point_lib.t
+  val of_bounding_box : Point_lib.t * Point_lib.t -> t
+end =
 struct
   (* A rendre plus performant ou pas*)
   (* le point correspond à un écart à prendre autour de la bounding box *)
@@ -84,6 +97,7 @@ type interactive =
   | IntOnTop of interactive * interactive
   | Inter of path * id
 
+type size = Size.t
 type commands = 
   | Empty
   | Transform of transform * commands
@@ -95,7 +109,7 @@ type commands =
   | ExternalImage of string * float * float
 
 and t = { fcl : commands;
-           fb : S.t;
+           fb : size;
            fi : interactive}
 
 let content x = x.fcl

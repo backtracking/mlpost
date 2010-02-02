@@ -14,7 +14,6 @@
 (*                                                                        *)
 (**************************************************************************)
 
-(*   val draw_spline : Cairo.t -> Picture_lib.Size.t -> unit *)
   val draw_tex : Cairo.t -> Gentex.t -> unit
 
 module MetaPath :
