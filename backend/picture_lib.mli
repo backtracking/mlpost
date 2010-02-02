@@ -35,9 +35,8 @@ type commands =
   | ExternalImage of string * float * float
 
 type size
-type t = { fcl : commands;
-           fb : size;
-           fi : interactive}
+
+type t
 
 type id = int
 

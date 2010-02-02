@@ -148,7 +148,7 @@ struct
     (* Only elliptical pens use the stroke command *)
     Cairo.set_line_cap cr Cairo.LINE_CAP_ROUND;
     Cairo.set_line_join cr Cairo.LINE_JOIN_ROUND;
-    draw_aux cr p.fcl;
+    draw_aux cr (content p);
     Cairo.restore cr
 
   let where cr t (x,y) = not_implemented "where"
