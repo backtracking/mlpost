@@ -18,7 +18,7 @@ type transform = Matrix.t
 type num = float
 type dash = float * num list
 type pen = transform
-type color = Types.color
+type color = Concrete_types.color
 
 type path = Spline_lib.path
 

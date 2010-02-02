@@ -15,6 +15,7 @@
 (**************************************************************************)
 
 (* print an mlpost AST for debugging *)
+open Concrete_types
 open Types
 open Format
 

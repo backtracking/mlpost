@@ -17,14 +17,7 @@
 val add_set_verbosity : (bool -> unit) -> unit
 val set_verbosity : bool -> unit
 
-type scolor = 
-  | RGB of float * float * float
-  | CMYK of float * float * float * float
-  | Gray of float
-
-type color = 
-  |OPAQUE of scolor
-  |TRANSPARENT of float * scolor
+type color = Concrete_types.color
 
 type name = string
 

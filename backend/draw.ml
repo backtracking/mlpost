@@ -71,7 +71,7 @@ end
 
 module Picture =
 struct
-  open Types
+  open Concrete_types
 
   exception Not_implemented of string
   let not_implemented s = raise (Not_implemented s)

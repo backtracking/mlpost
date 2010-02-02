@@ -16,6 +16,7 @@
 
 open Format
 open Misc
+open Concrete_types
 open Types
 module C = Compiled_types
 

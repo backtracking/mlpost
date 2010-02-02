@@ -14,14 +14,14 @@
 (*                                                                        *)
 (**************************************************************************)
 
-open Types
+open Concrete_types
 
-type st = Types.scolor = 
+type st = Concrete_types.scolor = 
   | RGB of float * float * float
   | CMYK of float * float * float * float
   | Gray of float
 
-type t = Types.color = 
+type t = Concrete_types.color = 
   |OPAQUE of scolor
   |TRANSPARENT of float * scolor
 
