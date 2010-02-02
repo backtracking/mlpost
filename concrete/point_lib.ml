@@ -66,6 +66,13 @@ let list_min_max f =
                      {x=max x_max sx_max;y=max y_max sy_max})
     ({x=infinity;y=infinity},{x=neg_infinity;y=neg_infinity})
 
+let list_min_max_float f p = 
+  List.fold_left (fun (x_min,y_min,x_max,y_max) s ->
+                    let (sx_min,sy_min,sx_max,sy_max) = f s in
+                    (min x_min sx_min,min y_min sy_min,
+                     max x_max sx_max,max y_max sy_max))
+    (infinity,infinity,neg_infinity,neg_infinity) p
+
 let sign f = 
   if f = 0. then 0. 
   else if f < 0. then -1. else 1.

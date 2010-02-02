@@ -182,24 +182,17 @@ let direction_of_abscissa p0 t =
         if min_abscissa p0 > t then Error.min_absc "direction_of_abscissa"
         else aux p.pl
 
-let list_min_max f p = 
-  List.fold_left (fun (x_min,y_min,x_max,y_max) s ->
-                    let (sx_min,sy_min,sx_max,sy_max) = f s in
-                    (min x_min sx_min,min y_min sy_min,
-                     max x_max sx_max,max y_max sy_max))
-    (infinity,infinity,neg_infinity,neg_infinity) p
-
 let unprecise_bounding_box = function
   | Path s -> 
       let (x_min,y_min,x_max,y_max) = 
-        list_min_max Spline.bounding_box s.pl in
+        P.list_min_max_float Spline.bounding_box s.pl in
       ({x=x_min;y=y_min},{x=x_max;y=y_max})
   | Point s -> s,s
 
 let bounding_box = function
   | Path s ->
       let (x_min,y_min,x_max,y_max) = 
-        list_min_max Spline.precise_bounding_box s.pl in
+        P.list_min_max_float Spline.precise_bounding_box s.pl in
       ({x=x_min;y=y_min},{x=x_max;y=y_max})
   | Point s -> (s,s)
 
@@ -377,11 +370,8 @@ let translate t p =
     | Point p -> Point (p +/ t)
 
 
-let transform_aux t p = 
-  List.map (Spline.transform t) p
-
 let transform t = function
-  | Path p -> Path {p with pl= transform_aux t p.pl}
+  | Path p -> Path {p with pl= List.map (Spline.transform t) p.pl}
   | Point p -> Point (P.transform t p)
     
 let buildcycle p1 p2 = not_implemented ("buildcycle")
@@ -402,52 +392,3 @@ let length p = max_abscissa p -. min_abscissa p
 let metapost_length = function
   | Point _ -> 0.
   | Path p -> float_of_int (List.length p.pl)
-
-module Size =
-struct
-  (* A rendre plus performant ou pas*)
-  (* le point correspond à un écart à prendre autour de la bounding box *)
-  type pen = path
-  type t = (spline list * pen) list
-  let print fmt p = 
-    Format.fprintf fmt "@[[%a]" 
-      (fun fmt -> 
-        List.iter 
-          (List.iter 
-            (fun (e,f) -> 
-              Format.fprintf fmt "%a[%a];" Spline.print e P.print f))) p
-
-  let empty = []
-
-  let create ?(base=Point P.zero) = function
-    |Path p -> [p.pl,base]
-    |Point p -> 
-        let x = 
-          match of_bounding_box (p,p) with 
-          | Path p -> p.pl 
-          | Point _ -> assert false
-        in
-        [x, base]
-
-  let of_path = create
-  let union x y = List.rev_append x y
-
-  let transform t x = 
-    List.map (fun (x,f) -> 
-      transform_aux t x, transform (Matrix.remove_translation t) f) x
-  let bounding_box sl =
-    let (x_min,y_min,x_max,y_max) = 
-      list_min_max (fun (e,f) -> 
-        let (x_min,y_min,x_max,y_max)=
-          list_min_max Spline.precise_bounding_box e in
-        let pen_min,pen_max = bounding_box f in
-        (*Format.printf "pen : %a,%a@." P.print pen_min P.print pen_max;*)
-        let p1,p2 = 
-          {x=x_min;y=y_min}+/pen_min,{x=x_max;y=y_max}+/pen_max in
-        (*Format.printf "p1,p2 : %a,%a@." P.print p1 P.print p2;*)
-        (p1.x,p1.y,p2.x,p2.y)) sl in
-    {x=x_min;y=y_min},{x=x_max;y=y_max}
-  let of_bounding_box l = create (of_bounding_box l)
-
-end
-

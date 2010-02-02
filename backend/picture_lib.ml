@@ -17,19 +17,65 @@
 let diameter_of_a_dot = 3.
 let default_line_size = 1.
 
+module Size =
+struct
+  (* A rendre plus performant ou pas*)
+  (* le point correspond à un écart à prendre autour de la bounding box *)
+  module S = Spline_lib
+  module P = Point_lib
+
+  type pen = S.path
+  type t = (Spline.t list * pen) list
+
+  let iter f l = List.iter (fun (e,_) -> List.iter (fun s -> f s) e) l
+  let empty = []
+
+  let create ?(base= S.Point P.zero) = function
+    | S.Path p -> [p.S.pl,base]
+    | S.Point p -> 
+        let x = 
+          match S.of_bounding_box (p,p) with 
+          | S.Path p -> p.S.pl 
+          | S.Point _ -> assert false
+        in
+        [x, base]
+
+  let of_path = create
+  let union x y = List.rev_append x y
+
+  let transform t x = 
+    List.map (fun (x,f) -> 
+      List.map (Spline.transform t) x, 
+        S.transform (Matrix.remove_translation t) f) x
+
+  open P
+  open P.Infix
+  let bounding_box sl =
+    let (x_min,y_min,x_max,y_max) = 
+      P.list_min_max_float (fun (e,f) -> 
+        let (x_min,y_min,x_max,y_max)=
+          P.list_min_max_float Spline.precise_bounding_box e in
+        let pen_min,pen_max = S.bounding_box f in
+        let p1,p2 = 
+          {x=x_min;y=y_min}+/pen_min,{x=x_max;y=y_max}+/pen_max in
+        (p1.x,p1.y,p2.x,p2.y)) sl in
+    {x=x_min;y=y_min},{x=x_max;y=y_max}
+  let of_bounding_box l = create (S.of_bounding_box l)
+
+end
+
 module MP = Metapath_lib
 open Types
-open Point_lib
+module P = Point_lib
+module S = Size
 type transform = Matrix.t
 type num = float
-type point = Point_lib.t
 type dash = float * num list
 type pen = transform
 type color = Types.color
 
 type path = Spline_lib.path
 
-type tex = Gentex.t
 type id = int
 type interactive = 
   | IntEmpty
@@ -42,37 +88,41 @@ type commands =
   | Empty
   | Transform of transform * commands
   | OnTop of commands list
-  | Tex of tex
+  | Tex of Gentex.t
   | Stroke_path of path * color option * pen * dash option
   | Fill_path of path * color option
   | Clip of commands  * path
   | ExternalImage of string * float * float
 
 and t = { fcl : commands;
-           fb : Spline_lib.Size.t;
+           fb : S.t;
            fi : interactive}
 
 let content x = x.fcl
 
-let empty = { fcl = Empty; fb = Spline_lib.Size.empty ; fi = IntEmpty }
+let empty = { fcl = Empty; fb = S.empty ; fi = IntEmpty }
+
 let tex t = {fcl = Tex t;
-             fb = Spline_lib.Size.of_bounding_box (Gentex.bounding_box t);
+             fb = S.of_bounding_box (Gentex.bounding_box t);
              fi = IntEmpty}
 let fill_path p c = {fcl = Fill_path (p,c);
-                     fb = Spline_lib.Size.of_path p;
+                     fb = S.of_path p;
                      fi = IntEmpty}
 
 let base_of_pen pen = 
   Spline_lib.transform pen (MP.Approx.fullcircle default_line_size)
 
-let stroke_path p c pen d = {fcl= Stroke_path (p,c,pen,d);
-                             fb = Spline_lib.Size.of_path ~base:(base_of_pen pen) p;
-                             fi = IntEmpty}
+let stroke_path p c pen d = 
+  { fcl= Stroke_path (p,c,pen,d);
+    fb = S.of_path ~base:(base_of_pen pen) p;
+    fi = IntEmpty}
 
-let draw_point p = stroke_path (Spline_lib.create_point p) None (Matrix.scale diameter_of_a_dot) None
+let draw_point p = 
+  stroke_path (Spline_lib.create_point p) None 
+    (Matrix.scale diameter_of_a_dot) None
 
 let clip p path = {fcl= Clip (p.fcl,path);
-                   fb = Spline_lib.Size.of_path path; 
+                   fb = S.of_path path; 
 (* la bounding box d'un clip est la bounding_box du chemin fermé*)
                    fi = IntClip (p.fi,path)}
 
@@ -98,23 +148,23 @@ let external_image filename spec =
               (fh/.fw)*.w,w
     end in
   {fcl = ExternalImage (filename,height,width);
-   fb = Spline_lib.Size.of_bounding_box ({x=0.;y=0.},{x=width;y=height});
+   fb = S.of_bounding_box (P.zero,{P.x=width;y=height});
    fi = IntEmpty}
    
 let interative path id = {fcl = Empty;
-                          fb = Spline_lib.Size.empty;
+                          fb = S.empty;
                           fi = Inter (path,id)}
 
 let on_top t1 t2 = {fcl = OnTop [t1.fcl;t2.fcl];
-                    fb = Spline_lib.Size.union (t1.fb) (t2.fb);
+                    fb = S.union (t1.fb) (t2.fb);
                     fi = IntOnTop (t1.fi,t2.fi)}
 
 let transform m t = {fcl = Transform (m,t.fcl);
-                     fb = Spline_lib.Size.transform m t.fb;
+                     fb = S.transform m t.fb;
                      fi = IntTransform (t.fi,m)}
 
 let shift t w h = transform (Matrix.xy_translation w h) t
-let bounding_box t = Spline_lib.Size.bounding_box t.fb
+let bounding_box t = S.bounding_box t.fb
 
 let baseline p = match p.fcl with
   | Tex tex -> Gentex.get_bases_pt tex

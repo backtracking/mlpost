@@ -123,16 +123,3 @@ val print_splines : Format.formatter -> Spline.t list -> unit
 val abscissa_of_metapost : path -> float -> abscissa
 val metapost_of_abscissa : path -> abscissa -> float
 
-module Size :
-sig
-  type pen = path
-  type t = (Spline.t list * pen) list
-  val empty : t
-  val create : ?base:pen -> path -> t
-  val of_path : ?base:pen -> path -> t
-  val union : t -> t -> t
-  val transform : Matrix.t -> t -> t
-  val bounding_box : t -> point * point
-  val of_bounding_box : point * point -> t
-end
-

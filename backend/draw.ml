@@ -15,16 +15,17 @@
 (**************************************************************************)
 
 open Point_lib
-open Spline_lib
+module S = Spline_lib
 
+(*
 let draw_spline cr p = 
-  List.iter (fun (e,_) -> 
-    List.iter (fun s -> 
-      let sa, sb, sc, sd = Spline.explode s in
-      Cairo.move_to cr sa.x sa.y ;
-      Cairo.curve_to cr sb.x sb.y sc.x sc.y sd.x sd.y) e) p;
+  Picture_lib.Size.iter (fun s ->
+    let sa, sb, sc, sd = Spline.explode s in
+    Cairo.move_to cr sa.x sa.y ;
+    Cairo.curve_to cr sb.x sb.y sc.x sc.y sd.x sd.y) p;
   Cairo.stroke cr
 
+*)
 module Cairo_device = Dev_save.Dev_load(Dvicairo.Cairo_device)
 
 let draw_tex cr tex = 
@@ -45,27 +46,27 @@ struct
     Cairo.curve_to cr sb.x sb.y sc.x sc.y sd.x sd.y
 
   let draw_path cr = function
-    | Path p ->
-        begin match p.pl with
+    | S.Path p ->
+        begin match p.S.pl with
         | [] -> assert false
         | (x::_) as l ->
             let sa = Spline.left_point x in
             Cairo.move_to cr sa.x sa.y;
             List.iter (curve_to cr) l
         end ;
-        if p.cycle then Cairo.close_path cr
-    | Spline_lib.Point _ -> 
+        if p.S.cycle then Cairo.close_path cr
+    | S.Point _ -> 
         failwith "Metapost fail in that case what should I do???"
 
   let stroke cr pen = function
-    | Path _ as path -> 
+    | S.Path _ as path -> 
         (*Format.printf "stroke : %a@." S.print path;*)
         draw_path cr path;
         Cairo.save cr;
         (*Matrix.set*) Cairo.transform cr pen;
         Cairo.stroke cr;
         Cairo.restore cr;
-    | Point p ->
+    | S.Point p ->
         (*Format.printf "stroke : %a@." S.print path;*)
         Cairo.save cr;
         Cairo.transform cr (Matrix.translation p);
