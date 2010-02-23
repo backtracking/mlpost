@@ -166,21 +166,22 @@ fi
 
 
 ## Where are the library we need
-# we look for ocamlfind; if not present, we just not use it to find
-# the library
-AC_CHECK_PROG(OCAMLFIND,ocamlfind,yes,no)
+# we look for ocamlfind; if not present, we just don't use it to find
+# libraries
+AC_CHECK_PROG(USEOCAMLFIND,ocamlfind,yes,no)
 
-if test "$OCAMLFIND" == "yes"; then
+if test "$USEOCAMLFIND" == "yes"; then
    OCAMLFINDLIB=$(ocamlfind printconf stdlib)
+   OCAMLFIND=$(which ocamlfind)
    if test "$OCAMLFINDLIB" != "$OCAMLLIB"; then
-   OCAMLFIND=no;
+   USEOCAMLFIND=no;
    echo "but your ocamlfind is not compatible with your ocamlc:"
    echo "ocamlfind : $OCAMLFINDLIB, ocamlc : $OCAMLLIB"
    fi
 fi
 
 if test "$LIBDIR" = ""; then
-   if test "$OCAMLFIND" == "yes"; then
+   if test "$USEOCAMLFIND" == "yes"; then
         LIBDIR=$(ocamlfind printconf destdir)/mlpost
    else
         LIBDIR=$OCAMLLIB/mlpost
@@ -211,7 +212,7 @@ case $OCAMLVERSION in
 esac
 
 # checking for mlcairo
-if test "$OCAMLFIND" == yes; then
+if test "$USEOCAMLFIND" == yes; then
    CAIROLIB=$(ocamlfind query cairo)
 fi
 
@@ -230,7 +231,7 @@ else
     fi
 fi
 
-if test "$OCAMLFIND" == yes; then
+if test "$USEOCAMLFIND" == yes; then
    BITSTRINGLIB=$(ocamlfind query bitstring)
 fi
 
@@ -270,7 +271,7 @@ fi
 #INCLUDELIBS=""
 
 # checking for lablgtk2
-if test "$OCAMLFIND" == yes; then
+if test "$USEOCAMLFIND" == yes; then
    LABLGTK2LIB=$(ocamlfind query lablgtk2)
 fi
 
@@ -317,6 +318,7 @@ AC_SUBST(BASICOFLAGS)
 AC_SUBST(OCAMLWEB)
 AC_SUBST(OCAMLBUILD)
 AC_SUBST(OCAMLFIND)
+AC_SUBST(USEOCAMLFIND)
 AC_SUBST(LABLGTK2)
 AC_SUBST(INCLUDEGTK2)
 AC_SUBST(LABLGTK2LIB)

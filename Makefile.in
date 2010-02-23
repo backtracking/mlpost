@@ -24,6 +24,7 @@ datadir = @datadir@
 exec_prefix=@exec_prefix@
 BINDIR=@bindir@
 LIBDIR=@LIBDIR@
+USEOCAMLFIND=@USEOCAMLFIND@
 OCAMLFIND=@OCAMLFIND@
 
 # where to install the man page
@@ -105,12 +106,12 @@ else
 DESTDIR=-destdir $(LIBDIR:/mlpost=)
 
 install-byte:
-	ocamlfind remove $(DESTDIR) mlpost
-	ocamlfind install $(DESTDIR) mlpost $(BUILD)mlpost.cmi META $(BCMA)
+	$(OCAMLFIND) remove $(DESTDIR) mlpost
+	$(OCAMLFIND) install $(DESTDIR) mlpost $(BUILD)mlpost.cmi META $(BCMA)
 
 install-opt:
-	ocamlfind remove $(DESTDIR) mlpost
-	ocamlfind install $(DESTDIR) mlpost $(BUILD)mlpost$(LIBEXT) $(BUILD)mlpost.cmi META $(BCMXA) $(BCMA)
+	$(OCAMLFIND) remove $(DESTDIR) mlpost
+	$(OCAMLFIND) install $(DESTDIR) mlpost $(BUILD)mlpost$(LIBEXT) $(BUILD)mlpost.cmi META $(BCMXA) $(BCMA)
 endif
 
 install-bin:
