@@ -136,8 +136,11 @@ FTP = $(WWW)/download
 
 FILES := $(wildcard *.ml) $(wildcard *.mli) $(wildcard *.mll) \
 	 $(wildcard *.in) configure README.txt INSTALL LICENSE CHANGES FAQ \
-	 mlpost.1 _tags *.mlpack mlpost.odocl
-BACKENDFILES = backend/*ml backend/*mly backend/*mll backend/*mli backend/_tags
+	 mlpost.1 _tags *.mlpack mlpost.odocl \
+	simple.Makefile ocamlbuild.Makefile
+BACKENDFILES = backend/*ml backend/*mli backend/_tags
+DVIFILES = dvi/*mly dvi/*mll dvi/*ml dvi/*mli dvi/_tags
+CONCRETEFILES = concrete/*ml concrete/*mli concrete/_tags
 GENERATEDSOURCEFILES = version.ml myocamlbuild.ml $(GENERATED)
 GUIFILES = gui/*.mll gui/*.ml gui/_tags 
 EXFILES = examples/Makefile examples/*.ml examples/all.template\
@@ -157,6 +160,10 @@ source:
 	cp $(filter-out $(GENERATEDSOURCEFILES), $(FILES)) export/$(EXPORTDIR)
 	mkdir -p export/$(EXPORTDIR)/backend
 	cp $(BACKENDFILES) export/$(EXPORTDIR)/backend
+	mkdir -p export/$(EXPORTDIR)/dvi
+	cp $(DVIFILES) export/$(EXPORTDIR)/dvi
+	mkdir -p export/$(EXPORTDIR)/concrete
+	cp $(CONCRETEFILES) export/$(EXPORTDIR)/concrete
 	mkdir -p export/$(EXPORTDIR)/gui
 	cp $(GUIFILES) export/$(EXPORTDIR)/gui
 	mkdir -p export/$(EXPORTDIR)/examples
