@@ -116,13 +116,11 @@ let supported = false
 
 let not_supported s = failwith ("Concrete."^s^" : not supported")
 
-let set_verbosity b = not_supported "set_verbosity"
-
-let set_prelude filename = not_supported "set_prelude"
-
-let set_t1disasm opt = not_supported "set_t1disasm"
-
-let set_prelude2 prelude = not_supported "set_prelude2"
+(* these are only configuration; we silently do nothing here *)
+let set_verbosity _ = ()
+let set_prelude _ = ()
+let set_t1disasm _ = ()
+let set_prelude2 _ = ()
 
 module CPoint =
 struct
