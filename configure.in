@@ -170,7 +170,7 @@ fi
 # libraries
 AC_CHECK_PROG(USEOCAMLFIND,ocamlfind,yes,no)
 
-if test "$USEOCAMLFIND" == "yes"; then
+if test "$USEOCAMLFIND" = yes; then
    OCAMLFINDLIB=$(ocamlfind printconf stdlib)
    OCAMLFIND=$(which ocamlfind)
    if test "$OCAMLFINDLIB" != "$OCAMLLIB"; then
@@ -181,7 +181,7 @@ if test "$USEOCAMLFIND" == "yes"; then
 fi
 
 if test "$LIBDIR" = ""; then
-   if test "$USEOCAMLFIND" == "yes"; then
+   if test "$USEOCAMLFIND" = yes; then
         LIBDIR=$(ocamlfind printconf destdir)/mlpost
    else
         LIBDIR=$OCAMLLIB/mlpost
@@ -195,7 +195,7 @@ case $OCAMLVERSION in
         OCAMLBUILD=no;;
   *)
         AC_CHECK_PROG(OCAMLBUILD,ocamlbuild,yes,no)
-        if test "$OCAMLBUILD" == "yes"; then
+        if test "$OCAMLBUILD" = yes; then
            OCAMLBUILDLIB=$(ocamlbuild -where)
            if test "$OCAMLBUILDLIB" != "${OCAMLLIB}/ocamlbuild"; then
               OCAMLBUILD=no
@@ -212,7 +212,7 @@ case $OCAMLVERSION in
 esac
 
 # checking for mlcairo
-if test "$USEOCAMLFIND" == yes; then
+if test "$USEOCAMLFIND" = yes; then
    CAIROLIB=$(ocamlfind query cairo)
 fi
 
@@ -231,7 +231,7 @@ else
     fi
 fi
 
-if test "$USEOCAMLFIND" == yes; then
+if test "$USEOCAMLFIND" = yes; then
    BITSTRINGLIB=$(ocamlfind query bitstring)
 fi
 
@@ -250,17 +250,20 @@ else
     fi
 fi
 
-if test "$OCAMLBUILD" == yes -a -n "$BITSTRINGLIB"; then
-  if test -n "$CAIROLIB"; then
+if test "$OCAMLBUILD" = yes -a "$BITSTRING" = yes; then
+  if test "$CAIRO" = yes; then
     TAGS="-tags cairo_yes,concrete_yes"
     INCLUDELIBS="-I $CAIROLIB -I $BITSTRINGLIB"
     METAREQUIRESPACKAGE="unix cairo bitstring"
   else
+    CAIRO=no
     TAGS="-tag concrete_yes"
     INCLUDELIBS="-I $BITSTRINGLIB"
     METAREQUIRESPACKAGE="unix bitstring"
   fi
 else
+  CAIRO=no
+  BITSTRING=no
   TAGS=""
   INCLUDELIBS=""
   METAREQUIRESPACKAGE="unix"
