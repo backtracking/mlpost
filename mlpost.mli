@@ -1854,8 +1854,8 @@ module Tree : sig
     *)
 
     val bin  : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
-      ?edge_style:edge_style -> ?stroke:Color.t -> ?brush:Brush.t -> ?pen:Pen.t -> ?sep:Num.t ->
-      Box.t -> t -> t -> t
+      ?edge_style:edge_style -> ?stroke:Color.t -> ?brush:Brush.t -> ?pen:Pen.t
+      -> ?sep:Num.t -> Box.t -> t -> t -> t
       (* [bin t1 t2] is the same as [node [t1;t2] ] *)
 
     val to_box : t -> Box.t
@@ -1896,7 +1896,9 @@ module Tree_adv : sig
 
   val filter : ('a -> bool) -> 'a t -> 'a t
     (** filter f t
-	If for a node n of t f n is false then it doesn't appear in the result as well as its descendants. If f is false for the root node, invalid_argument is raised *)
+        If for a node n of t f n is false then it doesn't appear in the result
+        as well as its descendants. If f is false for the root node,
+        invalid_argument is raised *)
 
   val filter_option : ('a -> 'b option) -> 'a t -> 'b t
 
@@ -1930,13 +1932,15 @@ module Tree_adv : sig
       height:('a -> Num.t) -> 
       set_pos:(Types.point -> 'a -> 'b) -> 'c) 
     -> 'c*)
-    (** wrap_whs_box give_box mod_box f returns f where its arguments width height and set_pos have been set *)
+    (** wrap_whs_box give_box mod_box f returns f where its arguments width
+      height and set_pos have been set *)
 
   val wrap_corner_box :
     ('a -> Box.t) ->
     ( corner : (Box.position -> 'a -> Point.t) -> 'c)
     -> 'c
-    (** wrap_corner_box give_box f returns f where its argument corner has been set *)
+    (** wrap_corner_box give_box f returns f where its argument corner has been
+      set *)
 
   (** Tools for tree overlay aware *)
   module Overlays :
