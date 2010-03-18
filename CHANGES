@@ -3,16 +3,16 @@ o - changes in behaviour, new features, bugfixes
 
 current
 -------
-o concrete computations are now available without the Cairo library
-o option -ps with -cairo
-o adding Concrete.baseline
-o Fixed: "make install" with ocamlfind (reported by Julien Signoles)
-o Bugfix: Concrete does not complain about being unsupported for the following
-  functions: set_verbosity; set_prelude, set_prelude2, set_t1disasm
-o Fixed: Don't use "tracingchoices"
 * module Color: the definitions of the following colors have changed:
   lightblue, green, lightgreen, orange, lightcyan, purple, lightyellow
   These colors are now compatible to HTML/CSS and X11 definitions
+o concrete computations are now available without the Cairo library
+o option -ps with -cairo
+o adding Concrete.baseline
+o Bugfix: "make install" with ocamlfind (reported by Julien Signoles)
+o Bugfix: Concrete does not complain about being unsupported for the following
+  functions: set_verbosity; set_prelude, set_prelude2, set_t1disasm
+o Bugfix: Don't use "tracingchoices"
 
 current stable
 --------------
