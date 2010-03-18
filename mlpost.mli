@@ -26,9 +26,9 @@ module rec Num : sig
 
   type t
       (** The Mlpost numeric type is an abstract datatype *)
-      
+
   (** {2 Conversion functions} *)
-  (** The base unit in Mlpost are bp. The following functions 
+  (** The base unit in Mlpost are bp. The following functions
       permit to specify values in other common units *)
 
   val bp : float -> t
@@ -44,7 +44,7 @@ module rec Num : sig
 
   val em : float -> t
   (** the width of an "m" *)
-  
+
   val ex : float -> t
   (** the height of an "x" *)
 
@@ -73,7 +73,7 @@ module rec Num : sig
 
     val (+/) : t -> t -> t
     (** alias for {!Num.addn} *)
-     
+
     val (-/) : t -> t -> t
     (** alias for {!Num.subn} *)
 
@@ -123,13 +123,13 @@ and Point : sig
   (**  Construct a point from two numeric values *)
   val pt : Num.t * Num.t -> t
 
-  (** The following functions create points of length 1. 
+  (** The following functions create points of length 1.
       They are especially useful to specify directions with [Path.Vec] *)
 
-  (** [dir f] is the point at angle [f] on the unit circle. 
+  (** [dir f] is the point at angle [f] on the unit circle.
       [f] shall be given in degrees *)
   val dir : float -> t
-    
+
   (** The unitary vectors pointing up, down, left and right *)
 
   val up : t
@@ -149,7 +149,7 @@ and Point : sig
   (** [ypart p] is the y coordinate of point [p] *)
 
   (** {2 Operations on points} *)
-    
+
   val transform : Transform.t -> t -> t
   (** Apply a transformation to a point *)
 
@@ -160,18 +160,18 @@ and Point : sig
   val add : t -> t -> t
   val shift : t -> t -> t
   (** Sum two points *)
-  
+
   val sub : t -> t -> t
   (** Substract two points *)
-  
+
   val mult : Num.t -> t -> t
   val scale : Num.t -> t -> t
   (** Multiply a point by a scalar *)
-  
+
   val rotate : float -> t -> t
   (** Rotate a point by an angle in degrees *)
 
-  (** [rotate_around p1 f p2] rotates [p2] around [p1] by an angle [f] 
+  (** [rotate_around p1 f p2] rotates [p2] around [p1] by an angle [f]
       in degrees *)
   val rotate_around : t -> float -> t -> t
 
@@ -187,7 +187,7 @@ and Point : sig
 
   (** {2 Convenient constructors} *)
 
-  (** The following functions build a point at a 
+  (** The following functions build a point at a
       given scale (see {!Num.t} for scales) *)
 
   val bpp : float * float -> t
@@ -218,14 +218,14 @@ and Point : sig
 	@param pen the pen used to draw the pen; default is [Brush.Pen.default]*)
 
 end
-    
+
   (** MetaPaths: gradually build a path with constraints, get a real path at the
      end. *)
 and MetaPath : sig
 
-  (** MetaPaths are the objects used to describe lines, curves, and 
-      more generally almost everything that is drawn with Mlpost. 
-      A path ([Path.t]) is defined by points and control points. 
+  (** MetaPaths are the objects used to describe lines, curves, and
+      more generally almost everything that is drawn with Mlpost.
+      A path ([Path.t]) is defined by points and control points.
       A metapath is defined by points (knots) and constraints on the links
       between the points. A metapath is an easy way to define a path gradually
       with only a few points, and apply heuristics afterwards to transform it
@@ -233,7 +233,7 @@ and MetaPath : sig
 
   (** A [direction] is used to put constraints on metapaths:
       {ul {- [vec p] defines a direction by a point (interpreted as a vector)}
-      {- [curl f] changes the curling factor of the extremity of a metapath; 
+      {- [curl f] changes the curling factor of the extremity of a metapath;
       higher curling factor means flatter curves}
       {- [noDir] means no particular direction} } *)
   type direction = Path.direction
@@ -242,7 +242,7 @@ and MetaPath : sig
   val curl : float -> direction
   val noDir : direction
 
-  (** A [knot] is the basic element of a metapath, and is simply a point 
+  (** A [knot] is the basic element of a metapath, and is simply a point
       with an incoming and outgoing direction constraint *)
   type knot = Path.knot
 
@@ -251,7 +251,7 @@ and MetaPath : sig
     ?l:direction -> ?r:direction -> Point.t -> knot
 
   val knotlist : (direction * Point.t * direction) list -> knot list
-    
+
 
   (** A joint is the connection between two knots in a metapath. It is either
       {ul {- [jLine] for a straight line}
@@ -279,10 +279,10 @@ and MetaPath : sig
   (** {2 Labelled metapath constructors} *)
   (** Build a knot from a pair of floats
       @param l an incoming direction
-      @param r an outgoing direction 
+      @param r an outgoing direction
       @param scale a scaling factor applied to the floats *)
   val knot :
-    ?l:direction -> ?r:direction -> 
+    ?l:direction -> ?r:direction ->
     ?scale:(float -> Num.t) -> float * float -> knot
 
   (** Build a knot from a Num.t pair; the optional arguments are as in {!knot} *)
@@ -292,12 +292,12 @@ and MetaPath : sig
       @param style the joint style used for all joints in the metapath
       @param cycle if given, the metapath is closed using the given style
       @param scale permits to scale the whole metapath *)
-  val path : 
-    ?style:joint -> ?scale:(float -> Num.t) -> 
+  val path :
+    ?style:joint -> ?scale:(float -> Num.t) ->
     (float * float) list -> t
 
   (** Same as [metapath], but uses a [Num.t] list *)
-  val pathn : 
+  val pathn :
     ?style:joint -> (Num.t * Num.t) list -> t
 
   (** Same as [metapath], but uses a knot list *)
@@ -310,16 +310,16 @@ and MetaPath : sig
   (** Build a metapath from [n] knots and [n-1] joints *)
   val jointpathk : knot list -> joint list -> t
 
-  (** Build a metapath from [n] points and [n-1] joints, 
+  (** Build a metapath from [n] points and [n-1] joints,
       with default directions *)
   val jointpathp : Point.t list -> joint list -> t
 
   val jointpathn : (Num.t * Num.t) list -> joint list -> t
 
-  (** Build a metapath from [n] float_pairs and [n-1] joints, 
+  (** Build a metapath from [n] float_pairs and [n-1] joints,
       with default directions *)
-  val jointpath : 
-    ?scale:(float -> Num.t) -> (float * float) list -> 
+  val jointpath :
+    ?scale:(float -> Num.t) -> (float * float) list ->
     joint list -> t
 
   (** Close a metapath using direction [dir] and style [style] *)
@@ -342,13 +342,13 @@ and MetaPath : sig
   val defaultjoint : joint
 
   (** {2 Conversions} *)
-  (** Compute the control point of the path 
+  (** Compute the control point of the path
       for a good looking result according to the constraint
       on the direction, tension, curve *)
-  val to_path : t -> path 
-    
+  val to_path : t -> path
+
   (** Obtain a metapath from a path with exactly the same
-      control point. p = of_metapath (of_path p) is true but 
+      control point. p = of_metapath (of_path p) is true but
       not the opposite.*)
   val of_path : path -> t
 
@@ -357,12 +357,12 @@ end
   (** Fixed Paths *)
 and Path : sig
 
-  (** Paths are the objects used to describe lines, curves, and 
-      more generally almost everything that is drawn with Mlpost *) 
+  (** Paths are the objects used to describe lines, curves, and
+      more generally almost everything that is drawn with Mlpost *)
 
   (** A [direction] is used to put constraints on paths:
       {ul {- [vec p] defines a direction by a point (interpreted as a vector)}
-      {- [curl f] changes the curling factor of the extremity of a path; 
+      {- [curl f] changes the curling factor of the extremity of a path;
       higher curling factor means flatter curves}
       {- [noDir] means no particular direction} } *)
   type direction
@@ -371,7 +371,7 @@ and Path : sig
   val curl : float -> direction
   val noDir : direction
 
-  (** A [knot] is the basic element of a path, and is simply a point 
+  (** A [knot] is the basic element of a path, and is simply a point
       with an incoming and outgoing direction constraint *)
   type knot
 
@@ -380,7 +380,7 @@ and Path : sig
     ?l:direction -> ?r:direction -> Point.t -> knot
 
   val knotlist : (direction * Point.t * direction) list -> knot list
-    
+
 
   (** A joint is the connection between two knots in a path. It is either
       {ul {- [jLine] for a straight line}
@@ -389,7 +389,7 @@ and Path : sig
       {- [jTension f1 f2] to specify "tension" on the joint; [jCurve] uses a default
       tension of 1. Higher tension means less "wild" curves}
       {- [jControls p1 p2] to explicitely specify control points}} *)
-  type joint 
+  type joint
   val jLine : joint
   val jCurve : joint
   val jCurveNoInflex : joint
@@ -406,10 +406,10 @@ and Path : sig
   (** {2 Labelled path constructors} *)
   (** Build a knot from a pair of floats
       @param l an incoming direction
-      @param r an outgoing direction 
+      @param r an outgoing direction
       @param scale a scaling factor applied to the floats *)
   val knot :
-    ?l:direction -> ?r:direction -> 
+    ?l:direction -> ?r:direction ->
     ?scale:(float -> Num.t) -> float * float -> knot
 
   (** Build a knot from a Num.t pair; the optional arguments are as in {!knot} *)
@@ -419,12 +419,12 @@ and Path : sig
       @param style the joint style used for all joints in the path
       @param cycle if given, the path is closed using the given style
       @param scale permits to scale the whole path *)
-  val path : 
-    ?style:joint -> ?cycle:joint -> ?scale:(float -> Num.t) -> 
+  val path :
+    ?style:joint -> ?cycle:joint -> ?scale:(float -> Num.t) ->
     (float * float) list -> t
 
   (** Same as [path], but uses a [Num.t] list *)
-  val pathn : 
+  val pathn :
     ?style:joint -> ?cycle:joint -> (Num.t * Num.t) list -> t
 
   (** Same as [path], but uses a knot list *)
@@ -437,16 +437,16 @@ and Path : sig
   (** Build a path from [n] knots and [n-1] joints *)
   val jointpathk : knot list -> joint list -> t
 
-  (** Build a path from [n] points and [n-1] joints, 
+  (** Build a path from [n] points and [n-1] joints,
       with default directions *)
   val jointpathp : Point.t list -> joint list -> t
 
   val jointpathn : (Num.t * Num.t) list -> joint list -> t
 
-  (** Build a path from [n] float_pairs and [n-1] joints, 
+  (** Build a path from [n] float_pairs and [n-1] joints,
       with default directions *)
-  val jointpath : 
-    ?scale:(float -> Num.t) -> (float * float) list -> 
+  val jointpath :
+    ?scale:(float -> Num.t) -> (float * float) list ->
     joint list -> t
 
   (** Close a path using direction [dir] and style [style] *)
@@ -501,8 +501,8 @@ and Path : sig
   val xscale : Num.t -> t -> t
   (** Shortcuts for transformations of Paths *)
 
-  (** [cut_after p1 p2] cuts [p2] after the intersection with [p1]. 
-      To memorize the order of the arguments, 
+  (** [cut_after p1 p2] cuts [p2] after the intersection with [p1].
+      To memorize the order of the arguments,
       you can read: "cut after [p1]" *)
   val cut_after : t -> t -> t
 
@@ -535,26 +535,26 @@ and Path : sig
   (** {2 Conversions} *)
 
   type metapath = MetaPath.t
-  (** Compute the control point of the path 
+  (** Compute the control point of the path
       for a good looking result according to the constraint
       on the direction, tension, curve *)
-  val of_metapath : metapath -> t 
-    
+  val of_metapath : metapath -> t
+
   (** Obtain a metapath from a path with exactly the same
-      control point. p = of_metapath (of_path p) is true but 
+      control point. p = of_metapath (of_path p) is true but
       not the opposite.*)
   val to_metapath : t -> metapath
 
   (** {2 Smart path } *)
 
-  type orientation = 
+  type orientation =
     | Up | Down | Left | Right
     | Upn of Num.t | Downn of Num.t | Leftn of Num.t | Rightn of Num.t
 
   val smart_path : ?style:joint -> orientation list -> Point.t -> Point.t -> t
 
   val draw : ?brush:Brush.t -> ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> t -> Command.t
-    (** Draw a path 
+    (** Draw a path
         @param brush the brush used to draw the path; the next argument redefined this one
 	@param color the color of the path; default is black
 	@param pen the pen used to draw the path; default is [Brush.Pen.default]
@@ -573,7 +573,7 @@ and Pen : sig
   val transform : Transform.t -> t -> t
     (** Apply a transformation to pens *)
   val default : t
-    (** The default pen; it corresponds to 
+    (** The default pen; it corresponds to
       [Pen.scale (Num.bp 0.5) Pen.circle] *)
   val circle : t
     (** A circular pen of diameter 1 bp *)
@@ -608,14 +608,14 @@ and Dash : sig
   val shifted : Point.t -> t -> t
     (** Shift a dash pattern *)
 
-  type on_off 
+  type on_off
 
   val on : Num.t -> on_off
   val off : Num.t -> on_off
 
   val pattern : on_off list -> t
     (** This function, together with the type [on_off]  permits to construct
-     custom dash patterns, by giving a list of [on] / [off] constructors, with 
+     custom dash patterns, by giving a list of [on] / [off] constructors, with
       corresponding lengths *)
 
 end
@@ -627,14 +627,14 @@ and Brush : sig
   (** Pens: change the way lines look like in Mlpost *)
   module Pen : sig
     (** Pens are used to change the the way lines are drawn in Mlpost *)
-    
+
     type t (**/**) = Pen.t (**/**)
       (** The abstract type of pens *)
-      
+
     val transform : Transform.t -> t -> t
       (** Apply a transformation to pens *)
     val default : t
-      (** The default pen; it corresponds to 
+      (** The default pen; it corresponds to
       [Pen.scale (Num.bp 0.5) Pen.circle] *)
     val circle : t
     (** A circular pen of diameter 1 bp *)
@@ -642,7 +642,7 @@ and Brush : sig
       (** A pen in form of a square, of length 1 bp *)
     val from_path : Path.t -> t
       (** Construct a pen from a closed path *)
-      
+
     val scale : Num.t -> t -> t
     val rotate : float -> t -> t
     val shift : Point.t -> t -> t
@@ -650,48 +650,48 @@ and Brush : sig
     val xscale : Num.t -> t -> t
       (** Shortcuts for transformations of pens *)
   end
-    
+
   (** Dash patterns *)
   module Dash : sig
     (** This module permits to define dash patterns, that are used to draw lines
         in different styles *)
-    
+
     type t (**/**) = Dash.t (**/**)
       (** The abstract type of dash patterns *)
-      
+
     val evenly : t
       (** The pattern composed of evenly spaced dashes *)
     val withdots : t
       (** The pattern composed of evenly spaced dots *)
-      
+
     val scaled : Num.t -> t -> t
       (** Scale a dash pattern *)
     val shifted : Point.t -> t -> t
       (** Shift a dash pattern *)
 
-    type on_off 
-      
+    type on_off
+
     val on : Num.t -> on_off
     val off : Num.t -> on_off
-      
+
     val pattern : on_off list -> t
       (** This function, together with the type [on_off]  permits to construct
-          custom dash patterns, by giving a list of [on] / [off] constructors, with 
+          custom dash patterns, by giving a list of [on] / [off] constructors, with
           corresponding lengths *)
-      
+
   end
 
   type t
 
-  val t : 
-    ?color:Color.t -> ?pen:Pen.t -> 
-    ?dash:Dash.t -> ?scale:Num.t -> 
+  val t :
+    ?color:Color.t -> ?pen:Pen.t ->
+    ?dash:Dash.t -> ?scale:Num.t ->
     ?brush:t ->
     unit -> t
 
   (** {2 Brushes with Predefined Colors} *)
-  type brush_colored = 
-      ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t -> 
+  type brush_colored =
+      ?pen:Pen.t -> ?dash:Dash.t -> ?scale:Num.t ->
     ?brush:t -> unit -> t
   (** {3 base colors} *)
 
@@ -703,7 +703,7 @@ and Brush : sig
   val cyan : brush_colored
   val yellow : brush_colored
   val magenta : brush_colored
-    
+
   (** {3 lighter colors} *)
 
   val lightred : brush_colored
@@ -739,13 +739,13 @@ and Color : sig
     (** the default color is black *)
 
   val rgb : float -> float -> float -> t
-    (** [rgb r g b] constructs the color that corresponds to the color code 
+    (** [rgb r g b] constructs the color that corresponds to the color code
 	RGB(r,g,b)  *)
   val rgb8 : int -> int -> int -> t
     (** similar to [rgb], but takes integers between 0 and 255 as argument *)
 
   val cmyk : float -> float -> float -> float -> t
-    (** [cmyk c m y k] constructs the color that corresponds to the color code 
+    (** [cmyk c m y k] constructs the color that corresponds to the color code
 	CMYK(c,m,y,k)  *)
 
   val rgba : float -> float -> float -> float -> t
@@ -758,10 +758,10 @@ and Color : sig
 
   val is_opaque : t -> bool
     (** test if the color is opaque *)
-   
+
   val opaque : t -> t
     (** make a color opaque *)
-    
+
   val transparent : float -> t -> t
     (** [transparent f c] multiplies by f the factor of transparency of c *)
 
@@ -777,7 +777,7 @@ and Color : sig
   val cyan : t
   val yellow : t
   val magenta : t
-    
+
   (** {3 lighter colors} *)
 
   val lightred : t
@@ -815,7 +815,7 @@ and Transform : sig
   (** Transformations are an important way to modify objects in Mlpost.
       Objects can be scaled, shifted, rotated, etc, and any combination of
       these transformations is possible. Currently, transformations can be
-      applied to Pictures, Pens and Paths. *)  
+      applied to Pictures, Pens and Paths. *)
 
   type t'
     (** The abstract type of a single transformation *)
@@ -909,7 +909,7 @@ and Picture : sig
   (** @img south.png *)
   val west  : t -> Point.t
   (** @img west.png *)
-  val east  : t -> Point.t 
+  val east  : t -> Point.t
   (** @img east.png *)
   val north_west : t -> Point.t
   (** @img north_west.png *)
@@ -931,7 +931,7 @@ and Picture : sig
   val lrcorner : t -> Point.t
 
   val clip : t -> Path.t -> t
-  (** [clip pic path] limits [pic] to the cyclic path [path]; all elements 
+  (** [clip pic path] limits [pic] to the cyclic path [path]; all elements
       outside of [path] are cut off. *)
 
   (** {2 Dimensions} *)
@@ -976,25 +976,25 @@ and Command : sig
   (** {2 Drawing Commands} *)
 
   val draw : ?brush:Brush.t -> ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> Path.t -> t
-    (** Draw a path 
+    (** Draw a path
 	@param color the color of the path; default is black
 	@param pen the pen used to draw the path; default is [Brush.Pen.default]
 	@param dashed if given, the path is drawn using that dash_style. *)
 
 (*
   val draw_arrow : ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> Path.t -> t
-    (** Draw a path with an arrow head; the optional arguments 
+    (** Draw a path with an arrow head; the optional arguments
 	are the same as for {!draw} *)
 *)
 
   val fill : ?color:Color.t -> Path.t -> t
-    (** Fill a contour given by a closed path 
+    (** Fill a contour given by a closed path
 	@param color the color used to fill the area; default is black *)
 
   val draw_pic : Picture.t -> t
-    (** draws a picture *) 
+    (** draws a picture *)
 
-  val externalimage : string ->       
+  val externalimage : string ->
     [ `None
     | `Width of Num.t (** keep the proportion of the image *)
     | `Height of Num.t
@@ -1030,12 +1030,12 @@ and Command : sig
   type hposition = [ | `Center | `West | `East | `Left | `Right ]
   type vposition = [ `Center | `North | `South | `Top | `Bot | `Bottom ]
   type position = [
-  | hposition 
-  | vposition 
+  | hposition
+  | vposition
   | `Northwest | `Northeast | `Southwest | `Southeast
-  | `Upperleft | `Upperright | `Lowerleft | `Lowerright 
+  | `Upperleft | `Upperright | `Lowerleft | `Lowerright
   | `Topleft | `Topright | `Bottomleft | `Bottomright
-  | `Upleft | `Upright | `Lowleft | `Lowright 
+  | `Upleft | `Upright | `Lowleft | `Lowright
   ]
   (** Positions - they are used at many places in Mlpost to indicate a direction
    or position.  *)
@@ -1061,7 +1061,7 @@ module rec Shapes : sig
 	of an ellipse of radii [rx] and [ry]. [rx] (resp. [ry]) should
 	be positive and smaller than [w/2] (resp. [h/2]).
     *)
-      
+
   val rectangle : Num.t -> Num.t -> Path.t
     (** [rectangle w h] returns a rectangle of width [w] and height [h].
     *)
@@ -1089,7 +1089,7 @@ module rec Shapes : sig
   val arc_ellipse :
     ?fill:Color.t -> ?stroke:Color.t -> ?thickness:float -> ?close:bool ->
     Num.t -> Num.t -> float -> float -> Picture.t
-    (** [arc_ellipse rx ry th1 th2] draws an arc of the ellipse 
+    (** [arc_ellipse rx ry th1 th2] draws an arc of the ellipse
 	of great axis [rx] and small axis [ry] starting at angle [th1] and
 	ending at angle [th2] (in radians).
 	The ellipse is centered on the origin and aligned with the x axis.
@@ -1099,7 +1099,7 @@ module rec Shapes : sig
 	  drawn ; default is black.
 	@param thickness the thickness of the pen used to draw
 	  the outline ; 1. is default
-	@param close if true, the extremities of the arc are joined to 
+	@param close if true, the extremities of the arc are joined to
 	the origin by straight lines, thus closing path. If [fill] is provided,
 	then [close] will be true by default ; otherwise it is false.
     *)
@@ -1118,7 +1118,7 @@ and Box : sig
 
   (** {2 Creating boxes} *)
 
-  type style = 
+  type style =
     | Rect
     | Circle
     | RoundRect
@@ -1128,9 +1128,9 @@ and Box : sig
     | RoundBox
     | Custom of (Num.t -> Num.t -> Num.t * Num.t * Path.t)
 
-  type 'a box_creator = 
-    ?dx:Num.t -> ?dy:Num.t -> ?name:string -> 
-    ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> 
+  type 'a box_creator =
+    ?dx:Num.t -> ?dy:Num.t -> ?name:string ->
+    ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t ->
     ?fill:Color.t -> 'a -> t
     (** All functions used to create boxes take the following optional
 	parameters : [dx] (resp. [dy]) is the horizontal
@@ -1139,17 +1139,17 @@ and Box : sig
 	can be used to retrieve it using [get] ; [stroke] is the color
 	used to draw the outline of the box ; when equal to [None],
 	the outline will not be drawn ; [pen] is the pen used to draw
-	the box's outline, if absent [Brush.Pen.default] is used ; 
-	[fill], if present, is the color used to fill the box.  
+	the box's outline, if absent [Brush.Pen.default] is used ;
+	[fill], if present, is the color used to fill the box.
     *)
 
-  val empty : 
-    ?width:Num.t -> ?height:Num.t -> ?style:style -> ?name:string -> 
+  val empty :
+    ?width:Num.t -> ?height:Num.t -> ?style:style -> ?name:string ->
     ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> ?fill:Color.t -> unit -> t
     (** the empty box *)
 
-  val empty_from_box : 
-    ?style:style -> ?name:string -> 
+  val empty_from_box :
+    ?style:style -> ?name:string ->
     ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> ?fill:Color.t -> t -> t
     (** the empty box with the same position and dimension as the box *)
 
@@ -1168,46 +1168,46 @@ and Box : sig
 
   val circle : t box_creator
     (** [circle pic] creates a circle box containing the picture
-    [pic]. Optional padding is given by arguments [dx] and [dy]; 
+    [pic]. Optional padding is given by arguments [dx] and [dy];
     default is 2bp.
     @img circle.png *)
 
   val ellipse : t box_creator
     (** [ellipse pic] creates a elliptic box containing the picture
-	[pic]. Optional padding is given by arguments [dx] and [dy]; 
+	[pic]. Optional padding is given by arguments [dx] and [dy];
 	default is 2bp
     @img ellipse.png *)
 
   val rect :  t box_creator
     (** [rect pic] creates a rectangular box containing the picture
-	[pic]. Optional padding is given by arguments [dx] and [dy]; 
+	[pic]. Optional padding is given by arguments [dx] and [dy];
 	default is 2bp.
     @img rect.png *)
 
   val round_rect : t box_creator
-    (** [round_rect pic] creates a rectangular box containing the picture 
-	[pic], with rounded corners. Optional padding is given by [dx] 
+    (** [round_rect pic] creates a rectangular box containing the picture
+	[pic], with rounded corners. Optional padding is given by [dx]
 	and [dy]; default is 2bp
     @img round_rect.png *)
 
   val patatoid : t box_creator
-    (** [patatoid pic] creates an undefined, vaguely rectangular box 
-	containing the picture [pic]. It may happen that the content 
+    (** [patatoid pic] creates an undefined, vaguely rectangular box
+	containing the picture [pic]. It may happen that the content
 	overlaps with the box.
     @img patatoid.png *)
 
   val patatoid2 : t box_creator
-    (** [patatoid2 pic] creates an undefined, vaguely rectangular box 
+    (** [patatoid2 pic] creates an undefined, vaguely rectangular box
 	containing the picture [pic], which is guaranteed to be fully
         contained in the patatoid. *)
 
   val round_box : t box_creator
 
 (***
-  val round_rect_gen : ?dx:Num.t -> ?dy:Num.t -> ?rx:Num.t -> ?ry:Num.t -> 
+  val round_rect_gen : ?dx:Num.t -> ?dy:Num.t -> ?rx:Num.t -> ?ry:Num.t ->
     Point.t -> Picture.t -> t
-    (** [round_rect_gen p pic] creates a rectangular box of center [p] and 
-	of contents [pic], with rounded corners of radii [rx] and [ry]. 
+    (** [round_rect_gen p pic] creates a rectangular box of center [p] and
+	of contents [pic], with rounded corners of radii [rx] and [ry].
 	Optional padding is given by [dx] and [dy] ; default is 2bp *)
 ***)
 
@@ -1224,7 +1224,7 @@ and Box : sig
   (** @img south.png *)
   val west  : t -> Point.t
   (** @img west.png *)
-  val east  : t -> Point.t 
+  val east  : t -> Point.t
   (** @img east.png *)
   val north_west : t -> Point.t
   (** @img north_west.png *)
@@ -1248,27 +1248,27 @@ and Box : sig
   (** {2 Operators} *)
 
   val height : t -> Num.t
-  (** return the height of the box 
+  (** return the height of the box
    @img height.png *)
   val width : t -> Num.t
-  (** return the width of the box 
+  (** return the width of the box
    @img width.png *)
   val shift : Point.t -> t -> t
-  (** [shift pt x] shifts the box [x] about the point [pt] 
+  (** [shift pt x] shifts the box [x] about the point [pt]
    @img shift.png *)
   val center : Point.t -> t -> t
   (** [center pt x] centers the box [x] at the point [pt]
    @img center.png *)
 
   val draw : ?debug:bool -> t -> Command.t
-    (** Draws a box 
+    (** Draws a box
 	@param debug if set to to true, the bounding
 	path and the center of the box are drawn as well, default is false
     *)
 
   val group : ?style:style -> t list box_creator
     (** [group bl] groups a list of boxes [bl] into a single box *)
-	
+
 
   (** {2 Boxes alignment} *)
 
@@ -1283,17 +1283,17 @@ and Box : sig
   val valign : ?pos:hposition -> Num.t -> t list -> t list
   (** the vertical counterpart of [valign]. *)
 
-  val hplace : ?padding:Num.t -> ?pos:position -> 
+  val hplace : ?padding:Num.t -> ?pos:position ->
                ?min_width:Num.t -> ?same_width:bool -> t list -> t list
     (** [hplace l] places the boxes of [l] horizontally, from left to right
        following the order of list elements, without changing their vertical
        position.
        @param min_width minimum width of all boxes; default is zero
-       @param same_width if [true], all boxes are of same width, 
+       @param same_width if [true], all boxes are of same width,
                and at least of [min_width]; default is false
        @img hplace.png
                *)
-  val vplace : ?padding:Num.t -> ?pos:position -> 
+  val vplace : ?padding:Num.t -> ?pos:position ->
                ?min_height:Num.t -> ?same_height:bool -> t list -> t list
     (** the vertical counterpart of [hplace] *)
 
@@ -1302,24 +1302,24 @@ and Box : sig
                t list box_creator
       (** places the given boxes horizontally, aligning them horizontally, and
           returns a box containing these boxes as sub-components. Leave the
-          first box at its place. [hbox l] actually gives the same result as 
+          first box at its place. [hbox l] actually gives the same result as
           [group (hplace (halign l))].
-	  @param padding horizontal padding used to separate the boxes; 
+	  @param padding horizontal padding used to separate the boxes;
 	  defaults to 0
 	  @param pos used to determine the way boxes are aligned; defaults to
 	  [`Center]
       @img hbox.png
       *)
 
-  val hbox_list : 
-    ?padding:Num.t -> ?pos:position -> 
+  val hbox_list :
+    ?padding:Num.t -> ?pos:position ->
     ?min_width:Num.t -> ?same_width:bool -> t list -> t list
     (** as [hbox], but does not group the resulting boxes into a surrounding
         box; it returns the list of placed boxes instead. [hbox_list l] is equal
         to [hplace (halign l)]. *)
 
 
-  val vbox : ?padding:Num.t -> ?pos:position -> ?style:style -> 
+  val vbox : ?padding:Num.t -> ?pos:position -> ?style:style ->
              ?min_height:Num.t -> ?same_height:bool ->
     t list box_creator
       (** aligns the given boxes vertically and returns a box containing
@@ -1328,75 +1328,75 @@ and Box : sig
 	  @param pos used to determine the way boxes are aligned
       *)
 
-  val vbox_list : 
-    ?padding:Num.t -> ?pos:position -> 
+  val vbox_list :
+    ?padding:Num.t -> ?pos:position ->
     ?min_height:Num.t -> ?same_height:bool -> t list -> t list
     (* as vbox_list, but does not group the resulting boxes into a surrounding
        box *)
 
-  val tabular : 
+  val tabular :
     ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
-    ?style:style -> ?name:string -> ?stroke:Color.t option -> 
+    ?style:style -> ?name:string -> ?stroke:Color.t option ->
     ?pen:Pen.t -> ?dash:Dash.t -> ?fill:Color.t ->
     t array array -> t
     (** aligns the given boxes both vertically and horizontally and returns
 	a box containing all these boxes (with rows as first sub-components,
-	and then individual boxes as sub-components of each row). 
+	and then individual boxes as sub-components of each row).
 	Columns (resp. rows) are separated by [hpadding] (resp. [vpadding]);
 	both default to 0.
-	Alignment within columns and rows is controlled using [pos]. 
+	Alignment within columns and rows is controlled using [pos].
 	The arrays for rows must have the same lengths; otherwise
 	[Invalid_argument] is raised. *)
 
-  val tabularl : 
+  val tabularl :
     ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
-    ?style:style -> ?name:string -> ?stroke:Color.t option -> 
+    ?style:style -> ?name:string -> ?stroke:Color.t option ->
     ?pen:Pen.t -> ?dash:Dash.t -> ?fill:Color.t ->
     t list list -> t
     (** similar to [tabular], but using lists instead of arrays *)
 
-  val tabulari : 
+  val tabulari :
     ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
-    ?style:style -> ?name:string -> ?stroke:Color.t option -> 
+    ?style:style -> ?name:string -> ?stroke:Color.t option ->
     ?pen:Pen.t -> ?dash:Dash.t -> ?fill:Color.t ->
-    int -> int -> (int -> int -> t) -> t 
+    int -> int -> (int -> int -> t) -> t
     (** similar to [tabular], but using a matrix defined with a function *)
 
-  val hblock : ?padding:Num.t -> ?pos:Command.position -> ?name:string -> 
-               ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> 
+  val hblock : ?padding:Num.t -> ?pos:Command.position -> ?name:string ->
+               ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t ->
                ?min_width:Num.t -> ?same_width:bool -> t list -> t
     (** [hblock bl] aligns the boxes of [bl] horizontally and surround
 	them with new rectangular boxes of the same height; all these new
 	boxes are packed together into the returned box.
         @param min_width minimum width of all boxes; default is zero
-        @param same_width if [true], all boxes are of same width, 
+        @param same_width if [true], all boxes are of same width,
                and at least of [min_width]; default is false*)
 
-  val vblock : ?padding:Num.t -> ?pos:Command.position -> ?name:string -> 
-               ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> 
+  val vblock : ?padding:Num.t -> ?pos:Command.position -> ?name:string ->
+               ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t ->
                ?min_height:Num.t -> ?same_height:bool -> t list -> t
     (** similar to [hblock], with vertical alignment.
         @param min_height minimum height of all boxes; default is zero
         @param same_height if [true], all boxes are of same height, and at least
         of [min_height]; default is false*)
 
-  val grid : 
-    ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position -> 
-    ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> 
+  val grid :
+    ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
+    ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t ->
     t array array -> t
     (** Aligns the given boxes in a way that is similar to [hblock] and [vblock]:
-	boxes are aligned in a grid where all cells have the same size. Each one 
+	boxes are aligned in a grid where all cells have the same size. Each one
 	of these cells is a box containing the original corresponding box. *)
-	
-  val gridl : 
-    ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position -> 
-    ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> 
+
+  val gridl :
+    ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
+    ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t ->
     t list list -> t
     (** similar to [grid], but using lists instead of arrays *)
-    
-  val gridi : 
-    ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position -> 
-    ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> 
+
+  val gridi :
+    ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->
+    ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t ->
     int -> int -> (int -> int -> t) -> t
     (** similar to [gridi], but using a matrix defined with a function *)
 
@@ -1436,7 +1436,7 @@ and Box : sig
 	if [b] contains several sub-boxes with name [n]. *)
 
   val sub : t -> t -> t
-  (** [sub b1 b] returns the sub-box of [b] which has the same name as [b1], 
+  (** [sub b1 b] returns the sub-box of [b] which has the same name as [b1],
      if any, and raises [Invalid_argument] otherwise. The behavior is not
      specified if [b] contains several sub-boxes with the name of [b1]. *)
 
@@ -1445,9 +1445,9 @@ and Box : sig
         the empty box or a box containing a picture. *)
 
   (** {2 Specials Points} *)
-    
+
   val setp : string -> Point.t -> t -> t
-    
+
   val getp : string -> t -> Point.t
   val getpx : string -> t -> Num.t
   val getpy : string -> t -> Num.t
@@ -1500,24 +1500,24 @@ and Box : sig
   val cpath :
     ?style:Path.joint ->
     ?outd:Path.direction ->
-    ?ind:Path.direction -> 
+    ?ind:Path.direction ->
     ?sep:Num.t ->
     t -> t -> Path.t
-    (** the path that connects 2 boxes and stops at the box boundaries *) 
+    (** the path that connects 2 boxes and stops at the box boundaries *)
 
   val cpath_left :
     ?style:Path.joint ->
     ?outd:Path.direction ->
     ?ind:Path.direction -> t -> Point.t -> Path.t
     (** the path that connects a box and a point and stops at the box
-        boundaries *) 
+        boundaries *)
 
   val cpath_right :
     ?style:Path.joint ->
     ?outd:Path.direction ->
     ?ind:Path.direction -> Point.t -> t -> Path.t
     (** the path that connects a box and a point and stops at the box
-        boundaries *) 
+        boundaries *)
 
   val transform : Transform.t -> t -> t
 
@@ -1543,13 +1543,13 @@ module Arrow : sig
 
   (** {2 Drawing Arrows} *)
 
-  (** If you need to place a label which is not TeX but any picture, if 
+  (** If you need to place a label which is not TeX but any picture, if
       you need to place it at a symbolic position on the path,
       or if you need to place more than one label, you cannot do it directly
       using the [draw] commands. First draw the arrow, then use functions such
       as {!Command.label}. *)
 
-  val simple : 
+  val simple :
     ?color:Color.t -> ?brush:Brush.t -> ?pen:Pen.t -> ?dashed:Dash.t -> Path.t -> Command.t
     (** Draw a simple arrow following the given path.
         @param color the color of the arrow
@@ -1728,16 +1728,16 @@ module Helpers : sig
   val draw_label_arrow :
     ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
-    ?pos:Command.position -> Picture.t -> 
+    ?pos:Command.position -> Picture.t ->
     Point.t -> Point.t -> Command.t
   val draw_labelbox_arrow :
     ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
-    ?pos:Command.position -> Box.t -> 
+    ?pos:Command.position -> Box.t ->
     Point.t -> Point.t -> Command.t
   val box_arrow :
     ?within:Box.t -> ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
-    ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction -> 
+    ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
     ?sep:Num.t ->
     Box.t -> Box.t -> Command.t
   (** Draw an arrow between two boxes. The options [pen], [dashed], [color]
@@ -1747,31 +1747,31 @@ module Helpers : sig
     [within]. *)
   val box_line :
     ?within:Box.t -> ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
-    ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction -> 
+    ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
     ?sep:Num.t ->
     Box.t -> Box.t -> Command.t
   val box_label_arrow :
     ?within:Box.t -> ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
     ?sep:Num.t ->
-    ?pos:Command.position -> Picture.t -> 
+    ?pos:Command.position -> Picture.t ->
     Box.t -> Box.t -> Command.t
   val box_label_line :
     ?within:Box.t -> ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
     ?sep:Num.t ->
-    ?pos:Command.position -> Picture.t -> 
+    ?pos:Command.position -> Picture.t ->
     Box.t -> Box.t -> Command.t
   val box_labelbox_arrow :
     ?within:Box.t -> ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
     ?sep:Num.t ->
-    ?pos:Command.position -> Box.t -> 
+    ?pos:Command.position -> Box.t ->
     Box.t -> Box.t -> Command.t
 (***
-  val hboxjoin : 
+  val hboxjoin :
     ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
-    ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position -> ?spacing:Num.t -> 
+    ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position -> ?spacing:Num.t ->
      Picture.t list -> Command.t
 ***)
 
@@ -1787,31 +1787,31 @@ module Tree : sig
     (** The type of trees *)
 
   (** The style of arrows between nodes *)
-  type arrow_style = 
-      Directed     (** edges are directed and an 
+  type arrow_style =
+      Directed     (** edges are directed and an
 		       arrow is drawn at the end of an edge *)
     | Undirected   (** edges are undirected and no arrow is drawn *)
 
   (** There are several styles available for edges *)
-  type edge_style = 
+  type edge_style =
       Straight 	  (** edges are straight lines between nodes *)
     | Curve 	  (** edges are curved lines between nodes *)
-    | Square 	  (** edges are straight lines and 
+    | Square 	  (** edges are straight lines and
 		      branch out from the sides of nodes *)
-    | HalfSquare  (** edges are straight lines and 
+    | HalfSquare  (** edges are straight lines and
 		      branch out from below nodes *)
 
   (** {2 Creation} *)
   val leaf : Box.t -> t
     (** [leaf b] creates a leaf with Box [b]. *)
 
-  val node : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
-             ?edge_style:edge_style -> ?stroke:Color.t -> 
+  val node : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style ->
+             ?edge_style:edge_style -> ?stroke:Color.t ->
              ?brush:Brush.t -> ?pen:Pen.t ->
              ?sep:Num.t ->
              Box.t -> t list -> t
     (** [node label children] creates a node with label [label] and a list
-	of children [children]. 
+	of children [children].
         Default arrow_style is [Directed].
 	Default edge_style is [Straight].
 	- [ls] (level sep): vertical distance between levels.
@@ -1820,20 +1820,20 @@ module Tree : sig
         The default value is 0.2.
 	Optional arguments are the same as in [leaf]. *)
 
-  val nodel : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
-             ?edge_style:edge_style -> ?stroke:Color.t -> 
+  val nodel : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style ->
+             ?edge_style:edge_style -> ?stroke:Color.t ->
              ?brush:Brush.t -> ?pen:Pen.t ->
              ?sep:Num.t ->
              Box.t -> (t * (Command.position * Picture.t)) list -> t
-    (** Similar to [node] but with labels on edges. 
+    (** Similar to [node] but with labels on edges.
         Labels are taken into account only when [edge_style] is [Straight]. *)
 
-  val bin  : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
-             ?edge_style:edge_style -> ?stroke:Color.t -> 
+  val bin  : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style ->
+             ?edge_style:edge_style -> ?stroke:Color.t ->
              ?brush:Brush.t -> ?pen:Pen.t ->
              ?sep:Num.t ->
              Box.t -> t -> t -> t
-    (** [bin label l r] creates a binary node with label [label] and 
+    (** [bin label l r] creates a binary node with label [label] and
 	children [l] and [r].
 	Optional arguments are the same as in [leaf]. *)
 
@@ -1844,8 +1844,8 @@ module Tree : sig
   module Simple : sig
     type t
     val leaf : Box.t -> t
-    val node : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
-      ?edge_style:edge_style -> ?stroke:Color.t -> 
+    val node : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style ->
+      ?edge_style:edge_style -> ?stroke:Color.t ->
       ?brush:Brush.t -> ?pen:Pen.t -> ?sep:Num.t ->
       ?valign:Command.position -> ?halign:Command.position ->
       Box.t -> t list -> t
@@ -1858,11 +1858,11 @@ module Tree : sig
 	@param cs (children sep): horizontal distance between siblings.
         The default value is 0.2.
       @param halign change alignment of children (default: [`Top])
-      @param valign change alignment of parent node wrt. children 
+      @param valign change alignment of parent node wrt. children
                (default: [`Children])
     *)
 
-    val bin  : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style -> 
+    val bin  : ?ls:Num.t -> ?cs:Num.t -> ?arrow_style:arrow_style ->
       ?edge_style:edge_style -> ?stroke:Color.t -> ?brush:Brush.t -> ?pen:Pen.t
       -> ?sep:Num.t -> Box.t -> t -> t -> t
       (* [bin t1 t2] is the same as [node [t1;t2] ] *)
@@ -1877,31 +1877,73 @@ end
 (** EXPERIMENTAL: A new way of placing trees. *)
 module Tree_adv : sig
 
+  (** This module provides even more high-level means for placing trees. *)
+
   type 'a t = Node of 'a * 'a t list
+  (** The type of polymorphic trees *)
+
+  (** {2 Functions for placement} *)
+
+  val gen_place :
+    width:('a -> Num.t) ->
+    height:('a -> Num.t) ->
+    set_pos:(Point.t -> 'a -> 'b) ->
+    place:(Box.t t -> Box.t) -> 'a t -> 'b t
+    (** This is a generic function for placing trees, provided that the user
+     can give us the following functions:
+     @param width a function to compute the width of an object
+     @param height a function to compute the height of an object
+     @param set_pos a function to move an object wrt. to an offset
+     @param place a function which knows how to place a tree of boxes - it
+     should return a box where all the boxes of the input tree appear.
+     *)
+
+  val place :
+      width:('a -> Num.t) ->
+      height:('a -> Num.t) ->
+      set_pos:(Point.t -> 'a -> 'b) -> ?ls:Num.t -> ?cs:Num.t ->
+      ?valign:Box.position -> ?halign:Box.position -> 'a t -> 'b t
+    (** This is an instance of [gen_place] using the tree drawing algorithm
+       from the module {!Tree}. *)
+
+  val gen_draw_arrows :
+     'c -> style:(Point.t -> Point.t -> 'c) ->
+     corner:(Box.position -> 'a -> Point.t) -> 'a t -> 'c t
+   (** draws arrows from a node to its children with a given style *)
+
+  val draw : ('a -> Box.t) -> 'a t ->  Command.t
+  (** Draws a tree that has already been placed when one knows how to draw its
+     elements. *)
 
     (** {2 Useful functions} *)
 
   val map : ('a -> 'b) -> 'a t -> 'b t
+  (** apply a function everywhere in the tree *)
 
   val map2 : ('a -> 'b -> 'c) -> 'a t -> 'b t -> 'c t
-
-  val root_map : ('a option -> 'a -> 'b) -> 'a t -> 'b t
-    (** root_map f t
-	f is called with each pair father node.
-	A tree is constructed with the result.
-	f None r is called once with the root r *)
-
-  val map_children : ('a -> 'a list -> 'b) -> 'a t -> 'b t
-    (** map_children f t
-	f is called with each pair node children.
-	A tree is constructed with the result.*)
-
-  val fold : ('a -> 'b -> 'a) -> 'a -> 'b t -> 'a
-    (** prefix *)
+  (** [map2 f] takes two trees of identical structure and applies the function
+    [f] to every pair of nodes. Raise [Invalid_argument] if the trees do not
+    have the same structure. *)
 
   val combine : 'a t -> 'b t -> ('a * 'b) t
+  (** Transform a pair of trees into a tree of pairs. Raise [Invalid_argument]
+     if the trees do not have the same structure. *)
 
   val split : ('a * 'b) t -> 'a t * 'b t
+  (** Transform a tree of pairs  into a pair of trees. *)
+
+  val root_map : ('a option -> 'a -> 'b) -> 'a t -> 'b t
+  (** [root_map f t] calls [f (Some father) node] for each node of [t] and its
+     father. It calls [f None root], where [root] is the root of the once, once
+     at the beginning. A tree having the same structure is built with the
+     results. *)
+
+  val map_children : ('a -> 'a list -> 'b) -> 'a t -> 'b t
+  (** [map_children f t] calls [f node children] for each node of [t] and its
+     children. A tree having the same structure is built with the results *)
+
+  val fold : ('a -> 'b -> 'a) -> 'a -> 'b t -> 'a
+    (** Traverse the tree in a bottom-up, left-to-right order *)
 
   val filter : ('a -> bool) -> 'a t -> 'a t
     (** filter f t
@@ -1910,36 +1952,15 @@ module Tree_adv : sig
         invalid_argument is raised *)
 
   val filter_option : ('a -> 'b option) -> 'a t -> 'b t
-
-    (** {2 Functions for placement} *)
-
-  val gen_place :
-    width:('a -> Num.t) ->
-    height:('a -> Num.t) ->
-    set_pos:(Point.t -> 'a -> 'b) -> (Box.t t -> Box.t) -> 'a t -> 'b t
-    (** gen_place ~width ~height ~set_pos place_box t
-	place_box t2 should return a box where all the box of t2 appear. *)
-
-  val place :
-      width:('a -> Num.t) ->
-      height:('a -> Num.t) ->
-      set_pos:(Point.t -> 'a -> 'b) -> ?ls:Num.t -> ?cs:Num.t ->
-      ?valign:Box.position -> ?halign:Box.position -> 'a t -> 'b t
-
-  val gen_draw_arrows : 
-     'c -> style:(Point.t -> Point.t -> 'c) ->
-     corner:(Box.position -> 'a -> Point.t) -> 'a t -> 'c t
-
-  (** Simple functions *)
-  val draw : ('a -> Box.t) -> 'a t ->  Command.t
+  (** Suppress a subtree depending on a condition on the node *)
 
     (** Tools for creating its own type *)
   (*val wrap_whs_box :
     ('a -> Box.t) ->
     ('a -> Box.t -> 'b) ->
     ( width:('a -> Num.t) ->
-      height:('a -> Num.t) -> 
-      set_pos:(Types.point -> 'a -> 'b) -> 'c) 
+      height:('a -> Num.t) ->
+      set_pos:(Types.point -> 'a -> 'b) -> 'c)
     -> 'c*)
     (** wrap_whs_box give_box mod_box f returns f where its arguments width
       height and set_pos have been set *)
@@ -1948,29 +1969,50 @@ module Tree_adv : sig
     ('a -> Box.t) ->
     ( corner : (Box.position -> 'a -> Point.t) -> 'c)
     -> 'c
-    (** wrap_corner_box give_box f returns f where its argument corner has been
-      set *)
+    (** [wrap_corner_box give_box f] returns [f] where its argument corner has
+     been set *)
 
-  (** Tools for tree overlay aware *)
+  (** Tools for overlay aware trees  *)
   module Overlays :
   sig
+
+    (** This module provides a type to associate an interval of time to a value,
+       to control its visibility *)
+
         type interval = | Bet of int * int (** \[|a,b|\] *)
 			| Bef of int       (** \]|-oo,a|\] *)
 			| Aft of int       (** \[|a,+oo|\[ *)
 			| Nev              (** emptyset *)
 			| Alw              (** N *)
+       (** This type describes an interval of discrete points of time *)
 
 	val in_interval : int -> interval -> bool
+        (** test if an integer is in an interval *)
+
 	val min_interval : int -> interval -> int
+        (** The minimum between the integer argument and the beginning of the
+        interval; returns the integer argument in the cases [Nev] and [Alw] *)
+
 	val max_interval : int -> interval -> int
+        (** The dual of [min_interval] *)
+
 	val min_tree : ('a -> interval) -> 'a t -> int
+        (** The first moment of the tree to appear, not considering [Nev] and
+           [Alw] *)
+
 	val max_tree : ('a -> interval) -> 'a t -> int
+        (** The last moment of the tree to appear, not considering [Nev] and
+           [Alw] *)
+        (* FIXME Pourquoi min_interval et max_interval ne regardent-ils pas Nev
+           et Alw ?? *)
 
 	type 'a spec = (interval * 'a) list
+        (* TODO ca fait quoi tout ca *)
 	val assoq : int -> 'a spec -> 'a
 	val max : ('a -> Num.t) -> ('b * 'a) list -> Num.t
 	  (** for width and height *)
-	(*val set_pos : ('f -> 'g -> 'h) -> 'f -> ('i * 'g) list -> ('i * 'h) list*)
+	(*val set_pos :
+          * ('f -> 'g -> 'h) -> 'f -> ('i * 'g) list -> ('i * 'h) list*)
 	val set_pos : (Point.t -> 'a -> 'b) -> Point.t -> 'a spec -> 'b spec
   end
 end
@@ -1982,7 +2024,7 @@ module Diag : sig
 
   (** This module permits to create diagrams in a very simple and yet quite
    flexible fashion. It permits to specify content, form and color of nodes as
-   well as color, form and labels of arrows between nodes. Nodes have to be 
+   well as color, form and labels of arrows between nodes. Nodes have to be
    placed by hand, though *)
 
   (** {2 Creation} *)
@@ -2007,14 +2049,14 @@ module Diag : sig
 
   type dir = Up | Down | Left | Right | Angle of float
 
-  val arrow : 
-    t -> ?lab:string -> 
+  val arrow :
+    t -> ?lab:string ->
     ?line_width:Num.t ->
     ?boxed:bool ->
     ?line_color:Color.t ->
     ?fill_color:Color.t ->
-    ?pos:Command.position ->  
-    ?head:bool -> ?dashed:Dash.t -> ?outd:dir -> ?ind:dir -> 
+    ?pos:Command.position ->
+    ?head:bool -> ?dashed:Dash.t -> ?outd:dir -> ?ind:dir ->
     node -> node -> unit
     (** [arrow d n1 n2] adds an arrow between n1 and n2 in the diagram d, by
         side effect.
@@ -2027,13 +2069,13 @@ module Diag : sig
 
   (** {2 Drawing} *)
 
-  val draw : 
-    ?scale:(float -> Num.t) -> ?style:node_style -> 
+  val draw :
+    ?scale:(float -> Num.t) -> ?style:node_style ->
     ?boxed:bool -> ?fill:Color.t -> ?stroke:Color.t -> ?pen:Pen.t ->
     t -> Command.t
     (** Draws the diagram.
         @param scale The distance between nodes; default is 40 bp
-	@param style The style of nodes: circular or rectangular 
+	@param style The style of nodes: circular or rectangular
 	(default is circular)
 	@param boxed The border is drawn if set (default is true)
 	@param fill The color to fill nodes
@@ -2057,17 +2099,17 @@ module Plot : sig
 
   type labels = int -> Num.t -> Picture.t option
   type ticks =  (Num.t * Pen.t) option
-	
+
   type drawing = Stepwise | Normal
-	
+
   val draw_grid : ?hdash:(int -> Dash.t) ->
                   ?vdash:(int -> Dash.t) ->
                   ?hpen:(int -> Pen.t) ->
-                  ?vpen:(int -> Pen.t) -> ?color:Color.t -> 
+                  ?vpen:(int -> Pen.t) -> ?color:Color.t ->
                   skeleton -> Command.t
 
-  val draw_axes : ?hpen:Pen.t -> ?vpen:Pen.t -> ?hlabel:labels -> 
-                  ?vlabel:labels -> ?ticks:ticks -> ?closed:bool -> 
+  val draw_axes : ?hpen:Pen.t -> ?vpen:Pen.t -> ?hlabel:labels ->
+                  ?vlabel:labels -> ?ticks:ticks -> ?closed:bool ->
                   ?hcaption:Picture.t -> ?vcaption:Picture.t ->
                     skeleton -> Command.t
 
@@ -2075,7 +2117,7 @@ module Plot : sig
                             skeleton -> Command.t
 
 
-  val draw_func : ?pen:Pen.t -> ?drawing:drawing -> 
+  val draw_func : ?pen:Pen.t -> ?drawing:drawing ->
                   ?style:Path.joint -> ?dashed:Dash.t -> ?color:Color.t ->
                   ?label:(Picture.t * Command.position * int) ->
                   ?from_x:int -> ?to_x:int ->
@@ -2101,7 +2143,7 @@ module Hist : sig
     ?vcaption:Picture.t ->
     ?histlabel:Command.vposition * Picture.t labels ->
     ?vlabel:Plot.labels ->
-    ?hlabel:Picture.t list -> 
+    ?hlabel:Picture.t list ->
     float list -> Command.t
     (** [simple l] draws an histogram from a list [l] of floating-point values.
 	@param width Total width of the histogram (default: 100 bp)
@@ -2113,7 +2155,7 @@ module Hist : sig
 	@param vcaption See module Plot
 	@param hlabel Labels for each block
 	@param vlabel See module Plot
-	@param histlabel Add a label to each block; the first component controls 
+	@param histlabel Add a label to each block; the first component controls
 	  the placement of the label; the second component, of type [insideBox],
 	  controls the label itself, which is either the numerical value of the
 	  block (i.e. the float) or a user picture
@@ -2131,8 +2173,8 @@ module Hist : sig
     ?vlabel:Plot.labels ->
     ?hlabel:Picture.t list ->
     float list list -> Command.t
-    (** [compare l] draws a comparative histogram from a list [l] 
-	of floating-point lists. 
+    (** [compare l] draws a comparative histogram from a list [l]
+	of floating-point lists.
 	For optional arguments, see function [simple] above.
     *)
 
@@ -2146,10 +2188,10 @@ module Hist : sig
     ?vcaption:Picture.t ->
     ?histlabel:Command.vposition * Picture.t list labels ->
     ?vlabel:Plot.labels ->
-    ?hlabel:Picture.t list -> 
+    ?hlabel:Picture.t list ->
     float list list -> Command.t
-    (** [compare l] draws a stacked histogram from a list [l] 
-	of floating-point lists. 
+    (** [compare l] draws a stacked histogram from a list [l]
+	of floating-point lists.
 	For optional arguments, see function [simple] above.
     *)
 
@@ -2169,16 +2211,16 @@ module Radar : sig
     ?label:string list ->
     ?scale:float list ->
     float list list -> Picture.t
-    (** [stack l] builds a picture from a list [l] of floating-point lists. 
+    (** [stack l] builds a picture from a list [l] of floating-point lists.
 	The radars are all drawn on the same picture.
-	Each sublist represents one radar datas. 
+	Each sublist represents one radar datas.
 	All sublists must have the same length.
 	@param radius The radius of the whole picture
 	@param pen The pen used to draw the radars
 	@param color The colors used to draw each radar; it is used circularly
-	@param style The dash-styles used to draw each radar; it is used 
+	@param style The dash-styles used to draw each radar; it is used
 	  circularly
-	@param ticks The interval between each ticks along the axes 
+	@param ticks The interval between each ticks along the axes
 	  (relative to the values)
 	@param scale The size of every axe, relative to the values;
 	  when not specified, the maximal value along each axe is chosen
@@ -2195,20 +2237,20 @@ module Radar : sig
     ?scale:float list ->
     float list list -> Picture.t list
     (** [stack l] builds a list of pictures from a list [l] of
-	floating-point lists. 
+	floating-point lists.
 	Each picture represents one radar, and all picture have the same size.
-	Each sublist represents one radar datas, and all sublists must have 
-	the same length. 
+	Each sublist represents one radar datas, and all sublists must have
+	the same length.
 	For most optional arguments, see function [stack] above.
 	@param fill Fill the radar with its color.
     *)
-    
+
 end
 
 (** Build a legend for diagrams. *)
 module Legend : sig
 
-  val legend : 
+  val legend :
     ?ensstroke:Color.t ->
     ?colstroke:Color.t ->
     ?fill:Color.t ->
@@ -2232,7 +2274,7 @@ module Misc : sig
   val comma : Format.formatter -> unit -> unit
 
   val fold_from_to : ('a -> int -> 'a) -> 'a -> int -> int -> 'a
-  (** [fold_from_to f acc i j] is equivalent to 
+  (** [fold_from_to f acc i j] is equivalent to
       [List.fold_left f acc [i; i +1; .. j] ],
      where i <= j *)
   val call_cmd : ?inv:bool -> ?outv:bool -> ?verbose:bool -> string -> int * string
@@ -2259,7 +2301,7 @@ module Metapost : sig
     (int * Command.t) list -> unit
 
   val emit : string -> Command.t -> unit
-  val dump : 
+  val dump :
     ?prelude:string -> ?pdf:bool -> ?eps:bool -> ?verbose:bool -> ?clean:bool ->
       string -> unit
     (** [dump ?prelude ?pdf f] builds a Metapost file [f.mp] for all figures,
@@ -2267,9 +2309,9 @@ module Metapost : sig
 	names specified to [emit]. The file suffix is [.mps] if [pdf] is
 	set, and [.1] otherwise. *)
 
-  val dump_mp : 
+  val dump_mp :
     ?prelude:string -> string -> unit
-  val dump_png : 
+  val dump_png :
     ?prelude:string -> ?verbose:bool -> ?clean:bool -> string -> unit
 
   val read_prelude_from_tex_file : string -> string
@@ -2282,9 +2324,9 @@ module Metapost : sig
 
   val slideshow : Command.t list -> int -> (int * Command.t) list
     (** takes a list of figures and returns a list of figures of exactly the
-        same size (the size of the biggest figure). Shared objects are 
-        hopefully placed at the same absolute location across figures. The 
-        resulting figures are numbered with consecutive increasing integers, 
+        same size (the size of the biggest figure). Shared objects are
+        hopefully placed at the same absolute location across figures. The
+        resulting figures are numbered with consecutive increasing integers,
         starting with the given value. *)
 
   val emit_slideshow : string -> Command.t list -> unit
@@ -2303,7 +2345,7 @@ module Generate : sig
 
 end
 
-(** Compute concrete values of numerics, points and paths; 
+(** Compute concrete values of numerics, points and paths;
    not always available *)
 module Concrete : sig
   val supported : bool
@@ -2322,7 +2364,7 @@ module Concrete : sig
     val opp : t -> t
     val mult : float -> t -> t
     val div : t -> float -> t
-      
+
     module Infix :
     sig
       val (+/) : t -> t -> t
@@ -2347,7 +2389,7 @@ module Concrete : sig
     (* A path is a succession of splines *)
     type t
     type abscissa = float
-        
+
     val length : t -> float
     val is_closed : t -> bool
     val is_a_point : t -> CPoint.t option
@@ -2358,44 +2400,44 @@ module Concrete : sig
           one intersection point between p1 and p2. Additionnal point of
           intersection (two point for only one real intersection) can
           appear in degenerate case. *)
-      
+
     val one_intersection : t -> t -> (abscissa * abscissa)
       (** one_intersection p1 p2 return one of the intersections
           between p1 and p2 or raise Not_found if none exists*)
-      
-      
+
+
     val reverse : t -> t
       (** reverse p return the path p reversed *)
-      
-    val iter : 
+
+    val iter :
       (CPoint.t -> CPoint.t -> CPoint.t -> CPoint.t -> unit) -> t -> unit
       (** iter on all the splines of a path: iter f p applies f
-          successively to the splines of p with : 
-          - the start point of the spline as first argument 
-          - the control point of the start point as second argument 
-          - the control point of the end point as third argument 
+          successively to the splines of p with :
+          - the start point of the spline as first argument
+          - the control point of the start point as second argument
+          - the control point of the end point as third argument
           - the end point as fourth argument *)
-      
-    val fold_left : 
+
+    val fold_left :
       ('a -> CPoint.t -> CPoint.t -> CPoint.t -> CPoint.t -> 'a) -> 'a -> t -> 'a
       (** fold on all the splines of a path *)
-      
+
     val cut_before : t -> t -> t
     val cut_after : t -> t -> t
-      (** remove the part of a path before the first intersection 
+      (** remove the part of a path before the first intersection
           or after the last*)
-      
+
     val split : t -> abscissa -> t * t
     val subpath : t -> abscissa -> abscissa -> t
-        
+
     val direction_of_abscissa : t -> abscissa -> CPoint.t
     val point_of_abscissa : t -> abscissa -> CPoint.t
-      
+
     val bounding_box : t -> CPoint.t * CPoint.t
-      
+
     val dist_min_point : t -> CPoint.t -> float * abscissa
     val dist_min_path : t -> t -> float * (abscissa * abscissa)
-      
+
     val print : Format.formatter -> t -> unit
   end
 
@@ -2405,36 +2447,36 @@ module Concrete : sig
     (** The value of a num in bp *)
 
   val cpoint_of_point : Point.t -> CPoint.t
-    
+
   val cpath_of_path : Path.t -> CPath.t
 
   (** {2 Compute the baselines of a tex} *)
   val baselines : string -> float list
-    
+
   (** {2 Simple functions for the opposite operations} *)
-    
+
   val num_of_float : float -> Num.t
     (** exactly Num.bp *)
-  
+
   val point_of_cpoint : CPoint.t -> Point.t
   val path_of_cpath : CPath.t -> Path.t
-    
+
     (** {2 Some options (the mlpost tool takes care of them)} *)
   val set_verbosity : bool -> unit
 
   val set_prelude : string -> unit
-    (** set_prelude filename uses the prelude of the file filename 
+    (** set_prelude filename uses the prelude of the file filename
         for compilation of the tex snippets *)
 
   val set_prelude2 : string option -> unit
-    (** set_prelude2 prelude uses this prelude 
+    (** set_prelude2 prelude uses this prelude
         for compilation of the tex snippets *)
 
   val set_t1disasm : string option -> unit
     (** Deprecated in a next release *)
 
 end
-  
+
 (** Use the Cairo backend to draw your figures; not always available *)
 module Cairost : sig
 

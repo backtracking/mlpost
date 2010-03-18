@@ -59,10 +59,10 @@ let map_children f t =
   aux t
 
 
-let gen_place ~width ~height ~set_pos f t =
+let gen_place ~width ~height ~set_pos ~place t =
   let box_from_a z = Box.empty ~width:(width z) ~height:(height z) () in
   let box_tree = map box_from_a t in
-  let b = f box_tree in
+  let b = place box_tree in
   map2 (fun z e -> set_pos (Box.ctr (Box.sub e b)) z) t box_tree
 
 module Simple = struct
@@ -75,7 +75,7 @@ module Simple = struct
       aux t
 
   let place ~width ~height ~set_pos ?ls ?cs ?valign ?halign t =
-    gen_place ~width ~height ~set_pos (place ?ls ?cs ?valign ?halign) t
+    gen_place ~width ~height ~set_pos ~place:(place ?ls ?cs ?valign ?halign) t
 
 end
 
