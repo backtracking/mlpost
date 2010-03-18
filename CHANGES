@@ -9,6 +9,7 @@ current
 o concrete computations are now available without the Cairo library
 o option -ps with -cairo
 o adding Concrete.baseline
+o Num: new units em, ex
 o Bugfix: "make install" with ocamlfind (reported by Julien Signoles)
 o Bugfix: Concrete does not complain about being unsupported for the following
   functions: set_verbosity; set_prelude, set_prelude2, set_t1disasm

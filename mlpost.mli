@@ -34,13 +34,22 @@ module rec Num : sig
   val bp : float -> t
 
   val pt : float -> t
-  (** pt are PostScript points. This is the same unit as the pt unit in Latex *)
+  (** pt are PostScript points. This is the same unit as the pt unit in TeX *)
 
   val cm : float -> t
   val mm : float -> t
   val inch : float -> t
 
+  (** The following are units dependent of the font used *)
+
+  val em : float -> t
+  (** the width of an "m" *)
+  
+  val ex : float -> t
+  (** the height of an "x" *)
+
   (** {2 Useful operations on Nums} *)
+
   val addn : t -> t -> t
   val subn : t -> t -> t
   val multn : t -> t -> t

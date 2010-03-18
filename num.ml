@@ -35,34 +35,34 @@ let inch f = mkF (72. *. f)
 
 let pi = 3.1415926535897932384626433832795029
 let pi_div_180 = pi /. 180.0
-let deg2rad f = pi_div_180 *. f 
+let deg2rad f = pi_div_180 *. f
 
 let is_zero f = abs_float f < 0.0001
 
 type scale = float -> t
 
-let addn x y = 
+let addn x y =
   match x.node, y.node with
   | F f1, F f2 -> mkF (f1 +. f2)
   | _, F f when is_zero f -> x
   | F f, _ when is_zero f -> y
   | _, _ -> mkNAdd x y
 
-let subn x y = 
+let subn x y =
   match x.node, y.node with
   | F f1, F f2 -> mkF (f1 -. f2)
   | _, F f  when is_zero f -> x
   | _, _ -> mkNSub x y
 
-let multn x y = 
+let multn x y =
   match x.node, y.node with
   | F f1, F f2 -> mkF (f1 *. f2)
   | (F f, _ | _ , F f) when is_zero f -> zero
   | _, _ -> mkNMult x y
 
 let multf f x = multn (mkF f) x
-  
-let divn x y = 
+
+let divn x y =
   match x.node, y.node with
   | F f1, F f2 -> mkF (f1 /. f2)
   | F f, _ when is_zero f -> zero
@@ -80,7 +80,7 @@ let minn x y =
     | F f1, F f2 -> mkF (min f1 f2)
     | _, _ -> mkNMin x y
 
-let gmean x y = 
+let gmean x y =
   match x.node, y.node with
   | F f1, F f2 -> mkF ( sqrt (f1 *. f1 +. f2 *. f2 ))
   | _, F f when is_zero f -> x
@@ -125,3 +125,19 @@ open Infix
 let neg x = zero -/ x
 
 let abs x = maxn x (neg x)
+
+(* TeX units *)
+(* we have to do this by hand because we cannot use the Picture module here *)
+let xlength p =
+  mkNXPart (mkPTSub (mkPTPicCorner p `Northeast) (mkPTPicCorner p `Northwest))
+let ylength p =
+  mkNYPart (mkPTSub (mkPTPicCorner p `Northeast) (mkPTPicCorner p `Southeast))
+
+let pic s = mkPicture (mkPITex s)
+
+let em_factor = xlength (pic "m")
+let ex_factor = ylength (pic "x")
+
+let em f = f *./ em_factor
+let ex f = f *./ ex_factor
+
