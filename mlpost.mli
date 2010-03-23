@@ -1893,7 +1893,7 @@ module Tree_adv : sig
      can give us the following functions:
      @param width a function to compute the width of an object
      @param height a function to compute the height of an object
-     @param set_pos a function to move an object wrt. to an offset
+     @param set_pos a function to place an object at a certain point
      @param place a function which knows how to place a tree of boxes - it
      should return a box where all the boxes of the input tree appear.
      *)
@@ -1954,17 +1954,6 @@ module Tree_adv : sig
   val filter_option : ('a -> 'b option) -> 'a t -> 'b t
   (** Suppress a subtree depending on a condition on the node *)
 
-    (** Tools for creating its own type *)
-  (*val wrap_whs_box :
-    ('a -> Box.t) ->
-    ('a -> Box.t -> 'b) ->
-    ( width:('a -> Num.t) ->
-      height:('a -> Num.t) ->
-      set_pos:(Types.point -> 'a -> 'b) -> 'c)
-    -> 'c*)
-    (** wrap_whs_box give_box mod_box f returns f where its arguments width
-      height and set_pos have been set *)
-
   val wrap_corner_box :
     ('a -> Box.t) ->
     ( corner : (Box.position -> 'a -> Point.t) -> 'c)
@@ -2003,17 +1992,23 @@ module Tree_adv : sig
 	val max_tree : ('a -> interval) -> 'a t -> int
         (** The last moment of the tree to appear, not considering [Nev] and
            [Alw] *)
-        (* FIXME Pourquoi min_interval et max_interval ne regardent-ils pas Nev
-           et Alw ?? *)
 
 	type 'a spec = (interval * 'a) list
-        (* TODO ca fait quoi tout ca *)
+        (** A spec is a list of objects associated with a visibility interval *)
+
 	val assoq : int -> 'a spec -> 'a
+        (** returns the first element which is visible in the specification;
+            raises [Not_found] if no element is visible *)
+
 	val max : ('a -> Num.t) -> ('b * 'a) list -> Num.t
-	  (** for width and height *)
-	(*val set_pos :
-          * ('f -> 'g -> 'h) -> 'f -> ('i * 'g) list -> ('i * 'h) list*)
+        (** given a function to compute a numeric from an ['a], and a list of
+        objects [('b,'a)], return the maximal numeric from that list;
+        intended to be used with width and height functions for objects and with
+        a ['a spec list] *)
+
 	val set_pos : (Point.t -> 'a -> 'b) -> Point.t -> 'a spec -> 'b spec
+        (** Given a function to move objects of type ['a], return a function to
+          move functions of type ['a spec] *)
   end
 end
 
