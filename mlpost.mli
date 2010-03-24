@@ -20,18 +20,23 @@
   (** Abstract numeric values *)
 module rec Num : sig
 
-  (** Numerics are intended to be lengths in some unit. In addition, values of
-    type {!Num.t} may actually be unknown to Mlpost. This is why there is no
-    function that gives back a [float]. *)
+  (** Numerics are a symbolic representation of numeric values.
+    In many cases, but not always, an object of type {!Num.t} is intended to be
+    a length in some unit. In addition, values of type {!Num.t} may actually be
+    unknown to Mlpost. This is why there is no function that gives back a
+    [float].
+  *)
 
   type t
       (** The Mlpost numeric type is an abstract datatype *)
 
   (** {2 Conversion functions} *)
-  (** The base unit in Mlpost are bp. The following functions
-      permit to specify values in other common units *)
+
+  val of_float : float -> t
+  (** Convert a float into a {!Num.t} *)
 
   val bp : float -> t
+  (** The base unit in Mlpost is bp. *)
 
   val pt : float -> t
   (** pt are PostScript points. This is the same unit as the pt unit in TeX *)

@@ -25,6 +25,7 @@ let one = mkF 1.
 let minus_one = mkF (-.1.)
 let two = mkF 2.
 
+let of_float = mkF
 let num_of_int i = mkF (float_of_int i)
 
 let bp f = mkF f
