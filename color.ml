@@ -25,13 +25,34 @@ type t = Concrete_types.color =
   |OPAQUE of scolor
   |TRANSPARENT of float * scolor
 
-let rgb8 r g b = OPAQUE (RGB ((float r)/.255., (float g)/.255., (float b)/.255.))
-let rgb8a r g b a = TRANSPARENT ((float a)/.255.,RGB ((float r)/.255., (float g)/.255., (float b)/.255.))
+let rgb8 r g b = 
+  OPAQUE (RGB ((float r)/.255., (float g)/.255., (float b)/.255.))
+let rgb8a r g b a = 
+  TRANSPARENT ((float a)/.255.,
+               RGB ((float r)/.255., (float g)/.255., (float b)/.255.))
 let rgb_from_int i = 
   let b = i land 0xFF in
   let g = (i land 0xFF00) lsr 8 in
   let r = (i land 0xFF0000) lsr 16 in
   rgb8 r g b
+
+let hsv h s v = 
+  assert (0.<= s && s<=1.);
+  assert (0.<= v && v<=1.);
+  let c  = v *. s in
+  let h' = h /. 60. in
+  let x = c *. (1. -. (abs_float ((mod_float h' 2.) -. 1.))) in
+  let (r_1, g_1, b_1) = 
+    if      0. <= h' && h' < 1. then (c,x,0.)
+    else if 1. <= h' && h' < 2. then (x,c,0.)
+    else if 2. <= h' && h' < 3. then (0.,c,x)
+    else if 3. <= h' && h' < 4. then (0.,x,c)
+    else if 4. <= h' && h' < 5. then (x,0.,c)
+    else if 5. <= h' && h' < 6. then (c,0.,x)
+    else (0.,0.,0.) in
+  let m = v -. c in
+  OPAQUE (RGB (r_1 +. m, g_1 +. m, b_1 +. m))
+
 
 let red = OPAQUE (RGB (1.0,0.0,0.0))
 let lightred = OPAQUE (RGB (1.0,0.5,0.5))
@@ -46,8 +67,8 @@ let cyan =  OPAQUE (RGB (0.0,1.0,1.0))
 let lightcyan = rgb_from_int 0xE0FFFF
 let yellow = OPAQUE (RGB (1.0,1.0,0.0))
 let lightyellow = rgb_from_int 0xFFFFE0
-(* these colors do not correspond to neither X11 nor HTML colors - commented out
- * *)
+(* these colors do not correspond to neither X11 nor HTML colors 
+     - commented out*)
 (* let lightblue = OPAQUE (RGB (0.5,0.5,1.0)) *)
 (* let green = OPAQUE (RGB (0.0,1.0,0.0)) *)
 (* let lightgreen = OPAQUE (RGB (0.5,1.0,0.5)) *)
@@ -73,6 +94,15 @@ let opaque = function |TRANSPARENT (_,c) -> OPAQUE c | c -> c
 let transparent f = function 
   |TRANSPARENT (f2,c) -> TRANSPARENT (f*.f2,c) 
   |OPAQUE c -> TRANSPARENT (f,c)
+
+(* color generator *)
+(* TODO better *)
+let color_gen = 
+  let array = [|red;blue;green;purple;yellow|] in
+  let length = Array.length array in
+  fun () ->
+    let count = ref (-1) in
+    (fun () -> incr count; array.((!count) mod length))
 
 
 let colors : (string, t) Hashtbl.t = Hashtbl.create 91

@@ -78,3 +78,7 @@ let t color ?(pen) ?(dash) ?(scale) ?(brush) () =
   let purple = t (Some Color.purple)
 
 let t ?color = t color
+
+let color t = t.Hashcons.node.color
+let pen (t:t) = (t.Hashcons.node.pen : Pen.t option)
+let dash t = t.Hashcons.node.dash
