@@ -29,12 +29,8 @@ let draw_aux ?label values =
          let line = Path.pathn ~style:Path.jLine values in
          Path.draw ~brush line) values)
 
-let unit = function
-  | None -> Num.one
-  | Some f -> f 1.
 open Num
 
-let xsep = 10
 let ysep = 10
 
 let rec tick pitch xmax nb =

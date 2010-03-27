@@ -220,7 +220,7 @@ and Point : sig
   val draw : ?brush:Brush.t -> ?color:Color.t -> ?pen:Pen.t -> t -> Command.t
     (** Draw a point
 	@param color the color of the point; default is black
-	@param pen the pen used to draw the pen; default is 
+	@param pen the pen used to draw the pen; default is
                [Brush.Pen.default]*)
 
 end
@@ -264,7 +264,7 @@ and MetaPath : sig
       {ul {- [jLine] for a straight line}
       {- [jCurve] for a spline curve}
       {- [jCurveNoInflex] to avoid inflexion points}
-      {- [jTension f1 f2] to specify "tension" on the joint; [jCurve] uses a 
+      {- [jTension f1 f2] to specify "tension" on the joint; [jCurve] uses a
       default tension of 1. Higher tension means less "wild" curves}
       {- [jControls p1 p2] to explicitely specify control points}} *)
   type joint = Path.joint
@@ -395,7 +395,7 @@ and Path : sig
       {ul {- [jLine] for a straight line}
       {- [jCurve] for a spline curve}
       {- [jCurveNoInflex] to avoid inflexion points}
-      {- [jTension f1 f2] to specify "tension" on the joint; [jCurve] uses a 
+      {- [jTension f1 f2] to specify "tension" on the joint; [jCurve] uses a
       default
       tension of 1. Higher tension means less "wild" curves}
       {- [jControls p1 p2] to explicitely specify control points}} *)
@@ -564,13 +564,13 @@ and Path : sig
 
   val smart_path : ?style:joint -> orientation list -> Point.t -> Point.t -> t
 
-  val draw : ?brush:Brush.t -> ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t 
+  val draw : ?brush:Brush.t -> ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t
     -> t -> Command.t
     (** Draw a path
-        @param brush the brush used to draw the path; the next argument 
+        @param brush the brush used to draw the path; the next argument
                redefined this one
 	@param color the color of the path; default is black
-	@param pen the pen used to draw the path; default is 
+	@param pen the pen used to draw the path; default is
                [Brush.Pen.default]
 	@param dashed if given, the path is drawn using that dash_style. *)
 
@@ -788,7 +788,7 @@ and Color : sig
     (** convert an hsv color to an rgb *)
 
   (** {3 color generator} *)
-    
+
   val color_gen : unit -> (unit -> t)
     (* create a generator of colors which return a different color
        each time it is called. The goal is to have colors with a good
@@ -1011,12 +1011,12 @@ and Command : sig
  -> Path.t -> t
     (** Draw a path
 	@param color the color of the path; default is black
-	@param pen the pen used to draw the path; default is 
+	@param pen the pen used to draw the path; default is
         [Brush.Pen.default]
 	@param dashed if given, the path is drawn using that dash_style. *)
 
   (*
-    val draw_arrow : ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> Path.t 
+    val draw_arrow : ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t -> Path.t
     -> t
   (** Draw a path with an arrow head; the optional arguments
     are the same as for {!draw} *)
@@ -1033,7 +1033,7 @@ and Command : sig
     [ `None
     | `Width of Num.t (** keep the proportion of the image *)
     | `Height of Num.t
-    | `Inside of Num.t * Num.t 
+    | `Inside of Num.t * Num.t
         (** must be inside a box of this height and width *)
     | `Exact of Num.t * Num.t]
     -> t
@@ -1104,7 +1104,7 @@ module rec Shapes : sig
     *)
 
   val ellipse : Num.t -> Num.t -> Path.t
-    (** [ellipse rx ry] returns an ellipse of great axis [rx] and small axis 
+    (** [ellipse rx ry] returns an ellipse of great axis [rx] and small axis
         [ry]. The ellipse is centered on the origin and aligned with the x
         axis.
 	@param fill the color with which to fill the ellipse ; if no color
@@ -1183,7 +1183,7 @@ and Box : sig
 
   val empty :
     ?width:Num.t -> ?height:Num.t -> ?style:style -> ?name:string ->
-    ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> ?fill:Color.t -> 
+    ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> ?fill:Color.t ->
     unit -> t
     (** the empty box *)
 
@@ -1678,21 +1678,21 @@ module Arrow : sig
         draw the head at point [p] with direction [d]. Direction [d]
         is normalized before being given to the function. *)
 
-  val head_classic : ?color:Color.t -> 
-    ?brush:Brush.t -> 
-    ?pen:Pen.t -> 
+  val head_classic : ?color:Color.t ->
+    ?brush:Brush.t ->
+    ?pen:Pen.t ->
     ?dashed:Dash.t ->
     ?angle:float -> ?size:Num.t -> head
     (** A simple head with two straight lines.
         @param color the color of the head; default is black
-        @param pen the pen used to draw the head; default is 
+        @param pen the pen used to draw the head; default is
                [Brush.Pen.default]
         @param dashed if given, the head is drawn using that dash_style
         @param angle the angle between the two lines in degrees, default is 60
         degrees
         @param size the length of the two lines, default is 4bp *)
 
-  val head_triangle : ?color:Color.t -> ?brush:Brush.t -> ?pen:Pen.t -> 
+  val head_triangle : ?color:Color.t -> ?brush:Brush.t -> ?pen:Pen.t ->
     ?dashed:Dash.t ->
     ?angle:float -> ?size:Num.t -> head
   (** Same as [head_classic] except that the two lines are joined together
@@ -1711,14 +1711,14 @@ module Arrow : sig
   val empty: kind
     (** The empty kind with no line nor head. *)
 
-  val add_line: ?brush:Brush.t -> ?dashed: Dash.t -> ?color: Color.t -> 
+  val add_line: ?brush:Brush.t -> ?dashed: Dash.t -> ?color: Color.t ->
     ?pen: Pen.t ->
     ?from_point: float -> ?to_point: float -> ?dist: Num.t -> kind -> kind
     (** Add a line to a body. The line will be parallel to the path used
         to draw the arrow.
         @param dashed the dash style used to draw the line (default is plain)
         @param color the color of the line (default is black)
-        @param pen the pen used to draw the line 
+        @param pen the pen used to draw the line
                (default is [Brush.Pen.default])
         @param from_point from [0.] (foot of the arrow) to [1.] (head of the
           arrow), the line will start from this point
@@ -1899,7 +1899,7 @@ module Tree : sig
       ?brush:Brush.t -> ?pen:Pen.t -> ?sep:Num.t ->
       ?valign:Command.position -> ?halign:Command.position ->
       Box.t -> t list -> t
-    (** a simple tree placement algorithm: align all subtrees horizontally , 
+    (** a simple tree placement algorithm: align all subtrees horizontally ,
         and place the parent node above.
         Default arrow_style is [Directed].
 	Default edge_style is [Straight].
@@ -2108,7 +2108,7 @@ module Diag : sig
         side effect.
 	@param lab The label of the arrow, in Latex format
 	@param pos The position of the label, relative to the arrow
-	@param line_width Draws a thick arrow of that width, if present 
+	@param line_width Draws a thick arrow of that width, if present
                (experimental)
 	@param head If true, the arrow has a head. Otherwise, it's just a line.
 	@param outd The outgoing direction of the arrow
@@ -2177,7 +2177,7 @@ module Real_plot :
 sig
   type 'a curve
   type 'a graph
-    (** 'a store the information about : 
+    (** 'a store the information about :
        - the way the curve is drawn (style and color)
        - the label used in the legend
     *)
@@ -2185,14 +2185,14 @@ sig
   val curve : (float -> float) -> 'a -> 'a curve
     (** create a curve from a function and some information of
        drawing *)
-  
+
   val graph : 'a curve list -> 'a graph
     (* create a graph from a list of curve *)
 
-  val draw : 
+  val draw :
     ?logarithmic : bool -> (* use a logarithmic scale for ordinate *)
     ?curve_brush : ('a -> Brush.t) -> (* how to draw a curve *)
-    ?label : ('a -> string) -> (* give the label to use in the legend *) 
+    ?label : ('a -> string) -> (* give the label to use in the legend *)
     xmin : float ->
     xmax : float ->
     pitch : float ->
@@ -2233,7 +2233,7 @@ module Hist : sig
 	@param vcaption See module Plot
 	@param hlabel Labels for each block
 	@param vlabel See module Plot
-	@param histlabel Add a label to each block; the first component 
+	@param histlabel Add a label to each block; the first component
           controls the placement of the label; the second component, of type
           [insideBox], controls the label itself, which is either the numerical
           value of the block (i.e. the float) or a user picture
@@ -2355,7 +2355,7 @@ module Misc : sig
   (** [fold_from_to f acc i j] is equivalent to
       [List.fold_left f acc [i; i +1; .. j] ],
      where i <= j *)
-  val call_cmd : 
+  val call_cmd :
     ?inv:bool -> ?outv:bool -> ?verbose:bool -> string -> int * string
 
 end
@@ -2381,10 +2381,10 @@ module Metapost : sig
 
   val emit : string -> Command.t -> unit
   val dump :
-    ?prelude:string -> 
-    ?pdf:bool -> 
-    ?eps:bool -> 
-    ?verbose:bool -> 
+    ?prelude:string ->
+    ?pdf:bool ->
+    ?eps:bool ->
+    ?verbose:bool ->
     ?clean:bool ->
     string -> unit
     (** [dump ?prelude ?pdf f] builds a Metapost file [f.mp] for all figures,
