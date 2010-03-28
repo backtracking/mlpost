@@ -610,6 +610,7 @@ let vblock ?padding ?(pos=`Center) ?name ?stroke ?pen ?dash
       (vbox_list ~pos ?min_height ?same_height
         (List.map (set_width (extracth pos) (max_width pl)) pl)))
 
+
 let tabularl ?hpadding ?vpadding ?(pos=`Center) ?style ?name
              ?stroke ?pen ?dash ?fill pll =
   (* we first compute the widths of columns and heights of rows *)
@@ -626,25 +627,13 @@ let tabularl ?hpadding ?vpadding ?(pos=`Center) ?style ?name
 	(Num.fold_max width Num.zero cols) :: (calc_wmax qll)
   in
   let wmaxl = calc_wmax pll in
-  (* adapt the width of each column *)
   let pll =
-    List.map (fun r->
-                try
-                   List.map2 (fun cell w -> set_width (extracth pos) w cell)r wmaxl
-                 with Invalid_argument _ -> invalid_arg "Box.tabularl: not a matrix")
-      pll
-  in
-  (* adapt the height of each row *)
-  let pll =
-    try
-      List.map2 (fun h l ->
-                   List.map (fun cell -> set_height (extractv pos) h cell) l)
-        hmaxl pll
-    with Invalid_argument _ -> invalid_arg "Box.tabularl: not a matrix"
-  in
+    List.map2 (fun row height ->
+      List.map2 (fun cell width ->
+        set_size pos ~height ~width (group [cell])) row wmaxl
+    ) pll hmaxl in
   vbox ?padding:vpadding ~pos ?style ?name ?stroke ?pen ?dash ?fill
-    (List.map
-      (fun r -> hbox ?padding:hpadding ~pos r) pll)
+    (List.map (fun r -> hbox ?padding:hpadding ~pos r) pll)
 
 let tabular ?(hpadding=Num.zero) ?(vpadding=Num.zero) ?pos ?style
             ?name ?stroke ?pen ?dash ?fill m =
