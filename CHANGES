@@ -6,6 +6,8 @@ current
 * module Color: the definitions of the following colors have changed:
   lightblue, green, lightgreen, orange, lightcyan, purple, lightyellow
   These colors are now compatible to HTML/CSS and X11 definitions
+* Box: Box.tabularl did modify the input boxes, now it leaves them unchanged 
+  (reported by Julien Signoles)
 o concrete computations are now available without the Cairo library
 o option -ps with -cairo
 o adding Concrete.baseline
@@ -14,10 +16,7 @@ o Bugfix: "make install" with ocamlfind (reported by Julien Signoles)
 o Bugfix: Concrete does not complain about being unsupported for the following
   functions: set_verbosity; set_prelude, set_prelude2, set_t1disasm
 o Bugfix: Don't use "tracingchoices"
-
-current stable
---------------
-o fixed bug #411: correct definition of objects used in Path.subpath
+o Bugfix #411: correct definition of objects used in Path.subpath
 o metapost errors are printed (this should rarely occur)
 
 
