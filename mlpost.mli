@@ -574,6 +574,10 @@ and Path : sig
                [Brush.Pen.default]
 	@param dashed if given, the path is drawn using that dash_style. *)
 
+  val fill : ?color:Color.t -> t -> Command.t
+    (** Fill a contour given by a closed path
+	@param color the color used to fill the area; default is black *)
+
 end
 
 (**/**)
@@ -785,15 +789,16 @@ and Color : sig
     (** [transparent f c] multiplies by f the factor of transparency of c *)
 
   val hsv : float -> float -> float -> t
-    (** convert an hsv color to an rgb *)
+    (** hsv h s v convert an hsv color to an rgb.
+        0 <= h < 360, 0 <= s,v <= 1*)
 
   (** {3 color generator} *)
 
-  val color_gen : unit -> (unit -> t)
-    (* create a generator of colors which return a different color
-       each time it is called. The goal is to have colors with a good
-       contrast between them. Currently only 5 differents color are
-       used .... *)
+  val color_gen : float -> float -> (unit -> t)
+    (* color_gen s v creates a generator of colors which return a
+       different color (with saturation s and value v) each time it is
+       called. The goal is to have colors with a good contrast between
+       them. For given s and v the resutl is deterministically *)
 
   (** {2 Predefined Colors} *)
 

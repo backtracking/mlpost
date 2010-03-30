@@ -177,3 +177,6 @@ let draw ?brush ?color ?pen ?dashed t =
      ... withcolor (0.00red+0.00green+0.00blue) withpen .... 
      for each command in the output file *)
     mkCommand (mkCDraw t (mkBrushOpt brush color pen dashed))
+
+let fill ?color t = 
+  mkCommand (mkCFill t color)

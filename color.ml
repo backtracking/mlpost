@@ -53,6 +53,22 @@ let hsv h s v =
   let m = v -. c in
   OPAQUE (RGB (r_1 +. m, g_1 +. m, b_1 +. m))
 
+(* 0 180 90 270 45 135 225 315 ... *)
+(* Could be better (see the example) but I don't remenber the generator :
+   0 180 90 270 45 *225* *135* 315 ... *)
+let color_gen s v =
+  let h = ref 0. in
+  let step = ref 720. in
+  fun () -> 
+    let res = !h in
+    h := !h +. !step;
+    if !h >= 360.
+    then begin
+      step := !step /. 2. ;
+      h := !step /. 2.;
+    end;
+    hsv res s v
+      
 
 let red = OPAQUE (RGB (1.0,0.0,0.0))
 let lightred = OPAQUE (RGB (1.0,0.5,0.5))
@@ -67,7 +83,7 @@ let cyan =  OPAQUE (RGB (0.0,1.0,1.0))
 let lightcyan = rgb_from_int 0xE0FFFF
 let yellow = OPAQUE (RGB (1.0,1.0,0.0))
 let lightyellow = rgb_from_int 0xFFFFE0
-(* these colors do not correspond to neither X11 nor HTML colors
+  (* these colors do not correspond to neither X11 nor HTML colors
      - commented out*)
 (* let lightblue = OPAQUE (RGB (0.5,0.5,1.0)) *)
 (* let green = OPAQUE (RGB (0.0,1.0,0.0)) *)
@@ -94,16 +110,6 @@ let opaque = function |TRANSPARENT (_,c) -> OPAQUE c | c -> c
 let transparent f = function
   |TRANSPARENT (f2,c) -> TRANSPARENT (f*.f2,c)
   |OPAQUE c -> TRANSPARENT (f,c)
-
-(* color generator *)
-(* TODO better *)
-let color_gen =
-  let array = [|red;blue;green;purple;yellow|] in
-  let length = Array.length array in
-  fun () ->
-    let count = ref (-1) in
-    (fun () -> incr count; array.((!count) mod length))
-
 
 let colors : (string, t) Hashtbl.t = Hashtbl.create 91
 let color n = Hashtbl.find colors n

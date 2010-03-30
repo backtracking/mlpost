@@ -128,7 +128,7 @@ let draw ?(logarithmic=false) ?curve_brush
                            {x with values = List.map scale x.values}
                         ) values in
   (* Brush and legend *)
-  let color = Color.color_gen () in
+  let color = Color.color_gen 1. 1. in
   let curve_brush _ = Brush.t () in
   let colors = List.map (fun x -> 
                            let b = curve_brush x.node in

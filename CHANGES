@@ -8,7 +8,8 @@ o contrib Mlpost_dot : Use graphviz (dot) to place picture, box, ...
     mlpost -contrib dot [...]
 o module Real_plot: Plot function from float to float. It can use logarithmic
       scale.
-o module Color: new function hsv to create a color from hsv colorspace
+o module Color: new function hsv to create a color from hsv colorspace and 
+  color_gen to generate different colors using hsv colorspace
 * module Color: the definitions of the following colors have changed:
   lightblue, green, lightgreen, orange, lightcyan, purple, lightyellow
   These colors are now compatible to HTML/CSS and X11 definitions
