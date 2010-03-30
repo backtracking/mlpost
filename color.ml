@@ -36,6 +36,7 @@ let rgb_from_int i =
   let r = (i land 0xFF0000) lsr 16 in
   rgb8 r g b
 
+    (* http://en.wikipedia.org/wiki/HSL_and_HSV *)
 let hsv h s v =
   assert (0.<= s && s<=1.);
   assert (0.<= v && v<=1.);
@@ -53,22 +54,25 @@ let hsv h s v =
   let m = v -. c in
   OPAQUE (RGB (r_1 +. m, g_1 +. m, b_1 +. m))
 
-(* 0 180 90 270 45 135 225 315 ... *)
-(* Could be better (see the example) but I don't remenber the generator :
-   0 180 90 270 45 *225* *135* 315 ... *)
 let color_gen s v =
-  let h = ref 0. in
-  let step = ref 720. in
-  fun () -> 
-    let res = !h in
-    h := !h +. !step;
-    if !h >= 360.
-    then begin
-      step := !step /. 2. ;
-      h := !step /. 2.;
-    end;
+  let choices = ref [] in
+  let value = 180. in
+  let next = ref 0. in
+  fun () ->
+    let rec aux acc value current = function 
+      | [] -> 
+          assert (current = 0.);
+          next := value;
+          List.rev_append acc [true]
+      | true::l ->
+          aux (false::acc) (value/.2.) (current-.value) l
+      | false::l -> 
+          next := current +. value;
+          List.rev_append acc (true::l) in
+    let res = !next in
+    choices := aux [] value res !choices;
     hsv res s v
-      
+
 
 let red = OPAQUE (RGB (1.0,0.0,0.0))
 let lightred = OPAQUE (RGB (1.0,0.5,0.5))
