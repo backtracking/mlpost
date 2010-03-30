@@ -3,6 +3,11 @@ o - changes in behaviour, new features, bugfixes
 
 current
 -------
+o contrib Mlpost_dot : Use graphviz (dot) to place picture, box, ...
+    make contrib && make install-contrib
+o module Real_plot: Plot function from float to float. It can use logarithmic
+      scale.
+o module Color: new function hsv to create a color from hsv colorspace
 * module Color: the definitions of the following colors have changed:
   lightblue, green, lightgreen, orange, lightcyan, purple, lightyellow
   These colors are now compatible to HTML/CSS and X11 definitions

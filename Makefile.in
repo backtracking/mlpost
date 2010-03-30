@@ -90,10 +90,13 @@ headers:
 
 install: install-$(OCAMLBEST) install-bin
 
+install-contrib : install-$(OCAMLBEST)-contrib
+
+
 BCMA = $(addprefix $(BUILD), $(CMA))
 BCMXA = $(addprefix $(BUILD), $(CMXA) $(OBJ))
 
-ifeq "$(OCAMLFIND)" "no"
+ifeq "@USEOCAMLFIND@" "no"
 install-byte:
 	mkdir -p $(LIBDIR)
 	cp -f $(BUILD)mlpost.cmi META $(BCMA) "$(LIBDIR)"
@@ -102,6 +105,18 @@ install-opt:
 	mkdir -p $(LIBDIR)
 	cp -f $(BUILD)mlpost.cmi META $(BCMA) "$(LIBDIR)"
 	cp -f $(BUILD)mlpost$(LIBEXT) $(BCMXA) "$(LIBDIR)"
+
+install-byte-contrib:
+	mkdir -p $(LIBDIR)_dot
+	cp -f contrib/dot/META "$(LIBDIR)_dot"
+	cp -f $(addprefix contrib/dot/_build/mlpost_dot,.cmi .cma) "$(LIBDIR)_dot"
+
+
+install-opt-contrib:
+	mkdir -p $(LIBDIR)_dot
+	cp -f contrib/dot/META "$(LIBDIR)_dot"
+	cp -f $(addprefix contrib/dot/_build/mlpost_dot,.cmi .cma .cmxa $(LIBEXT)) "$(LIBDIR)_dot"
+
 else
 DESTDIR=-destdir $(LIBDIR:/mlpost=)
 
@@ -112,6 +127,18 @@ install-byte:
 install-opt:
 	$(OCAMLFIND) remove $(DESTDIR) mlpost
 	$(OCAMLFIND) install $(DESTDIR) mlpost $(BUILD)mlpost$(LIBEXT) $(BUILD)mlpost.cmi META $(BCMXA) $(BCMA)
+
+
+install-byte-contrib:
+	$(OCAMLFIND) remove $(DESTDIR) mlpost_dot
+	$(OCAMLFIND) install $(DESTDIR) mlpost_dot contrib/dot/META \
+	   $(addprefix contrib/dot/_build/mlpost_dot,.cmi .cma)
+
+install-opt-contrib:
+	$(OCAMLFIND) remove $(DESTDIR) mlpost_dot
+	$(OCAMLFIND) install $(DESTDIR) mlpost_dot contrib/dot/META \
+           $(addprefix contrib/dot/_build/mlpost_dot,.cmi .cma .cmxa $(LIBEXT))
+
 endif
 
 install-bin:

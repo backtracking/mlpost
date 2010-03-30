@@ -42,9 +42,19 @@ OBJ := mlpost_desc_options$(LIBEXT) mlpost_options$(LIBEXT)
 ifeq "$(OCAMLBEST)" "opt"
 all: 
 	$(OCAMLBUILD) $(CMA) $(CMXA) $(TOOL)
+
+lib:
+	$(OCAMLBUILD) $(CMA) $(CMXA)
+
+LIB_EXT=.cma .cmxa .cmi
 else
 all:
 	$(OCAMLBUILD) $(CMA) $(TOOL)
+
+lib:
+	$(OCAMLBUILD) $(CMA)
+
+LIB_EXT=.cma .cmi
 endif
 
 byte : 
@@ -134,6 +144,14 @@ examples: tool.opt
 
 examples-html: tool.opt
 	$(MAKEEXAMPLES) html
+
+# Contrib
+contrib: lib
+	@echo "make: Entering directory \`$(shell pwd)/contrib/dot'"
+	cd contrib/dot && ocamlbuild -cflags -I,$(shell pwd)/_build $(addprefix mlpost_dot,$(LIB_EXT)) && cd ../..
+
+clean-contrib:
+	cd contrib/dot && ocamlbuild -clean && cd ../..
 
 # GUI
 

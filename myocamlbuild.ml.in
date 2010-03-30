@@ -64,7 +64,8 @@ let _ = dispatch begin function
       Options.include_dirs :=
         "concrete"::"dvi"::"backend"::"gui"::!Options.include_dirs;
       Options.exclude_dirs :=
-        "presentations"::"papers"::"examples"::!Options.exclude_dirs;
+        "presentations"::"papers"::"examples"::
+          "contrib"::!Options.exclude_dirs;
       Options.ocamldoc := S[A"ocamldoc"]
   | Before_rules ->
       tagcairo := Ocamlbuild_pack.Configuration.has_tag "cairo_yes";
@@ -105,7 +106,8 @@ let _ = dispatch begin function
         ~prods: (List.map (fun x -> "img/"^x^".1") img_doc_prod)
         ~dep: "customdoc/img_doc.byte"
         begin fun env _ ->
-           Cmd(Sh "mkdir -p img/ && cd img/ && ../customdoc/img_doc.byte >> /dev/null && cd ..")
+           Cmd(Sh "mkdir -p img/ && cd img/ && ../customdoc/img_doc.byte \
+                     >> /dev/null && cd ..")
         end;
 
        (** conversion of images *)

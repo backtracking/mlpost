@@ -51,7 +51,8 @@ let tree6 =
 		node "3" [leaf "6"; leaf "7"]])
 (*parse >> <<tree7 *)
 let tree7 =
-  let node s = node ~arrow_style:Undirected ~edge_style:HalfSquare (Box.tex s) in
+  let node s = 
+    node ~arrow_style:Undirected ~edge_style:HalfSquare (Box.tex s) in
   let leaf s = leaf (Box.tex s) in
   draw 
      (node "1" [node "2" [node "3" [leaf "4"]; leaf "5"]; 
@@ -89,7 +90,8 @@ let rec bin = function
       Node (n, t :: l)
 
 let rec trans (Node (n,l)) = 
-  node ~arrow_style:Undirected (tex (sprintf "${2^{%d}}$" n)) (List.map trans l)
+  node ~arrow_style:Undirected (tex (sprintf "${2^{%d}}$" n)) 
+    (List.map trans l)
 
 let tree10 = draw (trans (bin 4))
 (*parse >> <<tree11 *)
@@ -128,7 +130,7 @@ let place_not_simple t =
   let height = max Box.height in
   let set_pos = set_pos Box.center in
   let bplace t = Tree.to_box (to_tree t) in
-  gen_place ~width ~height ~set_pos bplace t
+  gen_place ~width ~height ~set_pos ~place:bplace t
 
 let tree_adv_draw t i =
   let keep e = try Some (assoq i e)

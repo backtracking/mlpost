@@ -31,6 +31,9 @@ let add_nothing = ref false
 let files = 
   Queue.create ()
 
+let contribs = ref []
+let add_contrib x = contribs := x::!contribs 
+
 let add_file f = 
   if not (Filename.check_suffix f ".ml") then begin
     eprintf "mlpost: don't know what to do with %s@." f;
@@ -104,7 +107,8 @@ let wrap_option (opt,desc,help) =
       | Float f -> Float (fun s -> f s;aotofcp ~arg:(string_of_float s) opt)
       | Bool f -> Bool (fun s -> f s;aotofcp ~arg:(string_of_bool s) opt)
       | Set_int s -> Int (fun x -> s:=x; aotofcp ~arg:(string_of_int x) opt)
-      | Set_float s -> Float (fun x -> s:=x; aotofcp ~arg:(string_of_float x) opt)
+      | Set_float s -> Float (fun x -> s:=x; 
+                                aotofcp ~arg:(string_of_float x) opt)
       | Set_string s -> String (fun x -> s:=x; aotofcp ~arg:x opt)
       | Symbol (l, f) -> Symbol (l,fun x -> f x; aotofcp ~arg:x opt)
       | Rest _ | Tuple _ -> assert false (*Not implemented... *)
@@ -121,13 +125,19 @@ let spec = Arg.align
     "\"<options>\" Pass <options> to the compiled program";
     "-version", Unit version, " Print Mlpost version and exit";
     "-libdir", String ((:=) libdir), " Set path for mlpost.cma";
-    "-get-include-compile", Symbol (["cmxa";"cma";"dir";"file"],get_include_compile), " Output the libraries which are needed by the library Mlpost";
-    "-compile-name", String (fun s -> compile_name := Some s), "<compile-name> Keep the compiled version of the .ml file";
+    "-get-include-compile", 
+    Symbol (["cmxa";"cma";"dir";"file"],get_include_compile),
+    " Output the libraries which are needed by the library Mlpost";
+    "-compile-name", String (fun s -> compile_name := Some s),
+    "<compile-name> Keep the compiled version of the .ml file";
     "-dont-execute", Set dont_execute, " Don't execute the mlfile";
-    "-add-nothing", Set add_nothing, " Add nothing to the file (deprecated)"
+    "-add-nothing", Set add_nothing, " Add nothing to the file (deprecated)";
+    "-contrib", String add_contrib, " Compile with the specified contrib" 
   ]@(if notcairo 
-     then ["-cairo" , Unit nocairo, " Mlpost has not been compiled with the cairo backend";
-           "-t1disasm" , Unit nocairo, " Mlpost has not been compiled with the cairo backend";
+     then ["-cairo" , Unit nocairo,
+           " Mlpost has not been compiled with the cairo backend";
+           "-t1disasm" , Unit nocairo,
+           " Mlpost has not been compiled with the cairo backend";
           ]
      else [])
    @(List.map wrap_option Mlpost_desc_options.spec))
@@ -183,7 +193,8 @@ let ocamlopt bn args =
     | Some s -> ()
 
 let ocamlbuild args exec_name =
-  let args = if !verbose then "-classic-display" :: args else " -quiet"::args in
+  let args = 
+    if !verbose then "-classic-display" :: args else " -quiet"::args in
   command ~outv:true ("ocamlbuild " ^ String.concat " " args ^ exec_name);
   execute ~outv:true ("_build/"^exec_name);
   (match !compile_name with
@@ -205,31 +216,48 @@ let compile f =
       let args = 
         if notcairo then args else
           let includecairos = 
-            let cairolibs = List.map (fun (x,y) -> Filename.concat x y) Version.cairolibs in
+            let cairolibs = List.map (fun (x,y) -> Filename.concat x y) 
+              Version.cairolibs in
             String.concat "," cairolibs in
           let iI = String.concat  ","
             (List.map (fun (x,_) -> "-I,"^x) Version.cairolibs) in
-          args@[sprintf "-lflags %s -lib bigarray -libs %s" iI includecairos] in
+          args@
+            [sprintf "-lflags %s -lib bigarray -libs %s" iI includecairos] in
       let args =
         args@["-no-links";"-lib mlpost";"-lib mlpost_desc_options";
-              "-lib mlpost_options";!ccopt]
-      in
-      ocamlbuild args exec_name;
+              "-lib mlpost_options";!ccopt] in
+    let contrib_args = List.fold_left
+      (fun acc c -> 
+         let libdir = !libdir^"_"^c in
+         "-I"::libdir::("-lib mlpost_"^c)::acc) [] !contribs in
+      ocamlbuild (args@contrib_args) exec_name;
     with Command_failed out -> 
       exit out
   end else begin begin
+    let contrib_args ext = List.fold_left
+      (fun acc c -> 
+         let libdir = !libdir^"_"^c in
+         "-I"::libdir::("mlpost_"^c^ext)::acc) [] !contribs in
     if !native then
       let cairo_args = if notcairo then [] 
-      else [Version.include_string; "bigarray.cmxa"; "cairo.cmxa"; "bitstring.cmxa"] in
+      else [Version.include_string; "bigarray.cmxa"; 
+            "cairo.cmxa"; "bitstring.cmxa"] in
+      
       ocamlopt bn ([!ccopt; "-I"; !libdir;"unix.cmxa"] @ cairo_args @ 
-                     ["mlpost.cmxa";"mlpost_desc_options.cmxa";"mlpost_options.cmxa"; f])
+                     ["mlpost.cmxa";"mlpost_desc_options.cmxa";
+                      "mlpost_options.cmxa"] @
+                     (contrib_args ".cmxa") @ [f])
     else
       let cairo_args = if notcairo then [] 
-      else [Version.include_string; "bigarray.cma"; "cairo.cma"; "bitstring.cma"] in
+      else [Version.include_string; "bigarray.cma";
+            "cairo.cma"; "bitstring.cma"] in
       ocaml ([!ccopt; "-I"; !libdir;"unix.cma"] @ cairo_args @
-               ["mlpost.cma";"mlpost_desc_options.cma";"mlpost_options.cma"; f])
+               ["mlpost.cma";"mlpost_desc_options.cma";
+                "mlpost_options.cma"] @
+               (contrib_args ".cma")@ [f])
   end;
-    if not !dont_clean then List.iter (fun suf -> try_remove (bn^suf)) [".cmi";".cmo";".cmx";".o"]
+    if not !dont_clean then List.iter (fun suf -> try_remove (bn^suf))
+      [".cmi";".cmo";".cmx";".o"]
   end
 
 let () = Queue.iter compile files

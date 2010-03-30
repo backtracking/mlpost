@@ -36,6 +36,10 @@ HISTOUTFILES := $(HISTPNGFILES:.png=.1)
 RADARPNGFILES := radar1.png radar2.png
 RADAROUTFILES := $(RADARPNGFILES:.png=.1)
 
+DOTPNGFILES := dot1.png dot2.png
+DOTOUTFILES := $(DOTPNGFILES:.png=.1)
+
+
 HTMLFILES := boxes.ml.html paths.ml.html misc.ml.html tree.ml.html \
              label.ml.html automata.ml.html hist.ml.html radar.ml.html
 
@@ -46,6 +50,9 @@ MLPOST:=mlpost -v -ps
 all: $(BOXPNGFILES) $(PATHPNGFILES) $(MISCPNGFILES) \
      $(TREEPNGFILES) $(LABELPNGFILES) $(AUTOMPNGFILES) $(HISTPNGFILES) \
      $(RADARPNGFILES)
+
+contrib: $(DOTPNGFILES)
+
 html: $(HTMLFILES)
 %.ml.html : %.ml parse
 	caml2html -hc -ext "parse:./parse" $*.ml
@@ -79,10 +86,15 @@ $(LABELOUTFILES): label.dummy
 $(AUTOMOUTFILES): automata.dummy
 $(HISTOUTFILES): hist.dummy
 $(RADAROUTFILES): radar.dummy
+$(DOTOUTFILES): dot.dummy_dot
 
 
 %.dummy: %.ml
 	$(MLPOST) $^
+	touch $@
+
+%.dummy_dot: %.ml
+	$(MLPOST) -contrib dot $^
 	touch $@
 
 parse.ml: parse.mll
@@ -104,7 +116,7 @@ clean:
 	# do not remove automaton4.tex - it's handmade
 	rm -f boxes.ml.html paths.ml.html misc.ml.html tree.ml.html label.ml.html
 	rm -f parse.ml *.cmx *.cmo *.cmi parse *.o
-	rm -f *.png *.dummy
+	rm -f *.png *.dummy *.dummy_dot
 
 
 editor2 :

@@ -1,4 +1,4 @@
-description = "Library for Mlpost which use dot to place Box"
+description = "Library for Mlpost which use dot to place Box, Picture, ..."
 version = "0.1"
 archive(byte) = "mlpost_dot.cma"
 archive(native) = "mlpost_dot.cmxa"

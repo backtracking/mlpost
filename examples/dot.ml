@@ -1,16 +1,17 @@
 (* A compiler avec ocamlbuild : mlpost -ocamlbuild example.ml (-cairo)?*)
 
 open Mlpost
+open Mlpost_dot
 
 module Pi = Picture
 open Command
 
 module PiBox : Dot.Box 
   with type abstract = Pi.t
-with type concret = Pi.t = 
+with type concrete = Pi.t = 
 struct
   type abstract = Pi.t
-  type concret = Pi.t
+  type concrete = Pi.t
   include Pi
 end
 
@@ -27,10 +28,10 @@ let graph =
 
 module BBox : Dot.Box 
   with type abstract = Box.t
-with type concret = Box.t = 
+with type concrete = Box.t = 
 struct
   type abstract = Box.t
-  type concret = Box.t
+  type concrete = Box.t
   include Box
 end
 
@@ -47,5 +48,5 @@ let graph2 =
   (seq (List.map Box.draw nodes)) ++ (seq (List.map Arrow.simple edges))
 
 let () = List.iter (fun (n,f) -> Metapost.emit n f)
-  ["graph",graph;
-   "graph2",graph2]
+  ["dot1",graph;
+   "dot2",graph2]
