@@ -5,6 +5,7 @@ current
 -------
 o contrib Mlpost_dot : Use graphviz (dot) to place picture, box, ...
     make contrib && make install-contrib
+    mlpost -contrib dot [...]
 o module Real_plot: Plot function from float to float. It can use logarithmic
       scale.
 o module Color: new function hsv to create a color from hsv colorspace
