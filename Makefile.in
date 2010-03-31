@@ -53,6 +53,11 @@ INCLUDES = -I gui -I +threads @INCLUDEGTK2@
 BFLAGS = -dtypes $(INCLUDES) 
 OFLAGS = @BASICOFLAGS@ -dtypes $(INCLUDES) @FORPACK@
 
+LABLGTK2 = @LABLGTK2@
+LABLGTK2LIB = @LABLGTK2LIB@
+
+CAIROLABLGTK2 = @CAIROLABLGTK2@
+CAIROLABLGTK2LIB = @CAIROLABLGTK2LIB@
 
 # main target
 #############
@@ -91,6 +96,8 @@ headers:
 install: install-$(OCAMLBEST) install-bin
 
 install-contrib : install-$(OCAMLBEST)-contrib
+install-byte-contrib: install-byte-dot install-byte-lablgtk
+install-opt-contrib: install-opt-dot install-opt-lablgtk
 
 
 BCMA = $(addprefix $(BUILD), $(CMA))
@@ -106,16 +113,34 @@ install-opt:
 	cp -f $(BUILD)mlpost.cmi META $(BCMA) "$(LIBDIR)"
 	cp -f $(BUILD)mlpost$(LIBEXT) $(BCMXA) "$(LIBDIR)"
 
-install-byte-contrib:
+install-byte-dot:
 	mkdir -p $(LIBDIR)_dot
 	cp -f contrib/dot/META "$(LIBDIR)_dot"
 	cp -f $(addprefix contrib/dot/_build/mlpost_dot,.cmi .cma) "$(LIBDIR)_dot"
 
-
-install-opt-contrib:
+install-opt-dot:
 	mkdir -p $(LIBDIR)_dot
 	cp -f contrib/dot/META "$(LIBDIR)_dot"
 	cp -f $(addprefix contrib/dot/_build/mlpost_dot,.cmi .cma .cmxa $(LIBEXT)) "$(LIBDIR)_dot"
+
+ifeq "$(LABLGTK2)$(CAIROLABLGTK2)" "yesyes"
+
+install-byte-lablgtk:
+	mkdir -p $(LIBDIR)_lablgtk
+	cp -f contrib/lablgtk/META "$(LIBDIR)_lablgtk"
+	cp -f $(addprefix contrib/lablgtk/_build/mlpost_lablgtk,.cmi .cma) "$(LIBDIR)_lablgtk"
+
+install-opt-lablgtk:
+	mkdir -p $(LIBDIR)_lablgtk
+	cp -f contrib/lablgtk/META "$(LIBDIR)_lablgtk"
+	cp -f $(addprefix contrib/lablgtk/_build/mlpost_lablgtk,.cmi .cma .cmxa $(LIBEXT)) "$(LIBDIR)_lablgtk"
+
+else
+install-byte-lablgtk:
+
+install-opt-lablgtk:
+
+endif
 
 else
 DESTDIR=-destdir $(LIBDIR:/mlpost=)
@@ -129,17 +154,37 @@ install-opt:
 	$(OCAMLFIND) install $(DESTDIR) mlpost $(BUILD)mlpost$(LIBEXT) $(BUILD)mlpost.cmi META $(BCMXA) $(BCMA)
 
 
-install-byte-contrib:
+install-byte-dot:
 	$(OCAMLFIND) remove $(DESTDIR) mlpost_dot
 	$(OCAMLFIND) install $(DESTDIR) mlpost_dot contrib/dot/META \
 	   $(addprefix contrib/dot/_build/mlpost_dot,.cmi .cma)
 
-install-opt-contrib:
+install-opt-dot:
 	$(OCAMLFIND) remove $(DESTDIR) mlpost_dot
 	$(OCAMLFIND) install $(DESTDIR) mlpost_dot contrib/dot/META \
            $(addprefix contrib/dot/_build/mlpost_dot,.cmi .cma .cmxa $(LIBEXT))
 
+ifeq "$(LABLGTK2)$(CAIROLABLGTK2)" "yesyes"
+install-byte-lablgtk:
+	$(OCAMLFIND) remove $(DESTDIR) mlpost_lablgtk
+	$(OCAMLFIND) install $(DESTDIR) mlpost_lablgtk contrib/lablgtk/META \
+	   $(addprefix contrib/lablgtk/_build/mlpost_lablgtk,.cmi .cma)
+
+install-opt-lablgtk:
+	$(OCAMLFIND) remove $(DESTDIR) mlpost_lablgtk
+	$(OCAMLFIND) install $(DESTDIR) mlpost_lablgtk contrib/lablgtk/META \
+           $(addprefix contrib/lablgtk/_build/mlpost_lablgtk,.cmi .cma .cmxa $(LIBEXT))
+else
+install-byte-lablgtk:
+
+install-opt-lablgtk:
+
 endif
+
+endif
+
+install-byte-contrib: install-byte-dot install-byte-lablgtk
+
 
 install-bin:
 	mkdir -p $(BINDIR)

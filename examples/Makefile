@@ -121,3 +121,6 @@ clean:
 
 editor2 :
 	ocamlbuild editor2.native
+
+lattice_lablgtk : lattice_lablgtk.ml
+	mlpost -contrib lablgtk lattice_lablgtk.ml

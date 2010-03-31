@@ -302,6 +302,32 @@ else
    LABLGTK2=no
 fi
 
+# checking for cairo.lablgtk2
+if test "$USEOCAMLFIND" == yes; then
+   CAIROLABLGTK2LIB=$(ocamlfind query cairo.lablgtk2)
+fi
+
+if test -n "$CAIROLABLGTK2LIB";then
+   echo "ocamlfind found cairo.lablgtk2 in $CAIROLABLGTK2LIB"
+else
+    AC_CHECK_FILE($OCAMLLIB/cairo/cairo_lablgtk.cma,
+        CAIROLABLGTK2=yes,CAIROLABLGTK2=no)
+    if test "$CAIROLABLGTK2" = yes; then
+        CAIROLABLGTK2LIB=$OCAMLLIB/lablgtk2/
+    elif test -n "$OCAMLLIBLOCAL"; then
+       AC_CHECK_FILE($OCAMLLIBLOCAL/cairo/cairo_lablgtk.cma,
+        CAIROLABLGTK2=yes,CAIROLABLGTK2=no)
+       if test "$CAIROLABLGTK2" = yes; then
+        CAIROLABLGTK2LIB=$OCAMLLIBLOCAL/cairo/
+       fi
+    fi
+fi
+
+if test -n "$LABLGTK2LIB" ; then
+   CAIROLABLGTK2=yes
+else
+   CAIROLABLGTK2=no
+fi
 
 #Viewer for ps and pdf
 AC_CHECK_PROGS(PSVIEWER,gv evince)
@@ -325,6 +351,8 @@ AC_SUBST(USEOCAMLFIND)
 AC_SUBST(LABLGTK2)
 AC_SUBST(INCLUDEGTK2)
 AC_SUBST(LABLGTK2LIB)
+AC_SUBST(CAIROLABLGTK2)
+AC_SUBST(CAIROLABLGTK2LIB)
 AC_SUBST(TAGS)
 AC_SUBST(CAIROLIB)
 AC_SUBST(INCLUDELIBS)

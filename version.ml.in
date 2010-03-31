@@ -13,7 +13,7 @@
 (*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                  *)
 (*                                                                        *)
 (**************************************************************************)
-
+# 16 "version.ml.in"
 let version = "@MLPOSTVERSION@"
 let date = "@TODAY@"
 let ocamlopt = "@OCAMLOPT@"
@@ -21,6 +21,10 @@ let libdir = "@LIBDIR@"
 let include_string = "@INCLUDELIBS@"
 let cairolibs = ["@CAIROLIB@","/cairo";"@BITSTRINGLIB@","/bitstring"]
 
+let cairolablgtk2lib = "@CAIROLABLGTK2LIB@"
+let lablgtk2lib = "@LABLGTK2LIB@"
 
-
-
+let contribs =
+  [ "dot", ([libdir^"_dot"],["mlpost_dot"]);
+    "lablgtk", ([libdir^"_dot";lablgtk2lib;cairolablgtk2lib],
+                ["mlpost_dot"; "lablgtk"; "cairo_lablgtk"])]

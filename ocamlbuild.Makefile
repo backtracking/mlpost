@@ -146,12 +146,29 @@ examples-html: tool.opt
 	$(MAKEEXAMPLES) html
 
 # Contrib
-contrib: lib
+contrib: dot-contrib lablgtk-contrib
+
+dot-contrib : lib
 	@echo "make: Entering directory \`$(shell pwd)/contrib/dot'"
 	cd contrib/dot && ocamlbuild -cflags -I,$(shell pwd)/_build $(addprefix mlpost_dot,$(LIB_EXT)) && cd ../..
 
+ifeq "$(LABLGTK2)$(CAIROLABLGTK2)" "yesyes"
+lablgtk-contrib : lib
+	@echo "make: Entering directory \`$(shell pwd)/contrib/labgtk'"
+	cd contrib/lablgtk && ocamlbuild -cflags -I,$(shell pwd)/_build \
+		-cflags -I,$(LABLGTK2LIB) \
+		-cflags -I,$(CAIROLABLGTK2LIB) \
+		$(addprefix mlpost_lablgtk,$(LIB_EXT)) && cd ../..
+
+else
+
+lablgtk-contrib :
+	@echo "lablgtk2 or cairo.lablgtk2 hasn't been found I can't make mlpost_lablgtk"
+endif
+
 clean-contrib:
 	cd contrib/dot && ocamlbuild -clean && cd ../..
+	cd contrib/lablgtk && ocamlbuild -clean && cd ../..
 
 # GUI
 

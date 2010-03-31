@@ -228,16 +228,30 @@ let compile f =
               "-lib mlpost_options";!ccopt] in
     let contrib_args = List.fold_left
       (fun acc c -> 
-         let libdir = !libdir^"_"^c in
-         "-I"::libdir::("-lib mlpost_"^c)::acc) [] !contribs in
+         let llibdir,llib = 
+           try
+             List.assoc c Version.contribs
+           with Not_found -> Format.eprintf "contrib %s unknown" c; exit 1 in
+         let acc = List.fold_left 
+           (fun acc libdir -> "-I"::libdir::acc) acc llibdir in
+         let acc = List.fold_left 
+           (fun acc lib -> "-lib"::lib::acc) acc llib in
+         acc) [] !contribs in
       ocamlbuild (args@contrib_args) exec_name;
     with Command_failed out -> 
       exit out
   end else begin begin
     let contrib_args ext = List.fold_left
       (fun acc c -> 
-         let libdir = !libdir^"_"^c in
-         "-I"::libdir::("mlpost_"^c^ext)::acc) [] !contribs in
+         let llibdir,llib = 
+           try
+             List.assoc c Version.contribs
+           with Not_found -> Format.eprintf "contrib %s unknown" c;exit 1 in
+         let acc = List.fold_left 
+           (fun acc libdir -> "-I"::libdir::acc) acc llibdir in
+         let acc = List.fold_left 
+           (fun acc lib -> (lib^ext)::acc) acc llib in
+         acc) [] !contribs in
     if !native then
       let cairo_args = if notcairo then [] 
       else [Version.include_string; "bigarray.cmxa"; 
