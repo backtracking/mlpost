@@ -24,7 +24,10 @@ let cairolibs = ["@CAIROLIB@","/cairo";"@BITSTRINGLIB@","/bitstring"]
 let cairolablgtk2lib = "@CAIROLABLGTK2LIB@"
 let lablgtk2lib = "@LABLGTK2LIB@"
 
+(* (contrib_name, (include_list,lib_list)) *)
+(* The second second composante is linked in reversed order (cma,cmxa) *)
+
 let contribs =
   [ "dot", ([libdir^"_dot"],["mlpost_dot"]);
-    "lablgtk", ([libdir^"_dot";lablgtk2lib;cairolablgtk2lib],
-                ["mlpost_dot"; "lablgtk"; "cairo_lablgtk"])]
+    "lablgtk", ([libdir^"_lablgtk";lablgtk2lib;cairolablgtk2lib],
+                ["mlpost_lablgtk"; "cairo_lablgtk";"lablgtk"])]

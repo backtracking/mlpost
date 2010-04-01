@@ -248,7 +248,7 @@ let compile f =
              List.assoc c Version.contribs
            with Not_found -> Format.eprintf "contrib %s unknown" c;exit 1 in
          let acc = List.fold_left 
-           (fun acc libdir -> "-I"::libdir::acc) acc llibdir in
+           (fun acc libdir -> "\\\n-I"::libdir::acc) acc llibdir in
          let acc = List.fold_left 
            (fun acc lib -> (lib^ext)::acc) acc llib in
          acc) [] !contribs in
