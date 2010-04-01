@@ -22,6 +22,7 @@ let real_plot1 =
     ] in
   draw
     ~label:(fun x -> x)
+    ~ymax:5. ~ymin:(-.5.)
     ~xmin:(-.5.) ~xmax:5.
     ~pitch:(0.01)
     ~width:(Num.cm 6.) ~height:(Num.cm 4.)
