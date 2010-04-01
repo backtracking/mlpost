@@ -2181,24 +2181,24 @@ end
 module Real_plot :
 sig
   type 'a curve
-  type 'a graph = 'a curve list
     (** 'a store the information about :
        - the way the curve is drawn (style and color)
        - the label used in the legend
     *)
 
-  exception Undefined
-
   val curve : (float -> float) -> 'a -> 'a curve
     (** create a curve from a function and some information of
-       drawing *)
+        drawing *)
 
-  val curvel : (float -> float) list -> 'a -> 'a curve
+  val curve_opt : (float -> float option) -> 'a -> 'a curve
     (** create a curve from a function and some information of
-       drawing *)
+        drawing. If the function return None the function is not
+        defined on this value *)
 
-  val graph : 'a curve list -> 'a graph
-    (* create a graph from a list of curve *)
+  val curve_l : (float -> float option) list -> 'a -> 'a curve
+    (** create a curve from multiple function and some information of
+        drawing. The different functions symbolize different part of
+        the curve which mustn't be connected *)
 
   val draw :
     ?logarithmic : bool -> (* use a logarithmic scale for ordinate *)
@@ -2210,7 +2210,7 @@ sig
     pitch : float ->
     width : Num.t ->
     height : Num.t ->
-    'a graph -> Command.t
+    'a curve list -> Command.t
     (* Draw a graph *)
 end
 

@@ -4,33 +4,37 @@ module P = Picture
 type ('a,'b) node = { values : 'b;
                       node : 'a}
 
-type 'a curve = ('a,(float -> float) list) node
+type 'a curve = ('a,(float -> float option) list) node
 
 type 'a graph = 'a curve list
 
 
-let curve f node  = { values = [f];
-                      node = node}
 
-let curvel lf node  = { values = lf;
-                       node = node}
+let curve_l fl node  = { values = fl;
+                          node = node}
+
+let curve_opt f node = curve_l [f] node
+
+let curve f node  = curve_opt (fun x -> Some (f x)) node
 
 
 let graph x = x
 
-exception Undefined
-
-let rec calc_one_value x = function
-  | [] -> None
+let rec calc_one_value nb_f ((which_f,acc) as w_acc) x = function
+  | [] -> (nb_f,None::acc)
   | f::lf -> 
-      try Some (f x) with Undefined -> calc_one_value x lf
+      match f x with 
+        | None -> calc_one_value (nb_f+1) w_acc x lf
+        | Some y -> 
+            if which_f = nb_f 
+            then (nb_f,Some (x,y)::acc) 
+            else (nb_f,Some (x,y)::None::acc)
 
 let calc xmin xmax pitch {values=cf;node=node} =
   let rec aux acc = function
-    | x when x<xmin -> (xmin,calc_one_value xmin cf)::acc
-    | x when x=xmin -> (x,calc_one_value x cf)::acc
-    | x -> aux ((x,calc_one_value x cf)::acc) (x-.pitch) in
-  {values=aux [] xmax;node=node}
+    | x when x<=xmin -> calc_one_value 0 acc xmin cf
+    | x -> aux (calc_one_value 0 acc x cf) (x-.pitch) in
+  {values=snd (aux (0,[]) xmax);node=node}
 
 open MetaPath
 
@@ -92,22 +96,18 @@ let draw_axes
 
 let count_max iter =
   let y = ref neg_infinity in
-  iter (function 
-          | Some x -> y := max !y x
-          | None -> ());
+  iter (fun x -> y := max !y x);
   !y
 
 let count_min iter =
   let y = ref infinity in
-  iter (function 
-          | Some x -> y := min !y x
-          | None -> ());
+  iter (fun x -> y := min !y x);
   !y
 
 let filter_opt f l = 
   {l with values = List.map (function 
-                              | (x,Some y) as p when f y -> p
-                              | (x,_) -> (x,None)) l.values}
+                              | Some (x,y) as p when f y -> p
+                              | _ -> None) l.values}
 
 let draw ?(logarithmic=false) ?curve_brush
   ?label ?ymin ?ymax ~xmin ~xmax ~pitch ~width ~height graph =
@@ -124,7 +124,8 @@ let draw ?(logarithmic=false) ?curve_brush
       List.map (filter_opt f) values in
   let yvalues = (fun f -> List.iter 
                    (fun x -> List.iter 
-                      (fun x -> f (snd x)) x.values) values) in
+                      (function Some (_,y) -> f y| None -> ()) 
+                      x.values) values) in
   let ymax = match ymax with None -> count_max yvalues | Some ymax -> ymax in
   (*let ymax =  if ymax = 0. then 1. else ymax in *)
   let ymin = match ymin with None -> count_min yvalues | Some ymin -> ymin in
@@ -143,8 +144,8 @@ let draw ?(logarithmic=false) ?curve_brush
   let scale (x,y) = Num.multn (Num.bp (x-.xmin)) scalex,
               Num.multn (Num.bp ((conv y)-.(conv ymin))) scaley in
   let scale_opt = function 
-    | (x,Some y) -> Some (scale (x,y))
-    | (x,None) -> None in
+    | Some (x,y) -> Some (scale (x,y))
+    | None -> None in
   let xzero,yzero = scale (0.,0.) in                   
   (* tick vertical *)
   let ymm = ymax -. ymin in
@@ -161,6 +162,8 @@ let draw ?(logarithmic=false) ?curve_brush
       tick ypitch ymax2 ysep in
 
   let ypitchl = (*ymin::ymax::*)ypitchl in
+  (* TODO : Remove the tick which are too close but we need concrete
+     for that... *)
   let ytick = List.map (fun y -> 
                           let p = Point.pt (scale (0.,y)) in
                           let (p1,p2) = (vtick p) in

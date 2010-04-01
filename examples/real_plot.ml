@@ -7,18 +7,17 @@ open Printf
 (*parse <<real_plot1 *)
 
 let real_plot1 =
-  let graph = graph 
-    [curve (fun f -> 
+  let graph =
+    [curve_opt (fun f -> 
               if f < 0. 
-              then raise Undefined 
-              else sqrt f) "sqrt";
+              then None
+              else Some (sqrt f)) "sqrt";
      curve ceil            "ceil";
      curve floor           "floor";
      curve sin             "sin";
-     curve (fun f -> 
-              if f = 0. 
-              then raise Undefined 
-              else 1./.f)  "$\\frac{1}{x}$";
+     curve_l 
+       [(fun f -> if f <= 0. then None else Some (1./.f));
+        (fun f -> if f >= 0. then None else Some (1./.f))]  "$\\frac{1}{x}$";
     ] in
   draw
     ~label:(fun x -> x)
@@ -38,7 +37,7 @@ let real_plot2 =
     ~xmin:0. ~xmax:5.
     ~pitch:(0.01)
     ~width:(Num.cm 6.) ~height:(Num.cm 8.)
-    (graph curves)
+    curves
 
 (*parse >> *)
 
