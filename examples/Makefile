@@ -36,12 +36,19 @@ HISTOUTFILES := $(HISTPNGFILES:.png=.1)
 RADARPNGFILES := radar1.png radar2.png
 RADAROUTFILES := $(RADARPNGFILES:.png=.1)
 
+REALPLOTPNGFILES := real_plot1.png real_plot2.png
+REALPLOTOUTFILES := $(REALPLOTPNGFILES:.png=.1)
+
+COLORPNGFILES := color1.png color2.png color3.png color4.png
+COLOROUTFILES := $(COLORPNGFILES:.png=.1)
+
 DOTPNGFILES := dot1.png dot2.png
 DOTOUTFILES := $(DOTPNGFILES:.png=.1)
 
 
 HTMLFILES := boxes.ml.html paths.ml.html misc.ml.html tree.ml.html \
-             label.ml.html automata.ml.html hist.ml.html radar.ml.html
+             label.ml.html automata.ml.html hist.ml.html radar.ml.html\
+	     real_plot.ml.html dot.ml.html color.ml.html
 
 CAIRO := cairo_test.ml
 
@@ -49,7 +56,7 @@ MLPOST:=mlpost -v -ps
 
 all: $(BOXPNGFILES) $(PATHPNGFILES) $(MISCPNGFILES) \
      $(TREEPNGFILES) $(LABELPNGFILES) $(AUTOMPNGFILES) $(HISTPNGFILES) \
-     $(RADARPNGFILES)
+     $(RADARPNGFILES) $(REALPLOTPNGFILES) $(COLORPNGFILES)
 
 contrib: $(DOTPNGFILES)
 
@@ -59,7 +66,7 @@ html: $(HTMLFILES)
 
 
 %.png: %.ps
-	convert $*.ps $@ 
+	convert -density 216 $*.ps  $@ 
 
 %.ps: %.1 all.template
 	sed -e 's/all/$*/' all.template > $*.tex
@@ -86,6 +93,8 @@ $(LABELOUTFILES): label.dummy
 $(AUTOMOUTFILES): automata.dummy
 $(HISTOUTFILES): hist.dummy
 $(RADAROUTFILES): radar.dummy
+$(REALPLOTOUTFILES): real_plot.dummy
+$(COLOROUTFILES): color.dummy
 $(DOTOUTFILES): dot.dummy_dot
 
 

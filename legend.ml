@@ -19,16 +19,15 @@ open Box
 open Color
 
 
-let rec mklegend ensstroke colstroke fill vb1 vb2 = function
+let rec mklegend ensstroke colstroke fill vb1 = function
     |[] -> set_fill fill (set_stroke ensstroke (
-	box (hbox ~padding:(Num.bp 10.) 
-	       [vbox ~padding:(Num.bp 10.) (List.rev vb1);
-		vbox ~padding:(Num.bp 10.) (List.rev vb2)])))
+	box (tabularl ~hpadding:(Num.bp 10.) ~vpadding:(Num.bp 10.) 
+	       (List.rev vb1))))
     |(col,text)::res -> 
        let c = set_fill col (set_stroke colstroke (
-			       empty ~width:(Num.bp 20.) ~height:(Num.bp 10.) ())) 
+        empty ~width:(Num.bp 20.) ~height:(Num.bp 10.) ())) 
        in
-	 mklegend ensstroke colstroke fill (c::vb1) (tex text::vb2) res
+	 mklegend ensstroke colstroke fill ([c;tex text]::vb1) res
 
 
 let legend ?ensstroke ?colstroke ?fill l =
@@ -44,5 +43,5 @@ let legend ?ensstroke ?colstroke ?fill l =
     |None-> Color.white
     |Some i -> i
   in
-    Picture.make (Box.draw (mklegend ensstroke colstroke fill [] [] l))
+    Picture.make (Box.draw (mklegend ensstroke colstroke fill [] l))
 

@@ -1,8 +1,9 @@
 \documentclass{article}
 \usepackage{graphicx}
 \pagestyle{empty}
+%\usepackage[paperwidth=1000pt, paperheight=2000pt]{geometry}
 \begin{document}
-\includegraphics[scale=3]{all.1}
+\includegraphics{all.1}
 \end{document}
 
 %%% Local Variables: 

@@ -2181,13 +2181,19 @@ end
 module Real_plot :
 sig
   type 'a curve
-  type 'a graph
+  type 'a graph = 'a curve list
     (** 'a store the information about :
        - the way the curve is drawn (style and color)
        - the label used in the legend
     *)
 
+  exception Undefined
+
   val curve : (float -> float) -> 'a -> 'a curve
+    (** create a curve from a function and some information of
+       drawing *)
+
+  val curvel : (float -> float) list -> 'a -> 'a curve
     (** create a curve from a function and some information of
        drawing *)
 
@@ -2198,6 +2204,7 @@ sig
     ?logarithmic : bool -> (* use a logarithmic scale for ordinate *)
     ?curve_brush : ('a -> Brush.t) -> (* how to draw a curve *)
     ?label : ('a -> string) -> (* give the label to use in the legend *)
+    ?ymin : float -> ?ymax : float ->
     xmin : float ->
     xmax : float ->
     pitch : float ->
