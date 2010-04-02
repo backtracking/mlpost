@@ -2203,7 +2203,9 @@ sig
   val draw :
     ?logarithmic : bool -> (* use a logarithmic scale for ordinate *)
     ?curve_brush : ('a -> Brush.t) -> (* how to draw a curve *)
-    ?label : ('a -> string) -> (* give the label to use in the legend *)
+    ?label : ('a -> string) -> 
+    (* return the label to use in the legend. 
+       If no function is given the legend is not drawn *)
     ?ymin : float -> ?ymax : float ->
     xmin : float ->
     xmax : float ->
@@ -2211,7 +2213,8 @@ sig
     width : Num.t ->
     height : Num.t ->
     'a curve list -> Command.t
-    (* Draw a graph *)
+    (* Draw a graph. If concrete is supported (Concrete.supported) the
+       label of ticks on the axes will not overlap *)
 end
 
 (** Draw Bar diagrams (Histograms). *)

@@ -36,7 +36,7 @@ let real_plot2 =
     ~label:(sprintf "$\\sqrt[%i]{x}$")
     ~xmin:0. ~xmax:5.
     ~pitch:(0.01)
-    ~width:(Num.cm 6.) ~height:(Num.cm 8.)
+    ~width:(Num.cm 6.) ~height:(Num.cm 4.)
     curves
 
 (*parse >> *)

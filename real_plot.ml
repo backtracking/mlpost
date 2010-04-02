@@ -161,9 +161,22 @@ let draw ?(logarithmic=false) ?curve_brush
       let ysep = int_of_float (ymm/.ypitch) in
       tick ypitch ymax2 ysep in
 
-  let ypitchl = (*ymin::ymax::*)ypitchl in
-  (* TODO : Remove the tick which are too close but we need concrete
-     for that... *)
+  let ypitchl = ymin::ypitchl@[ymax] in
+  (* Remove the tick which are too close but we need concrete
+     for that... Currently only for ex, but we can be more 
+     precise *)
+  let ypitchl = 
+    if not Concrete.supported then ypitchl
+    else 
+      let ex2 = 2. *. Concrete.float_of_num Num.ex_factor in
+      let _, ypitchl = List.fold_left 
+        (fun (last,acc) y -> 
+           let (_,yn) = scale (0.,y) in
+           let f = Concrete.float_of_num yn in
+           if abs_float (last -. f) > ex2 
+           then (f,y::acc) else (last,acc)) 
+        (infinity,[]) ypitchl in 
+      ypitchl in
   let ytick = List.map (fun y -> 
                           let p = Point.pt (scale (0.,y)) in
                           let (p1,p2) = (vtick p) in
