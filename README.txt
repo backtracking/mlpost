@@ -19,6 +19,10 @@ This is MLPost !
 Usage:
 ------
 
+* Open the Mlpost pack:
+
+         open Mlpost
+
 * Define your figures in an Ocaml file fig.ml
 
 	 let fig_a = ...
@@ -28,7 +32,7 @@ Usage:
 
 * Add some code to emit Metapost code, as follows
 
-  
+
 	let () = Metapost.emit "file_a" fig_a
 	let () = Metapost.emit "file_b" fig_b
 
@@ -45,16 +49,16 @@ Options:
 mlpost supports the following options:
 
 -pdf
-	creates .mps files instead of .1, for inclusion in LaTeX files 
+	creates .mps files instead of .1, for inclusion in LaTeX files
 	compiled with pdflatex (the PostScript file is actually the
 	same, but the suffix is used by pdflatex to identify
 	PostScript produced by Metapost)
 
--latex main.tex     
+-latex main.tex
         indicates the main LaTeX file, from which the prelude is
         extracted to be passed to Metapost (this way you can use
         macros, fonts and packages from your LaTeX document in your
-        figures). 
+        figures).
 
 -xpdf
         opens an xpdf viewer with the generated figure. Subsequent calls with
@@ -63,7 +67,7 @@ mlpost supports the following options:
 -native
         compile to native code. This is usually faster.
 
--eps    
+-eps
         produce standalone postscript files
 
 -ocamlbuild

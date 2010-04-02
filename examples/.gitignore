@@ -1,0 +1,9 @@
+*.1
+*.log
+*.tex
+*.aux
+*.png
+*.dvi
+*.dummy
+*.html
+*.ps

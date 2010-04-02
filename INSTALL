@@ -58,7 +58,7 @@ in /usr/local/bin (or any other directory specified with ./configure --bindir).
 
         make -C examples
 
-  and (optionnal) the contrib examples after installing the contrib librairies
+  and (optional) the contrib examples after installing the contrib librairies
         
         make -C examples contrib
 
