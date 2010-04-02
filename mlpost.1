@@ -14,6 +14,12 @@ mlpost \- wrapper around OCaml and Metapost for the Mlpost library
 .B \-pdf
 Generate .mps files (default)
 .TP
+.B \-mp
+Generate .mp files
+.TP
+.B \-png
+Generate .png files
+.TP
 .B \-ps
 Generate .1 files
 .TP
@@ -51,6 +57,9 @@ Set path for mlpost.cma
 .B \-depend
 output dependency lines in a format suitable for the make(1) utility
 .TP
+.B \-contrib "<contrib-name>"
+compile with the specified contrib
+.TP
 .B \-dumpable
 output one name of dumpable file by line. So it print all the figures
 which will be created by the .ml file.
@@ -61,12 +70,12 @@ output the libraries which are needed by the library Mlpost if you want not to u
         \- cmxa print the needed cmxa file (opt version)
         \- cma print the needed cma file (byte version)
         \- dir print the directories needed to be include
-        \- file print the file name inside this directory without 
+        \- file print the file name inside this directory without
 extension
 
 .TP
 .B \-compile-name <compile-name>
-Keep the compiled version of the .ml file and name it <compile-name>. 
+Keep the compiled version of the .ml file and name it <compile-name>.
 .TP
 .B \-dont-execute
 Don't execute the mlfile. So mlpost generates no figures. With this
@@ -80,12 +89,8 @@ line options.
 Don't remove intermediates files. The metapost backend use some
 intermediates files which are removed without this option.
 .TP
-.B -add-nothing
-Add nothing to the file. Without this option mlpost add to the file a
-command which use metapost or the cairo backend in order to create the figures.
-.TP
 .B \-cairo
-Use the experimental cairo backend instead of metapost
+Use the cairo backend instead of metapost
 .TP
 .B \-t1disasm
 Set the program used to decrypt PostScript Type 1 font, only with

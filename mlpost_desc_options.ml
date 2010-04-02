@@ -39,16 +39,20 @@ let png = ref false
 (* notuple please or change Tool.wrap_options *)
 let spec =
   (["-pdf", Set pdf, " Generate .mps files (default)";
-    "-mp", Set mp, " Generate .mp";
-    "-png", Set png, " Generate .png";
+    "-mp", Set mp, " Generate .mp files";
+    "-png", Set png, " Generate .png files";
     "-ps", Clear pdf, " Generate .1 files";
     "-latex", String set_latex_file, "<main.tex> Scan the LaTeX prelude";
     "-eps", Set eps, " Generate encapsulated postscript files";
     "-xpdf", Set xpdf, " wysiwyg mode using xpdf remote server";
     "-v", Set verbose, " be a bit more verbose";
-    "-depend", Set depend, " output dependency lines in a format suitable for the make(1) utility";
+    "-depend", Set depend,
+      " output dependency lines in a format suitable for the make(1) utility";
     "-dumpable", Set dumpable, " output one name of dumpable file by line";
     "-dont-clean", Set dont_clean, " Don't remove intermediate files";
-    "-cairo" , Set cairo, " Use the experimental cairo backend instead of metapost";
-    "-t1disasm" , String (fun s -> t1disasm := Some s), " Set the program used to decrypt PostScript Type 1 font, only with cairo (default built-in one)"])
+    "-cairo" , Set cairo,
+      " Use the experimental cairo backend instead of metapost";
+    "-t1disasm" , String (fun s -> t1disasm := Some s),
+      " Set the program used to decrypt PostScript Type 1 font, \
+        only with cairo (default built-in one)"])
 
