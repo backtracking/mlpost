@@ -51,7 +51,7 @@ let spec =
     "-dumpable", Set dumpable, " output one name of dumpable file by line";
     "-dont-clean", Set dont_clean, " Don't remove intermediate files";
     "-cairo" , Set cairo,
-      " Use the experimental cairo backend instead of metapost";
+      " Use the cairo backend instead of metapost";
     "-t1disasm" , String (fun s -> t1disasm := Some s),
       " Set the program used to decrypt PostScript Type 1 font, \
         only with cairo (default built-in one)"])

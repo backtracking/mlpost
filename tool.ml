@@ -90,7 +90,6 @@ let execopt cmd =
   let b = Buffer.create 30 in
   bprintf b "%s %a -- %s@?"
     cmd
-.B \-get-include-compile {cmxa|cma|dir|file}
     (fun fmt -> Queue.iter (fprintf fmt "\"%s\" ")) options_for_compiled_prog
     !execopt;
   Buffer.contents b
