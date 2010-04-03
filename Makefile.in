@@ -197,6 +197,12 @@ uninstall:
 	rm -f $(BINDIR)/mlpost
 	rm -f $(MANDIR)/mlpost
 
+uninstall-contrib:
+	$(OCAMLFIND) remove $(DESTDIR) mlpost_dot
+	$(OCAMLFIND) remove $(DESTDIR) mlpost_lablgtk
+
+
+
 # export
 ########
 

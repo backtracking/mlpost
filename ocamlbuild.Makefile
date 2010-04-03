@@ -129,7 +129,7 @@ other.byte: othergraphs.ml
 	$(PSVIEWER) test/othergraphs.ps
 
 .PHONY: check-examples examples
-SUBDIRMLPOST:=../$(BUILD)tool.native -ccopt "-I ../$(BUILD)" -v -ps
+SUBDIRMLPOST:=../$(BUILD)tool.native -ccopt "-I ../$(BUILD) -I ../contrib/dot/_build -I ../contrib/lablgtk/_build" -v -ps
 MAKEEXAMPLES=make -C examples MLPOST='$(SUBDIRMLPOST)'
 
 check-examples: mlpost.cma tool.opt
@@ -141,6 +141,9 @@ check-examples: mlpost.cma tool.opt
 
 examples: tool.opt
 	$(MAKEEXAMPLES)
+
+examples-contrib: tool.opt
+	$(MAKEEXAMPLES) contrib
 
 examples-html: tool.opt
 	$(MAKEEXAMPLES) html
