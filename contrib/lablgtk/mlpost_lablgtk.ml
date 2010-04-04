@@ -2,9 +2,9 @@
 (*    Lablgtk - Examples                                                  *)
 
 open StdLabels
+open Mlpost
 
 
-let _ = GMain.Main.init ()
 
 
 (*let file_dialog ~title ~callback ?filename () =
@@ -20,154 +20,142 @@ let _ = GMain.Main.init ()
   sel#show ()
 *)
 
-let window = GWindow.window ~width:500 ~height:300 ~title:"editor" ()
-let vbox = GPack.vbox ~packing:window#add ()
+open Format
+
+class mlpost_fig ?width ?height ?packing ?show fig =
+
+  (* Create the drawing area. *)
+  let da = GMisc.drawing_area ?width ?height ?packing ?show () in
+  let drawable = lazy (new GDraw.drawable da#misc#window) in
 
 
+  let new_pixmap width height =
+    let drawable = GDraw.pixmap ~width ~height () in
+    drawable#set_foreground `WHITE ;
+    drawable in
 
-let menubar = GMenu.menu_bar ~packing:vbox#pack ()
+  object (self)
+    inherit GObj.widget da#as_widget
 
-open Mlpost
-let fig = ref (fun () -> Command.nop)
-let set_fig = (:=) fig
+    val mutable need_update = true
 
-let width = ref 400
-let height = ref 500
+    (* The mlpost fig. *)
+    val mutable fig = fig
+    method set_fig t = fig <- t; need_update <- true
+    method fig = fig
 
-let window2 = GWindow.window ~width:!width ~height:!height ~title:"view" ()
-let () =
-  ignore(window2#connect#destroy ~callback:GMain.quit);
-  ignore(window2#show ())
+    val mutable size = (0,0)
+    val mutable pm = new_pixmap 1 1
+    val origin = Point.origin
 
+    method private repaint () =
+      try
+        let drawable = Lazy.force drawable in
+        let (width, height) as ssize = drawable#size in
+        if ssize <> size then
+          size <- ssize;
+          pm <- new_pixmap width height;
+        (* reset the pixmap *)
+        pm#rectangle ~x:0 ~y:0 ~width ~height ~filled:true ();
+        let w,h = (float_of_int width,float_of_int height) in
+        (* *)
+        let fig = Picture.shift origin fig in
+        let fig = Picture.shift (Point.ptp (w/.2.,h/.2.)) fig in
+        let cr = Cairo_lablgtk.create pm#pixmap in       
+        Cairost.emit_cairo cr (w,h) fig;
+        need_update<-false;
+      with e -> Format.eprintf "Error raised inside figure generation@ :@ %s@."
+        (Printexc.to_string e)
+     
+    (* Repaint the widget. *)
+    method private expose ev =
+      if need_update then self#repaint ();
+      let area = GdkEvent.Expose.area ev in
+      let gwin = da#misc#window in
+      let d = new GDraw.drawable gwin in
+      let x = Gdk.Rectangle.x area and y = Gdk.Rectangle.y area in
+      let width = Gdk.Rectangle.width area 
+      and height = Gdk.Rectangle.height area in
+      d#put_pixmap 
+        ~x ~y ~xsrc:x ~ysrc:y ~width ~height pm#pixmap
 
-let new_pixmap width height =
-  let drawable = GDraw.pixmap ~width ~height () in
-  drawable#set_foreground `WHITE ;
-  drawable#rectangle
-    ~x:0 ~y:0 ~width ~height ~filled:true () ;
-  drawable
+    initializer
+      ignore (da#event#connect#expose
+              ~callback:(fun ev -> self#expose ev; false));
+      ignore (da#event#connect#configure
+                ~callback:(fun _ -> need_update <- true; false));
 
-let pm = ref (new_pixmap !width !height)
-
-let need_update = ref true
-
-let origin = ref Point.origin
-
-let paint () =
-  try
-    let w,h = (float_of_int !width,float_of_int !height) in
-    let fig = (!fig ()) in
-    let fig = Picture.shift !origin fig in
-    let fig = Picture.shift (Point.ptp (w/.2.,h/.2.)) fig in
-    let _ = Mlpost.Concrete.float_of_num (Picture.width fig) in 
-    let cr = Cairo_lablgtk.create !pm#pixmap in
-      !pm#rectangle ~x:0 ~y:0 
-	~width:!width ~height:!height ~filled:true ();
-      Cairost.emit_cairo cr (w,h) fig
-  with e -> Format.eprintf "Error raised inside figure generation@ :@ %s@."
-    (Printexc.to_string e)
-
-let refresh da =
-  need_update := true ;
-  GtkBase.Widget.queue_draw da#as_widget
-
-let grow_pixmap () =
-  pm := new_pixmap !width !height ;
-  need_update := true 
-  (* no need to queue a redraw here, an expose 
-     event should follow the configure, right ? *)
-
-let config_cb ev =
-  let w = GdkEvent.Configure.width ev in
-  let h = GdkEvent.Configure.height ev in
-  let has_grown = w > !width || h > !height in
-  width := w ;
-  height := h ;
-  if has_grown
-  then grow_pixmap () ;
-  true
-
-let expose da x y width height =
-  let gwin = da#misc#window in
-  let d = new GDraw.drawable gwin in
-  d#put_pixmap ~x ~y ~xsrc:x ~ysrc:y ~width ~height !pm#pixmap
-
-let expose_cb da ev =
-  let area = GdkEvent.Expose.area ev in
-  let module GR = Gdk.Rectangle in
-    if !need_update (*&& editor#text#buffer#modified*) then paint ();
-    expose da (GR.x area) (GR.y area) (GR.width area) (GR.height area);
-    need_update := false;
-    true
-(*
-let button_ev da ev =
-  match GdkEvent.get_type ev with
-  | `BUTTON_RELEASE -> refresh da;true
-  | _ -> false
-
-let key_press da ev =
-  match GdkEvent. with
-  | `TOP | `BOTTOM | `LEFT | `RIGHT as x -> 
-      let dp = match x  with
-	| `TOP -> Point.cmp (0.,0.5)
-	| `BOTTOM -> Point.cmp (0.,-.0.5)
-	| `RIGHT -> Point.cmp (0.5,0.)
-	| `LEFT -> Point.cmp (-.0.5,0.) in
-	origin := Point.add !origin dp;
-	refresh da;true
-  | _ -> false
-*)
-let init packing =
-  let da = GMisc.drawing_area ~width:!width ~height:!height ~packing () in
-    da#misc#set_can_focus true ;
-    da#event#add [ `KEY_PRESS ];
-    ignore (da#event#connect#expose (expose_cb da));
-    ignore (da#event#connect#configure       (config_cb));
-(*    ignore (da#event#connect#key_press (button_ev da))*)
-
-    da
+  end
 
 
-let dda = 
-  let dda = init window2#add in
-  window2#show ();
-    dda
+module Interface =
+struct
+  type interface = {
+    window : GWindow.window;
+    main_vbox : GPack.box;
+    mutable show : bool; (* The main window is shown *)
+    mutable figda : ((unit -> Command.t) * (mlpost_fig * GWindow.window)) list}
 
-(** Editor window *)
-let create_option packing ?label l =
-  (match label with
-    | None -> ()
-    | Some text -> ignore (GMisc.label ~text ~packing ()));
-  let menu = GMenu.menu () in
-  let optionmenu = GMenu.option_menu ~packing () in
+  let new_interface ?width ?height ?title () =
+    let window = GWindow.window ?width ?height ?title () in
+    let vbox = GPack.vbox ~packing:window#add () in
+    let _ = GMenu.menu_bar ~packing:vbox#pack () in
+    ignore(window#connect#destroy ~callback:GMain.quit);
+    {window = window;main_vbox = vbox; show = false; figda = []}
+
+  let remove_fig window fig =
+    window.figda <- List.remove_assq fig window.figda
+ 
+  let add_fig w ?width ?height ?title fig =
+    let window = GWindow.window ?width ?height ?title () in
+    let mlpost_fig = new mlpost_fig ?width ?height 
+      ~packing:window#add (fig ()) in
+    w.figda <- (fig,(mlpost_fig,window))::w.figda;
+    ignore(window#connect#destroy 
+             ~callback:(fun () -> remove_fig w fig));
+    if w.show then ignore(window#show ())
+
+
+  let refresh w =
+    List.iter (fun (fig,(mlfig,_)) ->
+                 mlfig#set_fig (fig ());
+                 GtkBase.Widget.queue_draw mlfig#as_widget) w.figda
+
+
+  (** Editor window *)
+  let create_option w ~packing ?label l =
+    (match label with
+       | None -> ()
+       | Some text -> ignore (GMisc.label ~text ~packing ()));
+    let menu = GMenu.menu () in
+    let optionmenu = GMenu.option_menu ~packing () in
     optionmenu #set_menu menu;
     optionmenu #set_history 3;
     ignore (List.fold_left ~f:(fun group (s,(c:unit -> unit)) -> 
-				 let c () = c ();refresh dda in
-			 let menuitem = GMenu.radio_menu_item
-			   ?group
-			   ~label:s
-			   ~packing:menu#append () in
-			   ignore(menuitem#connect#toggled c); 
-			   Some (menuitem#group)
-		      ) ~init:None l)
+				 let c () = c ();refresh w in
+			         let menuitem = GMenu.radio_menu_item
+			           ?group
+			           ~label:s
+			           ~packing:menu#append () in
+			         ignore(menuitem#connect#toggled c); 
+			         Some (menuitem#group)
+		              ) ~init:None l)
       
-let create_option = create_option vbox#pack
-
-let create_text ?label get set =
-  (match label with
-    | None -> ()
-    | Some text -> ignore (GMisc.label ~text ~packing:vbox#pack ()));
-  let text = GText.view ~packing:vbox#pack ~show:true () in
-    text#buffer#set_text (get ());
+  let create_option w = create_option w ~packing:w.main_vbox#pack
+    
+  let create_text w ?label first set =
+    (match label with
+       | None -> ()
+       | Some text -> ignore (GMisc.label ~text ~packing:w.main_vbox#pack ()));
+    let text = GText.view ~packing:w.main_vbox#pack ~show:true () in
+    text#buffer#set_text first;
     ignore (text#buffer#connect#changed 
-	      (fun () -> set (text#buffer#get_text ());refresh dda))
+	      (fun () -> set (text#buffer#get_text ());refresh w))
 
 
+  let main w =
+    ignore(w.window#show ());
+    List.iter (fun (_,(_,window)) -> ignore(window#show ())) w.figda;
+    GMain.main ()
 
-open GdkKeysyms
-
-let main () =
-  ignore(window#connect#destroy ~callback:GMain.quit);
-  ignore(window#show ());
-  GMain.main ()
+end

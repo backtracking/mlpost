@@ -157,7 +157,7 @@ dot-contrib : lib
 
 ifeq "$(LABLGTK2)$(CAIROLABLGTK2)" "yesyes"
 lablgtk-contrib : lib
-	@echo "make: Entering directory \`$(shell pwd)/contrib/labgtk'"
+	@echo "make: Entering directory \`$(shell pwd)/contrib/lablgtk'"
 	cd contrib/lablgtk && ocamlbuild -cflags -I,$(shell pwd)/_build \
 		-cflags -I,$(LABLGTK2LIB) \
 		-cflags -I,$(CAIROLABLGTK2LIB) \

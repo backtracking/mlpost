@@ -141,8 +141,9 @@ let draw ?(logarithmic=false) ?curve_brush
     else fun v -> v in
   let scaley = Num.divn height (Num.bp ((conv ymax)-. (conv ymin))) in
   let scalex = Num.divn width (Num.bp (xmax-.xmin)) in
-  let scale (x,y) = Num.multn (Num.bp (x-.xmin)) scalex,
-              Num.multn (Num.bp ((conv y)-.(conv ymin))) scaley in
+  let scalex x = Num.multn (Num.bp (x-.xmin)) scalex in
+  let scaley y = Num.multn (Num.bp ((conv y)-.(conv ymin))) scaley in
+  let scale (x,y) = scalex x,scaley y in
   let scale_opt = function 
     | Some (x,y) -> Some (scale (x,y))
     | None -> None in
@@ -166,19 +167,21 @@ let draw ?(logarithmic=false) ?curve_brush
      for that... Currently only for ex, but we can be more 
      precise *)
   let ypitchl = 
-    if not Concrete.supported then ypitchl
+    if not Concrete.supported then
+      List.map (fun y -> (y,scaley y)) ypitchl
     else 
       let ex2 = 2. *. Concrete.float_of_num Num.ex_factor in
       let _, ypitchl = List.fold_left 
         (fun (last,acc) y -> 
-           let (_,yn) = scale (0.,y) in
+           let yn = scaley y in
            let f = Concrete.float_of_num yn in
-           if abs_float (last -. f) > ex2 
-           then (f,y::acc) else (last,acc)) 
+           if abs_float (last -. f) > ex2
+           then (f,(y,yn)::acc) else (last,acc)) 
         (infinity,[]) ypitchl in 
       ypitchl in
-  let ytick = List.map (fun y -> 
-                          let p = Point.pt (scale (0.,y)) in
+  let zero = scalex 0. in
+  let ytick = List.map (fun (y,yn) -> 
+                          let p = Point.pt (zero,yn) in
                           let (p1,p2) = (vtick p) in
                           let label = Format.sprintf "{%2.1f}" y in
                           C.seq [

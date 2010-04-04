@@ -87,13 +87,17 @@ let lattice s =
 
 (** End of the copy *)
 
-module L = Mlpost_lablgtk
+module L = Mlpost_lablgtk.Interface
+
+let _ = GMain.Main.init ()
 
 let word = ref "abcd"
 
-let () = L.create_text ~label:"lattice of subwords of"
-  (fun () -> !word) ((:=) word)
+let int = L.new_interface ()
 
-let () = L.set_fig (fun () -> lattice !word)
+let () = L.create_text int ~label:"lattice of subwords of"
+  !word ((:=) word)
 
-let () = L.main ()
+let () = L.add_fig int (fun () -> lattice !word)
+
+let () = L.main int
