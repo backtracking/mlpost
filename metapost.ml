@@ -113,18 +113,19 @@ let print_latex_error s =
   end else Printf.printf "%s\n" s
 
 let generate_aux bn ?prelude ?(pdf=false) ?eps ?(verbose=false) ?(clean=true) figl =
-  let f = bn ^ ".mp" in
-  generate_mp f ?prelude ?eps figl;
-  let s,outp =
-    Misc.call_cmd ~verbose
-      (sprintf "mpost -interaction=\"nonstopmode\" %s" f) in
-  if s <> 0 then print_latex_error outp;
-  if clean then
-    ignore (Misc.call_cmd ~verbose
-      (Printf.sprintf
-        "rm -f mpxerr.log mpxerr.tex mpxerr.aux mpxerr.dvi %s.mp %s.mpx %s.log"
-        bn bn bn));
-  if s <> 0 then exit 1
+  if figl <> [] then
+    let f = bn ^ ".mp" in
+    generate_mp f ?prelude ?eps figl;
+    let s,outp =
+      Misc.call_cmd ~verbose
+        (sprintf "mpost -interaction=\"nonstopmode\" %s" f) in
+    if s <> 0 then print_latex_error outp;
+    if clean then
+      ignore (Misc.call_cmd ~verbose
+                (Printf.sprintf
+                   "rm -f mpxerr.log mpxerr.tex mpxerr.aux mpxerr.dvi %s.mp %s.mpx %s.log"
+                   bn bn bn));
+    if s <> 0 then exit 1
 
 let generate bn ?prelude ?(pdf=false) ?eps ?verbose ?clean figl =
   generate_aux bn ?prelude ~pdf ?eps ?verbose ?clean figl;

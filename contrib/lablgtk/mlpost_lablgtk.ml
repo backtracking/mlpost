@@ -4,22 +4,6 @@
 open StdLabels
 open Mlpost
 
-
-
-
-(*let file_dialog ~title ~callback ?filename () =
-  let sel =
-    GWindow.file_selection ~title ~modal:true ?filename () in
-  ignore(sel#cancel_button#connect#clicked ~callback:sel#destroy);
-  ignore(sel#ok_button#connect#clicked ~callback:
-    begin fun () ->
-      let name = sel#filename in
-      sel#destroy ();
-      callback name
-    end);
-  sel#show ()
-*)
-
 open Format
 
 class mlpost_fig ?width ?height ?packing ?show fig =
