@@ -126,11 +126,9 @@ let rec to_tree = function
 let node i e l = Node ([Aft i,tex e],l)
 
 let place_not_simple t =
-  let width = max Box.width in
-  let height = max Box.height in
-  let set_pos = set_pos Box.center in
+  let module P = Place(Overlays_Boxlike(Box)) in
   let bplace t = Tree.to_box (to_tree t) in
-  gen_place ~width ~height ~set_pos ~place:bplace t
+  P.gen_place ~place:bplace t
 
 let tree_adv_draw t i =
   let keep e = try Some (assoq i e)

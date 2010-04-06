@@ -103,19 +103,10 @@ let call_dot orient nodes edges =
 
 (** User interface *)
 
-module type Box =
-sig
-  type abstract
-  type concrete
-  val width : abstract -> Num.t
-  val height : abstract -> Num.t
-  val center : Point.t -> abstract -> concrete
-end
-
-module Make (B : Box) =
+module Make (B : Signature.Boxlike) =
 struct
   type node = { id : int;
-                fig : B.abstract}
+                fig : B.t}
       
   type edge = node * node
 
@@ -150,7 +141,7 @@ struct
       (List.length d.nodes) (List.length d.edges);*)
     let nodes = List.map (fun (n,p) ->
                             let fig = assoc_node n nodes in
-                            B.center (ip p) fig) d.nodes in
+                            B.set_pos (ip p) fig) d.nodes in
     let edges = List.map interp_edge d.edges in
     (nodes,(edges:Mlpost.Path.t list))
 end

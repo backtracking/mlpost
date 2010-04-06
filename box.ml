@@ -172,7 +172,6 @@ let xscale n p = transform [Transform.xscaled n] p
 
 let center pt x = shift (Point.sub pt x.ctr) x
 
-
 let border pos b =
   match pos with
   | `North -> ypart (ctr b) +/ height b /./ 2.
@@ -209,7 +208,8 @@ let rec draw ?(debug=false) b =
           | Name.Internal _ -> Command.nop
           | Name.Userdef s ->
               Command.label ~pos:`Center
-              (Picture.tex ("\\tiny " ^ (Picture.escape_all s))) (north_west b)]
+              (Picture.tex ("\\tiny " ^ (Picture.escape_all s))) 
+                (north_west b)]
     else
       Command.nop
   in
@@ -294,7 +294,8 @@ let box ?style ?dx ?dy ?name ?stroke ?pen ?dash ?fill b =
   (width b) (height b) (ctr b) (Grp ([|b|], merge_maps [b] ))
 
 let path ?style ?dx ?dy ?name ?(stroke=None) ?pen ?dash ?fill p =
-  pic ?style ?dx ?dy ?name ~stroke ?pen ?dash ?fill (Picture.make (Command.draw p))
+  pic ?style ?dx ?dy ?name ~stroke ?pen ?dash ?fill
+    (Picture.make (Command.draw p))
 
 let empty ?(width=Num.zero) ?(height=Num.zero) ?style ?name ?(stroke=None)
           ?pen ?dash ?fill () =
@@ -525,7 +526,8 @@ let max_width l = Num.fold_max width Num.zero l
 let same_size ?(pos=`Center) bl =
   List.map (set_size pos ~width:(max_width bl) ~height:(max_height bl)) bl
 
-let same_height ?(pos=`Center) bl = List.map (set_height pos (max_height bl)) bl
+let same_height ?(pos=`Center) bl = 
+  List.map (set_height pos (max_height bl)) bl
 let same_width ?(pos=`Center) bl = List.map (set_width pos (max_width bl)) bl
 
 let hplace ?(padding=zero) ?(pos=`Center)
@@ -704,7 +706,8 @@ let thick_arrow ?style ?(boxed=true) ?line_color ?fill_color ?outd ?ind ?width
 
 (* Specials Points *)
 let setp name pt box =
-  let add_smap m = NMap.add (Name.Userdef name) (shift pt (empty ~name ())) m in
+  let add_smap m = 
+    NMap.add (Name.Userdef name) (shift pt (empty ~name ())) m in
   { box with
     desc =
       match box.desc with
@@ -754,3 +757,6 @@ let place posa ?(pos = opposite_position posa) ?padding a b =
     | Some padding ->
         shift (Point.mult padding (normalize (Point.sub pa (ctr a)))) c
 
+(* Boxlike *) 
+
+let set_pos = center

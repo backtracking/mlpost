@@ -106,3 +106,5 @@ let escape_latex l = Misc.generic_quote_list (escaped_to_list [] l)
 
 let escape_all = escape_latex [`Backslash;`Underscore]
 
+
+let set_pos = center

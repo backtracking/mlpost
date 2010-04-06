@@ -15,6 +15,20 @@
 (**************************************************************************)
 (** This is Mlpost *)
 
+module Signature : sig
+  type point
+  type num
+    
+  module type Boxlike =
+  sig
+    type t
+    val width : t -> num
+    val height : t -> num
+    val set_pos : point -> t -> t
+  end
+
+end
+
 (** {2 Interfaces to basic Metapost datatypes} *)
 
   (** Abstract numeric values *)
@@ -27,7 +41,7 @@ module rec Num : sig
     [float].
   *)
 
-  type t
+  type t = Signature.num
       (** The Mlpost numeric type is an abstract datatype *)
 
   (** {2 Conversion functions} *)
@@ -123,7 +137,7 @@ end
 and Point : sig
 
   (** The abstract type for points *)
-  type t
+  type t = Signature.point
 
   (**  Construct a point from two numeric values *)
   val pt : Num.t * Num.t -> t
@@ -891,7 +905,6 @@ end
 
 (** Functions to manipulate commands as if they were pictures  *)
 and Picture : sig
-
   (** Pictures are a powerful way to reuse and modify parts of a figure *)
 
   type t = Command.t
@@ -991,6 +1004,8 @@ and Picture : sig
 
   val escape_all : string -> string
 
+  val set_pos : Point.t -> t -> t
+    (** alias of center *)
 end
 
 (** Basic drawing commands *)
@@ -1152,7 +1167,7 @@ end
 
 (** A Box is a rectangle with some content and a (not necessarily rectangular)
     frame. Boxes can be placed, aligned and modified.   *)
-and Box : sig
+module Box : sig
 
   (** Boxes *)
 
@@ -1572,6 +1587,11 @@ and Box : sig
   val shift : Point.t -> t -> t
   val yscale : Num.t -> t -> t
   val xscale : Num.t -> t -> t
+
+ (** {2} Boxlike : An argument for functor of object that are similar to box *)
+
+  val set_pos : Point.t -> t -> t
+    (** same as center *)
 end
 
 (** Draw arrows and build new forms of arrows. *)
@@ -1939,27 +1959,22 @@ module Tree_adv : sig
 
   (** {2 Functions for placement} *)
 
-  val gen_place :
-    width:('a -> Num.t) ->
-    height:('a -> Num.t) ->
-    set_pos:(Point.t -> 'a -> 'b) ->
-    place:(Box.t t -> Box.t) -> 'a t -> 'b t
-    (** This is a generic function for placing trees, provided that the user
-     can give us the following functions:
-     @param width a function to compute the width of an object
-     @param height a function to compute the height of an object
-     @param set_pos a function to place an object at a certain point
-     @param place a function which knows how to place a tree of boxes - it
-     should return a box where all the boxes of the input tree appear.
-     *)
-
-  val place :
-      width:('a -> Num.t) ->
-      height:('a -> Num.t) ->
-      set_pos:(Point.t -> 'a -> 'b) -> ?ls:Num.t -> ?cs:Num.t ->
-      ?valign:Box.position -> ?halign:Box.position -> 'a t -> 'b t
-    (** This is an instance of [gen_place] using the tree drawing algorithm
-       from the module {!Tree}. *)
+  module Place (X : Signature.Boxlike) : sig
+    val gen_place :
+      place:(Box.t t -> Box.t) -> X.t t -> X.t t
+      (** This is a generic function for placing trees, provided that the user
+          can give us the following functions:
+          @param place a function which knows how to place a tree of boxes - it
+          should return a box where all the boxes of the input tree appear.
+      *)
+      
+    val place :
+      ?ls:Num.t -> ?cs:Num.t ->
+      ?valign:Box.position -> ?halign:Box.position -> 
+      X.t t -> X.t t
+      (** This is an instance of [gen_place] using the tree drawing algorithm
+          from the module {!Tree}. *)
+  end
 
   val gen_draw_arrows :
      'c -> style:(Point.t -> Point.t -> 'c) ->
@@ -2066,6 +2081,10 @@ module Tree_adv : sig
           (** Given a function to move objects of type ['a], return a
               function to move functions of type ['a spec] *)
   end
+
+  module Overlays_Boxlike (X : Signature.Boxlike):
+    Signature.Boxlike with type t = X.t Overlays.spec 
+
 end
 
 (** Create simple diagrams by placing objects in a table. Deprecated. *)

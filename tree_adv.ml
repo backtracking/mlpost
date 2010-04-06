@@ -58,28 +58,25 @@ let map_children f t =
     Node (f x child, List.map aux l) in
   aux t
 
+module Place (X : Signature.Boxlike) = struct
+  let gen_place ~place t =
+    let box_from_a z = Box.empty ~width:(X.width z) ~height:(X.height z) () in
+    let box_tree = map box_from_a t in
+    let b = place box_tree in
+    map2 (fun z e -> X.set_pos (Box.ctr (Box.sub e b)) z) t box_tree
 
-let gen_place ~width ~height ~set_pos ~place t =
-  let box_from_a z = Box.empty ~width:(width z) ~height:(height z) () in
-  let box_tree = map box_from_a t in
-  let b = place box_tree in
-  map2 (fun z e -> set_pos (Box.ctr (Box.sub e b)) z) t box_tree
-
-module Simple = struct
 
   let place ?(cs=Num.bp 5.) ?(ls=Num.bp 12.) ?(valign=`Center) ?(halign=`North)
-     t =
-      let rec aux (Node (x,l)) =
-        let l = Box.hbox ~padding:cs ~pos:halign (List.map aux l) in 
-        Box.vbox ~padding:ls ~pos:valign [x;l] in
-      aux t
+      t =
+    let rec aux (Node (x,l)) =
+      let l = Box.hbox ~padding:cs ~pos:halign (List.map aux l) in 
+      Box.vbox ~padding:ls ~pos:valign [x;l] in
+    aux t
 
-  let place ~width ~height ~set_pos ?ls ?cs ?valign ?halign t =
-    gen_place ~width ~height ~set_pos ~place:(place ?ls ?cs ?valign ?halign) t
+  let place ?ls ?cs ?valign ?halign t =
+    gen_place ~place:(place ?ls ?cs ?valign ?halign) t
 
 end
-
-let place = Simple.place
 
 open Command
 let draw to_box t = 
@@ -153,4 +150,17 @@ struct
     let set_pos sp pos =
 	List.map (fun (i,b) -> i,sp pos b)
 
+end
+
+module Overlays_Boxlike (X : Signature.Boxlike)
+  : Signature.Boxlike with type t = X.t Overlays.spec
+
+=
+struct
+  open Overlays
+  type t = X.t spec
+        
+  let width = max X.width
+  let height = max X.height
+  let set_pos = set_pos X.set_pos
 end

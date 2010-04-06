@@ -10,16 +10,7 @@ open Command
 
 (*parse <<dot1 *)
 
-module PiBox : Dot.Box 
-  with type abstract = Pi.t
-with type concrete = Pi.t = 
-struct
-  type abstract = Pi.t
-  type concrete = Pi.t
-  include Pi
-end
-
-module G = Dot.Make(PiBox)
+module G = Dot.Make(Picture)
 
 let dot1 =
   let a = G.mknode (Pi.tex "Bonjour voici un A") in
@@ -31,16 +22,8 @@ let dot1 =
   (seq nodes) ++ (seq (List.map Arrow.simple edges))
 
 (*parse >> <<dot2 *)
-module BBox : Dot.Box 
-  with type abstract = Box.t
-with type concrete = Box.t = 
-struct
-  type abstract = Box.t
-  type concrete = Box.t
-  include Box
-end
 
-module G2 = Dot.Make(BBox)
+module G2 = Dot.Make(Box)
 
 let dot2 =
   let tex s = Box.rect (Box.tex s) in
