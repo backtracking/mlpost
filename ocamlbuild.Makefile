@@ -40,7 +40,7 @@ CMXA := mlpost.cmxa mlpost_desc_options.cmxa mlpost_options.cmxa
 OBJ := mlpost_desc_options$(LIBEXT) mlpost_options$(LIBEXT)
 
 ifeq "$(OCAMLBEST)" "opt"
-all: 
+all:
 	$(OCAMLBUILD) $(CMA) $(CMXA) $(TOOL)
 
 lib:
@@ -57,10 +57,10 @@ lib:
 LIB_EXT=.cma .cmi
 endif
 
-byte : 
+byte :
 	$(OCAMLBUILD) $(CMA) tool.byte
 
-opt : 
+opt :
 	$(OCAMLBUILD) $(CMXA) tool.native
 
 check: all $(TESTS) check-examples

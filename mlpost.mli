@@ -32,7 +32,7 @@ end
 (** {2 Interfaces to basic Metapost datatypes} *)
 
   (** Abstract numeric values *)
-module rec Num : sig
+module Num : sig
 
   (** Numerics are a symbolic representation of numeric values.
     In many cases, but not always, an object of type {!Num.t} is intended to be
@@ -133,8 +133,103 @@ module rec Num : sig
   end
 end
 
+(** Definitions of many colors *)
+module Color : sig
+
+  (** Colors *)
+
+  type t
+    (** the abstract type of colors *)
+
+  val default : t
+    (** the default color is black *)
+
+  val rgb : float -> float -> float -> t
+    (** [rgb r g b] constructs the color that corresponds to the color code
+	RGB(r,g,b)  *)
+  val rgb8 : int -> int -> int -> t
+    (** similar to [rgb], but takes integers between 0 and 255 as argument *)
+
+  val cmyk : float -> float -> float -> float -> t
+    (** [cmyk c m y k] constructs the color that corresponds to the color code
+	CMYK(c,m,y,k)  *)
+
+  val rgba : float -> float -> float -> float -> t
+    (** similar to [rgb], but takes the factor of transparency *)
+  val rgb8a : int -> int -> int -> int -> t
+    (** similar to [rgb8], but takes the factor of transparency *)
+
+  val cmyka : float -> float -> float -> float -> float -> t
+    (** similar to [cmyk], but takes the factor of transparency *)
+
+  val is_opaque : t -> bool
+    (** test if the color is opaque *)
+
+  val opaque : t -> t
+    (** make a color opaque *)
+
+  val transparent : float -> t -> t
+    (** [transparent f c] multiplies by f the factor of transparency of c *)
+
+  val hsv : float -> float -> float -> t
+    (** hsv h s v convert an hsv color to an rgb.
+        0 <= h < 360, 0 <= s,v <= 1*)
+
+  (** {3 color generator} *)
+
+  val color_gen : float -> float -> (unit -> t)
+    (* color_gen s v creates a generator of colors which return a
+       different color (with saturation s and value v) each time it is
+       called. The goal is to have colors with a good contrast between
+       them. For given s and v the resutl is deterministically *)
+
+  (** {2 Predefined Colors} *)
+
+  (** {3 base colors} *)
+
+  val white : t
+  val black : t
+  val red : t
+  val blue : t
+  val green : t
+  val cyan : t
+  val yellow : t
+  val magenta : t
+
+  (** {3 lighter colors} *)
+
+  val lightred : t
+  val lightblue : t
+  val lightgreen : t
+  val lightcyan : t
+  val lightyellow : t
+  val lightmagenta : t
+
+  (** {3 grays} *)
+
+  val gray : float -> t
+  val lightgray : t
+  val mediumgray : t
+  val darkgray : t
+
+  (** {3 additional colors} *)
+
+  val orange : t
+  val purple : t
+
+  (** {3 X11-named Colors} *)
+
+  val color : string -> t
+    (** [color n] returns the RGB color associated to name [n]
+	(as defined in /etc/X11/rgb.txt). Raises [Not_found] if [n] does not
+	correspond to a color.
+        See {{:http://en.wikipedia.org/wiki/X11_color_names} this list} for an
+        overview.*)
+
+end
+
   (** Points in the plane *)
-and Point : sig
+module rec Point : sig
 
   (** The abstract type for points *)
   type t = Signature.point
@@ -764,100 +859,6 @@ and Brush : sig
 
 end
 
-(** Definitions of many colors *)
-and Color : sig
-
-  (** Colors *)
-
-  type t
-    (** the abstract type of colors *)
-
-  val default : t
-    (** the default color is black *)
-
-  val rgb : float -> float -> float -> t
-    (** [rgb r g b] constructs the color that corresponds to the color code
-	RGB(r,g,b)  *)
-  val rgb8 : int -> int -> int -> t
-    (** similar to [rgb], but takes integers between 0 and 255 as argument *)
-
-  val cmyk : float -> float -> float -> float -> t
-    (** [cmyk c m y k] constructs the color that corresponds to the color code
-	CMYK(c,m,y,k)  *)
-
-  val rgba : float -> float -> float -> float -> t
-    (** similar to [rgb], but takes the factor of transparency *)
-  val rgb8a : int -> int -> int -> int -> t
-    (** similar to [rgb8], but takes the factor of transparency *)
-
-  val cmyka : float -> float -> float -> float -> float -> t
-    (** similar to [cmyk], but takes the factor of transparency *)
-
-  val is_opaque : t -> bool
-    (** test if the color is opaque *)
-
-  val opaque : t -> t
-    (** make a color opaque *)
-
-  val transparent : float -> t -> t
-    (** [transparent f c] multiplies by f the factor of transparency of c *)
-
-  val hsv : float -> float -> float -> t
-    (** hsv h s v convert an hsv color to an rgb.
-        0 <= h < 360, 0 <= s,v <= 1*)
-
-  (** {3 color generator} *)
-
-  val color_gen : float -> float -> (unit -> t)
-    (* color_gen s v creates a generator of colors which return a
-       different color (with saturation s and value v) each time it is
-       called. The goal is to have colors with a good contrast between
-       them. For given s and v the resutl is deterministically *)
-
-  (** {2 Predefined Colors} *)
-
-  (** {3 base colors} *)
-
-  val white : t
-  val black : t
-  val red : t
-  val blue : t
-  val green : t
-  val cyan : t
-  val yellow : t
-  val magenta : t
-
-  (** {3 lighter colors} *)
-
-  val lightred : t
-  val lightblue : t
-  val lightgreen : t
-  val lightcyan : t
-  val lightyellow : t
-  val lightmagenta : t
-
-  (** {3 grays} *)
-
-  val gray : float -> t
-  val lightgray : t
-  val mediumgray : t
-  val darkgray : t
-
-  (** {3 additional colors} *)
-
-  val orange : t
-  val purple : t
-
-  (** {3 X11-named Colors} *)
-
-  val color : string -> t
-    (** [color n] returns the RGB color associated to name [n]
-	(as defined in /etc/X11/rgb.txt). Raises [Not_found] if [n] does not
-	correspond to a color.
-        See {{:http://en.wikipedia.org/wiki/X11_color_names} this list} for an
-        overview.*)
-
-end
 
 (** Apply linear transformations to objects in Mlpost *)
 and Transform : sig
@@ -1108,7 +1109,7 @@ end
 (** {2 Advanced graphical components} *)
 
 (** Rectangles, Circles, etc. *)
-module rec Shapes : sig
+module Shapes : sig
 
 (** Various Basic Geometric Shapes *)
 
