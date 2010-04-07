@@ -130,6 +130,10 @@ and path_node =
 
 and path = path_node hash_consed
 
+and matrix = 
+    { xx : num; yx : num; 
+      xy : num; yy : num; x0 : num; y0 : num; }
+
 and transform_node =
   | TRRotated of float
   | TRScaled of num
@@ -140,6 +144,7 @@ and transform_node =
   | TRZscaled of point
   | TRReflect of point * point
   | TRRotateAround of point * float
+  | TRMatrix of matrix
 
 and transform = transform_node hash_consed
 
@@ -290,6 +295,9 @@ let transform = function
   | TRZscaled p -> combine 58 p.hkey
   | TRReflect(p,q) -> combine2 59 p.hkey q.hkey
   | TRRotateAround(p,q) -> combine2 60 p.hkey (hash_float q)
+  | TRMatrix m -> 
+      List.fold_left (fun acc n -> combine2 63 acc n.hkey) 61
+        [m.x0;m.y0;m.xx;m.xy;m.yx;m.yy]
 
 let picture = function
   | PITex s -> combine 38 (hash_string s)
@@ -334,10 +342,12 @@ let command = function
   | CLabel(pic,pos,poi) -> combine3 47 pic.hkey (hash_position pos) poi.hkey
   | CDotLabel(pic,pos,poi) -> 
       combine3 48 pic.hkey (hash_position pos) poi.hkey
-  | CExternalImage (filename,spec) -> combine2 52 (hash_string filename) (hash_spec_image spec)
+  | CExternalImage (filename,spec) -> combine2 52 (hash_string filename)
+      (hash_spec_image spec)
 
 let brush b =
-  combine3 85 (hash_opt hash_color b.color) (hash_opt hash_key b.pen) (hash_opt hash_key b.dash)
+  combine3 85 (hash_opt hash_color b.color) (hash_opt hash_key b.pen)
+    (hash_opt hash_key b.dash)
 
 (** equality *)
 
@@ -496,6 +506,13 @@ let eq_transform_node t1 t2 =
       eq_hashcons p11 p21 && eq_hashcons p12 p22
   | TRRotateAround(p1,f1), TRRotateAround(p2,f2) ->
       eq_hashcons p1 p2 && eq_float f1 f2
+  | TRMatrix m1, TRMatrix m2 -> 
+      eq_hashcons m1.x0 m2.x0
+      &&  eq_hashcons m1.y0 m2.y0
+      &&  eq_hashcons m1.xx m2.xx
+      &&  eq_hashcons m1.xy m2.xy
+      &&  eq_hashcons m1.yx m2.yx
+      &&  eq_hashcons m1.yy m2.yy
   | _ -> false
 
 let eq_knot_node k1 k2 =
@@ -607,6 +624,7 @@ let mkTRShifted pt = hashtransform (TRShifted pt)
 let mkTRSlanted n = hashtransform (TRSlanted n)
 let mkTRReflect pt1 pt2 = hashtransform (TRReflect(pt1,pt2))
 let mkTRRotateAround pt f = hashtransform (TRRotateAround(pt,f))
+let mkTRMatrix m = hashtransform (TRMatrix m)
 
 (* knot *)
 

@@ -65,7 +65,9 @@ let rec num fmt = function
   | C.NGMean (f1, f2) -> fprintf fmt "(%a@ ++@ %a@,)" num f1 num f2
   | C.NName n -> pp_print_string fmt n
   | C.NLength p -> fprintf fmt "length (%a@,)" path p
-  | C.NIfnullthenelse (n,n1,n2) -> fprintf fmt "(if (%a = 0): %a else: %a fi)" num n num n1 num n2
+  | C.NIfnullthenelse (n,n1,n2) -> 
+      fprintf fmt "(if (%a = 0): %a else: %a fi)" 
+        num n num n1 num n2
 
 and float fmt f = num fmt (C.F f)
 
@@ -103,8 +105,9 @@ and transform fmt = function
   | C.TRZscaled a -> fprintf fmt "zscaled %a@," point a
   | C.TRReflect (p1,p2) -> 
       fprintf fmt "reflectedabout (%a,@ %a)@," point p1 point p2
-  | C.TRRotateAround (p,f) -> fprintf fmt "rotatedaround(%a,@ %a)@," point p float f
-
+  | C.TRRotateAround (p,f) -> 
+      fprintf fmt "rotatedaround(%a,@ %a)@," point p float f
+  | C.TRName tn -> fprintf fmt "transformed %s" tn
 and picture fmt = function
   | C.PITex s -> fprintf fmt "btex %s etex" s
   | C.PITransformed (p, tr) -> fprintf fmt "((%a) %a@,)" picture p transform tr
@@ -204,6 +207,16 @@ and command fmt  = function
       command fmt cmd;
       fprintf fmt "%s = currentpicture;@\n" pic;
       fprintf fmt "currentpicture := %s;@\n" savepic
+  | C.CDefTrans (n,t) ->
+      fprintf fmt "transform %s ;@\n\
+xpart %s = %a;@\n\
+ypart %s = %a;@\n\
+xxpart %s = %a;@\n\
+xypart %s = %a;@\n\
+yxpart %s = %a;@\n\
+yypart %s = %a;@\n@." n 
+        n num t.C.x0 n 
+        num t.C.y0 n num t.C.xx n num t.C.xy n num t.C.yx n num t.C.yy
   | C.CClip (pic,pth) -> fprintf fmt "clip %s to %a;@\n" pic path pth
   | C.CExternalImage (filename, spec) ->
       match spec with
@@ -223,4 +236,4 @@ and command fmt  = function
                 | `Inside (h,w) -> 
                     let w = C.NMin (C.NMult (h,C.F (fw/.fh)),w) in
                     printext (C.NMult (C.F (fh/.fw),w)) w
-
+                

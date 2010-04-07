@@ -74,6 +74,10 @@ and path =
   | PABBox of picture
   | PAName of name
 
+and matrix = 
+    { xx : num; yx : num; 
+      xy : num; yy : num; x0 : num; y0 : num; }
+
 and transform = 
   | TRRotated of float
   | TRScaled of num
@@ -84,6 +88,7 @@ and transform =
   | TRZscaled of point
   | TRReflect of point * point
   | TRRotateAround of point * float
+  | TRName of name
 
 and picture =
   | PITex of string
@@ -115,6 +120,7 @@ and command =
   | CDeclPoint of name * point
   | CDeclNum of name * num
   | CDefPic of name * command
+  | CDefTrans of name * matrix
   | CSimplePic of name * picture
   | CClip of name * path
   | CExternalImage of string * spec_image

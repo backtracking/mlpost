@@ -32,22 +32,22 @@ open Tree_adv
 
 let rec bin = function
   | 0 -> Node (0, [])
-  | n -> 
+  | n ->
       let (Node (_,l) as t) = bin (n-1) in
       Node (n, t :: l)
 let to_box n = Box.tex (sprintf "${2^{%d}}$" n), n
 let t = map to_box (bin 4)
 
-let t = place ~width:(fun (z,_) -> Box.width z) 
+let t = Box.place ~width:(fun (z,_) -> Box.width z)
               ~height:(fun (z,_) -> Box.height z)
               ~set_pos:(fun p (z,n) -> Box.center p z, n) t
 
-let adv_fig = 
+let adv_fig =
   let (++) = Command.(++) in
-  draw fst t ++ 
-  (fold (++) Command.nop 
+  draw fst t ++
+  (fold (++) Command.nop
     (gen_draw_arrows Command.nop
-      ~style:(fun a b -> Helpers.draw_simple_arrow a b) 
+      ~style:(fun a b -> Helpers.draw_simple_arrow a b)
       ~corner:(fun d (z,_) -> Box.corner d z) t))
 
 open Tree
@@ -76,39 +76,39 @@ let bresenham_data =
 
 (* drawing *)
 
-let bresenham0 = 
+let bresenham0 =
   let width = bp 6. and height = bp 6. in
-  let g = Box.gridi (x2+1) (y2+1) 
-    (fun i j -> 
+  let g = Box.gridi (x2+1) (y2+1)
+    (fun i j ->
       let fill = if bresenham_data.(i) = y2-j then Some Color.red else None in
       Box.empty ~width ~height ?fill ~stroke:(Some Color.black) ()) in
   Box.draw g
 
 
-let block1 = 
-  let b1 = hblock ~min_width:(width (tex "c")) 
+let block1 =
+  let b1 = hblock ~min_width:(width (tex "c"))
     [empty (); tex "A"; tex "B"; tex "c"; tex "toto"] in
   let b2 = hblock ~same_width:true
              [tex "A"; tex "B"; tex ~fill:Color.red "c"; tex "toto"] in
   draw (vbox [b1;b2])
 
-let block2 = 
+let block2 =
   draw (hblock [tex "A"; tex "B"; tex "c"; tex "toto"])
 
-let vblock1 = 
+let vblock1 =
   draw (vblock [tex "A"; tex "B"; tex "c"; tex "toto"])
 
-let hbox1 = 
+let hbox1 =
   draw (hbox ~pos:`North [tex "."; tex "B"; tex "c"; tex "toto"])
 
-let hbox2 = 
+let hbox2 =
   let s b = Box.shift (Point.p (100.,100.)) b in
   let stroke = Some Color.red in
   let b = vbox ~stroke ~pos:`West [tex "A"; s (tex "Bx") ; tex "c"; tex "toto"] in
   let t = hbox ~stroke [b;b;b] in
   draw (vbox [t;s t;t])
 
-let simple_box = 
+let simple_box =
   Box.draw (Box.rect ~stroke:(Some Color.black) (Box.empty ~width:(bp 50.) ~height:(bp 50.) ()))
 
 let hvbox =
@@ -116,9 +116,9 @@ let hvbox =
   let col = hbox [nth 0 row ; tex "D" ; tex "E"] in
   seq [ draw row; draw col ]
 
-let d1 = 
+let d1 =
   let a = circle (tex "$\\sqrt2$") in
-  let b = 
+  let b =
     shift (2. ++ 0.) (rect ~fill:Color.purple (tex "$\\pi$"))
   in
   let pen = Pen.scale (bp 3.) Pen.default in
@@ -127,7 +127,7 @@ let d1 =
     Command.draw
       ~color:Color.red
       (Path.shift (1. ++ 1.) (bpath a));
-    draw_label_arrow ~color:Color.orange ~pen 
+    draw_label_arrow ~color:Color.orange ~pen
       ~pos:`Northeast (Picture.tex "foo") (west a) (south_east b);
     box_arrow ~color:Color.blue a b;
   ]
@@ -136,7 +136,7 @@ open Box
 
 let d2 =
   let tex = tex ~stroke:(Some Color.black) in
-  let b = 
+  let b =
     hbox ~padding:(bp 10.) ~pos:`North ~stroke:(Some Color.red) ~dx:(bp 2.)
       ~dy:(bp 2.)
       [vbox ~padding:(bp 4.) ~pos:`East [tex "A"; tex "BC"; tex "D"];
@@ -173,22 +173,22 @@ let yannick style =
   draw tree
 
 
-let rec random_tree ?arrow_style ?edge_style ?stroke ?pen ?sep n = 
+let rec random_tree ?arrow_style ?edge_style ?stroke ?pen ?sep n =
   let random_tree = random_tree ?arrow_style ?edge_style ?stroke ?pen ?sep in
   let tex s = shadow (tex ~fill:Color.yellow ~stroke:(Some Color.black) s) in
   match n with
   | 1 -> leaf (tex "1")
-  | 2 -> 
-      node ?arrow_style ?edge_style ?stroke ?pen ?sep 
-        (Box.tex ~style:Box.Rect ~fill:(Color.rgb 0.5 0.3 0.2) "2") 
+  | 2 ->
+      node ?arrow_style ?edge_style ?stroke ?pen ?sep
+        (Box.tex ~style:Box.Rect ~fill:(Color.rgb 0.5 0.3 0.2) "2")
         [leaf (tex "1")]
-  | n -> 
+  | n ->
       let k = 1 + Random.int (n - 2) in
-      node ?arrow_style ?edge_style ?stroke ?pen ?sep 
-        (tex (string_of_int n)) 
+      node ?arrow_style ?edge_style ?stroke ?pen ?sep
+        (tex (string_of_int n))
         [random_tree k; random_tree (n - 1 - k)]
 
-let d2c, d2s, d2sq, d2hsq = 
+let d2c, d2s, d2sq, d2hsq =
 (*   let ls = bp (-1.0) in *)
   let stroke = Color.blue and pen = Pen.circle and arrow_style = Directed in
   draw (random_tree ~edge_style:Curve ~arrow_style ~stroke ~pen ~sep:(bp 5.) 17),
@@ -196,9 +196,9 @@ let d2c, d2s, d2sq, d2hsq =
   draw (random_tree ~edge_style:Square ~arrow_style ~stroke ~pen 17),
   draw (random_tree ~edge_style:HalfSquare ~arrow_style ~stroke ~pen 17)
 
-let d5 = 
-  let rand_tree name i = 
-    set_name name (set_stroke Color.black 
+let d5 =
+  let rand_tree name i =
+    set_name name (set_stroke Color.black
 		      (to_box (random_tree i))) in
   let t1 = rand_tree "1" 5 in
   let t2 = rand_tree "2" 6 in
@@ -213,18 +213,18 @@ let tree1 () = pic (draw (random_tree (1 + Random.int 5)))
 let rec random_tree2 = function
   | 1 -> leaf (tree1 ())
   | 2 -> node ~cs:(mm 0.2) (tree1 ()) [leaf (tree1 ())]
-  | n -> 
+  | n ->
       let k = 1 + Random.int (n - 2) in
       node ~cs:(mm 0.2) (tree1 ()) [random_tree2 k; random_tree2 (n - 1 - k)]
 
 let d6 = draw  (random_tree2 10)
 let cheno011 =
-  let p = Path.path ~cycle:jCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)] 
+  let p = Path.path ~cycle:jCurve [(0.,0.); (30.,40.); (40.,-20.); (10.,20.)]
   in
   let pen = Pen.scale (bp 1.5) Pen.circle in
   seq [Command.draw p;
    seq (List.map
-	   (fun (pos, l, i) -> 
+	   (fun (pos, l, i) ->
 	     Command.dotlabel ~pos (Picture.tex l) (point i p))
 	   [`South, "0", 0.;  `Northeast, "1", 1. ;
 	    `Southwest, "2", 2. ;  `North, "3", 3. ; `West, "4", 4. ]);
@@ -239,18 +239,18 @@ let d3 =
 
 
 
-let d4 = 
+let d4 =
   seq [cheno011;
-   iter 1 5 
-     (fun i -> 
+   iter 1 5
+     (fun i ->
 	Picture.transform [T.rotated (10. *. float i)] cheno011)
   ]
 
 let d7 =
-  let pic = 
+  let pic =
     Picture.transform [T.scaled (bp 4.)] (Picture.tex "bound this!") in
   let pbox = pathp ~style:jLine ~cycle:jLine
-    [Picture.ulcorner pic; Picture.urcorner pic; 
+    [Picture.ulcorner pic; Picture.urcorner pic;
      Picture.lrcorner pic; Picture.llcorner pic] in
     seq [pic;
      Command.draw (Picture.bbox pic);
@@ -260,10 +260,10 @@ let d7 =
      Command.dotlabel ~pos:`East (Picture.tex "urcorner") (Picture.urcorner pic);
      Command.dotlabel ~pos:`East (Picture.tex "lrcorner") (Picture.lrcorner pic);
     ]
-    
+
 let half pic = Picture.transform [Transform.scaled (bp 0.5)] pic
 
-let rec right_split n pic = 
+let rec right_split n pic =
   if n <= 0 then pic
   else
     let smaller = right_split (n-1) (half pic) in
@@ -280,7 +280,7 @@ let rec sierpinski p n =
     let p1 = Picture.beside p p in
       Picture.below p p1
 
-let d12 = 
+let d12 =
   let p1 = Picture.tex "A" in
     sierpinski p1 7
 
@@ -298,7 +298,7 @@ let f3 i = squaref (float_of_int i)
 let d14 =
   let hdash _ = Dash.scaled 0.5 Dash.withdots in
   let vdash _ = Dash.scaled 2. Dash.evenly in
-  let hvpen i = 
+  let hvpen i =
     if i mod 5 = 0 then Pen.scale (bp 2.5) Pen.default else Pen.default in
   let pen = Pen.scale (bp 4.) Pen.default in
      seq [draw_grid ~hdash ~vdash ~hpen:hvpen ~vpen:hvpen sk;
@@ -334,7 +334,7 @@ let f2 i =
   | 8 -> 4
   | 9 -> 5
   | 10 | 11 | 12 -> 6
-  | 13 -> 7 
+  | 13 -> 7
   | 14 -> 8
   | 15 | 16 | 17 -> 9
   | 18 -> 10
@@ -351,19 +351,19 @@ let flab i = (Picture.transform
 		[Transform.scaled (bp 1.7)]
 		(Picture.tex (Printf.sprintf "$f_{\\omega_%d}$" i)),
 	      `North, 19)
-	
-let instants = 
+
+let instants =
   let pen = Pen.scale (bp 2.5) Pen.default in
-  let base = 
+  let base =
     Command.draw ~pen (Path.path ~style:jLine [(0.,-65.); (280.,-65.)]) in
-  let tick i = 
+  let tick i =
     let xi = float_of_int i *. 14. in
     let yi = if f1 i = f1 (i-1) then -60. else -45. in
     let p = Path.path ~style:jLine [(xi,-65.); (xi, yi)] in
       Command.draw ~pen p
   in
-    Command.seq 
-      [base; Command.iter 0 20 tick; 
+    Command.seq
+      [base; Command.iter 0 20 tick;
        Command.label (Picture.transform [Transform.scaled two]
 			(Picture.tex "$\\omega_1$")) (p (-20., -55.))]
 
@@ -374,7 +374,7 @@ let florence =
   let dash _ = Dash.scaled 0.5 Dash.withdots in
   let dash2 = Dash.scaled 0.66 Dash.withdots in
   let dash3 = Dash.scaled 0.9 Dash.evenly in
-  let vcaption, hcaption = 
+  let vcaption, hcaption =
     let tr = [Transform.scaled (bp 1.5)] in
       Picture.transform tr (Picture.tex "\\textsf{Number of ones}"),
     Picture.transform tr (Picture.tex "\\textsf{Instants}") in
@@ -396,7 +396,7 @@ let shapes1 =
      Box.path (Shapes.round_rect (bp 55.) (bp 25.) (bp 20.) (bp 5.));
      Box.path (Shapes.round_rect (bp 70.) (bp 25.) (bp 14.) (bp 14.));
     ]
-  
+
 let shapes2 =
   Box.vbox
     [
@@ -404,7 +404,7 @@ let shapes2 =
       Shapes.arc_ellipse (f 10.) (f 10.) 0. 1.7;
       Shapes.arc_ellipse ~stroke:Color.red (f 30.) (f 10.) 0. 1.7;
       Shapes.arc_ellipse ~stroke:Color.red ~close:true (f 30.) (f 10.) 0. 1.7;
-      Shapes.arc_ellipse 
+      Shapes.arc_ellipse
 	~fill:Color.black ~stroke:Color.red (f 30.) (f 10.) 0. 1.7;
 *)
       Box.path (Shapes.ellipse (bp 10.) (bp 10.));
@@ -415,15 +415,15 @@ let shapes2 =
 let farey n =
   let u x = Num.bp (200.0 *. x) in
   let circle x y r =
-    Command.fill ~color:Color.lightgray 
+    Command.fill ~color:Color.lightgray
       (Path.shift (Point.pt (u y, u x))
-	 (Path.scale (u (2.*.r)) fullcircle)) 
-  in    
+	 (Path.scale (u (2.*.r)) fullcircle))
+  in
   let quartercircle x y r theta =
-    Command.draw 
+    Command.draw
       (Path.shift (Point.pt (u y, u x))
-	 (Path.scale (u (2.*.r)) (Path.rotate theta quartercircle))) 
-  in    
+	 (Path.scale (u (2.*.r)) (Path.rotate theta quartercircle)))
+  in
   let rec aux acc p1 q1 p2 q2 =
     let p = p1 + p2 in
     let q = q1 + q2 in
@@ -434,22 +434,22 @@ let farey n =
       let acc = aux acc p1 q1 p q in
       aux acc p q p2 q2
   in
-  let l = 
-    aux [ quartercircle 0.0 0.5 0.5 90.0; 
-	  quartercircle 1.0 0.5 0.5 180.0] 
+  let l =
+    aux [ quartercircle 0.0 0.5 0.5 90.0;
+	  quartercircle 1.0 0.5 0.5 180.0]
       0 1 1 1 in
   Picture.scale (Num.bp 30.0) (Command.seq l)
-      
-  
+
+
 let why_platform =
   let tabular l =
     "{\\begin{tabular}{l}" ^ String.concat " \\\\ " l ^ "\\end{tabular}}" in
   let dx = bp 5. and dy = bp 5. in
   let space ~name b = rect ~stroke:None ~name ~dx ~dy b in
-  let green s = 
-    space ~name:s 
+  let green s =
+    space ~name:s
       (round_rect ~dx ~dy ~stroke:None ~fill:Color.lightgreen (tex s)) in
-  let pink s = 
+  let pink s =
     space ~name:s (shadow (rect  ~dx ~dy ~fill:(Color.color "light pink")
 			      (tex ("\\large\\sf " ^ s)))) in
   let interactive = tex ~name:"interactive"
@@ -457,15 +457,15 @@ let why_platform =
   let automatic = tex ~name:"automatic"
     (tabular ["Automatic provers";
 	      "(Alt-Ergo, Simplify,"; "Yices, Z3, CVC3, etc.)"]) in
-  let b = 
+  let b =
     tabularl ~hpadding:(bp 20.) ~vpadding:(bp 30.)
-      [[green "Annotated C programs"; empty (); 
+      [[green "Annotated C programs"; empty ();
 	green "JML-annotated Java programs"];
        [pink "Caduceus"; green "Why program"; pink "Krakatoa";];
        [empty (); pink "Why"; empty ()];
        [interactive; green "verification conditions"; automatic]]
   in
-  let arrow x y = 
+  let arrow x y =
     let p = Box.cpath (get x b) (get y b) in
     Arrow.draw_thick ~line_color:Color.red ~width:(bp 4.) ~head_width:(bp 10.)
       ~fill_color:Color.red (Path.point 0. p) (Path.point 1. p)
@@ -483,9 +483,9 @@ let why_platform =
 
 (***
 let alt_ergo =
-  let b = 
+  let b =
     tabularl ~hpadding:(bp 20.) ~vpadding:(bp 30.)
-      [[green "Annotated C programs"; empty (); 
+      [[green "Annotated C programs"; empty ();
 	green "JML-annotated Java programs"];
        [pink "Caduceus"; green "Why program"; pink "Krakatoa";];
        [empty (); pink "Why"; empty ()];
@@ -494,7 +494,7 @@ let alt_ergo =
   [Box.draw b]
 ***)
 
-let rotatedbox = 
+let rotatedbox =
   let t = tex  "$A^{-1}$" in
   let b1 = Box.rotate 90. t in
   Box.draw (Box.hblock [b1;t])
@@ -515,40 +515,40 @@ let assia_schema =
     "{\\begin{tabular}{l}" ^ String.concat " \\\\ " l ^ "\\end{tabular}}" in
   let lang = tex ~stroke:(Some Color.red) "langage de developpement de preuves" in
   let genie = Box.tex "Genie logiciel formel" in
-  let moteur = 
-    tex' ~stroke:(Some Color.purple) 
+  let moteur =
+    tex' ~stroke:(Some Color.purple)
     (tabular ["moteur de"; "dev de preuves"]) in
-  let verif = 
-    tex' ~stroke:(Some Color.purple) 
+  let verif =
+    tex' ~stroke:(Some Color.purple)
     (tabular ["verificateur";" de preuves"]) in
-  let langf = 
-    Box.round_rect 
+  let langf =
+    Box.round_rect
       ~stroke:(Some Color.blue) ~pen
       ~dx:(bp 50.) ~dy:(bp 10.) (Box.tex "langage formel") in
   let h = Box.hbox ~padding:(bp 20.) [moteur;verif] in
-  let v = 
-    Box.vbox 
+  let v =
+    Box.vbox
       ~dx ~dy:(bp 10.) ~pen
       ~padding:(bp 5.) ~style ~stroke:(Some Color.orange) [lang; genie]
   in
   Box.draw (Box.vbox ~padding:(bp (-5.)) [langf; h;v])
 
-let grid_with_padding = 
+let grid_with_padding =
   let red s = rect ~stroke:None ~fill:Color.lightred (tex s) in
   let blue s = rect ~stroke:None ~fill:Color.lightblue (tex s) in
-  let b = gridl ~stroke:None ~hpadding:(bp 5.) ~vpadding:(bp 5.) 
+  let b = gridl ~stroke:None ~hpadding:(bp 5.) ~vpadding:(bp 5.)
     [[empty (); red "abc"; red "def"];
      [blue "titre 1"; red ""; red ""];
      [blue "titre 2"; red ""; red ""]]
   in
   Box.draw b
 
-let grid_with_padding_2 = 
+let grid_with_padding_2 =
   let red s = rect ~stroke:None ~fill:Color.lightred (tex s) in
   let blue s = rect ~stroke:None ~fill:Color.lightblue (tex s) in
   let pen = Pen.scale (Num.pt 1.5) Pen.circle in
-  let b = 
-    gridl ~stroke:(Some Color.white) ~pen ~hpadding:(bp 5.) ~vpadding:(bp 5.) 
+  let b =
+    gridl ~stroke:(Some Color.white) ~pen ~hpadding:(bp 5.) ~vpadding:(bp 5.)
     [[empty (); red "abc"; red "def"];
      [blue "titre 1"; red ""; red ""];
      [blue "titre 2"; red ""; red ""]]
@@ -572,15 +572,15 @@ let figs = [
   vblock1;
   yannick Box.Rect; yannick Box.Patatoid; yannick Box.Patatoid2; d1;  proval;
   d2sq; d2hsq; d2s; d2c; cheno011; d3; d4;
-  d7; 
+  d7;
   (* recursion *)
-  d11; d12 ; 
+  d11; d12 ;
   farey 17;
   (* other *)
-  florence; Box.draw shapes1; Box.draw shapes2; 
-  d14; d13; d5; 
+  florence; Box.draw shapes1; Box.draw shapes2;
+  d14; d13; d5;
 (*   d6 *)
-] 
+]
 
 let figs =
   let r = ref 0 in

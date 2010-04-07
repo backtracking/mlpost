@@ -1,5 +1,7 @@
 type point = Ctypes.point
-type t = Ctypes.matrix
+type t = Ctypes.matrix =
+    { xx : float; yx : float; xy : float; yy : float; x0 : float; y0 : float; }
+
 
 val scale : float -> t
 val rotation : float -> t

@@ -18,7 +18,7 @@
 module Signature : sig
   type point
   type num
-    
+
   module type Boxlike =
   sig
     type t
@@ -896,6 +896,12 @@ and Transform : sig
         given points *)
   val rotate_around : Point.t -> float -> t'
     (** Rotate an object by an angle given in degrees, around a given point *)
+
+  type matrix  = 
+      { xx : Num.t; yx : Num.t; 
+        xy : Num.t; yy : Num.t; x0 : Num.t; y0 : Num.t}
+
+  val explicit : matrix -> t'
 
   type t = t' list
     (** A transformation is a list of single transformations *)
@@ -1968,10 +1974,10 @@ module Tree_adv : sig
           @param place a function which knows how to place a tree of boxes - it
           should return a box where all the boxes of the input tree appear.
       *)
-      
+
     val place :
       ?ls:Num.t -> ?cs:Num.t ->
-      ?valign:Box.position -> ?halign:Box.position -> 
+      ?valign:Box.position -> ?halign:Box.position ->
       X.t t -> X.t t
       (** This is an instance of [gen_place] using the tree drawing algorithm
           from the module {!Tree}. *)
@@ -2084,7 +2090,7 @@ module Tree_adv : sig
   end
 
   module Overlays_Boxlike (X : Signature.Boxlike):
-    Signature.Boxlike with type t = X.t Overlays.spec 
+    Signature.Boxlike with type t = X.t Overlays.spec
 
 end
 
@@ -2223,8 +2229,8 @@ sig
   val draw :
     ?logarithmic : bool -> (* use a logarithmic scale for ordinate *)
     ?curve_brush : ('a -> Brush.t) -> (* how to draw a curve *)
-    ?label : ('a -> string) -> 
-    (* return the label to use in the legend. 
+    ?label : ('a -> string) ->
+    (* return the label to use in the legend.
        If no function is given the legend is not drawn *)
     ?ymin : float -> ?ymax : float ->
     xmin : float ->
@@ -2563,6 +2569,19 @@ module Concrete : sig
     val print : Format.formatter -> t -> unit
   end
 
+  module CTransform :
+  sig
+    IFDEF CAIRO THEN
+    type t = Cairo.matrix =
+        { xx : float; yx : float
+        ; xy : float; yy : float; x0 : float; y0 : float; }
+    ELSE
+    type t = 
+        { xx : float; yx : float; 
+          xy : float; yy : float; x0 : float; y0 : float; }
+    END
+  end
+
   (** {2 Compute the concrete value} *)
   val float_of_num : Num.t -> float
   val compute_nums : unit -> (Num.t -> unit) * (unit -> unit)
@@ -2571,6 +2590,8 @@ module Concrete : sig
   val cpoint_of_point : Point.t -> CPoint.t
 
   val cpath_of_path : Path.t -> CPath.t
+
+  val ctransform_of_transform : Transform.t -> CTransform.t
 
   (** {2 Compute the baselines of a tex} *)
   val baselines : string -> float list
@@ -2582,6 +2603,8 @@ module Concrete : sig
 
   val point_of_cpoint : CPoint.t -> Point.t
   val path_of_cpath : CPath.t -> Path.t
+
+  val transform_of_ctransform : CTransform.t -> Transform.t
 
     (** {2 Some options (the mlpost tool takes care of them)} *)
   val set_verbosity : bool -> unit

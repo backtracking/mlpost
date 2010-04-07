@@ -318,6 +318,12 @@ and transform t =
   | TRZscaled p -> Matrix.zscaled (point p)
   | TRReflect (p1,p2) -> Matrix.reflect (point p1) (point p2)
   | TRRotateAround (p,f) -> Matrix.rotate_around (point p) (deg2rad f)
+  | TRMatrix p -> {Ctypes.x0 = num p.Types.x0;
+                   Ctypes.y0 = num p.Types.y0;
+                   Ctypes.xx = num p.Types.xx;
+                   Ctypes.xy = num p.Types.xy;
+                   Ctypes.yx = num p.Types.yx;
+                   Ctypes.yy = num p.Types.yy}
 
 and commandpic p =
   match p.Hashcons.node with

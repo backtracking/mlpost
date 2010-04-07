@@ -132,6 +132,10 @@ and path_node = private
 
 and path = path_node hash_consed
 
+and matrix = 
+    { xx : num; yx : num; 
+      xy : num; yy : num; x0 : num; y0 : num; }
+
 and transform_node = private
   | TRRotated of float
   | TRScaled of num
@@ -142,6 +146,7 @@ and transform_node = private
   | TRZscaled of point
   | TRReflect of point * point
   | TRRotateAround of point * float
+  | TRMatrix of matrix
 
 and transform = transform_node hash_consed
 
@@ -237,6 +242,8 @@ val mkTRShifted : point -> transform
 val mkTRSlanted : num -> transform
 val mkTRReflect : point -> point -> transform
 val mkTRRotateAround : point -> float -> transform
+val mkTRMatrix : matrix -> transform
+
 
 (* knot *)
 val mkKnot : direction -> point -> direction -> knot
@@ -318,7 +325,8 @@ val mkPenTransformed: pen -> transform -> pen
 
 (* brush *)
 val mkBrush: color option -> pen option -> dash option -> brush
-val mkBrushOpt : brush option -> color option -> pen option -> dash option -> brush
+val mkBrushOpt : brush option -> color option -> pen option -> dash option 
+  -> brush
 
 (* on_off *)
 

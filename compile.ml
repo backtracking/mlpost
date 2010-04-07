@@ -332,6 +332,22 @@ and transform t =
   | TRRotateAround (p,f) ->
       let p, code = point p in
         C.TRRotateAround (p,f), code
+  | TRMatrix p ->
+      let nx0,nc0 = num p.x0 in
+      let ny0,nc1 = num p.y0 in
+      let nxx,nc2 = num p.xx in
+      let nxy,nc3 = num p.xy in
+      let nyx,nc4 = num p.yx in
+      let nyy,nc5 = num p.yy in
+      let tname = Name.transform () in
+      C.TRName tname, 
+      nc0 ++ nc1 ++ nc2 ++ nc3 ++ nc4 ++ nc5 ++ 
+        C.CDefTrans (tname,{ C.x0 = nx0;
+                             y0 = ny0;
+                             xx = nxx;
+                             xy = nxy;
+                             yx = nyx;
+                             yy = nyy})
 
 and pen p = 
     match p.Hashcons.node with

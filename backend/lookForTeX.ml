@@ -112,6 +112,8 @@ and transform acc t =
     | TRScaled f | TRSlanted f | TRXscaled f | TRYscaled f -> num acc f
     | TRShifted p | TRZscaled p | TRRotateAround (p,_)-> point acc p
     | TRReflect (p1,p2) -> point (point acc p1) p2
+    | TRMatrix p -> 
+        num (num (num (num (num (num acc p.x0) p.y0) p.xx) p.xy) p.yx) p.yy
 and dash acc d =
   match d.Hashcons.node with
     | DEvenly | DWithdots -> acc
@@ -182,4 +184,6 @@ let point arg = ct_aux point arg; Compute.point arg
 let path arg = ct_aux path arg; Compute.path arg
 let metapath arg = ct_aux metapath arg; Compute.metapath arg
 let picture arg = ct_aux picture arg; Compute.picture arg
-
+let transform arg = ct_auxl transform arg; 
+  List.fold_left (fun acc t -> Matrix.multiply acc (Compute.transform t)) 
+    Matrix.identity arg

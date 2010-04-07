@@ -166,6 +166,7 @@ and transform t =
   | TRShifted p | TRZscaled p -> point p
   | TRReflect (p1,p2) -> point p1; point p2
   | TRRotateAround (p,f) -> point p
+  | TRMatrix p -> num p.x0; num p.y0; num p.xx; num p.xy; num p.yx; num p.yy
 and command c = 
   match c.node with
   | CDraw (p, b) ->

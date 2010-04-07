@@ -16,8 +16,8 @@
 
 open Ctypes
 type point = Ctypes.point
-type t = matrix
-
+type t = matrix =
+    { xx : float; yx : float; xy : float; yy : float; x0 : float; y0 : float; }
 (* specialized negation here to avoid dependency *)
 let neg_point p = 
   { x = -.p.x; y = -.p.y}

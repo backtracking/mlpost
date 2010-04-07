@@ -86,10 +86,13 @@ module CPath =
 
   end
 
+module CTransform = Matrix
+
 let float_of_num = LookForTeX.num
 let compute_nums = LookForTeX.compute_nums
 let cpoint_of_point = LookForTeX.point
 let cpath_of_path = LookForTeX.path
+let ctransform_of_transform = LookForTeX.transform
 
 let baselines s = Picture_lib.baseline (LookForTeX.picture (Types.mkPITex s))
 
@@ -110,6 +113,14 @@ let path_of_cpath p =
   if CPath.is_closed p
   then Types.mkMPACycle Types.mkNoDir Types.mkJLine path
   else Types.mkPAofMPA path
+
+let transform_of_ctransform p = [Types.mkTRMatrix
+   {Types.x0 = Types.mkF p.Ctypes.x0;
+    Types.y0 = Types.mkF p.Ctypes.y0;
+    Types.xx = Types.mkF p.Ctypes.xx;
+    Types.xy = Types.mkF p.Ctypes.xy;
+    Types.yx = Types.mkF p.Ctypes.yx;
+    Types.yy = Types.mkF p.Ctypes.yy}]
 
 ELSE
 let supported = false
@@ -186,16 +197,24 @@ struct
 
 end
 
+module CTransform =
+struct
+  type matrix = 
+      { xx : float; yx : float; 
+        xy : float; yy : float; x0 : float; y0 : float; }
+end
+
 let float_of_num _ = not_supported "float_of_num"
 let compute_nums _ = not_supported "compute_nums"
 let cpoint_of_point _ = not_supported "cpoint_of_point"
 let cpath_of_path _ = not_supported "cpath_of_path"
 
+let ctransform_of_transform = not_supported "ctransform_of_transform"
 
 let num_of_float f = not_supported "num_of_float"
 let point_of_cpoint p = not_supported "point_of_cpoint"
 
 let path_of_cpath p = not_supported "path_of_cpath"
-
+let transform_of_ctransform = not_supported "transform_of_ctransform"
 let baselines p = not_supported "baselines"
 END

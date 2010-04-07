@@ -41,3 +41,7 @@ let point =
 let num =
   let r = ref 0 in
   fun () -> incr r; "num" ^ alpha !r
+
+let transform =
+  let r = ref 0 in
+  fun () -> incr r; "trans" ^ alpha !r
