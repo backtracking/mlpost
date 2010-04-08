@@ -19,7 +19,7 @@
 #   OCAMLC        "ocamlc" if present in the path, or a failure
 #                 or "ocamlc.opt" if present with same version number as ocamlc
 #   OCAMLOPT      "ocamlopt" (or "ocamlopt.opt" if present), or "no"
-#   OCAMLBEST     either "byte" if no native compiler was found, 
+#   OCAMLBEST     either "byte" if no native compiler was found,
 #                 or "opt" otherwise
 #   OCAMLDEP      "ocamldep"
 #   OCAMLLEX      "ocamllex" (or "ocamllex.opt" if present)
@@ -30,7 +30,7 @@
 #   OCAMLWIN32    "yes"/"no" depending on Sys.os_type = "Win32"
 #   EXE           ".exe" if OCAMLWIN32=yes, "" otherwise
 
-# check for one particular file of the sources 
+# check for one particular file of the sources
 # ADAPT THE FOLLOWING LINE TO YOUR SOURCES!
 AC_INIT(mlpost.mli)
 
@@ -61,23 +61,10 @@ else
 fi
 
 
-#Set FORPACK and abort if ocaml version is < 3.08
-case $OCAMLVERSION in
-  0.*|1.*|2.*|3.00*|3.01*|3.02*|3.03*|3.04*|3.05*|3.06*|3.07*)
-        AC_MSG_ERROR(mlpost needs ocaml version 3.08.0 or higher);;
-  3.08*)
-	FORPACK="";;
-  *)
-	FORPACK="-for-pack Mlpost";;
-esac
+# TODO put this in Makefile.in as it is no longer dependent on configure
+FORPACK="-for-pack Mlpost"
+BASICOFLAGS="-g"
 
-#Set basic OFLAGS - lower than 3.10 doesn't have -g for ocamlopt
-case $OCAMLVERSION in
-  0.*|1.*|2.*|3.00*|3.01*|3.02*|3.03*|3.04*|3.05*|3.06*|3.07*|3.08*|3.09*)
-       BASICOFLAGS="";;
-  *)
-       BASICOFLAGS="-g";;
-esac
 # then we look for ocamlopt; if not present, we issue a warning
 # if the version is not the same, we also discard it
 # we set OCAMLBEST to "opt" or "byte", whether ocamlopt is available or not
@@ -146,6 +133,20 @@ if test "$OCAMLYACC" = no ; then
 	AC_MSG_ERROR(Cannot find ocamlyacc.)
 fi
 
+# TODO does mlpost compile with 3.10.0?
+AC_CHECK_PROG(OCAMLBUILD, ocamlbuild, ocamlbuild, no)
+if test "$OCAMLBUILD" = no; then
+    AC_MSG_ERROR(Cannot find ocamlbuild.)
+else
+    AC_MSG_CHECKING(ocamlbuild version)
+    TMPVER=`$OCAMLBUILD -version | sed -n -e 's|.*ocamlbuild *\(.*\)$|\1|p' `
+    if test "$TMPVER" != "$OCAMLVERSION" ; then
+        AC_MSG_ERROR(differs from ocamlc. Aborting.)
+    else
+        AC_MSG_RESULT(ok)
+    fi
+fi
+
 AC_CHECK_PROG(OCAMLWEB,ocamlweb,ocamlweb,true)
 
 # platform
@@ -189,28 +190,6 @@ if test "$LIBDIR" = ""; then
 fi
 echo "Mlpost library will be installed in: $LIBDIR"
 
-case $OCAMLVERSION in
-  3.08|3.09|3.10.0|3.10.1*)
-        echo "Your ocaml is too old (or too buggy 3.10.0, 3.10.1). I can't compile the backend cairo without ocamlbuild"
-        OCAMLBUILD=no;;
-  *)
-        AC_CHECK_PROG(OCAMLBUILD,ocamlbuild,yes,no)
-        if test "$OCAMLBUILD" = yes; then
-           OCAMLBUILDLIB=$(ocamlbuild -where)
-           if test "$OCAMLBUILDLIB" != "${OCAMLLIB}/ocamlbuild"; then
-              OCAMLBUILD=no
-              echo "ocamlbuild present but your ocamlbuild is not compatible with your ocamlc:"
-              echo "ocamlbuild : $OCAMLBUILDLIB, ocamlc : $OCAMLLIB"
-           else
-              echo "ocamlbuild ok"
-              OCAMLBUILD=yes
-           fi
-        else
-           OCAMLBUILD=no
-           echo "With your version of ocaml you should have ocamlbuild in your path"
-        fi;;
-esac
-
 # checking for mlcairo
 if test "$USEOCAMLFIND" = yes; then
    CAIROLIB=$(ocamlfind query cairo)
@@ -250,7 +229,7 @@ else
     fi
 fi
 
-if test "$OCAMLBUILD" = yes -a "$BITSTRING" = yes; then
+if test "$BITSTRING" = yes; then
   if test "$CAIRO" = yes; then
     TAGS="-tags cairo_yes,concrete_yes"
     INCLUDELIBS="-I $CAIROLIB -I $BITSTRINGLIB"

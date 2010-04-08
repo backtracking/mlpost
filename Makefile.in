@@ -35,7 +35,7 @@ PDFVIEWER=@PDFVIEWER@
 
 # other variables set by ./configure
 OCAMLC   = @OCAMLC@
-OCAMLOPT = @OCAMLOPT@		
+OCAMLOPT = @OCAMLOPT@
 OCAMLDEP = @OCAMLDEP@
 OCAMLLEX = @OCAMLLEX@
 OCAMLYACC= @OCAMLYACC@
@@ -49,8 +49,8 @@ LIBEXT = @LIBEXT@
 OBJEXT = @OBJEXT@
 TAGS = @TAGS@
 
-INCLUDES = -I gui -I +threads @INCLUDEGTK2@ 
-BFLAGS = -dtypes $(INCLUDES) 
+INCLUDES = -I gui -I +threads @INCLUDEGTK2@
+BFLAGS = -dtypes $(INCLUDES)
 OFLAGS = @BASICOFLAGS@ -dtypes $(INCLUDES) @FORPACK@
 
 LABLGTK2 = @LABLGTK2@
@@ -65,7 +65,7 @@ CAIROLABLGTK2LIB = @CAIROLABLGTK2LIB@
 NAME = mlpost
 MLPOSTVERSION=@MLPOSTVERSION@
 
-# decide which Makefile to use 
+# decide which Makefile to use
 ifeq "@OCAMLBUILD@" "yes"
 include ocamlbuild.Makefile
 else
@@ -87,7 +87,7 @@ wc:
 
 headers:
 	headache -c headache_config.txt -h header.txt \
-	 *.in README.txt *.mli *.ml *.mll backend/*.ml backend/*.ml[iyl] 
+	 *.in README.txt *.mli *.ml *.mll backend/*.ml backend/*.ml[iyl]
 	./config.status
 
 # installation
@@ -192,7 +192,7 @@ install-bin:
 	cp -f mlpost.1 $(MANDIR)/man1
 
 uninstall:
-	rm -f $(LIBDIR)/mlpost.cmo $(LIBDIR)/mlpost.cmi $(LIBDIR)/META 
+	rm -f $(LIBDIR)/mlpost.cmo $(LIBDIR)/mlpost.cmi $(LIBDIR)/META
 	rm -f $(LIBDIR)/mlpost$(LIBEXT) $(LIBDIR)/mlpost.cmx $(addprefix $(LIBDIR)/,$(CMA)) $(addprefix $(LIBDIR)/,$(CMXA))
 	rm -f $(BINDIR)/mlpost
 	rm -f $(MANDIR)/mlpost
@@ -220,7 +220,7 @@ BACKENDFILES = backend/*ml backend/*mli backend/_tags
 DVIFILES = dvi/*mly dvi/*mll dvi/*ml dvi/*mli dvi/_tags
 CONCRETEFILES = concrete/*ml concrete/*mli concrete/_tags
 GENERATEDSOURCEFILES = version.ml myocamlbuild.ml $(GENERATED)
-GUIFILES = gui/*.mll gui/*.ml gui/_tags 
+GUIFILES = gui/*.mll gui/*.ml gui/_tags
 EXFILES = examples/Makefile examples/*.ml examples/all.template\
 	  examples/index.html examples/parse.mll examples/README examples/automaton4.tex
 CUSTOMDOCFILES = customdoc/all.template customdoc/img_doc.ml customdoc/img.ml \
@@ -233,7 +233,7 @@ export: export-source export-www export-examples export-doc
 export-source: source
 	cp export/$(TAR).gz $(FTP)
 
-source: 
+source:
 	mkdir -p export/$(EXPORTDIR)
 	cp $(filter-out $(GENERATEDSOURCEFILES), $(FILES)) export/$(EXPORTDIR)
 	mkdir -p export/$(EXPORTDIR)/backend
@@ -267,7 +267,7 @@ export-www: www/version.prehtml
 www/version.prehtml: Makefile
 	echo "<#def version>$(MLPOSTVERSION)</#def>" > www/version.prehtml
 
-export-examples: 
+export-examples:
 	$(MAKEEXAMPLES)
 	cp -f --parents examples/*.png examples/*.html $(WWW)
 
@@ -299,5 +299,5 @@ config.status: configure
 	./config.status --recheck
 
 configure: configure.in
-	autoconf 
+	autoconf
 
