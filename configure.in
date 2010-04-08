@@ -134,7 +134,7 @@ if test "$OCAMLYACC" = no ; then
 	AC_MSG_ERROR(Cannot find ocamlyacc.)
 fi
 
-# TODO does mlpost compile with 3.10.0?
+#First check that the versions for ocamlbuild are OK
 AC_CHECK_PROG(OCAMLBUILD, ocamlbuild, ocamlbuild, no)
 if test "$OCAMLBUILD" = no; then
     AC_MSG_ERROR(Cannot find ocamlbuild.)
@@ -155,6 +155,16 @@ else
           AC_MSG_RESULT(ok)
         fi ;;
     esac
+fi
+# Then check that we are dealing with ocamlbuild at the right place
+AC_MSG_CHECKING(ocamlbuild place)
+OCAMLBUILDLIB=$(ocamlbuild -where)
+if test "$OCAMLBUILDLIB" != "${OCAMLLIB}/ocamlbuild"; then
+  echo "ocamlbuild present but your ocamlbuild is not compatible with your ocamlc:"
+  echo "ocamlbuild : $OCAMLBUILDLIB, ocamlc : $OCAMLLIB"
+  AC_MSG_ERROR(ocamlbuild not at the right place)
+else
+   AC_MSG_RESULT(ok)
 fi
 
 AC_CHECK_PROG(OCAMLWEB,ocamlweb,ocamlweb,true)
