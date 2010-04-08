@@ -199,8 +199,8 @@ end
 
 module CTransform =
 struct
-  type matrix = 
-      { xx : float; yx : float; 
+  type t =
+      { xx : float; yx : float;
         xy : float; yy : float; x0 : float; y0 : float; }
 end
 
