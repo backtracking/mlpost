@@ -60,6 +60,11 @@ else
         echo "ocaml library path is $OCAMLLIB"
 fi
 
+case $OCAMLVERSION in
+  3.10.0*)
+    AC_MSG_ERROR(ocamlbuild is too buggy in this version. Aborting.)
+    ;;
+esac
 
 # TODO put this in Makefile.in as it is no longer dependent on configure
 FORPACK="-for-pack Mlpost"
