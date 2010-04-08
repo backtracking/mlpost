@@ -140,11 +140,20 @@ if test "$OCAMLBUILD" = no; then
 else
     AC_MSG_CHECKING(ocamlbuild version)
     TMPVER=`$OCAMLBUILD -version | sed -n -e 's|.*ocamlbuild *\(.*\)$|\1|p' `
-    if test "$TMPVER" != "$OCAMLVERSION" ; then
-        AC_MSG_ERROR(differs from ocamlc. Aborting.)
-    else
-        AC_MSG_RESULT(ok)
-    fi
+    case $OCAMLVERSION in
+      3.10.0*)
+        if test "$TMPVER" != "0.1"; then
+          AC_MSG_ERROR(differs from ocamlc. Aborting.)
+        else
+          AC_MSG_RESULT(ok)
+        fi ;;
+      *)
+        if test "$TMPVER" != "$OCAMLVERSION" ; then
+          AC_MSG_ERROR(differs from ocamlc. Aborting.)
+        else
+          AC_MSG_RESULT(ok)
+        fi ;;
+    esac
 fi
 
 AC_CHECK_PROG(OCAMLWEB,ocamlweb,ocamlweb,true)
