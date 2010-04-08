@@ -14,7 +14,7 @@
 (*                                                                        *)
 (**************************************************************************)
 # 16 "version.ml.in"
-let version = "@MLPOSTVERSION@"
+let version = "@PACKAGE_VERSION@"
 let date = "@TODAY@"
 let ocamlopt = "@OCAMLOPT@"
 let libdir = "@LIBDIR@"

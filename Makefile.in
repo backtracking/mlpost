@@ -63,7 +63,7 @@ CAIROLABLGTK2LIB = @CAIROLABLGTK2LIB@
 #############
 
 NAME = mlpost
-MLPOSTVERSION=@MLPOSTVERSION@
+MLPOSTVERSION=@PACKAGE_VERSION@
 
 # decide which Makefile to use
 include ocamlbuild.Makefile
