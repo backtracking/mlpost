@@ -66,11 +66,7 @@ NAME = mlpost
 MLPOSTVERSION=@MLPOSTVERSION@
 
 # decide which Makefile to use
-ifeq "@OCAMLBUILD@" "yes"
 include ocamlbuild.Makefile
-else
-include simple.Makefile
-endif
 
 # common part of both Makefiles
 ##################################
