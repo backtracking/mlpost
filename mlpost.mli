@@ -897,8 +897,8 @@ and Transform : sig
   val rotate_around : Point.t -> float -> t'
     (** Rotate an object by an angle given in degrees, around a given point *)
 
-  type matrix  = 
-      { xx : Num.t; yx : Num.t; 
+  type matrix  =
+      { xx : Num.t; yx : Num.t;
         xy : Num.t; yy : Num.t; x0 : Num.t; y0 : Num.t}
 
   val explicit : matrix -> t'
@@ -2576,8 +2576,8 @@ module Concrete : sig
         { xx : float; yx : float
         ; xy : float; yy : float; x0 : float; y0 : float; }
     ELSE
-    type t = 
-        { xx : float; yx : float; 
+    type t =
+        { xx : float; yx : float;
           xy : float; yy : float; x0 : float; y0 : float; }
     END
   end

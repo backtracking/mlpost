@@ -23,9 +23,9 @@ let tagconcrete = ref false
 
 let packages_cairo = ["cairo","@CAIROLIB@","cairo"; ]
 
-let packages () = 
-  let acc = 
-    [ 
+let packages () =
+  let acc =
+    [
       "lablgtk2","@LABLGTK2LIB@","lablgtk";
       "lablgnomecanvas","@LABLGTK2LIB@","lablgnomecanvas"; ] in
   if !tagconcrete then
@@ -34,14 +34,14 @@ let packages () =
 
 let gen_def_string () =
   let l = [] in
-  let l = if !tagconcrete then "-D CONCRETE" :: l else l in 
+  let l = if !tagconcrete then "-D CONCRETE" :: l else l in
   let l = if !tagcairo then "-D CAIRO"::l else l in
   l
 
 let string_flatten l = List.fold_left (fun acc s -> acc ^ " " ^ s) "" l
 
-let syntaxes () = 
-  let bitstring_entry = 
+let syntaxes () =
+  let bitstring_entry =
     let cmd = "camlp4o -I @BITSTRINGLIB@ bitstring.cma \
                 bitstring_persistent.cma pa_bitstring.cmo" in
      "bitstring", cmd, cmd in
@@ -158,4 +158,4 @@ let _ = dispatch begin function
         flag ["ocaml"; "doc";      "syntax_"^syntax] & S[A"-pp"; A doc];)
       (syntaxes ());
    | _ -> ()
-end 
+end

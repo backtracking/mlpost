@@ -19,14 +19,14 @@ type point = Ctypes.point
 type t = matrix =
     { xx : float; yx : float; xy : float; yy : float; x0 : float; y0 : float; }
 (* specialized negation here to avoid dependency *)
-let neg_point p = 
+let neg_point p =
   { x = -.p.x; y = -.p.y}
 
-let linear xx xy yx yy = 
+let linear xx xy yx yy =
   { xx = xx; xy = xy; yx = yx; yy = yy; x0 = 0.; y0 = 0. }
 
 (*
-let scale_mult m f = 
+let scale_mult m f =
   { xx = m.xx *. f;
     xy = m.xy *. f;
     yx = m.yx *. f;
@@ -36,13 +36,13 @@ let scale_mult m f =
   }
 *)
 
-let init_translate x y = 
+let init_translate x y =
   { xx = 1.; yx = 0.; xy = 0.; yy = 1.; x0 = x; y0 = y }
 
-let init_scale x y = 
+let init_scale x y =
   { xx = x; yx = 0.; xy = 0.; yy = y; x0 = 0.; y0 = 0. }
 
-let init_identity = 
+let init_identity =
   { xx = 1.; yx = 0.; xy = 0.; yy = 1.; x0 = 0.; y0 = 0. }
 
 let init_rotate a =
@@ -50,7 +50,7 @@ let init_rotate a =
   let c = cos a in
   { xx = c; yx = s; xy = -.s; yy = c; x0 = 0.; y0 = 0. }
 
-let multiply a b = 
+let multiply a b =
   { xx = a.xx *. b.xx +. a.yx *. b.xy ;
     yx = a.xx *. b.yx +. a.yx *. b.yy;
     xy = a.xy *. b.xx +. a.yy *. b.xy;
@@ -59,7 +59,7 @@ let multiply a b =
     y0 = a.x0 *. b.yx +. a.y0 *. b.yy +. b.y0;
   }
 
-let translate m tx ty = 
+let translate m tx ty =
   multiply (init_translate tx ty) m
 
 let translation p = init_translate p.x p.y
@@ -75,7 +75,7 @@ let reflect p1 p2 = (*TODO *) assert false
 
 let rotate m f =
   multiply (init_rotate f) m
-let rotate_around p f = 
+let rotate_around p f =
   translate (rotate (translation (neg_point p)) f) p.x p.y
 
 
@@ -85,6 +85,6 @@ let identity = init_identity
 
 let remove_translation t = { t with x0 = 0.; y0 = 0.}
 
-let print fmt m = 
-  Format.fprintf fmt "[|[|%f;%f|];[|%f;%f|];[|%f;%f|]|]" 
+let print fmt m =
+  Format.fprintf fmt "[|[|%f;%f|];[|%f;%f|];[|%f;%f|]|]"
     m.xx m.xy m.yx m.yy m.x0 m.y0

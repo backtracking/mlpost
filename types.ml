@@ -18,15 +18,15 @@ type name = string
 
 include Concrete_types
 
-type corner =  [ 
-  | `Northwest | `Northeast | `Southwest | `Southeast 
-  | `Upleft | `Upright | `Lowleft | `Lowright 
-  | `Upperleft | `Upperright | `Lowerleft | `Lowerright 
+type corner =  [
+  | `Northwest | `Northeast | `Southwest | `Southeast
+  | `Upleft | `Upright | `Lowleft | `Lowright
+  | `Upperleft | `Upperright | `Lowerleft | `Lowerright
   | `Topleft | `Topright | `Bottomleft | `Bottomright
 ]
 
-type corner_red =  [ 
-  | `Northwest | `Northeast | `Southwest | `Southeast 
+type corner_red =  [
+  | `Northwest | `Northeast | `Southwest | `Southeast
 ]
 
 type hposition = [
@@ -49,7 +49,7 @@ type position_red = [ | hposition_red | vposition_red | corner_red ]
 
 open Hashcons
 
-type num_node = 
+type num_node =
   | F of float
   | NXPart of point
   | NYPart of point
@@ -65,7 +65,7 @@ type num_node =
 
 and num = num_node hash_consed
 
-and point_node = 
+and point_node =
   | PTPair of num * num
   | PTPicCorner of commandpic * corner
   | PTPointOf of num * path
@@ -78,20 +78,20 @@ and point_node =
 
 and point = point_node hash_consed
 
-and on_off_node = 
-  | On of num 
+and on_off_node =
+  | On of num
   | Off of num
 
-and on_off = on_off_node hash_consed 
+and on_off = on_off_node hash_consed
 
-and direction_node = 
+and direction_node =
   | Vec of point
   | Curl of float
-  | NoDir 
+  | NoDir
 
 and direction = direction_node hash_consed
 
-and joint_node = 
+and joint_node =
   | JLine
   | JCurve
   | JCurveNoInflex
@@ -100,12 +100,12 @@ and joint_node =
 
 and joint = joint_node hash_consed
 
-and knot_node = 
+and knot_node =
     { knot_in : direction ; knot_p : point ; knot_out : direction }
 
 and knot = knot_node hash_consed
 
-and metapath_node = 
+and metapath_node =
   | MPAConcat of knot * joint * metapath
   | MPAKnot of knot
   | MPAAppend of metapath * joint * metapath
@@ -130,8 +130,8 @@ and path_node =
 
 and path = path_node hash_consed
 
-and matrix = 
-    { xx : num; yx : num; 
+and matrix =
+    { xx : num; yx : num;
       xy : num; yy : num; x0 : num; y0 : num; }
 
 and transform_node =
@@ -157,7 +157,7 @@ and dash_node =
 
 and dash = dash_node hash_consed
 
-and pen_node = 
+and pen_node =
   | PenCircle
   | PenSquare
   | PenFromPath of path
@@ -165,7 +165,7 @@ and pen_node =
 
 and pen = pen_node hash_consed
 
-and picture_node = 
+and picture_node =
   | PITex of string
   | PITransformed of commandpic * transform
   | PIClip of commandpic * path
@@ -216,7 +216,7 @@ let combine3 n acc1 acc2 acc3 = combine n (combine acc1 (combine acc2 acc3))
 let combine4 n acc1 acc2 acc3 acc4 = combine n (combine3 acc1 acc2 acc3 acc4)
 
 
-let num = function 
+let num = function
   | F f -> combine 1 (hash_float f)
   | NXPart p -> combine 2 p.hkey
   | NYPart p -> combine 3 p.hkey
@@ -242,7 +242,7 @@ let point = function
   | PTRotated(f,p) -> combine2 19 (hash_float f) p.hkey
   | PTTransformed(p,tr) -> combine2 20 p.hkey tr.hkey
 
-let on_off = function 
+let on_off = function
   | On n -> combine 65 n.hkey
   | Off n -> combine 66 n.hkey
 
@@ -255,14 +255,14 @@ let joint = function
   | JLine -> 67
   | JCurve -> 68
   | JCurveNoInflex -> 69
-  | JTension(f1,f2) -> combine2 70 (hash_float f1) (hash_float f2) 
+  | JTension(f1,f2) -> combine2 70 (hash_float f1) (hash_float f2)
   | JControls(p1,p2) -> combine2 71 p1.hkey p2.hkey
 
-let knot k = 
+let knot k =
   combine3 64 k.knot_in.hkey k.knot_p.hkey k.knot_out.hkey
 
 let metapath = function
-  | MPAConcat(k,j,p) -> 
+  | MPAConcat(k,j,p) ->
       combine3 85 k.hkey j.hkey p.hkey
   | MPAAppend(p1,j,p2) -> combine3 86 p1.hkey j.hkey p2.hkey
   | MPAofPA p -> combine 87 p.hkey
@@ -295,7 +295,7 @@ let transform = function
   | TRZscaled p -> combine 58 p.hkey
   | TRReflect(p,q) -> combine2 59 p.hkey q.hkey
   | TRRotateAround(p,q) -> combine2 60 p.hkey (hash_float q)
-  | TRMatrix m -> 
+  | TRMatrix m ->
       List.fold_left (fun acc n -> combine2 63 acc n.hkey) 61
         [m.x0;m.y0;m.xx;m.xy;m.yx;m.yy]
 
@@ -314,7 +314,7 @@ let dash = function
   | DWithdots -> 73
   | DScaled(f,d) -> combine2 74 (hash_float f) d.hkey
   | DShifted(p,d) -> combine2 75 p.hkey d.hkey
-  | DPattern l -> 
+  | DPattern l ->
       List.fold_left (fun acc o -> combine2 76 acc o.hkey) 77 l
 
 let pen = function
@@ -340,7 +340,7 @@ let command = function
       combine2 43 pa.hkey b.hkey
   | CFill(p,c) -> combine2 46 p.hkey (hash_color c)
   | CLabel(pic,pos,poi) -> combine3 47 pic.hkey (hash_position pos) poi.hkey
-  | CDotLabel(pic,pos,poi) -> 
+  | CDotLabel(pic,pos,poi) ->
       combine3 48 pic.hkey (hash_position pos) poi.hkey
   | CExternalImage (filename,spec) -> combine2 52 (hash_string filename)
       (hash_spec_image spec)
@@ -355,7 +355,7 @@ let brush b =
 let eq_float (f1:float) (f2:float) =
   Pervasives.compare f1 f2 == 0
 
-(* we enforce to use physical equality only on hash-consed data 
+(* we enforce to use physical equality only on hash-consed data
    of the same type *)
 let eq_hashcons (x:'a hash_consed) (y:'a hash_consed) =
   x == y
@@ -376,7 +376,7 @@ let eq_color c1 c2 = Pervasives.compare c1 c2 = 0
 
 let eq_pen_node p1 p2 =
   match p1, p2 with
-    | PenCircle, PenCircle 
+    | PenCircle, PenCircle
     | PenSquare, PenSquare -> true
     | PenFromPath p1, PenFromPath p2 ->
 	eq_hashcons p1 p2
@@ -386,7 +386,7 @@ let eq_pen_node p1 p2 =
 
 let eq_dash_node d1 d2 =
   match d1, d2 with
-  | DEvenly, DEvenly 
+  | DEvenly, DEvenly
   | DWithdots, DWithdots -> true
   | DScaled(f1,d1), DScaled(f2,d2) ->
       eq_hashcons f1 f2 && eq_hashcons d1 d2
@@ -407,35 +407,35 @@ let eq_on_off o1 o2 =
     | On n1, On n2 -> eq_hashcons n1 n2
     | _ -> false
 
-let eq_position (p1:position) (p2:position) = 
+let eq_position (p1:position) (p2:position) =
   p1 == p2 (* correct because this type contains only constants *)
 
 let eq_num_node n1 n2 =
   match n1,n2 with
     | F f1, F f2 -> eq_float f1 f2
-    | NXPart p1, NXPart p2 
+    | NXPart p1, NXPart p2
     | NYPart p1, NYPart p2 -> eq_hashcons p1 p2
-    | NAdd(n11,n12),NAdd(n21,n22) 
-    | NSub(n11,n12),NSub(n21,n22) 
-    | NMult(n11,n12),NMult(n21,n22) 
-    | NDiv(n11,n12),NDiv(n21,n22) 
-    | NMax(n11,n12),NMax(n21,n22) 
-    | NMin(n11,n12),NMin(n21,n22) 
-    | NGMean(n11,n12),NGMean(n21,n22) 
+    | NAdd(n11,n12),NAdd(n21,n22)
+    | NSub(n11,n12),NSub(n21,n22)
+    | NMult(n11,n12),NMult(n21,n22)
+    | NDiv(n11,n12),NDiv(n21,n22)
+    | NMax(n11,n12),NMax(n21,n22)
+    | NMin(n11,n12),NMin(n21,n22)
+    | NGMean(n11,n12),NGMean(n21,n22)
 	-> eq_hashcons n11 n21 && eq_hashcons n12 n22
     | NLength p1, NLength p2 -> eq_hashcons p1 p2
     | _ -> false
 
 let eq_point_node p1 p2 =
   match p1,p2 with
-    | PTPair(n11,n12),PTPair(n21,n22) -> 
-	eq_hashcons n11 n21 && eq_hashcons n12 n22 
+    | PTPair(n11,n12),PTPair(n21,n22) ->
+	eq_hashcons n11 n21 && eq_hashcons n12 n22
     | PTPicCorner(pic1,corn1), PTPicCorner(pic2,corn2) ->
-	eq_hashcons pic1 pic2 && 
+	eq_hashcons pic1 pic2 &&
         eq_position (corn1 :> position) (corn2 :> position)
     | PTPointOf(n1,p1), PTPointOf(n2,p2)
     | PTDirectionOf(n1,p1), PTDirectionOf(n2,p2)
-	-> eq_hashcons n1 n2 && eq_hashcons p1 p2 
+	-> eq_hashcons n1 n2 && eq_hashcons p1 p2
     | PTAdd(p11,p12),PTAdd(p21,p22)
     | PTSub(p11,p12),PTSub(p21,p22)
 	-> eq_hashcons p11 p21 && eq_hashcons p12 p22
@@ -461,17 +461,17 @@ let eq_metapath_node p1 p2 =
 let eq_path_node p1 p2 =
   match p1,p2 with
     | PAofMPA p1, PAofMPA p2 -> eq_hashcons p1 p2
-    | MPACycle(d1,j1,p1),MPACycle(d2,j2,p2) ->	
+    | MPACycle(d1,j1,p1),MPACycle(d2,j2,p2) ->
 	eq_hashcons d1 d2 && eq_hashcons j1 j2 && eq_hashcons p1 p2
-    | PAFullCircle, PAFullCircle 
+    | PAFullCircle, PAFullCircle
     | PAHalfCircle, PAHalfCircle
     | PAQuarterCircle, PAQuarterCircle
-    | PAUnitSquare, PAUnitSquare 
+    | PAUnitSquare, PAUnitSquare
 	-> true
     | PATransformed(p1,tr1),PATransformed(p2,tr2) ->
 	eq_hashcons p1 p2 && eq_hashcons tr1 tr2
     | PACutAfter(p11,p12),PACutAfter(p21,p22)
-    | PACutBefore(p11,p12),PACutBefore(p21,p22) 
+    | PACutBefore(p11,p12),PACutBefore(p21,p22)
 	-> eq_hashcons p11 p21 && eq_hashcons p12 p22
     | PABuildCycle(l1),PABuildCycle(l2) ->
 	eq_hashcons_list l1 l2
@@ -484,9 +484,9 @@ let eq_path_node p1 p2 =
 
 let eq_picture_node p1 p2 =
   match p1,p2 with
-    | PITex s1, PITex s2 -> 
+    | PITex s1, PITex s2 ->
         (* it actually happens that the same text appears twice *)
-        s1<>"" && s1=s2 
+        s1<>"" && s1=s2
     | PITransformed(p1,tr1), PITransformed(p2,tr2) ->
 	eq_hashcons p1 p2 && eq_hashcons tr1 tr2
     | PIClip(pi1,pa1), PIClip(pi2,pa2) ->
@@ -496,7 +496,7 @@ let eq_picture_node p1 p2 =
 let eq_transform_node t1 t2 =
   match t1,t2 with
   | TRRotated f1, TRRotated f2 -> eq_float f1 f2
-  | TRScaled n1, TRScaled n2 
+  | TRScaled n1, TRScaled n2
   | TRSlanted n1, TRSlanted n2
   | TRXscaled n1, TRXscaled n2
   | TRYscaled n1, TRYscaled n2 -> eq_hashcons n1 n2
@@ -506,7 +506,7 @@ let eq_transform_node t1 t2 =
       eq_hashcons p11 p21 && eq_hashcons p12 p22
   | TRRotateAround(p1,f1), TRRotateAround(p2,f2) ->
       eq_hashcons p1 p2 && eq_float f1 f2
-  | TRMatrix m1, TRMatrix m2 -> 
+  | TRMatrix m1, TRMatrix m2 ->
       eq_hashcons m1.x0 m2.x0
       &&  eq_hashcons m1.y0 m2.y0
       &&  eq_hashcons m1.xx m2.xx
@@ -536,15 +536,15 @@ let eq_direction_node d1 d2 =
     | Vec p1, Vec p2 -> eq_hashcons p1 p2
     | Curl f1, Curl f2 -> eq_float f1 f2
     | NoDir, NoDir -> true
-    | _ -> false 
-  
+    | _ -> false
+
 let eq_command_node c1 c2 =
   match c1,c2 with
   | CDraw(p1,b1), CDraw(p2,b2) ->
       eq_hashcons p1 p2 && eq_hashcons b1 b2
   | CFill(p1,c1), CFill(p2,c2) ->
       eq_hashcons p1 p2 && eq_opt eq_color c1 c2
-  | CLabel(pic1,pos1,poi1), CLabel(pic2,pos2,poi2) 
+  | CLabel(pic1,pos1,poi1), CLabel(pic2,pos2,poi2)
   | CDotLabel(pic1,pos1,poi1), CDotLabel(pic2,pos2,poi2) ->
       eq_hashcons pic1 pic2 && eq_position pos1 pos2 && eq_hashcons poi1 poi2
   | _ -> false
@@ -562,7 +562,7 @@ let eq_commandpic_node p1 p2 =
 
 let unsigned f x = (f x) land 0x3FFFFFFF
 
-module HashNum = 
+module HashNum =
   Hashcons.Make(struct type t = num_node
 		       let equal = eq_num_node
 		       let hash = unsigned num end)
@@ -570,7 +570,7 @@ module HashNum =
 let hashnum_table = HashNum.create 257;;
 let hashnum = HashNum.hashcons hashnum_table
 
-let mkF f = hashnum (F f) 
+let mkF f = hashnum (F f)
 let mkNAdd n1 n2 = hashnum (NAdd(n1,n2))
 let mkNSub n1 n2 = hashnum (NSub(n1,n2))
 let mkNMult n1 n2 = hashnum (NMult(n1,n2))
@@ -586,7 +586,7 @@ let mkNIfnullthenelse p n1 n2 = hashnum (NIfnullthenelse (p,n1,n2))
 (* point *)
 
 
-module HashPoint = 
+module HashPoint =
   Hashcons.Make(struct type t = point_node
 		       let equal = eq_point_node
 		       let hash = unsigned point end)
@@ -607,7 +607,7 @@ let mkPTPicCorner x y = hashpoint (PTPicCorner(x,y))
 (* transform *)
 
 
-module HashTransform = 
+module HashTransform =
   Hashcons.Make(struct type t = transform_node
 		       let equal = eq_transform_node
 		       let hash = unsigned transform end)
@@ -628,7 +628,7 @@ let mkTRMatrix m = hashtransform (TRMatrix m)
 
 (* knot *)
 
-module HashKnot = 
+module HashKnot =
   Hashcons.Make(struct type t = knot_node
 		       let equal = eq_knot_node
 		       let hash = unsigned knot end)
@@ -638,7 +638,7 @@ let hashknot = HashKnot.hashcons hashknot_table
 let mkKnot d1 p d2 = hashknot { knot_in = d1; knot_p = p; knot_out = d2 }
 
 (* metapath *)
-module HashMetaPath = 
+module HashMetaPath =
   Hashcons.Make(struct type t = metapath_node
 		       let equal = eq_metapath_node
 		       let hash = unsigned metapath end)
@@ -653,7 +653,7 @@ let mkMPAofPA p = hashmetapath (MPAofPA p)
 
 (* path *)
 
-module HashPath = 
+module HashPath =
   Hashcons.Make(struct type t = path_node
 		       let equal = eq_path_node
 		       let hash = unsigned path end)
@@ -680,7 +680,7 @@ let mkPABBox pic = hashpath (PABBox pic)
 
 (* joint *)
 
-module HashJoint = 
+module HashJoint =
   Hashcons.Make(struct type t = joint_node
 		       let equal = eq_joint_node
 		       let hash = unsigned joint end)
@@ -696,7 +696,7 @@ let mkJControls x y = hashjoint (JControls(x,y))
 
 (* direction *)
 
-module HashDir = 
+module HashDir =
   Hashcons.Make(struct type t = direction_node
 		       let equal = eq_direction_node
 		       let hash = unsigned direction end)
@@ -710,7 +710,7 @@ let mkCurl f = hashdir (Curl f)
 
 (* picture *)
 
-module HashPicture = 
+module HashPicture =
   Hashcons.Make(struct type t = picture_node
 		       let equal = eq_picture_node
 		       let hash = unsigned picture end)
@@ -724,7 +724,7 @@ let mkPIClip p pic = hashpicture (PIClip(p,pic))
 
 (* command *)
 
-module HashCommand = 
+module HashCommand =
   Hashcons.Make(struct type t = command_node
 		       let equal = eq_command_node
 		       let hash = unsigned command end)
@@ -739,7 +739,7 @@ let mkCDotLabel x y z = hashcommand (CDotLabel(x,y,z))
 let mkCExternalImage f s = hashcommand (CExternalImage (f,s))
 
 (* commandPic *)
-module HashCommandPic = 
+module HashCommandPic =
   Hashcons.Make (struct type t = commandpic_node
                         let equal = eq_commandpic_node
                         let hash = unsigned commandpic end)
@@ -752,7 +752,7 @@ let mkCommand p = hashcommandpic (Command p)
 let mkSeq l = hashcommandpic (Seq l)
 (* dash *)
 
-module HashDash = 
+module HashDash =
   Hashcons.Make(struct type t = dash_node
 		       let equal = eq_dash_node
 		       let hash = unsigned dash end)
@@ -768,7 +768,7 @@ let mkDPattern l = hashdash (DPattern l)
 
 (* pen *)
 
-module HashPen = 
+module HashPen =
   Hashcons.Make(struct type t = pen_node
 		       let equal = eq_pen_node
 		       let hash = unsigned pen end)
@@ -782,7 +782,7 @@ let mkPenFromPath p = hashpen (PenFromPath p)
 let mkPenTransformed x y = hashpen (PenTransformed(x,y))
 
 (* brush *)
-module HashBrush = 
+module HashBrush =
   Hashcons.Make(struct type t = brush_node
 		       let equal = eq_brush_node
 		       let hash = unsigned brush end)
@@ -800,7 +800,7 @@ let opt_def_map f def = function
   | None -> def
   | Some s -> f s
 
-let mkBrushOpt b c p d = 
+let mkBrushOpt b c p d =
   let b = opt_def_node {color = None; pen = None; dash = None} b in
   let b = opt_def_map (fun x -> {b with color = Some x}) b c in
   let b = opt_def_map (fun x -> {b with pen = Some x}) b p in
@@ -809,7 +809,7 @@ let mkBrushOpt b c p d =
 
 (* on_off *)
 
-module HashOnOff = 
+module HashOnOff =
   Hashcons.Make(struct type t = on_off_node
 		       let equal = eq_on_off
 		       let hash = unsigned on_off end)

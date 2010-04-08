@@ -40,5 +40,5 @@ type matrix = Types.matrix =  {
          }
 let explicit t = mkTRMatrix t
 
-(* applied the transformations in the order of the list *) 
+(* applied the transformations in the order of the list *)
 let id = []
