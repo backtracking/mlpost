@@ -50,7 +50,7 @@ let () =
   Concrete.set_t1disasm !t1disasm;
   Concrete.set_prelude2 prelude;
 
-  let bn = Filename.concat (Sys.getcwd ()) 
+  let bn = Filename.concat (Sys.getcwd ())
     (Filename.basename (Sys.argv.(0))) in
 
   let do_at_exit () =
@@ -86,10 +86,10 @@ let () =
         ignore (call_cmd ~verbose "setsid xpdf -remote mlpost _mlpost.pdf &")
     end in
 
-  (* When an exit is fired inside do_at_exit 
+  (* When an exit is fired inside do_at_exit
      the function seems to be run again *)
   let done_once = ref false in
   at_exit (fun () -> if not !done_once
-           then (done_once := true; 
+           then (done_once := true;
                  do_at_exit ()))
 

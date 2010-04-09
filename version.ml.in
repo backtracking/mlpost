@@ -39,7 +39,7 @@ let libraries =
                 ["lablgtk"; "cairo_lablgtk"; "mlpost_lablgtk"; ]);
     "cairo", ([cairolib], ["bigarray";"cairo";]);
     "bitstring", ([bitstringlib], ["bitstring"]);
-    "mlpost", ([libdir],
-               ["mlpost"; "mlpost_desc_options" ; "mlpost_options"]);
+    "mlpost", ([libdir], ["mlpost"]);
+   "mlpost_options", ([libdir], [ "mlpost_desc_options";"mlpost_options"]);
     "unix" , ([],["unix"])
   ]

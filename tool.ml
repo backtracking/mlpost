@@ -40,12 +40,17 @@ let used_libs =
   let acc = if not_cairo then acc else "cairo"::acc in
   let acc = if not_bitstring then acc else "bitstring"::acc in
   let acc = "mlpost"::acc in
+  (* mlpost_options is activated by default *)
+  let acc = "mlpost_options"::acc in
   ref acc
 
 let add_contrib x =
   if List.mem_assoc x Version.libraries then
     used_libs := x::!used_libs
   else begin Format.eprintf "contrib %s unknown" x; exit 1 end
+
+let remove_mlpost_options () =
+  used_libs := List.filter (fun s -> s <> "mlpost_options") !used_libs
 
 let add_file f =
   if not (Filename.check_suffix f ".ml") then begin
@@ -163,7 +168,8 @@ let spec = Arg.align
     "-compile-name", String (fun s -> compile_name := Some s),
     "<compile-name> Keep the compiled version of the .ml file";
     "-dont-execute", Set dont_execute, " Don't execute the mlfile";
-    "-add-nothing", Set add_nothing, " Add nothing to the file (deprecated)";
+    "-no-magic", Unit remove_mlpost_options, " Do not parse mlpost options,
+    do not call Metapost.dump";
     "-contrib", String add_contrib, " Compile with the specified contrib"
   ]@(if not_cairo
      then ["-cairo" , Unit nocairo,
