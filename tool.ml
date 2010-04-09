@@ -240,15 +240,14 @@ let compile f =
     let ext = if !native then ".native" else ".byte" in
     let exec_name = bn ^ ext in
     try
-      let args = ["-lib unix"] in
+      let args = build_args () in
       let args = args@["-no-links";!ccopt] in
-      let contrib_args = build_args () in
-      ocamlbuild (args@contrib_args) exec_name;
+      ocamlbuild args exec_name;
     with Command_failed out ->
       exit out
   end else begin begin
-    if !native then ocamlopt bn (!ccopt :: (build_args ~ext:".cmxa" ()) @ [f])
-    else ocaml (!ccopt :: (build_args ~ext:".cma" ())@ [f])
+    if !native then ocamlopt bn ((build_args ~ext:".cmxa" ()) @ [!ccopt;f])
+    else ocaml ((build_args ~ext:".cma" ())@ [!ccopt;f])
   end;
     if not !dont_clean then List.iter (fun suf -> try_remove (bn^suf))
       [".cmi";".cmo";".cmx";".o"]
