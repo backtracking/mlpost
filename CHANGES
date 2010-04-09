@@ -25,6 +25,8 @@ o Bugfix: Concrete does not complain about being unsupported for the following
 o Bugfix: Don't use "tracingchoices"
 o Bugfix #411: correct definition of objects used in Path.subpath
 o metapost errors are printed (this should rarely occur)
+* no more option -libdir
+* ocaml >= 3.10.1 is required now
 
 
 version 0.7.4, October 20th, 2009

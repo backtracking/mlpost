@@ -119,7 +119,7 @@ install-opt-dot:
 	cp -f contrib/dot/META "$(LIBDIR)_dot"
 	cp -f $(addprefix contrib/dot/_build/mlpost_dot,.cmi .cma .cmxa $(LIBEXT)) "$(LIBDIR)_dot"
 
-ifeq "$(LABLGTK2)$(CAIROLABLGTK2)" "yesyes"
+ifeq "$(LABLGTK2)$(CAIROLABLGTK2)$(USEOCAMLFIND)" "yesyesyes"
 
 install-byte-lablgtk:
 	mkdir -p $(LIBDIR)_lablgtk
@@ -160,7 +160,7 @@ install-opt-dot:
 	$(OCAMLFIND) install $(DESTDIR) mlpost_dot contrib/dot/META \
            $(addprefix contrib/dot/_build/mlpost_dot,.cmi .cma .cmxa $(LIBEXT))
 
-ifeq "$(LABLGTK2)$(CAIROLABLGTK2)" "yesyes"
+ifeq "$(LABLGTK2)$(CAIROLABLGTK2)$(USEOCAMLFIND)" "yesyesyes"
 install-byte-lablgtk:
 	$(OCAMLFIND) remove $(DESTDIR) mlpost_lablgtk
 	$(OCAMLFIND) install $(DESTDIR) mlpost_lablgtk contrib/lablgtk/META \

@@ -19,7 +19,24 @@ let date = "@TODAY@"
 let ocamlopt = "@OCAMLOPT@"
 let libdir = "@LIBDIR@"
 let include_string = "@INCLUDELIBS@"
-let cairolibs = ["@CAIROLIB@","/cairo";"@BITSTRINGLIB@","/bitstring"]
+
+let include_libs =
+  let acc1,acc2 = [], [] in
+  let acc1,acc2 =
+    if "@CAIROLIB@" = "" then "@CAIROLIB@"::acc1, "cairo"::acc2
+    else acc1, acc2 in
+  let acc1,acc2 =
+    if "@BITSTRINGLIB@" = "" then "@BITSTRINGLIB@"::acc1, "bitstring"::acc2
+    else acc1, acc2 in
+  acc1,acc2
+
+let not_cairo =
+  let have_cairo = "@CAIROLIB@" in
+  have_cairo = ""
+
+let not_bitstring =
+  let have_bitstring = "@BITSTRINGLIB@" in
+  have_bitstring = ""
 
 let cairolablgtk2lib = "@CAIROLABLGTK2LIB@"
 let lablgtk2lib = "@LABLGTK2LIB@"
@@ -27,7 +44,13 @@ let lablgtk2lib = "@LABLGTK2LIB@"
 (* (contrib_name, (include_list,lib_list)) *)
 (* The second second composante is linked in reversed order (cma,cmxa) *)
 
-let contribs =
-  [ "dot", ([libdir^"_dot"],["mlpost_dot"]);
+let libraries =
+  [
+    "dot", ([libdir^"_dot"],["mlpost_dot"]);
     "lablgtk", ([libdir^"_lablgtk";lablgtk2lib;cairolablgtk2lib],
-                ["mlpost_lablgtk"; "cairo_lablgtk";"lablgtk"])]
+                ["lablgtk"; "cairo_lablgtk"; "mlpost_lablgtk"; ]);
+    "cairo", (["@CAIROLIB@"], ["bigarray";"cairo";]);
+    "bitstring", (["@BITSTRINGLIB@"], ["unix";"bitstring"]);
+    "mlpost", ([libdir],
+               ["unix";"mlpost"; "mlpost_desc_options" ; "mlpost_options"]);
+  ]
