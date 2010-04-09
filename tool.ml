@@ -215,7 +215,7 @@ let ocaml args =
     | None -> if !dont_clean then () else Sys.remove s
     | Some s -> ()
 
-let ocamlopt bn args =
+let ocamlopt args =
   let exe = get_exec_name !compile_name in
   let cmd = Version.ocamlopt^" -o " ^ exe ^ " " ^ String.concat " " args in
   command ~outv:true cmd;
@@ -246,8 +246,9 @@ let compile f =
     with Command_failed out ->
       exit out
   end else begin begin
-    if !native then ocamlopt bn ((build_args ~ext:".cmxa" ()) @ [!ccopt;f])
-    else ocaml ((build_args ~ext:".cma" ())@ [!ccopt;f])
+    let ext = if !native then ".cmxa" else ".cma" in
+    let args = build_args ~ext () @ [!ccopt; f] in
+    if !native then ocamlopt args else ocaml args
   end;
     if not !dont_clean then List.iter (fun suf -> try_remove (bn^suf))
       [".cmi";".cmo";".cmx";".o"]
