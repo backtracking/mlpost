@@ -206,43 +206,57 @@ if test "$LIBDIR" = ""; then
 fi
 echo "Mlpost library will be installed in: $LIBDIR"
 
-# checking for mlcairo
-if test "$USEOCAMLFIND" = yes; then
-   CAIROLIB=$(ocamlfind query cairo)
+AC_ARG_ENABLE(cairo,
+  [  --enable-cairo enable the cairo backend (requires cairo library, implies --enable-concrete)[default=yes]],,
+  enable_cairo=yes)
+
+CAIRO=no
+if test "$enable_cairo" = yes; then
+  # checking for mlcairo
+  if test "$USEOCAMLFIND" = yes; then
+     CAIROLIB=$(ocamlfind query cairo)
+  fi
+
+  if test -n "$CAIROLIB";then
+     echo "ocamlfind found cairo in $CAIROLIB"
+     CAIRO=yes
+  else
+      AC_CHECK_FILE($OCAMLLIB/cairo/cairo.cma,CAIRO=yes,CAIRO=no)
+      if test "$CAIRO" = yes; then
+         CAIROLIB=$OCAMLLIB/cairo/
+      elif test -n "$OCAMLLIBLOCAL"; then
+         AC_CHECK_FILE($OCAMLLIBLOCAL/cairo/cairo.cma,CAIRO=yes,CAIRO=no)
+         if test "$CAIRO" = yes; then
+         CAIROLIB=$OCAMLLIBLOCAL/cairo/
+         fi
+      fi
+  fi
 fi
 
-if test -n "$CAIROLIB";then
-   echo "ocamlfind found cairo in $CAIROLIB"
-   CAIRO=yes
-else
-    AC_CHECK_FILE($OCAMLLIB/cairo/cairo.cma,CAIRO=yes,CAIRO=no)
-    if test "$CAIRO" = yes; then
-       CAIROLIB=$OCAMLLIB/cairo/
-    elif test -n "$OCAMLLIBLOCAL"; then
-       AC_CHECK_FILE($OCAMLLIBLOCAL/cairo/cairo.cma,CAIRO=yes,CAIRO=no)
-       if test "$CAIRO" = yes; then
-       CAIROLIB=$OCAMLLIBLOCAL/cairo/
-       fi
-    fi
-fi
+AC_ARG_ENABLE(concrete,
+  [  --enable-concrete enable concrete computations (requires bitstring library) [default=yes]],,
+  enable_concrete=yes)
 
-if test "$USEOCAMLFIND" = yes; then
-   BITSTRINGLIB=$(ocamlfind query bitstring)
-fi
+BITSTRING=no
+if test "$enable_concrete" = yes; then
+  if test "$USEOCAMLFIND" = yes; then
+     BITSTRINGLIB=$(ocamlfind query bitstring)
+  fi
 
-if test -n "$BITSTRINGLIB";then
-   echo "ocamlfind found bitstring in $BITSTRINGLIB"
-   BITSTRING=yes
-else
-    AC_CHECK_FILE($OCAMLLIB/bitstring/bitstring.cma,BITSTRING=yes,BITSTRING=no)
-    if test "$BITSTRING" = yes; then
-       BITSTRINGLIB=$OCAMLLIB/bitstring/
-    elif test -n "$OCAMLLIBLOCAL"; then
-       AC_CHECK_FILE($OCAMLLIBLOCAL/bitstring/bitstring.cma,BITSTRING=yes,BITSTRING=no)
-       if test "$BITSTRING" = yes; then
-       BITSTRINGLIB=$OCAMLLIBLOCAL/bitstring/
-       fi
-    fi
+  if test -n "$BITSTRINGLIB";then
+     echo "ocamlfind found bitstring in $BITSTRINGLIB"
+     BITSTRING=yes
+  else
+      AC_CHECK_FILE($OCAMLLIB/bitstring/bitstring.cma,BITSTRING=yes,BITSTRING=no)
+      if test "$BITSTRING" = yes; then
+         BITSTRINGLIB=$OCAMLLIB/bitstring/
+      elif test -n "$OCAMLLIBLOCAL"; then
+         AC_CHECK_FILE($OCAMLLIBLOCAL/bitstring/bitstring.cma,BITSTRING=yes,BITSTRING=no)
+         if test "$BITSTRING" = yes; then
+         BITSTRINGLIB=$OCAMLLIBLOCAL/bitstring/
+         fi
+      fi
+  fi
 fi
 
 if test "$BITSTRING" = yes; then
