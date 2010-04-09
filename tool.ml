@@ -202,27 +202,17 @@ let get_exec_name compile_name =
 let try_remove s =
   try Sys.remove s with _ -> ()
 
-let ocaml args =
-(*  match !compile_name with
-    | None when not !dont_execute ->
-        execute ~outv:true ("ocaml" ^ String.concat " " args)
-    | _ -> *)
+let ocaml_generic compiler args =
   let s = get_exec_name !compile_name in
-  let cmd = Version.ocamlc ^ String.concat " " args ^ " -o " ^ s in
+  let cmd = compiler ^ " -o " ^ s ^ " " ^ String.concat " " args in
   command ~outv:true cmd;
   execute ~outv:true s;
   match !compile_name with
     | None -> if !dont_clean then () else Sys.remove s
     | Some s -> ()
 
-let ocamlopt args =
-  let exe = get_exec_name !compile_name in
-  let cmd = Version.ocamlopt^" -o " ^ exe ^ " " ^ String.concat " " args in
-  command ~outv:true cmd;
-  execute ~outv:true exe;
-  match !compile_name with
-    | None -> if !dont_clean then () else Sys.remove exe
-    | Some s -> ()
+let ocaml = ocaml_generic Version.ocamlc
+let ocamlopt = ocaml_generic Version.ocamlopt
 
 let ocamlbuild args exec_name =
   let args =
