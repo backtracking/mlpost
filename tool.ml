@@ -208,7 +208,7 @@ let ocaml args =
         execute ~outv:true ("ocaml" ^ String.concat " " args)
     | _ -> *)
   let s = get_exec_name !compile_name in
-  let cmd = "ocamlc " ^ String.concat " " args ^ " -o " ^ s in
+  let cmd = Version.ocamlc ^ String.concat " " args ^ " -o " ^ s in
   command ~outv:true cmd;
   execute ~outv:true s;
   match !compile_name with
