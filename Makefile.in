@@ -78,6 +78,9 @@ dep:
 wc:
 	ocamlwc *.ml* backend/*.ml* -p
 
+man:
+	nroff -Tascii -mandoc mlpost.1 | less
+
 # headers
 #########
 
