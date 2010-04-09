@@ -50,7 +50,8 @@ let libraries =
     "lablgtk", ([libdir^"_lablgtk";lablgtk2lib;cairolablgtk2lib],
                 ["lablgtk"; "cairo_lablgtk"; "mlpost_lablgtk"; ]);
     "cairo", (["@CAIROLIB@"], ["bigarray";"cairo";]);
-    "bitstring", (["@BITSTRINGLIB@"], ["unix";"bitstring"]);
+    "bitstring", (["@BITSTRINGLIB@"], ["bitstring"]);
     "mlpost", ([libdir],
-               ["unix";"mlpost"; "mlpost_desc_options" ; "mlpost_options"]);
+               ["mlpost"; "mlpost_desc_options" ; "mlpost_options"]);
+    "unix" , ([],["unix"])
   ]
