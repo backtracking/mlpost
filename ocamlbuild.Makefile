@@ -155,7 +155,7 @@ dot-contrib : lib
 	@echo "make: Entering directory \`$(shell pwd)/contrib/dot'"
 	cd contrib/dot && ocamlbuild -cflags -I,$(shell pwd)/_build $(addprefix mlpost_dot,$(LIB_EXT)) && cd ../..
 
-ifeq "$(LABLGTK2)$(CAIROLABLGTK2)" "yesyes"
+ifeq "$(LABLGTK2)$(CAIROLABLGTK2)$(USEOCAMLFIND)" "yesyesyes"
 lablgtk-contrib : lib
 	@echo "make: Entering directory \`$(shell pwd)/contrib/lablgtk'"
 	cd contrib/lablgtk && ocamlbuild -cflags -I,$(shell pwd)/_build \

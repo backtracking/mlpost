@@ -1,3 +1,4 @@
+#TODO rewrite
 # all files that are generated from boxes.ml
 BOXPNGFILES := simple.png f1.png f2.png traffic.png hierarchy.png custom.png\
 		place.png place_circle.png
@@ -27,7 +28,7 @@ LABELPNGFILES := handbook3.png other27.png
 LABELOUTFILES := $(LABELPNGFILES:.png=.1)
 
 # all files that are generated from automata.ml
-AUTOMPNGFILES := automaton1.png automaton2.png automaton4.png 
+AUTOMPNGFILES := automaton1.png automaton2.png automaton4.png
 AUTOMOUTFILES := $(AUTOMPNGFILES:.png=.1)
 
 HISTPNGFILES := hist1.png
@@ -66,7 +67,7 @@ html: $(HTMLFILES)
 
 
 %.png: %.ps
-	convert -density 216 $*.ps  $@ 
+	convert -density 216 $*.ps  $@
 
 %.ps: %.1 all.template
 	sed -e 's/all/$*/' all.template > $*.tex
@@ -80,7 +81,7 @@ html: $(HTMLFILES)
 %.mps: %.1
 	cp $*.1 $*.mps
 
-automaton4.ps: automaton4.1 
+automaton4.ps: automaton4.1
 	latex automaton4.tex
 	dvips -E automaton4.dvi -o
 

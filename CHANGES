@@ -3,18 +3,20 @@ o - changes in behaviour, new features, bugfixes
 
 current
 -------
+* no more option -libdir
+* ocaml >= 3.10.1 is required now
+* module Color: the definitions of the following colors have changed:
+  lightblue, green, lightgreen, orange, lightcyan, purple, lightyellow
+  These colors are now compatible to HTML/CSS and X11 definitions
+* Box: Box.tabularl did modify the input boxes, now it leaves them unchanged
+  (reported by Julien Signoles)
 o contrib Mlpost_dot : Use graphviz (dot) to place picture, box, ...
     make contrib && make install-contrib
     mlpost -contrib dot [...]
 o module Real_plot: Plot function from float to float. It can use logarithmic
       scale.
-o module Color: new function hsv to create a color from hsv colorspace and 
+o module Color: new function hsv to create a color from hsv colorspace and
   color_gen to generate different colors using hsv colorspace
-* module Color: the definitions of the following colors have changed:
-  lightblue, green, lightgreen, orange, lightcyan, purple, lightyellow
-  These colors are now compatible to HTML/CSS and X11 definitions
-* Box: Box.tabularl did modify the input boxes, now it leaves them unchanged 
-  (reported by Julien Signoles)
 o concrete computations are now available without the Cairo library
 o option -ps with -cairo
 o adding Concrete.baseline
@@ -56,7 +58,7 @@ o Fix for Performance bug when shifting boxes
 
 version 0.7, July 23rd, 2009
 ----------------------------
-* add Point.draw and Path.draw (alias of Command.draw) which can mask 
+* add Point.draw and Path.draw (alias of Command.draw) which can mask
   Command.draw in case of an open Point after an open Command
 * Command.draw_arrow becomes Arrow.simple
 * Arrow.draw: ~pos becomes ~anchor, new ~pos is point on path
@@ -70,7 +72,7 @@ o New experimental backend using Cairo; it permits output in PS, PDF, SVG and
   same results as the old metapost backend. Please send a bug report if it is
   not the case
 o A module Concrete which permits to compute concrete values of mlpost
-  objects, e.g. the float value corresponding to an object of type Num.t , 
+  objects, e.g. the float value corresponding to an object of type Num.t ,
   the concrete point { x : float; y : float } corresponding to a Point.t, and
   so on
 o A better tree drawing algorithm (module Tree)
@@ -78,7 +80,7 @@ o new function Tree.nodel to add labels to tree edges
 o "Smart" paths to construct a path by giving only a sequence of directions
   (module Path)
 o Histograms and Radar diagrams (modules Hist and Radar)
-o The type Picture.t now is equal to the type Command.t 
+o The type Picture.t now is equal to the type Command.t
   (no more conversion needed)
 o module Box: each box has a name by default; use Box.sub to retrieve a box
   with the same name inside another
