@@ -199,8 +199,7 @@ let get_exec_name compile_name =
     | None -> Filename.temp_file "mlpost" ""
     | Some s -> normalize_filename s
 
-let try_remove s =
-  try Sys.remove s with _ -> ()
+let try_remove s = try Sys.remove s with _ -> ()
 
 let ocaml_generic compiler args =
   let s = get_exec_name !compile_name in
@@ -226,22 +225,16 @@ let ocamlbuild args exec_name =
 
 let compile f =
   let bn = Filename.chop_extension f in
-  if !use_ocamlbuild then begin
+  if !use_ocamlbuild then
     let ext = if !native then ".native" else ".byte" in
     let exec_name = bn ^ ext in
-    try
-      let args = build_args () in
-      let args = args@["-no-links";!ccopt] in
-      ocamlbuild args exec_name;
-    with Command_failed out ->
-      exit out
-  end else begin begin
+    try ocamlbuild (build_args () @ ["-no-links";!ccopt]) exec_name
+    with Command_failed out -> exit out
+  else
     let ext = if !native then ".cmxa" else ".cma" in
     let args = build_args ~ext () @ [!ccopt; f] in
-    if !native then ocamlopt args else ocaml args
-  end;
+    if !native then ocamlopt args else ocaml args;
     if not !dont_clean then List.iter (fun suf -> try_remove (bn^suf))
       [".cmi";".cmo";".cmx";".o"]
-  end
 
 let () = Queue.iter compile files
