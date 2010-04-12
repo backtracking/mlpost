@@ -29,7 +29,8 @@ let enc_int r plain =
   let cipher = logxor plain (shift_right_logical !r 8) in
   let tmp2 = add (mul (add cipher !r) c1) c2 in
   r := logand tmp2 mask16 (*rem tmp2 max16*);
-  Format.printf "ENC : @[tmp2 = %li@.er = %li@.cipher = %li@.plain = %li@]@." tmp2 er cipher plain;
+  Format.printf "ENC : @[tmp2 = %li@.er = %li@.cipher = %li@.plain = %li@]@."
+    tmp2 er cipher plain;
   cipher
 
 let dec_int r cipher =

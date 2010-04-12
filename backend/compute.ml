@@ -24,7 +24,7 @@ let bbox_offset = {P.x=2.;P.y=2.}
 
 let pi = 3.1415926535897932384626433832795029
 let pi_div_180 = pi /. 180.0
-let deg2rad f = pi_div_180 *. f 
+let deg2rad f = pi_div_180 *. f
 
 open Types
 open Hashcons
@@ -36,23 +36,20 @@ module MP = Metapath_lib
 let debug = true
 
 let memoize f fname memoize =
-  fun arg -> 
-    try
-      Hashtbl.find memoize arg.tag
-    with
-        Not_found -> 
-          let result = 
-            try 
-              f arg.node 
-            with exn -> 
-              if debug then
-                Format.printf "Compute.%s raises : %s@.@?" 
-                  fname (Printexc.to_string exn);
-              raise exn
-          in
-          Hashtbl.add memoize arg.tag result;
-          result
-              
+  fun arg ->
+    try Hashtbl.find memoize arg.tag
+    with Not_found ->
+      let result =
+        try f arg.node
+        with exn ->
+          if debug then
+            Format.printf "Compute.%s raises : %s@.@?"
+              fname (Printexc.to_string exn);
+          raise exn
+      in
+      Hashtbl.add memoize arg.tag result;
+      result
+
 
 let nop = Picture_lib.empty
 
@@ -67,7 +64,7 @@ let option_def_compile def f = function
 let middle x y = (x/.2.)+.(y/.2.)
 
 let point_of_position ecart
-  ({ P.x = xmin; y = ymin}, { P.x = xmax; y = ymax}) pos = 
+  ({ P.x = xmin; y = ymin}, { P.x = xmax; y = ymax}) pos =
     match pos_reduce pos with
     | `North -> {P.x=middle xmin xmax; y=ymax+.ecart}
     | `South -> {P.x=middle xmin xmax; y=ymin-.ecart}
@@ -79,7 +76,7 @@ let point_of_position ecart
     | `Southeast -> {P.x=xmax+.ecart;y=ymin-.ecart}
     | `Center -> {P.x = middle xmin xmax; P.y = middle ymin ymax }
 
-let anchor_of_position pos = 
+let anchor_of_position pos =
   match pos_reduce pos with
   | `North -> `South
   | `South -> `North
@@ -98,7 +95,7 @@ let path_memoize = Hashtbl.create 50
 let picture_memoize = Hashtbl.create 50
 let command_memoize = Hashtbl.create 50
 
-let clear () = 
+let clear () =
   Hashtbl.clear num_memoize;
   Hashtbl.clear point_memoize;
   Hashtbl.clear metapath_memoize;
@@ -112,7 +109,7 @@ let set_prelude = (:=) prelude
 let set_verbosity b =
   Gentex.set_verbosity b
 
-let float_to_metapost f = 
+let float_to_metapost f =
       (* Compatibility with metapost *)
       if f = infinity then 4095.99998 (* cf mpman *)
       else if f > 4095. then 4095.
@@ -121,7 +118,7 @@ let float_to_metapost f =
 
 let rec num' = function
   | F f -> (*float_to_metapost*) f
-  | NXPart p -> 
+  | NXPart p ->
       let p = point p in
       p.P.x
   | NYPart p ->
@@ -161,25 +158,25 @@ let rec num' = function
   | NLength p ->
       let p = path p in
       Spline_lib.metapost_length p
-  | NIfnullthenelse (n,n1,n2) -> 
+  | NIfnullthenelse (n,n1,n2) ->
       let n = num n in
       if n = 0. then num n1 else num n2
 
 and num n = memoize num' "num" num_memoize n
 and point' = function
-  | PTPair (f1,f2) -> 
+  | PTPair (f1,f2) ->
       let f1 = num f1 in
-      let f2 = num f2 in 
+      let f2 = num f2 in
       {P.x=f1;y=f2}
-  | PTPointOf (f,p) -> 
+  | PTPointOf (f,p) ->
       let p = path p in
       let f = Spline_lib.abscissa_of_metapost p (num f) in
       Spline_lib.abscissa_to_point p f
-  | PTDirectionOf (f,p) -> 
+  | PTDirectionOf (f,p) ->
       let p = path p in
       let f = Spline_lib.abscissa_of_metapost p (num f) in
       Spline_lib.direction_of_abscissa p f
-  | PTAdd (p1,p2) -> 
+  | PTAdd (p1,p2) ->
       let p1 = point p1 in
       let p2 = point p2 in
       P.add p1 p2
@@ -211,7 +208,7 @@ and knot k =
         let d1,d2 = MP.equalize_dir (d1,d2) in
         d1,MP.knot p,d2
 
-and joint dl j dr = 
+and joint dl j dr =
   match j.Hashcons.node with
   | JLine -> MP.line_joint
   | JCurve -> MP.curve_joint dl dr
@@ -221,9 +218,9 @@ and joint dl j dr =
       let p1 = point p1 in
       let p2 = point p2 in
       MP.controls_joint p1 p2
-and direction d = 
+and direction d =
   match d.Hashcons.node with
-  | Vec p -> 
+  | Vec p ->
       let p = point p in
       MP.vec_direction p
   | Curl f -> MP.curl_direction (float_to_metapost f)
@@ -239,15 +236,15 @@ and metapath' = function
       let p2dl,p2,p2dr = metapath p2 in
       let j = joint p1dr j p2dl in
       p1dl,MP.append p1 j p2,p2dr
-  | MPAKnot k -> 
+  | MPAKnot k ->
       let dl,p,dr = knot k in
       dl,MP.start p, dr
-  | MPAofPA p -> 
+  | MPAofPA p ->
       MP.no_direction, MP.from_path (path p), MP.no_direction
 
 and metapath p = memoize metapath' "metapath" metapath_memoize p
 and path' = function
-  | PAofMPA p -> 
+  | PAofMPA p ->
       let _,mp,_ = (metapath p) in
       MP.to_path mp
   | MPACycle (d,j,p) ->
@@ -280,24 +277,24 @@ and path' = function
       let p = commandpic p in
       let pmin,pmax = Picture_lib.bounding_box p in
       let pmin,pmax = P.sub pmin bbox_offset,P.add pmax bbox_offset in
-      Spline_lib.close 
+      Spline_lib.close
         (Spline_lib.create_lines [{P.x = pmin.P.x; y = pmin.P.y};
                                   {P.x = pmin.P.x; y = pmax.P.y};
                                   {P.x = pmax.P.x; y = pmax.P.y};
                                   {P.x = pmax.P.x; y = pmin.P.y}])
-                          
+
   | PAUnitSquare -> MP.Approx.unitsquare 1.
   | PAQuarterCircle -> MP.Approx.quartercircle 1.
   | PAHalfCircle -> MP.Approx.halfcirle 1.
   | PAFullCircle -> MP.Approx.fullcircle 1.
-and path p = (*Format.printf "path : %a@.@?" Print.path p;*) 
+and path p = (*Format.printf "path : %a@.@?" Print.path p;*)
   memoize path' "path" path_memoize p
 and picture' = function
   | PITransformed (p,tr) ->
       let tr = transform tr in
       let pic = commandpic p in
       Picture_lib.transform tr pic
-  | PITex s -> 
+  | PITex s ->
       (* With lookfortex we never pass this point *)
       let tex = List.hd (Gentex.create !prelude [s]) in
       Picture_lib.tex tex
@@ -307,14 +304,14 @@ and picture' = function
       Picture_lib.clip pic pth
 
 and picture p = memoize picture' "picture" picture_memoize p
-and transform t = 
+and transform t =
   match t.Hashcons.node with
   | TRRotated f -> Matrix.rotation (deg2rad f)
   | TRScaled f -> Matrix.scale (num f)
   | TRSlanted f -> Matrix.slanted (num f)
   | TRXscaled f -> Matrix.xscaled (num f)
   | TRYscaled f -> Matrix.yscaled (num f)
-  | TRShifted p -> 
+  | TRShifted p ->
       let p = point p in
       Matrix.translation p
   | TRZscaled p -> Matrix.zscaled (point p)
@@ -335,16 +332,16 @@ and commandpic p =
       begin match l with
       | [] -> Picture_lib.empty
       | [x] -> commandpic x
-      | (x::r) -> 
-          List.fold_left 
+      | (x::r) ->
+          List.fold_left
           (fun acc c -> Picture_lib.on_top acc (commandpic c)) (commandpic x) r
       end
 
-and dash d = 
+and dash d =
     match d.Hashcons.node with
   | DEvenly -> Picture_lib.Dash.line
   | DWithdots -> Picture_lib.Dash.dots
-  | DScaled (f, d) -> 
+  | DScaled (f, d) ->
       let f = num f in
       let d = dash d in
       Picture_lib.Dash.scale f d
@@ -356,11 +353,11 @@ and dash d =
       let l = List.map dash_pattern l in
       Picture_lib.Dash.pattern l
 
-and dash_pattern o = 
+and dash_pattern o =
     match o.Hashcons.node with
       | On f -> Picture_lib.Dash.On (num f)
       | Off f -> Picture_lib.Dash.Off (num f)
-	
+
 and command' = function
   | CDraw (p, b) ->
       let p = path p in
@@ -368,13 +365,13 @@ and command' = function
       let pe = (option_def_compile default_pen pen) pe in
       let dsh = (option_compile dash) dsh in
       Picture_lib.stroke_path p c pe dsh
-  | CFill (p, c) -> 
+  | CFill (p, c) ->
       let p = path p in
       Picture_lib.fill_path p c
-  | CDotLabel (pic, pos, pt) -> 
-      Picture_lib.on_top (Picture_lib.draw_point (point pt)) 
+  | CDotLabel (pic, pos, pt) ->
+      Picture_lib.on_top (Picture_lib.draw_point (point pt))
         (command (mkCLabel pic pos pt))
-  | CLabel (pic, pos ,pt) -> 
+  | CLabel (pic, pos ,pt) ->
       let pic = commandpic pic in
       let pt = point pt in
       let mm = (Picture_lib.bounding_box pic) in
@@ -382,7 +379,7 @@ and command' = function
       let pos = (point_of_position default_labeloffset mm anchor) in
       let tr = Matrix.translation (P.sub pt pos) in
       Picture_lib.transform tr pic
-  | CExternalImage (filename,sp) -> 
+  | CExternalImage (filename,sp) ->
       Picture_lib.external_image filename (spec sp)
 and spec = function
   | `Exact (n1,n2) -> `Exact (num n1, num n2)
@@ -390,7 +387,7 @@ and spec = function
   | `Width n -> `Width (num n)
   | `Inside (n1,n2) -> `Inside (num n1, num n2)
   | `None -> `None
-and pen p = 
+and pen p =
   (* TODO : the bounding box is not aware of the pen size *)
   match p.Hashcons.node with
     | PenCircle -> Matrix.identity

@@ -34,14 +34,14 @@ let rec iter_after f after = function
   | [a] -> f a
   | a::l -> f a; after a;iter_after f after l
 
-let error_replace_by_tex msg_error f arg = 
+let error_replace_by_tex msg_error f arg =
   match msg_error with
   | None -> f arg
-  | Some w -> try f arg with exn -> 
+  | Some w -> try f arg with exn ->
       let msg = sprintf "Error : %s" (Printexc.to_string exn) in
       let msg = Picture.escape_all msg in
       printf "%s@." msg;
-      f (Types.mkPicture (Types.mkPITex (sprintf 
+      f (Types.mkPicture (Types.mkPITex (sprintf
 "\\begin{minipage}{%f pt}
 %s
 \\end{minipage}
@@ -50,26 +50,26 @@ let error_replace_by_tex msg_error f arg =
 let min_if_inf = {x= -1.;y= -1.}
 let max_if_inf = {x= 1.;y= 1.}
 
-let emit_gen ?msg_error create next_page figs = 
+let emit_gen ?msg_error create next_page figs =
   (*Format.printf "Fig : %a@." Print.commandpic (List.hd figs);*)
-  let figs = LookForTeX.commandpicl_error 
-    (error_replace_by_tex msg_error) figs in
+  let figs =
+    LookForTeX.commandpicl_error (error_replace_by_tex msg_error) figs in
   let (min,max) = Point_lib.list_min_max Picture_lib.bounding_box figs in
   let min = norm_infinity min_if_inf min in
   let max = norm_infinity max_if_inf max in
   let ({x=xmin;y=ymin},{x=xmax;y=ymax}) = min,max in
   (*Point_lib.sub min Compute.bbox_offset,
     Point_lib.add max Compute.bbox_offset in*)
-  
+
   let height = ymax -. ymin in
   let width = xmax -. xmin in
   let not_null f = if f <= 0. then 1. else f in
   let height = not_null height and width = not_null width in
-  let figs = List.map (fun fig -> Picture_lib.shift fig (-.xmin) (-.ymin)) 
+  let figs = List.map (fun fig -> Picture_lib.shift fig (-.xmin) (-.ymin))
     figs in
  (*  try *)
-    create (fun cr -> 
-              iter_after (Draw.Picture.draw cr width height) 
+    create (fun cr ->
+              iter_after (Draw.Picture.draw cr width height)
                 (next_page cr) figs
            ) height width
  (*  with Cairo.Error e -> invalid_arg  *)
@@ -77,32 +77,32 @@ let emit_gen ?msg_error create next_page figs =
 
 let dumb_next_page _ _ = assert false
 
-let emit_pdf ?msg_error fname fig = 
-  emit_gen ?msg_error 
+let emit_pdf ?msg_error fname fig =
+  emit_gen ?msg_error
     (create Cairo_pdf.surface_create_for_channel fname) dumb_next_page [fig]
-let emit_ps fname fig = 
-  emit_gen (create Cairo_ps.surface_create_for_channel fname) 
+let emit_ps fname fig =
+  emit_gen (create Cairo_ps.surface_create_for_channel fname)
     dumb_next_page [fig]
-let emit_svg fname fig = 
-  emit_gen (create Cairo_svg.surface_create_for_channel fname) 
+let emit_svg fname fig =
+  emit_gen (create Cairo_svg.surface_create_for_channel fname)
     dumb_next_page [fig]
-let emit_png fname fig = emit_gen 
+let emit_png fname fig = emit_gen
   (fun draw height width ->
      let width = int_of_float (ceil width) in
      let height = int_of_float (ceil height) in
-     let surf = Cairo.image_surface_create 
+     let surf = Cairo.image_surface_create
        Cairo.FORMAT_ARGB32 ~width ~height in
      let cr = (Cairo.create surf) in
      draw cr;
      Cairo_png.surface_write_to_file surf fname) dumb_next_page [fig]
 
-let emit_cairo cairo (width,height) fig = 
+let emit_cairo cairo (width,height) fig =
   (*Compute.clear (); LookForTeX.clear ();*)
   let fig = LookForTeX.commandpic fig in
   Draw.Picture.draw cairo width height fig
 
-let emit_pdfs fname figs = emit_gen 
-  (create Cairo_pdf.surface_create_for_channel fname) 
+let emit_pdfs fname figs = emit_gen
+  (create Cairo_pdf.surface_create_for_channel fname)
   (fun cr _ -> Cairo.show_page cr) figs
 
 

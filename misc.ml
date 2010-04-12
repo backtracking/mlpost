@@ -37,6 +37,7 @@ let rec print_list sep prf fmt = function
 let space fmt () = Format.fprintf fmt "@ "
 let comma fmt () = Format.fprintf fmt ",@ "
 let semicolon fmt () = Format.fprintf fmt ";@ "
+let newline fmt () = Format.fprintf fmt "@\n "
 
 let rec fold_from_to f acc a b =
   if a <= b then fold_from_to f (f acc a) (a+1) b else acc
