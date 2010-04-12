@@ -135,8 +135,8 @@ let build_args ?ext () =
     | Some ext -> "-I"::libdir::acc in
   List.fold_left (fun acc c ->
     let llibdir,llib = List.assoc c !libraries in
-    let acc = List.fold_left include_ acc llibdir in
     let acc = List.fold_right lib_ext llib acc in
+    let acc = List.fold_left include_ acc llibdir in
     acc) [] !used_libs
 
  (* The option have the same behavior but
