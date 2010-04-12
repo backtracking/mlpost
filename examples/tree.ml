@@ -148,11 +148,11 @@ let mytree_placed =
   
 
 
-let tree_adv0 = tree_adv_draw mytree_placed 0
+let tree12 = tree_adv_draw mytree_placed 0
 (*parse >> <<tree_adv1 *)
-let tree_adv1 = tree_adv_draw mytree_placed 1
+let tree13 = tree_adv_draw mytree_placed 1
 (*parse >> <<tree_adv2 *)
-let tree_adv2 = tree_adv_draw mytree_placed 2
+let tree14 = tree_adv_draw mytree_placed 2
 
 (*parse >> *)
 
@@ -169,7 +169,7 @@ let _ =
     "tree9", tree9;
     "tree10", tree10;
     "tree11", tree11;
-    "tree_adv0", tree_adv0;
-    "tree_adv1", tree_adv1;
-    "tree_adv2", tree_adv2;
+    "tree12", tree12;
+    "tree13", tree13;
+    "tree14", tree14;
   ]

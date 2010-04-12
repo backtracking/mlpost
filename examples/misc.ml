@@ -8,7 +8,7 @@ open Helpers
 
 (*parse <<togglescript>> *)
 
-(*parse <<bresenham *)
+(*parse <<misc1 *)
 (* the data to plot are computed here *)
 
 let x2 = 9
@@ -38,7 +38,7 @@ let grid w h d f =
        iter 0 w (fun i -> draw ~pen (pathn [p i 0; p i h]));
        iter 0 h (fun j -> draw ~pen (pathn [p 0 j; p w j]))]
 
-let bresenham = 
+let misc1 = 
   let d = 10. in
   let p i j = bp (float i *. d), bp (float j *. d) in
   let p2 i j = bp ((0.5 +. float i) *. d), bp ((0.5 +. float j) *. d) in
@@ -62,8 +62,8 @@ let bresenham =
 
 open Diag
 
-(*parse <<cfg *)
-let cfg =
+(*parse <<misc2 *)
+let misc2 =
   let pen = Pen.circle in
   let node x y s = node x y (Box.tex s) in
   let empty_node x y = node x y "\\phantom{M}" in
@@ -85,7 +85,7 @@ let cfg =
   draw ~fill:Color.yellow ~stroke:Color.blue ~pen diag
 
 
-(*parse >> <<chess *)
+(*
 let pen = Pen.scale (bp 1.5) Pen.default
 
 let grid w h d f =
@@ -97,7 +97,7 @@ let grid w h d f =
 let bq = tex "\\font\\Chess=chess10 {\\Chess q}"
 let question = tex "?"
 
-let chess = 
+let misc3 = 
   let d = 15. in
   let p i j = bp (float i *. d), bp (float j *. d) in
   let p2 i j = bp ((0.5 +. float i) *. d), bp ((0.5 +. float j) *. d) in
@@ -120,8 +120,8 @@ let chess =
 	 l)
   in
   grid 8 8 d cell
-
-(*parse >> <<diag1 *)
+*)
+(*parse >> <<misc4 *)
 
 let foi, iof = float_of_int, int_of_float
 
@@ -146,9 +146,9 @@ let edges =
 
 let graph = draw ~fill:(Color.gray 0.8) 
                  ~style:(Box.circle ~dx:(Num.bp 6.) ~dy:(Num.bp 6.)) diag
-let diag1 = draw_pic (Picture.scale (bp 0.5) (Picture.make graph))
+let misc4 = draw_pic (Picture.scale (bp 0.5) (Picture.make graph))
 
-(*parse >> <<diag2 *)
+(*parse >> <<misc5 *)
 
 let foi, iof = float_of_int, int_of_float
 
@@ -180,9 +180,9 @@ let edges =
 
 let graph = draw ~fill:(Color.gray 0.8) 
             ~style:(Box.circle ~dx:(Num.bp 6.) ~dy:(Num.bp 6.)) diag
-let diag2 = draw_pic (Picture.scale (bp 0.5) (Picture.make graph))
+let misc5 = draw_pic (Picture.scale (bp 0.5) (Picture.make graph))
 
-(*parse >> <<drums *)
+(*parse >> <<misc6 *)
 
 open Num.Infix
 
@@ -236,10 +236,10 @@ let snarepic b pos =
   let tpic = Picture.transform [Transform.shifted (Point.p ~scale pos)] pic in
     draw_pic tpic
 
-let drums = 
+let misc6 = 
   seq [hihat true; snarepic true (-5.3,-3.8)]
 
-(*parse >> <<escher *)
+(*parse >> <<misc7 *)
 
 open Point
 
@@ -257,7 +257,7 @@ let add (a1,a2) (b1,b2) = (a1 +. b1 , a2 +. b2)
 let mult f (a1,a2) = (f *. a1, f *. a2) 
 let myscale = List.map (mult s)
 
-let escher =
+let misc7 =
   let pen1 = Pen.circle in
   let mygreen = Color.rgb 0.8 0.9 0.8 in
   let p1  = ( 750.,8000. -. 4950. ) in
@@ -389,7 +389,7 @@ let escher =
                        List.map (fun p -> Command.draw ~pen:pen1 (tr p)) 
                        [line6; line7; line8] ) ) )
 
-(*parse >> <<lattice *)
+(*parse >> <<misc8 *)
 
 (* type of Box lattice *)
 
@@ -466,10 +466,10 @@ let subwords s =
   let _ = make_node n (lnot ((-1) lsl n)) in
   Array.to_list levels 
 
-let lattice =
+let misc8 =
   draw (subwords "abcd")
 
-(*parse >> <<other208 *)
+(*parse >> <<misc9 *)
 
 type t = One | Two | Three | Four
 
@@ -514,16 +514,17 @@ let rec pave t a b c n =
          seq (List.map (fun l -> Command.draw ~pen (pathp ~style:jLine l)) segs)
     ]
 
-let other208 = 
+let misc9 = 
   let a = cmp (0., 0.) in
   let b = cmp (3., 0.) in
   let d = Point.rotate 72. b in
   let c = Point.add d (cmp (3.,0.)) in
   seq [pave Three a c d 6; pave Four a b c 6]
 
-(*parse >> <<proval *)
+(*
+(*>> <<misc10 *)
 
-let proval =
+let misc10 =
   let k = 7. in
   let pen = Pen.rotate 40. (Pen.scale (bp 0.5) Pen.square) in
   let check = 
@@ -533,10 +534,10 @@ let proval =
        label ~pos:`Left (Picture.tex "Pr") (Point.p (k /. (-4.),0.)) ;
        label ~pos:`Right (Picture.tex "al") (Point.p (k /. 4.,0.)) ;
        Command.draw ~color:Color.green ~pen check;]
+*)
+(*parse >> <<misc11 *)
 
-(*parse >> <<randtree *)
-
-let randtree =
+let misc11 =
   let () = Random.self_init () in
   let branchrotation = 60. in
   let offset = 180. -. branchrotation  in
@@ -563,7 +564,7 @@ let randtree =
   in
     seq (tree (p (0.,0.)) (pt (bp 0., Num.cm 1.)) 10  2. [])
 
-(*parse >> <<rubik *)
+(*parse >> <<misc12 *)
 let alpha = atan 1.
 let beta = atan 1. /. 2. 
 let mag = 10.
@@ -584,12 +585,12 @@ let right = square Color.orange (fun i j -> proj i 0 j)
 let up = square Color.yellow (fun i j -> proj i j 3)
 let left = square Color.green (fun i j -> proj 0 (3 - i) j)
 
-let rubik = 
+let misc12 = 
   seq [iter 0 2 (fun i -> iter 0 2 (right i));
        iter 0 2 (fun i -> iter 0 2 (up i));
        iter 0 2 (fun i -> iter 0 2 (left i));]
 
-(*parse >> <<football *)
+(*parse >> <<misc13 *)
 
 (* football field of length 2w and width 2h *)
 let football_field w h =
@@ -634,13 +635,13 @@ let football_field w h =
   line (circle 0. 0. 9.15) ++
   plot 0. 0.
 
-let football = football_field 50. 35.
+let misc13 = football_field 50. 35.
 
-(*parse >> <<test *)
+(*parse >> <<misc14 *)
 
 let (++) x y = pt (cm x, cm y)
 
-let test =
+let misc14 =
   let a = Box.circle (Box.tex "$\\sqrt2$") in
   let b = 
     Box.shift (2. ++ 0.) (Box.rect ~fill:Color.purple (Box.tex "$\\pi$"))
@@ -655,21 +656,19 @@ let test =
     ]
 
 (*parse >> *)
-
-let _ = 
-  List.iter (fun (name,fig) -> Metapost.emit name fig)
-  [ "bresenham", bresenham;
-    "cfg", cfg;
-    "chess", chess;
-    "diag1", diag1;
-    "diag2", diag2;
-    "drums", drums;
-    "escher", escher;
-    "lattice", lattice;
-    "other208", other208;
-    "proval", proval;
-    "randtree", randtree;
-    "rubik", rubik;
-    "football", football;
-    "test", test;
-  ]
+let () = List.iter (fun (i,fig) -> 
+                      Metapost.emit ("misc"^(string_of_int i)) fig)
+  [1,misc1;
+   2,misc2;
+(*   3,misc3; chess10 can't be used by cairo*)
+   4,misc4;
+   5,misc5;
+   6,misc6;
+   7,misc7;
+   8,misc8;
+   9,misc9;
+(*   10,misc10; Pen.square is not implemented *)
+   11,misc11;
+   12,misc12;
+   13,misc13;
+   14,misc14]

@@ -53,9 +53,9 @@ let initial states name =
 
 (*** Examples ***************************************************************)
 
-(*parse <<automaton1 *)
+(*parse <<automata1 *)
 
-let automaton1 =
+let automata1 =
   let states = Box.hbox ~padding: (cm 1.4)
     [ state ~name:"0" "0"; final ~name:"1" (state "1") ]
   in
@@ -66,9 +66,9 @@ let automaton1 =
 
 (*parse >> *)
 
-(*parse <<automaton2 *)
+(*parse <<automata2 *)
 
-let automaton2 =
+let automata2 =
   let states = Box.hbox ~padding: (cm 2.)
     [ state ~name:"0" "0"; state ~name:"1" "1"; 
       state ~name:"2" "2"; state ~name:"3" "3"; 
@@ -90,7 +90,7 @@ let automaton2 =
 
 let state name s = rect ~name  ~stroke:None (rect (tex ("$" ^ s ^ "$")))
 
-let automaton3 =
+let automata3 =
   let states = tabularl ~hpadding:(cm 1.) ~vpadding:(cm 1.)
     [[state "11" "S\\rightarrow E\\bullet";
       state "0" "S\\rightarrow\\bullet E"; 
@@ -143,7 +143,7 @@ let automaton3 =
 
 ****)
 
-(*parse <<automaton4 *)
+(*parse <<automata4 *)
 
 let state name l = 
   rect ~name ~stroke:None 
@@ -151,7 +151,7 @@ let state name l =
 		String.concat "\\\\" l ^ 
 		"\\end{array}$")))
 
-let automaton4 =
+let automata4 =
   let states = tabularl ~hpadding:(cm 1.) ~vpadding:(cm 1.)
     [[state "1" ["S\\rightarrow\\bullet E\\#";
 		 "E\\rightarrow\\bullet E\\texttt{+}E";
@@ -201,6 +201,6 @@ let automaton4 =
 
 (*parse >> *)
 
-let () = Metapost.emit "automaton1" automaton1
-let () = Metapost.emit "automaton2" automaton2
-let () = Metapost.emit "automaton4" automaton4
+let () = Metapost.emit "automata1" automata1
+let () = Metapost.emit "automata2" automata2
+let () = Metapost.emit "automata4" automata4

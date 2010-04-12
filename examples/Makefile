@@ -1,65 +1,45 @@
-#TODO rewrite
+MAX := 17
 # all files that are generated from boxes.ml
-BOXPNGFILES := simple.png f1.png f2.png traffic.png hierarchy.png custom.png\
-		place.png place_circle.png
-BOXOUTFILES := $(BOXPNGFILES:.png=.1)
+BOXESPNG := $(foreach i,$(shell seq 1 8), boxes$(i).png)
 
 # all files that are generated from paths.ml
-PATHPNGFILES := path1.png path2.png path3.png path4.png path5.png \
-		  path6.png path7.png path8.png path9.png path10.png\
-		  path11.png path12.png path13.png path14.png path15.png\
-		  cheno11.png cheno14.png
-PATHOUTFILES := $(PATHPNGFILES:.png=.1)
+PATHSPNG := $(foreach i,$(shell seq 1 17), paths$(i).png)
 
 # all files that are generated from misc.ml
-MISCPNGFILES := bresenham.png cfg.png chess.png diag1.png diag2.png\
-		drums.png escher.png other208.png proval.png\
-		randtree.png rubik.png test.png lattice.png football.png
-MISCOUTFILES := $(MISCPNGFILES:.png=.1)
+MISCPNG := $(foreach i,1 2 $(shell seq 4 9) $(shell seq 11 14), misc$(i).png)
 
 # all files that are generated from tree.ml
-TREEPNGFILES := tree1.png tree2.png tree3.png tree4.png tree5.png \
-                tree6.png tree7.png tree8.png tree9.png tree10.png \
-		tree11.png tree_adv0.png tree_adv1.png tree_adv2.png
-TREEOUTFILES := $(TREEPNGFILES:.png=.1)
+TREEPNG := $(foreach i,$(shell seq 1 14), tree$(i).png)
 
-# all files that are generated from labels.ml
-LABELPNGFILES := handbook3.png other27.png
-LABELOUTFILES := $(LABELPNGFILES:.png=.1)
+
+# all files that are generated from label.ml
+LABELPNG := $(foreach i,$(shell seq 1 2), label$(i).png)
 
 # all files that are generated from automata.ml
-AUTOMPNGFILES := automaton1.png automaton2.png automaton4.png
-AUTOMOUTFILES := $(AUTOMPNGFILES:.png=.1)
+AUTOMPNG := automata1.png automata2.png automata4.png
 
-HISTPNGFILES := hist1.png
-HISTOUTFILES := $(HISTPNGFILES:.png=.1)
+HISTPNG := hist1.png
 
-RADARPNGFILES := radar1.png radar2.png
-RADAROUTFILES := $(RADARPNGFILES:.png=.1)
+RADARPNG := radar1.png radar2.png
 
-REALPLOTPNGFILES := real_plot1.png real_plot2.png
-REALPLOTOUTFILES := $(REALPLOTPNGFILES:.png=.1)
+REALPLOTPNG := real_plot1.png real_plot2.png
 
-COLORPNGFILES := color1.png color2.png color3.png color4.png
-COLOROUTFILES := $(COLORPNGFILES:.png=.1)
+COLORPNG := color1.png color2.png color3.png color4.png
 
-DOTPNGFILES := dot1.png dot2.png
-DOTOUTFILES := $(DOTPNGFILES:.png=.1)
-
+DOTPNG := dot1_dot.png dot2_dot.png
 
 HTMLFILES := boxes.ml.html paths.ml.html misc.ml.html tree.ml.html \
              label.ml.html automata.ml.html hist.ml.html radar.ml.html\
 	     real_plot.ml.html dot.ml.html color.ml.html
 
-CAIRO := cairo_test.ml
+CAIRO = # -cairo
 
-MLPOST:=mlpost -v -ps
+MLPOST:=mlpost -v -ps $(CAIRO)
 
-all: $(BOXPNGFILES) $(PATHPNGFILES) $(MISCPNGFILES) \
-     $(TREEPNGFILES) $(LABELPNGFILES) $(AUTOMPNGFILES) $(HISTPNGFILES) \
-     $(RADARPNGFILES) $(REALPLOTPNGFILES) $(COLORPNGFILES)
+all: $(BOXESPNG) $(PATHSPNG) $(MISCPNG) $(TREEPNG) $(LABELPNG) $(AUTOMPNG)\
+	$(HISTPNG)  $(RADARPNG) $(REALPLOTPNG) $(COLORPNG)
 
-contrib: $(DOTPNGFILES)
+contrib: $(DOTPNG)
 
 html: $(HTMLFILES)
 %.ml.html : %.ml parse
@@ -81,31 +61,28 @@ html: $(HTMLFILES)
 %.mps: %.1
 	cp $*.1 $*.mps
 
-automaton4.ps: automaton4.1
-	latex automaton4.tex
-	dvips -E automaton4.dvi -o
+#automaton4.ps: automaton4.1
+#	latex automaton4.tex
+#	dvips -E automaton4.dvi -o
 
 # dangerous - might be called more than once or even at the same time
-$(BOXOUTFILES): boxes.dummy
-$(PATHOUTFILES): paths.dummy
-$(MISCOUTFILES): misc.dummy
-$(TREEOUTFILES): tree.dummy
-$(LABELOUTFILES): label.dummy
-$(AUTOMOUTFILES): automata.dummy
-$(HISTOUTFILES): hist.dummy
-$(RADAROUTFILES): radar.dummy
-$(REALPLOTOUTFILES): real_plot.dummy
-$(COLOROUTFILES): color.dummy
-$(DOTOUTFILES): dot.dummy_dot
 
-
-%.dummy: %.ml
-	$(MLPOST) $^
-	touch $@
-
-%.dummy_dot: %.ml
+ifeq "$(CAIRO)" "-cairo"
+$(foreach i,$(shell seq 1 $(MAX)), %$(i)_dot.ps): %_dot.ml
+	@echo MLPOST $^
 	$(MLPOST) -contrib dot $^
-	touch $@
+
+$(foreach i,$(shell seq 1 $(MAX)), %$(i).ps) : %.ml
+	$(MLPOST) $^
+
+else
+$(foreach i,$(shell seq 1 $(MAX)), %$(i)_dot.1): %_dot.ml
+	@echo MLPOST $^
+	$(MLPOST) -contrib dot $^
+
+$(foreach i,$(shell seq 1 $(MAX)), %$(i).1) : %.ml
+	$(MLPOST) $^
+endif
 
 parse.ml: parse.mll
 	ocamllex parse.mll
@@ -113,11 +90,11 @@ parse.ml: parse.mll
 parse: parse.ml
 	ocamlopt.opt -o parse parse.ml
 
-BOXTEXFILES:=$(BOXPNGFILES:.png=.tex)
-PATHTEXFILES:=$(PATHPNGFILES:.png=.tex)
-MISCTEXFILES:=$(MISCPNGFILES:.png=.tex)
-TREETEXFILES:=$(TREEPNGFILES:.png=.tex)
-LABELTEXFILES:=$(LABELPNGFILES:.png=.tex)
+BOXTEXFILES:=$(BOXPNG:.png=.tex)
+PATHTEXFILES:=$(PATHPNG:.png=.tex)
+MISCTEXFILES:=$(MISCPNG:.png=.tex)
+TREETEXFILES:=$(TREEPNG:.png=.tex)
+LABELTEXFILES:=$(LABELPNG:.png=.tex)
 clean:
 	rm -f *.aux *.dvi *.ps *.1 *.log $(PNGFILES) *.mp *.mpx *.mps
 	rm -f $(BOXTEXFILES) $(PATHTEXFILES) $(MISCTEXFILES) $(TREETEXFILES)

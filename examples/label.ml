@@ -7,11 +7,11 @@ module H = Helpers
 
 (*parse <<togglescript>> *)
 
-(*parse <<other27 *)
+(*parse <<label1 *)
 
 let a = Point.pt (Num.bp 0., Num.bp 0.)
 let pen = Pen.scale (Num.bp 4.) Pen.circle
-let other27 = 
+let label1 = 
   seq [
     draw (Path.pathp [a]) ~pen;
     label ~pos:`Top (Picture.tex "Au dessus") a;
@@ -20,7 +20,7 @@ let other27 =
     label ~pos:`Left (Picture.tex "\\`A gauche") a;
   ]
 
-(*parse >> <<handbook3 *)
+(*parse >> <<label2 *)
 let z0 = 0.,0.
 let z1 = 60.,40.
 let z2 = 40.,90.
@@ -33,11 +33,11 @@ let labels1 =
        dotlabel ~pos:`Left (tex "3") (bpp z3);
        dotlabel ~pos:`Right (tex "1") (bpp z1) ]
 
-let handbook3 = seq [ draw (path ~style:jCurve  l1); labels1 ]
+let label2 = seq [ draw (path ~style:jCurve  l1); labels1 ]
 (*parse >> *)
 
 let _ = 
   List.iter (fun (name,fig) -> Metapost.emit name fig)
-  [ "other27", other27;
-    "handbook3", handbook3;
+  [ "label1", label1;
+    "label2", label2;
   ]

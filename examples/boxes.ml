@@ -9,9 +9,9 @@ open Box
 
 (*parse <<togglescript>> *)
 
-(*parse <<simple *)
+(*parse <<boxes1 *)
 
-let simple =
+let boxes1 =
   let node s =
     rect ~name:s ~stroke:None (round_rect ~stroke:None ~fill:lightblue (tex s))
   in
@@ -19,8 +19,8 @@ let simple =
   let arrow x y = box_arrow ~pen:Pen.circle ~color:red (get x b) (get y b) in
   seq [draw b; arrow "A" "B"]
 
-(*parse >> <<f1 *)
-let f1 =
+(*parse >> <<boxes2 *)
+let boxes2 =
   let tex = tex ~style:Rect ~stroke:(Some Color.black) in
   let b = 
     hbox ~padding:(bp 20.)
@@ -32,8 +32,8 @@ let f1 =
   seq [draw b;
        box_arrow (get "bc" b) (get "e" b)]
 
-(*parse >> <<f2 *)
-let f2 =
+(*parse >> <<boxes3 *)
+let boxes3 =
   let tex = tex ~style:Circle ~stroke:(Some Color.black) in
   let b = vbox [tex "a"; hbox [tex ~name:"b" "b"; tex "c"]] in
   let f = hbox ~padding:(bp 20.) [b;b;b] in
@@ -42,9 +42,9 @@ let f2 =
   seq [draw f;
        arrow (node 0) (node 1); arrow (node 1) (node 2)]
 
-(*parse >> <<traffic *)
+(*parse >> <<boxes4 *)
 (* inspired by functional metapost *)
-let traffic =
+let boxes4 =
   let two = Num.bp 2. in
   let b = 
     vbox ~fill:black ~padding:(Num.bp 3.) ~dx:two ~dy:two
@@ -54,9 +54,9 @@ let traffic =
   in
   draw b
 
-(*parse >> <<hierarchy *)
+(*parse >> <<boxes5 *)
 (* inspired by functional metapost *)
-let hierarchy =
+let boxes5 =
   let two = Num.bp 2. in
   let five = Num.bp 5. in
   let tex = tex ~dx:two ~dy:two in
@@ -73,7 +73,7 @@ let hierarchy =
   in
   draw b
 
-(*parse >> <<custom *)
+(*parse >> <<boxes6 *)
 module P = Point
 open Num.Infix
 
@@ -82,7 +82,7 @@ let (|>) x f = f x
 let draw_point t = Point.draw ~pen:(Pen.scale (bp 4.) Pen.default) ~color:(Color.red) t
 
 (* align verticalement le barycentre [(west,5);(east,2)] *)
-let custom =
+let boxes6 =
   let two = Num.bp 2. in
   let five = Num.bp 5. in
   let tex = tex ~dx:two ~dy:two in
@@ -109,9 +109,9 @@ let custom =
   Box.draw (vbox ~pos:(`Custom (getp "something")) [a;b;c])]
   
 
-(*parse >> <<place *)
+(*parse >> <<boxes7 *)
 
-let place =
+let boxes7 =
   let b = rect (empty ~width: (cm 3.) ~height: (cm 1.5) ()) in
   let make t pos = 
     let aux pad = (Box.draw (Box.place pos b ?padding:pad (rect (tex t)))) in
@@ -132,7 +132,7 @@ let place =
   ] in
   Command.seq boxes
 
-(*parse >> <<place_circle *)
+(*parse >> <<boxes8 *)
 
 let mod_float a b = 
    a -. b *. floor (a /. b)
@@ -157,7 +157,7 @@ let place_circle_ ?auto_inverse r n f =
     let arc = 360./.(float_of_int n) in
     place_around ?auto_inverse r arc n f
 
-let place_circle =
+let boxes8 =
   let yop d i = Box.circle (Box.tex (Printf.sprintf "$%i_{%02d}$" d i)) in
   let rec aux acc = function
     | 0 -> acc
@@ -173,11 +173,13 @@ let place_circle =
 
 (*parse >> *)
 
-let () = Metapost.emit "simple" simple
-let () = Metapost.emit "f1" f1
-let () = Metapost.emit "f2" f2
-let () = Metapost.emit "traffic" traffic
-let () = Metapost.emit "hierarchy" hierarchy
-let () = Metapost.emit "custom" custom
-let () = Metapost.emit "place" place
-let () = Metapost.emit "place_circle" place_circle
+let () = List.iter (fun (i,fig) -> 
+                      Metapost.emit ("boxes"^(string_of_int i)) fig)
+  [1,boxes1;
+   2,boxes2;
+   3,boxes3;
+   4,boxes4;
+   5,boxes5;
+   6,boxes6;
+   7,boxes7;
+   8,boxes8]
