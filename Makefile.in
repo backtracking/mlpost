@@ -190,15 +190,27 @@ install-bin:
 	cp -f $(BUILD)$(TOOL) $(BINDIR)/mlpost
 	cp -f mlpost.1 $(MANDIR)/man1
 
-uninstall:
-	rm -f $(LIBDIR)/mlpost.cmo $(LIBDIR)/mlpost.cmi $(LIBDIR)/META
-	rm -f $(LIBDIR)/mlpost$(LIBEXT) $(LIBDIR)/mlpost.cmx $(addprefix $(LIBDIR)/,$(CMA)) $(addprefix $(LIBDIR)/,$(CMXA))
+ifeq "@USEOCAMLFIND@" "no"
+uninstall: uninstall-contrib
+	rm -rf $(LIBDIR)
 	rm -f $(BINDIR)/mlpost
 	rm -f $(MANDIR)/mlpost
+else
+uninstall: uninstall-contrib
+	$(OCAMLFIND) remove $(DESTDIR) mlpost
+	rm -f $(BINDIR)/mlpost
+	rm -f $(MANDIR)/mlpost
+endif
 
+ifeq "@USEOCAMLFIND@" "no"
+uninstall-contrib:
+	rm -rf $(LIBDIR)/mlpost_lablgtk
+	rm -rf $(LIBDIR)/mlpost_dot
+else
 uninstall-contrib:
 	$(OCAMLFIND) remove $(DESTDIR) mlpost_dot
 	$(OCAMLFIND) remove $(DESTDIR) mlpost_lablgtk
+endif
 
 
 
