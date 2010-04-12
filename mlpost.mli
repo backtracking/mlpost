@@ -2405,6 +2405,10 @@ end
 (** Functions to generate Metapost files *)
 module Metapost : sig
 
+  val set_filename_prefix : string -> unit
+    (** Add to the filename given to the emit function this prefix.
+        This function is here just for convenience *)
+
   val generate_mp :
     string ->
     ?prelude:string ->

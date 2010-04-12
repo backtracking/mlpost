@@ -38,7 +38,8 @@ def doexternalfigure (expr filename) text transformation =
   addto p contour unitsquare transformed t ;
   setbounds p to unitsquare transformed t ;
   _color_counter_ := _color_counter_ + 1 ;
-  draw p withcolor (_special_signal_/_special_div_,_color_counter_/_special_div_,_special_counter_/_special_div_) ;
+  draw p withcolor (_special_signal_/_special_div_,\
+_color_counter_/_special_div_,_special_counter_/_special_div_) ;
   endgroup ;
 enddef ;
 
@@ -72,9 +73,12 @@ let generate_mp fn ?(prelude=defaultprelude) ?eps l =
 let figuren = ref 0
 let figures = Queue.create ()
 
+let filename_prefix = ref ""
+let set_filename_prefix = (:=) filename_prefix
+
 let emit s f =
   incr figuren;
-  Queue.add (!figuren, s, f) figures
+  Queue.add (!figuren, !filename_prefix^s, f) figures
 
 let read_prelude_from_tex_file = Metapost_tool.read_prelude_from_tex_file
 
@@ -93,7 +97,8 @@ let dump_tex ?prelude f =
   Queue.iter
     (fun (_,s,_) ->
        fprintf fmt "\\hrulefill\\verb!%s!\\hrulefill\\\\[1em]@\n" s;
-(*        fprintf fmt "\\framebox{\\includegraphics[width=\\textwidth]{%s.mps}}\\\\[1em]@\n" s; *)
+(*        fprintf fmt "\\framebox{\\includegraphics[width=\\textwidth]\
+          {%s.mps}}\\\\[1em]@\n" s; *)
 (*        fprintf fmt "\\framebox{\\includegraphics{%s.mps}}\\\\@\n" s; *)
        fprintf fmt "\\includegraphics{%s.mps}\\\\@\n" s;
        fprintf fmt "\\hrulefill\\\\@\n@\n\\medskip@\n";)
@@ -112,41 +117,49 @@ let print_latex_error s =
               "latex -interaction=nonstopmode mpxerr.tex")
   end else Printf.printf "%s\n" s
 
-let generate_aux bn ?prelude ?(pdf=false) ?eps ?(verbose=false) ?(clean=true) figl =
+let generate_aux rename bn ?prelude ?(pdf=false) ?eps ?(verbose=false)
+    ?(clean=true) figl =
   if figl <> [] then
-    let f = bn ^ ".mp" in
-    generate_mp f ?prelude ?eps figl;
-    let s,outp =
-      Misc.call_cmd ~verbose
-        (sprintf "mpost -interaction=\"nonstopmode\" %s" f) in
-    if s <> 0 then print_latex_error outp;
-    if clean then
-      ignore (Misc.call_cmd ~verbose
-                (Printf.sprintf
-                   "rm -f mpxerr.log mpxerr.tex mpxerr.aux mpxerr.dvi %s.mp %s.mpx %s.log"
-                   bn bn bn));
+    let do_ workdir tmpdir =
+      (* a chdir has been done to tmpdir *)
+      let f = bn ^ ".mp" in
+      generate_mp f ?prelude ?eps figl;
+      let s,outp =
+        Misc.call_cmd ~verbose
+          (sprintf "mpost -interaction=\"nonstopmode\" %s" f) in
+      if s <> 0 then print_latex_error outp
+      else rename workdir tmpdir;
+      s in
+    let s = Metapost_tool.tempdir ~clean "mlpost" "mpost" do_ in
     if s <> 0 then exit 1
 
 let generate bn ?prelude ?(pdf=false) ?eps ?verbose ?clean figl =
-  generate_aux bn ?prelude ~pdf ?eps ?verbose ?clean figl;
-  let suf = if pdf then ".mps" else ".1" in
-  let sep = if pdf then "-" else "." in
-  List.iter
-    (fun (i,_) ->
-       let si = string_of_int i in
-       Sys.rename (bn ^ "." ^ si) (bn ^ sep ^ si ^ suf))
-    figl
-
+  let basename = Filename.basename bn in
+  let rename workdir tmpdir =
+    let suf = if pdf then ".mps" else ".1" in
+    let sep = if pdf then "-" else "." in
+    List.iter
+      (fun (i,_) ->
+         let si = string_of_int i in
+         let from = Filename.concat tmpdir (basename ^ "." ^ si) in
+         let to_ = Filename.concat workdir (bn ^ sep ^ si ^ suf) in
+         Metapost_tool.file_move from to_) figl in
+  generate_aux rename basename ?prelude ~pdf ?eps ?verbose ?clean figl
 
 let dump ?prelude ?(pdf=false) ?eps ?(verbose=false) ?clean bn =
   let figl = Queue.fold (fun l (i,_,f) -> (i,f) :: l) [] figures in
-  generate_aux bn ?prelude ~pdf ?eps ~verbose ?clean figl;
-  let suf = if pdf then ".mps" else ".1" in
-  Queue.iter
-    (fun (i,s,_) ->
-      let e = s ^ suf in
-      if verbose then Printf.printf "saving result in %s\n" e;
-      Sys.rename (bn ^ "." ^ string_of_int i) e) figures
+  let bn = Filename.basename bn in
+  let rename workdir tmpdir = 
+    let suf = if pdf then ".mps" else ".1" in
+    Queue.iter
+      (fun (i,s,_) ->
+         let e = s ^ suf in
+         let from = Filename.concat tmpdir (bn ^ "." ^ string_of_int i) in
+         let to_ = Filename.concat workdir e in
+         if verbose then Printf.printf "saving result in %s\n" e;
+         Metapost_tool.file_move from to_) figures in
+  generate_aux rename bn ?prelude ~pdf ?eps ~verbose ?clean figl
+  
 
 let dump_mp ?prelude bn =
   let figl = Queue.fold (fun l (i,_,f) -> (i,f) :: l) [] figures in
@@ -171,7 +184,8 @@ let dump_png ?prelude ?(verbose=false) ?(clean=true) bn =
     (fun (i,s,_) ->
        let s,outp =
          Misc.call_cmd ~verbose
-           (sprintf "convert -density 600x600 \"%s-%i.pdf\" \"%s.png\"" bn i s) in
+           (sprintf "convert -density 600x600 \"%s-%i.pdf\" \"%s.png\"" bn i s)
+       in
        if clean then
          ignore (Misc.call_cmd ~verbose
                    (Printf.sprintf

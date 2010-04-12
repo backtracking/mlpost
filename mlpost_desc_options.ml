@@ -35,6 +35,7 @@ let dumpable = ref false
 let dont_clean = ref false
 let mp = ref false
 let png = ref false
+let filename_prefix = ref ""
 
 (* notuple please or change Tool.wrap_options *)
 let spec =
@@ -52,6 +53,8 @@ let spec =
     "-dont-clean", Set dont_clean, " Don't remove intermediate files";
     "-cairo" , Set cairo,
       " Use the cairo backend instead of metapost";
+    "-prefix", String ((:=) filename_prefix), 
+      "Add to all the filename this prefix"; 
     "-t1disasm" , String (fun s -> t1disasm := Some s),
       " Set the program used to decrypt PostScript Type 1 font, \
         only with cairo (default built-in one)"])

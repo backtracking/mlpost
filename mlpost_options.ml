@@ -46,6 +46,7 @@ let () =
 
   let verbose = !verbose in
 
+  Metapost.set_filename_prefix !filename_prefix;
   Command.set_verbosity verbose;
   Concrete.set_t1disasm !t1disasm;
   Concrete.set_prelude2 prelude;
