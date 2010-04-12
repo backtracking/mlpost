@@ -33,13 +33,13 @@ type cairo_t = Cairo.t
 let emit_cairo = emit_cairo
 (*let emit_cairo = fun x -> ()*)
 
-let dump_pdf () = 
-  Queue.iter (fun (_,fname,fig) -> 
+let dump_pdf () =
+  Queue.iter (fun (_,fname,fig) ->
 		let pdfname = (fname^".pdf") in
 		  try
 		    emit_pdf  pdfname fig
 		  with
-		    | Cairo.Error status -> 
+		    | Cairo.Error status ->
 			Format.printf "An@ internal@ error@ occured@ during@\
  the generation@ of@ %s@ with@ Cairo :@ %s@."
 			  pdfname (Cairo.string_of_status status)
@@ -48,23 +48,23 @@ let dump_pdf () =
 			pdfname (Printexc.to_string error)
 	     ) Metapost.figures
 
-let dump_pdfs fname = 
-  let figs = 
+let dump_pdfs fname =
+  let figs =
     List.rev (Queue.fold (fun l (_,_,x) ->  x::l) [] Metapost.figures) in
   emit_pdfs (fname^".pdf") figs
 
-let generate_pdfs pdffile figs = List.iter 
-  (fun (i,fig) -> emit_pdf ~msg_error:100. 
+let generate_pdfs pdffile figs = List.iter
+  (fun (i,fig) -> emit_pdf ~msg_error:100.
      (Printf.sprintf "%s-%i.pdf" pdffile i) fig) figs
 
-let dump_ps () = 
+let dump_ps () =
   Queue.iter (fun (_,fname,fig) -> emit_ps (fname^".ps") fig) Metapost.figures
 
-let dump_png () = 
+let dump_png () =
   Queue.iter (fun (_,fname,fig) -> emit_png (fname^".png") fig)
     Metapost.figures
 
-let dump_svg () = 
+let dump_svg () =
   Queue.iter (fun (_,fname,fig) -> emit_svg (fname^".svg") fig)
     Metapost.figures
 
@@ -86,6 +86,7 @@ let dump_pdf _ = failwith "Cairost.dump_pdf : not supported"
 let dump_pdfs _ = failwith "Cairost.dump_pdfs : not supported"
 let dump_ps _ = failwith "Cairost.dump_ps : not supported"
 let dump_png _ = failwith "Cairost.dump_png : not supported"
+let dump_svg _ = failwith "Cairost.dump_svg : not supported"
 
 let set_prelude _ = failwith "Cairost.set_prelude : not supported"
 let set_t1disasm _ = failwith "Cairost.set_t1disasm : not supported"
@@ -95,5 +96,6 @@ let generate_pdfs _ _ = failwith "Cairost.generate_pdfs : not supported"
 type cairo_t = unit
 
 let emit_cairo  _ _ _ = failwith "Cairost.emit_cairo : not supported"
+
 
 END

@@ -62,18 +62,12 @@ contrib:$(DOTPNG)\
 	$(addprefix pdf_cairo_,$(DOTPNG))\
 	$(addprefix ps_cairo_,$(DOTPNG))
 
-#automaton4.ps: automaton4.1
-#	latex automaton4.tex
-#	dvips -E automaton4.dvi -o
-
-# dangerous - might be called more than once or even at the same time
-
 #Compilation
 %_dot.native : %_dot.ml
-	mlpost -ccopt -dtypes -native -contrib dot -dont-execute -compile-name $@ $^
+	$(MLPOST) -native -contrib dot -dont-execute -compile-name $@ $^
 
 %.native : %.ml
-	mlpost -ccopt -dtypes -native -dont-execute -compile-name $@ $^
+	$(MLPOST) -native -dont-execute -compile-name $@ $^
 
 #With Metapost :
 $(foreach i,$(shell seq 1 $(MAX)), %$(i).1) : %.native

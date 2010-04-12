@@ -79,3 +79,14 @@ mlpost supports the following options:
 
 -execopt <options>
         pass options to the compiled program
+
+
+Cairo output:
+-------------
+
+The following functions are not supported in combination with the Concrete /
+Cairo modules:
+
+* Path.build_cycle
+* Pen.square
+* Pen.from_path

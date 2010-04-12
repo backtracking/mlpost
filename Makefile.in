@@ -213,15 +213,17 @@ FTP = $(WWW)/download
 
 FILES := $(wildcard *.ml) $(wildcard *.mli) $(wildcard *.mll) \
 	 $(wildcard *.in) configure README.txt INSTALL LICENSE CHANGES FAQ \
-	 mlpost.1 _tags *.mlpack mlpost.odocl \
-	simple.Makefile ocamlbuild.Makefile
+	 mlpost.1 _tags *.mlpack mlpost.odocl ocamlbuild.Makefile
 BACKENDFILES = backend/*ml backend/*mli backend/_tags
 DVIFILES = dvi/*mly dvi/*mll dvi/*ml dvi/*mli dvi/_tags
 CONCRETEFILES = concrete/*ml concrete/*mli concrete/_tags
 GENERATEDSOURCEFILES = version.ml myocamlbuild.ml $(GENERATED)
 GUIFILES = gui/*.mll gui/*.ml gui/_tags
 EXFILES = examples/Makefile examples/*.ml examples/all.template\
-	  examples/index.html examples/parse.mll examples/README examples/automaton4.tex
+	  examples/index.html examples/parse.mll examples/README\
+	  examples/prototype.js examples/style.css
+CONTRIBDOTFILES = $(addprefix contrib/dot/, dot.ml dot.mli Makefile META mlpost_dot.mli mlpost_dot.mlpack _tags xdot_ast.mli xdot_lexer.mll xdot_parser.mly)
+CONTRIBLABLGTKFILES = $(addprefix contrib/lablgtk/, META mlpost_lablgtk.ml mlpost_lablgtk.mli)
 CUSTOMDOCFILES = customdoc/all.template customdoc/img_doc.ml customdoc/img.ml \
 		 customdoc/Makefile customdoc/_tags
 LATEXFILES = latex/*sty latex/*tex latex/README
@@ -249,6 +251,10 @@ source:
 	cp $(CUSTOMDOCFILES) export/$(EXPORTDIR)/customdoc
 	mkdir -p export/$(EXPORTDIR)/latex
 	cp $(LATEXFILES) export/$(EXPORTDIR)/latex
+	mkdir -p export/$(EXPORTDIR)/contrib/dot
+	mkdir -p export/$(EXPORTDIR)/contrib/lablgtk
+	cp $(CONTRIBDOTFILES) export/$(EXPORTDIR)/contrib/dot
+	cp $(CONTRIBLABLGTKFILES) export/$(EXPORTDIR)/contrib/lablgtk
 	cd export ; tar cf $(TAR) $(EXPORTDIR) ; gzip -f --best $(TAR)
 
 
