@@ -55,6 +55,7 @@ let () =
     (Filename.basename (Sys.argv.(0))) in
 
   let do_at_exit () =
+    if !mps then begin Mps.dump (); exit 0 end;
     if !cairo then begin
       if not !xpdf then
         if !png then Cairost.dump_png ()

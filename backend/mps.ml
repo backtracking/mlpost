@@ -94,5 +94,13 @@ let draw fmt x =
   fprintf fmt "%%%%Page: 1 1@\n";
   picture fmt (content x)
 
+let dump () =
+  let _,fn,fig = Queue.pop Metapost.figures in
+  let fig = LookForTeX.commandpic fig in
+  let fn = fn ^ ".mps" in
+  let c = open_out fn in
+  let fmt = Format.formatter_of_out_channel c in
+  draw fmt fig;
+  Format.fprintf fmt "@.";
+  close_out c
 
-let 
