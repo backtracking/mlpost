@@ -44,15 +44,17 @@ ALL_CAIRO_PNG := $(addprefix png_,$(ALL_CAIRO))
 ALL_CAIRO_PDF := $(addprefix pdf_,$(ALL_CAIRO))
 
 ALL_CAIRO_PS := $(addprefix ps_,$(ALL_CAIRO))
+ALL_CAIRO_SVG := $(addprefix svg_,$(ALL_CAIRO:.png=.svg))
 
 all : all_metapost all_cairo
 
 all_metapost: $(ALL)
-all_cairo: all_cairo_png all_cairo_ps all_cairo_pdf
+all_cairo: all_cairo_png all_cairo_ps all_cairo_pdf all_cairo_svg
 
 all_cairo_png:  $(ALL_CAIRO_PNG)
 all_cairo_pdf:  $(ALL_CAIRO_PDF)
 all_cairo_ps:  $(ALL_CAIRO_PS)
+all_cairo_svg:  $(ALL_CAIRO_SVG)
 
 
 contrib:$(DOTPNG)\
@@ -88,6 +90,10 @@ $(foreach i,$(shell seq 1 $(MAX)), ps_cairo_%$(i).ps) : %.native
 #With cairo png
 $(foreach i,$(shell seq 1 $(MAX)), png_cairo_%$(i).png) : %.native
 	./$^ -png -cairo -prefix "png_cairo_"
+
+#With cairo svg
+$(foreach i,$(shell seq 1 $(MAX)), svg_cairo_%$(i).svg) : %.native
+	./$^ -svg -cairo -prefix "svg_cairo_"
 
 parse.ml: parse.mll
 	ocamllex parse.mll

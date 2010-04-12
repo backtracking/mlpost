@@ -40,9 +40,11 @@ let dump_pdf () =
 		    emit_pdf  pdfname fig
 		  with
 		    | Cairo.Error status -> 
-			Format.printf "An@ internal@ error@ occured@ during@ the generation@ of@ %s@ with@ Cairo :@ %s@."
+			Format.printf "An@ internal@ error@ occured@ during@\
+ the generation@ of@ %s@ with@ Cairo :@ %s@."
 			  pdfname (Cairo.string_of_status status)
-		    | error -> Format.printf "An@ internal@ error@ occured@ during@ the@ generation@ of@ %s :@ %s@."
+		    | error -> Format.printf "An@ internal@ error@ occured@\
+ during@ the@ generation@ of@ %s :@ %s@."
 			pdfname (Printexc.to_string error)
 	     ) Metapost.figures
 
@@ -59,7 +61,12 @@ let dump_ps () =
   Queue.iter (fun (_,fname,fig) -> emit_ps (fname^".ps") fig) Metapost.figures
 
 let dump_png () = 
-  Queue.iter (fun (_,fname,fig) -> emit_png (fname^".png") fig) Metapost.figures
+  Queue.iter (fun (_,fname,fig) -> emit_png (fname^".png") fig)
+    Metapost.figures
+
+let dump_svg () = 
+  Queue.iter (fun (_,fname,fig) -> emit_svg (fname^".svg") fig)
+    Metapost.figures
 
 ELSE
 

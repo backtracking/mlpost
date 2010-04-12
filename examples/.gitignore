@@ -8,3 +8,9 @@
 *.html
 *.ps
 *.pdf
+*.svg
+*.annot
+*.cmx
+*.cmi
+*.o
+parse.ml

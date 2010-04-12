@@ -2643,6 +2643,7 @@ module Cairost : sig
   val dump_pdf : unit -> unit
   val dump_ps : unit -> unit
   val dump_png : unit -> unit
+  val dump_svg : unit -> unit
   val dump_pdfs : string -> unit
     (** Use the figures recorded by the function emit of metapost *)
 

@@ -58,6 +58,7 @@ let () =
     if !cairo then begin
       if not !xpdf then
         if !png then Cairost.dump_png ()
+        else if !svg then Cairost.dump_svg ()
         else if !pdf then Cairost.dump_pdf ()
         else Cairost.dump_ps ()
       else Cairost.dump_pdfs "_mlpost"

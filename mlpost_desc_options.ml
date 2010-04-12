@@ -35,6 +35,7 @@ let dumpable = ref false
 let dont_clean = ref false
 let mp = ref false
 let png = ref false
+let svg = ref false
 let filename_prefix = ref ""
 
 (* notuple please or change Tool.wrap_options *)
@@ -43,6 +44,7 @@ let spec =
     "-mp", Set mp, " Generate .mp files";
     "-png", Set png, " Generate .png files";
     "-ps", Clear pdf, " Generate .1 files";
+    "-svg", Set svg, " Generate .svg files (only with cairo)";
     "-latex", String set_latex_file, "<main.tex> Scan the LaTeX prelude";
     "-eps", Set eps, " Generate encapsulated postscript files";
     "-xpdf", Set xpdf, " wysiwyg mode using xpdf remote server";

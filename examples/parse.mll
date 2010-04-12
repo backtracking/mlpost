@@ -26,13 +26,18 @@ hide mpost</a>
    >
 show cairo png</a>
 <a href=\"javascript:void(0)\" 
+   onclick=\"toggle_css_ident(event,'.ps_cairo')\"
+   >
+show cairo ps</a>
+<a href=\"javascript:void(0)\" 
    onclick=\"toggle_css_ident(event,'.pdf_cairo')\"
    >
 show cairo pdf</a>
 <a href=\"javascript:void(0)\" 
-   onclick=\"toggle_css_ident(event,'.ps_cairo')\"
+   onclick=\"toggle_css_ident(event,'.svg_cairo')\"
    >
-show cairo ps</a>
+show cairo svg</a>
+
 "
 }
 
@@ -61,6 +66,10 @@ rule scan = parse
         Printf.printf 
 "<div class=\"table pdf_cairo\" style=\"display:none;\">\
 <img title=\"with cairo : -cairo -pdf\" src=\"pdf_cairo_%s.png\" /></div>" i;
+        Printf.printf 
+"<div class=\"table svg_cairo\" style=\"display:none;\">\
+<object title=\"with cairo : -cairo -svg\" data=\"svg_cairo_%s.svg\" />\
+</div>" i;
         Printf.printf "<div style=\"clear:both;\">";
         Printf.printf "<a href=\"javascript:toggle_visibility('%s')\">" i;
         Printf.printf "show/hide code</a>";
