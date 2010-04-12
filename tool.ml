@@ -22,7 +22,7 @@ let ccopt = ref " "
 let execopt = ref " "
 let verbose = Mlpost_desc_options.verbose
 let native = ref false
-let libdir = ref Version.libdir
+let libraries = ref Version.libraries
 let compile_name = ref None
 let dont_execute = ref false
 let dont_clean = ref false
@@ -76,10 +76,17 @@ let version () =
 let add_ccopt x = ccopt := !ccopt ^ x ^ " "
 let add_execopt x = execopt := !execopt ^ x ^ " "
 
+let add_libdir libdir =
+  libraries :=
+    [
+      "mlpost", ([libdir], ["mlpost"]);
+     "mlpost_options", ([libdir], [ "mlpost_desc_options";"mlpost_options"]);
+    ] @ !libraries
+
 let give_lib () =
   List.fold_left
   (fun (acc1,acc2) x ->
-    let includes_,libs = List.assoc x Version.libraries in
+    let includes_,libs = List.assoc x !libraries in
     List.rev_append includes_ acc1, List.rev_append libs acc2)
   ([],[]) !used_libs
 
@@ -127,7 +134,7 @@ let build_args ?ext () =
     | None -> (sprintf "-cflags -I,%s -lflags -I,%s " libdir libdir)::acc
     | Some ext -> "-I"::libdir::acc in
   List.fold_left (fun acc c ->
-    let llibdir,llib = List.assoc c Version.libraries in
+    let llibdir,llib = List.assoc c !libraries in
     let acc = List.fold_left include_ acc llibdir in
     let acc = List.fold_right lib_ext llib acc in
     acc) [] !used_libs
@@ -162,6 +169,7 @@ let spec = Arg.align
     "-execopt", String add_execopt,
     "\"<options>\" Pass <options> to the compiled program";
     "-version", Unit version, " Print Mlpost version and exit";
+    "-libdir", String add_libdir, " change assumed libdir of mlpost";
     "-get-include-compile",
     Symbol (["cmxa";"cma";"dir";"file"],get_include_compile),
     " Output the libraries which are needed by the library Mlpost";
