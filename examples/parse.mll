@@ -2,17 +2,38 @@
   open Lexing
 
   let togglescript = 
-    "<script type=\"text/javascript\">
+    "<script type=\"text/javascript\" src=\"prototype.js\"></script>
+<script type=\"text/javascript\">
 <!--
-    function toggle_visibility(id) {
-       var e = document.getElementById(id);
-       if(e.style.display == 'block')
-          e.style.display = 'none';
-       else
-          e.style.display = 'block';
-    }
+    function toggle_visibility(id) {$(id).toggle(); }
+    function toggle_css_ident(event,class) 
+      {$$(class).invoke('toggle');
+       var elt = event.findElement();
+       if(elt.textContent.startsWith('\\nhide')){
+         elt.textContent = elt.textContent.sub('hide','show');
+       }else{
+         elt.textContent = elt.textContent.sub('show','hide');
+         }
+       }
 //-->
-</script>"
+</script>
+<a href=\"javascript::void(0)\"
+   onclick=\"toggle_css_ident(event,'.mpost')\"
+   >
+hide mpost</a>
+<a href=\"javascript:void(0)\" 
+   onclick=\"toggle_css_ident(event,'.png_cairo')\"
+   >
+show cairo png</a>
+<a href=\"javascript:void(0)\" 
+   onclick=\"toggle_css_ident(event,'.pdf_cairo')\"
+   >
+show cairo pdf</a>
+<a href=\"javascript:void(0)\" 
+   onclick=\"toggle_css_ident(event,'.ps_cairo')\"
+   >
+show cairo ps</a>
+"
 }
 
 let alpha_lower = ['a'-'z' ]
@@ -27,9 +48,24 @@ rule scan = parse
   | ">>" { Printf.printf "</p> </div><hr>"; scan lexbuf }
   | "<<" (identifier as i)
       { 
-        Printf.printf "<p><img src=\"%s.png\" /></p>" i;
-        Printf.printf "<a href=\"javascript:toggle_visibility('%s')\">show/hide code</a>" i;
-        Printf.printf "<div id=\"%s\" style='display:none;'>" i;
+       
+        Printf.printf 
+"<div class=\"table mpost\" title=\"with mpost : -ps\">\
+<img src=\"%s.png\" /></div>" i;
+        Printf.printf 
+"<div class=\"table png_cairo\" style=\"display:none;\">\
+<img title=\"with cairo : -cairo -png\" src=\"png_cairo_%s.png\" /></div>" i;
+        Printf.printf 
+"<div class=\"table ps_cairo\" style=\"display:none;\">\
+<img title=\"with cairo : -cairo -ps\" src=\"ps_cairo_%s.png\" /></div>" i;
+        Printf.printf 
+"<div class=\"table pdf_cairo\" style=\"display:none;\">\
+<img title=\"with cairo : -cairo -pdf\" src=\"pdf_cairo_%s.png\" /></div>" i;
+        Printf.printf "<div style=\"clear:both;\">";
+        Printf.printf "<a href=\"javascript:toggle_visibility('%s')\">" i;
+        Printf.printf "show/hide code</a>";
+        Printf.printf "</div>";
+        Printf.printf "<div id=\"%s\" style=\"display:none;\" >" i;
         Printf.printf "<p>";
         scan lexbuf
       }

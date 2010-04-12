@@ -201,6 +201,6 @@ let automata4 =
 
 (*parse >> *)
 
-let () = Metapost.emit "automata1" automata1
-let () = Metapost.emit "automata2" automata2
-let () = Metapost.emit "automata4" automata4
+let () = Metapost.emit "automata1" (Picture.scale (Num.bp 3.) automata1)
+let () = Metapost.emit "automata2" (Picture.scale (Num.bp 3.) automata2)
+let () = Metapost.emit "automata4" (Picture.scale (Num.bp 2.) automata4)

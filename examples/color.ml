@@ -35,7 +35,8 @@ let color_gen_line nb =
   
 (*parse >> *)
 let () = 
-  List.iter (fun (name,fig) -> Metapost.emit name fig)
+  List.iter (fun (name,fig) -> Metapost.emit name 
+               (Picture.scale (Num.bp 2.) fig))
     ["color1",color1;
      "color2",color2;
      "color3",color3;

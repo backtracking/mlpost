@@ -538,7 +538,7 @@ let misc10 =
 (*parse >> <<misc11 *)
 
 let misc11 =
-  let () = Random.self_init () in
+  let () = Random.init 42 in (* In order to have always the same figure *)
   let branchrotation = 60. in
   let offset = 180. -. branchrotation  in
   let thinning =  0.7 in
@@ -657,7 +657,8 @@ let misc14 =
 
 (*parse >> *)
 let () = List.iter (fun (i,fig) -> 
-                      Metapost.emit ("misc"^(string_of_int i)) fig)
+                      Metapost.emit ("misc"^(string_of_int i)) 
+                        (Picture.scale (Num.bp 3.) fig))
   [1,misc1;
    2,misc2;
 (*   3,misc3; chess10 can't be used by cairo*)

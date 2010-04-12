@@ -41,7 +41,8 @@ let real_plot2 =
 
 (*parse >> *)
 
-let () = List.iter (fun (name,fig) -> Metapost.emit name fig)
+let () = List.iter (fun (name,fig) -> Metapost.emit name 
+                      (Picture.scale (Num.bp 3.) fig))
   ["real_plot1",real_plot1;
    "real_plot2",real_plot2]
 

@@ -115,7 +115,7 @@ let rec to_tree (Node (b,l)) =
 
 let tree11 = draw (to_tree (bin 5))
 
-(*parse >> <<tree_adv0 *)
+(*parse >> <<tree12 *)
 open Tree_adv
 open Tree_adv.Overlays
 
@@ -149,15 +149,16 @@ let mytree_placed =
 
 
 let tree12 = tree_adv_draw mytree_placed 0
-(*parse >> <<tree_adv1 *)
+(*parse >> <<tree13 *)
 let tree13 = tree_adv_draw mytree_placed 1
-(*parse >> <<tree_adv2 *)
+(*parse >> <<tree14 *)
 let tree14 = tree_adv_draw mytree_placed 2
 
 (*parse >> *)
 
 let _ = 
-  List.iter (fun (name,fig) -> Metapost.emit name fig)
+  List.iter (fun (name,fig) -> Metapost.emit name 
+               (Picture.scale (Num.bp 3.) fig))
   [ "tree1", tree1;
     "tree2", tree2;
     "tree3", tree3;

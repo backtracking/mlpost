@@ -36,7 +36,8 @@ let radar2 =
 (*parse >> *)
 
 let _ = 
-  List.iter (fun (name,fig) -> Metapost.emit name fig)
+  List.iter (fun (name,fig) -> Metapost.emit name 
+               (Picture.scale (Num.bp 3.) fig))
   [ "radar1", radar1;
     "radar2", radar2;
   ]

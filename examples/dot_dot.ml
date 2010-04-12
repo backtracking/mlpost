@@ -8,7 +8,7 @@ open Command
 
 (*parse <<togglescript>> *)
 
-(*parse <<dot1_dot *)
+(*parse <<dot_dot1 *)
 
 module G = Dot.Make(Picture)
 
@@ -21,7 +21,7 @@ let dot1 =
   let (nodes,edges) = G.place [a;b;c;d] edges in
   (seq nodes) ++ (seq (List.map Arrow.simple edges))
 
-(*parse >> <<dot1_dot *)
+(*parse >> <<dot_dot2 *)
 
 module G2 = Dot.Make(Box)
 
@@ -39,5 +39,5 @@ let dot2 =
 
 
 let () = List.iter (fun (n,f) -> Metapost.emit n f)
-  ["dot1_dot",dot1;
-   "dot2_dot",dot2]
+  ["dot_dot1",dot1;
+   "dot_dot2",dot2]

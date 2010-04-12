@@ -37,7 +37,8 @@ let label2 = seq [ draw (path ~style:jCurve  l1); labels1 ]
 (*parse >> *)
 
 let _ = 
-  List.iter (fun (name,fig) -> Metapost.emit name fig)
+  List.iter (fun (name,fig) -> Metapost.emit name 
+               (Picture.scale (Num.bp 3.) fig))
   [ "label1", label1;
     "label2", label2;
   ]

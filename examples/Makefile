@@ -26,40 +26,39 @@ REALPLOTPNG := real_plot1.png real_plot2.png
 
 COLORPNG := color1.png color2.png color3.png color4.png
 
-DOTPNG := dot1_dot.png dot2_dot.png
+DOTPNG := dot_dot1.png dot_dot2.png
 
 HTMLFILES := boxes.ml.html paths.ml.html misc.ml.html tree.ml.html \
              label.ml.html automata.ml.html hist.ml.html radar.ml.html\
-	     real_plot.ml.html dot.ml.html color.ml.html
+	     real_plot.ml.html dot_dot.ml.html color.ml.html
 
-CAIRO = # -cairo
+MLPOST:=mlpost -v -ps
 
-MLPOST:=mlpost -v -ps $(CAIRO)
-
-all: $(BOXESPNG) $(PATHSPNG) $(MISCPNG) $(TREEPNG) $(LABELPNG) $(AUTOMPNG)\
+ALL := $(BOXESPNG) $(PATHSPNG) $(MISCPNG) $(TREEPNG) $(LABELPNG) $(AUTOMPNG)\
 	$(HISTPNG)  $(RADARPNG) $(REALPLOTPNG) $(COLORPNG)
 
-contrib: $(DOTPNG)
+ALL_CAIRO := $(addprefix cairo_,$(ALL))
 
-html: $(HTMLFILES)
-%.ml.html : %.ml parse
-	caml2html -hc -ext "parse:./parse" $*.ml
+ALL_CAIRO_PNG := $(addprefix png_,$(ALL_CAIRO))
+
+ALL_CAIRO_PDF := $(addprefix pdf_,$(ALL_CAIRO))
+
+ALL_CAIRO_PS := $(addprefix ps_,$(ALL_CAIRO))
+
+all : all_metapost all_cairo
+
+all_metapost: $(ALL)
+all_cairo: all_cairo_png all_cairo_ps all_cairo_pdf
+
+all_cairo_png:  $(ALL_CAIRO_PNG)
+all_cairo_pdf:  $(ALL_CAIRO_PDF)
+all_cairo_ps:  $(ALL_CAIRO_PS)
 
 
-%.png: %.ps
-	convert -density 216 $*.ps  $@
-
-%.ps: %.1 all.template
-	sed -e 's/all/$*/' all.template > $*.tex
-	latex $*
-	dvips -E $*.dvi -o
-
-%.pdf: %.mps all.template2
-	sed -e 's/all/$*/' all.template2 > $*.tex
-	pdflatex $*
-
-%.mps: %.1
-	cp $*.1 $*.mps
+contrib:$(DOTPNG)\
+	$(addprefix png_cairo_,$(DOTPNG))\
+	$(addprefix pdf_cairo_,$(DOTPNG))\
+	$(addprefix ps_cairo_,$(DOTPNG))
 
 #automaton4.ps: automaton4.1
 #	latex automaton4.tex
@@ -67,22 +66,28 @@ html: $(HTMLFILES)
 
 # dangerous - might be called more than once or even at the same time
 
-ifeq "$(CAIRO)" "-cairo"
-$(foreach i,$(shell seq 1 $(MAX)), %$(i)_dot.ps): %_dot.ml
-	@echo MLPOST $^
-	$(MLPOST) -contrib dot $^
+#Compilation
+%_dot.native : %_dot.ml
+	mlpost -ccopt -dtypes -native -contrib dot -dont-execute -compile-name $@ $^
 
-$(foreach i,$(shell seq 1 $(MAX)), %$(i).ps) : %.ml
-	$(MLPOST) $^
+%.native : %.ml
+	mlpost -ccopt -dtypes -native -dont-execute -compile-name $@ $^
 
-else
-$(foreach i,$(shell seq 1 $(MAX)), %$(i)_dot.1): %_dot.ml
-	@echo MLPOST $^
-	$(MLPOST) -contrib dot $^
+#With Metapost :
+$(foreach i,$(shell seq 1 $(MAX)), %$(i).1) : %.native
+	./$^ -ps
 
-$(foreach i,$(shell seq 1 $(MAX)), %$(i).1) : %.ml
-	$(MLPOST) $^
-endif
+#With cairo pdf
+$(foreach i,$(shell seq 1 $(MAX)), pdf_cairo_%$(i).pdf) : %.native
+	./$^ -pdf -cairo -prefix "pdf_cairo_"
+
+#With cairo ps
+$(foreach i,$(shell seq 1 $(MAX)), ps_cairo_%$(i).ps) : %.native
+	./$^ -ps -cairo -prefix "ps_cairo_"
+
+#With cairo png
+$(foreach i,$(shell seq 1 $(MAX)), png_cairo_%$(i).png) : %.native
+	./$^ -png -cairo -prefix "png_cairo_"
 
 parse.ml: parse.mll
 	ocamllex parse.mll
@@ -90,20 +95,40 @@ parse.ml: parse.mll
 parse: parse.ml
 	ocamlopt.opt -o parse parse.ml
 
-BOXTEXFILES:=$(BOXPNG:.png=.tex)
-PATHTEXFILES:=$(PATHPNG:.png=.tex)
-MISCTEXFILES:=$(MISCPNG:.png=.tex)
-TREETEXFILES:=$(TREEPNG:.png=.tex)
-LABELTEXFILES:=$(LABELPNG:.png=.tex)
+#Other
+html: $(HTMLFILES)
+%.ml.html : %.ml parse style.css
+	caml2html -css -hc -ext "parse:./parse" $*.ml
+
+
+%.png: %.ps
+	convert $^  $@
+
+%.png: %.pdf
+	convert $^  $@
+
+%.tex: all.template
+	sed -e 's/all/$*/' all.template > $@
+
+%.ps: %.1 %.tex
+	latex $*
+	dvips -E $*.dvi -o
+
+# %.pdf: %.mps all.template2
+# 	sed -e 's/all/$*/' all.template2 > $*.tex
+# 	pdflatex $*
+
+# %.mps: %.1
+# 	cp $*.1 $*.mps
+
+ALLTEX:=$(ALL:.png=.tex)
+
 clean:
-	rm -f *.aux *.dvi *.ps *.1 *.log $(PNGFILES) *.mp *.mpx *.mps
-	rm -f $(BOXTEXFILES) $(PATHTEXFILES) $(MISCTEXFILES) $(TREETEXFILES)
-	rm -f $(LABELTEXFILES)
-	rm -f automaton1.tex automaton2.tex
-	# do not remove automaton4.tex - it's handmade
-	rm -f boxes.ml.html paths.ml.html misc.ml.html tree.ml.html label.ml.html
+	rm -f *.aux *.dvi *.ps *.1 *.log $(PNGFILES) *.mp *.mpx *.mps *.pdf
+	rm -f $(ALLTEX)
+	rm -f $(HTML)
 	rm -f parse.ml *.cmx *.cmo *.cmi parse *.o
-	rm -f *.png *.dummy *.dummy_dot
+	rm -f *.png *.dummy *.dummy_dot *.native *.annot
 
 
 editor2 :

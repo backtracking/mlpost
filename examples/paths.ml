@@ -141,7 +141,8 @@ let paths17 =
 (*parse >> *)
 
 let _ = 
-  List.iter (fun (name,fig) -> Metapost.emit name fig)
+  List.iter (fun (name,fig) -> Metapost.emit name 
+               (Picture.scale (Num.bp 3.) fig))
     [ "paths1", paths1 ;
       "paths2", paths2;
       "paths3", paths3;

@@ -1,7 +1,7 @@
 \documentclass{article}
 \usepackage{graphicx}
 \pagestyle{empty}
-%\usepackage[paperwidth=1000pt, paperheight=2000pt]{geometry}
+\usepackage[paperwidth=1000pt, paperheight=2000pt]{geometry}
 \begin{document}
 \includegraphics{all.1}
 \end{document}

@@ -174,7 +174,8 @@ let boxes8 =
 (*parse >> *)
 
 let () = List.iter (fun (i,fig) -> 
-                      Metapost.emit ("boxes"^(string_of_int i)) fig)
+                      Metapost.emit ("boxes"^(string_of_int i)) 
+                        (Picture.scale (Num.bp 3.) fig))
   [1,boxes1;
    2,boxes2;
    3,boxes3;
