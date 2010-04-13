@@ -1595,7 +1595,7 @@ module Box : sig
   val yscale : Num.t -> t -> t
   val xscale : Num.t -> t -> t
 
- (** {2} Boxlike : An argument for functor of object that are similar to box *)
+  (** {2 Boxlike : An argument for functor of object that are similar to box} *)
 
   val set_pos : Point.t -> t -> t
     (** same as center *)
