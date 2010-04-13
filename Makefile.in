@@ -288,7 +288,7 @@ www/version.prehtml: Makefile
 
 export-examples:
 	$(MAKEEXAMPLES)
-	cp -f --parents examples/*.png examples/*.html $(WWW)
+	cp -f --parents examples/*.png examples/*.html examples/*.svg examples/prototype.js examples/style.css $(WWW)
 
 # Emacs tags
 ############

@@ -1,7 +1,7 @@
 o - changes in behaviour, new features, bugfixes
 * - incompatible changes in the interface
 
-current
+version 0.8.0
 -------
 * ocaml >= 3.10.1 is required now
 * externalimage work only with png image
