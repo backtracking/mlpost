@@ -26,7 +26,7 @@ let path_memoize = Hashtbl.create 50
 let picture_memoize = Hashtbl.create 50
 let command_memoize = Hashtbl.create 50
 
-let clear () = 
+let clear () =
   Hashtbl.clear num_memoize;
   Hashtbl.clear point_memoize;
   Hashtbl.clear metapath_memoize;
@@ -35,12 +35,12 @@ let clear () =
   Hashtbl.clear command_memoize
 
 let memoize f memoize =
-  fun acc arg -> 
+  fun acc arg ->
     try
       Hashtbl.find memoize arg.tag;
       acc
     with
-        Not_found -> 
+        Not_found ->
           Hashtbl.add memoize arg.tag ();
           f acc arg.node
 
@@ -67,7 +67,7 @@ and point' acc = function
   | PTPicCorner (pic,_) -> commandpic acc pic
   | PTTransformed (p,tr) -> point (transform acc tr) p
 and point acc = memoize point' point_memoize acc
-and knot acc k = 
+and knot acc k =
   match k.Hashcons.node with
     |{ knot_in = d1 ; knot_p = p ; knot_out = d2 } ->
        direction (direction (point acc p) d1) d2
@@ -75,7 +75,7 @@ and joint acc j =
   match j.Hashcons.node with
       | JControls (p1,p2) -> point (point acc p1) p2
       | JLine|JCurve|JCurveNoInflex|JTension _ -> acc
-and direction acc d = 
+and direction acc d =
   match d.Hashcons.node with
     | Vec p -> point acc p
     | Curl _ | NoDir -> acc
@@ -100,7 +100,7 @@ and picture acc arg =
     Hashtbl.find picture_memoize arg.tag;
     acc
   with
-      Not_found -> 
+      Not_found ->
         Hashtbl.add picture_memoize arg.tag ();
         match arg.node with
           | PITransformed (p,tr) -> commandpic (transform acc tr) p
@@ -112,7 +112,7 @@ and transform acc t =
     | TRScaled f | TRSlanted f | TRXscaled f | TRYscaled f -> num acc f
     | TRShifted p | TRZscaled p | TRRotateAround (p,_)-> point acc p
     | TRReflect (p1,p2) -> point (point acc p1) p2
-    | TRMatrix p -> 
+    | TRMatrix p ->
         num (num (num (num (num (num acc p.x0) p.y0) p.xx) p.xy) p.yx) p.yy
 and dash acc d =
   match d.Hashcons.node with
@@ -124,13 +124,13 @@ and dash_pattern acc o =
   match o.Hashcons.node with
     | On f | Off f -> num acc f
 and command' acc = function
-  | CDraw (p, b) -> 
+  | CDraw (p, b) ->
       let {color = _; pen = pe; dash = dsh} = b.Hashcons.node in
       path ((option_compile pen) ((option_compile dash) acc dsh) pe) p
   | CFill (p,_) -> path acc p
   | CDotLabel (pic,_,pt) | CLabel (pic,_,pt) -> commandpic (point acc pt) pic
   | CExternalImage _ -> acc
-and pen acc p = 
+and pen acc p =
   match p.Hashcons.node with
     | PenCircle | PenSquare -> acc
     | PenFromPath p -> path acc p
@@ -147,7 +147,7 @@ and commandpic acc p =
 let compile_tex l =
   let tags,texs = List.split l in
   let texs = Gentex.create !Compute.prelude texs in
-  List.iter2 (fun tag tex -> Hashtbl.add 
+  List.iter2 (fun tag tex -> Hashtbl.add
                 Compute.picture_memoize tag.tag (Picture_lib.tex tex))
     tags texs
 
@@ -162,21 +162,20 @@ let pathl arg = ct_auxl path arg; List.map Compute.path arg
 let metapathl arg = ct_auxl metapath arg; List.map Compute.metapath arg
 let picturel arg = ct_auxl picture arg; List.map Compute.picture arg
 
-let commandl_error ferror arg = ct_auxl command arg; 
+let commandl_error ferror arg = ct_auxl command arg;
   List.map (ferror Compute.command) arg
-let commandpicl_error ferror arg = ct_auxl commandpic arg; 
+let commandpicl_error ferror arg = ct_auxl commandpic arg;
   List.map (ferror Compute.commandpic) arg
-let numl_error ferror arg = ct_auxl num arg; 
+let numl_error ferror arg = ct_auxl num arg;
   List.map (ferror Compute.num) arg
-let pointl_error ferror  arg = ct_auxl point arg; 
+let pointl_error ferror  arg = ct_auxl point arg;
   List.map (ferror Compute.point) arg
-let pathl_error ferror  arg = ct_auxl path arg; 
+let pathl_error ferror  arg = ct_auxl path arg;
   List.map (ferror Compute.path) arg
-let metapathl_error ferror  arg = ct_auxl metapath arg; 
+let metapathl_error ferror  arg = ct_auxl metapath arg;
   List.map (ferror Compute.metapath) arg
-let picturel_error ferror arg = ct_auxl picture arg; 
+let picturel_error ferror arg = ct_auxl picture arg;
   List.map (ferror Compute.picture) arg
-
 
 
 let compute_nums () =
@@ -191,6 +190,6 @@ let point arg = ct_aux point arg; Compute.point arg
 let path arg = ct_aux path arg; Compute.path arg
 let metapath arg = ct_aux metapath arg; Compute.metapath arg
 let picture arg = ct_aux picture arg; Compute.picture arg
-let transform arg = ct_auxl transform arg; 
-  List.fold_left (fun acc t -> Matrix.multiply acc (Compute.transform t)) 
+let transform arg = ct_auxl transform arg;
+  List.fold_left (fun acc t -> Matrix.multiply acc (Compute.transform t))
     Matrix.identity arg

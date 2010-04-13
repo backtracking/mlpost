@@ -55,7 +55,6 @@ let () =
     (Filename.basename (Sys.argv.(0))) in
 
   let do_at_exit () =
-    if !mps then begin Mps.dump (); exit 0 end;
     if !cairo then begin
       if not !xpdf then
         if !png then Cairost.dump_png ()
@@ -70,7 +69,8 @@ let () =
       else if !png && not !xpdf then
         Metapost.dump_png ?prelude ~verbose ~clean:(not !dont_clean) bn
       else
-        Metapost.dump
+        if !mps then Mps.dump () else
+          Metapost.dump
           ?prelude ~pdf:!pdf ~eps:!eps
           ~verbose ~clean:(not !dont_clean) bn;
       if !xpdf then begin

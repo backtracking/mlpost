@@ -17,6 +17,7 @@
 IFDEF CAIRO THEN
 let supported = true
 
+module M = Mps
 open Icairost
 
 let set_verbosity = set_verbosity

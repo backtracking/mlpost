@@ -13,7 +13,6 @@
 (*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                  *)
 (*                                                                        *)
 (**************************************************************************)
-(** This is Mlpost *)
 
 module Signature : sig
   type point
@@ -2664,5 +2663,10 @@ end
 (**/**)
 module Metapost_tool : sig
   val read_prelude_from_tex_file : string -> string
+end
+
+module Mps : sig
+  val dump: unit -> unit
+  val generate : string -> ?pdf:bool -> (int * Command.t) list -> unit
 end
 (**/**)
