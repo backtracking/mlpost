@@ -32,12 +32,14 @@ let debug = ref false
 let specials = ref false
 let info = ref false
 
-module Cairo_device : dev with type arg = multi_page_pic with type cooked = unit =
+module Cairo_device : dev with type arg = multi_page_pic with type cooked
+  = unit =
 struct
   type arg = multi_page_pic
   type t = { arg : arg;
              doc : Dvi.t}
-             (*fonts :(string,Cairo_ft.font_face * Cairo_ft.ft_face) Hashtbl.t*)
+             (*fonts :(string,Cairo_ft.font_face * Cairo_ft.ft_face) 
+               Hashtbl.t*)
   type cooked = unit
 
   let ft = Cairo_ft.init_freetype ()
@@ -61,7 +63,9 @@ struct
 
   let new_document arg doc = 
     let first_page = ref true in
-    {arg = {arg with new_page = (fun () -> if !first_page then first_page := false else arg.new_page ());
+    {arg = {arg with new_page = 
+         (fun () -> if !first_page then first_page := false 
+          else arg.new_page ());
          x_origin = point_of_cm arg.x_origin;
          y_origin = point_of_cm arg.y_origin};
      doc = doc}
@@ -78,9 +82,11 @@ struct
         if !debug then
           printf "Use color Gray (%f)@." g;
         Cairo.set_source_rgb pic g g g
-    | CMYK _ -> failwith "dvicairo : I don't know how to convert CMYK to RGB and cairo doesn't support it"
+    | CMYK _ -> failwith "dvicairo : I don't know how to convert CMYK\
+ to RGB and cairo doesn't support it"
     | HSB _ -> failwith "dvicairo : I'm lazy I haven't written this conversion"
-        (* http://en.wikipedia.org/wiki/HSL_and_HSV#Conversion_from_HSV_to_RGB *)
+        (* http://en.wikipedia.org/wiki/HSL_and_HSV#Conversion_from_HSV_to_RGB
+        and in color.ml*)
 
 
   let fill_rect s dinfo x1 y1 w h = 
@@ -146,7 +152,8 @@ let create_window () =
     ignore (w#connect#destroy GMain.quit);
     if !debug then
       printf "Create the picture@.";
-    let pixmap = GDraw.pixmap ~width:(int_of_float width) ~height:(int_of_float height) ~window:w () in
+    let pixmap = GDraw.pixmap ~width:(int_of_float width)
+  ~height:(int_of_float height) ~window:w () in
     pixmap
 
 let show_gtk doc pixmap window = 
@@ -176,7 +183,8 @@ let show_gtk doc pixmap window =
 let create_png _ _ _ _ _ _ = ()
 let create_gtk _ _ _ _ _ _ = ()
 
-let create create_surface height width x_origin y_origin (interp_doc: multi_page_pic -> unit) out_file =
+let create create_surface height width x_origin y_origin 
+    (interp_doc: multi_page_pic -> unit) out_file =
   let height = point_of_cm height and width = point_of_cm width in
   if !info then printf "height = %f, width = %f@." height width;
   let oc = open_out out_file in

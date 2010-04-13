@@ -110,7 +110,8 @@ struct
     | Tex t -> 
         Cairo.save cr;
         let ({y=min},{y=max}) = Gentex.bounding_box t in
-        inversey cr (max+.min);
+        (*inversey cr (max+.min);*)
+        Cairo.scale cr ~sx:1. ~sy:(-.1.);
         draw_tex cr t;
         Cairo.restore cr
     | Stroke_path(path,c,pen,d) ->

@@ -1,6 +1,6 @@
 MAX := 17
 # all files that are generated from boxes.ml
-BOXESPNG := $(foreach i,$(shell seq 1 8), boxes$(i).png)
+BOXESPNG := $(foreach i,$(shell seq 1 9), boxes$(i).png)
 
 # all files that are generated from paths.ml
 PATHSPNG := $(foreach i,$(shell seq 1 17), paths$(i).png)

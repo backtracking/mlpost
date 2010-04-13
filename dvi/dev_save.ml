@@ -17,7 +17,8 @@
 open Tfm
 open Fonts
 
-type command = | Rectangle of Dviinterp.info*float * float * float * float (* x,y,w,h *)
+type command = | Rectangle of Dviinterp.info*float * float * float * float
+  (* x,y,w,h *)
                | Glyph of Dviinterp.info*Fonts.t * Int32.t * float * float
                | Specials of Dviinterp.info*string * float *float (* s,x,y *)
 
@@ -50,9 +51,11 @@ let replay_page_aux trace fill_rect draw_char specials dev page =
       fill_rect dev Dviinterp.dumb_info (msd page.x_max) page.y_min stroke h
     end
 
-let replay trace new_document new_page fill_rect draw_char specials end_document saved arg =
+let replay trace new_document new_page fill_rect draw_char specials 
+    end_document saved arg =
   let dev = new_document arg saved.doc in
-  List.iter (fun page -> new_page dev; replay_page_aux trace fill_rect draw_char specials dev page) saved.pages;
+  List.iter (fun page -> new_page dev; replay_page_aux trace fill_rect 
+               draw_char specials dev page) saved.pages;
   end_document dev
 
 let separe_pages saved =
@@ -114,15 +117,23 @@ struct
                          y_max = s.ty_max;
                          bases = s.tbases;
                         }
+
+          (* Dans ce cas on utilise une vrule qui est mis
+             specialement pour connaitre la taille du tex
+             vphantom *)
+          (* Cependant le y donné est très étrange *)
           | true, (Rectangle (_,x,y,_,h))::l -> {c = List.rev l;
-                                               x_min = 0.;
-                                               y_min = y;
-                                               x_max = x;
-                                               y_max = y+.h;
-                                               bases = s.tbases;
-                                              }
-          | _ -> failwith "I thought there were always a vrule at the end, please report. thx"
+                                                 x_min = 0.;
+                                                 y_min = -.(y+.h);
+                                                 x_max = x;
+                                                 y_max = -.y;
+                                                 bases = s.tbases;
+                                                }
+          | _ -> failwith "I thought there were always a vrule at the end,\
+ please report. thx"
         in
+        (*Format.eprintf "x_min = %f; x_max = %f; y_min = %f; y_max = %f@."
+          page.x_min page.x_max page.y_min page.y_max;*)
         s.tpages <- page::s.tpages;
         s.tc <- [];
         s.tx_min <- infinity;
@@ -134,7 +145,7 @@ struct
 
   let fill_rect s info x y w h =
     s.tc <- (Rectangle (info,x,y,w,h))::s.tc;
-    if s.use_last_vrule then
+    if not s.use_last_vrule then
       let xmin,xmax = x,x+.w(*min x (x+.w), max x (x+.w)*) in
       let ymin,ymax = y,y+.h(*min y (y+.h), max y (y+.h)*) in
       s.tx_min <- (min s.tx_min xmin);
@@ -147,7 +158,7 @@ struct
   let draw_char s info font char x y =
     s.tc <- (Glyph (info,font,char,x,y))::s.tc;
     if not (List.mem y s.tbases) then s.tbases <- y::s.tbases;
-    if s.use_last_vrule then
+    if not s.use_last_vrule then
       let width,height,depth = Fonts.char_dims font (Int32.to_int char) in
       s.tx_min <- min s.tx_min x;
       s.ty_min <- min s.ty_min (y-.depth);
@@ -164,7 +175,8 @@ end
   
 module Dev_load (Dev : Dviinterp.dev) =
 struct
-  let replay trace = replay trace Dev.new_document Dev.new_page Dev.fill_rect Dev.draw_char Dev.specials Dev.end_document
+  let replay trace = replay trace Dev.new_document Dev.new_page Dev.fill_rect
+    Dev.draw_char Dev.specials Dev.end_document
     
   let load_doc saved doc arg = 
     if get_doc saved = doc then replay false saved arg

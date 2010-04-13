@@ -79,9 +79,10 @@ open Num.Infix
 
 let (|>) x f = f x
 
-let draw_point t = Point.draw ~pen:(Pen.scale (bp 4.) Pen.default) ~color:(Color.red) t
+let draw_point ?(color=Color.red) t = 
+  Point.draw ~pen:(Pen.scale (bp 4.) Pen.default) ~color t
 
-(* align verticalement le barycentre [(west,5);(east,2)] *)
+(* aligne verticalement le barycentre [(west,5);(east,2)] *)
 let boxes6 =
   let two = Num.bp 2. in
   let five = Num.bp 5. in
@@ -92,7 +93,8 @@ let boxes6 =
   let add_point t = 
     let w = corner `West t in
     let e = corner `East t in
-    let p = P.mult (one // (two +/ five)) (P.add (P.mult five w) (P.mult two e)) in
+    let p = P.mult (one // (two +/ five)) (P.add (P.mult five w) 
+                                             (P.mult two e)) in
     setp "something" p t in
   let a = add_point a in
   let b = add_point b in
@@ -101,8 +103,9 @@ let boxes6 =
     |> List.map (getp "something")
     |> List.map draw_point
     |> Command.seq  in
-  (*(*Example de dÃ©buggage quand on a le nouveau backend*)
-    List.iter fun p -> let {Concrete.CPoint.x=x;y=y} = Concrete.cpoint_of_point (getp "something" p) in
+  (*(*Example de débuggage quand on a le nouveau backend*)
+    List.iter fun p -> let {Concrete.CPoint.x=x;y=y} = 
+    Concrete.cpoint_of_point (getp "something" p) in
              Format.printf "x = %f; y = %f@." x y) [a;b;c];*)
   Command.seq [
     points;
@@ -128,7 +131,8 @@ let boxes7 =
     make "southeast" `Southeast;
     make "northwest" `Northwest;
     make "northeast" `Northeast;
-    make "custom" (`Custom (fun b -> Point.add (Point.scale (bp 0.5) (ctr b)) (Point.scale (bp 0.5) (corner `Southeast b))))
+    make "custom" (`Custom (fun b -> Point.add (Point.scale (bp 0.5) (ctr b))
+                              (Point.scale (bp 0.5) (corner `Southeast b))))
   ] in
   Command.seq boxes
 
@@ -170,6 +174,20 @@ let boxes8 =
                                 r n (yop i)))::acc) (i-1) in
   Command.seq (aux [] 3)
 
+(*parse >> <<boxes9 *)
+(* aligne verticalement le barycentre [(west,5);(east,2)] *)
+let boxes9 =
+  let t = Picture.tex "f" in
+  let a = Picture.tex "y" in
+  Command.seq [draw_point ~color:Color.blue Point.origin;
+               draw_point ~color:Color.red (Point.bpp (6.,6.));
+               draw_point ~color:Color.green (Point.bpp (-6.,-6.));
+               draw_point ~color:Color.orange (Picture.north t);
+               draw_point ~color:Color.red (Picture.south t);
+               draw_point ~color:Color.green (Picture.north a);
+               draw_point ~color:Color.cyan (Picture.south a);
+               a;t]
+               
 
 (*parse >> *)
 
@@ -183,4 +201,5 @@ let () = List.iter (fun (i,fig) ->
    5,boxes5;
    6,boxes6;
    7,boxes7;
-   8,boxes8]
+   8,boxes8;
+   9,boxes9]
