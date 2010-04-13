@@ -79,3 +79,10 @@ let sign f =
 
 let sign { x=x; y = y} = { x = sign x; y = sign y}
 
+let norm_infinity default f = 
+  if f = infinity || f = neg_infinity then default
+  else f
+
+let norm_infinity {x=xdef;y=ydef} {x=x;y=y} = 
+  {x= norm_infinity xdef x;y= norm_infinity ydef y}
+  

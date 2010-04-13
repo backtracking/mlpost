@@ -1,6 +1,8 @@
 META
 Makefile
 _build/
+_build_dot
+_build_lablgtk
 autom4te.cache/
 config.log
 config.status

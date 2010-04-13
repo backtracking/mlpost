@@ -54,3 +54,5 @@ val print : Format.formatter -> t -> unit
     val ( */) : float -> t -> t
     val ( //) : t -> float -> t
   end
+
+val norm_infinity : t -> t -> t

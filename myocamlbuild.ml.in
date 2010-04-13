@@ -65,7 +65,7 @@ let _ = dispatch begin function
         "concrete"::"dvi"::"backend"::"gui"::!Options.include_dirs;
       Options.exclude_dirs :=
         "presentations"::"papers"::"examples"::
-          "contrib"::!Options.exclude_dirs;
+          "contrib"::"test"::!Options.exclude_dirs;
       Options.ocamldoc := S[A"ocamldoc"]
   | Before_rules ->
       tagcairo := Ocamlbuild_pack.Configuration.has_tag "cairo_yes";
