@@ -3,6 +3,7 @@ o - changes in behaviour, new features, bugfixes
 
 current
 -------
+* externalimage work only with png image
 * no more option -libdir
 * ocaml >= 3.10.1 is required now
 * module Color: the definitions of the following colors have changed:
