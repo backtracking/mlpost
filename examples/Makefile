@@ -26,7 +26,7 @@ REALPLOTPNG := real_plot1.png real_plot2.png
 
 COLORPNG := color1.png color2.png color3.png color4.png
 
-INCLUDEPNG := include1.png include2.png
+INCLUDEPNG := include1.png include2.png include3.png
 
 DOTPNG := dot_dot1.png dot_dot2.png
 
