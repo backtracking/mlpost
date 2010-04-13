@@ -50,7 +50,17 @@ let draw_pic p = p
 let append c1 c2 = seq [c1; c2]
 let (++) = append
 
-let externalimage filename spec = 
+let externalimage filename spec =
+  if not (Filename.check_suffix filename "png")
+  then invalid_arg 
+    (Format.sprintf "externalimage support only png image : %s" filename);
+  if not (Sys.file_exists filename)
+  then invalid_arg 
+    (Format.sprintf "externalimage file doesn't exist : %s" filename);
+  let filename = 
+    if Filename.is_relative filename
+    then Filename.concat (Sys.getcwd ()) filename
+    else filename in 
   mkCommand (mkCExternalImage filename spec)
 
 (* syntactic sugar *)

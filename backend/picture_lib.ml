@@ -140,17 +140,20 @@ let clip p path = {fcl= Clip (p.fcl,path);
                    fi = IntClip (p.fi,path)}
 
 let externalimage_dimension filename : float * float = 
-  let inch = Unix.open_process_in ("identify -format \"%h\\n%w\" "^filename) in
+  let inch = Unix.open_process_in 
+    (Format.sprintf "identify -format \"%%h\\n%%w\" \"%s\"" filename) in
   try let h = float_of_string (input_line inch) in
   let w = float_of_string (input_line inch) in (h,w)
-  with End_of_file | Failure "float_of_string" -> invalid_arg "Unknown external image"
+  with End_of_file | Failure "float_of_string" -> 
+    invalid_arg (Format.sprintf "Unknown external image %s" filename)
 
 let external_image filename spec = 
   let height,width = 
     begin
       match spec with
         | `Exact (h,w) -> (h,w)
-        | ((`None as spec)| (`Height _ as spec)| (`Width _ as spec)|(`Inside _ as spec)) -> 
+        | ((`None as spec)| (`Height _ as spec)| (`Width _ as spec)
+          |(`Inside _ as spec)) -> 
             let fh,fw = externalimage_dimension filename in
             match spec with
               | `None -> fh,fw

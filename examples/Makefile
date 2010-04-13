@@ -26,16 +26,18 @@ REALPLOTPNG := real_plot1.png real_plot2.png
 
 COLORPNG := color1.png color2.png color3.png color4.png
 
+INCLUDEPNG := include1.png include2.png
+
 DOTPNG := dot_dot1.png dot_dot2.png
 
 HTMLFILES := boxes.ml.html paths.ml.html misc.ml.html tree.ml.html \
              label.ml.html automata.ml.html hist.ml.html radar.ml.html\
-	     real_plot.ml.html dot_dot.ml.html color.ml.html
+	     real_plot.ml.html dot_dot.ml.html color.ml.html include.ml.html
 
 MLPOST:=mlpost -v -ps
 
 ALL := $(BOXESPNG) $(PATHSPNG) $(MISCPNG) $(TREEPNG) $(LABELPNG) $(AUTOMPNG)\
-	$(HISTPNG)  $(RADARPNG) $(REALPLOTPNG) $(COLORPNG)
+	$(HISTPNG)  $(RADARPNG) $(REALPLOTPNG) $(COLORPNG) $(INCLUDEPNG)
 
 ALL_CAIRO := $(addprefix cairo_,$(ALL))
 

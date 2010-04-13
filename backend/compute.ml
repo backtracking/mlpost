@@ -46,7 +46,8 @@ let memoize f fname memoize =
               f arg.node 
             with exn -> 
               if debug then
-                Format.printf "Compute.%s raises : %s@.@?" fname (Printexc.to_string exn);
+                Format.printf "Compute.%s raises : %s@.@?" 
+                  fname (Printexc.to_string exn);
               raise exn
           in
           Hashtbl.add memoize arg.tag result;
@@ -289,7 +290,8 @@ and path' = function
   | PAQuarterCircle -> MP.Approx.quartercircle 1.
   | PAHalfCircle -> MP.Approx.halfcirle 1.
   | PAFullCircle -> MP.Approx.fullcircle 1.
-and path p = (*Format.printf "path : %a@.@?" Print.path p;*) memoize path' "path" path_memoize p
+and path p = (*Format.printf "path : %a@.@?" Print.path p;*) 
+  memoize path' "path" path_memoize p
 and picture' = function
   | PITransformed (p,tr) ->
       let tr = transform tr in
@@ -370,7 +372,8 @@ and command' = function
       let p = path p in
       Picture_lib.fill_path p c
   | CDotLabel (pic, pos, pt) -> 
-      Picture_lib.on_top (Picture_lib.draw_point (point pt)) (command (mkCLabel pic pos pt))
+      Picture_lib.on_top (Picture_lib.draw_point (point pt)) 
+        (command (mkCLabel pic pos pt))
   | CLabel (pic, pos ,pt) -> 
       let pic = commandpic pic in
       let pt = point pt in
