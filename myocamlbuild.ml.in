@@ -92,7 +92,7 @@ let _ = dispatch begin function
           ~deps:[file1] ~prod:(file2)
           (fun _ _ -> cp file1 file2) in
       copy "contrib/dot/mlpost_dot.mli" "mlpost_dot.mli";
-      copy "contrib/dot/mlpost_lablgtk.mli" "mlpost_lablgtk.mli";
+      copy "contrib/lablgtk/mlpost_lablgtk.mli" "mlpost_lablgtk.mli";
       
       (**doc *)
       rule "generation of the documentation" ~prod:"doc/index.html"
