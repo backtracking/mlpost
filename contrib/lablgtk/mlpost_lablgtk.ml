@@ -6,7 +6,7 @@ open Mlpost
 
 open Format
 
-class mlpost_fig ?width ?height ?packing ?show fig =
+class mlpost_fig ?width ?height ?packing ?show () =
 
   (* Create the drawing area. *)
   let da = GMisc.drawing_area ?width ?height ?packing ?show () in
@@ -24,7 +24,7 @@ class mlpost_fig ?width ?height ?packing ?show fig =
     val mutable need_update = true
 
     (* The mlpost fig. *)
-    val mutable fig = fig
+    val mutable fig = Command.nop
     method set_fig t = fig <- t; need_update <- true
     method fig = fig
 
@@ -93,7 +93,8 @@ struct
   let add_fig w ?width ?height ?title fig =
     let window = GWindow.window ?width ?height ?title () in
     let mlpost_fig = new mlpost_fig ?width ?height 
-      ~packing:window#add (fig ()) in
+      ~packing:window#add () in
+    mlpost_fig#set_fig (fig ());
     w.figda <- (fig,(mlpost_fig,window))::w.figda;
     ignore(window#connect#destroy 
              ~callback:(fun () -> remove_fig w fig));

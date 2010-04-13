@@ -163,7 +163,7 @@ lablgtk-contrib : lib
 		-cflags -I,$(LABLGTK2LIB) \
 		-cflags -I,$(CAIROLABLGTK2LIB) \
 		$(addprefix mlpost_lablgtk,$(LIB_EXT)) && cd ../..
-	ln -sf contrib/dot/_build _build_dot 
+	ln -sf contrib/lablgtk/_build _build_lablgtk 
 
 else
 

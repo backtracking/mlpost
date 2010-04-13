@@ -1,7 +1,7 @@
 
 class mlpost_fig : 
-  ?width:int -> ?height:int -> ?packing:(GObj.widget -> unit) -> ?show:bool ->
-  Mlpost.Command.t -> 
+  ?width:int -> ?height:int -> ?packing:(GObj.widget -> unit) -> 
+  ?show:bool -> unit ->
 object 
   inherit GObj.widget
   val obj : Gtk.widget Gtk.obj

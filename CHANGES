@@ -10,6 +10,8 @@ current
   These colors are now compatible to HTML/CSS and X11 definitions
 * Box: Box.tabularl did modify the input boxes, now it leaves them unchanged
   (reported by Julien Signoles)
+o contrib Mlpost_lablgtk : define a gtk widget to display mlpost figures
+  It also allow to easily create an interface to interact with an mlpost figures
 o contrib Mlpost_dot : Use graphviz (dot) to place picture, box, ...
     make contrib && make install-contrib
     mlpost -contrib dot [...]
