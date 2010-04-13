@@ -130,7 +130,8 @@ clean:
 	rm -f $(ALLTEX)
 	rm -f $(HTML)
 	rm -f parse.ml *.cmx *.cmo *.cmi parse *.o
-	rm -f *.png *.dummy *.dummy_dot *.native *.annot
+	rm -f *.dummy *.dummy_dot *.native *.annot
+	rm -f $(filter-out powered-by-caml.128x58.png,$(wildcard *.png))
 
 
 editor2 :

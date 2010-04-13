@@ -233,7 +233,9 @@ GENERATEDSOURCEFILES = version.ml myocamlbuild.ml $(GENERATED)
 GUIFILES = gui/*.mll gui/*.ml gui/_tags
 EXFILES = examples/Makefile examples/*.ml examples/all.template\
 	  examples/index.html examples/parse.mll examples/README\
-	  examples/prototype.js examples/style.css
+	  examples/prototype.js examples/style.css \
+	  examples/powered-by-caml.128x58.png
+
 CONTRIBDOTFILES = $(addprefix contrib/dot/, dot.ml dot.mli Makefile META mlpost_dot.mli mlpost_dot.mlpack _tags xdot_ast.mli xdot_lexer.mll xdot_parser.mly)
 CONTRIBLABLGTKFILES = $(addprefix contrib/lablgtk/, META mlpost_lablgtk.ml mlpost_lablgtk.mli)
 CUSTOMDOCFILES = customdoc/all.template customdoc/img_doc.ml customdoc/img.ml \
