@@ -1,4 +1,6 @@
+(** Use Mlpost figures inside gtk interface *) 
 
+(** widget gtk for displaying mlpost figure *)
 class mlpost_fig : 
   ?width:int -> ?height:int -> ?packing:(GObj.widget -> unit) -> 
   ?show:bool -> unit ->
@@ -11,15 +13,15 @@ end
 
 module Interface :
 sig
-  (** {1} Abstract lablgtk in order to display Mlpost figures inside a very
-      simple interface *)
+  (** {1 Abstract lablgtk in order to display Mlpost figures inside a very
+      simple interface} *)
 
   type interface
 
   val new_interface : 
     ?width:int -> ?height:int -> ?title:string -> unit -> interface
 
-  (** {2} Interfaces *)
+  (** {2 Interfaces} *)
   val create_text : 
     interface -> ?label:string -> string -> (string -> unit) -> unit
     (** create_text ~label get set add to the interface window a text
@@ -36,7 +38,7 @@ sig
 
   val remove_fig : interface -> (unit -> Mlpost.Command.t) -> unit
 
-  (** {2} Required function *)
+  (** {2 Required function} *)
   val add_fig : 
     interface -> 
     ?width:int -> ?height:int -> 

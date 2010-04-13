@@ -65,7 +65,8 @@ let _ = dispatch begin function
         "concrete"::"dvi"::"backend"::"gui"::!Options.include_dirs;
       Options.exclude_dirs :=
         "presentations"::"papers"::"examples"::
-          "contrib"::"test"::!Options.exclude_dirs;
+          "contrib/dot/_build"::"contrib/lablgtk/_build"::
+          "test"::!Options.exclude_dirs;
       Options.ocamldoc := S[A"ocamldoc"]
   | Before_rules ->
       tagcairo := Ocamlbuild_pack.Configuration.has_tag "cairo_yes";
@@ -84,7 +85,16 @@ let _ = dispatch begin function
         end
       end;
 
-       (**doc *)
+      yesnofile_rule "mlpost" "_@LABLGTK2@lablgtk" ".odocl";
+            
+      let copy file1 file2 =
+        rule (" copy from "^file1^"to "^file2)
+          ~deps:[file1] ~prod:(file2)
+          (fun _ _ -> cp file1 file2) in
+      copy "contrib/dot/mlpost_dot.mli" "mlpost_dot.mli";
+      copy "contrib/dot/mlpost_lablgtk.mli" "mlpost_lablgtk.mli";
+      
+      (**doc *)
       rule "generation of the documentation" ~prod:"doc/index.html"
         ~deps:["mlpost.docdir/html.stamp";"img/stamp"]
          (fun _ _ ->
@@ -93,7 +103,10 @@ let _ = dispatch begin function
       dep ["ocaml";"doc"] ["customdoc/img.cmo"];
       dep ["ocaml"; "syntax_mymacroparser"] ["myocamlmacroparser.native"];
       flag ["ocaml";"doc"] &
-        S[A"-hide" ; A "Mlpost"; A"-g"; A "customdoc/img.cmo"];
+        S([A"-hide" ; A "Mlpost"; A"-g"; A "customdoc/img.cmo"]
+            @ (if "@LABLGTK2@" = "yes" 
+               then [A"-I"; A"@LABLGTK2LIB@"]
+               else []));
 
       rule "generation of the images for the documentation"
         ~prod:"img/image.png"
