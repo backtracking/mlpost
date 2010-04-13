@@ -3,9 +3,8 @@ o - changes in behaviour, new features, bugfixes
 
 current
 -------
-* externalimage work only with png image
-* no more option -libdir
 * ocaml >= 3.10.1 is required now
+* externalimage work only with png image
 * module Color: the definitions of the following colors have changed:
   lightblue, green, lightgreen, orange, lightcyan, purple, lightyellow
   These colors are now compatible to HTML/CSS and X11 definitions

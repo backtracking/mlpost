@@ -22,7 +22,7 @@ let ccopt = ref " "
 let execopt = ref " "
 let verbose = Mlpost_desc_options.verbose
 let native = ref false
-let libraries = ref Version.libraries
+let libraries = ref (Version.libraries Version.libdir)
 let compile_name = ref None
 let dont_execute = ref false
 let dont_clean = ref false
@@ -45,7 +45,7 @@ let used_libs =
   ref acc
 
 let add_contrib x =
-  if List.mem_assoc x Version.libraries then
+  if List.mem_assoc x !libraries then
     used_libs := x::!used_libs
   else begin Format.eprintf "contrib %s unknown" x; exit 1 end
 
@@ -77,11 +77,7 @@ let add_ccopt x = ccopt := !ccopt ^ x ^ " "
 let add_execopt x = execopt := !execopt ^ x ^ " "
 
 let add_libdir libdir =
-  libraries :=
-    [
-      "mlpost", ([libdir], ["mlpost"]);
-     "mlpost_options", ([libdir], [ "mlpost_desc_options";"mlpost_options"]);
-    ] @ !libraries
+  libraries := Version.libraries libdir
 
 let give_lib () =
   List.fold_left

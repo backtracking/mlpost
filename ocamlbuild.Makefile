@@ -129,7 +129,7 @@ other.byte: othergraphs.ml
 	$(PSVIEWER) test/othergraphs.ps
 
 .PHONY: check-examples examples
-SUBDIRMLPOST:=../$(BUILD)tool.native -libdir ../$(BUILD) -ccopt "-I ../contrib/dot/_build -I ../contrib/lablgtk/_build" -v -ps -native
+SUBDIRMLPOST:=../$(BUILD)tool.native -libdir ../$(BUILD) -v -ps -native
 MAKEEXAMPLES=make -C examples MLPOST='$(SUBDIRMLPOST)'
 
 check-examples: mlpost.cma tool.opt
@@ -154,6 +154,7 @@ contrib: dot-contrib lablgtk-contrib
 dot-contrib : lib
 	@echo "make: Entering directory \`$(shell pwd)/contrib/dot'"
 	cd contrib/dot && ocamlbuild -cflags -I,$(shell pwd)/_build $(addprefix mlpost_dot,$(LIB_EXT)) && cd ../..
+	ln -sf contrib/dot/_build _build_dot 
 
 ifeq "$(LABLGTK2)$(CAIROLABLGTK2)$(USEOCAMLFIND)" "yesyesyes"
 lablgtk-contrib : lib
@@ -162,6 +163,7 @@ lablgtk-contrib : lib
 		-cflags -I,$(LABLGTK2LIB) \
 		-cflags -I,$(CAIROLABLGTK2LIB) \
 		$(addprefix mlpost_lablgtk,$(LIB_EXT)) && cd ../..
+	ln -sf contrib/dot/_build _build_dot 
 
 else
 

@@ -32,10 +32,17 @@ let not_bitstring = bitstringlib = ""
 (* (contrib_name, (include_list,lib_list)) *)
 (* The second second composante is linked in reversed order (cma,cmxa) *)
 
-let libraries =
+let append_dir dir suffix =
+  let dir = 
+    if Filename.check_suffix dir "/" 
+    then Filename.chop_suffix dir "/"
+    else dir in
+  dir^suffix
+
+let libraries libdir =
   [
-    "dot", ([libdir^"_dot"],["mlpost_dot"]);
-    "lablgtk", ([libdir^"_lablgtk";lablgtk2lib;cairolablgtk2lib],
+    "dot", ([append_dir libdir "_dot"],["mlpost_dot"]);
+    "lablgtk", ([append_dir libdir "_lablgtk";lablgtk2lib;cairolablgtk2lib],
                 ["lablgtk"; "cairo_lablgtk"; "mlpost_lablgtk"; ]);
     "cairo", ([cairolib], ["bigarray";"cairo";]);
     "bitstring", ([bitstringlib], ["bitstring"]);
