@@ -1,8 +1,11 @@
 o - changes in behaviour, new features, bugfixes
 * - incompatible changes in the interface
 
-version 0.8.0
+current
 -------
+
+version 0.8.0
+-------------
 * ocaml >= 3.10.1 is required now
 * externalimage work only with png image
 * module Color: the definitions of the following colors have changed:
