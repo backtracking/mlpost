@@ -31,7 +31,7 @@
 #   EXE           ".exe" if OCAMLWIN32=yes, "" otherwise
 
 # The name of the package and its version
-AC_INIT(mlpost,0.8,[],[],[])
+AC_INIT(mlpost,0.8.0,[],[],[])
 
 # The compilation date
 TODAY=`date`
