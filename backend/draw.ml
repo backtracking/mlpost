@@ -19,10 +19,10 @@ module S = Spline_lib
 
 module Cairo_device = Dev_save.Dev_load(Dvicairo.Cairo_device)
 
-let draw_tex cr tex = 
+let draw_tex cr tex =
   Cairo.save cr;
   Cairo.transform cr tex.Gentex.trans;
-  Cairo_device.replay false tex.Gentex.tex 
+  Cairo_device.replay false tex.Gentex.tex
   {Dvicairo.pic = cr;new_page = (fun () -> assert false);
    x_origin = 0.; y_origin = 0.};
   Cairo.restore cr
@@ -32,7 +32,7 @@ module MetaPath =
 struct
   type pen = Matrix.t
 
-  let curve_to cr s = 
+  let curve_to cr s =
     let _, sb, sc, sd = Spline.explode s in
     Cairo.curve_to cr sb.x sb.y sc.x sc.y sd.x sd.y
 
@@ -46,11 +46,11 @@ struct
             List.iter (curve_to cr) l
         end ;
         if p.S.cycle then Cairo.close_path cr
-    | S.Point _ -> 
+    | S.Point _ ->
         failwith "Metapost fail in that case what should I do???"
 
   let stroke cr pen = function
-    | S.Path _ as path -> 
+    | S.Path _ as path ->
         (*Format.printf "stroke : %a@." S.print path;*)
         draw_path cr path;
         Cairo.save cr;
@@ -92,7 +92,7 @@ struct
     | None | Some (_,[]) -> ();
     | Some (f,l) -> Cairo.set_dash cr (Array.of_list l) f
 
-  let inversey cr height = 
+  let inversey cr height =
     Cairo.translate cr ~tx:0. ~ty:height;
     Cairo.scale cr ~sx:1. ~sy:(-.1.)
 
@@ -100,17 +100,15 @@ struct
 
   let rec draw_aux cr = function
     | Empty -> ()
-    | Transform (m,t) -> 
+    | Transform (m,t) ->
         Cairo.save cr;
         Cairo.transform cr m;
         (*Format.printf "Transform : %a@." Matrix.print m;*)
         draw_aux cr t;
         Cairo.restore cr
     | OnTop l -> List.iter (draw_aux cr) l
-    | Tex t -> 
+    | Tex t ->
         Cairo.save cr;
-        let ({y=min},{y=max}) = Gentex.bounding_box t in
-        (*inversey cr (max+.min);*)
         Cairo.scale cr ~sx:1. ~sy:(-.1.);
         draw_tex cr t;
         Cairo.restore cr
@@ -120,18 +118,18 @@ struct
         dash cr d;
         MetaPath.stroke cr pen path;
         Cairo.restore cr
-    | Fill_path (path,c)-> 
+    | Fill_path (path,c)->
         Cairo.save cr;
         color_option cr c;
         MetaPath.fill cr path;
         Cairo.restore cr
-    | Clip (com,p) -> 
+    | Clip (com,p) ->
         Cairo.save cr;
         MetaPath.draw_path cr p;
         Cairo.clip cr;
         draw_aux cr com;
         Cairo.restore cr
-    | ExternalImage (filename,height,width) -> 
+    | ExternalImage (filename,height,width) ->
         Cairo.save cr;
         inversey cr height;
         let img = Cairo_png.image_surface_create_from_file filename in
