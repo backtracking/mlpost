@@ -9,18 +9,24 @@ sig
     type edge = node * node
 
     val mknode : B.t -> node
-      (** creates a node from a boxlike *)
-
-    val mkedge : node -> node -> edge
-      (** creates an edge between two nodes *)
-
-    val mkedges : (node * node) list -> edge list
+      (** creates an abstract node from a boxlike *)
 
     val place : 
       ?orient:[`TB|`LR|`BT|`RL] -> 
       node list -> edge list -> B.t list * Path.t list
-      (** place ~orient nodes edges returns the list of all the
-      boxlike in nodes placed by dot and the list of path of xedges
-      which link the box *)
+      (** [place ~orient nodes edges] returns a concrete
+          representation of the abstract directed graph composed by
+          [nodes] linked by [edges]. The concrete representation is
+          composed by the list of all the boxlikes of [nodes] placed
+          by dot and by the list of paths representing the [edges]
+          drawn by dot
+
+          @param orient specifies the orientation of the graph :
+          - `TB top to bottom (default)
+          - `LR left to right
+          - `BT bottom to top
+          - `RL right to left
+
+      *)
   end
 end
