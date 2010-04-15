@@ -13,17 +13,6 @@
 (*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                  *)
 (*                                                                        *)
 (**************************************************************************)
-# 16 "version.ml.in"
-let version = "@PACKAGE_VERSION@"
-let date = "@TODAY@"
-let ocamlopt = "@OCAMLOPT@"
-let ocamlc = "@OCAMLC@"
-let libdir = "@LIBDIR@"
-let include_string = "@INCLUDELIBS@"
-let cairolib = "@CAIROLIB@"
-let bitstringlib = "@BITSTRINGLIB@"
-let cairolablgtk2lib = "@CAIROLABLGTK2LIB@"
-let lablgtk2lib = "@LABLGTK2LIB@"
 
 let not_cairo = cairolib = ""
 let not_bitstring = bitstringlib = ""

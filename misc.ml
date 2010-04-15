@@ -23,7 +23,7 @@ let write_to_formatted_file filename f =
   write_to_file filename
     (fun chan ->
       let fmt = Format.formatter_of_out_channel chan in
-        f fmt)
+      f fmt; Format.fprintf fmt "@?")
 
 let print_option start printer fmt = function
   | None -> ()
