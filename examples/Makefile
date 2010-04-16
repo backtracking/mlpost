@@ -62,7 +62,8 @@ all_cairo_svg:  $(ALL_CAIRO_SVG)
 contrib:$(DOTPNG)\
 	$(addprefix png_cairo_,$(DOTPNG))\
 	$(addprefix pdf_cairo_,$(DOTPNG))\
-	$(addprefix ps_cairo_,$(DOTPNG))
+	$(addprefix ps_cairo_,$(DOTPNG))\
+	$(addprefix svg_cairo_,$(DOTPNG:png=svg))
 
 #Compilation
 %_dot.native : %_dot.ml
