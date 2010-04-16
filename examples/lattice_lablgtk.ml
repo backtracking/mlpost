@@ -87,6 +87,7 @@ let lattice s =
 
 (** End of the copy *)
 
+open Mlpost_lablgtk
 module L = Mlpost_lablgtk.Interface
 
 let _ = GMain.Main.init ()
@@ -98,6 +99,16 @@ let int = L.new_interface ()
 let () = L.create_text int ~label:"lattice of subwords of"
   !word ((:=) word)
 
-let () = L.add_fig int (fun () -> lattice !word)
+let aa ~width ~height _ =
+  let p = Point.pt (Num.divf width 2.,Num.divf height 2.) in
+  [Transform.shifted p]
+
+let aa2 ~width ~height pic =
+  let p = Point.pt (Num.divf width 2.,Num.divf height 2.) in
+  [Transform.shifted (Point.sub p (Picture.ctr pic))]
+
+
+let () = L.add_pic ~auto_aspect:aa_fit_page int 
+  (fun () -> lattice !word)
 
 let () = L.main int

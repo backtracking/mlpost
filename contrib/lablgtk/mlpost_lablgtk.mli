@@ -1,17 +1,41 @@
 (** Use Mlpost figures inside gtk interface *) 
+open Mlpost
+type auto_aspect = width:Num.t -> height:Num.t -> 
+  Mlpost.Picture.t -> Mlpost.Transform.t
+  
+val aa_nothing    : auto_aspect
+val aa_center     : auto_aspect
+val aa_fit_page   : auto_aspect
+val aa_fit_width  : auto_aspect
+val aa_fit_height : auto_aspect
 
-(** widget gtk to display one mlpost figure *)
-class mlpost_fig : 
+
+(** widget gtk to display one mlpost picture *)
+class mlpost_pic : 
   ?width:int -> ?height:int -> ?packing:(GObj.widget -> unit) -> 
   ?show:bool -> unit ->
 object 
   inherit GObj.widget
   val obj : Gtk.widget Gtk.obj
-  method fig : Mlpost.Command.t
-    (** The displayed figure *)
-  method set_fig : Mlpost.Command.t -> unit
-    (** Sets the figure to display. This function doesn't refresh
+  method pic : Mlpost.Picture.t
+    (** The displayed picture *)
+  method set_pic : Mlpost.Picture.t -> unit
+    (** Sets the picture to display. This function doesn't refresh
        the widget. *)
+
+  method background : GDraw.color
+    (** The actual background color *)
+  method set_background : GDraw.color -> unit
+    (** Sets the background color *)
+
+  method size : int * int
+    (** The size of the drawing area (width,height) *)
+  method set_auto_aspect : auto_aspect -> unit
+    (** define the transformation used to have a good aspect of the
+        picture (centered, ...) *)
+
+  method set_show_corner : bool -> unit
+
 end
 
 module Interface :
@@ -42,25 +66,29 @@ sig
         the callback function used when this choice is selected. *)
 
 
-  val remove_fig : interface -> (unit -> Mlpost.Command.t) -> unit
-    (** [remove_fig gen_fig] removes a display window created by
-        [add_fig gen_fig] *)
+  val remove_pic : interface -> (unit -> Mlpost.Command.t) -> unit
+    (** [remove_pic gen_pic] removes a display window created by
+        [add_pic gen_pic] *)
 
 
     (** {2 Required function} *)
-    (** functions needed to see one mlpost figure : *)
+    (** functions needed to see one mlpost picure : *)
 
-  val add_fig : 
+  val add_pic : 
     interface -> 
     ?width:int -> ?height:int -> 
-    ?title:string -> (unit -> Mlpost.Command.t) -> unit
-    (** [add_fig get_fig] add a new display window. [get_fig] is
+    ?title:string ->
+    ?show_corner:bool ->
+    ?auto_aspect:auto_aspect -> 
+    (unit -> Mlpost.Command.t) ->
+    unit
+    (** [add_pic get_pic] add a new display window. [get_pic] is
         called each times the window must be refreshed. If the value
-        of one of the interfaces is changed, the displayed figure is
+        of one of the interfaces is changed, the displayed picure is
         refreshed.*)
 
 
   val main : interface -> unit
     (** Start the main loop. During the main loop some texts or
-        options can be added and {!add_fig} can be called *)
+        options can be added and {!add_pic} can be called *)
 end
