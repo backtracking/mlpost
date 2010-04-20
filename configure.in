@@ -109,6 +109,36 @@ if test "$OCAMLOPT" != no ; then
     fi
 fi
 
+# checking for camlp4o
+AC_PATH_PROG(CAMLP4O,camlp4o,no)
+if test "$CAMLP4O" != no ; then
+  AC_MSG_CHECKING(camlp4o version)
+  TMPVER=`$CAMLP4O -version`
+  if test "$TMPVER" != "$OCAMLVERSION" ; then
+    AC_MSG_ERROR(differs from ocamlc; Aborting.)
+  else
+    AC_MSG_RESULT(ok)
+  fi
+fi
+
+# currently commented out because some other part of the code relies on
+# camlp4o in bytecode
+#AC_PATH_PROG(CAMLP4ODOTOPT, camlp4o.opt,no)
+#if test "$CAMLP4ODOTOPT" != no ; then
+#  AC_MSG_CHECKING(camlp4o.opt version)
+#  TMPVER=`$CAMLP4ODOTOPT -version`
+#  if test "$TMPVER" != "$OCAMLVERSION" ; then
+#    AC_MSG_ERROR(differs from ocamlc; Aborting.)
+#  else
+#    AC_MSG_RESULT(ok)
+#    CAMLP4O=$CAMLP4ODOTOPT
+#  fi
+#fi
+
+#checking for ocamldoc
+AC_PATH_PROG(OCAMLDOC,ocamldoc,no)
+
+
 # ocamldep, ocamllex and ocamlyacc should also be present in the path
 AC_PATH_PROG(OCAMLDEP,ocamldep,no)
 if test "$OCAMLDEP" = no ; then
@@ -353,6 +383,8 @@ AC_CHECK_PROGS(PDFVIEWER,xpdf acroread evince)
 # substitutions to perform
 AC_SUBST(OCAMLC)
 AC_SUBST(OCAMLOPT)
+AC_SUBST(CAMLP4O)
+AC_SUBST(OCAMLDOC)
 AC_SUBST(OCAMLDEP)
 AC_SUBST(OCAMLLEX)
 AC_SUBST(OCAMLYACC)

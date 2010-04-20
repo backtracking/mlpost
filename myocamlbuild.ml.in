@@ -42,11 +42,11 @@ let string_flatten l = List.fold_left (fun acc s -> acc ^ " " ^ s) "" l
 
 let syntaxes () =
   let bitstring_entry =
-    let cmd = "camlp4o -I @BITSTRINGLIB@ bitstring.cma \
+    let cmd = "@CAMLP4O@ -I @BITSTRINGLIB@ bitstring.cma \
                 bitstring_persistent.cma pa_bitstring.cmo" in
      "bitstring", cmd, cmd in
   let s = string_flatten (gen_def_string ()) in
-  let compile_cmd = "camlp4o Camlp4MacroParser.cmo " ^ s in
+  let compile_cmd = "@CAMLP4O@ Camlp4MacroParser.cmo " ^ s in
   let doc_cmd = "./myocamlmacroparser.native " ^ s in
   let mymacroparser_entry = "mymacroparser",compile_cmd, doc_cmd in
   let macro_entry = "macro", compile_cmd, compile_cmd in
@@ -67,7 +67,7 @@ let _ = dispatch begin function
         "presentations"::"papers"::"examples"::
           "contrib/dot/_build"::"contrib/lablgtk/_build"::
           "test"::!Options.exclude_dirs;
-      Options.ocamldoc := S[A"ocamldoc"]
+      Options.ocamldoc := S[A"@OCAMLDOC@"]
   | Before_rules ->
       tagcairo := Ocamlbuild_pack.Configuration.has_tag "cairo_yes";
       tagconcrete := Ocamlbuild_pack.Configuration.has_tag "concrete_yes";
