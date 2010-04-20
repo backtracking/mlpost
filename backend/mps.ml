@@ -21,103 +21,206 @@ module S = Spline_lib
 open Format
 
 let string = pp_print_string
+let float fmt f = fprintf fmt "%f" f
 
-module PS = struct
-  let moveto fmt p = fprintf fmt " %f %f moveto " p.x p.y
+let conversion = 0.3937 *. 72.
+let point_of_cm cm = conversion *. cm
+
+module MPS = struct
+
+  type line_cap =
+    | ButtCap
+    | RoundCap
+    | SquareCap
+
+  type line_join =
+    | MiterJoin
+    | RoundJoin
+    | BevelJoin
+
+  let psstart fmt = fprintf fmt "@ @["
+  let psend fmt = fprintf fmt "@]@ "
+  let moveto_float fmt x y =
+    fprintf fmt "%t%a %a moveto%t" psstart float x float y psend
+  let lineto_float fmt x y =
+    fprintf fmt "%t%a %a lineto%t" psstart float x float y psend
+  let moveto fmt p = moveto_float fmt p.x p.y
   let curveto fmt p1 p2 p3 =
-    fprintf fmt " %f %f %f %f %f %f curveto " p1.x p1.y p2.x p2.y p3.x p3.y
-  let close_path fmt = string fmt " close_path "
-  let newpath fmt = string fmt " newpath "
-  let stroke fmt = string fmt " stroke "
-  let fill fmt = string fmt " fill "
+    fprintf fmt "%t%f %f %f %f %f %f curveto%t"
+      psstart p1.x p1.y p2.x p2.y p3.x p3.y psend
+
+  let rlineto fmt p =
+    fprintf fmt "%t%a %a rlineto%t" psstart float p.x float p.y psend
+  let close_path fmt = fprintf fmt "%tclose_path%t" psstart psend
+  let newpath fmt = fprintf fmt "%tnewpath%t" psstart psend
+  let stroke fmt = fprintf fmt "%tstroke%t" psstart psend
+  let fill fmt = fprintf fmt "%tfill%t" psstart psend
+  let showpage fmt = fprintf fmt "%tshowpage%t" psstart psend
+  let clip fmt = fprintf fmt "%tclip%t" psstart psend
+
+  let gsave fmt = fprintf fmt "@[%tgsave%t" psstart psend
+  let grestore fmt = fprintf fmt "%tgrestore%t@]" psstart psend
+
+  let setlinewidth fmt f =
+    fprintf fmt "%t0 %a dtransform truncate idtransform setlinewidth pop%t"
+      psstart float f psend
+
+  let setlinecap fmt c =
+    let i =
+      match c with
+      | ButtCap -> 0
+      | RoundCap -> 1
+      | SquareCap -> 2 in
+    fprintf fmt "%t%d setlinecap%t" psstart i psend
+
+  let setlinejoin fmt j =
+    let i =
+      match j with
+      | MiterJoin -> 0
+      | RoundJoin -> 1
+      | BevelJoin -> 2 in
+    fprintf fmt "%t%d setlinejoin%t" psstart i psend
+
+  let matrix fmt t =
+    fprintf fmt "%t[ %a %a %a %a %a %a]%t" psstart
+      float t.xx float t.yx float t.xy float t.yy float t.x0 float t.y0 psend
+
+  let transform fmt t =
+    fprintf fmt "%t%a concat%t" psstart matrix t psend
+
+  let scolor fmt c =
+    match c with
+    | Concrete_types.RGB (r,g,b) ->
+        fprintf fmt "%t%a %a %a setrgbcolor%t"
+          psstart float r float g float b psend
+    | Concrete_types.CMYK (c,m,y,k) ->
+        fprintf fmt "%t%a %a %a %a setcmykcolor%t"
+          psstart float c float m float y float k psend
+    | Concrete_types.Gray c ->
+        fprintf fmt "%t%a setgray%t" psstart float c psend
+
+  let color fmt c =
+    match c with
+    | Concrete_types.OPAQUE c -> scolor fmt c
+    | Concrete_types.TRANSPARENT _ -> assert false
+
+  let char_const fmt c =
+    fprintf fmt "%t(\\%03o)%t" psstart c psend
+
+  let glyph fmt c font =
+    fprintf fmt "%t%a %s %a fshow%t" psstart char_const c (Fonts.tex_name font)
+      float (Fonts.scale font conversion) psend
+
+  let rectangle fmt p w h =
+    newpath fmt;
+    moveto fmt p;
+    lineto_float fmt (p.x+.w) p.y;
+    lineto_float fmt (p.x+.w) (p.y+.h);
+    lineto_float fmt p.x (p.y+.h);
+    close_path fmt;
+    fill fmt
 end
 
-let transform fmt t =
-  fprintf fmt " [ %a %a %a %a %a %a] "
+module MPS_device =
+struct
+  type arg =
+    { fmt : Format.formatter;
+      trans : Matrix.t }
+  type t = arg
+
+  type cooked = unit
+  let new_document arg _ = arg
+  let new_page _ = ()
+  let fill_rect t _ x y w h =
+    let x = point_of_cm x and y = point_of_cm y
+    and w = point_of_cm w and h = point_of_cm h in
+    let p = Point_lib.transform t.trans {x = x; y = y } in
+    MPS.rectangle t.fmt p w h
+
+  let specials _ = assert false
+  let end_document _ = ()
+  let draw_char t _ font c f1 f2 =
+    let f1 = point_of_cm f1 and f2 = point_of_cm f2 in
+    let p = Point_lib.transform t.trans { x = f1; y = f2 } in
+    MPS.moveto t.fmt p;
+    MPS.glyph t.fmt (Int32.to_int c) font
+
+end
+
+module MyDevice = Dev_save.Dev_load(MPS_device)
+
 let curveto fmt s =
   let _, sb, sc, sd = Spline.explode s in
-  PS.curveto fmt sb sc sd
+  MPS.curveto fmt sb sc sd
 
-let path fmt = function
-  | S.Path p ->
-      begin match p.S.pl with
-      | [] -> assert false
-      | (x::_) as l ->
-          PS.newpath fmt;
-          PS.moveto fmt (Spline.left_point x);
-          Misc.print_list Misc.newline curveto fmt l
-      end ;
-      if p.S.cycle then PS.close_path fmt
-  | S.Point _ ->
-      failwith "Metapost fails in that case what should I do???"
+let path =
+  let rec path fmt = function
+    | S.Path p ->
+        begin match p.S.pl with
+        | [] -> assert false
+        | (x::_) as l ->
+          MPS.moveto fmt (Spline.left_point x);
+          Misc.print_list Misc.space curveto fmt l
+        end ;
+        if p.S.cycle then MPS.close_path fmt
+    | S.Point p ->
+        MPS.newpath fmt;
+        MPS.moveto fmt p;
+        MPS.rlineto fmt p in
+  fun fmt p ->
+    MPS.newpath fmt;
+    path fmt p
+
 
 let option p fmt o =
   match o with
   | None -> ()
   | Some c -> p fmt c
 
-let float fmt f = fprintf fmt "%g" f
+let in_context fmt f =
+  MPS.gsave fmt;
+  f ();
+  MPS.grestore fmt
 
-let scolor fmt c =
-  match c with
-  | Concrete_types.RGB (r,g,b) ->
-      fprintf fmt " %a %a %a setrgbcolor " float r float g float b
-  | Concrete_types.CMYK (c,m,y,k) ->
-      fprintf fmt " %a %a %a %a setcmykcolor " float c float m float y float k
-  | Concrete_types.Gray c ->
-      fprintf fmt " %a %a %a setrgbcolor " float c float c float c
+let pen fmt t =
+  (* FIXME do something better *)
+  (* for now assume that the pen is simply a scaled circle, so just grab the xx
+   * value of the matrix and use that as linewidth *)
+  MPS.setlinewidth fmt t.xx
 
-let color fmt c =
-  match c with
-  | Concrete_types.OPAQUE c -> scolor fmt c
-  | Concrete_types.TRANSPARENT _ -> assert false
+let draw_tex fmt t =
+  let tr = t.Gentex.trans in
+  (* TODO find something more general here *)
+  if tr.xx = 1. && tr.yy = 1. && tr.xy = 0. && tr.yx = 0. then
+    MPS.moveto_float fmt tr.x0 tr.y0;
+    MyDevice.replay false t.Gentex.tex { MPS_device.fmt = fmt ; trans = tr }
 
 
 let rec picture fmt = function
   | Empty -> ()
   | OnTop l ->
-      Misc.print_list Misc.newline picture fmt l
-  | Stroke_path(p,c,_,_) ->
-      option color fmt c;
-(*
-      fprintf fmt "0 0.5 dtransform truncate idtransform
-      setlinewidth pop \
-       [3 3 ] 0 setdash 1 setlinecap 1 setlinejoin 10 setmiterlimit";
-*)
-      path fmt p; PS.stroke fmt
+      Misc.print_list Misc.space picture fmt l
+  | Stroke_path(pa,clr,pe,_) ->
+      in_context fmt (fun () ->
+        option MPS.color fmt clr;
+        pen fmt pe;
+        path fmt pa;
+        MPS.stroke fmt)
   | Fill_path (p,c)->
-      option color fmt c;
-      path fmt p;
-      PS.fill fmt
-(*
-  | Tex t ->
-      Cairo.save cr;
-      let ({y=min},{y=max}) = Gentex.bounding_box t in
-      inversey cr (max+.min);
-      draw_tex cr t;
-      Cairo.restore cr
-*)
+      in_context fmt (fun () ->
+        option MPS.color fmt c;
+        path fmt p;
+        MPS.fill fmt)
+  | Tex t -> draw_tex fmt t
+  | Transform (m,t) -> picture fmt (apply_transform_cmds m t)
+  | Clip (com,p) ->
+      in_context fmt (fun () ->
+        path fmt p;
+        MPS.clip fmt;
+        picture fmt com
+      )
   | _ -> assert false
 (*
-      Cairo.save cr;
-      color_option cr c;
-      dash cr d;
-      MetaPath.stroke cr pen path;
-      Cairo.restore cr
-*)
-(*
-  | Transform (m,t) ->
-      Cairo.save cr;
-      Cairo.transform cr m;
-      (*Format.printf "Transform : %a@." Matrix.print m;*)
-      draw_aux cr t;
-      Cairo.restore cr
-  | Clip (com,p) ->
-      Cairo.save cr;
-      MetaPath.draw_path cr p;
-      Cairo.clip cr;
-      draw_aux cr com;
-      Cairo.restore cr
   | ExternalImage (filename,height,width) ->
       Cairo.save cr;
       inversey cr height;
@@ -131,18 +234,26 @@ let rec picture fmt = function
 *)
 
 let draw fmt x =
-  (* TODO specialize *)
+  let {x = minx; y = miny},{x = maxx; y = maxy} = Picture_lib.bounding_box x in
+  let minxt, minyt, maxxt, maxyt =
+    floor minx, floor miny, ceil maxx, ceil maxy in
   fprintf fmt "%%!PS@\n";
-  fprintf fmt "%%%%BoundingBox: -1 -1 51 51@\n";
-  fprintf fmt "%%%%HiResBoundingBox: -0.25 -0.25 50.25 50.25@\n";
-  fprintf fmt "%%%%Creator: Mlpost 0.9@\n";
-  fprintf fmt "%%%%CreationDate: 2010.04.12:0849@\n";
+  fprintf fmt "%%%%BoundingBox: %a %a %a %a@\n"
+    float minxt float minyt float maxxt float maxyt;
+  fprintf fmt "%%%%HiResBoundingBox: %a %a %a %a@\n"
+    float minx float miny float maxx float maxy;
+  fprintf fmt "%%%%Creator: Mlpost %s@\n" Version.version;
+  (* FIXME font declarations *)
+  (* FIXME Date *)
   fprintf fmt "%%%%Pages: 1@\n";
   fprintf fmt "%%%%BeginProlog@\n";
   fprintf fmt "%%%%EndProlog@\n";
   fprintf fmt "%%%%Page: 1 1@\n";
+  MPS.setlinewidth fmt (default_line_size /.2.);
+  MPS.setlinecap fmt MPS.RoundCap;
+  MPS.setlinejoin fmt MPS.RoundJoin;
   picture fmt (content x);
-  fprintf fmt "@\nshowpage@\n";
+  MPS.showpage fmt;
   fprintf fmt "%%%%EOF@\n"
 
 let dump () =
@@ -164,7 +275,7 @@ let generate bn ?(pdf=false) figs =
   let sep = if pdf then "-" else "." in
   List.iter (fun (i,fig) ->
     let si = string_of_int i in
-    let fn = basename ^ si ^ sep ^ suf in
+    let fn = basename ^ sep ^ si ^ suf in
     let fig = LookForTeX.commandpic fig in
     generate_one fn fig) figs
 

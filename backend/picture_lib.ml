@@ -45,10 +45,10 @@ struct
 
   let create ?(base= S.Point P.zero) = function
     | S.Path p -> [p.S.pl,base]
-    | S.Point p -> 
-        let x = 
-          match S.of_bounding_box (p,p) with 
-          | S.Path p -> p.S.pl 
+    | S.Point p ->
+        let x =
+          match S.of_bounding_box (p,p) with
+          | S.Path p -> p.S.pl
           | S.Point _ -> assert false
         in
         [x, base]
@@ -56,20 +56,20 @@ struct
   let of_path = create
   let union x y = List.rev_append x y
 
-  let transform t x = 
-    List.map (fun (x,f) -> 
-      List.map (Spline.transform t) x, 
+  let transform t x =
+    List.map (fun (x,f) ->
+      List.map (Spline.transform t) x,
         S.transform (Matrix.remove_translation t) f) x
 
   open P
   open P.Infix
   let bounding_box sl =
-    let (x_min,y_min,x_max,y_max) = 
-      P.list_min_max_float (fun (e,f) -> 
+    let (x_min,y_min,x_max,y_max) =
+      P.list_min_max_float (fun (e,f) ->
         let (x_min,y_min,x_max,y_max)=
           P.list_min_max_float Spline.precise_bounding_box e in
         let pen_min,pen_max = S.bounding_box f in
-        let p1,p2 = 
+        let p1,p2 =
           {x=x_min;y=y_min}+/pen_min,{x=x_max;y=y_max}+/pen_max in
         (p1.x,p1.y,p2.x,p2.y)) sl in
     {x=x_min;y=y_min},{x=x_max;y=y_max}
@@ -90,14 +90,14 @@ type color = Concrete_types.color
 type path = Spline_lib.path
 
 type id = int
-type interactive = 
+type interactive =
   | IntEmpty
   | IntTransform of interactive * transform
-  | IntClip of interactive * path 
+  | IntClip of interactive * path
   | IntOnTop of interactive * interactive
   | Inter of path * id
 
-type commands = 
+type commands =
   | Empty
   | Transform of transform * commands
   | OnTop of commands list
@@ -122,51 +122,51 @@ let fill_path p c = {fcl = Fill_path (p,c);
                      fb = S.of_path p;
                      fi = IntEmpty}
 
-let base_of_pen pen = 
+let base_of_pen pen =
   Spline_lib.transform pen (MP.Approx.fullcircle default_line_size)
 
-let stroke_path p c pen d = 
+let stroke_path p c pen d =
   { fcl= Stroke_path (p,c,pen,d);
     fb = S.of_path ~base:(base_of_pen pen) p;
     fi = IntEmpty}
 
-let draw_point p = 
-  stroke_path (Spline_lib.create_point p) None 
+let draw_point p =
+  stroke_path (Spline_lib.create_point p) None
     (Matrix.scale diameter_of_a_dot) None
 
 let clip p path = {fcl= Clip (p.fcl,path);
-                   fb = S.of_path path; 
+                   fb = S.of_path path;
 (* la bounding box d'un clip est la bounding_box du chemin fermé*)
                    fi = IntClip (p.fi,path)}
 
-let externalimage_dimension filename : float * float = 
-  let inch = Unix.open_process_in 
+let externalimage_dimension filename : float * float =
+  let inch = Unix.open_process_in
     (Format.sprintf "identify -format \"%%h\\n%%w\" \"%s\"" filename) in
   try let h = float_of_string (input_line inch) in
   let w = float_of_string (input_line inch) in (h,w)
-  with End_of_file | Failure "float_of_string" -> 
+  with End_of_file | Failure "float_of_string" ->
     invalid_arg (Format.sprintf "Unknown external image %s" filename)
 
-let external_image filename spec = 
-  let height,width = 
+let external_image filename spec =
+  let height,width =
     begin
       match spec with
         | `Exact (h,w) -> (h,w)
         | ((`None as spec)| (`Height _ as spec)| (`Width _ as spec)
-          |(`Inside _ as spec)) -> 
+          |(`Inside _ as spec)) ->
             let fh,fw = externalimage_dimension filename in
             match spec with
               | `None -> fh,fw
               | `Height h -> h,(fw/.fh)*.h
               | `Width w -> (fh/.fw)*.w,w
-          | `Inside (h,w) -> 
+          | `Inside (h,w) ->
               let w = min (h*.(fw/.fh)) w in
               (fh/.fw)*.w,w
     end in
   {fcl = ExternalImage (filename,height,width);
    fb = S.of_bounding_box (P.zero,{P.x=width;y=height});
    fi = IntEmpty}
-   
+
 let interactive path id = {fcl = Empty;
                           fb = S.empty;
                           fi = Inter (path,id)}
@@ -186,11 +186,32 @@ let baseline p = match p.fcl with
   | Tex tex -> Gentex.get_bases_pt tex
   | _ -> []
 
-module Dash = 
+let apply_transform_cmds t =
+  let rec aux pic =
+    match pic with
+    | Empty -> Empty
+    | OnTop l -> OnTop (List.map aux l)
+    | Fill_path (p,c) -> Fill_path (path p,c)
+    | Stroke_path (pa,c,pe,d) ->
+        Stroke_path (path pa, c, pe, d)
+    | Clip (cmds, p) -> Clip (aux cmds, path p)
+    | Tex g -> Tex { Gentex.tex = g.Gentex.tex ;
+                     trans = Matrix.multiply t g.Gentex.trans }
+    | ExternalImage _ -> pic
+    | Transform (t', l) -> Transform (Matrix.multiply t t', l)
+  and path p = Spline_lib.transform t p in
+  aux
+
+let apply_transform t p =
+  { p with fcl = apply_transform_cmds t p.fcl;
+           fb = BoundingBox.transform t p.fb;
+  }
+
+module Dash =
 struct
   type t = float * float list
 
-  type input_dash = 
+  type input_dash =
     | On of float
     | Off of float
 
@@ -212,9 +233,9 @@ struct
     | On f::l -> on f l
     | Off f::l -> 0. :: (off f l)
 
-  let pattern l = 
+  let pattern l =
     0., to_dash l
 
-  let scale f (x,l) = 
+  let scale f (x,l) =
     x, List.map (fun z -> f *. z) l
 end

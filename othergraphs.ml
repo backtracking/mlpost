@@ -33,9 +33,9 @@ let l = [a ; b ; c]
 let d1 = 1, draw (path ~style:jLine ~scale:N.cm l)
 let d2 = 2, draw (path ~style:jLine ~scale:N.cm ~cycle:jLine l)
 
-let d4 =  
+let d4 =
   let pen = Pen.scale (bp 4.) Pen.circle in
-    4, draw ~pen (path ~scale:N.cm [a]) 
+    4, draw ~pen (path ~scale:N.cm [a])
 
 let d5 = 5,
   let pen = Pen.scale (bp 4.) P.circle in
@@ -58,7 +58,7 @@ let d12 = 12,
                  draw ~pen ~color (path ~style:jLine ~scale:N.cm [a;b]))
               [a,b;b,c;c,a] cl)
 
-let triangle = 
+let triangle =
   path ~scale:N.cm ~style:jLine ~cycle:jLine [(0.,0.);(1.,0.);(0.,1.)]
 
 let d20 =
@@ -94,15 +94,15 @@ let d111 =
   let c = transform t b in
   seq
     (List.map (fun (color, p) -> fill ~color p)
-      [ Co.red, a ; Co.green, b; Co.blue, c; Co.yellow, build_cycle [a;b]; 
-        Co.cyan, build_cycle [b;c]; Co.magenta, build_cycle [c;a]; 
+      [ Co.red, a ; Co.green, b; Co.blue, c; Co.yellow, build_cycle [a;b];
+        Co.cyan, build_cycle [b;c]; Co.magenta, build_cycle [c;a];
         Co.white, build_cycle [a;b;c] ] @ List.map draw [a;b;c])
 
 
 let deuxpi = 2.*.3.14159
 
 let d130 =
-  let sq = path ~style:jLine ~scale:N.cm ~cycle:jLine 
+  let sq = path ~style:jLine ~scale:N.cm ~cycle:jLine
     [(0.,0.);(2.,0.);(2.,2.);(0.,2.)] in
     (** on peut pas utiliser la resolution de MetaPost donc on
 	construit la transform à la main.. :-/ *)
@@ -111,7 +111,7 @@ let d130 =
   let v = pt (Num.cm 0.2, Num.cm 0.) in
   let t = [T.rotated angle; T.scaled (bp ratio); T.shifted v] in
   let rec apply acc = function 0 -> acc | n -> apply (transform t acc) (n-1) in
-  let cmd i = 
+  let cmd i =
     let p = apply sq (2*i) in
     seq [fill ~color:(Color.gray 0.8) p;
 	 fill ~color:Color.white (transform t p)]
@@ -121,7 +121,7 @@ let d130 =
 let d140 =
   let cmd i =
     let s = 1. -. ((float_of_int i) *. 0.01) in
-      fill ~color:(Color.gray s) 
+      fill ~color:(Color.gray s)
         (Path.scale (Num.cm (2.*.s)) fullcircle)
   in
   140, seq [iter 0 99 cmd;
@@ -138,12 +138,12 @@ let d149 =
   let pen = Pen.scale two Pen.circle in
   let cmd i =
     let angle = step *. (float_of_int i) in
-    draw  ~color:(couleur (angle /. deuxpi)) ~pen 
+    draw  ~color:(couleur (angle /. deuxpi)) ~pen
       (path ~scale:N.cm [pt angle])
   in
     149,Command.iter 0 719 cmd
 
-let d195 = 
+let d195 =
   let n = 8 and u x = 5.*. (float_of_int x) in
   let un = u n and u1 = u 1 and udemi = (u 1) /. 5. in
   let color = Color.gray 0.8 in
@@ -154,7 +154,7 @@ let d195 =
 	let strip k =
 	  let kf = (float_of_int k) *. udemi in let umk = u1 -. kf in
 	  let udp = kf +. udemi and udm = umk -. udemi in
-	  let l = 
+	  let l =
 	    if k mod 2 = 1 then [(kf,0.); (u1,umk); (u1,udm); (udp,0.)]
 	    else [(0.,kf); (umk,u1); (udm,u1); (0.,udp)]
 	  in fill ~color (transform [t i j]
@@ -162,7 +162,7 @@ let d195 =
 	in
 	Command.iter 0 4 strip
       else Command.nop
-    in 
+    in
     Command.iter 0 (n-1) col
   in
   let grid i =
@@ -172,17 +172,17 @@ let d195 =
   in
     195, seq [Command.iter 0 (n-1) row; Command.iter 0 (n) grid]
 
-let d267 = 
+let d267 =
   let tex = tex ~stroke:(Some Color.black) in
   let rose = Color.rgb 1. 0.5 0.5 in
   let a = tex ~fill:rose ~style:RoundBox "D\\'ebut" in
   let b = Box.shift (cmp (2., 0.)) (tex ~fill:rose ~style:RoundBox "Fin") in
   let path angle a b =
-    cut_after (bpath b) 
-      (cut_before (bpath a) 
+    cut_after (bpath b)
+      (cut_before (bpath a)
 	  (jointpathk
-	      [knotp ~r:(vec (dir angle)) (Box.ctr a); 
-	       knotp ~r:(vec (dir (-. angle))) (Box.ctr b)] [jCurve])) 
+	      [knotp ~r:(vec (dir angle)) (Box.ctr a);
+	       knotp ~r:(vec (dir (-. angle))) (Box.ctr b)] [jCurve]))
   in
     seq [Box.draw a; Box.draw b;
    Arrow.simple (path 45. a b); Arrow.simple (path (-135.) b a)]
@@ -193,19 +193,19 @@ let max = 1.
 let b = (cycle ~style:jLine (path ~style:jLine [(min,min);(max,min);(max,max);(min,max)]))
 
 (* Pour avoir une echelle *)
-let embed (id,p) = 
+let embed (id,p) =
   id,seq [p;draw b;fill ~color:Color.white b]
 
-let figs = 
-  [ 
-(*     d1; d2; d7;  *)
-(*     d12; d20; d21; d22; *)
-(*     d23; 60, d60; d130;  *)
-    d140; d195; 267,d267
-  (*
-     d4;d5; d149; 
+let figs =
+  [
+    d1; d2; d7;
+    d12;
+    d20; d21; d22;
+    d23; 60, d60; d130;
+    d140; d195;
+    267,d267;
+     d4;d5; d149;
      111, d111;
-*)
   ]
 
 let mpostfile = "othergraphs"

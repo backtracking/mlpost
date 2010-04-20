@@ -60,7 +60,11 @@ val on_top : t -> t -> t
 val empty : t
 val transform : Matrix.t -> t -> t
 val shift : t -> float -> float -> t
+
+val apply_transform : Matrix.t -> t -> t
+val apply_transform_cmds : Matrix.t -> commands -> commands
 val bounding_box : t -> Point_lib.t * Point_lib.t
+(* lower left and upper right point *)
 
 (* Return the empty list if the picture is not directly a Tex *)
 val baseline : t -> float list
