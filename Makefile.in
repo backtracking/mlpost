@@ -307,6 +307,7 @@ tags:
 ocamlwizard:
 	ocamlrun -bt ocamlwizard compile types.mli $(CMO:.cmo=.ml) mlpost.mli
 
+
 # Makefile is rebuilt whenever Makefile.in or configure.in is modified
 ######################################################################
 
