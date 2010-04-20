@@ -86,14 +86,14 @@ let _ = dispatch begin function
       end;
 
       yesnofile_rule "mlpost" "_@LABLGTK2@lablgtk" ".odocl";
-            
+
       let copy file1 file2 =
         rule (" copy from "^file1^"to "^file2)
           ~deps:[file1] ~prod:(file2)
           (fun _ _ -> cp file1 file2) in
       copy "contrib/dot/mlpost_dot.mli" "mlpost_dot.mli";
       copy "contrib/lablgtk/mlpost_lablgtk.mli" "mlpost_lablgtk.mli";
-      
+
       (**doc *)
       rule "generation of the documentation" ~prod:"doc/index.html"
         ~deps:["mlpost.docdir/html.stamp";"img/stamp"]
@@ -104,7 +104,7 @@ let _ = dispatch begin function
       dep ["ocaml"; "syntax_mymacroparser"] ["myocamlmacroparser.native"];
       flag ["ocaml";"doc"] &
         S([A"-hide" ; A "Mlpost"; A"-g"; A "customdoc/img.cmo"]
-            @ (if "@LABLGTK2@" = "yes" 
+            @ (if "@LABLGTK2@" = "yes"
                then [A"-I"; A"@LABLGTK2LIB@"]
                else []));
 

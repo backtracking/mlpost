@@ -31,7 +31,7 @@ endif
 
 DTYPES = -tag dtypes
 
-OCAMLBUILD := ocamlbuild $(OBOPTS) -no-links $(DTYPES) $(TAGS) $(OCAMLBUILD_DISPLAY) -classic-display -log "build.log"
+OCAMLBUILD := $(OCAMLBUILDBIN) $(OBOPTS) -no-links $(DTYPES) $(TAGS) $(OCAMLBUILD_DISPLAY) -classic-display -log "build.log"
 
 BUILD := _build/
 
@@ -153,13 +153,13 @@ contrib: dot-contrib lablgtk-contrib
 
 dot-contrib : lib
 	@echo "make: Entering directory \`$(shell pwd)/contrib/dot'"
-	cd contrib/dot && ocamlbuild -tag dtypes -cflags -I,$(shell pwd)/_build $(addprefix mlpost_dot,$(LIB_EXT)) && cd ../..
+	cd contrib/dot && $(OCAMLBUILDBIN) -tag dtypes -cflags -I,$(shell pwd)/_build $(addprefix mlpost_dot,$(LIB_EXT)) && cd ../..
 	ln -sf contrib/dot/_build _build_dot
 
 ifeq "$(LABLGTK2)$(CAIROLABLGTK2)$(USEOCAMLFIND)" "yesyesyes"
 lablgtk-contrib : lib
 	@echo "make: Entering directory \`$(shell pwd)/contrib/lablgtk'"
-	cd contrib/lablgtk && ocamlbuild -tag dtypes -cflags -I,$(shell pwd)/_build \
+	cd contrib/lablgtk && $(OCAMLBUILDBIN) -tag dtypes -cflags -I,$(shell pwd)/_build \
 		-cflags -I,$(LABLGTK2LIB) \
 		-cflags -I,$(CAIROLABLGTK2LIB) \
 		$(addprefix mlpost_lablgtk,$(LIB_EXT)) && cd ../..
@@ -172,8 +172,8 @@ lablgtk-contrib :
 endif
 
 clean-contrib:
-	cd contrib/dot && ocamlbuild -clean && cd ../..
-	cd contrib/lablgtk && ocamlbuild -clean && cd ../..
+	cd contrib/dot && $(OCAMLBUILDBIN) -clean && cd ../..
+	cd contrib/lablgtk && $(OCAMLBUILDBIN) -clean && cd ../..
 
 # GUI
 
