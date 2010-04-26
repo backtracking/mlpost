@@ -31,7 +31,7 @@ type t = {tex : Dev_save.t;
 
 module Saved_device = Dviinterp.Interp(Dev_save.Dev_save)
 
-let set_verbosity b = 
+let set_verbosity b =
   Saved_device.set_verbosity b
 
 let create prelude = function
@@ -46,7 +46,7 @@ let create prelude = function
   \\dimen1=\\ht0 \\dimen2=\\dp0
   \\setbox0=\\hbox\\bgroup
     \\box0
-    \\ifnum\\dimen0>0 \\vrule width1sp height\\dimen1 depth\\dimen2 
+    \\ifnum\\dimen0>0 \\vrule width1sp height\\dimen1 depth\\dimen2
     \\else \\vrule width1sp height1sp depth0sp\\relax
     \\fi\\egroup
   \\ht0=0pt \\dp0=0pt \\box0 \\egroup}
@@ -55,7 +55,7 @@ let create prelude = function
 (fun fmt -> List.iter (Printf.fprintf fmt
 "\\mpxshipout
 %s\\stopmpxshipout")) texs in
-  let todo _ pwd = 
+  let todo _ pwd =
     let latex = genfile_name^".tex" in
     let file = open_out latex in
     Printf.fprintf file "%t" format;
@@ -66,14 +66,14 @@ gentex_dev_null.log" com_latex latex) in
 %s %s log in gentex.log" pwd com_latex latex);
     let dvi = genfile_name^".dvi" in
     let saved = Saved_device.load_file true dvi in
-    List.map (fun x -> {tex = x;trans= Matrix.identity}) 
+    List.map (fun x -> {tex = x;trans= Matrix.identity})
       (Dev_save.separe_pages saved) in
   tempdir genfile_name "" todo
-      
+
 let point_of_cm cm = (0.3937 *. 72.) *. cm
 
 let get_dimen_cm x = Dev_save.get_dimen_first_page x.tex
-let get_dimen_pt x = 
+let get_dimen_pt x =
   let (x_min,y_min,x_max,y_max) = get_dimen_cm x in
   (point_of_cm x_min,
    point_of_cm y_min,
@@ -84,7 +84,7 @@ let get_dimen_pt x =
 let get_bases_cm x = Dev_save.get_bases_first_page x.tex
 let get_bases_pt x = List.map point_of_cm (get_bases_cm x)
 
-let bounding_box x = 
+let bounding_box x =
   let (xmin,ymin,xmax,ymax) = get_dimen_pt x in
   if debug then
     Format.printf "gentex bb : %f %f %f %f@." xmin ymin xmax ymax;

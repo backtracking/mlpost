@@ -29,9 +29,9 @@ type page = { c : command list;
               y_max : float;
               bases : float list
             }
-              
+
 let stroke = 0.05
-  
+
 
 type t = {mutable pages : page list;
           doc : Dvi.t}
@@ -40,7 +40,7 @@ let replay_page_aux trace fill_rect draw_char specials dev page =
   List.iter (function |Rectangle (info,x,y,w,h) -> fill_rect dev info x y w h
                |Glyph (info,font,char,x,y) -> draw_char dev info font char x y
                |Specials (info,xxx,x,y) -> specials dev info xxx x y) page.c;
-  if trace then 
+  if trace then
     begin
       let h = page.y_max -. page.y_min in
       let w = page.x_max -. page.x_min in
@@ -51,10 +51,10 @@ let replay_page_aux trace fill_rect draw_char specials dev page =
       fill_rect dev Dviinterp.dumb_info (msd page.x_max) page.y_min stroke h
     end
 
-let replay trace new_document new_page fill_rect draw_char specials 
+let replay trace new_document new_page fill_rect draw_char specials
     end_document saved arg =
   let dev = new_document arg saved.doc in
-  List.iter (fun page -> new_page dev; replay_page_aux trace fill_rect 
+  List.iter (fun page -> new_page dev; replay_page_aux trace fill_rect
                draw_char specials dev page) saved.pages;
   end_document dev
 
@@ -63,7 +63,7 @@ let separe_pages saved =
 
 let get_doc s = s.doc
 
-let get_dimen_page s = 
+let get_dimen_page s =
   (s.x_min,s.y_min,s.x_max,s.y_max)
 
 let get_dimen_first_page s = get_dimen_page (List.hd s.pages)
@@ -103,9 +103,9 @@ struct
       tbases = [];
       use_last_vrule = use_last_vrule
     }
-  
+
   let new_page s =
-    if s.tfirst_page 
+    if s.tfirst_page
     then s.tfirst_page<-false
     else
       begin
@@ -172,13 +172,13 @@ struct
     new_page s;
     {pages = List.rev s.tpages; doc = s.tdoc}
 end
-  
+
 module Dev_load (Dev : Dviinterp.dev) =
 struct
   let replay trace = replay trace Dev.new_document Dev.new_page Dev.fill_rect
     Dev.draw_char Dev.specials Dev.end_document
-    
-  let load_doc saved doc arg = 
+
+  let load_doc saved doc arg =
     if get_doc saved = doc then replay false saved arg
     else invalid_arg ("The dvi doc is different")
 end
