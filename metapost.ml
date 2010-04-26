@@ -117,7 +117,7 @@ let print_latex_error s =
               "latex -interaction=nonstopmode mpxerr.tex")
   end else Printf.printf "%s\n" s
 
-let generate_aux rename bn ?prelude ?(pdf=false) ?eps ?(verbose=false)
+let generate_aux rename bn ?prelude ?eps ?(verbose=false)
     ?(clean=true) figl =
   if figl <> [] then
     let do_ workdir tmpdir =
@@ -144,7 +144,7 @@ let generate bn ?prelude ?(pdf=false) ?eps ?verbose ?clean figl =
          let from = Filename.concat tmpdir (basename ^ "." ^ si) in
          let to_ = Filename.concat workdir (bn ^ sep ^ si ^ suf) in
          Metapost_tool.file_move from to_) figl in
-  generate_aux rename basename ?prelude ~pdf ?eps ?verbose ?clean figl
+  generate_aux rename basename ?prelude ?eps ?verbose ?clean figl
 
 let dump ?prelude ?(pdf=false) ?eps ?(verbose=false) ?clean bn =
   let figl = Queue.fold (fun l (i,_,f) -> (i,f) :: l) [] figures in
@@ -158,7 +158,7 @@ let dump ?prelude ?(pdf=false) ?eps ?(verbose=false) ?clean bn =
          let to_ = Filename.concat workdir e in
          if verbose then Printf.printf "saving result in %s\n" e;
          Metapost_tool.file_move from to_) figures in
-  generate_aux rename bn ?prelude ~pdf ?eps ~verbose ?clean figl
+  generate_aux rename bn ?prelude ?eps ~verbose ?clean figl
   
 
 let dump_mp ?prelude bn =
