@@ -45,7 +45,7 @@ let rec fold_from_to f acc a b =
 let sprintf s =
   let buf = Buffer.create 1024 in
   let fmt = Format.formatter_of_buffer buf in
-  Format.kfprintf 
+  Format.kfprintf
     (fun _ -> Format.pp_print_flush fmt (); Buffer.contents buf) fmt s
 
 (*Filename.generic_quote*)
@@ -57,7 +57,7 @@ let generic_quote whatquote quotequote s =
     then Buffer.add_string b quotequote
     else Buffer.add_char b  s.[i]
   done;
-  Buffer.contents b  
+  Buffer.contents b
 
 let generic_quote_list lwqq s =
   let l = String.length s in
@@ -67,25 +67,37 @@ let generic_quote_list lwqq s =
     then Buffer.add_string b (List.assoc s.[i] lwqq)
     else Buffer.add_char b s.[i]
   done;
-  Buffer.contents b  
+  Buffer.contents b
 
 let call_cmd ?(inv=false) ?(outv=false) ?(verbose=false) cmd =
   (* inv = true -> print command line
    * outv = true -> print command output
-   * verbose = true -> both 
+   * verbose = true -> both
    *)
   if inv || verbose then Format.printf "+ %s@." cmd;
-  let inc = Unix.open_process_in cmd in  
-  let buf = Buffer.create 16 in                       
-  (try
-     while true do
-       Buffer.add_channel buf inc 1
-     done
-   with End_of_file -> ());
-  let status = Unix.close_process_in inc in
-  let outp = Buffer.contents buf in
-  if outv || verbose then Format.printf "%s@?" outp;
-  (match status with | Unix.WEXITED n -> n | _ -> exit 1), outp
+  let (outc,inc,errc) as proc =
+    Unix.open_process_full cmd (Unix.environment ()) in
+  close_out inc;
+  if outv || verbose then begin
+    let out_descr = Unix.descr_of_in_channel outc and
+        err_descr = Unix.descr_of_in_channel errc in
+    (* using Unix.select as in OCaml PLEAC *)
+    let selector = ref [ out_descr ; err_descr ] in
+    while !selector <> [] do
+      let can_read, _, _ = Unix.select !selector [] [] 1.0 in
+      List.iter
+        (fun fh ->
+           try
+             if fh = err_descr
+             then prerr_endline (input_line errc)
+             else print_endline (input_line outc)
+           with End_of_file ->
+             selector := List.filter (fun fh' -> fh <> fh') !selector)
+        can_read
+    done end;
+  let status = Unix.close_process_full proc in
+  flush stdout; flush stderr;
+  (match status with | Unix.WEXITED n -> n | _ -> exit 1), ""
 
 (* persistent queues *)
 module Q = struct
@@ -110,5 +122,5 @@ module Q = struct
 
 end
 
-  
+
 
