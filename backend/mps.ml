@@ -24,11 +24,14 @@ let conversion = 0.3937 *. 72.
 let point_of_cm cm = conversion *. cm
 
 let float fmt f =
+    (* PDF does not understand e notation, so we protect the printf which
+    uses %g in the cases where this would use e notation; we do not need that
+    much precision anyway*)
   if abs_float f < 0.0001 then fprintf fmt "0@ "
   else if abs_float f >= 1.e04 then
-    fprintf fmt "%f@ " f
+    fprintf fmt "%.4f@ " f
   else
-    fprintf fmt "%g@ " f
+    fprintf fmt "%.4g@ " f
 module MPS = struct
 
   type line_cap =
