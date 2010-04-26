@@ -1,16 +1,16 @@
 o - changes in behaviour, new features, bugfixes
 * - incompatible changes in the interface
 
-version 0.8.1 - April 26th 2010
--------------------------------
+version 0.8.1, April 26th 2010
+------------------------------
 
 o configure: store absolute paths of programs
 o configure: fixed META file
 o doc: documentation for contribs
 o contrib lablgtk: background setting possible and function auto_aspect
 
-version 0.8.0
--------------
+version 0.8.0, April 13th, 2010
+-------------------------------
 * ocaml >= 3.10.1 is required now
 * externalimage work only with png image
 * module Color: the definitions of the following colors have changed:
