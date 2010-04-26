@@ -20,12 +20,15 @@ open Picture_lib
 module S = Spline_lib
 open Format
 
-let string = pp_print_string
-let float fmt f = fprintf fmt "%f" f
-
 let conversion = 0.3937 *. 72.
 let point_of_cm cm = conversion *. cm
 
+let float fmt f =
+  if abs_float f < 0.0001 then fprintf fmt "0@ "
+  else if abs_float f >= 1.e04 then
+    fprintf fmt "%f@ " f
+  else
+    fprintf fmt "%g@ " f
 module MPS = struct
 
   type line_cap =
@@ -38,19 +41,21 @@ module MPS = struct
     | RoundJoin
     | BevelJoin
 
-  let psstart fmt = fprintf fmt "@ @["
+  let psstart fmt = fprintf fmt "@["
   let psend fmt = fprintf fmt "@]@ "
+  let string = pp_print_string
   let moveto_float fmt x y =
-    fprintf fmt "%t%a %a moveto%t" psstart float x float y psend
+    fprintf fmt "%t%a%amoveto%t" psstart float x float y psend
   let lineto_float fmt x y =
-    fprintf fmt "%t%a %a lineto%t" psstart float x float y psend
+    psstart fmt; float fmt x; float fmt y; string fmt "lineto"; psend fmt
+(*     fprintf fmt "%t%a%alineto%t" psstart float x float y psend *)
   let moveto fmt p = moveto_float fmt p.x p.y
   let curveto fmt p1 p2 p3 =
-    fprintf fmt "%t%f %f %f %f %f %f curveto%t"
+    fprintf fmt "%t%f@ %f@ %f@ %f@ %f@ %f@ curveto%t"
       psstart p1.x p1.y p2.x p2.y p3.x p3.y psend
 
   let rlineto fmt p =
-    fprintf fmt "%t%a %a rlineto%t" psstart float p.x float p.y psend
+    fprintf fmt "%t%a%arlineto%t" psstart float p.x float p.y psend
   let close_path fmt = fprintf fmt "%tclose_path%t" psstart psend
   let newpath fmt = fprintf fmt "%tnewpath%t" psstart psend
   let stroke fmt = fprintf fmt "%tstroke%t" psstart psend
@@ -58,12 +63,12 @@ module MPS = struct
   let showpage fmt = fprintf fmt "%tshowpage%t" psstart psend
   let clip fmt = fprintf fmt "%tclip%t" psstart psend
 
-  let gsave fmt = fprintf fmt "@[%tgsave%t" psstart psend
-  let grestore fmt = fprintf fmt "%tgrestore%t@]" psstart psend
+  let gsave fmt = fprintf fmt "%tgsave%t" psstart psend
+  let grestore fmt = fprintf fmt "%tgrestore%t" psstart psend
 
   let setlinewidth fmt f =
-    fprintf fmt "%t0 %a dtransform truncate idtransform setlinewidth pop%t"
-      psstart float f psend
+   fprintf fmt "%t0@ %adtransform@ truncate@ idtransform@ setlinewidth@ pop%t"
+     psstart float f psend
 
   let setlinecap fmt c =
     let i =
@@ -82,7 +87,7 @@ module MPS = struct
     fprintf fmt "%t%d setlinejoin%t" psstart i psend
 
   let matrix fmt t =
-    fprintf fmt "%t[ %a %a %a %a %a %a]%t" psstart
+    fprintf fmt "%t[%a%a%a%a%a%a]%t" psstart
       float t.xx float t.yx float t.xy float t.yy float t.x0 float t.y0 psend
 
   let transform fmt t =
@@ -91,13 +96,13 @@ module MPS = struct
   let scolor fmt c =
     match c with
     | Concrete_types.RGB (r,g,b) ->
-        fprintf fmt "%t%a %a %a setrgbcolor%t"
+        fprintf fmt "%t%a%a%asetrgbcolor%t"
           psstart float r float g float b psend
     | Concrete_types.CMYK (c,m,y,k) ->
-        fprintf fmt "%t%a %a %a %a setcmykcolor%t"
+        fprintf fmt "%t%a%a%a%asetcmykcolor%t"
           psstart float c float m float y float k psend
     | Concrete_types.Gray c ->
-        fprintf fmt "%t%a setgray%t" psstart float c psend
+        fprintf fmt "%t%asetgray%t" psstart float c psend
 
   let color fmt c =
     match c with
@@ -108,8 +113,8 @@ module MPS = struct
     fprintf fmt "%t(\\%03o)%t" psstart c psend
 
   let glyph fmt c font =
-    fprintf fmt "%t%a %s %a fshow%t" psstart char_const c (Fonts.tex_name font)
-      float (Fonts.scale font conversion) psend
+    fprintf fmt "%t%a%s@ %afshow%t" psstart char_const c
+      (Fonts.tex_name font) float (Fonts.scale font conversion) psend
 
   let rectangle fmt p w h =
     newpath fmt;
@@ -120,6 +125,11 @@ module MPS = struct
     close_path fmt;
     fill fmt
 end
+
+let in_context fmt f =
+  MPS.gsave fmt;
+  f ();
+  MPS.grestore fmt
 
 module MPS_device =
 struct
@@ -134,16 +144,25 @@ struct
   let fill_rect t _ x y w h =
     let x = point_of_cm x and y = point_of_cm y
     and w = point_of_cm w and h = point_of_cm h in
-    let p = Point_lib.transform t.trans {x = x; y = y } in
-    MPS.rectangle t.fmt p w h
+    let p = { x = x ; y = y } in
+    let fmt = t.fmt in
+    in_context fmt (fun () ->
+      MPS.transform fmt t.trans;
+      MPS.rectangle t.fmt p w h
+    )
 
   let specials _ = assert false
   let end_document _ = ()
+
   let draw_char t _ font c f1 f2 =
     let f1 = point_of_cm f1 and f2 = point_of_cm f2 in
-    let p = Point_lib.transform t.trans { x = f1; y = f2 } in
-    MPS.moveto t.fmt p;
-    MPS.glyph t.fmt (Int32.to_int c) font
+    let p = { x = f1; y = f2 } in
+    let fmt = t.fmt in
+    in_context fmt (fun () ->
+      MPS.transform fmt t.trans;
+      MPS.moveto fmt p;
+      MPS.glyph fmt (Int32.to_int c) font
+    )
 
 end
 
@@ -177,11 +196,6 @@ let option p fmt o =
   | None -> ()
   | Some c -> p fmt c
 
-let in_context fmt f =
-  MPS.gsave fmt;
-  f ();
-  MPS.grestore fmt
-
 let pen fmt t =
   (* FIXME do something better *)
   (* for now assume that the pen is simply a scaled circle, so just grab the xx
@@ -189,10 +203,9 @@ let pen fmt t =
   MPS.setlinewidth fmt t.xx
 
 let draw_tex fmt t =
+  (* FIXME currently the transformation is applied and restored for every letter
+   * *)
   let tr = t.Gentex.trans in
-  (* TODO find something more general here *)
-  if tr.xx = 1. && tr.yy = 1. && tr.xy = 0. && tr.yx = 0. then
-    MPS.moveto_float fmt tr.x0 tr.y0;
     MyDevice.replay false t.Gentex.tex { MPS_device.fmt = fmt ; trans = tr }
 
 
@@ -201,6 +214,7 @@ let rec picture fmt = function
   | OnTop l ->
       Misc.print_list Misc.space picture fmt l
   | Stroke_path(pa,clr,pe,_) ->
+      (* FIXME dash pattern *)
       in_context fmt (fun () ->
         option MPS.color fmt clr;
         pen fmt pe;
@@ -238,10 +252,8 @@ let draw fmt x =
   let minxt, minyt, maxxt, maxyt =
     floor minx, floor miny, ceil maxx, ceil maxy in
   fprintf fmt "%%!PS@\n";
-  fprintf fmt "%%%%BoundingBox: %a %a %a %a@\n"
-    float minxt float minyt float maxxt float maxyt;
-  fprintf fmt "%%%%HiResBoundingBox: %a %a %a %a@\n"
-    float minx float miny float maxx float maxy;
+  fprintf fmt "%%%%BoundingBox: %f %f %f %f@\n" minxt minyt maxxt maxyt;
+  fprintf fmt "%%%%HiResBoundingBox: %f %f %f %f@\n" minx miny maxx maxy;
   fprintf fmt "%%%%Creator: Mlpost %s@\n" Version.version;
   (* FIXME font declarations *)
   (* FIXME Date *)
@@ -256,18 +268,15 @@ let draw fmt x =
   MPS.showpage fmt;
   fprintf fmt "%%%%EOF@\n"
 
-let dump () =
-  let _,fn,fig = Queue.peek Metapost.figures in
-  let fig = LookForTeX.commandpic fig in
-  let fn = fn ^ ".mps" in
-  let c = open_out fn in
-  let fmt = Format.formatter_of_out_channel c in
-  draw fmt fig;
-  Format.fprintf fmt "@.";
-  close_out c
-
 let generate_one fn fig =
   Misc.write_to_formatted_file fn (fun fmt -> draw fmt fig)
+
+let dump () =
+  Queue.iter (fun (_,fn,fig) ->
+    let fig = LookForTeX.commandpic fig in
+    let fn = fn ^ ".mps" in
+    Misc.write_to_formatted_file fn (fun fmt -> draw fmt fig)
+  ) Metapost.figures
 
 let generate bn ?(pdf=false) figs =
   let basename = Filename.basename bn in
