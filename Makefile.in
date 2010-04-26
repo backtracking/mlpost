@@ -226,7 +226,7 @@ FTP = $(WWW)/download
 
 FILES := $(wildcard *.ml) $(wildcard *.mli) $(wildcard *.mll) \
 	 $(wildcard *.in) configure README.txt INSTALL LICENSE CHANGES FAQ \
-	 mlpost.1 _tags *.mlpack mlpost.odocl ocamlbuild.Makefile
+	 mlpost.1 _tags *.mlpack mlpost_yeslablgtk.odocl mlpost_nolablgtk.odocl ocamlbuild.Makefile
 BACKENDFILES = backend/*ml backend/*mli backend/_tags
 DVIFILES = dvi/*mly dvi/*mll dvi/*ml dvi/*mli dvi/_tags
 CONCRETEFILES = concrete/*ml concrete/*mli concrete/_tags
