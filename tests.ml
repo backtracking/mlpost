@@ -38,9 +38,16 @@ let rec bin = function
 let to_box n = Box.tex (sprintf "${2^{%d}}$" n), n
 let t = map to_box (bin 4)
 
-let t = Box.place ~width:(fun (z,_) -> Box.width z)
-              ~height:(fun (z,_) -> Box.height z)
-              ~set_pos:(fun p (z,n) -> Box.center p z, n) t
+module Pl = struct
+  type t = Box.t * int
+  let width (z,_) = Box.width z
+  let height (z,_) = Box.height z
+  let set_pos p (z,n) = Box.center p z, n
+end
+
+module P = Tree_adv.Place(Pl)
+
+let t = P.place t
 
 let adv_fig =
   let (++) = Command.(++) in
@@ -556,7 +563,10 @@ let grid_with_padding_2 =
   seq [Box.draw b; Box.draw (shift (Point.pt (bp 5., bp 5.)) b)]
 
 let figs = [
+(*
   grid_with_padding;
+*)
+(*
   adv_fig;
   grid_with_padding_2;
   rotatedbox;
@@ -567,12 +577,16 @@ let figs = [
   simple_box;
   block1;
   hvbox;
+*)
   why_platform;d2;
   block2;
   vblock1;
+(*
   yannick Box.Rect; yannick Box.Patatoid; yannick Box.Patatoid2; d1;  proval;
   d2sq; d2hsq; d2s; d2c; cheno011; d3; d4;
   d7;
+*)
+(*
   (* recursion *)
   d11; d12 ;
   farey 17;
@@ -580,6 +594,7 @@ let figs = [
   florence; Box.draw shapes1; Box.draw shapes2;
   d14; d13; d5;
 (*   d6 *)
+*)
 ]
 
 let figs =
@@ -588,12 +603,18 @@ let figs =
 
 (* CM fonts do not scale well *)
 
+(*
 let theprelude = "\\documentclass[a4paper]{article}
 \\usepackage[T1]{fontenc}
 \\usepackage{times}
 "
+*)
 
 
+let () =
+  List.iter (fun (i,r) -> Metapost.emit (string_of_int i) r) figs
+
+(*
 let () =
   Metapost.generate_mp ~prelude:theprelude "test/tests.mp" figs;
   Misc.write_to_formatted_file "test/tests.tex"
@@ -611,3 +632,4 @@ let () =
           fprintf fmt "@\n \\vspace{3cm}@\n"
         ) figs;
       fprintf fmt "@]@\n\\end{document}@.")
+*)
