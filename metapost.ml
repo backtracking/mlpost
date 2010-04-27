@@ -107,7 +107,7 @@ let dump_tex ?prelude f =
   fprintf fmt "\\end{document}@.";
   close_out c
 
-let print_latex_error s =
+let print_latex_error () =
   if Sys.file_exists "mpxerr.tex" then begin
     Printf.printf
       "############################################################\n";
@@ -115,7 +115,9 @@ let print_latex_error s =
       "LaTeX has found an error in your file. Here is its output:\n";
     ignore (Misc.call_cmd ~outv:true
               "latex -interaction=nonstopmode mpxerr.tex")
-  end else Printf.printf "%s\n" s
+  end else
+    Printf.printf "There was an error during execution of metapost. Aborting. \
+      Execute with option -v to see the error.\n"
 
 let generate_aux rename bn ?prelude ?eps ?(verbose=false)
     ?(clean=true) figl =
@@ -124,14 +126,16 @@ let generate_aux rename bn ?prelude ?eps ?(verbose=false)
       (* a chdir has been done to tmpdir *)
       let f = bn ^ ".mp" in
       generate_mp f ?prelude ?eps figl;
-      let s,outp =
+      Printf.printf "here\n%!";
+      let s =
         Misc.call_cmd ~verbose
           (sprintf "mpost -interaction=\"nonstopmode\" %s" f) in
-      if s <> 0 then print_latex_error outp
+      Printf.printf "finished\n%!";
+      if s <> 0 then print_latex_error ()
       else rename workdir tmpdir;
       s in
     let s = Metapost_tool.tempdir ~clean "mlpost" "mpost" do_ in
-    if s <> 0 then exit 1
+    if s <> 0 then exit 2
 
 let generate bn ?prelude ?(pdf=false) ?eps ?verbose ?clean figl =
   let basename = Filename.basename bn in
@@ -149,7 +153,7 @@ let generate bn ?prelude ?(pdf=false) ?eps ?verbose ?clean figl =
 let dump ?prelude ?(pdf=false) ?eps ?(verbose=false) ?clean bn =
   let figl = Queue.fold (fun l (i,_,f) -> (i,f) :: l) [] figures in
   let bn = Filename.basename bn in
-  let rename workdir tmpdir = 
+  let rename workdir tmpdir =
     let suf = if pdf then ".mps" else ".1" in
     Queue.iter
       (fun (i,s,_) ->
@@ -159,7 +163,7 @@ let dump ?prelude ?(pdf=false) ?eps ?(verbose=false) ?clean bn =
          if verbose then Printf.printf "saving result in %s\n" e;
          Metapost_tool.file_move from to_) figures in
   generate_aux rename bn ?prelude ?eps ~verbose ?clean figl
-  
+
 
 let dump_mp ?prelude bn =
   let figl = Queue.fold (fun l (i,_,f) -> (i,f) :: l) [] figures in
@@ -170,10 +174,10 @@ let dump_mp ?prelude bn =
 (** with mptopdf *)
 let dump_png ?prelude ?(verbose=false) ?(clean=true) bn =
   dump_mp ?prelude bn;
-  let s,outp =
+  let s =
     Misc.call_cmd ~verbose
       (sprintf "mptopdf %s.mp" bn) in
-  if s <> 0 then print_latex_error outp;
+  if s <> 0 then print_latex_error ();
   if clean then
     ignore (Misc.call_cmd ~verbose
       (Printf.sprintf
@@ -182,7 +186,7 @@ let dump_png ?prelude ?(verbose=false) ?(clean=true) bn =
   if s <> 0 then exit 1;
   Queue.iter
     (fun (i,s,_) ->
-       let s,outp =
+       let s =
          Misc.call_cmd ~verbose
            (sprintf "convert -density 600x600 \"%s-%i.pdf\" \"%s.png\"" bn i s)
        in

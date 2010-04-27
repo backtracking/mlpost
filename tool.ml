@@ -190,7 +190,7 @@ let () =
 exception Command_failed of int
 
 let command' ?inv ?outv s =
-  let s, _ = Misc.call_cmd ?inv ?outv ~verbose:!verbose s in
+  let s = Misc.call_cmd ?inv ?outv ~verbose:!verbose s in
   if s <> 0 then raise (Command_failed s)
 
 let command ?inv ?outv s =

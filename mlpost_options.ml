@@ -83,7 +83,7 @@ let () =
     if !xpdf then begin
       (*     ignore (Misc.call_cmd ~verbose "setsid xpdf -remote mlpost
              _mlpost.pdf &") *)
-      if fst (call_cmd ~verbose "fuser _mlpost.pdf") = 0 then
+      if call_cmd ~verbose "fuser _mlpost.pdf" = 0 then
         ignore (call_cmd ~verbose "xpdf -remote mlpost -reload")
       else
         ignore (call_cmd ~verbose "setsid xpdf -remote mlpost _mlpost.pdf &")

@@ -2397,7 +2397,7 @@ module Misc : sig
       [List.fold_left f acc [i; i +1; .. j] ],
      where i <= j *)
   val call_cmd :
-    ?inv:bool -> ?outv:bool -> ?verbose:bool -> string -> int * string
+    ?inv:bool -> ?outv:bool -> ?verbose:bool -> string -> int
 
 end
 (**/**)

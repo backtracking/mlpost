@@ -78,26 +78,33 @@ let call_cmd ?(inv=false) ?(outv=false) ?(verbose=false) cmd =
   let (outc,inc,errc) as proc =
     Unix.open_process_full cmd (Unix.environment ()) in
   close_out inc;
-  if outv || verbose then begin
-    let out_descr = Unix.descr_of_in_channel outc and
-        err_descr = Unix.descr_of_in_channel errc in
-    (* using Unix.select as in OCaml PLEAC *)
-    let selector = ref [ out_descr ; err_descr ] in
-    while !selector <> [] do
-      let can_read, _, _ = Unix.select !selector [] [] 1.0 in
-      List.iter
-        (fun fh ->
-           try
-             if fh = err_descr
-             then prerr_endline (input_line errc)
-             else print_endline (input_line outc)
-           with End_of_file ->
-             selector := List.filter (fun fh' -> fh <> fh') !selector)
-        can_read
-    done end;
+  let out_descr = Unix.descr_of_in_channel outc and
+      err_descr = Unix.descr_of_in_channel errc in
+  (* using Unix.select as in OCaml PLEAC *)
+  let selector = ref [ out_descr ; err_descr ] in
+  let buf = String.create 1024 in
+  while !selector <> [] do
+    let can_read, _, _ = Unix.select !selector [] [] 1.0 in
+    List.iter
+      (fun fh ->
+        let ret = Unix.read fh buf 0 1024 in
+        if ret = 0 then
+          selector := List.filter (fun fh' -> fh <> fh') !selector;
+        if fh = err_descr
+        then ignore (Unix.write Unix.stderr buf 0 ret)
+        else ignore (Unix.write Unix.stdout buf 0 ret))
+      can_read
+  done;
   let status = Unix.close_process_full proc in
   flush stdout; flush stderr;
-  (match status with | Unix.WEXITED n -> n | _ -> exit 1), ""
+  match status with
+  | Unix.WEXITED n ->
+      if n > 124 then begin
+        Printf.eprintf "command %s has aborted with exit code: %d@\n" cmd n;
+        exit n
+      end;
+      n
+  | _ -> exit 1
 
 (* persistent queues *)
 module Q = struct
