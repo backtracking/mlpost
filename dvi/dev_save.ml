@@ -58,7 +58,7 @@ let replay trace new_document new_page fill_rect draw_char specials
                draw_char specials dev page) saved.pages;
   end_document dev
 
-let separe_pages saved =
+let separate_pages saved =
   List.map (fun page -> {pages = [page];doc=saved.doc}) saved.pages
 
 let get_doc s = s.doc
