@@ -23,7 +23,7 @@ type color =
   | HSB of float * float * float
   | Gray of float
 
-(* a state can be push pop *)
+(* a state can be pushed/ popped *)
 type state = {
   h : int32;
   v : int32;
@@ -32,7 +32,8 @@ type state = {
   y : int32;
   z : int32;
 }
-    (* an env can't *)
+
+(* an env can't *)
 type 'a env = {
   dev : 'a;
   mutable ecolor : color;
