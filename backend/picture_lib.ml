@@ -202,6 +202,16 @@ let apply_transform_cmds t =
   and path p = Spline_lib.transform t p in
   aux
 
+let iter f t =
+  let rec aux p =
+    f p;
+    match p with
+    | Empty | Fill_path _ | Stroke_path _ | ExternalImage _ | Tex _ -> ()
+    | OnTop l -> List.iter aux l
+    | Clip (c,_) -> aux c
+    | Transform (_,l) -> aux l in
+  aux (content t)
+
 let apply_transform t p =
   { p with fcl = apply_transform_cmds t p.fcl;
            fb = BoundingBox.transform t p.fb;

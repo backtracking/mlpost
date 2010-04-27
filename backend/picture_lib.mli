@@ -23,13 +23,13 @@ type color = Concrete_types.color
 type path = Spline_lib.path
 
 type interactive
-type commands = 
+type commands =
     private
   | Empty
   | Transform of transform * commands
   | OnTop of commands list
   | Tex of Gentex.t
-  | Stroke_path of path * color option * pen * dash option 
+  | Stroke_path of path * color option * pen * dash option
   | Fill_path of path * color option
   | Clip of commands  * path
   | ExternalImage of string * float * float
@@ -47,7 +47,7 @@ val draw_point : Point_lib.t -> t
 val default_line_size : float
 
 val clip : t -> path -> t
-val external_image : string -> 
+val external_image : string ->
   [< `Exact of float * float
   | `Height of float
   | `Inside of float * float
@@ -63,6 +63,7 @@ val shift : t -> float -> float -> t
 
 val apply_transform : Matrix.t -> t -> t
 val apply_transform_cmds : Matrix.t -> commands -> commands
+val iter : (commands -> unit) -> t -> unit
 val bounding_box : t -> Point_lib.t * Point_lib.t
 (* lower left and upper right point *)
 
