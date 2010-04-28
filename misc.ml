@@ -29,6 +29,12 @@ let print_option start printer fmt = function
   | None -> ()
   | Some o -> Format.fprintf fmt "%s%a " start printer o
 
+let date_string () =
+  let tm = Unix.gmtime (Unix.time ()) in
+  Printf.sprintf "%d/%d/%d, %d:%d:%d" (tm.Unix.tm_mon + 1) tm.Unix.tm_mday
+    (tm.Unix.tm_year + 1900) tm.Unix.tm_hour tm.Unix.tm_min  tm.Unix.tm_sec
+
+
 let rec print_list sep prf fmt = function
   | [] -> ()
   | [x] -> prf fmt x

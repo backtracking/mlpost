@@ -250,6 +250,13 @@ let rec picture fmt = function
       Cairo.restore cr
 *)
 
+(*
+let fonts p =
+  let x = ref [] in
+  Picture_lib.iter (fun p ->
+    match p with
+    | Tex g ->
+*)
 let draw fmt x =
   let {x = minx; y = miny},{x = maxx; y = maxy} = Picture_lib.bounding_box x in
   let minxt, minyt, maxxt, maxyt =
@@ -258,9 +265,9 @@ let draw fmt x =
   fprintf fmt "%%%%BoundingBox: %f %f %f %f@\n" minxt minyt maxxt maxyt;
   fprintf fmt "%%%%HiResBoundingBox: %f %f %f %f@\n" minx miny maxx maxy;
   fprintf fmt "%%%%Creator: Mlpost %s@\n" Version.version;
-  (* FIXME font declarations *)
-  (* FIXME Date *)
+  fprintf fmt "%%%%CreationDate: %s@\n" (Misc.date_string ());
   fprintf fmt "%%%%Pages: 1@\n";
+  (* FIXME font declarations *)
   fprintf fmt "%%%%BeginProlog@\n";
   fprintf fmt "%%%%EndProlog@\n";
   fprintf fmt "%%%%Page: 1 1@\n";
