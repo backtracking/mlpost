@@ -54,8 +54,9 @@ module MPS = struct
 (*     fprintf fmt "%t%a%alineto%t" psstart float x float y psend *)
   let moveto fmt p = moveto_float fmt p.x p.y
   let curveto fmt p1 p2 p3 =
-    fprintf fmt "%t%f@ %f@ %f@ %f@ %f@ %f@ curveto%t"
-      psstart p1.x p1.y p2.x p2.y p3.x p3.y psend
+    fprintf fmt "%t%a%a%a%a%a%acurveto%t"
+      psstart float p1.x float p1.y float p2.x float p2.y float p3.x float p3.y
+      psend
 
   let rlineto fmt p =
     fprintf fmt "%t%a%arlineto%t" psstart float p.x float p.y psend
@@ -250,13 +251,25 @@ let rec picture fmt = function
       Cairo.restore cr
 *)
 
-(*
+(* FIXME do better than comparing font names *)
+module FontCmp = struct
+  type t = Fonts.t
+  let compare a b = String.compare (Fonts.tex_name a) (Fonts.tex_name b)
+end
+module FS = Set.Make(FontCmp)
+
 let fonts p =
-  let x = ref [] in
+  let x = ref FS.empty in
   Picture_lib.iter (fun p ->
     match p with
     | Tex g ->
-*)
+        Dev_save.cmd_iter (fun c ->
+          match c with
+          | Dev_save.Glyph (_,f,_,_,_) -> x := FS.add f !x
+          | _ -> ()) g.Gentex.tex
+    | _ -> ()) p;
+  !x
+
 let draw fmt x =
   let {x = minx; y = miny},{x = maxx; y = maxy} = Picture_lib.bounding_box x in
   let minxt, minyt, maxxt, maxyt =
@@ -267,7 +280,15 @@ let draw fmt x =
   fprintf fmt "%%%%Creator: Mlpost %s@\n" Version.version;
   fprintf fmt "%%%%CreationDate: %s@\n" (Misc.date_string ());
   fprintf fmt "%%%%Pages: 1@\n";
-  (* FIXME font declarations *)
+  let usedfonts = fonts x in
+  FS.iter (fun f ->
+    let n = Fonts.tex_name f in
+    (* FIXME this is not exactly as metapost does *)
+    let d = Fonts.design_size f in
+    let r = point_of_cm (Fonts.ratio_cm f) in
+  (* FIXME what is the 30:f8 for? *)
+  (* FIXME why two values after the font name? *)
+    fprintf fmt "%%*Font: %s %f %f 30:f8@\n" n d r) usedfonts;
   fprintf fmt "%%%%BeginProlog@\n";
   fprintf fmt "%%%%EndProlog@\n";
   fprintf fmt "%%%%Page: 1 1@\n";
