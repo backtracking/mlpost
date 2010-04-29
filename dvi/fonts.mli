@@ -1,13 +1,13 @@
-type font_def 
+type font_def
 
-val mk_font_def : 
+val mk_font_def :
   checksum : int32 ->
   scale_factor : int32 ->
   design_size : int32 ->
-  area: string -> 
+  area: string ->
   name:string -> font_def
 
-type t 
+type t
 
 val set_verbosity : bool -> unit
 
@@ -39,3 +39,5 @@ val char_dims : t -> int -> float * float * float
 
 val scale : t -> float -> float
 (** [scale t f] scale the given float [f] by [ratio_cm t]  *)
+
+val design_size : t -> float

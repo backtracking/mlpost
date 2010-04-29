@@ -21,7 +21,7 @@ let font_error s = raise (Fonterror s)
 
 type glyphs = {
   glyphs_filename : string; (* the file, pfb or pfa, which define the glyphs *)
-  glyphs_enc : int -> int; (* the conversion of the characters 
+  glyphs_enc : int -> int; (* the conversion of the characters
                               between tex and the font *)
 }
 
@@ -33,20 +33,21 @@ type font_def = {
   name : string;
 }
 
-let mk_font_def ~checksum ~scale_factor ~design_size ~area ~name = 
+let mk_font_def ~checksum ~scale_factor ~design_size ~area ~name =
   { checksum = checksum ;
     scale_factor =  scale_factor ;
     design_size = design_size ;
     area = area ;
-    name = name 
+    name = name
   }
 
 
-type t = 
+type t =
     { tex_name : string;
       metric : Tfm.t;
-      glyphs_filename : string; (* the file, pfb or pfa, which define the glyphs *)
-      glyphs_enc : int -> int; (* the conversion of the characters 
+      glyphs_filename : string;
+        (* the file, pfb or pfa, which define the glyphs *)
+      glyphs_enc : int -> int; (* the conversion of the characters
                                   between tex and the font *)
       slant : float option;
       extend : float option;
@@ -64,6 +65,7 @@ let ratio_cm t = t.ratio_cm
 let slant t = t.slant
 let extend t = t.extend
 let metric t = t.metric
+let design_size t = Tfm.design_size t.metric
 
 let scale t f = t.ratio_cm *. f
 let set_verbosity b = info := b
@@ -74,9 +76,9 @@ module Print = struct
     |None -> fprintf ff "None"
     |Some a -> pr ff a
 
-  let font_map ff font = 
-    fprintf ff "Tex:%s Human:%s Slant:%a Extend:%a Enc:%a Pfab:%s@." 
-      font.Fonts_type.tex_name 
+  let font_map ff font =
+    fprintf ff "Tex:%s Human:%s Slant:%a Extend:%a Enc:%a Pfab:%s@."
+      font.Fonts_type.tex_name
       font.Fonts_type.human_name
       (print_option pp_print_float) font.Fonts_type.slant
       (print_option pp_print_float) font.Fonts_type.extend
@@ -87,7 +89,7 @@ module Print = struct
     fprintf fmt "\tFont number %ld (%s in directory [%s]) :\n"
       k f.name f.area;
     fprintf fmt "\t Checksum = %lx\n" f.checksum;
-    fprintf fmt "\t Scale factor / Design size : %ld / %ld\n" 
+    fprintf fmt "\t Scale factor / Design size : %ld / %ld\n"
       f.scale_factor f.design_size
 end
 
@@ -98,11 +100,11 @@ let which_fonts_table = "pdftex.map"
 
 let memoize f nb =
   let memoize = Hashtbl.create nb in
-  fun arg -> 
+  fun arg ->
     try
       Hashtbl.find memoize arg
     with
-        Not_found -> 
+        Not_found ->
           let result = f arg in
           Hashtbl.add memoize arg result;
           result
@@ -128,7 +130,7 @@ module HString = Hashtbl
 
 let open_pfb_decrypted filename =
   match !t1disasm with
-    | None -> 
+    | None ->
         let buf = T1disasm.open_decr filename in
         (*Buffer.output_buffer stdout buf;*)
         Lexing.from_string (Buffer.contents buf), fun () -> ()
@@ -147,10 +149,12 @@ let load_pfb_aux filename =
     Format.printf "Loading font from %s...@?" filename;
   let lexbuf,do_done = open_pfb_decrypted filename in
   try
-    let encoding_table, charstring = Pfb_parser.pfb_human_main Pfb_lexer.pfb_human_token lexbuf in
+    let encoding_table, charstring =
+      Pfb_parser.pfb_human_main Pfb_lexer.pfb_human_token lexbuf in
     let charstring_table = Hashtbl.create 700 in
     let count = ref 0 in
-    List.iter (fun x -> Hashtbl.add charstring_table x !count;incr(count)) charstring;
+    List.iter (fun x ->
+      Hashtbl.add charstring_table x !count;incr(count)) charstring;
     if !info then Format.printf "done@.";
     do_done ();
     encoding_table,charstring_table
@@ -158,7 +162,15 @@ let load_pfb_aux filename =
       (Parsing.Parse_error |Failure _) as a->
         let p_start = Lexing.lexeme_start_p lexbuf in
         let p_end = Lexing.lexeme_end_p lexbuf in
-       Format. eprintf "line %i, characters %i-%i : %s parse_error state : %s@." p_start.Lexing.pos_lnum p_start.Lexing.pos_bol p_end.Lexing.pos_bol (Lexing.lexeme lexbuf) (match !Pfb_lexer.state with |Pfb_lexer.Header -> "header" | Pfb_lexer.Encoding -> "encoding" | Pfb_lexer.Charstring -> "charstring") ; raise a
+        let str =
+          match !Pfb_lexer.state with
+          | Pfb_lexer.Header -> "header"
+          | Pfb_lexer.Encoding -> "encoding"
+          | Pfb_lexer.Charstring -> "charstring" in
+        Format.eprintf "line %i, characters %i-%i : %s parse_error state : %s@."
+          p_start.Lexing.pos_lnum p_start.Lexing.pos_bol p_end.Lexing.pos_bol
+          (Lexing.lexeme lexbuf) str ;
+        raise a
 
 let load_pfb = memoize load_pfb_aux 15
 
@@ -169,17 +181,19 @@ let load_fonts_map filename =
   try
     let result = Map_parser.pdftex_main Map_lexer.pdftex_token lexbuf in
     let table = HString.create 1500 in
-    List.iter (fun x -> HString.add table x.Fonts_type.tex_name x) result; 
+    List.iter (fun x -> HString.add table x.Fonts_type.tex_name x) result;
     if !info then Format.printf "done@.";
     table
   with
       (Parsing.Parse_error |Failure _) as a->
         let p_start = Lexing.lexeme_start_p lexbuf in
         let p_end = Lexing.lexeme_end_p lexbuf in
-        Format.eprintf "file %s, line %i, characters %i-%i : %s parse_error@." filename p_start.Lexing.pos_lnum p_start.Lexing.pos_bol p_end.Lexing.pos_bol (Lexing.lexeme lexbuf); raise a
+        Format.eprintf "file %s, line %i, characters %i-%i : %s parse_error@."
+          filename p_start.Lexing.pos_lnum p_start.Lexing.pos_bol
+          p_end.Lexing.pos_bol (Lexing.lexeme lexbuf); raise a
 
 let load_enc_aux filename =
-  if !info then 
+  if !info then
     Format.printf "Loading enc from %s...@?" filename;
   let file = open_in filename in
   let lexbuf = Lexing.from_channel file in
@@ -187,14 +201,16 @@ let load_enc_aux filename =
     let result = Pfb_parser.enc_main Pfb_lexer.enc_token lexbuf in
     let enc_table = Array.create 256 "" in
     let count = ref 0 in
-    List.iter (fun x -> enc_table.(!count)<-x;incr(count)) result; 
+    List.iter (fun x -> enc_table.(!count)<-x;incr(count)) result;
     if !info then Format.printf "done@.";
     enc_table
   with
       (Parsing.Parse_error |Failure _) as a->
         let p_start = Lexing.lexeme_start_p lexbuf in
         let p_end = Lexing.lexeme_end_p lexbuf in
-        Format.eprintf "file %s, line %i, characters %i-%i : %s parse_error@." filename p_start.Lexing.pos_lnum p_start.Lexing.pos_bol p_end.Lexing.pos_bol (Lexing.lexeme lexbuf); raise a
+        Format.eprintf "file %s, line %i, characters %i-%i : %s parse_error@."
+        filename p_start.Lexing.pos_lnum p_start.Lexing.pos_bol
+        p_end.Lexing.pos_bol (Lexing.lexeme lexbuf); raise a
 
 let load_enc = memoize load_enc_aux 15
 
@@ -204,26 +220,26 @@ let fonts_table = (HString.create 1500 : (string,t) Hashtbl.t)
 
 let load_font_tfm fd =
   if !info then
-    Format.printf "Loading font %s at [%ld/%ld]...@?" 
+    Format.printf "Loading font %s at [%ld/%ld]...@?"
       fd.name fd.scale_factor fd.design_size;
-  let filename =   
-    if fd.area <> "" then 
+  let filename =
+    if fd.area <> "" then
       Filename.concat fd.area fd.name
     else
       find_file (fd.name^".tfm") in
   if !debug then
     Format.printf "Trying to find metrics at %s...@." filename;
   let tfm = Tfm.read_file filename in
-  if (Int32.compare tfm.Tfm.body.Tfm.header.Tfm.checksum 
+  if (Int32.compare tfm.Tfm.body.Tfm.header.Tfm.checksum
 	fd.checksum <> 0) then
     font_error "Metrics checksum do not match !.@.";
   if !debug then
-    Format.printf "Metrics successfully loaded for font %s from %s.@." 
+    Format.printf "Metrics successfully loaded for font %s from %s.@."
       fd.name filename;
   if !info then
     Format.printf "done@.";
   tfm
-    
+
 let compute_trans_enc encoding_table charset_table char =
   Hashtbl.find charset_table (encoding_table.(char))
 
@@ -242,9 +258,9 @@ let load_font doc_conv fdef =
     | Some x -> load_enc (find_file x) in
   let glyphs_enc = compute_trans_enc enc pfab_charset in
   let ratio = Int32.to_float fdef.scale_factor
-    (*(Int32.to_float (Int32.mul mag fdef.Dvi.scale_factor)) 
+    (*(Int32.to_float (Int32.mul mag fdef.Dvi.scale_factor))
     /. 1000. (* fdef.Dvi.design_size *)*)
-  and ratio_cm = 
+  and ratio_cm =
     (Int32.to_float fdef.scale_factor) *. doc_conv
     in
   { tex_name = tex_name;
@@ -257,13 +273,13 @@ let load_font doc_conv fdef =
     ratio_cm = ratio_cm
   }
 
-let load_font =   
+let load_font =
   let memoize = Hashtbl.create 15 in
-  fun (fdef : font_def) (doc_conv : float) -> 
+  fun (fdef : font_def) (doc_conv : float) ->
     try
       Hashtbl.find memoize (doc_conv,fdef)
     with
-        Not_found -> 
+        Not_found ->
           let result = load_font doc_conv fdef in
           Hashtbl.add memoize (doc_conv,fdef) result;
           result
@@ -272,7 +288,7 @@ let char_width t c = Metric.char_width t.metric c *. t.ratio
 let char_height t c = Metric.char_height t.metric c *. t.ratio
 let char_depth t c = Metric.char_depth t.metric c *. t.ratio
 
-let char_dims t c = 
+let char_dims t c =
   let a,b,c = Metric.char_dims t.metric c and f = t.ratio in
   a *. f, b *. f, c *. f
 
