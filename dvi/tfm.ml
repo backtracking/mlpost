@@ -293,3 +293,5 @@ let read_file file =
     Print.file_hdr std_formatter fh;
   let body = body fh bits in
   { file_hdr = fh; body = body }
+
+let design_size t = t.body.header.design_size

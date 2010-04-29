@@ -66,3 +66,5 @@ type t = {
 }
 
 val read_file : string -> t
+
+val design_size : t -> float
