@@ -36,6 +36,11 @@ let stroke = 0.05
 type t = {mutable pages : page list;
           doc : Dvi.t}
 
+let pages t = t.pages
+
+let cmd_iter f t =
+  List.iter (fun p -> List.iter f p.c) t.pages
+
 let replay_page_aux trace fill_rect draw_char specials dev page =
   List.iter (function |Rectangle (info,x,y,w,h) -> fill_rect dev info x y w h
                |Glyph (info,font,char,x,y) -> draw_char dev info font char x y
