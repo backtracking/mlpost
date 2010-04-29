@@ -14,8 +14,9 @@ val char_italic : t -> int -> float
 (* same as [char_width], but for italic correction of the character *)
 
 val char_dims : t -> int -> float * float * float
-(** [scaled_dims metric i] returns the width, height and depth of the [i]th
- * char, slightly more efficient than invoking the other functions three times *)
+(** [char_dims metric i] returns the width, height and depth of the [i]th
+ * char, slightly more efficient than invoking the other functions three times
+ *)
 
 val slant : t -> float
 (** is the amount of italic slant, which is used to help position accents. For
