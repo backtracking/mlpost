@@ -126,11 +126,9 @@ let generate_aux rename bn ?prelude ?eps ?(verbose=false)
       (* a chdir has been done to tmpdir *)
       let f = bn ^ ".mp" in
       generate_mp f ?prelude ?eps figl;
-      Printf.printf "here\n%!";
       let s =
         Misc.call_cmd ~verbose
           (sprintf "mpost -interaction=\"nonstopmode\" %s" f) in
-      Printf.printf "finished\n%!";
       if s <> 0 then print_latex_error ()
       else rename workdir tmpdir;
       s in
