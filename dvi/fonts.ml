@@ -19,12 +19,6 @@ exception Fonterror of string
 
 let font_error s = raise (Fonterror s)
 
-type glyphs = {
-  glyphs_filename : string; (* the file, pfb or pfa, which define the glyphs *)
-  glyphs_enc : int -> int; (* the conversion of the characters
-                              between tex and the font *)
-}
-
 type font_def = {
   checksum : int32;
   scale_factor : int32;
@@ -232,9 +226,6 @@ let load_font_tfm fd =
 
 let compute_trans_enc encoding_table charset_table char =
   Hashtbl.find charset_table (encoding_table.(char))
-
-
-
 
 let load_font doc_conv fdef =
   let tex_name = fdef.name in
