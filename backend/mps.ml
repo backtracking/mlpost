@@ -287,7 +287,6 @@ let draw fmt x =
     let d = Fonts.design_size f in
     let r = point_of_cm (Fonts.ratio_cm f) in
   (* FIXME what is the 30:f8 for? *)
-  (* FIXME why two values after the font name? *)
     fprintf fmt "%%*Font: %s %f %f 30:f8@\n" n d r) usedfonts;
   fprintf fmt "%%%%BeginProlog@\n";
   fprintf fmt "%%%%EndProlog@\n";

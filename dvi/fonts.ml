@@ -144,12 +144,29 @@ let open_pfb_decrypted filename =
           let file = open_in temp_fn in
           Lexing.from_channel file,(fun () -> Sys.remove temp_fn)
 
+let deal_with_error ?(pfb=false) lexbuf f =
+  try f ()
+  with
+  | (Parsing.Parse_error |Failure _) as a->
+      let p_start = Lexing.lexeme_start_p lexbuf in
+      let p_end = Lexing.lexeme_end_p lexbuf in
+      let str =
+        if not pfb then "" else
+          match !Pfb_lexer.state with
+          | Pfb_lexer.Header -> "header"
+          | Pfb_lexer.Encoding -> "encoding"
+          | Pfb_lexer.Charstring -> "charstring" in
+      Format.eprintf "line %i, characters %i-%i : %s parse_error state : %s@."
+      p_start.Lexing.pos_lnum p_start.Lexing.pos_bol p_end.Lexing.pos_bol
+      (Lexing.lexeme lexbuf) str ;
+      raise a
+
 let load_pfb_aux filename =
   if !info then
     Format.printf "Loading font from %s...@?" filename;
   let lexbuf,do_done = open_pfb_decrypted filename in
-  try
-    let encoding_table, charstring =
+  deal_with_error lexbuf ~pfb:true (fun () ->
+     let encoding_table, charstring =
       Pfb_parser.pfb_human_main Pfb_lexer.pfb_human_token lexbuf in
     let charstring_table = Hashtbl.create 700 in
     let count = ref 0 in
@@ -157,20 +174,7 @@ let load_pfb_aux filename =
       Hashtbl.add charstring_table x !count;incr(count)) charstring;
     if !info then Format.printf "done@.";
     do_done ();
-    encoding_table,charstring_table
-  with
-      (Parsing.Parse_error |Failure _) as a->
-        let p_start = Lexing.lexeme_start_p lexbuf in
-        let p_end = Lexing.lexeme_end_p lexbuf in
-        let str =
-          match !Pfb_lexer.state with
-          | Pfb_lexer.Header -> "header"
-          | Pfb_lexer.Encoding -> "encoding"
-          | Pfb_lexer.Charstring -> "charstring" in
-        Format.eprintf "line %i, characters %i-%i : %s parse_error state : %s@."
-          p_start.Lexing.pos_lnum p_start.Lexing.pos_bol p_end.Lexing.pos_bol
-          (Lexing.lexeme lexbuf) str ;
-        raise a
+    encoding_table,charstring_table)
 
 let load_pfb = memoize load_pfb_aux 15
 
@@ -178,39 +182,25 @@ let load_fonts_map filename =
   if !info then Format.printf "Load font map from %s...@?" filename;
   let file = open_in filename in
   let lexbuf = Lexing.from_channel file in
-  try
+  deal_with_error lexbuf (fun () ->
     let result = Map_parser.pdftex_main Map_lexer.pdftex_token lexbuf in
     let table = HString.create 1500 in
     List.iter (fun x -> HString.add table x.Fonts_type.tex_name x) result;
     if !info then Format.printf "done@.";
-    table
-  with
-      (Parsing.Parse_error |Failure _) as a->
-        let p_start = Lexing.lexeme_start_p lexbuf in
-        let p_end = Lexing.lexeme_end_p lexbuf in
-        Format.eprintf "file %s, line %i, characters %i-%i : %s parse_error@."
-          filename p_start.Lexing.pos_lnum p_start.Lexing.pos_bol
-          p_end.Lexing.pos_bol (Lexing.lexeme lexbuf); raise a
+    table)
 
 let load_enc_aux filename =
   if !info then
     Format.printf "Loading enc from %s...@?" filename;
   let file = open_in filename in
   let lexbuf = Lexing.from_channel file in
-  try
+  deal_with_error lexbuf (fun () ->
     let result = Pfb_parser.enc_main Pfb_lexer.enc_token lexbuf in
     let enc_table = Array.create 256 "" in
     let count = ref 0 in
     List.iter (fun x -> enc_table.(!count)<-x;incr(count)) result;
     if !info then Format.printf "done@.";
-    enc_table
-  with
-      (Parsing.Parse_error |Failure _) as a->
-        let p_start = Lexing.lexeme_start_p lexbuf in
-        let p_end = Lexing.lexeme_end_p lexbuf in
-        Format.eprintf "file %s, line %i, characters %i-%i : %s parse_error@."
-        filename p_start.Lexing.pos_lnum p_start.Lexing.pos_bol
-        p_end.Lexing.pos_bol (Lexing.lexeme lexbuf); raise a
+    enc_table)
 
 let load_enc = memoize load_enc_aux 15
 
