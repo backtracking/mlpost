@@ -1,22 +1,22 @@
+(** A high-level interface for Font metrics *)
+
 type t = Tfm.t
 
-(* convenience interface for font metrics *)
-
 val char_width : t -> int -> float
-(* [char_width t i] returns the width of the [i]th character of the font metric
+(** [char_width t i] returns the width of the [i]th character of the font metric
    [t], [0] is the first character *)
 
 val char_height : t -> int -> float
-(* same as [char_width], but for character height *)
+(** same as [char_width], but for character height *)
+
 val char_depth : t -> int -> float
-(* same as [char_width], but for character depth *)
+(** same as [char_width], but for character depth *)
 val char_italic : t -> int -> float
-(* same as [char_width], but for italic correction of the character *)
+(** same as [char_width], but for italic correction of the character *)
 
 val char_dims : t -> int -> float * float * float
 (** [char_dims metric i] returns the width, height and depth of the [i]th
- * char, slightly more efficient than invoking the other functions three times
- *)
+  char, slightly more efficient than invoking the other functions three times *)
 
 val slant : t -> float
 (** is the amount of italic slant, which is used to help position accents. For

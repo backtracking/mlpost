@@ -4,3 +4,6 @@ all:
 
 clean:
 	$(OCAMLBUILD) -clean
+
+doc:
+	$(OCAMLBUILD) dvi.docdir/index.html

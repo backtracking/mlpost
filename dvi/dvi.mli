@@ -1,4 +1,34 @@
+(** Low-level DVI interface *)
 
+(** The DVI preamble *)
+type preamble = {
+  pre_version : int;
+  pre_num : int32;
+  pre_den : int32;
+  pre_mag : int32;
+  pre_text : string;
+}
+
+(** The DVI postamble *)
+type postamble = {
+  last_page : int32;
+  post_num : int32;
+  post_den : int32;
+  post_mag : int32;
+  post_height : int32;
+  post_width : int32;
+  post_stack : int;
+  post_pages : int;
+}
+
+(** The DVI postpostamble *)
+type postpostamble = {
+  postamble_pointer : int32;
+  post_post_version : int;
+}
+
+(** The type of commands. All coordinates in this type are relative to the
+    current state of the DVI document. *)
 type command =
   | SetChar of int32
   | SetRule of int32 * int32
@@ -19,10 +49,24 @@ type command =
   | FontNum of int32
   | Special of string
 
-type page 
+(** A page is a list of commands *)
+type page = {
+  counters : int32 array;
+  previous : int32;
+  commands : command list
+}
 
-type t
+(** A document is a list of pages, plus a preamble, postamble,
+   postpostamble and font map *)
+type t = {
+  preamble : preamble;
+  pages : page list;
+  postamble : postamble;
+  postpostamble : postpostamble;
+  font_map : Fonts.font_def Dvi_util.Int32Map.t
+}
 
+(** a few accessor functions *)
 val get_conv : t -> float
 
 val fontmap : t -> Fonts.font_def Dvi_util.Int32Map.t
