@@ -135,42 +135,36 @@ let in_context fmt f =
   f ();
   MPS.grestore fmt
 
-module MPS_device =
-struct
-  type arg =
-    { fmt : Format.formatter;
-      trans : Matrix.t }
-  type t = arg
+let fill_rect fmt trans _ x y w h =
+  (** FIXME take into account info *)
+  let x = point_of_cm x and y = point_of_cm y
+  and w = point_of_cm w and h = point_of_cm h in
+  let p = { x = x ; y = y } in
+  in_context fmt (fun () ->
+    MPS.transform fmt trans;
+    MPS.rectangle fmt p w h
+  )
 
-  type cooked = unit
-  let new_document arg _ = arg
-  let new_page _ = ()
-  let fill_rect t _ x y w h =
-    let x = point_of_cm x and y = point_of_cm y
-    and w = point_of_cm w and h = point_of_cm h in
-    let p = { x = x ; y = y } in
-    let fmt = t.fmt in
-    in_context fmt (fun () ->
-      MPS.transform fmt t.trans;
-      MPS.rectangle t.fmt p w h
-    )
+let draw_char fmt trans _ font c f1 f2 =
+  (** FIXME take into account info *)
+  let f1 = point_of_cm f1 and f2 = point_of_cm f2 in
+  let p = { x = f1; y = f2 } in
+  in_context fmt (fun () ->
+    MPS.transform fmt trans;
+    MPS.moveto fmt p;
+    MPS.glyph fmt (Int32.to_int c) font
+  )
 
-  let specials _ = assert false
-  let end_document _ = ()
+let tex_cmd fmt trans c =
+  match c with
+  | Dev_save.Rectangle (i,x,y,w,h) -> fill_rect fmt trans i x y w h
+  | Dev_save.Glyph (i,font,c,x,y) -> draw_char fmt trans i font c x y
+  | Dev_save.Specials _ -> assert false
 
-  let draw_char t _ font c f1 f2 =
-    let f1 = point_of_cm f1 and f2 = point_of_cm f2 in
-    let p = { x = f1; y = f2 } in
-    let fmt = t.fmt in
-    in_context fmt (fun () ->
-      MPS.transform fmt t.trans;
-      MPS.moveto fmt p;
-      MPS.glyph fmt (Int32.to_int c) font
-    )
-
-end
-
-module MyDevice = Dev_save.Dev_load(MPS_device)
+let draw_tex fmt t =
+  (* FIXME currently the transformation is applied and restored for every letter
+     *)
+  Dev_save.cmd_iter (tex_cmd fmt t.Gentex.trans) t.Gentex.tex
 
 let curveto fmt s =
   let _, sb, sc, sd = Spline.explode s in
@@ -205,13 +199,6 @@ let pen fmt t =
   (* for now assume that the pen is simply a scaled circle, so just grab the xx
    * value of the matrix and use that as linewidth *)
   MPS.setlinewidth fmt t.xx
-
-let draw_tex fmt t =
-  (* FIXME currently the transformation is applied and restored for every letter
-   * *)
-  let tr = t.Gentex.trans in
-    MyDevice.replay false t.Gentex.tex { MPS_device.fmt = fmt ; trans = tr }
-
 
 let rec picture fmt = function
   | Empty -> ()
