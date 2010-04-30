@@ -2,9 +2,9 @@
 
 (** The type of commands. All coordinates are absolute in the current page. *)
 type command =
-  | Rectangle of Dviinterp.info*float * float * float * float (** x,y,w,h *)
-  | Glyph of Dviinterp.info*Fonts.t * Int32.t * float * float
-  | Specials of Dviinterp.info*string * float *float (** s,x,y *)
+  | Rectangle of Dviinterp.info * float * float * float * float (** x,y,w,h *)
+  | Glyph of Dviinterp.info * Fonts.t * Int32.t * float * float
+  | Specials of Dviinterp.info * string * float *float (** s,x,y *)
 
 (** Pages are a list of commands and information about extremal coordinates *)
 type page = { c : command list;
