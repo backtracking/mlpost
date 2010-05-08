@@ -1195,8 +1195,8 @@ module Box : sig
 
   type 'a box_creator =
     ?dx:Num.t -> ?dy:Num.t -> ?name:string ->
-    ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t ->
-    ?fill:Color.t -> 'a -> t
+    ?brush:Brush.t -> ?stroke:Color.t option -> ?pen:Pen.t ->
+    ?dash:Dash.t -> ?fill:Color.t -> 'a -> t
     (** All functions used to create boxes take the following optional
 	parameters : [dx] (resp. [dy]) is the horizontal
 	(resp. vertical) padding between the box border and its
@@ -1210,12 +1210,12 @@ module Box : sig
 
   val empty :
     ?width:Num.t -> ?height:Num.t -> ?style:style -> ?name:string ->
-    ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> ?fill:Color.t ->
-    unit -> t
+    ?brush:Brush.t -> ?stroke:Color.t option -> ?pen:Pen.t ->
+    ?dash:Dash.t -> ?fill:Color.t -> unit -> t
     (** the empty box *)
 
   val empty_from_box :
-    ?style:style -> ?name:string ->
+    ?style:style -> ?name:string -> ?brush:Brush.t ->
     ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> ?fill:Color.t -> t
     -> t
     (** the empty box with the same position and dimension as the box *)
