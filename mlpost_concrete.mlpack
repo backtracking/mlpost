@@ -1,3 +1,4 @@
+Version
 Signature
 Num
 Point
@@ -60,3 +61,7 @@ Ctypes
 Metapost_tool
 Metric
 Mps
+Name
+Dvi_util
+Scan_prelude
+Fonts_type
