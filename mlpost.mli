@@ -2660,6 +2660,11 @@ module Cairost : sig
 
 end
 
+module Version : sig
+  val version : string
+  val date : string
+end
+
 (**/**)
 module Metapost_tool : sig
   val read_prelude_from_tex_file : string -> string
