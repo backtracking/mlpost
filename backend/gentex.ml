@@ -20,11 +20,6 @@ let com_latex = "latex"
 let genfile_name = "gentex"
 let default_prelude = "\\documentclass{article}\n"
 
-(*
-FIXME Why would we need this?
-let _ = Random.self_init ()
-*)
-
 let debug = false
 
 let tempdir = Metapost_tool.tempdir

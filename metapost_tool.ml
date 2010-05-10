@@ -20,12 +20,15 @@ let read_prelude_from_tex_file file =
   close_in c;
   s
 
+let rnd_state = Random.State.make_self_init ()
+
 (* f is called with f currdir tempdir *)
 let tempdir ?(clean=true) prefix suffix f =
   let rec create_dir () =
     try
+      let i = Random.State.int rnd_state 10000 in
       let dirname = Filename.concat Filename.temp_dir_name
-        (Printf.sprintf "%s%i%s" prefix (Random.int 10000) suffix) in
+        (Printf.sprintf "%s%i%s" prefix i suffix) in
       Unix.mkdir dirname  0o700; dirname
     with | Unix.Unix_error (Unix.EEXIST, _, _) -> create_dir () in
   let dirname = create_dir () in
