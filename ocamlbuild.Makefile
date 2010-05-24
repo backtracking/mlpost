@@ -214,4 +214,4 @@ cleaner:: clean
 	make -C examples clean
 
 dist-clean distclean:: clean
-	rm -f Makefile config.cache config.log config.status META version.ml myocamlbuild.ml ocamlbuild.Makefile simple.Makefile
+	rm -f Makefile config.cache config.log config.status META version.ml myocamlbuild.ml
