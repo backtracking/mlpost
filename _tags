@@ -12,3 +12,4 @@
 <test*> : use_unix, pkg_bitstring, pkg_cairo, use_cairo_bigarray
 <handbookgraphs.*> : use_unix, pkg_bitstring, pkg_cairo, use_cairo_bigarray
 <othergraphs.*> : use_unix, pkg_bitstring, pkg_cairo, use_cairo_bigarray
+<testsuite>: include
