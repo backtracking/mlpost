@@ -129,37 +129,33 @@ let generate_aux rename bn ?prelude ?eps ?(verbose=false)
       let s =
         Misc.call_cmd ~verbose
           (sprintf "mpost -interaction=\"nonstopmode\" %s" f) in
-      if s <> 0 then print_latex_error ()
-      else rename workdir tmpdir;
+      if s <> 0 then print_latex_error ();
       s in
-    let s = Metapost_tool.tempdir ~clean "mlpost" "mpost" do_ in
+    let s = Metapost_tool.tempdir ~clean "mlpost" "mpost" do_ rename in
     if s <> 0 then exit 2
 
 let generate bn ?prelude ?(pdf=false) ?eps ?verbose ?clean figl =
   let basename = Filename.basename bn in
-  let rename workdir tmpdir =
-    let suf = if pdf then ".mps" else ".1" in
-    let sep = if pdf then "-" else "." in
-    List.iter
-      (fun (i,_) ->
-         let si = string_of_int i in
-         let from = Filename.concat tmpdir (basename ^ "." ^ si) in
-         let to_ = Filename.concat workdir (bn ^ sep ^ si ^ suf) in
-         Metapost_tool.file_move from to_) figl in
+  let suf = if pdf then ".mps" else ".1" in
+  let sep = if pdf then "-" else "." in
+  let rename =
+    List.fold_left (fun acc (i,_) ->
+      let si = string_of_int i in
+      let from = basename ^ "." ^ si in
+      let to_ = bn ^ sep ^ si ^ suf in
+      Misc.StringMap.add from to_ acc) Misc.StringMap.empty figl in
   generate_aux rename basename ?prelude ?eps ?verbose ?clean figl
 
 let dump ?prelude ?(pdf=false) ?eps ?(verbose=false) ?clean bn =
   let figl = Queue.fold (fun l (i,_,f) -> (i,f) :: l) [] figures in
   let bn = Filename.basename bn in
-  let rename workdir tmpdir =
-    let suf = if pdf then ".mps" else ".1" in
-    Queue.iter
-      (fun (i,s,_) ->
-         let e = s ^ suf in
-         let from = Filename.concat tmpdir (bn ^ "." ^ string_of_int i) in
-         let to_ = Filename.concat workdir e in
-         if verbose then Printf.printf "saving result in %s\n" e;
-         Metapost_tool.file_move from to_) figures in
+  let suf = if pdf then ".mps" else ".1" in
+  let rename =
+    Queue.fold
+      (fun acc (i,s,_) ->
+         let from = bn ^ "." ^ string_of_int i in
+         let to_ = s ^ suf in
+         Misc.StringMap.add from to_ acc) Misc.StringMap.empty figures in
   generate_aux rename bn ?prelude ?eps ~verbose ?clean figl
 
 

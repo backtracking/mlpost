@@ -22,27 +22,12 @@ let read_prelude_from_tex_file file =
 
 let rnd_state = Random.State.make_self_init ()
 
+(** delete a directory that may contain files *)
 let rmdir dir =
   Array.iter (fun x -> Sys.remove (Filename.concat dir x)) (Sys.readdir dir);
   Unix.rmdir dir
 
-(* f is called with f currdir tempdir *)
-let tempdir ?(clean=true) prefix suffix f =
-  let rec create_dir () =
-    try
-      let i = Random.State.int rnd_state 10000 in
-      let dirname = Filename.concat Filename.temp_dir_name
-        (Printf.sprintf "%s%i%s" prefix i suffix) in
-      Unix.mkdir dirname  0o700; dirname
-    with | Unix.Unix_error (Unix.EEXIST, _, _) -> create_dir () in
-  let dirname = create_dir () in
-  let workdir_bak = Sys.getcwd () in
-  Sys.chdir dirname;
-  let res = f workdir_bak dirname in
-  Sys.chdir workdir_bak;
-  if clean then rmdir dirname;
-  res
-
+(** copy a file to another *)
 let file_copy src dest =
   let cin = open_in src
   and cout = open_out dest
@@ -54,9 +39,33 @@ let file_copy src dest =
   done;
   close_in cin; close_out cout
 
-
+(** rename a file *)
 let file_move src dest =
+  try Unix.rename src dest
+  with Unix.Unix_error (Unix.EXDEV,_,_) -> file_copy src dest
+
+(** create a temporary directory *)
+let rec create_dir prefix suffix =
   try
-    Unix.rename src dest
-  with Unix.Unix_error (Unix.EXDEV,_,_) ->
-    file_copy src dest
+    let i = Random.State.int rnd_state 10000 in
+    let dirname = Filename.concat Filename.temp_dir_name
+                    (Printf.sprintf "%s%i%s" prefix i suffix) in
+    Unix.mkdir dirname  0o700; dirname
+  with Unix.Unix_error (Unix.EEXIST, _, _) -> create_dir prefix suffix
+
+(** create a temporary directory and call function [f] within.
+ * [rename] is a map from file names to file names; after executing [f], for
+ * each pair [(key,value)] in [rename], [tempdir]/[key] is moved to
+ * [workdir]/[value] *)
+let tempdir ?(clean=true) prefix suffix f rename =
+  let tmpdir = create_dir prefix suffix in
+  let workdir = Sys.getcwd () in
+  Sys.chdir tmpdir;
+  let res = f workdir tmpdir in
+  Sys.chdir workdir;
+  Misc.StringMap.iter (fun k v ->
+    let from = Filename.concat tmpdir k in
+    let to_ = Filename.concat workdir v in
+    file_move from to_) rename;
+  if clean then rmdir tmpdir;
+  res

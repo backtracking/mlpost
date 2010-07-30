@@ -135,5 +135,7 @@ module Q = struct
 
 end
 
+module StringMap = Map.Make(String)
+
 
 
