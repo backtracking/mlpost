@@ -32,12 +32,7 @@ let not_bitstring = bitstringlib = ""
 (* (contrib_name, (include_list,lib_list)) *)
 (* The second second composante is linked in reversed order (cma,cmxa) *)
 
-let append_dir dir suffix =
-  let dir = 
-    if Filename.check_suffix dir "/" 
-    then Filename.chop_suffix dir "/"
-    else dir in
-  dir^suffix
+let append_dir = Metapost_tool.append_dir
 
 let libraries libdir =
   [

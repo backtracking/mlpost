@@ -69,3 +69,11 @@ let tempdir ?(clean=true) prefix suffix f rename =
     file_move from to_) rename;
   if clean then rmdir tmpdir;
   res
+
+let append_dir dir suffix =
+  let dir =
+    if Filename.check_suffix dir Filename.dir_sep
+    then Filename.chop_suffix dir Filename.dir_sep
+    else dir in
+  dir^suffix
+
