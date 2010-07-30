@@ -96,9 +96,10 @@ let call_cmd ?(inv=false) ?(outv=false) ?(verbose=false) cmd =
         let ret = Unix.read fh buf 0 1024 in
         if ret = 0 then
           selector := List.filter (fun fh' -> fh <> fh') !selector;
-        if fh = err_descr
-        then ignore (Unix.write Unix.stderr buf 0 ret)
-        else ignore (Unix.write Unix.stdout buf 0 ret))
+        if outv || verbose then
+          if fh = err_descr
+          then ignore (Unix.write Unix.stderr buf 0 ret)
+          else ignore (Unix.write Unix.stdout buf 0 ret))
       can_read
   done;
   let status = Unix.close_process_full proc in

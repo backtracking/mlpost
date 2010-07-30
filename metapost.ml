@@ -122,7 +122,7 @@ let print_latex_error () =
 let generate_aux rename bn ?prelude ?eps ?(verbose=false)
     ?(clean=true) figl =
   if figl <> [] then
-    let do_ workdir tmpdir =
+    let do_ _ _ =
       (* a chdir has been done to tmpdir *)
       let f = bn ^ ".mp" in
       generate_mp f ?prelude ?eps figl;
