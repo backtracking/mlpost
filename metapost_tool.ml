@@ -22,6 +22,10 @@ let read_prelude_from_tex_file file =
 
 let rnd_state = Random.State.make_self_init ()
 
+let rmdir dir =
+  Array.iter (fun x -> Sys.remove (Filename.concat dir x)) (Sys.readdir dir);
+  Unix.rmdir dir
+
 (* f is called with f currdir tempdir *)
 let tempdir ?(clean=true) prefix suffix f =
   let rec create_dir () =
@@ -36,13 +40,8 @@ let tempdir ?(clean=true) prefix suffix f =
   Sys.chdir dirname;
   let res = f workdir_bak dirname in
   Sys.chdir workdir_bak;
-  if clean then begin
-    Array.iter (fun x -> Sys.remove (Filename.concat dirname x))
-      (Sys.readdir dirname);
-    Unix.rmdir dirname;
-  end;
+  if clean then rmdir dirname;
   res
-
 
 let file_copy src dest =
   let cin = open_in src
