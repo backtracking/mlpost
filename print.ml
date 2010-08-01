@@ -100,8 +100,10 @@ and path fmt p =
   | PATransformed (p,tr) -> fprintf fmt "(tr %a by %a)" path p transform tr
   | PACutAfter (p1,p2) -> fprintf fmt "(cutafter %a by %a)" path p1 path p2
   | PACutBefore (p1,p2) -> fprintf fmt "(cutbefore %a by %a)" path p1 path p2
-  | PABuildCycle pl -> fprintf fmt "(buildcycle %a)" (Misc.print_list Misc.semicolon path) pl
-  | PASub (f1, f2, p) ->  fprintf fmt "(sub %a from %a to %a)" path p num f1 num f2
+  | PABuildCycle pl ->
+      fprintf fmt "(buildcycle %a)" (Misc.print_list Misc.semicolon path) pl
+  | PASub (f1, f2, p) ->
+      fprintf fmt "(sub %a from %a to %a)" path p num f1 num f2
   | PABBox p -> fprintf fmt "(bbox %a)" commandpic p
   | PAUnitSquare -> fprintf fmt "unitsquare"
   | PAQuarterCircle -> fprintf fmt "quartercircle"
