@@ -34,13 +34,13 @@ let picture_names = D.PicM.create 257
 
 let option_compile f = function
   | None -> None, nop
-  | Some obj -> 
+  | Some obj ->
       let obj, c = f obj in
         Some obj, c
 
 let rec num' = function
   | F f -> C.F f, nop
-  | NXPart p -> 
+  | NXPart p ->
       let p,c = point p in
       C.NXPart p, c
   | NYPart p ->
@@ -77,13 +77,13 @@ let rec num' = function
   | NLength p ->
       let p,c = path p in
       C.NLength p, c
-  | NIfnullthenelse (n,n1,n2) -> 
+  | NIfnullthenelse (n,n1,n2) ->
       let n,c = num n in
       let n1,c1 = num n1 in
       let n2,c2 = num n2 in
       C.NIfnullthenelse (n,n1,n2), c ++ c1 ++ c2
 
-and num n = 
+and num n =
   match n.node with
   | F f -> C.F f, nop
   | _ ->
@@ -91,7 +91,7 @@ and num n =
       if cnt >= 2 then num_save n
       else num' n.node
 and num_save n =
-  try 
+  try
     let x = D.NM.find num_names n in
     C.NName x, nop
   with Not_found ->
@@ -101,19 +101,19 @@ and num_save n =
     C.NName x, code ++ C.CDeclNum (x,n')
 
 and point' = function
-  | PTPair (f1,f2) -> 
+  | PTPair (f1,f2) ->
       let f1, c1 = num f1 in
-      let f2,c2 = num f2 in 
+      let f2,c2 = num f2 in
       C.PTPair (f1,f2), c1 ++ c2
-  | PTPointOf (f,p) -> 
+  | PTPointOf (f,p) ->
       let f, c = num f in
       let p, code = path p in
       C.PTPointOf (f, p), c ++ code
-  | PTDirectionOf (f,p) -> 
+  | PTDirectionOf (f,p) ->
       let f, c = num f in
       let p, code = path p in
       C.PTDirectionOf (f, p), c ++ code
-  | PTAdd (p1,p2) -> 
+  | PTAdd (p1,p2) ->
       let p1,c1 = point p1 in
       let p2,c2 = point p2 in
         C.PTAdd (p1,p2),  c1 ++ c2
@@ -142,8 +142,8 @@ and point p =
     let cnt = try !(D.PtM.find D.point_map p) with Not_found -> assert false in
     if cnt >= 2 then point_save p
     else point' p.node
-and point_save p = 
-  try 
+and point_save p =
+  try
     let x = D.PtM.find point_names p in
     C.PTName x, nop
   with Not_found ->
@@ -160,7 +160,7 @@ and knot k =
         let d2, c3 = direction d2 in
         (d1,p,d2), c1 ++ c2 ++ c3
 
-and joint j = 
+and joint j =
   match j.Hashcons.node with
   | JLine -> C.JLine, nop
   | JCurve -> C.JCurve, nop
@@ -171,15 +171,15 @@ and joint j =
       let p2,c2 = point p2 in
       C.JControls (p1,p2), c1 ++ c2
 
-and direction d = 
+and direction d =
   match d.Hashcons.node with
-  | Vec p -> 
+  | Vec p ->
       let p, code = point p in
       C.Vec p, code
   | Curl f -> C.Curl f, nop
   | NoDir  -> C.NoDir, nop
 
-and metapath p = 
+and metapath p =
   match p.Hashcons.node with
   | MPAConcat (pa,j,p) ->
       let p, c1 = metapath p in
@@ -194,12 +194,12 @@ and metapath p =
   | MPAKnot path ->
       let path, code = knot path in
       C.PAKnot path, code
-  | MPAofPA p -> 
+  | MPAofPA p ->
       let p,c = path p in
       C.PAScope p, c
 
 and path' = function
-  | PAofMPA p -> 
+  | PAofMPA p ->
       let p,c = metapath p in
       C.PAScope p, c
   | MPACycle (d,j,p) ->
@@ -247,7 +247,7 @@ and path p =
   if cnt >= 2 then path_save p
   else path' p.node
 and path_save p =
-  try 
+  try
     let x = D.PthM.find path_names p in
     C.PAName x, nop
   with Not_found ->
@@ -262,18 +262,18 @@ and picture' = function
       let pic, c2 = commandpic_pic p in
       C.PITransformed (pic,tr), c1 ++ c2
   | PITex s -> C.PITex s, nop
-  | PIClip (pic,pth) -> 
+  | PIClip (pic,pth) ->
       let pic, c1 = commandpic_pic_save pic in
       let pth, c2 = path pth in
       let pn = Name.picture () in
       (* slight redundance here *)
       C.PIName pn, c1 ++ c2 ++ C.CSimplePic (pn,pic) ++ C.CClip (pn,pth)
-and picture pic = 
+and picture pic =
   let cnt = !(D.PicM.find D.picture_map pic) in
   if cnt >= 2 then picture_save pic
   else picture' pic.node
-and picture_save pic = 
-  try 
+and picture_save pic =
+  try
     let x = D.PicM.find picture_names pic in
     C.PIName x, nop
   with Not_found ->
@@ -291,12 +291,12 @@ and commandpic_pic pc =
   | Seq l ->
       let pn = Name.picture () in
       C.PIName pn, C.CDefPic (pn, C.CSeq (List.map commandpic_cmd l))
-and commandpic_pic_save pc = 
+and commandpic_pic_save pc =
   match pc.Hashcons.node with
   | Picture p -> picture_save p
   | _ -> commandpic_pic pc
 
-and commandpic_cmd pc = 
+and commandpic_cmd pc =
   match pc.Hashcons.node with
   | Picture p ->
       let p, code = picture p in
@@ -304,25 +304,25 @@ and commandpic_cmd pc =
   | Command c -> command c
   | Seq l -> C.CSeq (List.map commandpic_cmd l)
 
-and transform t = 
+and transform t =
   match t.Hashcons.node with
   | TRRotated f -> C.TRRotated f, nop
-  | TRScaled f -> 
+  | TRScaled f ->
       let f,c = num f in
       C.TRScaled f, c
-  | TRSlanted f -> 
+  | TRSlanted f ->
       let f,c = num f in
       C.TRSlanted f, c
-  | TRXscaled f -> 
+  | TRXscaled f ->
       let f,c = num f in
       C.TRXscaled f, c
-  | TRYscaled f -> 
+  | TRYscaled f ->
       let f,c = num f in
       C.TRYscaled f, c
-  | TRShifted p -> 
+  | TRShifted p ->
       let p, code = point p in
         C.TRShifted p, code
-  | TRZscaled p -> 
+  | TRZscaled p ->
       let p, code = point p in
         C.TRZscaled p, code
   | TRReflect (p1,p2) ->
@@ -340,8 +340,8 @@ and transform t =
       let nyx,nc4 = num p.yx in
       let nyy,nc5 = num p.yy in
       let tname = Name.transform () in
-      C.TRName tname, 
-      nc0 ++ nc1 ++ nc2 ++ nc3 ++ nc4 ++ nc5 ++ 
+      C.TRName tname,
+      nc0 ++ nc1 ++ nc2 ++ nc3 ++ nc4 ++ nc5 ++
         C.CDefTrans (tname,{ C.x0 = nx0;
                              y0 = ny0;
                              xx = nxx;
@@ -349,11 +349,11 @@ and transform t =
                              yx = nyx;
                              yy = nyy})
 
-and pen p = 
+and pen p =
     match p.Hashcons.node with
   | PenCircle -> C.PenCircle, nop
   | PenSquare -> C.PenSquare, nop
-  | PenFromPath p -> 
+  | PenFromPath p ->
       let p, code = path p in
         C.PenFromPath p, code
   | PenTransformed (p, tr) ->
@@ -361,11 +361,11 @@ and pen p =
       let tr, c2 = transform tr in
         C.PenTransformed (p,tr), c1 ++ c2
 
-and dash d = 
+and dash d =
     match d.Hashcons.node with
   | DEvenly -> C.DEvenly, nop
   | DWithdots -> C.DWithdots, nop
-  | DScaled (f, d) -> 
+  | DScaled (f, d) ->
       let f,c1 = num f in
       let d,c2 = dash d in
         C.DScaled (f,d) , c1 ++ c2
@@ -373,22 +373,22 @@ and dash d =
       let p, c1 = point p in
       let d, c2 = dash d in
         C.DShifted (p,d), c1 ++ c2
-  | DPattern l -> 
+  | DPattern l ->
       let l1,l2 = List.fold_right
-        (fun pat (patl, cl) -> 
+        (fun pat (patl, cl) ->
            let pat,c =  dash_pattern pat in
              pat::patl, c::cl ) l ([],[]) in
 	C.DPattern l1, C.CSeq l2
 
-and dash_pattern o = 
+and dash_pattern o =
     match o.Hashcons.node with
-      | On f -> 
+      | On f ->
 	  let f1, c1 = num f in C.On f1, c1
-      | Off f -> 
+      | Off f ->
 	  let f1, c1 = num f in C.Off f1, c1
-	
-and command c = 
-    match c.Hashcons.node with 
+
+and command c =
+    match c.Hashcons.node with
   | CDraw (p, b) ->
       let p, c1 = path p in
       let {color = color; pen = pe; dash = dsh} = b.Hashcons.node in
@@ -403,28 +403,28 @@ and command c =
   | CFill (p, c) ->
       let p, code = path p in
       C.CSeq [code; C.CFill (p, c)]
-  | CDotLabel (pic, pos, pt) -> 
+  | CDotLabel (pic, pos, pt) ->
       let pic, c1 = commandpic_pic pic in
       let pt, c2 = point pt in
         c1 ++ c2 ++ C.CDotLabel (pic,pos,pt)
-  | CLabel (pic, pos ,pt) -> 
+  | CLabel (pic, pos ,pt) ->
       let pic, c1 = commandpic_pic pic in
       let pt, c2 = point pt in
       c1 ++ c2 ++ C.CLabel (pic,pos,pt)
-  | CExternalImage (filename,spec) -> 
+  | CExternalImage (filename,spec) ->
       let spec,code = match spec with
-        | `Exact (h,w) -> 
+        | `Exact (h,w) ->
             let hn,hc = num h in
             let wn,wc = num w in
               `Exact (hn,wn),hc ++ wc
-        | `Inside (h,w) -> 
+        | `Inside (h,w) ->
             let hn,hc = num h in
             let wn,wc = num w in
               `Inside (hn,wn),hc++wc
-        | `Height h -> 
+        | `Height h ->
             let hn,hc = num h in
               `Height hn,hc
-        | `Width w -> 
+        | `Width w ->
             let wn,wc = num w in
               `Width wn,wc
         | `None -> `None,C.CSeq []

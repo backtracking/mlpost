@@ -23,7 +23,7 @@ let option_print pr fmt = function
   | None -> ()
   | Some x -> pr fmt x
 
-let position fmt p = 
+let position fmt p =
   match pos_reduce p with
   | `Center  -> fprintf fmt ""
   | `West   -> fprintf fmt ".lft"
@@ -35,7 +35,7 @@ let position fmt p =
   | `Southwest -> fprintf fmt ".llft"
   | `Southeast -> fprintf fmt ".lrt"
 
-let rec num fmt n = 
+let rec num fmt n =
   match n.Hashcons.node with
   | F f -> fprintf fmt "%f" f
   | NXPart p -> fprintf fmt "xpart(%a)" point p
@@ -48,25 +48,26 @@ let rec num fmt n =
   | NMin(n1,n2) -> fprintf fmt "min(%a,%a)" num n1 num n2
   | NLength p -> fprintf fmt "length %a" path p
   | NGMean (n1,n2) -> fprintf fmt "mean(%a,%a)" num n1 num n2
-  | NIfnullthenelse (n,n1,n2) -> fprintf fmt "(if %a = 0 then %a else %a)" num n num n1 num n2
+  | NIfnullthenelse (n,n1,n2) ->
+      fprintf fmt "(if %a = 0 then %a else %a)" num n num n1 num n2
 
-and point fmt p = 
+and point fmt p =
   match p.Hashcons.node with
   | PTPair (n1,n2) -> fprintf fmt "(%a,%a)" num n1 num n2
-  | PTPicCorner (p,pc) -> 
+  | PTPicCorner (p,pc) ->
       fprintf fmt "%a(%a)" position (pc :> position) commandpic p
   | PTAdd (p1,p2) -> fprintf fmt "(%a + %a)" point p1 point p2
   | PTSub (p1,p2) -> fprintf fmt "(%a - %a)" point p1 point p2
   | PTMult (n,p) -> fprintf fmt "(%a * %a)" num n point p
   | _ -> fprintf fmt "somepoint..."
-and picture fmt p = 
+and picture fmt p =
   match p.Hashcons.node with
   | PITex s -> fprintf fmt "tex(%s)" s
-  | PITransformed (p,tr) -> 
+  | PITransformed (p,tr) ->
       fprintf fmt "%a transformed %a" commandpic p transform tr
   | PIClip _ -> ()
 
-and transform fmt t = 
+and transform fmt t =
   match t.Hashcons.node with
     | TRShifted p -> fprintf fmt "shifted %a" point p
     | TRYscaled f ->  fprintf fmt "yscaled %a" num f
@@ -77,7 +78,7 @@ and knot fmt k =
   | { knot_in = d1 ; knot_p = p ; knot_out = d2 } ->
       fprintf fmt "%a%a%a" direction d1 point p direction d2
 
-and direction fmt d = 
+and direction fmt d =
   match d.Hashcons.node with
   | Vec p -> fprintf fmt "{%a}" point p
   | Curl f -> fprintf fmt "{curl %f}" f
@@ -85,16 +86,16 @@ and direction fmt d =
 
 and metapath fmt p =
   match p.Hashcons.node with
-  | MPAConcat (k,j,p) -> 
+  | MPAConcat (k,j,p) ->
       fprintf fmt "%a%a%a" metapath p joint j knot k
-  | MPAAppend (p1,j,p2) -> 
+  | MPAAppend (p1,j,p2) ->
       fprintf fmt "%a%a%a" metapath p1 joint j metapath p2
   | MPAKnot k -> knot fmt k
   | MPAofPA p -> fprintf fmt "(%a)" path p
-and path fmt p = 
+and path fmt p =
   match p.Hashcons.node with
   | PAofMPA p -> fprintf fmt "(from_metapath %a)" metapath p
-  | MPACycle (d,j,p) -> 
+  | MPACycle (d,j,p) ->
       fprintf fmt "(cycle of %a with %a)" metapath p joint j
   | PATransformed (p,tr) -> fprintf fmt "(tr %a by %a)" path p transform tr
   | PACutAfter (p1,p2) -> fprintf fmt "(cutafter %a by %a)" path p1 path p2
@@ -106,7 +107,7 @@ and path fmt p =
   | PAQuarterCircle -> fprintf fmt "quartercircle"
   | PAHalfCircle -> fprintf fmt "halfcircle"
   | PAFullCircle -> fprintf fmt "fullcircle"
-and joint fmt j = 
+and joint fmt j =
   match j.Hashcons.node with
   | JLine -> fprintf fmt "--"
   | JCurve -> fprintf fmt ".."
@@ -114,20 +115,20 @@ and joint fmt j =
   | JTension (a,b) -> fprintf fmt "..tension(%f,%f).." a b
   | JControls (p1,p2) -> fprintf fmt "..%a..%a.." point p1 point p2
 
-and command fmt c = 
-  match c.Hashcons.node with 
+and command fmt c =
+  match c.Hashcons.node with
   | CDraw (p,b) ->
       let {color = c; pen = pe; dash = d} = b.Hashcons.node in
-      fprintf fmt "draw (%a,%a,%a,%a);" 
+      fprintf fmt "draw (%a,%a,%a,%a);"
       path p option_color c option_pen pe option_dash d
-  | CFill (p,c) -> fprintf fmt "fill (%a,%a);" 
+  | CFill (p,c) -> fprintf fmt "fill (%a,%a);"
       path p option_color c
-  | CLabel (pic,pos,pt) -> 
+  | CLabel (pic,pos,pt) ->
       fprintf fmt "label%a(%a,%a)" position pos commandpic pic point pt
   | CDotLabel (pic,pos,pt) ->
       fprintf fmt "dotlabel%a(%a,%a)" position pos commandpic pic point pt
   | CExternalImage (f,spec) -> fprintf fmt "externalimage %s@ " f
-and color fmt (c:Types.color) = 
+and color fmt (c:Types.color) =
   let mode,color = match c with
     | OPAQUE c -> (None, c)
     | TRANSPARENT (f,c) -> (Some f, c) in
@@ -135,13 +136,13 @@ and color fmt (c:Types.color) =
     | None -> fprintf fmt "O"
     | Some f -> fprintf fmt "%f" f in
   match color with
-  | RGB (r,g,b) -> 
+  | RGB (r,g,b) ->
       fprintf fmt "(%f, %f , %f, %a)" r g b pmode mode
   | CMYK (c,m,y,k) ->
       fprintf fmt "(%f, %f, %f, %f, %a)" c m y k pmode mode
   | Gray f -> fprintf fmt "(%f * white, %a)" f pmode mode
 
-and commandpic fmt c = 
+and commandpic fmt c =
   match c.Hashcons.node with
   | Picture p -> picture fmt p
   | Command c -> command fmt c
@@ -153,7 +154,7 @@ and pen fmt x =
   | PenFromPath p -> assert false
   | PenTransformed (p,trl) -> fprintf fmt "(%a,%a)" pen p transform trl
 
-and dash fmt x = 
+and dash fmt x =
   match x.Hashcons.node with
   | DEvenly -> fprintf fmt "evenly"
   | DWithdots -> assert false

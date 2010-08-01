@@ -20,23 +20,23 @@ open Concrete_types
 open Types
 module C = Compiled_types
 
-let externalimage_dimension filename : float * float = 
+let externalimage_dimension filename : float * float =
   let inch = Unix.open_process_in ("identify -format \"%h\\n%w\" "^filename) in
   try let h = float_of_string (input_line inch) in
   let w = float_of_string (input_line inch) in (h,w)
-  with End_of_file | Failure "float_of_string" -> 
+  with End_of_file | Failure "float_of_string" ->
     invalid_arg "Unknown external image"
 
 let name = pp_print_string
 
-let piccorner fmt p = 
+let piccorner fmt p =
   match corner_reduce p with
   | `Northwest  -> fprintf fmt "ulcorner"
   | `Northeast -> fprintf fmt "urcorner"
   | `Southwest -> fprintf fmt "llcorner"
   | `Southeast -> fprintf fmt "lrcorner"
 
-let position fmt p = 
+let position fmt p =
   match pos_reduce p with
   | `Center  -> fprintf fmt ""
   | `West   -> fprintf fmt ".lft"
@@ -65,8 +65,8 @@ let rec num fmt = function
   | C.NGMean (f1, f2) -> fprintf fmt "(%a@ ++@ %a@,)" num f1 num f2
   | C.NName n -> pp_print_string fmt n
   | C.NLength p -> fprintf fmt "length (%a@,)" path p
-  | C.NIfnullthenelse (n,n1,n2) -> 
-      fprintf fmt "(if (%a = 0): %a else: %a fi)" 
+  | C.NIfnullthenelse (n,n1,n2) ->
+      fprintf fmt "(if (%a = 0): %a else: %a fi)"
         num n num n1 num n2
 
 and float fmt f = num fmt (C.F f)
@@ -103,9 +103,9 @@ and transform fmt = function
   | C.TRXscaled a -> fprintf fmt "xscaled %a@," num a
   | C.TRYscaled a -> fprintf fmt "yscaled %a@," num a
   | C.TRZscaled a -> fprintf fmt "zscaled %a@," point a
-  | C.TRReflect (p1,p2) -> 
+  | C.TRReflect (p1,p2) ->
       fprintf fmt "reflectedabout (%a,@ %a)@," point p1 point p2
-  | C.TRRotateAround (p,f) -> 
+  | C.TRRotateAround (p,f) ->
       fprintf fmt "rotatedaround(%a,@ %a)@," point p float f
   | C.TRName tn -> fprintf fmt "transformed %s" tn
 and picture fmt = function
@@ -153,14 +153,14 @@ and dash fmt = function
   | C.DWithdots -> fprintf fmt "withdots"
   | C.DScaled (s, d) -> fprintf fmt "%a scaled %a" dash d num s
   | C.DShifted (p, d) -> fprintf fmt "%a shifted %a" dash d point p
-  | C.DPattern l -> 
+  | C.DPattern l ->
       fprintf fmt "dashpattern(";
-      List.iter 
-	(fun p -> 
+      List.iter
+	(fun p ->
 	  let p,n = match p with C.On n -> "on", n | C.Off n -> "off", n in
-	    fprintf fmt "%s %a " p num n) 
+	    fprintf fmt "%s %a " p num n)
 	l;
-      fprintf fmt ")" 
+      fprintf fmt ")"
 
 and pen fmt = function
   | C.PenCircle -> fprintf fmt "pencircle"
@@ -214,26 +214,26 @@ ypart %s = %a;@\n\
 xxpart %s = %a;@\n\
 xypart %s = %a;@\n\
 yxpart %s = %a;@\n\
-yypart %s = %a;@\n@." n 
-        n num t.C.x0 n 
+yypart %s = %a;@\n@." n
+        n num t.C.x0 n
         num t.C.y0 n num t.C.xx n num t.C.xy n num t.C.yx n num t.C.yy
   | C.CClip (pic,pth) -> fprintf fmt "clip %s to %a;@\n" pic path pth
   | C.CExternalImage (filename, spec) ->
       match spec with
-        | `Exact (h,w) -> 
-            fprintf fmt "externalfigure \"%s\" xyscaled (%a,%a);@\n" 
+        | `Exact (h,w) ->
+            fprintf fmt "externalfigure \"%s\" xyscaled (%a,%a);@\n"
               filename num w num h
-        | ((`None as spec) | (`Height _ as spec)| 
-          (`Width _ as spec)| (`Inside _ as spec)) -> 
+        | ((`None as spec) | (`Height _ as spec)|
+          (`Width _ as spec)| (`Inside _ as spec)) ->
             let fh,fw = externalimage_dimension filename in
-            let printext h w = 
-              fprintf fmt "externalfigure \"%s\" xyscaled (%a,%a);@\n" 
+            let printext h w =
+              fprintf fmt "externalfigure \"%s\" xyscaled (%a,%a);@\n"
                 filename num w num h in
               match spec with
                 | `None -> printext (C.F fh) (C.F fw)
                 | `Height h -> printext h (C.NMult (C.F (fw/.fh),h))
                 | `Width w -> printext (C.NMult (C.F (fh/.fw),w)) w
-                | `Inside (h,w) -> 
+                | `Inside (h,w) ->
                     let w = C.NMin (C.NMult (h,C.F (fw/.fh)),w) in
                     printext (C.NMult (C.F (fh/.fw),w)) w
-                
+
