@@ -2415,15 +2415,6 @@ module Metapost : sig
     ?eps:bool ->
     (int * Command.t) list -> unit
 
-  val generate :
-    string ->
-    ?prelude:string ->
-    ?pdf:bool ->
-    ?eps:bool ->
-    ?verbose:bool ->
-    ?clean:bool ->
-    (int * Command.t) list -> unit
-
   val emit : string -> Command.t -> unit
   val dump :
     ?prelude:string ->
