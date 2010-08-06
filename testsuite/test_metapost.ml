@@ -53,25 +53,46 @@ end
 let test_generate_mp =
   let out = "hello.output" in
   let ref = "hello.reference" in
-  Test.mk (fun () ->
-    Metapost.generate_mp out [1,fig];
-    Assert.File.exists out;
-    Assert.File.eq ref out
-  )
+  Test.mk
+    ~clean_up:(fun () ->
+      Sys.remove out)
+    (fun () ->
+      Metapost.generate_mp out [1,fig];
+      Assert.File.exists out;
+      Assert.File.eq ref out)
 
 let test_generate_aux =
   let out = "hello.1" in
   let ref = "hello.mps.reference" in
   let rename = SM.add out out SM.empty in
-  Test.mk (fun () ->
-    Metapost.generate_aux rename s [1,fig];
-    Assert.File.exists out;
-    Assert.File.eq ~ignore:"%%CreationDate:" ref out
-  )
+  Test.mk
+    ~clean_up:(fun () ->
+      Sys.remove out)
+    (fun () ->
+      Metapost.generate_aux rename s [1,fig];
+      Assert.File.exists out;
+      Assert.File.eq ~ignore:"%%CreationDate:" ref out)
+
+let test_dump_png =
+  let bn = "hello" in
+  let out = bn ^ ".png" in
+  Test.mk
+    ~prepare:(fun () ->
+      Metapost.emit bn fig;
+      (* TODO this reset should not be necessary *)
+      Compile.reset ())
+    ~clean_up:(fun () ->
+      Sys.remove out)
+    (fun () ->
+      Metapost.dump_png bn;
+      Assert.File.exists out)
 
 
 let tests =
-  [ test_generate_mp ; test_generate_aux ]
+  [ test_generate_mp ;
+    test_generate_aux;
+    test_dump_png
+    ]
 
 let _ =
   Sys.chdir "testspace";
