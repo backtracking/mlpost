@@ -34,18 +34,20 @@ type cairo_t = Cairo.t
 let emit_cairo = emit_cairo
 (*let emit_cairo = fun x -> ()*)
 
-let dump_pdf () = 
+let dump_pdf () =
   Queue.iter (fun (fname,fig) ->
     let pdfname = File.set_ext fname "pdf" in
     let pdfname_s = File.to_string pdfname in
     try emit_pdf pdfname_s fig
     with
-    | Cairo.Error status -> 
-        Format.printf "An@ internal@ error@ occured@ during@ the generation@ of@ %s@ with@ Cairo :@ %s@."
+    | Cairo.Error status ->
+        Format.printf "An@ internal@ error@ occured@ during@ the\
+          generation@ of@ %s@ with@ Cairo :@ %s@."
           pdfname_s (Cairo.string_of_status status)
-    | error -> 
-        Format.printf "An@ internal@ error@ occured@ during@ the@ generation@ of@ %s :@ %s@."
-        pdfname_s (Printexc.to_string error)
+    | error ->
+        Format.printf "An@ internal@ error@ occured@ during@ the\
+          @ generation@ of@ %s :@ %s@."
+          pdfname_s (Printexc.to_string error)
   ) Metapost.figures
 
 let dump_pdfs fname =
