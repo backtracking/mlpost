@@ -61,14 +61,19 @@ vardef reset_extra_specials =
 
 let defaultprelude = "\\documentclass{article}\n\\usepackage[T1]{fontenc}\n"
 
-(** take a list of figures [l] and generate a single metapost file [fn]
- * containing the code of the file *)
-let generate_mp fn ?(prelude=defaultprelude) ?eps l =
-  Misc.write_to_formatted_file fn
-    (fun fmt ->
-       print_prelude ?eps prelude fmt ();
-       List.iter (fun (i,f) -> print i fmt f) l;
-       fprintf fmt "end@.")
+(** take a list of figures [l] and write the code to the formatter in argument
+ *)
+
+let generate_mp_fmt l ?(prelude=defaultprelude) ?eps fmt =
+  print_prelude ?eps prelude fmt ();
+  List.iter (fun (i,f) -> print i fmt f) l;
+  fprintf fmt "end@."
+
+let generate_mp fn ?prelude ?eps l =
+  File.LowLevel.write_to_formatted fn (generate_mp_fmt l ?prelude ?eps)
+
+let generate_mp_file fn ?prelude ?eps l =
+  File.write_to_formatted fn (generate_mp_fmt l ?prelude ?eps)
 
 (* batch processing *)
 
@@ -111,7 +116,8 @@ let call_latex ?inv ?outv ?verbose f =
   Misc.call_cmd ?inv ?outv ?verbose cmd
 
 let call_mpost ?inv ?outv ?verbose f =
-  let cmd = Misc.sprintf "mpost -interaction=nonstopmode %s" f in
+  let cmd =
+    Misc.sprintf "mpost -interaction=nonstopmode %s" (File.to_string f) in
   Misc.call_cmd ?inv ?outv ?verbose cmd
 
 let print_latex_error () =
@@ -130,38 +136,41 @@ let generate_aux rename f ?prelude ?eps ?(verbose=false)
   if figl <> [] then
     let do_ _ _ =
       (* a chdir has been done to tmpdir *)
-      generate_mp f ?prelude ?eps figl;
+      generate_mp_file f ?prelude ?eps figl;
       let s = call_mpost ~verbose f in
       if s <> 0 then print_latex_error ();
       s in
     if Metapost_tool.tempdir ~clean "mlpost" "mpost" do_ rename <> 0
     then exit 2
 
+(* TODO to be removed *)
 let generate bn ?prelude ?(pdf=false) ?eps ?verbose ?clean figl =
-  let basename = Filename.basename bn in
-  let f = bn ^ ".mp" in
-  let suf = if pdf then ".mps" else ".1" in
+  let fn = File.from_string bn in
+  let base = File.clear_dir fn in
+  let mpfile = File.set_ext fn "mp" in
+  let suf = if pdf then "mps" else "1" in
   let sep = if pdf then "-" else "." in
   let rename =
     List.fold_left (fun acc (i,_) ->
       let si = string_of_int i in
-      let from = basename ^ "." ^ si in
-      let to_ = bn ^ sep ^ si ^ suf in
-      Misc.StringMap.add from to_ acc) Misc.StringMap.empty figl in
-  generate_aux rename f ?prelude ?eps ?verbose ?clean figl
+      let from = File.set_ext base si in
+      let to_ = File.set_ext (File.append fn sep) suf in
+      File.Map.add from to_ acc) File.Map.empty figl in
+  generate_aux rename mpfile ?prelude ?eps ?verbose ?clean figl
 
 let dump ?prelude ?(pdf=false) ?eps ?(verbose=false) ?clean bn =
   let figl = Queue.fold (fun l (i,_,f) -> (i,f) :: l) [] figures in
-  let bn = Filename.basename bn in
-  let f = bn ^ ".mp" in
-  let suf = if pdf then ".mps" else ".1" in
+  let fn = File.from_string bn in
+  let base = File.clear_dir fn in
+  let mpfile = File.set_ext fn "mp" in
+  let suf = if pdf then "mps" else "1" in
   let rename =
     Queue.fold
       (fun acc (i,s,_) ->
-         let from = bn ^ "." ^ string_of_int i in
-         let to_ = s ^ suf in
-         Misc.StringMap.add from to_ acc) Misc.StringMap.empty figures in
-  generate_aux rename f ?prelude ?eps ~verbose ?clean figl
+         let from = File.set_ext base (string_of_int i) in
+         let to_ = File.set_ext base suf in
+         File.Map.add from to_ acc) File.Map.empty figures in
+  generate_aux rename mpfile ?prelude ?eps ~verbose ?clean figl
 
 
 let dump_mp ?prelude bn =

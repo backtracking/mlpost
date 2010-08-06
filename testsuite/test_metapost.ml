@@ -1,6 +1,6 @@
 let s = "hello"
 let fig = Picture.tex s
-module SM = Misc.StringMap
+module FM = File.Map
 
 module Assert = struct
 
@@ -64,12 +64,13 @@ let test_generate_mp =
 let test_generate_aux =
   let out = "hello.1" in
   let ref = "hello.mps.reference" in
-  let rename = SM.add out out SM.empty in
+  let outf = File.from_string out in
+  let rename = FM.add outf outf FM.empty in
   Test.mk
     ~clean_up:(fun () ->
       Sys.remove out)
     (fun () ->
-      Metapost.generate_aux rename s [1,fig];
+      Metapost.generate_aux rename (File.from_string s) [1,fig];
       Assert.File.exists out;
       Assert.File.eq ~ignore:"%%CreationDate:" ref out)
 

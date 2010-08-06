@@ -6,6 +6,7 @@
 
 <cairost.*> or <mlpost.mlpack>: pkg_cairo
 <tool.*>: use_unix
+<file.*> : pkg_str
 
 <mlpost.mli>: syntax_mymacroparser
 <cairost.ml> or <concrete.ml>: syntax_macro
