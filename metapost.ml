@@ -66,7 +66,7 @@ let defaultprelude = "\\documentclass{article}\n\\usepackage[T1]{fontenc}\n"
 
 let generate_mp_fmt l ?(prelude=defaultprelude) ?eps fmt =
   print_prelude ?eps prelude fmt ();
-  List.iter (fun (i,f) -> print i fmt f) l;
+  List.iter (fun (i,_,f) -> print i fmt f) l;
   fprintf fmt "end@."
 
 let generate_mp fn ?prelude ?eps l =
@@ -143,38 +143,27 @@ let generate_aux rename f ?prelude ?eps ?(verbose=false)
     if Metapost_tool.tempdir ~clean "mlpost" "mpost" do_ rename <> 0
     then exit 2
 
-(* TODO to be removed *)
-let generate bn ?prelude ?(pdf=false) ?eps ?verbose ?clean figl =
-  let fn = File.from_string bn in
-  let base = File.clear_dir fn in
-  let mpfile = File.set_ext fn "mp" in
-  let suf = if pdf then "mps" else "1" in
-  let sep = if pdf then "-" else "." in
-  let rename =
-    List.fold_left (fun acc (i,_) ->
-      let si = string_of_int i in
-      let from = File.set_ext base si in
-      let to_ = File.set_ext (File.append fn sep) suf in
-      File.Map.add from to_ acc) File.Map.empty figl in
-  generate_aux rename mpfile ?prelude ?eps ?verbose ?clean figl
-
-let dump ?prelude ?(pdf=false) ?eps ?(verbose=false) ?clean bn =
-  let figl = Queue.fold (fun l (i,_,f) -> (i,f) :: l) [] figures in
+let generate ?prelude ?(pdf=false) ?eps ?(verbose=false) ?clean bn figl =
   let fn = File.from_string bn in
   let base = File.clear_dir fn in
   let mpfile = File.set_ext fn "mp" in
   let suf = if pdf then "mps" else "1" in
   let rename =
-    Queue.fold
+    List.fold_left
       (fun acc (i,s,_) ->
          let from = File.set_ext base (string_of_int i) in
-         let to_ = File.set_ext base suf in
-         File.Map.add from to_ acc) File.Map.empty figures in
+         let to_ = File.set_ext (File.from_string s) suf in
+         File.Map.add from to_ acc) File.Map.empty figl in
   generate_aux rename mpfile ?prelude ?eps ~verbose ?clean figl
+
+let dump ?prelude ?pdf ?eps ?verbose ?clean bn =
+  let figl = Queue.fold (fun l (i,s,f) -> (i,s,f) :: l) [] figures in
+  generate ?prelude ?pdf ?eps ?verbose ?clean bn figl
+
 
 
 let dump_mp ?prelude bn =
-  let figl = Queue.fold (fun l (i,_,f) -> (i,f) :: l) [] figures in
+  let figl = Queue.fold (fun l s -> s :: l) [] figures in
   let f = bn ^ ".mp" in
   generate_mp f ?prelude figl
 

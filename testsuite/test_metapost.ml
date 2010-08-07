@@ -25,24 +25,39 @@ module Assert = struct
 end
 
 module Test = struct
+
+  let _ = Printexc.record_backtrace true
+
   let id_unit () = ()
 
   type t =
     { prepare : unit -> unit;
       run : unit -> unit;
-      clean_up : unit -> unit }
+      clean_up : unit -> unit;
+      name : string
+    }
 
-  let mk ?(prepare=id_unit) ?(clean_up=id_unit) run =
-    { prepare = prepare ; clean_up = clean_up; run = run }
+  let mk ?(prepare=id_unit) ?(clean_up=id_unit) ~name run =
+    { prepare = prepare ; clean_up = clean_up; run = run; name = name }
 
   let run_one t =
     t.prepare ();
     begin try t.run (); Format.printf ".@?"
     with
     | Assert.Assert _ -> Format.printf "!@?"
-    | _ -> Format.printf "?@?"
+    | e ->
+        Format.printf "?@?";
+        Format.eprintf "Error during test %s...@." t.name;
+        Format.eprintf "%s@." (Printexc.to_string e);
+        Printexc.print_backtrace Pervasives.stderr
     end;
-    t.clean_up ()
+    try t.clean_up ()
+    with e ->
+      Format.eprintf "Error during cleanup of test %s...@." t.name;
+      Format.eprintf "%s@." (Printexc.to_string e);
+      Printexc.print_backtrace Pervasives.stderr;
+      exit 1
+
 
   let run_many l =
     List.iter run_one l;
@@ -54,10 +69,11 @@ let test_generate_mp =
   let out = "hello.output" in
   let ref = "hello.reference" in
   Test.mk
+    ~name:"generate_mp"
     ~clean_up:(fun () ->
       Sys.remove out)
     (fun () ->
-      Metapost.generate_mp out [1,fig];
+      Metapost.generate_mp out [1,"",fig];
       Assert.File.exists out;
       Assert.File.eq ref out)
 
@@ -67,10 +83,11 @@ let test_generate_aux =
   let outf = File.from_string out in
   let rename = FM.add outf outf FM.empty in
   Test.mk
+    ~name:"generate_aux"
     ~clean_up:(fun () ->
       Sys.remove out)
     (fun () ->
-      Metapost.generate_aux rename (File.from_string s) [1,fig];
+      Metapost.generate_aux rename (File.from_string s) [1,"",fig];
       Assert.File.exists out;
       Assert.File.eq ~ignore:"%%CreationDate:" ref out)
 
@@ -78,6 +95,7 @@ let test_dump_png =
   let bn = "hello" in
   let out = bn ^ ".png" in
   Test.mk
+    ~name:"dump_png"
     ~prepare:(fun () ->
       Metapost.emit bn fig;
       (* TODO this reset should not be necessary *)

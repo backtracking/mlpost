@@ -2382,8 +2382,6 @@ end
 (* Misc does not appear in the documentation *)
 (**/**)
 module Misc : sig
-  val write_to_file : string -> (out_channel -> 'a) -> unit
-  val write_to_formatted_file : string -> (Format.formatter -> 'a) -> unit
   val print_option :
     string ->
     (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a option -> unit
@@ -2409,13 +2407,16 @@ module Metapost : sig
     (** Add to the filename given to the emit function this prefix.
         This function is here just for convenience *)
 
-  val generate_mp :
-    string ->
-    ?prelude:string ->
-    ?eps:bool ->
-    (int * Command.t) list -> unit
-
   val emit : string -> Command.t -> unit
+
+  val generate :
+    ?prelude:string ->
+    ?pdf:bool ->
+    ?eps:bool ->
+    ?verbose:bool ->
+    ?clean:bool ->
+    string -> (int * string * Command.t) list -> unit
+
   val dump :
     ?prelude:string ->
     ?pdf:bool ->

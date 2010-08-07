@@ -61,12 +61,12 @@ let create prelude = function
     let exit_status = Sys.command (sprintf "%s -halt-on-error %s > \
 gentex_dev_null.log" com_latex latex) in
     if exit_status <> 0 then failwith (sprintf "Error with : %s : \
-%s %s log in gentex.log" pwd com_latex latex);
+%s %s log in gentex.log" (File.Dir.to_string pwd) com_latex latex);
     let dvi = genfile_name^".dvi" in
     let saved = Saved_device.load_file true dvi in
     List.map (fun x -> {tex = x;trans= Matrix.identity})
       (Dev_save.separate_pages saved) in
-  tempdir genfile_name "" todo Misc.StringMap.empty
+  tempdir genfile_name "" todo File.Map.empty
 
 let point_of_cm cm = (0.3937 *. 72.) *. cm
 

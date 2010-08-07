@@ -16,6 +16,7 @@ module Dir : sig
   val rm : t -> unit
   val concat : t -> t -> t
   val from_string : string -> t
+  val to_string : t -> string
 
 
   val mk : t -> int -> unit
@@ -42,6 +43,7 @@ val concat : Dir.t -> t -> t
 (** concat directory information given to the one of the file *)
 
 val append : t -> string -> t
+val prepend : t -> string -> t
 (** append string to file name - do not use this for file extensions *)
 
 val move : t -> t -> unit

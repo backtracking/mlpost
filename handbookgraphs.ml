@@ -268,7 +268,7 @@ let figs = (*List.map embed*)
   ] @ draw11 @ [
   draw17;
 draw18;
-   draw21; draw40
+  draw21; draw40;
   draw22;
   ]
 
@@ -278,17 +278,20 @@ let texfile = "testmanual.tex"
 
 let _ =
   Sys.chdir "test";
+  let nfig = List.map (fun (i,f) ->
+    i, mpostfile^"-"^(string_of_int i), f) figs in
   if Cairost.supported then
     begin
-      Mps.generate mpostfile ~pdf:true figs;
+      Metapost.generate mpostfile ~pdf:true nfig;
       Cairost.generate_pdfs cairostfile figs;
       Generate.generate_tex_cairo texfile "manual/manual"
         "testmanualMP" "testmanual_cairo" figs;
     end
   else
     begin
-      Metapost.generate mpostfile ~pdf:true figs;
-      Generate.generate_tex ~pdf:true texfile "manual/manual" "testmanualMP" figs;
+      Metapost.generate mpostfile ~pdf:true nfig;
+      Generate.generate_tex ~pdf:true
+        texfile "manual/manual" "testmanualMP" figs;
     end
 
 

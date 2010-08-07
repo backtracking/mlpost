@@ -28,7 +28,7 @@ open Format
 let generate_tex ?(pdf=false) tf tmpl1 tmpl2 l =
   let suf = if pdf then ".mps" else "" in
   let sep = if pdf then "-" else "." in
-    Misc.write_to_formatted_file tf
+    File.LowLevel.write_to_formatted tf
       (fun fmt ->
           fprintf fmt "\\documentclass[a4paper]{article}@.";
           fprintf fmt "\\usepackage[]{graphicx}@.";
@@ -43,7 +43,7 @@ let generate_tex ?(pdf=false) tf tmpl1 tmpl2 l =
           fprintf fmt "@]@\n\\end{document}@.")
 
 let generate_tex_cairo tf tmpl1 tmpl2 tmpl3 l =
-    Misc.write_to_formatted_file tf
+    File.LowLevel.write_to_formatted tf
       (fun fmt ->
           fprintf fmt "\\documentclass[a4paper]{article}@.";
           fprintf fmt "\\usepackage[]{graphicx}@.";

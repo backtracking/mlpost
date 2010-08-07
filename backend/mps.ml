@@ -286,13 +286,13 @@ let draw fmt x =
   fprintf fmt "%%%%EOF@\n"
 
 let generate_one fn fig =
-  Misc.write_to_formatted_file fn (fun fmt -> draw fmt fig)
+  File.LowLevel.write_to_formatted fn (fun fmt -> draw fmt fig)
 
 let dump () =
   Queue.iter (fun (_,fn,fig) ->
     let fig = LookForTeX.commandpic fig in
     let fn = fn ^ ".mps" in
-    Misc.write_to_formatted_file fn (fun fmt -> draw fmt fig)
+    File.LowLevel.write_to_formatted fn (fun fmt -> draw fmt fig)
   ) Metapost.figures
 
 let generate bn ?(pdf=false) figs =

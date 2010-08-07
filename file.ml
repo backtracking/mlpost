@@ -52,15 +52,14 @@ module Dir = struct
       { dirs = List.rev (Str.split r s); is_relative = Filename.is_relative s }
 
   let concat d1 d2 =
-    assert (not d2.is_relative);
+    assert d2.is_relative;
     { d1 with dirs = d2.dirs @ d1.dirs }
 
   let print_sep fmt () = Format.pp_print_string fmt Filename.dir_sep
   let to_string s =
-    (** TODO fix things for absolute paths *)
     let prefix = if s.is_relative then "" else "/" in
       Misc.sprintf "%s%a" prefix
-        (Misc.print_list print_sep Format.pp_print_string) s.dirs
+        (Misc.print_list print_sep Format.pp_print_string) (List.rev s.dirs)
 
   let temp = from_string Filename.temp_dir_name
 
@@ -110,6 +109,7 @@ let place d t = { t with dir = d }
 let concat d t = { t with dir = Dir.concat d t.dir }
 
 let append t s = { t with bn = t.bn ^ s }
+let prepend t s = { t with bn = s ^ t.bn }
 
 let file_to_string bn ext =
   match ext with
@@ -117,7 +117,11 @@ let file_to_string bn ext =
   | Some ext -> Misc.sprintf "%s.%s" bn ext
 
 let to_string t =
-  Misc.sprintf "%s/%s" (Dir.to_string t.dir) (file_to_string t.bn t.ext)
+  let dir = Dir.to_string t.dir in
+  let sep =
+    if String.length dir <> 0 && dir.[String.length dir-1] <> '/' then "/"
+    else "" in
+  Misc.sprintf "%s%s%s" (Dir.to_string t.dir) sep (file_to_string t.bn t.ext)
 
 let set_ext t s =
   let ext = if s = "" then None else Some s in
