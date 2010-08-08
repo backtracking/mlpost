@@ -45,7 +45,7 @@ let test_png =
     ~prepare:(fun () ->
       Compile.reset ())
     (fun () ->
-      let l = Metapost.png "hello" [bn,fig] in
+      let l = Metapost.temp_png "hello" [bn,fig] in
       Assert.List.non_empty l;
       let f = List.hd l in
       Assert.bool (File.compare f out = 0);

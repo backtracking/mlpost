@@ -31,3 +31,4 @@ test/manual/*.[0-9]*
 test/manual/*.mpx
 test/manual/*.mps
 test/manual/*.log
+*.native
