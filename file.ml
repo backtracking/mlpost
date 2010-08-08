@@ -39,6 +39,9 @@ module LowLevel = struct
         let r = f fmt in
         Format.fprintf fmt "@?"; r)
 
+  let exists = Sys.file_exists
+  let rm = Sys.remove
+
 end
 
 module Dir = struct
@@ -83,16 +86,19 @@ type t =
   { dir: Dir.t ; bn : string ; ext : string option }
 
 let dir t = t.dir
-let extension t = t.ext
+let extension t =
+  match t.ext with
+  | Some s -> s
+  | None -> ""
 let basename t = t.bn
 
 let split_ext =
-  let r = Str.regexp_string ".[^./]$" in
+  let r = Str.regexp "\\.[^./]+$" in
   fun s ->
     let l = String.length s in
     try
       let i = Str.search_backward r s (String.length s) in
-      String.sub s 0 i, Some (String.sub s (i+1) (l-i))
+      String.sub s 0 i, Some (String.sub s (i+1) (l-i-1))
     with Not_found -> s, None
 
 let from_string s =
@@ -123,6 +129,10 @@ let to_string t =
     else "" in
   Misc.sprintf "%s%s%s" (Dir.to_string t.dir) sep (file_to_string t.bn t.ext)
 
+let debug_to_string t =
+  Misc.sprintf "(%s,%s,%s)" (Dir.to_string t.dir) t.bn (extension t)
+
+
 let set_ext t s =
   let ext = if s = "" then None else Some s in
   { t with ext = ext }
@@ -143,3 +153,5 @@ let move a b = LowLevel.move (to_string a) (to_string b)
 let read_from t f = LowLevel.read_from (to_string t) f
 let write_to t f = LowLevel.write_to (to_string t) f
 let write_to_formatted t f = LowLevel.write_to_formatted (to_string t) f
+let exists t = LowLevel.exists (to_string t)
+let rm t = LowLevel.rm (to_string t)

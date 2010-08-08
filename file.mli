@@ -2,6 +2,7 @@ module LowLevel : sig
   val move : string -> string -> unit
   val copy : string -> string -> unit
   val rmdir : string -> unit
+  val rm : string -> unit
 
   val read_from : string -> (in_channel -> 'a) -> 'a
 
@@ -35,6 +36,7 @@ type t
 val from_string : string -> t
 
 val to_string : t -> string
+val debug_to_string : t -> string
 
 val place : Dir.t -> t -> t
 (** replace the current directory information of the file by the one given *)
@@ -54,8 +56,11 @@ val read_from : t -> (in_channel -> 'a) -> 'a
 val compare : t -> t -> int
 
 val basename : t -> string
-val extension : t -> string option
+val extension : t -> string
 val dir : t -> Dir.t
+
+val exists : t -> bool
+val rm : t -> unit
 
 val clear_dir : t -> t
 
