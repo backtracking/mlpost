@@ -27,6 +27,13 @@ verbatimtex
 \usepackage[T1]{fontenc}
 \begin{document}
 etex
+if scantokens(mpversion) < 1.200:
+filenametemplate
+else:
+outputtemplate :=
+fi
+  "hello.mps";
+  
 beginfig(1)
   draw btex hello etex;
    endfig;
