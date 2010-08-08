@@ -2411,16 +2411,12 @@ module Metapost : sig
 
   val generate :
     ?prelude:string ->
-    ?pdf:bool ->
-    ?eps:bool ->
     ?verbose:bool ->
     ?clean:bool ->
-    string -> (int * string * Command.t) list -> unit
+    string -> (string * Command.t) list -> unit
 
   val dump :
     ?prelude:string ->
-    ?pdf:bool ->
-    ?eps:bool ->
     ?verbose:bool ->
     ?clean:bool ->
     string -> unit
@@ -2430,7 +2426,10 @@ module Metapost : sig
 	set, and [.1] otherwise. *)
 
   val dump_mp :
-    ?prelude:string -> string -> unit
+    ?prelude:string ->
+    ?verbose:bool ->
+    ?clean:bool -> string -> unit
+
   val dump_png :
     ?prelude:string -> ?verbose:bool -> ?clean:bool -> string -> unit
 

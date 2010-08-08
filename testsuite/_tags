@@ -1,1 +1,1 @@
-<test_metapost.*> : use_unix, use_str
+<run_tests.*> : use_unix, use_str

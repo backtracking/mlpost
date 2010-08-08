@@ -71,8 +71,7 @@ let () =
       else
         if !mps then Mps.dump () else
           Metapost.dump
-          ?prelude ~pdf:!pdf ~eps:!eps
-          ~verbose ~clean:(not !dont_clean) bn;
+          ?prelude ~verbose ~clean:(not !dont_clean) bn;
       if !xpdf then begin
         Metapost.dump_tex ?prelude "_mlpost";
         begin try Sys.remove "_mlpost.aux" with _ -> () end;

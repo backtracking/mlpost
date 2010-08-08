@@ -35,37 +35,36 @@ let emit_cairo = emit_cairo
 (*let emit_cairo = fun x -> ()*)
 
 let dump_pdf () = 
-  Queue.iter (fun (_,fname,fig) -> 
-    let pdfname = (fname^".pdf") in
-    try emit_pdf pdfname fig
+  Queue.iter (fun (fname,fig) ->
+    let pdfname = File.set_ext fname "pdf" in
+    let pdfname_s = File.to_string pdfname in
+    try emit_pdf pdfname_s fig
     with
     | Cairo.Error status -> 
         Format.printf "An@ internal@ error@ occured@ during@ the generation@ of@ %s@ with@ Cairo :@ %s@."
-          pdfname (Cairo.string_of_status status)
+          pdfname_s (Cairo.string_of_status status)
     | error -> 
         Format.printf "An@ internal@ error@ occured@ during@ the@ generation@ of@ %s :@ %s@."
-        pdfname (Printexc.to_string error)
+        pdfname_s (Printexc.to_string error)
   ) Metapost.figures
 
 let dump_pdfs fname =
   let figs =
-    List.rev (Queue.fold (fun l (_,_,x) ->  x::l) [] Metapost.figures) in
+    List.rev (Queue.fold (fun l (_,x) ->  x::l) [] Metapost.figures) in
   emit_pdfs (fname^".pdf") figs
 
 let generate_pdfs pdffile figs = List.iter
   (fun (i,fig) -> emit_pdf ~msg_error:100.
      (Printf.sprintf "%s-%i.pdf" pdffile i) fig) figs
 
-let dump_ps () =
-  Queue.iter (fun (_,fname,fig) -> emit_ps (fname^".ps") fig) Metapost.figures
+let dump_ext ext f () =
+  Queue.iter (fun (fname,fig) ->
+    let s = File.to_string (File.set_ext fname ext) in
+    f s fig) Metapost.figures
 
-let dump_png () =
-  Queue.iter (fun (_,fname,fig) -> emit_png (fname^".png") fig)
-    Metapost.figures
-
-let dump_svg () =
-  Queue.iter (fun (_,fname,fig) -> emit_svg (fname^".svg") fig)
-    Metapost.figures
+let dump_ps = dump_ext "ps" emit_ps
+let dump_png = dump_ext "png" emit_png
+let dump_svg = dump_ext "svg" emit_svg
 
 ELSE
 

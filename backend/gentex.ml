@@ -65,8 +65,8 @@ gentex_dev_null.log" com_latex latex) in
     let dvi = genfile_name^".dvi" in
     let saved = Saved_device.load_file true dvi in
     List.map (fun x -> {tex = x;trans= Matrix.identity})
-      (Dev_save.separate_pages saved) in
-  tempdir genfile_name "" todo File.Map.empty
+      (Dev_save.separate_pages saved), [] in
+  tempdir genfile_name "" todo
 
 let point_of_cm cm = (0.3937 *. 72.) *. cm
 

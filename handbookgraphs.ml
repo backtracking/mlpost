@@ -278,8 +278,7 @@ let texfile = "testmanual.tex"
 
 let _ =
   Sys.chdir "test";
-  let nfig = List.map (fun (i,f) ->
-    i, mpostfile^"-"^(string_of_int i), f) figs in
+  let nfig = List.map (fun (i,f) -> mpostfile^"-"^(string_of_int i), f) figs in
   if Cairost.supported then
     begin
       Metapost.generate mpostfile ~pdf:true nfig;

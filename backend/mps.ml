@@ -289,10 +289,10 @@ let generate_one fn fig =
   File.LowLevel.write_to_formatted fn (fun fmt -> draw fmt fig)
 
 let dump () =
-  Queue.iter (fun (_,fn,fig) ->
+  Queue.iter (fun (fn,fig) ->
     let fig = LookForTeX.commandpic fig in
-    let fn = fn ^ ".mps" in
-    File.LowLevel.write_to_formatted fn (fun fmt -> draw fmt fig)
+    let fn =  File.set_ext fn "mps" in
+    File.write_to_formatted fn (fun fmt -> draw fmt fig)
   ) Metapost.figures
 
 let generate bn ?(pdf=false) figs =

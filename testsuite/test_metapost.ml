@@ -1,118 +1,59 @@
+open FrameWork
+
 let s = "hello"
 let fig = Picture.tex s
 module FM = File.Map
 
-module Assert = struct
-
-  exception Assert of string option
-
-  let assert_failure s = raise (Assert s)
-
-  let bool ?s cond = if cond then () else assert_failure s
-  let eq ?s a b = if a = b then () else assert_failure s
-
-  module File = struct
-    let exists ?s f = bool ?s (Sys.file_exists f)
-    let eq ?s ?ignore a b =
-      let ignore =
-        match ignore with
-        | None -> ""
-        | Some s -> "-I " ^ s in
-      let r =
-        Misc.call_cmd ~outv:true (Misc.sprintf "diff %s %s %s" ignore a b) in
-      eq ?s r 0
-  end
-end
-
-module Test = struct
-
-  let _ = Printexc.record_backtrace true
-
-  let id_unit () = ()
-
-  type t =
-    { prepare : unit -> unit;
-      run : unit -> unit;
-      clean_up : unit -> unit;
-      name : string
-    }
-
-  let mk ?(prepare=id_unit) ?(clean_up=id_unit) ~name run =
-    { prepare = prepare ; clean_up = clean_up; run = run; name = name }
-
-  let run_one t =
-    t.prepare ();
-    begin try t.run (); Format.printf ".@?"
-    with
-    | Assert.Assert _ -> Format.printf "!@?"
-    | e ->
-        Format.printf "?@?";
-        Format.eprintf "Error during test %s...@." t.name;
-        Format.eprintf "%s@." (Printexc.to_string e);
-        Printexc.print_backtrace Pervasives.stderr
-    end;
-    try t.clean_up ()
-    with e ->
-      Format.eprintf "Error during cleanup of test %s...@." t.name;
-      Format.eprintf "%s@." (Printexc.to_string e);
-      Printexc.print_backtrace Pervasives.stderr;
-      exit 1
-
-
-  let run_many l =
-    List.iter run_one l;
-    Format.printf "@."
-
-end
-
-let test_generate_mp =
-  let out = "hello.output" in
-  let ref = "hello.reference" in
+let test_mp =
+  let out = "hello" in
+  let ref_file = File.from_string "hello.reference" in
+  let cleanup = ref (File.from_string "") in
   Test.mk
-    ~name:"generate_mp"
+    ~name:"mp"
     ~clean_up:(fun () ->
-      Sys.remove out)
+      File.rm !cleanup
+      )
     (fun () ->
-      Metapost.generate_mp out [1,"",fig];
-      Assert.File.exists out;
-      Assert.File.eq ref out)
+      let f = Metapost.mp out [File.from_string "hello.mps",fig] in
+      cleanup := f;
+      Assert.File.exists f;
+      Assert.File.eq ref_file f;
+    )
 
-let test_generate_aux =
-  let out = "hello.1" in
-  let ref = "hello.mps.reference" in
-  let outf = File.from_string out in
-  let rename = FM.add outf outf FM.empty in
+let test_mps =
+  let out = File.from_string "hello.mps" in
+  let ref = File.from_string "hello.mps.reference" in
   Test.mk
-    ~name:"generate_aux"
+    ~name:"mps"
     ~clean_up:(fun () ->
-      Sys.remove out)
+      File.rm out)
     (fun () ->
-      Metapost.generate_aux rename (File.from_string s) [1,"",fig];
-      Assert.File.exists out;
-      Assert.File.eq ~ignore:"%%CreationDate:" ref out)
+      let l = Metapost.temp_mps "hello" [out,fig] in
+      Assert.List.non_empty l;
+      let f = List.hd l in
+      Assert.bool (File.compare f out = 0);
+      Assert.File.exists f;
+      Assert.File.eq ~ignore:"%%CreationDate:" ref f)
 
-let test_dump_png =
-  let bn = "hello" in
-  let out = bn ^ ".png" in
+let test_png =
+  let bn = File.from_string "hello.mps" in
+  let out = File.set_ext bn "png" in
   Test.mk
-    ~name:"dump_png"
+    ~name:"png"
+    ~clean_up:(fun () ->
+      File.rm out)
     ~prepare:(fun () ->
-      Metapost.emit bn fig;
-      (* TODO this reset should not be necessary *)
       Compile.reset ())
-    ~clean_up:(fun () ->
-      Sys.remove out)
     (fun () ->
-      Metapost.dump_png bn;
-      Assert.File.exists out)
+      let l = Metapost.png "hello" [bn,fig] in
+      Assert.List.non_empty l;
+      let f = List.hd l in
+      Assert.bool (File.compare f out = 0);
+      Assert.File.exists f)
 
 
 let tests =
-  [ test_generate_mp ;
-    test_generate_aux;
-    test_dump_png
+  [ test_mp ;
+    test_mps;
+    test_png
     ]
-
-let _ =
-  Sys.chdir "testspace";
-  Test.run_many tests

@@ -190,7 +190,9 @@ let d267 =
 let min = -1.
 let max = 1.
 
-let b = (cycle ~style:jLine (path ~style:jLine [(min,min);(max,min);(max,max);(min,max)]))
+let b =
+  cycle ~style:jLine
+    (path ~style:jLine [(min,min);(max,min);(max,max);(min,max)])
 
 (* Pour avoir une echelle *)
 let embed (id,p) =
@@ -214,8 +216,7 @@ let texfile = "othergraphs.tex"
 
 let _ =
   Sys.chdir "test";
-  let nfig = List.map (fun (i,f) ->
-    i, mpostfile^"-"^(string_of_int i), f) figs in
+  let nfig = List.map (fun (i,f) -> mpostfile^"-"^(string_of_int i), f) figs in
   if Cairost.supported then
     begin
 (*       Metapost.generate mpostfile ~pdf:true figs; *)
@@ -227,6 +228,7 @@ let _ =
   else
     begin
       Metapost.generate mpostfile ~pdf:true nfig;
-      Generate.generate_tex ~pdf:true texfile "othergraphs/mpost" "othergraphs" figs;
+      Generate.generate_tex
+        ~pdf:true texfile "othergraphs/mpost" "othergraphs" figs;
     end
 

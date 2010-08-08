@@ -33,16 +33,16 @@ let rec create_dir prefix suffix =
  * [rename] is a map from file names to file names; after executing [f], for
  * each pair [(key,value)] in [rename], [tempdir]/[key] is moved to
  * [workdir]/[value] *)
-let tempdir ?(clean=true) prefix suffix f rename =
+let tempdir ?(clean=true) prefix suffix f =
   let tmpdir = create_dir prefix suffix in
   let workdir = File.Dir.cwd () in
   File.Dir.ch tmpdir;
-  let res = f workdir tmpdir in
+  let res, files = f workdir tmpdir in
   File.Dir.ch workdir;
-  File.Map.iter (fun k v ->
-    let from = File.place tmpdir k in
-    let to_ = File.place workdir v in
-    File.move from to_) rename;
+  List.iter (fun r ->
+    let from = File.place tmpdir r in
+    let to_ = File.place workdir r in
+    File.move from to_) files;
   if clean then File.Dir.rm tmpdir;
   res
 

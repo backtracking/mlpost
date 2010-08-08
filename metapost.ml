@@ -16,15 +16,21 @@
 
 open Format
 
-let print i fmt c =
+let print fmt target c =
   (* resetting is actually not needed; variables other than
      x,y are not local to figures *)
 (*   Compile.reset (); *)
   let () = Duplicate.commandpic c in
   let c = Compile.commandpic_cmd c in
-  fprintf fmt "@[beginfig(%d)@\n  @[%a@] endfig;@]@." i MPprint.command c
+  fprintf fmt "if scantokens(mpversion) < 1.200:
+filenametemplate
+else:
+outputtemplate :=
+fi
+  \"%s\";
+  @[beginfig(1)@\n  @[%a@] endfig;@]@." target MPprint.command c
 
-let print_prelude ?(eps=false) s fmt () =
+let print_prelude s fmt () =
   fprintf fmt "input mp-tool ; %% some initializations and auxiliary macros
 input mp-spec ; %% macros that support special features
 
@@ -47,11 +53,8 @@ vardef reset_extra_specials =
   enddef ;
 
 @\n";
-  if eps then
-    fprintf fmt "prologues := 2;@\n"
-  else
-    (fprintf fmt "prologues := 0;@\n";
-     fprintf fmt "mpprocset := 0;@\n");
+ fprintf fmt "prologues := 0;@\n";
+ fprintf fmt "mpprocset := 0;@\n";
  fprintf fmt "verbatimtex@\n";
  fprintf fmt "%%&latex@\n";
  fprintf fmt "%s" s;
@@ -64,16 +67,14 @@ let defaultprelude = "\\documentclass{article}\n\\usepackage[T1]{fontenc}\n"
 (** take a list of figures [l] and write the code to the formatter in argument
  *)
 
-let generate_mp_fmt l ?(prelude=defaultprelude) ?eps fmt =
-  print_prelude ?eps prelude fmt ();
-  List.iter (fun (i,_,f) -> print i fmt f) l;
-  fprintf fmt "end@."
+let mp bn ?(prelude=defaultprelude) l =
+  let f = File.set_ext (File.from_string bn) "mp" in
+  File.write_to_formatted f (fun fmt ->
+    print_prelude prelude fmt ();
+    List.iter (fun (target,f) -> print fmt (File.to_string target) f) l;
+    fprintf fmt "end@.");
+  f
 
-let generate_mp fn ?prelude ?eps l =
-  File.LowLevel.write_to_formatted fn (generate_mp_fmt l ?prelude ?eps)
-
-let generate_mp_file fn ?prelude ?eps l =
-  File.write_to_formatted fn (generate_mp_fmt l ?prelude ?eps)
 
 (* batch processing *)
 
@@ -84,8 +85,9 @@ let filename_prefix = ref ""
 let set_filename_prefix = (:=) filename_prefix
 
 let emit s f =
-  incr figuren;
-  Queue.add (!figuren, !filename_prefix^s, f) figures
+  let fn =
+    File.set_ext (File.from_string (!filename_prefix^s)) ".mps" in
+  Queue.add (fn, f) figures
 
 let read_prelude_from_tex_file = Metapost_tool.read_prelude_from_tex_file
 
@@ -102,9 +104,10 @@ let dump_tex ?prelude f =
   fprintf fmt "\\begin{document}@\n";
   fprintf fmt "\\begin{center}@\n";
   Queue.iter
-    (fun (_,s,_) ->
-       fprintf fmt "\\hrulefill\\verb!%s!\\hrulefill\\\\[1em]@\n" s;
-       fprintf fmt "\\includegraphics{%s.mps}\\\\@\n" s;
+    (fun (s,_) ->
+       fprintf fmt "\\hrulefill\\verb!%s!\\hrulefill\\\\[1em]@\n"
+       (File.to_string s);
+       fprintf fmt "\\includegraphics{%s}\\\\@\n" (File.to_string s);
        fprintf fmt "\\hrulefill\\\\@\n@\n\\medskip@\n";)
     figures;
   fprintf fmt "\\end{center}@\n";
@@ -131,71 +134,75 @@ let print_latex_error () =
     Printf.printf "There was an error during execution of metapost. Aborting. \
       Execute with option -v to see the error.\n"
 
-let generate_aux rename f ?prelude ?eps ?(verbose=false)
-    ?(clean=true) figl =
+let mps ?prelude ?(verbose=false) bn figl =
+  if figl <> [] then
+    let targets = List.map fst figl in
+    let f = mp bn ?prelude figl in
+    let s = call_mpost ~verbose f in
+    if s <> 0 then print_latex_error ();
+    targets
+    else []
+
+(*
   if figl <> [] then
     let do_ _ _ =
       (* a chdir has been done to tmpdir *)
-      generate_mp_file f ?prelude ?eps figl;
-      let s = call_mpost ~verbose f in
-      if s <> 0 then print_latex_error ();
       s in
-    if Metapost_tool.tempdir ~clean "mlpost" "mpost" do_ rename <> 0
-    then exit 2
+    if Metapost_tool.tempdir ~clean "mlpost" "mpost" do_ targets <> 0
+    then [] else targets
+  else []
+*)
 
-let generate ?prelude ?(pdf=false) ?eps ?(verbose=false) ?clean bn figl =
-  let fn = File.from_string bn in
-  let base = File.clear_dir fn in
-  let mpfile = File.set_ext fn "mp" in
-  let suf = if pdf then "mps" else "1" in
-  let rename =
-    List.fold_left
-      (fun acc (i,s,_) ->
-         let from = File.set_ext base (string_of_int i) in
-         let to_ = File.set_ext (File.from_string s) suf in
-         File.Map.add from to_ acc) File.Map.empty figl in
-  generate_aux rename mpfile ?prelude ?eps ~verbose ?clean figl
+let call_mptopdf ?inv ?outv ?verbose f =
+  (** assume that f is ps file or sth like that *)
+  ignore (Misc.call_cmd ?inv ?outv ?verbose
+    (sprintf "mptopdf %s" (File.to_string f)));
+  let out = File.set_ext f "pdf" in
+  File.move (File.append out ("-"^File.extension f)) out;
+  out
 
-let dump ?prelude ?pdf ?eps ?verbose ?clean bn =
-  let figl = Queue.fold (fun l (i,s,f) -> (i,s,f) :: l) [] figures in
-  generate ?prelude ?pdf ?eps ?verbose ?clean bn figl
+let call_convert ?inv ?outv ?verbose from to_ =
+  ignore (Misc.call_cmd ?inv ?outv ?verbose
+    (sprintf "convert -density 600x600 \"%s\" \"%s\"" (File.to_string from)
+      (File.to_string to_)));
+  to_
 
+let pdf ?prelude ?verbose bn figl =
+  let l = mps ?prelude ?verbose bn figl in
+  List.map (fun f -> call_mptopdf ?verbose f) l
 
+let emited () = Queue.fold (fun l t -> t :: l) [] figures
 
-let dump_mp ?prelude bn =
-  let figl = Queue.fold (fun l s -> s :: l) [] figures in
-  let f = bn ^ ".mp" in
-  generate_mp f ?prelude figl
+let png ?prelude ?verbose bn figl =
+  let pdfl = pdf ?prelude ?verbose bn figl in
+  List.map (fun f -> call_convert ?verbose f (File.set_ext f "png")) pdfl
 
+let wrap_tempdir f suffix ?prelude ?verbose ?clean bn figl =
+  let do_ from_ to_ =
+    let l = f ?prelude ?verbose bn figl in
+    l, l
+  in
+  Metapost_tool.tempdir ?clean "mlpost" ("metapost-"^suffix) do_
 
-(** with mptopdf *)
-let dump_png ?prelude ?(verbose=false) ?(clean=true) bn =
-  dump_mp ?prelude bn;
-  let s =
-    Misc.call_cmd ~verbose
-      (sprintf "mptopdf %s.mp" bn) in
-  if s <> 0 then print_latex_error ();
-  if clean then
-    ignore (Misc.call_cmd ~verbose
-      (Printf.sprintf
-        "rm -f mpxerr.log mpxerr.tex mpxerr.aux mpxerr.dvi %s.mp %s.mpx %s.log"
-        bn bn bn));
-  if s <> 0 then exit 1;
-  Queue.iter
-    (fun (i,s,_) ->
-       let s =
-         Misc.call_cmd ~verbose
-           (sprintf "convert -density 600x600 \"%s-%i.pdf\" \"%s.png\"" bn i s)
-       in
-       if clean then
-         ignore (Misc.call_cmd ~verbose
-                   (Printf.sprintf
-                      "rm -f %s-%i.pdf" bn i));
-       if s <> 0 then (
-         ignore (Misc.call_cmd ~verbose
-                   (Printf.sprintf
-                      "rm -f %s-*.pdf" bn));exit 1)
-    ) figures
+let temp_mp ?prelude ?(verbose=false) ?(clean=true) = mp ?prelude
+let temp_mps = wrap_tempdir mps "mps"
+let temp_pdf = wrap_tempdir pdf "pdf"
+let temp_png = wrap_tempdir png "png"
+
+let wrap_dump f ?prelude ?verbose ?clean bn =
+  ignore (f ?prelude ?verbose ?clean bn (emited ()))
+
+let dump_mp = wrap_dump temp_mp
+let dump_mps = wrap_dump temp_mps
+let dump_pdf = wrap_dump temp_pdf
+let dump_png = wrap_dump temp_png
+let dump = dump_mps
+
+let generate ?prelude ?verbose ?clean bn figl =
+  let figl = List.map (fun (s,f) ->
+    let s = File.from_string s in
+    File.set_ext s "mps", f) figl in
+  ignore (temp_mps ?prelude ?verbose ?clean bn figl)
 
 let slideshow l k =
   let l = List.map Picture.make l in
@@ -215,13 +222,14 @@ let emit_slideshow s l =
   List.iter (fun (i,fig) -> emit (s^(string_of_int i)) fig) l
 
 
-let emited () = Queue.fold (fun l (i,n,f) -> (i,n,f) :: l) [] figures
-
 let dumpable () =
-  Queue.iter (fun (_,s,_) -> Printf.printf "%s\n" s) figures
+  Queue.iter (fun (s,_) ->
+    let s = File.set_ext s "" in
+    Printf.printf "%s\n" (File.to_string s)) figures
 
 let depend myname =
-  Queue.iter (fun (_,s,_) -> Printf.printf "%s.fmlpost " s) figures;
+  Queue.iter (fun (s,_) ->
+    Printf.printf "%s" (File.to_string (File.set_ext s "fmlpost"))) figures;
   Printf.printf " : %s.cmlpost\n" myname
 
 
