@@ -143,16 +143,6 @@ let mps ?prelude ?(verbose=false) bn figl =
     targets
     else []
 
-(*
-  if figl <> [] then
-    let do_ _ _ =
-      (* a chdir has been done to tmpdir *)
-      s in
-    if Metapost_tool.tempdir ~clean "mlpost" "mpost" do_ targets <> 0
-    then [] else targets
-  else []
-*)
-
 let call_mptopdf ?inv ?outv ?verbose f =
   (** assume that f is ps file or sth like that *)
   ignore (Misc.call_cmd ?inv ?outv ?verbose
