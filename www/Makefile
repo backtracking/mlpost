@@ -9,7 +9,7 @@ ALL:= $(GENERATED) slides-jfla.pdf mlpost-jfla.pdf
 install: all
 	cp -f --parents $(ALL) $(WWW)
 
-all: $(ALL) 
+all: $(ALL)
 
 $(GENERATED): macros.prehtml version.prehtml
 
