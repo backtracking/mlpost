@@ -53,8 +53,8 @@ packaged into a single module Mlpost.</#en>
 befinden sich in einem Hauptmodul Mlpost.  </#de>
 
 <p>
-<#fr>Notre <a href="mlpost-jfla.pdf">article</a> et nos 
-<a href="slides-jfla.pdf">slides</a> des 
+<#fr>Notre <a href="mlpost-jfla.pdf">article</a> et nos
+<a href="slides-jfla.pdf">slides</a> des
 <a href="http://jfla.inria.fr/2009/"> JFLA</a> sont disponibles.
 </#fr>
 </p>
@@ -69,12 +69,12 @@ La version courante est <#version> et peut être téléchargée
 Current version is <#version> and can be downloaded from <a
 href="download/">here</a>.
 Here are the <a href="download/CHANGES">CHANGES</a>.
-</#en> 
+</#en>
 <#de>
 Die aktuelle Version ist <#version> and kann im <a
 href="download/">Download-Bereich</a> heruntergeladen werden.
 Es gibt auch ein <a href="download/CHANGES">Changelog</a>.
-</#de> 
+</#de>
 </p>
 <p>
 <#fr>
@@ -104,7 +104,7 @@ sudo apt-get install mlpost
 
 <hr>
 <a href="index.fr.html">Français</a> /
-<a href="index.en.html">English</a> / 
+<a href="index.en.html">English</a> /
 <a href="index.de.html">Deutsch</a>
 
 </body>
