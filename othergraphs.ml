@@ -216,18 +216,20 @@ let texfile = "othergraphs.tex"
 
 let _ =
   Sys.chdir "test";
-  let nfig = List.map (fun (i,f) -> mpostfile^"-"^(string_of_int i), f) figs in
+  let nfig =
+    List.map (fun (i,f) ->
+      mpostfile^"-"^(string_of_int i) ^ ".mps", f) figs in
   if Cairost.supported then
     begin
 (*       Metapost.generate mpostfile ~pdf:true figs; *)
-      Metapost.generate mpostfile ~pdf:true nfig;
+      Metapost.generate mpostfile nfig;
       Cairost.generate_pdfs cairostfile figs;
       Generate.generate_tex_cairo texfile "othergraphs/mpost" "othergraphs"
       "testother_cairo" figs;
     end
   else
     begin
-      Metapost.generate mpostfile ~pdf:true nfig;
+      Metapost.generate mpostfile nfig;
       Generate.generate_tex
         ~pdf:true texfile "othergraphs/mpost" "othergraphs" figs;
     end

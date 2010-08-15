@@ -10,7 +10,7 @@
 
 <mlpost.mli>: syntax_mymacroparser
 <cairost.ml> or <concrete.ml>: syntax_macro
-<test*> : use_unix, pkg_bitstring, pkg_cairo, use_cairo_bigarray
+<test*> : use_unix, pkg_bitstring, pkg_cairo, use_cairo_bigarray, use_str
 <handbookgraphs.*> : use_unix, pkg_bitstring, pkg_cairo, use_cairo_bigarray, use_str
 <othergraphs.*> : use_unix, pkg_bitstring, pkg_cairo, use_cairo_bigarray, use_str
 <testsuite>: include

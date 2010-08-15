@@ -14,7 +14,7 @@ let test_mp =
       File.rm !cleanup
       )
     (fun () ->
-      let f = Metapost.mp out [File.from_string "hello.mps",fig] in
+      let f,m = Metapost.mp out [File.from_string "hello.mps",fig] in
       cleanup := f;
       Assert.File.exists f;
       Assert.File.eq ref_file f;

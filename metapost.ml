@@ -16,19 +16,14 @@
 
 open Format
 
-let print fmt target c =
+let print fmt i c =
   (* resetting is actually not needed; variables other than
      x,y are not local to figures *)
 (*   Compile.reset (); *)
   let () = Duplicate.commandpic c in
   let c = Compile.commandpic_cmd c in
-  fprintf fmt "if scantokens(mpversion) < 1.200:
-filenametemplate
-else:
-outputtemplate :=
-fi
-  \"%s\";
-  @[beginfig(1)@\n  @[%a@] endfig;@]@." target MPprint.command c
+  fprintf fmt "@[beginfig(%d)@\n  @[%a@] endfig;@]@."
+    i MPprint.command c
 
 let print_prelude s fmt () =
   fprintf fmt "input mp-tool ; %% some initializations and auxiliary macros
@@ -71,10 +66,12 @@ let mp bn ?(prelude=defaultprelude) l =
   let f = File.set_ext (File.from_string bn) "mp" in
   File.write_to_formatted f (fun fmt ->
     print_prelude prelude fmt ();
-    List.iter (fun (target,f) -> print fmt (File.to_string target) f) l;
-    fprintf fmt "end@.");
-  f
-
+    let i = ref 1 in
+    let m = List.fold_left (fun acc (t,f) ->
+      let acc = Misc.IntMap.add !i t acc in
+      print fmt !i f; incr i; acc) Misc.IntMap.empty l in
+    fprintf fmt "end@.";
+    f,m)
 
 (* batch processing *)
 
@@ -86,7 +83,7 @@ let set_filename_prefix = (:=) filename_prefix
 
 let emit s f =
   let fn =
-    File.set_ext (File.from_string (!filename_prefix^s)) ".mps" in
+    File.set_ext (File.from_string (!filename_prefix^s)) "mps" in
   Queue.add (fn, f) figures
 
 let read_prelude_from_tex_file = Metapost_tool.read_prelude_from_tex_file
@@ -137,9 +134,12 @@ let print_latex_error () =
 let mps ?prelude ?(verbose=false) bn figl =
   if figl <> [] then
     let targets = List.map fst figl in
-    let f = mp bn ?prelude figl in
+    let f, m = mp bn ?prelude figl in
     let s = call_mpost ~verbose f in
     if s <> 0 then print_latex_error ();
+    Misc.IntMap.iter (fun k to_ ->
+      let from = File.set_ext f (string_of_int k) in
+      File.move from to_) m;
     targets
     else []
 
@@ -180,6 +180,7 @@ let temp_pdf = wrap_tempdir pdf "pdf"
 let temp_png = wrap_tempdir png "png"
 
 let wrap_dump f ?prelude ?verbose ?clean bn =
+  let bn = Filename.basename bn in
   ignore (f ?prelude ?verbose ?clean bn (emited ()))
 
 let dump_mp = wrap_dump temp_mp

@@ -278,17 +278,18 @@ let texfile = "testmanual.tex"
 
 let _ =
   Sys.chdir "test";
-  let nfig = List.map (fun (i,f) -> mpostfile^"-"^(string_of_int i), f) figs in
+  let nfig =
+    List.map (fun (i,f) -> mpostfile^"-"^(string_of_int i) ^ ".mps", f) figs in
   if Cairost.supported then
     begin
-      Metapost.generate mpostfile ~pdf:true nfig;
+      Metapost.generate ~verbose:true mpostfile nfig;
       Cairost.generate_pdfs cairostfile figs;
       Generate.generate_tex_cairo texfile "manual/manual"
         "testmanualMP" "testmanual_cairo" figs;
     end
   else
     begin
-      Metapost.generate mpostfile ~pdf:true nfig;
+      Metapost.generate mpostfile nfig;
       Generate.generate_tex ~pdf:true
         texfile "manual/manual" "testmanualMP" figs;
     end

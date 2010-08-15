@@ -30,9 +30,8 @@ let rec create_dir prefix suffix =
   with Unix.Unix_error (Unix.EEXIST, _, _) -> create_dir prefix suffix
 
 (** create a temporary directory and call function [f] within.
- * [rename] is a map from file names to file names; after executing [f], for
- * each pair [(key,value)] in [rename], [tempdir]/[key] is moved to
- * [workdir]/[value] *)
+ *  [f] has to return a result [res] and a list of files [files] that are
+ *  copied from the [tmpdir] to the [workdir] *)
 let tempdir ?(clean=true) prefix suffix f =
   let tmpdir = create_dir prefix suffix in
   let workdir = File.Dir.cwd () in
@@ -42,6 +41,8 @@ let tempdir ?(clean=true) prefix suffix f =
   List.iter (fun r ->
     let from = File.place tmpdir r in
     let to_ = File.place workdir r in
+    Format.printf "copy result; from: %s; to: %s@." (File.debug_to_string from)
+      (File.debug_to_string to_);
     File.move from to_) files;
   if clean then File.Dir.rm tmpdir;
   res
