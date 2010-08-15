@@ -81,18 +81,18 @@ module Print = struct
   let preamble fmt p =
     fprintf fmt "* Preamble :\n";
     fprintf fmt "\tversion number = %d\n" p.pre_version;
-    fprintf fmt "\tnumerator/denominator = %ld/%ld\n" 
+    fprintf fmt "\tnumerator/denominator = %ld/%ld\n"
       p.pre_num p.pre_den;
     fprintf fmt "\tmagnification = %ld\n" p.pre_mag;
     fprintf fmt "\tcomment : %s\n" p.pre_text
 
-  let page fmt 
+  let page fmt
       {counters = c; previous = prev; commands = cmds} =
     fprintf fmt "* Page number :";
     Array.iter (fun c -> fprintf fmt "%ld;" c) c; fprintf fmt "\n";
     fprintf fmt "\tPrevious page can be found at %ld\n" prev;
     fprintf fmt "\t<list of commands skipped ...>"
-      
+
   let pages fmt =
     List.iter (fun p -> fprintf fmt "%a\n" page p)
 
@@ -103,19 +103,19 @@ module Print = struct
   let postamble fmt p =
     fprintf fmt "* Postamble :\n";
     fprintf fmt "\tlast page = %ld\n" p.last_page;
-    fprintf fmt "\tnumerator/denominator = %ld/%ld\n" 
+    fprintf fmt "\tnumerator/denominator = %ld/%ld\n"
       p.post_num p.post_den;
     fprintf fmt "\tmagnification = %ld\n" p.post_mag;
-    fprintf fmt "\theight - width = %ld - %ld\n" 
+    fprintf fmt "\theight - width = %ld - %ld\n"
       p.post_height p.post_width;
     fprintf fmt "\tmaximum stack depth = %d\n"  p.post_stack;
-    fprintf fmt "\ttotal # of pages = %d\n"  p.post_pages  
+    fprintf fmt "\ttotal # of pages = %d\n"  p.post_pages
 
   let postpostamble fmt p =
     fprintf fmt "* Postpostamble :\n";
     fprintf fmt "\tPostamble can be found at %ld.\n" p.postamble_pointer;
     fprintf fmt "\tDVI version : %d\n" p.post_post_version
-      
+
   let doc name fmt doc =
     fprintf fmt "***********************\n";
     fprintf fmt "Reading DVI file : %s\n" name;
@@ -129,7 +129,7 @@ end
 exception DviError of string ;;
 let dvi_error s = raise (DviError s)
 
-let preamble bits = 
+let preamble bits =
   bitmatch bits with
     | { 247 : 8;              (* Preamble opcode *)
 	version : 8;          (* DVI version *)
@@ -147,7 +147,7 @@ let preamble bits =
     | { _ : -1 : bitstring } ->
 	dvi_error "Ill-formed preamble"
 
-let add_font k font map = 
+let add_font k font map =
   if Int32Map.mem k map then
     dvi_error "Redefinition of font not allowed"
   else
@@ -196,8 +196,8 @@ let signed i j unsigned =
 let signed_8 = signed (Int32.shift_left Int32.one 23) (Int32.logxor Int32.minus_one (Int32.of_int 0xff))
 let signed_16 = signed (Int32.shift_left Int32.one 15) (Int32.logxor Int32.minus_one (Int32.of_int 0xffff))
 let signed_24 = signed (Int32.shift_left Int32.one 23) (Int32.logxor Int32.minus_one (Int32.of_int 0xffffff))
-	
-let command bits = 
+
+let command bits =
   bitmatch bits with
       (* Setting Characters *)
     | { k : 8 ; bits : -1 : bitstring } when 0 <= k && k <= 127 ->
@@ -311,7 +311,7 @@ let command bits =
 	Special x, bits
     | { 241 : 8; k : 24; x : k * 8 : string; bits : -1 : bitstring } ->
 	Special x, bits
-    | { 242 : 8; k : 32; x : (Int32.to_int k) * 8 : string; 
+    | { 242 : 8; k : 32; x : (Int32.to_int k) * 8 : string;
 	bits : -1 : bitstring } ->
 	Special x, bits
     | { _ : -1 : bitstring } ->
@@ -321,10 +321,10 @@ let rec page commands fonts bits =
   bitmatch bits with
     | { 140 : 8; bits : -1 : bitstring } -> (* End of page opcode *)
 	commands, fonts, bits
-      (* nop opcode *) 
+      (* nop opcode *)
     | { 138 : 8; bits : -1 : bitstring } ->
 	page commands fonts bits
-      (* font definitions *) 
+      (* font definitions *)
     | { 243 : 8; k : 8; bits : -1 : bitstring } ->
 	let font, bits = font_def bits in
 	  page commands (add_font (Int32.of_int k) font fonts) bits
@@ -344,10 +344,10 @@ let rec page commands fonts bits =
 
 let rec pages p fonts bits =
   bitmatch bits with
-      (* nop opcode *) 
+      (* nop opcode *)
     | { 138 : 8; bits : -1 : bitstring } ->
 	pages p fonts bits
-      (* font definitions *) 
+      (* font definitions *)
     | { 243 : 8; k : 8; bits : -1 : bitstring } ->
 	let font, bits = font_def bits in
 	  pages p (add_font (Int32.of_int k) font fonts) bits
@@ -364,7 +364,7 @@ let rec pages p fonts bits =
     | { 139 : 8; bits : -1 : bitstring } ->
 	let counters, previous, bits = page_counters bits in
 	let cmds, fonts, bits = page [] fonts bits in
-	let newp = 
+	let newp =
 	  {counters = counters; previous = previous; commands = cmds} in
         (* Pages in reverse order *)
 	  pages (newp::p) fonts bits
@@ -372,13 +372,13 @@ let rec pages p fonts bits =
 	p, fonts, bits
 	(* dvi_error "Expected : nop, font_definition, or new page" *)
 
-let postamble bits = 
+let postamble bits =
   let rec skip_font_defs bits =
     bitmatch bits with
-	(* nop opcode *) 
+	(* nop opcode *)
       | { 138 : 8; bits : -1 : bitstring } ->
 	  skip_font_defs bits
-        (* font definitions *) 
+        (* font definitions *)
       | { 243 : 8; k : 8; bits : -1 : bitstring } ->
 	  let _, bits = font_def bits in skip_font_defs bits
       | { 244 : 8; k : 16 : bigendian; bits : -1 : bitstring } ->
@@ -405,7 +405,7 @@ let postamble bits =
 	{ last_page = last_page;
 	  post_num = num; post_den = den; post_mag = mag;
 	  post_height = height; post_width = width;
-	  post_stack = stack; post_pages = pages 
+	  post_stack = stack; post_pages = pages
 	}, skip_font_defs bits
     | { _ : -1 : bitstring } ->
 	dvi_error "Ill-formed postamble"
@@ -447,10 +447,10 @@ let read_file file =
       font_map = fonts
     }
 
-let get_conv doc = 
+let get_conv doc =
     let formule_magique_cm mag num den =
       ((Int32.to_float mag) *. ((Int32.to_float num) /. (Int32.to_float den))) /. (10.**8.) in
-    formule_magique_cm doc.preamble.pre_mag 
+    formule_magique_cm doc.preamble.pre_mag
       doc.preamble.pre_num doc.preamble.pre_den
 
 let get_height_cm doc =
