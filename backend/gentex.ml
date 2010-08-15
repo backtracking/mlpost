@@ -92,3 +92,6 @@ let print fmt tex =
   let min,max = bounding_box tex in
   Format.fprintf fmt "[%a,%a]" print min print max
 
+let deb_print fmt tex =
+  Format.printf "{ tex: %a ; matrix: %a }" Dev_save.Print.dvi tex.tex
+    Matrix.print tex.trans

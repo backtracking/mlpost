@@ -38,3 +38,10 @@ val cmd_iter : (command -> unit) -> t -> unit
 module Dev_load ( Dev : Dviinterp.dev ) : sig
   val replay : bool ->  t -> Dev.arg -> Dev.cooked
 end
+
+module Print : sig
+  (* debug printing *)
+  val command : Format.formatter -> command -> unit
+  val page : Format.formatter -> page -> unit
+  val dvi : Format.formatter -> t -> unit
+end

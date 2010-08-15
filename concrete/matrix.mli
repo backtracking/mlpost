@@ -21,3 +21,5 @@ val xy_translation : float -> float -> t
 val remove_translation : t -> t
 
 val linear : float -> float -> float -> float -> t
+
+val print : Format.formatter -> t -> unit

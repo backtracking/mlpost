@@ -25,4 +25,5 @@ val bounding_box : t -> Point_lib.t * Point_lib.t
 val get_bases_pt : t -> float list
 val get_bases_cm : t -> float list
 val print : Format.formatter -> t -> unit
+val deb_print : Format.formatter -> t -> unit
 (** donne la dimension en centimètre *)

@@ -249,3 +249,25 @@ struct
   let scale f (x,l) =
     x, List.map (fun z -> f *. z) l
 end
+
+module Print = struct
+  (* debug printing *)
+
+  open Format
+  let rec command fmt c =
+    match c with
+    | Empty -> pp_print_string fmt "empty"
+    | Stroke_path (p,_,_,_) -> Spline_lib.print fmt p
+    | Tex g -> Gentex.deb_print fmt g
+    | OnTop cl -> Misc.print_list Misc.newline command fmt cl
+(*
+    | Transform of transform * commands
+    | Fill_path of path * color option
+    | Clip of commands  * path
+    | ExternalImage of string * float * float
+*)
+    | _ -> assert false
+
+  let pic fmt p = command fmt p.fcl
+
+end

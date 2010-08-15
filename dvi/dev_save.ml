@@ -17,10 +17,10 @@
 open Tfm
 open Fonts
 
-type command = | Rectangle of Dviinterp.info*float * float * float * float
-  (* x,y,w,h *)
-               | Glyph of Dviinterp.info*Fonts.t * Int32.t * float * float
-               | Specials of Dviinterp.info*string * float *float (* s,x,y *)
+type command =
+  | Rectangle of Dviinterp.info*float * float * float * float (* x,y,w,h *)
+  | Glyph of Dviinterp.info*Fonts.t * Int32.t * float * float
+  | Specials of Dviinterp.info*string * float *float (* s,x,y *)
 
 type page = { c : command list;
               x_min : float;
@@ -186,4 +186,22 @@ struct
   let load_doc saved doc arg =
     if get_doc saved = doc then replay false saved arg
     else invalid_arg ("The dvi doc is different")
+end
+
+module Print = struct
+  (* debug printing *)
+  open Format
+  let command fmt c =
+    match c with
+    | Rectangle (_,x,y,w,h) -> fprintf fmt "rect(%f,%f,%f,%f)" x y w h
+    | Glyph (_,f,i,_,_) ->
+        fprintf fmt "glyph (%s,%s)" (Fonts.tex_name f) (Int32.to_string i)
+    | Specials _ -> assert false
+
+  let page fmt p =
+    fprintf fmt "[< %a >]" (Misc.print_list Misc.newline command) p.c
+
+  let dvi fmt d =
+    Misc.print_list (fun fmt () ->
+      fprintf fmt "<newpage>@\n@\n") page fmt d.pages
 end

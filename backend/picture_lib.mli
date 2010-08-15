@@ -85,3 +85,8 @@ module Dash :
     val pattern : input_dash list -> t
     val scale : float -> t -> t
 end
+
+module Print : sig
+  val command : Format.formatter -> commands -> unit
+  val pic : Format.formatter -> t -> unit
+end
