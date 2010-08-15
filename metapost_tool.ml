@@ -41,8 +41,6 @@ let tempdir ?(clean=true) prefix suffix f =
   List.iter (fun r ->
     let from = File.place tmpdir r in
     let to_ = File.place workdir r in
-    Format.printf "copy result; from: %s; to: %s@." (File.debug_to_string from)
-      (File.debug_to_string to_);
     File.move from to_) files;
   if clean then File.Dir.rm tmpdir;
   res
