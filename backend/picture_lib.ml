@@ -198,7 +198,7 @@ let apply_transform_cmds t =
     | Tex g -> Tex { Gentex.tex = g.Gentex.tex ;
                      trans = Matrix.multiply t g.Gentex.trans }
     | ExternalImage _ -> pic
-    | Transform (t', l) -> Transform (Matrix.multiply t t', l)
+    | Transform (t', l) -> Transform (Matrix.multiply t' t, l)
   and path p = Spline_lib.transform t p in
   aux
 
