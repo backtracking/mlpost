@@ -17,4 +17,4 @@
 val draw : Format.formatter -> Picture_lib.t -> unit
 
 val dump: unit -> unit
-val generate : string -> ?pdf:bool -> (int * Command.t) list -> unit
+val generate : (string * Command.t) list -> unit

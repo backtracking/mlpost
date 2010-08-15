@@ -563,10 +563,7 @@ let grid_with_padding_2 =
   seq [Box.draw b; Box.draw (shift (Point.pt (bp 5., bp 5.)) b)]
 
 let figs = [
-(*
   grid_with_padding;
-*)
-(*
   adv_fig;
   grid_with_padding_2;
   rotatedbox;
@@ -577,18 +574,15 @@ let figs = [
   simple_box;
   block1;
   hvbox;
-*)
   why_platform;d2;
   block2;
   vblock1;
-(*
-  yannick Box.Rect; yannick Box.Patatoid; yannick Box.Patatoid2; d1;  proval;
+  yannick Box.Rect; yannick Box.Patatoid; yannick Box.Patatoid2; d1;
   d2sq; d2hsq; d2s; d2c; cheno011; d3; d4;
-  d7;
-*)
+  d7; d11;
+  (*  proval;*)
 (*
-  (* recursion *)
-  d11; d12 ;
+   d12 ;
   farey 17;
   (* other *)
   florence; Box.draw shapes1; Box.draw shapes2;

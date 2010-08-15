@@ -207,7 +207,7 @@ let figs =
     d140; d195;
     267,d267;
      d4;d5; d149;
-     111, d111;
+(*      111, d111; *)
   ]
 
 let mpostfile = "othergraphs"
@@ -221,8 +221,7 @@ let _ =
       mpostfile^"-"^(string_of_int i) ^ ".mps", f) figs in
   if Cairost.supported then
     begin
-(*       Metapost.generate mpostfile ~pdf:true figs; *)
-      Metapost.generate mpostfile nfig;
+      Mps.generate nfig;
       Cairost.generate_pdfs cairostfile figs;
       Generate.generate_tex_cairo texfile "othergraphs/mpost" "othergraphs"
       "testother_cairo" figs;

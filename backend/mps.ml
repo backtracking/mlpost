@@ -16,7 +16,7 @@
 
 open Point_lib
 open Matrix
-open Picture_lib
+module P = Picture_lib
 module S = Spline_lib
 open Format
 
@@ -27,11 +27,11 @@ let float fmt f =
     (* PDF does not understand e notation, so we protect the printf which
     uses %g in the cases where this would use e notation; we do not need that
     much precision anyway*)
-  if abs_float f < 0.0001 then fprintf fmt "0@ "
-  else if abs_float f >= 1.e04 then
-    fprintf fmt "%.4f@ " f
-  else
-    fprintf fmt "%.4g@ " f
+  let a = abs_float f in
+  if a < 0.0001 then fprintf fmt "0@ "
+  else if a >= 1.e04 then fprintf fmt "%.4f@ " f
+  else fprintf fmt "%.4g@ " f
+
 module MPS = struct
 
   type line_cap =
@@ -95,6 +95,7 @@ module MPS = struct
       float t.xx float t.yx float t.xy float t.yy float t.x0 float t.y0 psend
 
   let transform fmt t =
+    if t = Matrix.identity then () else
     fprintf fmt "%t%a concat%t" psstart matrix t psend
 
   let scolor fmt c =
@@ -155,10 +156,12 @@ let draw_char fmt trans _ font c f1 f2 =
     MPS.glyph fmt (Int32.to_int c) font
   )
 
+(* FIXME why do we need to negate y coordinates? *)
 let tex_cmd fmt trans c =
   match c with
-  | Dev_save.Rectangle (i,x,y,w,h) -> fill_rect fmt trans i x y w h
-  | Dev_save.Glyph (i,font,c,x,y) -> draw_char fmt trans i font c x y
+  | Dev_save.Rectangle (i,x,y,w,h) ->
+      fill_rect fmt trans i x (-. y) w h
+  | Dev_save.Glyph (i,font,c,x,y) -> draw_char fmt trans i font c x (-. y)
   | Dev_save.Specials _ -> assert false
 
 let draw_tex fmt t =
@@ -201,24 +204,24 @@ let pen fmt t =
   MPS.setlinewidth fmt t.xx
 
 let rec picture fmt = function
-  | Empty -> ()
-  | OnTop l ->
+  | P.Empty -> ()
+  | P.OnTop l ->
       Misc.print_list Misc.space picture fmt l
-  | Stroke_path(pa,clr,pe,_) ->
+  | P.Stroke_path(pa,clr,pe,_) ->
       (* FIXME dash pattern *)
       in_context fmt (fun () ->
         option MPS.color fmt clr;
         pen fmt pe;
         path fmt pa;
         MPS.stroke fmt)
-  | Fill_path (p,c)->
+  | P.Fill_path (p,c)->
       in_context fmt (fun () ->
         option MPS.color fmt c;
         path fmt p;
         MPS.fill fmt)
-  | Tex t -> draw_tex fmt t
-  | Transform (m,t) -> picture fmt (apply_transform_cmds m t)
-  | Clip (com,p) ->
+  | P.Tex t -> draw_tex fmt t
+  | P.Transform (m,t) -> picture fmt (P.apply_transform_cmds m t)
+  | P.Clip (com,p) ->
       in_context fmt (fun () ->
         path fmt p;
         MPS.clip fmt;
@@ -249,7 +252,7 @@ let fonts p =
   let x = ref FS.empty in
   Picture_lib.iter (fun p ->
     match p with
-    | Tex g ->
+    | P.Tex g ->
         Dev_save.cmd_iter (fun c ->
           match c with
           | Dev_save.Glyph (_,f,_,_,_) -> x := FS.add f !x
@@ -278,30 +281,29 @@ let draw fmt x =
   fprintf fmt "%%%%BeginProlog@\n";
   fprintf fmt "%%%%EndProlog@\n";
   fprintf fmt "%%%%Page: 1 1@\n";
-  MPS.setlinewidth fmt (default_line_size /.2.);
+  MPS.setlinewidth fmt (P.default_line_size /.2.);
   MPS.setlinecap fmt MPS.RoundCap;
   MPS.setlinejoin fmt MPS.RoundJoin;
-  picture fmt (content x);
+  picture fmt (P.content x);
   MPS.showpage fmt;
   fprintf fmt "%%%%EOF@\n"
 
 let generate_one fn fig =
-  File.LowLevel.write_to_formatted fn (fun fmt -> draw fmt fig)
-
-let dump () =
-  Queue.iter (fun (fn,fig) ->
+  File.write_to_formatted fn (fun fmt ->
     let fig = LookForTeX.commandpic fig in
-    let fn =  File.set_ext fn "mps" in
-    File.write_to_formatted fn (fun fmt -> draw fmt fig)
-  ) Metapost.figures
+(*     Format.printf "picturelib code: @\n %a@." P.Print.pic fig; *)
+    draw fmt fig);
+  fn
 
-let generate bn ?(pdf=false) figs =
-  let basename = Filename.basename bn in
-  let suf = if pdf then ".mps" else ".1" in
-  let sep = if pdf then "-" else "." in
-  List.iter (fun (i,fig) ->
-    let si = string_of_int i in
-    let fn = basename ^ sep ^ si ^ suf in
-    let fig = LookForTeX.commandpic fig in
-    generate_one fn fig) figs
+let mps figl =
+  List.map (fun (fn,fig) ->
+(*     Format.printf "metapost code:@\n %a@."Print.commandpic fig; *)
+    generate_one fn fig) figl
 
+let dump () = ignore (mps (Metapost.emited ()))
+
+let generate figs =
+  let figl = List.map (fun (s,f) ->
+    let s = File.from_string s in
+    File.set_ext s "mps", f) figs in
+  ignore (mps figl)
