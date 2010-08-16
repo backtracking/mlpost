@@ -118,8 +118,8 @@ Contributions</#en><#de>Bugs und Änderungsvorschläge</#de></h3>
   <p><pre><code>git clone http://git.ocamlcore.org/mlpost/mlpost.git</code></pre></p>
   <#fr>La branche principale de développement est <code>master</code>
   (attention, elle peut contenir des erreurs ou des features inachévées), mais
-  il existent aussi des branches pour chaque version distribuée. Nous sommes
-  contents de chaque patch envoyé.</#fr>
+  il existent aussi des branches pour chaque version distribuée. Nous
+  apprécions chaque patch qui nous est envoyé.</#fr>
   <#en> The main development branch is called <code>master</code> (Attention,
   the code may contain errors or unfinished features), but there are also
   branches for each released version. We are happy to receive patches.</#en>
