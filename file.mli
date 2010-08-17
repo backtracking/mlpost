@@ -10,6 +10,9 @@ module LowLevel : sig
   val write_to_formatted : string -> (Format.formatter -> 'a) -> 'a
 end
 
+val dir_sep : string
+  (* Filename.dir_sep in Ocaml >= 3.11.2 *)
+
 module Dir : sig
   type t
   val compare : t -> t -> int

@@ -28,9 +28,9 @@ let float fmt f =
     uses %g in the cases where this would use e notation; we do not need that
     much precision anyway*)
   let a = abs_float f in
-  if a < 0.0001 then fprintf fmt "0@ "
-  else if a >= 1.e04 then fprintf fmt "%.4f@ " f
-  else fprintf fmt "%.4g@ " f
+  if a < 0.0001 then fprintf fmt "0"
+  else if a >= 1.e04 then fprintf fmt "%.4f" f
+  else fprintf fmt "%.4g" f
 
 module MPS = struct
 
@@ -44,22 +44,22 @@ module MPS = struct
     | RoundJoin
     | BevelJoin
 
-  let psstart fmt = fprintf fmt "@["
-  let psend fmt = fprintf fmt "@]@ "
+  let psstart fmt = fprintf fmt "@[<hov 0>"
+  let psend fmt = fprintf fmt "@]"
   let string = pp_print_string
   let moveto_float fmt x y =
-    fprintf fmt "%t%a%amoveto%t" psstart float x float y psend
+    fprintf fmt "%t%a@ %a@ moveto%t" psstart float x float y psend
   let lineto_float fmt x y =
-    psstart fmt; float fmt x; float fmt y; string fmt "lineto"; psend fmt
-(*     fprintf fmt "%t%a%alineto%t" psstart float x float y psend *)
+    (* psstart fmt; float fmt x; float fmt y; string fmt "lineto"; psend fmt *)
+    fprintf fmt "%t%a@ %a@ lineto%t" psstart float x float y psend 
   let moveto fmt p = moveto_float fmt p.x p.y
   let curveto fmt p1 p2 p3 =
-    fprintf fmt "%t%a%a%a%a%a%acurveto%t"
+    fprintf fmt "%t%a@ %a@ %a@ %a@ %a@ %a@ curveto%t"
       psstart float p1.x float p1.y float p2.x float p2.y float p3.x float p3.y
       psend
 
   let rlineto fmt p =
-    fprintf fmt "%t%a%arlineto%t" psstart float p.x float p.y psend
+    fprintf fmt "%t%a@ %a@ rlineto%t" psstart float p.x float p.y psend
   let close_path fmt = fprintf fmt "%tclose_path%t" psstart psend
   let newpath fmt = fprintf fmt "%tnewpath%t" psstart psend
   let stroke fmt = fprintf fmt "%tstroke%t" psstart psend
@@ -71,7 +71,7 @@ module MPS = struct
   let grestore fmt = fprintf fmt "%tgrestore%t" psstart psend
 
   let setlinewidth fmt f =
-   fprintf fmt "%t0@ %adtransform@ truncate@ idtransform@ setlinewidth@ pop%t"
+   fprintf fmt "%t0@ %a@ dtransform@ truncate@ idtransform@ setlinewidth@ pop%t"
      psstart float f psend
 
   let setlinecap fmt c =
@@ -91,7 +91,7 @@ module MPS = struct
     fprintf fmt "%t%d setlinejoin%t" psstart i psend
 
   let matrix fmt t =
-    fprintf fmt "%t[%a%a%a%a%a%a]%t" psstart
+    fprintf fmt "%t[%a@ %a@ %a@ %a@ %a@ %a]%t" psstart
       float t.xx float t.yx float t.xy float t.yy float t.x0 float t.y0 psend
 
   let transform fmt t =
@@ -101,13 +101,13 @@ module MPS = struct
   let scolor fmt c =
     match c with
     | Concrete_types.RGB (r,g,b) ->
-        fprintf fmt "%t%a%a%asetrgbcolor%t"
+        fprintf fmt "%t%a@ %a@ %a@ setrgbcolor%t"
           psstart float r float g float b psend
     | Concrete_types.CMYK (c,m,y,k) ->
-        fprintf fmt "%t%a%a%a%asetcmykcolor%t"
+        fprintf fmt "%t%a@ %a@ %a@ %a@ setcmykcolor%t"
           psstart float c float m float y float k psend
     | Concrete_types.Gray c ->
-        fprintf fmt "%t%asetgray%t" psstart float c psend
+        fprintf fmt "%t%a@ setgray%t" psstart float c psend
 
   let color fmt c =
     match c with
@@ -118,22 +118,30 @@ module MPS = struct
     fprintf fmt "%t(\\%03o)%t" psstart c psend
 
   let glyph fmt c font =
-    fprintf fmt "%t%a%s@ %afshow%t" psstart char_const c
+    fprintf fmt "%t%a@ %s@ %a@ fshow%t" psstart char_const c
       (Fonts.tex_name font) float (Fonts.scale font conversion) psend
 
   let rectangle fmt p w h =
     newpath fmt;
+    pp_print_space fmt ();
     moveto fmt p;
+    pp_print_space fmt ();
     lineto_float fmt (p.x+.w) p.y;
+    pp_print_space fmt ();
     lineto_float fmt (p.x+.w) (p.y+.h);
+    pp_print_space fmt ();
     lineto_float fmt p.x (p.y+.h);
+    pp_print_space fmt ();
     close_path fmt;
+    pp_print_space fmt ();
     fill fmt
 end
 
 let in_context fmt f =
   MPS.gsave fmt;
+  pp_print_space fmt ();
   f ();
+  pp_print_space fmt ();
   MPS.grestore fmt
 
 let fill_rect fmt trans _ x y w h =
@@ -143,6 +151,7 @@ let fill_rect fmt trans _ x y w h =
   let p = { x = x ; y = y } in
   in_context fmt (fun () ->
     MPS.transform fmt trans;
+    pp_print_space fmt ();
     MPS.rectangle fmt p w h
   )
 
@@ -152,7 +161,9 @@ let draw_char fmt trans _ font c f1 f2 =
   let p = { x = f1; y = f2 } in
   in_context fmt (fun () ->
     MPS.transform fmt trans;
+    pp_print_space fmt ();
     MPS.moveto fmt p;
+    pp_print_space fmt ();
     MPS.glyph fmt (Int32.to_int c) font
   )
 
@@ -167,7 +178,9 @@ let tex_cmd fmt trans c =
 let draw_tex fmt t =
   (* FIXME currently the transformation is applied and restored for every letter
      *)
-  Dev_save.cmd_iter (tex_cmd fmt t.Gentex.trans) t.Gentex.tex
+  Dev_save.cmd_iter (fun x -> 
+		       tex_cmd fmt t.Gentex.trans x;
+		       pp_print_space fmt ()) t.Gentex.tex
 
 let curveto fmt s =
   let _, sb, sc, sd = Spline.explode s in
@@ -180,15 +193,19 @@ let path =
         | [] -> assert false
         | (x::_) as l ->
           MPS.moveto fmt (Spline.left_point x);
+	  pp_print_space fmt ();
           Misc.print_list Misc.space curveto fmt l
         end ;
-        if p.S.cycle then MPS.close_path fmt
+        if p.S.cycle then begin pp_print_space fmt (); MPS.close_path fmt end
     | S.Point p ->
         MPS.newpath fmt;
+	pp_print_space fmt ();
         MPS.moveto fmt p;
+	pp_print_space fmt ();
         MPS.rlineto fmt p in
   fun fmt p ->
     MPS.newpath fmt;
+    pp_print_space fmt ();
     path fmt p
 
 
@@ -211,20 +228,27 @@ let rec picture fmt = function
       (* FIXME dash pattern *)
       in_context fmt (fun () ->
         option MPS.color fmt clr;
+	pp_print_space fmt ();
         pen fmt pe;
+	pp_print_space fmt ();
         path fmt pa;
+	pp_print_space fmt ();
         MPS.stroke fmt)
   | P.Fill_path (p,c)->
       in_context fmt (fun () ->
         option MPS.color fmt c;
+	pp_print_space fmt ();
         path fmt p;
+	pp_print_space fmt ();
         MPS.fill fmt)
   | P.Tex t -> draw_tex fmt t
   | P.Transform (m,t) -> picture fmt (P.apply_transform_cmds m t)
   | P.Clip (com,p) ->
       in_context fmt (fun () ->
         path fmt p;
+	pp_print_space fmt ();
         MPS.clip fmt;
+	pp_print_space fmt ();
         picture fmt com
       )
   | _ -> assert false
@@ -282,11 +306,15 @@ let draw fmt x =
   fprintf fmt "%%%%EndProlog@\n";
   fprintf fmt "%%%%Page: 1 1@\n";
   MPS.setlinewidth fmt (P.default_line_size /.2.);
+  pp_print_space fmt ();
   MPS.setlinecap fmt MPS.RoundCap;
+  pp_print_space fmt ();
   MPS.setlinejoin fmt MPS.RoundJoin;
+  pp_print_space fmt ();
   picture fmt (P.content x);
+  pp_print_space fmt ();
   MPS.showpage fmt;
-  fprintf fmt "%%%%EOF@\n"
+  fprintf fmt "@\n%%%%EOF@\n"
 
 let generate_one fn fig =
   File.write_to_formatted fn (fun fmt ->

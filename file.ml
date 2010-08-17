@@ -44,13 +44,19 @@ module LowLevel = struct
 
 end
 
+(* Filename.dir_sep in Ocaml >= 3.11.2 *)
+let dir_sep = match Sys.os_type with
+  | "Cygwin" | "Unix" -> "/"
+  | "Win32" -> "\\"
+  | _ -> assert false
+
 module Dir = struct
   type t =
     { dirs : string list ; is_relative : bool }
   (* the type t is a stack of directories, innermost is on top *)
 
   let from_string =
-    let r = Str.regexp_string Filename.dir_sep in
+    let r = Str.regexp_string dir_sep in
     fun s ->
       { dirs = List.rev (Str.split r s); is_relative = Filename.is_relative s }
 
@@ -58,7 +64,7 @@ module Dir = struct
     assert d2.is_relative;
     { d1 with dirs = d2.dirs @ d1.dirs }
 
-  let print_sep fmt () = Format.pp_print_string fmt Filename.dir_sep
+  let print_sep fmt () = Format.pp_print_string fmt dir_sep
   let to_string s =
     let prefix = if s.is_relative then "" else "/" in
       Misc.sprintf "%s%a" prefix
