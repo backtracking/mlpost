@@ -51,7 +51,7 @@ module MPS = struct
     fprintf fmt "%t%a@ %a@ moveto%t" psstart float x float y psend
   let lineto_float fmt x y =
     (* psstart fmt; float fmt x; float fmt y; string fmt "lineto"; psend fmt *)
-    fprintf fmt "%t%a@ %a@ lineto%t" psstart float x float y psend 
+    fprintf fmt "%t%a@ %a@ lineto%t" psstart float x float y psend
   let moveto fmt p = moveto_float fmt p.x p.y
   let curveto fmt p1 p2 p3 =
     fprintf fmt "%t%a@ %a@ %a@ %a@ %a@ %a@ curveto%t"
@@ -178,7 +178,7 @@ let tex_cmd fmt trans c =
 let draw_tex fmt t =
   (* FIXME currently the transformation is applied and restored for every letter
      *)
-  Dev_save.cmd_iter (fun x -> 
+  Dev_save.cmd_iter (fun x ->
 		       tex_cmd fmt t.Gentex.trans x;
 		       pp_print_space fmt ()) t.Gentex.tex
 

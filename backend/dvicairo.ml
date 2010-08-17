@@ -38,7 +38,7 @@ struct
   type arg = multi_page_pic
   type t = { arg : arg;
              doc : Dvi.t}
-             (*fonts :(string,Cairo_ft.font_face * Cairo_ft.ft_face) 
+             (*fonts :(string,Cairo_ft.font_face * Cairo_ft.ft_face)
                Hashtbl.t*)
   type cooked = unit
 
@@ -46,7 +46,7 @@ struct
 
   let fonts_known = Hashtbl.create 30
 
-  let find_font font = 
+  let find_font font =
     let font_name = Fonts.tex_name font in
     try Hashtbl.find fonts_known font_name
     with Not_found ->
@@ -57,28 +57,28 @@ struct
       let f =Cairo_ft.font_face_create_for_ft_face face 0,face in
       Hashtbl.add fonts_known font_name f;f
 
-  let clean_up () = 
+  let clean_up () =
     Hashtbl.iter (fun _ (_,x) -> Cairo_ft.done_face x) fonts_known;
     Cairo_ft.done_freetype ft
 
-  let new_document arg doc = 
+  let new_document arg doc =
     let first_page = ref true in
-    {arg = {arg with new_page = 
-         (fun () -> if !first_page then first_page := false 
+    {arg = {arg with new_page =
+         (fun () -> if !first_page then first_page := false
           else arg.new_page ());
          x_origin = point_of_cm arg.x_origin;
          y_origin = point_of_cm arg.y_origin};
      doc = doc}
 
-  let new_page s = 
+  let new_page s =
     s.arg.new_page ()
 
   let set_source_color pic = function
-    | RGB(r,g,b) -> 
+    | RGB(r,g,b) ->
         if !debug then
           printf "Use color RGB (%f,%f,%f)@." r g b;
         Cairo.set_source_rgb pic r g b
-    | Gray(g) -> 
+    | Gray(g) ->
         if !debug then
           printf "Use color Gray (%f)@." g;
         Cairo.set_source_rgb pic g g g
@@ -89,7 +89,7 @@ struct
         and in color.ml*)
 
 
-  let fill_rect s dinfo x1 y1 w h = 
+  let fill_rect s dinfo x1 y1 w h =
     let x1 = point_of_cm x1 +. s.arg.x_origin
     and y1 = point_of_cm y1 +. s.arg.y_origin
     and w = point_of_cm w
@@ -102,7 +102,7 @@ struct
     Cairo.fill s.arg.pic;
     Cairo.restore s.arg.pic
 
-  let draw_char s dinfo font char x y = 
+  let draw_char s dinfo font char x y =
     let f = fst (find_font font) in
     let char = Fonts.glyphs_enc font (Int32.to_int char)
     and x = point_of_cm x +. s.arg.x_origin
@@ -111,26 +111,26 @@ struct
     if !debug then begin
       let name = Fonts.tex_name font in
       try
-        printf "Draw the char %i(%c) of %s in (%f,%f) x%f@." 
+        printf "Draw the char %i(%c) of %s in (%f,%f) x%f@."
           char (Char.chr char) name x y ratio;
-      with _ -> 
+      with _ ->
         printf "Draw the char %i of %s  in (%f,%f) x%f@." char name x y ratio
     end;
-        
+
     Cairo.save s.arg.pic;
     set_source_color s.arg.pic dinfo.Dviinterp.color;
     Cairo.set_font_face s.arg.pic f ;
     Cairo.set_font_size s.arg.pic ratio;
     (* slant and extend *)
     (match Fonts.slant font with
-      | Some a when !info -> 
+      | Some a when !info ->
           printf "slant of %f not used for %s@." a (Fonts.tex_name font)
       | Some _ | None -> ());
     (match Fonts.extend font with
-      | Some a when !info -> 
+      | Some a when !info ->
           printf "extend of %f not used for %s@." a (Fonts.tex_name font)
       | Some _ | None -> ());
-    Cairo.show_glyphs s.arg.pic 
+    Cairo.show_glyphs s.arg.pic
       [|{Cairo.index = char;
          Cairo.glyph_x = x;
          Cairo.glyph_y = y}|];
@@ -141,6 +141,6 @@ struct
     if !debug || !specials then
       printf "specials : \"%s\" at (%f,%f)@." xxx x y
 
-  let end_document s = 
+  let end_document s =
     ()
 end
