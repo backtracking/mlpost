@@ -198,8 +198,6 @@ let path =
         end ;
         if p.S.cycle then begin pp_print_space fmt (); MPS.close_path fmt end
     | S.Point p ->
-        MPS.newpath fmt;
-	pp_print_space fmt ();
         MPS.moveto fmt p;
 	pp_print_space fmt ();
         MPS.rlineto fmt p in
