@@ -171,9 +171,15 @@ let interactive path id = {fcl = Empty;
                           fb = S.empty;
                           fi = Inter (path,id)}
 
-let on_top t1 t2 = {fcl = OnTop [t1.fcl;t2.fcl];
-                    fb = S.union (t1.fb) (t2.fb);
-                    fi = IntOnTop (t1.fi,t2.fi)}
+let is_empty t = t.fcl = Empty
+
+let on_top t1 t2 =
+  if is_empty t1 then t2
+  else if is_empty t2 then t1
+  else
+    { fcl = OnTop [t1.fcl;t2.fcl];
+      fb = S.union (t1.fb) (t2.fb);
+      fi = IntOnTop (t1.fi,t2.fi) }
 
 let transform m t = {fcl = Transform (m,t.fcl);
                      fb = S.transform m t.fb;
