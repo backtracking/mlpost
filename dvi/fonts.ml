@@ -35,16 +35,18 @@ let mk_font_def ~checksum ~scale_factor ~design_size ~area ~name =
     name = name
   }
 
+type type1 =       
+    { glyphs_filename : string;
+      (* the file, pfb or pfa, which define the glyphs *)
+      glyphs_enc : int -> int; (* the conversion of the characters
+                                  between tex and the font *)
+      slant : float option;
+      extend : float option}
 
 type t =
     { tex_name : string;
       metric : Tfm.t;
-      glyphs_filename : string;
-        (* the file, pfb or pfa, which define the glyphs *)
-      glyphs_enc : int -> int; (* the conversion of the characters
-                                  between tex and the font *)
-      slant : float option;
-      extend : float option;
+      type1 : type1 Lazy.t;
       ratio : float;
       ratio_cm : float
     }
@@ -53,11 +55,11 @@ let debug = ref false
 let info = ref false
 
 let tex_name t = t.tex_name
-let glyphs_filename t = t.glyphs_filename
-let glyphs_enc t = t.glyphs_enc
+let glyphs_filename t = (Lazy.force t.type1).glyphs_filename
+let glyphs_enc t = (Lazy.force t.type1).glyphs_enc
 let ratio_cm t = t.ratio_cm
-let slant t = t.slant
-let extend t = t.extend
+let slant t = (Lazy.force t.type1).slant
+let extend t = (Lazy.force t.type1).extend
 let metric t = t.metric
 let design_size t = Tfm.design_size t.metric
 
@@ -229,27 +231,29 @@ let compute_trans_enc encoding_table charset_table char =
 
 let load_font doc_conv fdef =
   let tex_name = fdef.name in
-  let font_map = try HString.find (Lazy.force fonts_map_table) tex_name
-  with Not_found -> invalid_arg ("Unknown font : "^tex_name) in
   let tfm = load_font_tfm fdef in
-  let pfab = find_file font_map.Fonts_type.pfab_name in
-  let pfab_enc,pfab_charset = load_pfb pfab in
-  let enc = match font_map.Fonts_type.enc_name with
-    | None -> pfab_enc
-    | Some x -> load_enc (find_file x) in
-  let glyphs_enc = compute_trans_enc enc pfab_charset in
   let ratio = Int32.to_float fdef.scale_factor
     (*(Int32.to_float (Int32.mul mag fdef.Dvi.scale_factor))
     /. 1000. (* fdef.Dvi.design_size *)*)
   and ratio_cm =
     (Int32.to_float fdef.scale_factor) *. doc_conv
-    in
+  in
+  let type1 = lazy (
+    let font_map = try HString.find (Lazy.force fonts_map_table) tex_name
+      with Not_found -> invalid_arg ("Unknown font : "^tex_name) in
+    let pfab = find_file font_map.Fonts_type.pfab_name in
+    let pfab_enc,pfab_charset = load_pfb pfab in
+    let enc = match font_map.Fonts_type.enc_name with
+      | None -> pfab_enc
+      | Some x -> load_enc (find_file x) in
+    let glyphs_enc = compute_trans_enc enc pfab_charset in
+    {glyphs_filename = pfab;
+     glyphs_enc = glyphs_enc;
+     slant = font_map.Fonts_type.slant;
+     extend = font_map.Fonts_type.extend}) in
   { tex_name = tex_name;
     metric = tfm;
-    glyphs_filename = pfab;
-    glyphs_enc = glyphs_enc;
-    slant = font_map.Fonts_type.slant;
-    extend = font_map.Fonts_type.extend;
+    type1 = type1;
     ratio = ratio;
     ratio_cm = ratio_cm
   }
