@@ -173,7 +173,7 @@ let tex_cmd fmt trans c =
   | Dev_save.Rectangle (i,x,y,w,h) ->
       fill_rect fmt trans i x (-. y) w h
   | Dev_save.Glyph (i,font,c,x,y) -> draw_char fmt trans i font c x (-. y)
-  | Dev_save.Specials _ -> assert false
+  | Dev_save.Specials _ -> ()
 
 let draw_tex fmt t =
   (* FIXME currently the transformation is applied and restored for every letter
