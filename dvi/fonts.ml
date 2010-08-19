@@ -229,6 +229,12 @@ let load_font_tfm fd =
 let compute_trans_enc encoding_table charset_table char =
   Hashtbl.find charset_table (encoding_table.(char))
 
+let font_is_virtual s = 
+  try
+    ignore (find_file (s^".vf"));
+    true
+  with Fonterror _ -> false
+
 let load_font doc_conv fdef =
   let tex_name = fdef.name in
   let tfm = load_font_tfm fdef in
@@ -239,6 +245,11 @@ let load_font doc_conv fdef =
     (Int32.to_float fdef.scale_factor) *. doc_conv
   in
   let type1 = lazy (
+    if font_is_virtual tex_name 
+    then invalid_arg 
+      (Format.sprintf 
+         "The font %s is virtual I can't currently use it with cairo"
+         tex_name);
     let font_map = try HString.find (Lazy.force fonts_map_table) tex_name
       with Not_found -> 
         invalid_arg 
