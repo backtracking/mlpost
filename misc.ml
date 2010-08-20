@@ -31,10 +31,29 @@ let rec print_list sep prf fmt = function
   | [x] -> prf fmt x
   | (x::xs) -> prf fmt x; sep fmt (); print_list sep prf fmt xs
 
+
+let print_iter1 iter sep print fmt l =
+  let first = ref true in
+  iter (fun x -> 
+          if !first
+          then first := false
+          else sep fmt (); 
+          print fmt x ) l
+
+let print_iter2 iter sep1 sep2 print1 print2 fmt l =
+  let first = ref true in
+  iter (fun x y -> 
+          if !first
+          then first := false
+          else sep1 fmt (); 
+          print1 fmt x;sep2 fmt (); print2 fmt y) l
+
 let space fmt () = Format.fprintf fmt "@ "
 let comma fmt () = Format.fprintf fmt ",@ "
 let semicolon fmt () = Format.fprintf fmt ";@ "
 let newline fmt () = Format.fprintf fmt "@\n "
+let nothing _fmt _ = ()
+let print_int32 fmt i = Format.fprintf fmt "%ld" i
 
 let rec fold_from_to f acc a b =
   if a <= b then fold_from_to f (f acc a) (a+1) b else acc

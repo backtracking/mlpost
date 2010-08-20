@@ -74,6 +74,26 @@ type t = {
   font_map : Fonts.font_def Int32Map.t
 }
 
+(* vf *)
+
+type preamble_vf = {
+  pre_vf_version : int;
+  pre_vf_text    : string;
+  pre_vf_cs      : int32;
+  pre_vf_ds      : float;
+}
+
+type char_desc =
+    { char_code       : int32;
+      char_tfm        : int32;
+      char_commands   : command list}
+
+type vf =
+    { vf_preamble   : preamble_vf;
+      vf_font_map   : Fonts.font_def Int32Map.t;
+      vf_chars_desc : char_desc list}
+(* *)
+
 let fontmap d = d.font_map
 
 module Print = struct
@@ -123,6 +143,60 @@ module Print = struct
       preamble doc.preamble pages doc.pages
       fonts doc.font_map postamble doc.postamble
       postpostamble doc.postpostamble
+
+
+  let commands fmt = function
+    | SetChar c ->
+        Format.fprintf fmt "Setting character %ld.@\n" c
+    | SetRule(a, b) ->
+        Format.fprintf fmt "Setting rule (w=%ld, h=%ld).@\n" a b
+    | PutChar c ->
+        Format.fprintf fmt "Putting character %ld.@\n" c
+    | PutRule(a, b) ->
+        Format.fprintf fmt "Putting rule (w=%ld, h=%ld).@\n" a b
+    | Push ->
+        Format.fprintf fmt "Push current state.@\n"
+    | Pop ->
+        Format.fprintf fmt "Pop current state.@\n"
+    | Right b ->
+        Format.fprintf fmt "Moving right %ld.@\n" b
+    | Wdefault ->
+        Format.fprintf fmt "Moving right by the default W.@\n"
+    | W b ->
+        Format.fprintf fmt "Moving right and changing W to %ld.@\n" b
+    | Xdefault ->
+        Format.fprintf fmt "Moving right by the default X.@\n"
+    | X b ->
+        Format.fprintf fmt "Moving right and changing X to %ld.@\n" b
+    | Down a ->
+        Format.fprintf fmt "Moving down %ld.@\n" a
+    | Ydefault ->
+        Format.fprintf fmt "Moving down by the default Y.@\n"
+    | Y a ->
+        Format.fprintf fmt "Moving down and changing Y to %ld.@\n" a
+    | Zdefault ->
+        Format.fprintf fmt "Moving down by the default Z.@\n"
+    | Z a ->
+        Format.fprintf fmt "Moving down and changing Z to %ld.@\n" a
+    | FontNum f ->
+        Format.fprintf fmt "Font is now set to %ld@\n" f
+    | Special xxx ->
+        Format.fprintf fmt "Special command : %s@\n" xxx
+
+  let print_chars fmt c =
+    Format.fprintf fmt "@[<hov 3>%ld : %a@]@\n" c.char_code
+      (Misc.print_list Misc.newline commands) c.char_commands
+
+  let print_chars_desc = (Misc.print_list Misc.newline print_chars)
+
+  let print_vf fmt vf =
+    Format.fprintf fmt "cs=%ld ds=%f %s@\n%a@\n%a@\n"
+      vf.vf_preamble.pre_vf_cs
+      vf.vf_preamble.pre_vf_ds
+      vf.vf_preamble.pre_vf_text
+      fonts vf.vf_font_map
+      print_chars_desc vf.vf_chars_desc
+
 
 end
 
@@ -450,22 +524,6 @@ let read_file file =
       font_map = fonts
     }
 
-type preamble_vf = {
-  pre_vf_version : int;
-  pre_vf_text    : string;
-  pre_vf_cs      : int32;
-  pre_vf_ds      : int32;
-}
-
-type char_desc =
-    { char_code : int32;
-      char_tfm  : int32;
-      char_commands   : command list}
-
-type vf =
-    { preamble_vf : preamble_vf;
-      chars_desc   : char_desc list}
-
 
 let vf_preamble bits =
   bitmatch bits with
@@ -480,10 +538,34 @@ let vf_preamble bits =
 	{ pre_vf_version = version;
 	  pre_vf_text = x;
           pre_vf_cs   = cs;
-          pre_vf_ds   = ds
+          pre_vf_ds   = (Int32.to_float ds) /. (2.**20.)
 	}, bits
     | { _ : -1 : bitstring } ->
 	dvi_error "Ill-formed preamble"
+
+(* Could factor the code with the one of page?*)
+let rec preamble_fonts fonts bits =
+  bitmatch bits with
+      (* font definitions *)
+    | { 243 : 8; k : 8; bits : -1 : bitstring } ->
+	let font, bits = font_def bits in
+	  preamble_fonts (add_font (Int32.of_int k) font fonts) bits
+    | { 244 : 8; k : 16 : bigendian; bits : -1 : bitstring } ->
+	let font, bits = font_def bits in
+	  preamble_fonts (add_font (Int32.of_int k) font fonts) bits
+    | { 245 : 8; k : 24 : bigendian; bits : -1 : bitstring } ->
+	let font, bits = font_def bits in
+	  preamble_fonts (add_font (Int32.of_int k) font fonts) bits
+    | { 246 : 8; k : 32 : bigendian; bits : -1 : bitstring } ->
+	let font, bits = font_def bits in
+	  preamble_fonts (add_font k font fonts) bits
+    | { bits : -1 : bitstring } ->
+      fonts,bits
+
+let rec command_list cmds bits =
+  if Bitstring.bitstring_length bits = 0 then cmds
+  else let cmd,bits = command bits in
+       command_list (cmd::cmds) bits
 
 let rec vf_chars chars bits =
    bitmatch bits with
@@ -499,15 +581,29 @@ let rec vf_chars chars bits =
                    char_tfm  = tfm;
                    char_commands = []} in
       vf_chars (char::chars) bits
+    | {pl : 8;
+       cc  : 8;
+       tfm : 24;
+       coms : pl*8 : bitstring;
+       bits : -1 : bitstring
+      } ->
+      let coms = List.rev (command_list [] coms) in
+      let char = { char_code = Int32.of_int cc;
+                   char_tfm  = Int32.of_int tfm;
+                   char_commands = coms} in
+      vf_chars (char::chars) bits
+    | {i : 8} -> dvi_error "vf : ill-formed character"
+
+let print_vf = Print.print_vf
 
 let read_vf_file file =
   let bits = Bitstring.bitstring_of_file file in
   let preamble, bits = vf_preamble bits in
-  let pages, fonts, bits = pages [] Int32Map.empty bits in
-  assert (pages = []);
-  let chars_desc = vf_chars [] bits in
-  {preamble_vf = preamble;
-   chars_desc    = chars_desc}
+  let fonts, bits = preamble_fonts Int32Map.empty bits in
+  let chars_desc = List.rev (vf_chars [] bits) in
+  {vf_preamble = preamble;
+   vf_font_map    = fonts;
+   vf_chars_desc    = chars_desc}
 
 let get_conv doc =
     let formule_magique_cm mag num den =

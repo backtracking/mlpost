@@ -86,7 +86,7 @@ type preamble_vf = {
   pre_vf_version : int;
   pre_vf_text    : string;
   pre_vf_cs      : int32;
-  pre_vf_ds      : int32;
+  pre_vf_ds      : float;
 }
 
 type char_desc =
@@ -95,9 +95,10 @@ type char_desc =
       char_commands   : command list}
 
 type vf =
-    { preamble_vf : preamble_vf;
-      chars_desc   : char_desc list}
+    { vf_preamble   : preamble_vf;
+      vf_font_map   : Fonts.font_def Dvi_util.Int32Map.t;
+      vf_chars_desc : char_desc list}
 
-
+val print_vf : Format.formatter -> vf -> unit
 val read_vf_file : string -> vf
 
