@@ -240,7 +240,11 @@ let load_font doc_conv fdef =
   in
   let type1 = lazy (
     let font_map = try HString.find (Lazy.force fonts_map_table) tex_name
-      with Not_found -> invalid_arg ("Unknown font : "^tex_name) in
+      with Not_found -> 
+        invalid_arg 
+          (Format.sprintf "This tex font : %s has no pfb counterpart@ \
+                       it can't be currently used with the cairo backend"
+             tex_name) in
     let pfab = find_file font_map.Fonts_type.pfab_name in
     let pfab_enc,pfab_charset = load_pfb pfab in
     let enc = match font_map.Fonts_type.enc_name with
