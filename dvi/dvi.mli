@@ -76,3 +76,28 @@ val commands : page -> command list
 val pages : t -> page list
 
 val read_file : string -> t
+
+
+(** Vf files *)
+
+(* Vf type *)
+
+type preamble_vf = {
+  pre_vf_version : int;
+  pre_vf_text    : string;
+  pre_vf_cs      : int32;
+  pre_vf_ds      : int32;
+}
+
+type char_desc =
+    { char_code : int32;
+      char_tfm  : int32;
+      char_commands   : command list}
+
+type vf =
+    { preamble_vf : preamble_vf;
+      chars_desc   : char_desc list}
+
+
+val read_vf_file : string -> vf
+

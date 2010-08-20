@@ -193,9 +193,12 @@ let signed i j unsigned =
   else
     Int32.logor unsigned j
 
-let signed_8 = signed (Int32.shift_left Int32.one 23) (Int32.logxor Int32.minus_one (Int32.of_int 0xff))
-let signed_16 = signed (Int32.shift_left Int32.one 15) (Int32.logxor Int32.minus_one (Int32.of_int 0xffff))
-let signed_24 = signed (Int32.shift_left Int32.one 23) (Int32.logxor Int32.minus_one (Int32.of_int 0xffffff))
+let signed_8 = signed (Int32.shift_left Int32.one 23)
+  (Int32.logxor Int32.minus_one (Int32.of_int 0xff))
+let signed_16 = signed (Int32.shift_left Int32.one 15)
+  (Int32.logxor Int32.minus_one (Int32.of_int 0xffff))
+let signed_24 = signed (Int32.shift_left Int32.one 23)
+  (Int32.logxor Int32.minus_one (Int32.of_int 0xffffff))
 
 let command bits =
   bitmatch bits with
@@ -447,9 +450,69 @@ let read_file file =
       font_map = fonts
     }
 
+type preamble_vf = {
+  pre_vf_version : int;
+  pre_vf_text    : string;
+  pre_vf_cs      : int32;
+  pre_vf_ds      : int32;
+}
+
+type char_desc =
+    { char_code : int32;
+      char_tfm  : int32;
+      char_commands   : command list}
+
+type vf =
+    { preamble_vf : preamble_vf;
+      chars_desc   : char_desc list}
+
+
+let vf_preamble bits =
+  bitmatch bits with
+    | { 247 : 8;              (* Preamble opcode *)
+	version : 8;          (* VF version *)
+	k : 8;                (* size of string x *)
+	x : 8*k : string;     (* file comment *)
+	cs : 32 : bigendian; (* denominator *)
+	ds : 32 : bigendian; (* magnification *)
+	bits : -1 : bitstring
+      } ->
+	{ pre_vf_version = version;
+	  pre_vf_text = x;
+          pre_vf_cs   = cs;
+          pre_vf_ds   = ds
+	}, bits
+    | { _ : -1 : bitstring } ->
+	dvi_error "Ill-formed preamble"
+
+let rec vf_chars chars bits =
+   bitmatch bits with
+    | {248 : 8} -> chars
+    | {242 : 8;
+       pl  : 32;
+       cc  : 32;
+       tfm : 32;
+       _ : (Int32.to_int pl)*8 : bitstring;
+       bits : -1 : bitstring
+      } ->
+      let char = { char_code = cc;
+                   char_tfm  = tfm;
+                   char_commands = []} in
+      vf_chars (char::chars) bits
+
+let read_vf_file file =
+  let bits = Bitstring.bitstring_of_file file in
+  let preamble, bits = vf_preamble bits in
+  let pages, fonts, bits = pages [] Int32Map.empty bits in
+  assert (pages = []);
+  let chars_desc = vf_chars [] bits in
+  {preamble_vf = preamble;
+   chars_desc    = chars_desc}
+
 let get_conv doc =
     let formule_magique_cm mag num den =
-      ((Int32.to_float mag) *. ((Int32.to_float num) /. (Int32.to_float den))) /. (10.**8.) in
+      ((Int32.to_float mag) *.
+          ((Int32.to_float num) /. (Int32.to_float den))) /. (10.**8.) in
     formule_magique_cm doc.preamble.pre_mag
       doc.preamble.pre_num doc.preamble.pre_den
 
