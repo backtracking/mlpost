@@ -26,13 +26,13 @@ type arrow_style = Directed | Undirected
 type edge_style = Straight | Curve | Square | HalfSquare
 
 type 'a tree = Node of 'a * ('a tree list)
-type extend =  (Num.t * Num.t) list 
+type extend =  (Num.t * Num.t) list
 type 'a positionedtree = ('a * Num.t * Num.t) tree
 
 let movetree (Node((label,x,y),subtrees)) dx =
   Node((label,((+/) x dx),y),subtrees)
 
-let moveextend (e:extend) (x:Num.t) : extend = 
+let moveextend (e:extend) (x:Num.t) : extend =
   List.map (fun (p,q) -> (((+/) p x),((+/) q x))) e
 
 let rec merge a1 a2 = match a1,a2 with
@@ -47,10 +47,10 @@ let rec fit cs (a1:extend) (a2: extend) : Num.t = match a1,a2 with
   |_ -> bp 0.
 
 let fitlistl cs (l: extend list) :(Num.t list) =
-  let rec fitlistaux acc li = 
+  let rec fitlistaux acc li =
     match li with
       |[] -> []
-      |e::res -> 
+      |e::res ->
 	 let x = fit cs acc e in
 	 x::(fitlistaux (merge acc (moveextend e x)) res)
   in
@@ -68,13 +68,13 @@ let fitlistr cs (l: extend list) :(Num.t list) =
 
 let mean x y = ((//) ((+/) x y) (bp 2.))
 
-let fitlist cs (l: extend list) :(Num.t list) = 
+let fitlist cs (l: extend list) :(Num.t list) =
   List.map2 mean (fitlistl cs l) (fitlistr cs l)
 
-let bfs t = 
+let bfs t =
   let rec bfs_aux lesmax m current next =
     match current with
-      |[] -> 
+      |[] ->
 	 if next=[] then List.rev (m :: lesmax)
 	 else bfs_aux (m::lesmax) (bp 0.) next []
       |Node(x,tl)::cl ->
@@ -83,31 +83,31 @@ let bfs t =
 	 bfs_aux lesmax m cl (tl@next)
   in
   bfs_aux [] (bp 0.) [t] []
-	 
+
 let rec dfs lesmax t =
   match t,lesmax with
     |Node((b,x,_),tl),m::mres ->
        Node((b,x,m),List.map (dfs mres) tl)
     |_,[]-> failwith "impossible"
 
-type node_info = { 
-  ls:Num.t; 
-  cs:Num.t; 
+type node_info = {
+  ls:Num.t;
+  cs:Num.t;
   arrow_style:arrow_style;
-  edge_style:edge_style; 
-  stroke:Color.t option; 
+  edge_style:edge_style;
+  stroke:Color.t option;
   pen: Pen.t option;
   sep: Num.t option;
   lab: (Command.position * Picture.t) list option;
 }
 
-let dummy_info = 
-  { ls = zero; cs = zero; arrow_style = Directed; 
+let dummy_info =
+  { ls = zero; cs = zero; arrow_style = Directed;
     edge_style = Straight; stroke = None; pen = None; sep = None;
     lab = None }
 
-let design tree = 
-  let rec designaux (Node((b,ni) as label, subtrees)) = 
+let design tree =
+  let rec designaux (Node((b,ni) as label, subtrees)) =
     let trees,extends = List.split (List.map designaux subtrees) in
     let positions = fitlist ni.cs extends in
     let ptrees = List.map2 movetree trees positions in
@@ -119,12 +119,12 @@ let design tree =
     resulttree,resultextend
   in
   let thetree = fst (designaux tree) in
-  let maxlistheight = bfs thetree 
+  let maxlistheight = bfs thetree
   in
   dfs maxlistheight thetree
-      
- 
-       
+
+
+
 (* drawing *)
 
 let strip ?sep p = match sep with
@@ -136,68 +136,68 @@ let cpath ?style ?outd ?ind ?sep a b =
   let p = pathk ?style [knotp ?r (Box.ctr a); knotp ?l (Box.north b)] in
   strip ?sep (cut_before (Box.bpath a) p)
 
-let box_arrow ?color ?brush ?pen ?dashed ?style ?outd ?ind ?sep a b =   
+let box_arrow ?color ?brush ?pen ?dashed ?style ?outd ?ind ?sep a b =
   Arrow.simple ?color ?brush ?pen ?dashed (cpath ?style ?outd ?ind ?sep a b)
 
-let box_line ?color ?brush ?pen ?dashed ?style ?outd ?ind ?sep a b =   
+let box_line ?color ?brush ?pen ?dashed ?style ?outd ?ind ?sep a b =
   draw ?color ?brush ?pen ?dashed (cpath ?style ?outd ?ind ?sep a b)
 
 let arc astyle estyle ?stroke ?brush ?pen ?sep ?lab b1 b2 =
-  let x1,y1 = let p = Box.ctr b1 in Point.xpart p, Point.ypart p 
+  let x1,y1 = let p = Box.ctr b1 in Point.xpart p, Point.ypart p
   and x2,y2 = let p = Box.north b2 in Point.xpart p, Point.ypart p in
-  let boxdraw, linedraw  = match astyle with 
-    | Directed -> 
+  let boxdraw, linedraw  = match astyle with
+    | Directed ->
 	box_arrow ?color:stroke ?brush ?pen ?sep, Arrow.simple ?color:stroke ?brush ?pen
-    | Undirected -> 
-	box_line ?color:stroke ?brush ?pen ?sep, draw ?color:stroke ?brush ?pen 
+    | Undirected ->
+	box_line ?color:stroke ?brush ?pen ?sep, draw ?color:stroke ?brush ?pen
   in
   let drawlab b1 b2 = function
-    | None -> 
+    | None ->
 	nop
-    | Some (pos, lab) -> 
+    | Some (pos, lab) ->
 	let p = Box.cpath b1 b2 in label ~pos lab (Path.point 0.5 p)
   in
     match estyle with
-      | Straight -> 
+      | Straight ->
 	  boxdraw ~style:jLine b1 b2 ++ drawlab b1 b2 lab
-      | Curve -> 
+      | Curve ->
 	  let p1, p2 = Box.ctr b1, Box.ctr b2 in
 	  let corner = Point.pt (x2-/(x2-/x1) /./ 4.,(y1+/y2) /./ 2.) in
 	  let p = pathk ~style:jCurve
 	    (knotlist
-	       [noDir, p1, vec (Point.sub corner p1); 
-		noDir, corner, noDir; 
+	       [noDir, p1, vec (Point.sub corner p1);
+		noDir, corner, noDir;
 		vec (Point.sub p2 corner), p2, noDir]) in
-	  let parrow = 
+	  let parrow =
 	    cut_after (Box.bpath b2) (cut_before (Box.bpath b1) p)
 	  in
 	  linedraw (strip ?sep parrow)
-      | Square -> 
+      | Square ->
 	  let corner = Point.pt (x2,y1) in
-	  let p = pathp ~style:jLine 
+	  let p = pathp ~style:jLine
 	    [Box.ctr b1; corner; Box.ctr b2] in
-	  let parrow = 
-	    cut_after (Box.bpath b2) (cut_before (Box.bpath b1) p) 
+	  let parrow =
+	    cut_after (Box.bpath b2) (cut_before (Box.bpath b1) p)
 	  in
 	  linedraw (strip ?sep parrow)
-      | HalfSquare -> 
+      | HalfSquare ->
 	  let m = (y1+/y2) /./ 2. in
 	  let corner1, corner2 = Point.pt (x1,m), Point.pt (x2,m) in
-	  let p = pathp ~style:jLine 
+	  let p = pathp ~style:jLine
 	    [Box.ctr b1; corner1; corner2; Box.ctr b2] in
-	  let parrow = 
-	    cut_after (Box.bpath b2) (cut_before (Box.bpath b1) p) 
+	  let parrow =
+	    cut_after (Box.bpath b2) (cut_before (Box.bpath b1) p)
 	  in
 	  linedraw (strip ?sep parrow)
 
 let is_leaf x = Array.length (Box.elts x ) = 1
 
-let root x = 
-  (* if this access is invalid, the box has not been created using 
+let root x =
+  (* if this access is invalid, the box has not been created using
    * [leaf], [node] or [bin] *)
   Box.nth 0 x
 
-let children x = 
+let children x =
   if is_leaf x then []
   else Box.elts_list (Box.nth 1 x)
 
@@ -206,19 +206,19 @@ type t = (Box.t * node_info) tree
 let leaf b = Node ((b, dummy_info), [])
 
 let node ?(ls=bp 20.) ?(cs=bp 3.) ?(arrow_style=Directed)
-      ?(edge_style=Straight) ?stroke ?brush ?pen ?sep b l = 
-  Node ((b, {ls = ls; cs = cs; arrow_style = arrow_style; 
-             edge_style = edge_style; stroke = stroke; 
+      ?(edge_style=Straight) ?stroke ?brush ?pen ?sep b l =
+  Node ((b, {ls = ls; cs = cs; arrow_style = arrow_style;
+             edge_style = edge_style; stroke = stroke;
              pen = pen; sep = sep; lab = None}), l)
 
 let nodel ?(ls=bp 20.) ?(cs=bp 3.) ?(arrow_style=Directed)
-      ?(edge_style=Straight) ?stroke ?brush ?pen ?sep b l = 
-  Node ((b, { ls = ls; cs = cs; arrow_style = arrow_style; 
-              edge_style = edge_style; stroke = stroke; pen = pen; 
-              sep = sep; lab = Some (List.map snd l)}), 
+      ?(edge_style=Straight) ?stroke ?brush ?pen ?sep b l =
+  Node ((b, { ls = ls; cs = cs; arrow_style = arrow_style;
+              edge_style = edge_style; stroke = stroke; pen = pen;
+              sep = sep; lab = Some (List.map snd l)}),
        List.map fst l)
 
-let bin ?ls ?cs ?arrow_style ?edge_style ?stroke ?brush ?pen ?sep s x y = 
+let bin ?ls ?cs ?arrow_style ?edge_style ?stroke ?brush ?pen ?sep s x y =
   node ?ls ?cs ?arrow_style ?edge_style ?stroke ?brush ?pen ?sep s [x;y]
 
 let to_box t : Box.t =
@@ -227,20 +227,20 @@ let to_box t : Box.t =
     let x' = addn x dx in
     let y' = subn y (divf (Box.height b) 2.)in
     let y2 = subn y (maxn dy ni.ls) in
-    let b = 
+    let b =
       Box.group [Box.center (Point.pt (x', y')) b;
 		 Box.group (List.map (draw x' y2) tl)]
     in
     let draw_arcs tree = match ni.lab with
-      | None -> 
-	  Command.iterl 
-	    (fun child -> arc ~brush:(Types.mkBrush stroke pen None) ?sep ni.arrow_style ni.edge_style 
-              (root tree) (root child)) 
+      | None ->
+	  Command.iterl
+	    (fun child -> arc ~brush:(Types.mkBrush stroke pen None) ?sep ni.arrow_style ni.edge_style
+              (root tree) (root child))
 	    (children tree)
-      | Some lab -> 
-	  Command.iterl 
-	    (fun (child, lab) -> arc ~brush:(Types.mkBrush stroke pen None) ?sep ~lab 
-	      ni.arrow_style ni.edge_style (root tree) (root child)) 
+      | Some lab ->
+	  Command.iterl
+	    (fun (child, lab) -> arc ~brush:(Types.mkBrush stroke pen None) ?sep ~lab
+	      ni.arrow_style ni.edge_style (root tree) (root child))
 	    (List.combine (children tree) lab)
     in
     Box.set_post_draw draw_arcs b
@@ -253,22 +253,22 @@ let draw ?debug t = Box.draw ?debug (to_box t)
 
 module Simple = struct
   type t = Box.t
-      
+
   let leaf s = Box.group [s]
-    
+
   let node ?(ls=Num.bp 12.) ?(cs=Num.bp 5.) ?(arrow_style=Directed)
-      ?(edge_style=Straight) ?stroke ?brush ?pen ?sep 
-      ?(valign=`Center) ?(halign=`North) s l = 
-    let l = Box.hbox ~padding:cs ~pos:halign l in 
+      ?(edge_style=Straight) ?stroke ?brush ?pen ?sep
+      ?(valign=`Center) ?(halign=`North) s l =
+    let l = Box.hbox ~padding:cs ~pos:halign l in
     let tree = Box.vbox ~padding:ls ~pos:valign [s;l] in
-    Box.set_post_draw 
-      (fun tree -> 
-	 (Command.iterl 
-	    (fun child -> arc ?stroke ?brush ?pen ?sep arrow_style edge_style 
+    Box.set_post_draw
+      (fun tree ->
+	 (Command.iterl
+	    (fun child -> arc ?stroke ?brush ?pen ?sep arrow_style edge_style
                (root tree) (root child)) (children tree)))
       tree
-      
-  let bin ?ls ?cs ?arrow_style ?edge_style ?stroke ?brush ?pen ?sep s x y = 
+
+  let bin ?ls ?cs ?arrow_style ?edge_style ?stroke ?brush ?pen ?sep s x y =
     node ?ls ?cs ?arrow_style ?edge_style ?stroke ?brush ?pen ?sep s [x;y]
 
   let to_box b = b

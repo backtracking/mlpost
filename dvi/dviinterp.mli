@@ -1,7 +1,7 @@
 (** This module provides a functor to read DVI files *)
 
 (** The type of colors in a DVI file *)
-type color = 
+type color =
   | RGB of float * float * float
   | CMYK of float * float * float * float
   | HSB of float * float * float

@@ -19,10 +19,10 @@ open Transform
 
 type t = Types.pen
 
-let transform tr p = 
+let transform tr p =
   List.fold_left mkPenTransformed p tr
 
-let default = 
+let default =
   mkPenTransformed mkPenCircle (scaled (mkF 0.5))
 let circle = mkPenCircle
 let square = mkPenSquare

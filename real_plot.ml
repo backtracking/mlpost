@@ -38,12 +38,12 @@ let graph x = x
 
 let rec calc_one_value nb_f ((which_f,acc) as w_acc) x = function
   | [] -> (nb_f,None::acc)
-  | f::lf -> 
-      match f x with 
+  | f::lf ->
+      match f x with
         | None -> calc_one_value (nb_f+1) w_acc x lf
-        | Some y -> 
-            if which_f = nb_f 
-            then (nb_f,Some (x,y)::acc) 
+        | Some y ->
+            if which_f = nb_f
+            then (nb_f,Some (x,y)::acc)
             else (nb_f,Some (x,y)::None::acc)
 
 let calc xmin xmax pitch {values=cf;node=node} =
@@ -58,17 +58,17 @@ let cons_opt x l = match x with None -> l | Some x -> (to_path x)::l
 
 let rec pathn_opt acc current = function
   | [] -> cons_opt current acc
-  | v::l -> 
+  | v::l ->
       match v,current with
         | None, _ -> pathn_opt (cons_opt current acc) None l
-        | Some v, None -> pathn_opt acc 
+        | Some v, None -> pathn_opt acc
             (Some (start (knotn v))) l
-        | Some v, Some c -> pathn_opt acc 
+        | Some v, Some c -> pathn_opt acc
             (Some (concat ~style:jLine c (knotn v))) l
 
 let draw_aux ?label values =
   C.seq (
-    List.map 
+    List.map
       (fun (values,brush) ->
          let line = pathn_opt [] None values in
          C.seq (List.map (Path.draw ~brush) line)) values)
@@ -96,17 +96,17 @@ let rec tick_logneg xmin =
   aux [] (-.1.)
 
 
-let vtick = 
+let vtick =
   let t = Point.bpp (2.5,0.) in
-  fun v ->  
+  fun v ->
   (Point.sub v t, Point.add v t)
 
-let draw_axes 
+let draw_axes
     ~logarithmic ~ytick ~xmin ~xmax ~ymin ~ymax ~yzero ~xzero ~pitch =
   let ytick = C.seq ytick in
-  let vert = 
+  let vert =
     Arrow.simple (Path.pathn ~style:Path.jLine [xzero,ymin;xzero,ymax]) in
-  let hori = 
+  let hori =
     Arrow.simple (Path.pathn ~style:Path.jLine [xmin,yzero;xmax,yzero]) in
   C.seq [ytick;vert;hori]
 
@@ -120,8 +120,8 @@ let count_min iter =
   iter (fun x -> y := min !y x);
   !y
 
-let filter_opt f l = 
-  {l with values = List.map (function 
+let filter_opt f l =
+  {l with values = List.map (function
                               | Some (x,y) as p when f y -> p
                               | _ -> None) l.values}
 
@@ -131,16 +131,16 @@ let draw ?(logarithmic=false) ?curve_brush
   (* ymin, ymax calculation *)
   let values = match ymin,ymax with
     | None,None -> values
-    | _ -> let f = 
+    | _ -> let f =
         match ymin,ymax with
           | None,None -> assert false
           | Some ymin, None -> (fun f -> f >= ymin)
           | Some ymin, Some ymax -> (fun f -> f >= ymin && f <= ymax)
           | None, Some ymax -> (fun f -> f <= ymax) in
       List.map (filter_opt f) values in
-  let yvalues = (fun f -> List.iter 
-                   (fun x -> List.iter 
-                      (function Some (_,y) -> f y| None -> ()) 
+  let yvalues = (fun f -> List.iter
+                   (fun x -> List.iter
+                      (function Some (_,y) -> f y| None -> ())
                       x.values) values) in
   let ymax = match ymax with None -> count_max yvalues | Some ymax -> ymax in
   (*let ymax =  if ymax = 0. then 1. else ymax in *)
@@ -148,31 +148,31 @@ let draw ?(logarithmic=false) ?curve_brush
   (*let ymin = if ymin = 0. then -.1. else ymin in  *)
   let ymax = if ymin=ymax then ymin +. 1. else ymax in
     (* scale *)
-  let conv = 
-    if logarithmic then 
+  let conv =
+    if logarithmic then
       fun v ->
-        if abs_float v < 1. 
-        then v 
-        else ((log10 (abs_float v)) +. 1.) *. (v/.(abs_float v)) 
+        if abs_float v < 1.
+        then v
+        else ((log10 (abs_float v)) +. 1.) *. (v/.(abs_float v))
     else fun v -> v in
   let scaley = Num.divn height (Num.bp ((conv ymax)-. (conv ymin))) in
   let scalex = Num.divn width (Num.bp (xmax-.xmin)) in
   let scalex x = Num.multn (Num.bp (x-.xmin)) scalex in
   let scaley y = Num.multn (Num.bp ((conv y)-.(conv ymin))) scaley in
   let scale (x,y) = scalex x,scaley y in
-  let scale_opt = function 
+  let scale_opt = function
     | Some (x,y) -> Some (scale (x,y))
     | None -> None in
-  let xzero,yzero = scale (0.,0.) in                   
+  let xzero,yzero = scale (0.,0.) in
   (* tick vertical *)
   let ymm = ymax -. ymin in
   (*let xmm = xmax -. xmin in*)
-  let ypitchl = 
+  let ypitchl =
     if logarithmic then
       let l1 = tick_log ymax in
       let l2 = tick_logneg ymin in
       l1@l2
-    else 
+    else
       let ypitch = 10.**(floor (log10 (ymm/.(float ysep)))) in
       let ymax2 = ypitch *. (floor (ymax/.ypitch)) in
       let ysep = int_of_float (ymm/.ypitch) in
@@ -180,23 +180,23 @@ let draw ?(logarithmic=false) ?curve_brush
 
   let ypitchl = ymin::ypitchl@[ymax] in
   (* Remove the tick which are too close but we need concrete
-     for that... Currently only for ex, but we can be more 
+     for that... Currently only for ex, but we can be more
      precise *)
-  let ypitchl = 
+  let ypitchl =
     if not Concrete.supported then
       List.map (fun y -> (y,scaley y)) ypitchl
-    else 
+    else
       let ex2 = 2. *. Concrete.float_of_num Num.ex_factor in
-      let _, ypitchl = List.fold_left 
-        (fun (last,acc) y -> 
+      let _, ypitchl = List.fold_left
+        (fun (last,acc) y ->
            let yn = scaley y in
            let f = Concrete.float_of_num yn in
            if abs_float (last -. f) > ex2
-           then (f,(y,yn)::acc) else (last,acc)) 
-        (infinity,[]) ypitchl in 
+           then (f,(y,yn)::acc) else (last,acc))
+        (infinity,[]) ypitchl in
       ypitchl in
   let zero = scalex 0. in
-  let ytick = List.map (fun (y,yn) -> 
+  let ytick = List.map (fun (y,yn) ->
                           let p = Point.pt (zero,yn) in
                           let (p1,p2) = (vtick p) in
                           let label = Format.sprintf "{%2.1f}" y in
@@ -205,35 +205,35 @@ let draw ?(logarithmic=false) ?curve_brush
                             Path.draw (Path.pathp ~style:Path.jLine [p1;p2])])
     ypitchl in
   (* values *)
-  let values = List.map (fun x -> 
+  let values = List.map (fun x ->
                            {x with values = List.map scale_opt x.values}
                         ) values in
   (* Brush and legend *)
   let color = Color.color_gen 1. 1. in
   let curve_brush _ = Brush.t () in
-  let colors = List.map (fun x -> 
+  let colors = List.map (fun x ->
                            let b = curve_brush x.node in
                            let b,c = match Brush.color b with
                              | Some c -> b,c
-                             | None -> 
+                             | None ->
                                  let c = color () in
-                                 Brush.t ~color:c ~brush:b (),c in 
+                                 Brush.t ~color:c ~brush:b (),c in
                            (b,c,x)) values in
-  let legend = 
+  let legend =
     match label with
       | None -> C.nop
-      | Some label -> 
-          let legend = 
-            Legend.legend 
+      | Some label ->
+          let legend =
+            Legend.legend
               (List.map (fun (_,c,x) -> (c,label x.node)) colors) in
         C.label ~pos:`East legend (Point.pt (scale (xmax,(ymax+.ymin)/.2.))) in
   let values = List.map (fun (b,_,x) -> (x.values,b)) colors in
   let xmin,ymin = scale (xmin,ymin) in
   let xmax,ymax = scale (xmax,ymax) in
-  let axes = draw_axes 
+  let axes = draw_axes
     ~logarithmic ~ytick ~xmin ~xmax ~ymin ~ymax ~yzero ~xzero ~pitch in
   C.seq [axes;
          draw_aux ?label values;
         legend]
-    
-  
+
+

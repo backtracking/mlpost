@@ -14,7 +14,7 @@
 (*                                                                        *)
 (**************************************************************************)
 
-type num = 
+type num =
   | F of float
   | NXPart of point
   | NYPart of point
@@ -41,12 +41,12 @@ and point =
   | PTTransformed of point * transform
   | PTName of name
 
-and direction = 
+and direction =
   | Vec of point
   | Curl of float
-  | NoDir 
+  | NoDir
 
-and joint = 
+and joint =
   | JLine
   | JCurve
   | JCurveNoInflex
@@ -55,7 +55,7 @@ and joint =
 
 and knot = direction * point * direction
 
-and path = 
+and path =
   | PAScope of path
   | PAConcat of knot * joint * path
   | PACycle of direction * joint * path
@@ -74,11 +74,11 @@ and path =
   | PABBox of picture
   | PAName of name
 
-and matrix = 
-    { xx : num; yx : num; 
+and matrix =
+    { xx : num; yx : num;
       xy : num; yy : num; x0 : num; y0 : num; }
 
-and transform = 
+and transform =
   | TRRotated of float
   | TRScaled of num
   | TRShifted of point
@@ -102,13 +102,13 @@ and dash =
   | DShifted of point * dash
   | DPattern of on_off list
 
-and pen = 
+and pen =
   | PenCircle
   | PenSquare
   | PenFromPath of path
-  | PenTransformed of pen * transform 
+  | PenTransformed of pen * transform
 
-and command = 
+and command =
   | CDraw of path * color option * pen option * dash option
   | CDrawArrow of path * color option * pen option * dash option
   | CDrawPic of picture

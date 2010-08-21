@@ -28,7 +28,7 @@ module Q = Misc.Q
 
 let scale_radius r l=
   List.map (fun (x,y) -> (multf x r,multf y r)) l
-let scale_radius_2 r l = 
+let scale_radius_2 r l =
   List.map (scale_radius r) l
 
 (* Calcule la liste des max des ième éléments de chaque liste *)
@@ -41,7 +41,7 @@ type direction = Horizontal | Vertical | Other
 
 (* Calcule les 2 points à distance d de la droite de coefficient directeur a2_equ perpendiculaire à l'axe de tc *)
 let rec make_paths a2_equ tc d sens acc radius = match tc with
-  |(absc,ordo)::res -> 
+  |(absc,ordo)::res ->
      let (absc,ordo) = (multf absc radius,multf ordo radius) in
        begin
 	 match sens with
@@ -53,7 +53,7 @@ let rec make_paths a2_equ tc d sens acc radius = match tc with
 	      let ordo2 = (+/) ordo d in
 	      let ordo3 = (-/) ordo d in
 		make_paths a2_equ res d sens ([(absc,ordo2);(absc,ordo3)]::acc) radius
-	   | Other -> 
+	   | Other ->
 	      let b2_equ = (-/) ordo (( *./) a2_equ absc) in
 	      let co = 1. /. (sqrt (1.+.a2_equ*.a2_equ)) in
 	      let angle = if a2_equ>0. then 360 - (int_of_float ((acos co)*.180./.pi)) else int_of_float (acos(co)*.180./.pi) in
@@ -76,18 +76,18 @@ let draw_ticks ticks coords m d radius=
   let tc = ticks_coords [] ticks ticks x y m in
   let x = if (abs_float x < 10e-4) then 0. else x in
   let y = if (abs_float y < 10e-4) then 0. else y in
-  let a2_equ,sens = 
+  let a2_equ,sens =
     if x=0. then 0.,Vertical else if y=0. then 0.,Horizontal else ((-.x)/.y),Other
-  in 
-  let p = make_paths a2_equ tc d sens [] radius in 
+  in
+  let p = make_paths a2_equ tc d sens [] radius in
     iterl (fun x -> draw (pathn x)) p
 
 (* *)
-let draw_label pt lab radius = 
+let draw_label pt lab radius =
   let (x,y) = List.hd (List.rev pt) in
   let angl = (acos (x /. (sqrt (x*.x +. y*.y))))*.180./.pi in
   let angle = if y<0. then 360.-.angl else angl in
-  let placement = 
+  let placement =
     if ((angle>315. && angle<360.) || (angle>=0. && angle<=45.)) then `East
     else if (angle>45. && angle<=135.) then `North
     else if (angle>135. && angle<=225.) then `West
@@ -97,7 +97,7 @@ let draw_label pt lab radius =
 
 
 (* Dessine le radar vide *)
-let rec draw_skeleton acc ?label ticks lmax skltn d radius= 
+let rec draw_skeleton acc ?label ticks lmax skltn d radius=
   let label = match label with
     |None -> []
     |Some i -> i
@@ -115,13 +115,13 @@ let rec draw_skeleton acc ?label ticks lmax skltn d radius=
 
 
 (* Fabrique une liste contenant les coordonnées des axes du radar *)
-let empty_radar_coords nbr = 
-  let delta = 360. /. (float nbr) in 
-  let rec empty_radar acc nb diff angle = 
-    if nb>0 then 
-      empty_radar ([(0.,0.);(cos (angle*.2.*.pi/.360.), sin (angle*.2.*.pi/.360.) )]::acc) 
+let empty_radar_coords nbr =
+  let delta = 360. /. (float nbr) in
+  let rec empty_radar acc nb diff angle =
+    if nb>0 then
+      empty_radar ([(0.,0.);(cos (angle*.2.*.pi/.360.), sin (angle*.2.*.pi/.360.) )]::acc)
 	(nb-1) diff (angle+.diff)
-    else List.rev acc 
+    else List.rev acc
   in
     empty_radar [] nbr delta 0.
 
@@ -130,7 +130,7 @@ let empty_radar_coords nbr =
 let list_coord lmax l skeleton =
   let rec fct lmax l skeleton acc =
     match lmax,l,skeleton with
-      |x::res,y::res2,z::res3 -> 
+      |x::res,y::res2,z::res3 ->
 	 let (z1,z2) = List.hd (List.rev z) in
 	 let x_coord = z1*.y/.x in
 	 let y_coord = z2*.y/.x in
@@ -141,19 +141,19 @@ let list_coord lmax l skeleton =
     fct lmax l skeleton []
 
 (* Fabrique un radar associé au squelette de radar passé en paramètre *)
-let radar color lmax l skeleton pen fill stl radius = 
+let radar color lmax l skeleton pen fill stl radius =
   let coords = scale_radius radius (list_coord lmax l skeleton) in
   let rec dots acc f c = match c with
-    |x::res -> 
+    |x::res ->
        let col = if f then Color.black else color in
        let cmd = draw ~pen:(Pen.scale (bp 3.) pen) ~color:col (pathn [x]) in
 	 dots (cmd++acc) f res
     |[]->acc
-  in 
+  in
   let dots_cmd = dots nop fill coords in
   let clr = if fill then Color.black else color in
   let path_cmd = draw (pathn ~style:jLine ~cycle:jLine coords) ~pen ~color:clr ~dashed:stl in
-  let path_filled = if fill then (Command.fill ~color:color (pathn ~style:jLine ~cycle:jLine coords)) else nop 
+  let path_filled = if fill then (Command.fill ~color:color (pathn ~style:jLine ~cycle:jLine coords)) else nop
   in
     path_filled++path_cmd++dots_cmd
 
@@ -173,22 +173,22 @@ let init radius ?scale l=
       |x::_ -> empty_radar_coords (List.length x)
       |[] -> failwith "No data" in
   ticks_size,lesmax,skeleton
-  
 
-  
+
+
 (* Fabrique des radars empilés *)
 let stack ?(radius=default_radius)
-          ?(color=[black]) 
+          ?(color=[black])
           ?(pen=default_pen)
           ?(style=default_style) ?(ticks=1.) ?label ?scale l =
-  
+
   let ticks_size,lesmax,skeleton = init radius ?scale l in
-    
+
   let rec radar_list col stl maxi li skltn acc = match li,col,stl with
     |x::res,cq,sq ->
        let c,cres = Q.pop cq in
        let s,sres = Q.pop sq in
-	 radar_list (Q.push c cres) (Q.push s sres) maxi res skltn 
+	 radar_list (Q.push c cres) (Q.push s sres) maxi res skltn
 	   ((radar c maxi x skltn pen false s radius)++acc)
     |[],cq,sq-> acc
   in Picture.make ((draw_skeleton nop ?label ticks lesmax skeleton ticks_size radius)
@@ -197,15 +197,15 @@ let stack ?(radius=default_radius)
 
 (* Fabrique des radars comparatifs, renvoie la liste de Pictures représentant chaque radar *)
 let compare ?(radius=default_radius)
-            ?(color=[black]) 
-            ?(fill=false) 
-            ?(pen=default_pen) 
+            ?(color=[black])
+            ?(fill=false)
+            ?(pen=default_pen)
             ?(style=default_style) ?(ticks=1.) ?label ?scale l =
-  
+
   let ticks_size,lesmax,skeleton = init radius ?scale l in
 
   let rec build_pictures skltn col stl maxi li tcks acc = match li,col,stl with
-    |x::res,cq,sq -> 
+    |x::res,cq,sq ->
        let c,cres = Q.pop cq in
        let s,sres = Q.pop sq in
        let r = radar c maxi x skltn pen fill s radius in
@@ -213,9 +213,9 @@ let compare ?(radius=default_radius)
        let pic = Picture.make (r++sk) in
 	 build_pictures skltn (Q.push c cres) (Q.push s sres) maxi res tcks (pic::acc)
     |[],cq,sq-> List.rev acc
-  in 
-    build_pictures skeleton (Q.of_list color) (Q.of_list style) lesmax l ticks [] 
-  
+  in
+    build_pictures skeleton (Q.of_list color) (Q.of_list style) lesmax l ticks []
+
 
 
 

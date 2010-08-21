@@ -24,7 +24,7 @@ let rec map2 f (Node (x,l1)) (Node (y,l2)) =
 let rec combine (Node (x,l1)) (Node (y,l2)) =
   Node ((x,y), List.map2 combine l1 l2)
 
-let rec split (Node ((x,y),l)) = 
+let rec split (Node ((x,y),l)) =
   let l1,l2 = List.split (List.map split l) in
   Node (x,l1), Node (y,l2)
 
@@ -69,7 +69,7 @@ module Place (X : Signature.Boxlike) = struct
   let place ?(cs=Num.bp 5.) ?(ls=Num.bp 12.) ?(valign=`Center) ?(halign=`North)
       t =
     let rec aux (Node (x,l)) =
-      let l = Box.hbox ~padding:cs ~pos:halign (List.map aux l) in 
+      let l = Box.hbox ~padding:cs ~pos:halign (List.map aux l) in
       Box.vbox ~padding:ls ~pos:valign [x;l] in
     aux t
 
@@ -79,12 +79,12 @@ module Place (X : Signature.Boxlike) = struct
 end
 
 open Command
-let draw to_box t = 
+let draw to_box t =
   fold (fun acc x -> acc ++ Box.draw (to_box x)) Command.nop t
 
-let gen_draw_arrows default ~style ~corner t = 
-  root_map (fun a b -> 
-    match a with 
+let gen_draw_arrows default ~style ~corner t =
+  root_map (fun a b ->
+    match a with
     | None -> default
     | Some a -> style (corner `South a) (corner `North b)) t
 
@@ -159,7 +159,7 @@ module Overlays_Boxlike (X : Signature.Boxlike)
 struct
   open Overlays
   type t = X.t spec
-        
+
   let width = max X.width
   let height = max X.height
   let set_pos = set_pos X.set_pos

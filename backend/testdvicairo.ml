@@ -52,7 +52,7 @@ let all_output_aux h w x y prefix saved =
     Dvicairo.create_gtk h w x y (Cairo_device.replay !trace saved) prefix
 
 let all_output s =
-  let prefix = try Filename.chop_extension s 
+  let prefix = try Filename.chop_extension s
   with Invalid_argument _ -> s in
   let doc = Dvi.read_file s in
   let saved = Saved_device.load_doc () doc in
@@ -65,14 +65,14 @@ let all_output s =
           let x_min,y_min,x_max,y_max = Dev_save.get_dimen_first_page page in
           let w = x_max -. x_min in
           let h = y_max -. y_min in
-          all_output_aux h w (-.x_min) (-.y_min) (incr(count);fprefix !count) page 
+          all_output_aux h w (-.x_min) (-.y_min) (incr(count);fprefix !count) page
       ) pages
     else
       let height = Dvi.get_height_cm doc +. 2. *. !margin in
       let width = Dvi.get_width_cm doc +. 2. *. !margin in
       all_output_aux height width !margin !margin prefix saved
- 
-  
+
+
 let options =
   [("-m",Arg.Set_float margin,"Set the margin (cm) around the pages (2.54 cm = 1 in by default)");
    ("--pdf",Arg.Set pdf,"Output in pdf (dviname.pdf)");
@@ -86,5 +86,5 @@ let options =
    ("-v",Arg.Set debug,"Verbose")
 ]
 
-let _ = 
+let _ =
   Arg.parse options all_output "Usage :dvicairo [options] <file1.dvi> <file2.dvi> ...\n"

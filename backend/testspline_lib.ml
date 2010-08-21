@@ -15,7 +15,7 @@
 (**************************************************************************)
 
 type point = Cairo.point =
-    { x : float ; 
+    { x : float ;
       y : float }
 
 
@@ -53,7 +53,7 @@ let draw_point cr col pt  =
     |`Yellow -> Cairo.set_source_rgba cr 0. 1. 1. 0.5
     |`Red -> Cairo.set_source_rgba cr 1. 0. 0. 0.5);
   Cairo.new_path cr ;
-  Cairo.arc cr 
+  Cairo.arc cr
     pt.x pt.y
     (10. /. 1.25)
     0. two_pi ;
@@ -65,21 +65,21 @@ let draw_spline cr a b c d =
   Cairo.save cr ;
   begin
     Cairo.move_to cr  a.x a.y ;
-    Cairo.curve_to cr 
-      b.x b.y 
-      c.x c.y 
+    Cairo.curve_to cr
+      b.x b.y
+      c.x c.y
       d.x d.y ;
-    
+
     Cairo.stroke cr ;
-    
+
     draw_control_line cr a b 2. ;
     draw_control_line cr d c 2. ;
-    
+
     List.iter (draw_point cr `Red) [a;b;c;d];
   end;
   Cairo.restore cr
-    
-let ribbon = Spline_lib.create 
+
+let ribbon = Spline_lib.create
   {x=110.;y=20.} {x=310.;y=300.}
   {x=10.;y= 310.} {x=210.;y=20.}
 
@@ -125,7 +125,7 @@ let draw cr =
                           (Spline_lib.dist_min_point arc point_dist_min));
 
   Cairo.show_page cr;
-  
+
   (* Nearest point between the ribbon and two different arc *)
   let ribbon_t1 = Spline_lib.translate ribbon {x=400.;y=0.} in
   let arc_t3 = Spline_lib.translate arc {x=400.;y=250.} in
@@ -155,7 +155,7 @@ let draw cr =
 
 
     Cairo.show_page cr;
-    
+
   let segment1 = Spline_lib.create {x=150.;y=50.} {x=50.;y=150.} {x=150.;y=50.} {x=50.;y=150.} in
   let segment2 = Spline_lib.translate segment1 {y=50.;x=50.} in
   Spline_lib.iter (draw_spline cr) segment1;
@@ -165,7 +165,7 @@ let draw cr =
   draw_point cr `Green (Spline_lib.abscissa_to_point segment2 t2);
 
     Cairo.show_page cr;
-  
+
   let segment1 = Spline_lib.create {x=150.;y=50.} {x=50.;y=150.} {x=150.;y=50.} {x=50.;y=150.} in
   let segment2 = Spline_lib.translate segment1 {y=50.;x=75.} in
   Spline_lib.iter (draw_spline cr) segment1;
@@ -186,7 +186,7 @@ let draw cr =
                "\\newlength{\\hautw}\\settowidth{\\hautw}{Haut}\\parbox{\\hautw}{Haut\\newline Bas}"
               ] in
   let texs = Gentex.create "" label in
-  let box draw_bases tex = 
+  let box draw_bases tex =
     let (x_min,y_min,x_max,y_max) = Gentex.get_dimen_pt tex in
     Cairo.save cr;
     Cairo.set_source_rgb cr 0. 0. 1. ;
@@ -198,7 +198,7 @@ let draw cr =
     Cairo.line_to cr x_min y_min ;
     Cairo.stroke cr;
     if draw_bases then
-      List.iter (fun x -> 
+      List.iter (fun x ->
                    Cairo.set_source_rgb cr 0. 1. 0. ;
                    Cairo.move_to cr x_min x;
                    Cairo.line_to cr x_max x;
@@ -214,7 +214,7 @@ let draw cr =
                  box false tex;
                  Cairo.translate cr tx 0.) texs;
     Cairo.restore cr;
-    
+
     Cairo.save cr;
     Cairo.translate cr 0. ty;
     List.iter (fun tex ->
@@ -228,6 +228,6 @@ let draw cr =
   draw_all 60. 50.
 
 
-  
-let _ = 
+
+let _ =
   create_pdf 20. 29.7 draw "testspline_lib.pdf"

@@ -19,8 +19,8 @@ open Format
   let minipage fmt coef i tmpl sep suf =
     fprintf fmt "@[<hov 2>\\begin{minipage}[tb]{%f\\textwidth}@\n" coef;
     fprintf fmt "@[<hov 2>\\begin{center}@\n";
-    fprintf fmt 
-      "\\includegraphics[width=\\textwidth,height=\\textwidth,keepaspectratio]{%s%s%i%s}" 
+    fprintf fmt
+      "\\includegraphics[width=\\textwidth,height=\\textwidth,keepaspectratio]{%s%s%i%s}"
       tmpl sep i suf;
     fprintf fmt "@]@\n\\end{center}@\n";
     fprintf fmt "@]@\n\\end{minipage}@\n"

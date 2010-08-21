@@ -15,7 +15,7 @@
 (**************************************************************************)
 
 (*
-type color = 
+type color =
   | RGB of float * float * float
   | CMYK of float * float * float * float
   | Gray of float
@@ -48,7 +48,7 @@ type position =
   | Plowleft
   | Plowright
 
-let rec num = function 
+let rec num = function
   | F f -> combine 1 (hash f)
   | NXPart p -> combine 2 (point p)
   | NYPart p -> combine 3 (point p)
@@ -95,7 +95,7 @@ and knot(d1,p,d2) = combine3 64 (direction d1) (point p) (direction d2)
 
 
 and path = function
-  | PAConcat(k,j,p) -> 
+  | PAConcat(k,j,p) ->
       combine3 22 (knot k) (joint j) (path p)
   | PACycle(d,j,p) ->
       combine3 23 (direction d) (joint j) (path p)
@@ -158,8 +158,8 @@ and command = function
   | CDrawPic p -> combine 45 (picture p)
   | CFill(p,c) -> combine2 46 (path p) (hash c)
   | CLabel(pic,pos,poi) -> combine3 47 (picture pic) (hash pos) (point poi)
-  | CDotLabel(pic,pos,poi) -> 
-      combine3 48 (picture pic) (hash pos) (point poi) 
+  | CDotLabel(pic,pos,poi) ->
+      combine3 48 (picture pic) (hash pos) (point poi)
   | CLoop(n,m,_) ->  combine2 49 n m
   | CSeq l ->
       List.fold_left (fun acc t -> combine2 50 acc (command t)) 51 l

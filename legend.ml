@@ -21,11 +21,11 @@ open Color
 
 let rec mklegend ensstroke colstroke fill vb1 = function
     |[] -> set_fill fill (set_stroke ensstroke (
-	box (tabularl ~hpadding:(Num.bp 10.) ~vpadding:(Num.bp 10.) 
+	box (tabularl ~hpadding:(Num.bp 10.) ~vpadding:(Num.bp 10.)
 	       (List.rev vb1))))
-    |(col,text)::res -> 
+    |(col,text)::res ->
        let c = set_fill col (set_stroke colstroke (
-        empty ~width:(Num.bp 20.) ~height:(Num.bp 10.) ())) 
+        empty ~width:(Num.bp 20.) ~height:(Num.bp 10.) ()))
        in
 	 mklegend ensstroke colstroke fill ([c;tex text]::vb1) res
 

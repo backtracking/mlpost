@@ -25,7 +25,7 @@ let dotlabels ?(pos=`Center) ls lp =
   seq (List.map2 (fun s p -> dotlabel ~pos:pos (Picture.tex s) p) ls lp)
 
 let draw_simple_arrow ?color ?pen ?dashed ?style ?outd ?ind a b =
-  Arrow.simple ?color ?pen ?dashed 
+  Arrow.simple ?color ?pen ?dashed
     (Arrow.simple_point_point ?style ?outd ?ind a b)
 
 let draw_label_arrow ?color ?pen ?dashed ?style ?outd ?ind ?pos lab a b =
@@ -34,14 +34,14 @@ let draw_label_arrow ?color ?pen ?dashed ?style ?outd ?ind ?pos lab a b =
   label ?pos lab (Path.point 0.5 p)
 
 let draw_labelbox_arrow ?color ?pen ?dashed ?style ?outd ?ind ?pos lab a b =
-  draw_label_arrow ?color ?pen ?dashed ?style ?outd ?ind ?pos 
+  draw_label_arrow ?color ?pen ?dashed ?style ?outd ?ind ?pos
     (Picture.make (Box.draw lab)) a b
 
-let box_arrow ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep a b =   
+let box_arrow ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep a b =
   let a, b = match within with | None -> a,b | Some x -> Box.sub a x, Box.sub b x in
   Arrow.simple ?color ?pen ?dashed (Box.cpath ?style ?outd ?ind ?sep a b)
 
-let box_line ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep a b =   
+let box_line ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep a b =
   let a, b = match within with | None -> a,b | Some x -> Box.sub a x, Box.sub b x in
   draw ?color ?pen ?dashed (Box.cpath ?style ?outd ?ind ?sep a b)
 
@@ -59,7 +59,7 @@ let box_label_arrow ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep ?pos lab 
 
 (* TODO unify all these functions *)
 let box_labelbox_arrow ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep ?pos lab a b =
-  box_label_arrow ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep ?pos 
+  box_label_arrow ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep ?pos
     (Picture.make (Box.draw lab)) a b
 
 (***
@@ -69,13 +69,13 @@ let hboxjoin ?color ?pen ?dashed ?dx ?dy ?pos ?spacing pl =
   let bl = Box.halign_to_box ?dx ?pos ?spacing pl in
     match bl with
     | [] -> nop
-    | hd::tl -> 
-        let cmd,_ = 
+    | hd::tl ->
+        let cmd,_ =
           List.fold_left
           (fun (cmd,b1) b2 ->
             Box.draw b2 ++ box_arrow ?color ?pen ?dashed b1 b2 ++ cmd,b2 )
           (Box.draw hd,hd) tl
-        in 
+        in
           cmd
 
 ***)

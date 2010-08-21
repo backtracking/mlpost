@@ -33,18 +33,18 @@ let south_west = llcorner
 let north_east = urcorner
 let south_east = lrcorner
 
-let corner_bbox ?(dx=Num.zero) ?(dy=Num.zero) pic = 
+let corner_bbox ?(dx=Num.zero) ?(dy=Num.zero) pic =
   let pdx = Point.pt (dx, Num.zero) in
   let pdy = Point.pt (Num.zero, dy) in
-  Path.pathp ~style:Path.jLine ~cycle:Path.jLine 
+  Path.pathp ~style:Path.jLine ~cycle:Path.jLine
     [Point.add (Point.sub (ulcorner pic) pdx) pdy;
      Point.sub (Point.sub (llcorner pic) pdx) pdy;
      Point.sub (Point.add (lrcorner pic) pdx) pdy;
      Point.add (Point.add (urcorner pic) pdx) pdy]
 
-let transform trl p = 
-  List.fold_left 
-    (fun acc tr -> mkPicture (mkPITransformed acc tr)) p trl 
+let transform trl p =
+  List.fold_left
+    (fun acc tr -> mkPicture (mkPITransformed acc tr)) p trl
 
 let ctr pic = Point.segment 0.5 (llcorner pic) (urcorner pic)
 
@@ -63,13 +63,13 @@ let place_up_right p pic = place urcorner pic p
 let place_bot_left p pic = place llcorner pic p
 let place_bot_right p pic = place lrcorner pic p
 
-let beside p1 p2 = 
+let beside p1 p2 =
   mkSeq [p1; place_up_left (urcorner p1) p2]
 
 let below p1 p2 =
   mkSeq [p1; place_up_left (llcorner p1) p2]
 
-let clip pic pth = 
+let clip pic pth =
   mkPicture (mkPIClip pic pth)
 
 let width p = Point.xpart (Point.sub (urcorner p) (ulcorner p))
@@ -81,7 +81,7 @@ let south p = Point.segment 0.5 (south_east p) (south_west p)
 let west p = Point.segment 0.5 (south_west p) (north_west p)
 let east p = Point.segment 0.5 (north_east p) (south_east p)
 
-let corner pos x = 
+let corner pos x =
   match pos_reduce pos with
   | `Northwest -> north_west x
   | `Northeast -> north_east x
@@ -93,7 +93,7 @@ let corner pos x =
   | `North -> north x
   | `South -> south x
 
-type escaped = 
+type escaped =
     [`Backslash
     |`Underscore]
 

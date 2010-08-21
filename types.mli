@@ -21,15 +21,15 @@ type color = Concrete_types.color
 
 type name = string
 
-type corner =  [ 
-  | `Northwest | `Northeast | `Southwest | `Southeast 
-  | `Upleft | `Upright | `Lowleft | `Lowright 
-  | `Upperleft | `Upperright | `Lowerleft | `Lowerright 
+type corner =  [
+  | `Northwest | `Northeast | `Southwest | `Southeast
+  | `Upleft | `Upright | `Lowleft | `Lowright
+  | `Upperleft | `Upperright | `Lowerleft | `Lowerright
   | `Topleft | `Topright | `Bottomleft | `Bottomright
 ]
 
-type corner_red =  [ 
-  | `Northwest | `Northeast | `Southwest | `Southeast 
+type corner_red =  [
+  | `Northwest | `Northeast | `Southwest | `Southeast
 ]
 
 type hposition = [
@@ -80,16 +80,16 @@ and point_node = private
 
 and point = point_node hash_consed
 
-and on_off_node = private 
-  | On of num 
+and on_off_node = private
+  | On of num
   | Off of num
 
-and on_off = on_off_node hash_consed 
+and on_off = on_off_node hash_consed
 
 and direction_node = private
   | Vec of point
   | Curl of float
-  | NoDir 
+  | NoDir
 
 and direction = direction_node hash_consed
 
@@ -102,7 +102,7 @@ and joint_node = private
 
 and joint = joint_node hash_consed
 
-and knot_node = private 
+and knot_node = private
     { knot_in : direction ; knot_p : point ; knot_out : direction }
 
 and knot = knot_node hash_consed
@@ -132,8 +132,8 @@ and path_node = private
 
 and path = path_node hash_consed
 
-and matrix = 
-    { xx : num; yx : num; 
+and matrix =
+    { xx : num; yx : num;
       xy : num; yy : num; x0 : num; y0 : num; }
 
 and transform_node = private
@@ -325,7 +325,7 @@ val mkPenTransformed: pen -> transform -> pen
 
 (* brush *)
 val mkBrush: color option -> pen option -> dash option -> brush
-val mkBrushOpt : brush option -> color option -> pen option -> dash option 
+val mkBrushOpt : brush option -> color option -> pen option -> dash option
   -> brush
 
 (* on_off *)

@@ -56,7 +56,7 @@ let dec_channel_for_lexer ic =
   let s = String.make random_bytes ' ' in
   ignore (input ic s 0 random_bytes);
   dec_string r s;
-  Lexing.from_function (fun buf n -> 
+  Lexing.from_function (fun buf n ->
                           let n = input ic buf 0 n in
                           dec_string r buf;
                           n)
@@ -69,7 +69,7 @@ let suppres buf_out buf_tmp start len =
   Buffer.add_substring buf_out buf_tmp 0 start;
   let buflen = String.length buf_tmp in
   if len+start <buflen then
-    (Buffer.add_substring buf_out buf_tmp (start+len) 
+    (Buffer.add_substring buf_out buf_tmp (start+len)
       (buflen-start-len);
      0)
   else
@@ -102,7 +102,7 @@ let dec_buffer ch len buf_out =
     let dec = (dec_char r (input_char ch)) in
     if dec == '\013' then Buffer.add_char buf_tmp '\n'
     else if dec != '\n' then Buffer.add_char buf_tmp dec
-    else 
+    else
       (eexec_line (Buffer.contents buf_tmp) buf_out;
        Buffer.clear buf_tmp)
   done
@@ -110,7 +110,7 @@ let dec_buffer ch len buf_out =
 
 
 
-let all ch = 
+let all ch =
   let r = ref init in
   while true do
     let c = input_char ch in
@@ -125,14 +125,14 @@ let rec input_char_list ch = function
 
 let rec decale  = function
   | [] -> ()
-  | _::tl as l -> 
+  | _::tl as l ->
       let r = ref init in
       let l = List.map (dec_char r) l in
       Format.printf "LINE : %i\n" (List.length l);
       Format.printf "%a@.@." (fun fmt -> List.iter (Format.fprintf fmt "%c")) l;
       decale tl
 
-let search ch = 
+let search ch =
   let l = input_char_list ch 100 in
   decale l
 
@@ -182,7 +182,7 @@ let find_block ch =
           dec_buffer ch block_len buf_out;
           find_block_aux ()
       | _ -> failwith "pfb format error, try with t1disasm"
-  in 
+  in
   find_block_aux ();
   buf_out
 
@@ -192,8 +192,8 @@ let open_decr filename =
 
 let print_block ch =
     Buffer.output_buffer stdout (find_block ch)
-               
-(*let _ = 
+
+(*let _ =
   let ch = open_in_bin Sys.argv.(1) in
   print_block ch
 *)

@@ -28,7 +28,7 @@ module Picture :
 sig
   val draw : Cairo.t -> float -> float -> Picture_lib.t -> unit
   val where : Cairo.t -> Picture_lib.t -> float * float -> Picture_lib.id list
-  val move : 
+  val move :
     Cairo.t -> Picture_lib.t -> Picture_lib.id -> float * float -> float * float
 end
 

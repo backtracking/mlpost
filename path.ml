@@ -20,12 +20,12 @@ open Types
 include MetaPath.BaseDefs
 
 let start x = of_metapath (start x)
-let append ?style x y  = 
+let append ?style x y  =
   of_metapath (append ?style (of_path x) (of_path y))
 
 type t = Types.path
 type metapath = Types.metapath
-let knotp ?(l=defaultdir) ?(r=defaultdir) p = Types.mkKnot l p r 
+let knotp ?(l=defaultdir) ?(r=defaultdir) p = Types.mkKnot l p r
 
 let knot ?(l) ?(r) ?(scale) p = knotp ?l (S.p ?scale p) ?r
 let knotn ?(l) ?(r) p = knotp ?l (S.pt p) ?r
@@ -75,7 +75,7 @@ let strip n p =
 
 (* directed paths *)
 
-type orientation = 
+type orientation =
     | Up | Down | Left | Right
     | Upn of Num.t | Downn of Num.t | Leftn of Num.t | Rightn of Num.t
 
@@ -96,20 +96,20 @@ let dist_horizontal dirlist abs distance =
   let left,right,listn = divise_dir dirlist in
   let diff = (List.length right) - (List.length left) in
   let distance = gmean distance zero in
-  let d = List.fold_left (fun a x -> match x with 
+  let d = List.fold_left (fun a x -> match x with
 			    |Leftn n -> (-/) a n
 			    |Rightn n -> (+/) a n
 			    |_ -> failwith "impossible") distance listn in
   let dist,b = if diff = 0 then (bp 10.),false else (gmean ((/./) d (float diff)) zero),true in
-    
+
   let rec fct acc abs = function
     |[] -> List.rev acc
-    |Left::res -> 
-       let abs = (-/) abs dist in 
+    |Left::res ->
+       let abs = (-/) abs dist in
 	 fct (abs::acc) abs res
-    |Leftn n::res -> let abs = (-/) abs n in 
+    |Leftn n::res -> let abs = (-/) abs n in
 	fct (abs::acc) abs res
-    |Right::res -> 
+    |Right::res ->
        let abs = (+/) abs dist in
 	 fct (abs::acc) abs res
     |Rightn n::res -> let abs = (+/) abs n in
@@ -117,13 +117,13 @@ let dist_horizontal dirlist abs distance =
     |_ -> failwith "impossible"
   in
     fct [] abs dirlist
-	
+
 
 let dist_vertical dirlist ordo distance =
 
   let down,up,listn = divise_dir dirlist in
   let diff = (List.length up) - (List.length down) in
-  let d = List.fold_left (fun a x -> match x with 
+  let d = List.fold_left (fun a x -> match x with
 			    |Downn n -> (-/) a n
 			    |Upn n -> (+/) a n
 			    |_ -> failwith "impossible") distance listn in
@@ -131,33 +131,33 @@ let dist_vertical dirlist ordo distance =
   let dist,b = if diff = 0 then (bp 10.),false else (gmean ((/./) d (float diff)) zero),true in
   let rec fct acc ordo = function
     |[] -> List.rev acc
-    |Down::res -> 
+    |Down::res ->
        let ordo = (-/) ordo dist in
 	 fct (ordo::acc) ordo res
     |Downn n::res -> let ordo = (-/) ordo n in
 	fct (ordo::acc) ordo res
-    |Up::res -> 
+    |Up::res ->
        let ordo = (+/) ordo dist in
 	 fct (ordo::acc) ordo res
-    |Upn n::res -> let ordo = (+/) ordo n in 
+    |Upn n::res -> let ordo = (+/) ordo n in
 	fct (ordo::acc) ordo res
     |_ -> failwith "impossible"
   in
     fct [] ordo dirlist
-    
+
 let smart_path ?style dirlist p1 p2 =
   let width = (-/) (xpart p2) (xpart p1) in
   let height = (-/) (ypart p2) (ypart p1) in
-  let dirhorizontal, dirvertical = List.partition 
+  let dirhorizontal, dirvertical = List.partition
     (fun x -> match x with |(Left|Right|Leftn _|Rightn _) -> true |_->false) dirlist in
   let lesdisth = dist_horizontal dirhorizontal (xpart p1) width in
   let lesdistv = dist_vertical dirvertical (ypart p1) height in
 
-  let rec fct pc acc dirl dv dh = 
+  let rec fct pc acc dirl dv dh =
     match dirl,dv,dh with
       |(Up|Upn _|Down|Downn _)::dres,
 	dv::dvres,
-	dhlist -> 
+	dhlist ->
 	 let ps = pt (xpart pc, dv) in
 	   fct ps (ps::acc) dres dvres dhlist
       |(Left|Leftn _|Right|Rightn _)::dres,
@@ -172,11 +172,11 @@ let smart_path ?style dirlist p1 p2 =
   in
   pathp ?style points
 
-let draw ?brush ?color ?pen ?dashed t = 
-  (* We don't use a default to avoid the output of 
-     ... withcolor (0.00red+0.00green+0.00blue) withpen .... 
+let draw ?brush ?color ?pen ?dashed t =
+  (* We don't use a default to avoid the output of
+     ... withcolor (0.00red+0.00green+0.00blue) withpen ....
      for each command in the output file *)
     mkCommand (mkCDraw t (mkBrushOpt brush color pen dashed))
 
-let fill ?color t = 
+let fill ?color t =
   mkCommand (mkCFill t color)

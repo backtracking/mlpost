@@ -59,14 +59,14 @@ let color_gen s v =
   let value = 180. in
   let next = ref 0. in
   fun () ->
-    let rec aux acc value current = function 
-      | [] -> 
+    let rec aux acc value current = function
+      | [] ->
           assert (current = 0.);
           next := value;
           List.rev_append acc [true]
       | true::l ->
           aux (false::acc) (value/.2.) (current-.value) l
-      | false::l -> 
+      | false::l ->
           next := current +. value;
           List.rev_append acc (true::l) in
     let res = !next in

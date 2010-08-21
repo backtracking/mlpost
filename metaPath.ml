@@ -17,15 +17,15 @@
 module S = Point
 open Types
 
-module BaseDefs = 
+module BaseDefs =
 struct
-  type direction = Types.direction 
+  type direction = Types.direction
 
   let vec = mkVec
   let curl = mkCurl
   let noDir = mkNoDir
 
-  type joint = Types.joint 
+  type joint = Types.joint
 
   let jLine = mkJLine
   let jCurve = mkJCurve
@@ -71,7 +71,7 @@ end
 include BaseDefs
 type t = metapath
 type path = Types.path
-let knotp ?(l=defaultdir) ?(r=defaultdir) p = Types.mkKnot l p r 
+let knotp ?(l=defaultdir) ?(r=defaultdir) p = Types.mkKnot l p r
 
 let knot ?(l) ?(r) ?(scale) p = knotp ?l (S.p ?scale p) ?r
 let knotn ?(l) ?(r) p = knotp ?l (S.pt p) ?r
@@ -86,11 +86,11 @@ let concat ?(style=defaultjoint) p k = mkMPAConcat k style p
 let pathk ?(style) = function
   | [] -> failwith "empty path is not allowed"
   | (x::xs) ->
-      List.fold_left 
+      List.fold_left
                  (fun p knot -> concat ?style p knot) (start x) xs
 
 let pathp ?(style) l =
-  pathk ?style 
+  pathk ?style
     (List.map (knotp) l)
 
 let pathn ?(style) l = pathp ?style (List.map (Point.pt) l)
@@ -101,7 +101,7 @@ let path ?(style) ?(scale) l =
 (* construct a path with knot list and joint list *)
 let jointpathk lp lj =
   try
-    List.fold_left2  
+    List.fold_left2
       (fun acc j k -> mkMPAConcat k j acc)
       (start (List.hd lp)) lj (List.tl lp)
   with Invalid_argument _ -> invalid_arg "jointpathk : the list of knot must \

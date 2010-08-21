@@ -281,9 +281,9 @@ let draw_thick ?style ?(boxed=true) ?line_color ?fill_color ?outd ?ind ?width
   Command.append fill_cmd draw_cmd
 
 let simple ?color ?brush ?pen ?dashed p =
-  let kind = 
-    add_head 
-      ~head:(head_triangle_full ?color) 
+  let kind =
+    add_head
+      ~head:(head_triangle_full ?color)
       (add_line ?dashed ?color ?brush ?pen empty) in
   draw ~kind p
 

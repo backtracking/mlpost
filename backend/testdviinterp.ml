@@ -30,7 +30,7 @@ struct
 end
 
 module Dumb_interp = Interp(Dumb_device)
-  
+
 let _ =
   Dumb_interp.set_debug true;
   match Array.length Sys.argv with

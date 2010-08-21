@@ -16,8 +16,8 @@
 
 let _ = GMain.Main.init ()
 
-type point = Cairo.point = 
-    { x : float ; 
+type point = Cairo.point =
+    { x : float ;
       y : float }
 
 type one_spl = {
@@ -44,7 +44,7 @@ type spl = {
   }
 
 
-let ribbon = 
+let ribbon =
   [| 110., 20.  ; 310., 300. ;
      10. , 310. ; 210., 20.  |]
 
@@ -63,7 +63,7 @@ let spline_copy arr =
    active = 0}
 
 let exec_on_spls f spls =
-  f (List.map (fun {pt = pt} -> pt) spls) 
+  f (List.map (fun {pt = pt} -> pt) spls)
 
 let new_pixmap width height =
   let drawable = GDraw.pixmap ~width ~height () in
@@ -72,14 +72,14 @@ let new_pixmap width height =
     ~x:0 ~y:0 ~width ~height ~filled:true () ;
   drawable
 
-let init_spl myfun = 
+let init_spl myfun =
   let width = 400 in
   let height = 400 in
   {
    pm = new_pixmap width height ;
    spls = [spline_copy ribbon] ;
    tolerance = 0.1 ;
-   line_width = 10. ; 
+   line_width = 10. ;
    line_cap = Cairo.LINE_CAP_ROUND ;
    zoom = 1. ;
    xtrans = 0. ;
@@ -111,11 +111,11 @@ let draw_spline cr spl one_spl =
   let drag_pt = Cairo.device_to_user cr drag_pt in
   Cairo.save cr ; begin
     Cairo.move_to cr  one_spl.pt.(0).x one_spl.pt.(0).y ;
-    Cairo.curve_to cr 
-      one_spl.pt.(1).x one_spl.pt.(1).y 
-      one_spl.pt.(2).x one_spl.pt.(2).y 
+    Cairo.curve_to cr
+      one_spl.pt.(1).x one_spl.pt.(1).y
+      one_spl.pt.(2).x one_spl.pt.(2).y
       one_spl.pt.(3).x one_spl.pt.(3).y ;
-    
+
     if spl.click && Cairo.in_stroke cr drag_pt
     then one_spl.active <- 0xf ;
 
@@ -128,7 +128,7 @@ let draw_spline cr spl one_spl =
       Cairo.save cr ; begin
 	Cairo.set_source_rgba cr 1. 0. 0. 0.5 ;
 	Cairo.new_path cr ;
-	Cairo.arc cr 
+	Cairo.arc cr
 	  one_spl.pt.(i).x one_spl.pt.(i).y
 	  (spl.line_width /. 1.25)
 	  0. two_pi ;
@@ -140,14 +140,14 @@ let draw_spline cr spl one_spl =
       Cairo.restore cr
     done end ;
   Cairo.restore cr
-	  
+
 let draw_point spl cr col pt  =
   Cairo.save cr ;
   (match col with
     |`Green -> Cairo.set_source_rgba cr 0. 1. 0. 0.5 ;
     |`Yellow -> Cairo.set_source_rgba cr 0. 1. 1. 0.5);
   Cairo.new_path cr ;
-  Cairo.arc cr 
+  Cairo.arc cr
     pt.x pt.y
     (spl.line_width /. 1.25)
     0. two_pi ;
@@ -156,7 +156,7 @@ let draw_point spl cr col pt  =
 
 let paint spl =
   let cr = Cairo_lablgtk.create spl.pm#pixmap in
-  spl.pm#rectangle ~x:0 ~y:0 
+  spl.pm#rectangle ~x:0 ~y:0
     ~width:spl.width ~height:spl.height ~filled:true () ;
   Cairo.set_source_rgb cr 0. 0. 0. ;
   Cairo.set_line_width cr spl.line_width ;
@@ -165,8 +165,8 @@ let paint spl =
   Cairo.scale cr spl.zoom spl.zoom ;
   Cairo.set_tolerance cr spl.tolerance ;
 
-  (try 
-    List.iter (draw_spline cr spl) spl.spls ; 
+  (try
+    List.iter (draw_spline cr spl) spl.spls ;
     spl.need_update <- false
   with Cairo.Error _ ->
     prerr_endline "Cairo is unhappy");
@@ -191,25 +191,25 @@ let trans_vert_cb dir spl =
   end ;
   true
 
-let zoom_cb dir spl = 
+let zoom_cb dir spl =
   begin match dir with
-  | `OUT -> spl.zoom <- spl.zoom /. 1.1 
-  | `IN  -> spl.zoom <- spl.zoom *. 1.1 
-  end ; 
+  | `OUT -> spl.zoom <- spl.zoom /. 1.1
+  | `IN  -> spl.zoom <- spl.zoom *. 1.1
+  end ;
   true
 
 let smooth_cb dir spl =
   begin match dir with
   | `INC -> spl.tolerance <- spl.tolerance *. 10.
   | `DEC -> spl.tolerance <- spl.tolerance /. 10.
-  end ; 
+  end ;
   true
 
 let line_width_cb dir spl =
   begin match dir with
   | `W -> spl.line_width <- spl.line_width *. 2.
   | `N -> spl.line_width <- spl.line_width /. 2.
-  end ; 
+  end ;
   true
 
 let gest_spline action spl =
@@ -224,7 +224,7 @@ let pt_f fmt p =
 
 let print_spline =
   fun pt ->
-    Format.printf "@[{ %a,@ %a,@ %a,@ %a }@]@." 
+    Format.printf "@[{ %a,@ %a,@ %a,@ %a }@]@."
       pt_f pt.(0) pt_f pt.(1) pt_f pt.(2) pt_f pt.(3)
 
 let print_one_spl {pt = pt} = print_spline pt
@@ -284,8 +284,8 @@ let refresh da spl =
 
 let grow_pixmap spl =
   spl.pm <- new_pixmap spl.width spl.height ;
-  spl.need_update <- true 
-  (* no need to queue a redraw here, an expose 
+  spl.need_update <- true
+  (* no need to queue a redraw here, an expose
      event should follow the configure, right ? *)
 
 let config_cb spl ev =
@@ -313,7 +313,7 @@ let expose_cb da spl ev =
 
 
 let key_press_cb da spl ev =
-  try 
+  try
     let (_, cb, _) =
       List.assoc (GdkEvent.Key.keyval ev) keybindings in
     let need_refresh = cb spl in
@@ -327,7 +327,7 @@ let button_ev da spl ev =
       spl.click <- true ;
       spl.drag_pt <- { x = GdkEvent.Button.x ev ; y = GdkEvent.Button.y ev } ;
       true
-  | `BUTTON_RELEASE -> 
+  | `BUTTON_RELEASE ->
       spl.click  <- false ;
       List.iter (fun one_spl -> one_spl.active <- 0)  spl.spls;
       true
@@ -361,7 +361,7 @@ let init spl packing =
   ignore (da#event#connect#configure      (config_cb spl));
   ignore (da#event#connect#button_press   (button_ev da spl)) ;
   ignore (da#event#connect#button_release (button_ev da spl)) ;
-  ignore (da#event#connect#motion_notify  (motion_notify_cb da spl)) ; 
+  ignore (da#event#connect#motion_notify  (motion_notify_cb da spl)) ;
   ignore (da#event#connect#key_press      (key_press_cb da spl))
 
 let show_help kb =
@@ -382,28 +382,28 @@ let rec keep f a = function
 (* Prend une liste de splines en argument et renvoit une liste de points à afficher *)
 (*[start;start_control;end_control;end]*)
 let myfun (spls:point array list) : point list =
-  let map f = List.map (function 
-                          | [|a;b;c;d|] -> 
+  let map f = List.map (function
+                          | [|a;b;c;d|] ->
                               let s = Spline_lib.create a b c d in
-                              f s 
+                              f s
                           | _ -> assert false) in
   match !select_feature with
-    | 0 -> one_to_one (fun a lpt b -> (List.map (fun (tp,_) -> Spline_lib.abscissa_to_point a tp) 
+    | 0 -> one_to_one (fun a lpt b -> (List.map (fun (tp,_) -> Spline_lib.abscissa_to_point a tp)
                                          (Spline_lib.intersection a b))@lpt) [] (map (fun x -> x) spls)
     | 1 -> map (fun s -> Spline_lib.abscissa_to_point s (Spline_lib.dist_min_point s point_dist_min)) spls
-    | 2 -> one_to_one (fun a lpt b -> ((fun (tp,_) -> Spline_lib.abscissa_to_point a tp) 
+    | 2 -> one_to_one (fun a lpt b -> ((fun (tp,_) -> Spline_lib.abscissa_to_point a tp)
                                          (Spline_lib.dist_min_path a b))::lpt) [] (map (fun x -> x) spls)
     | 3 -> one_to_one (fun a lpt b -> try
-                         ((fun (tp,_) -> Spline_lib.abscissa_to_point a tp) 
+                         ((fun (tp,_) -> Spline_lib.abscissa_to_point a tp)
                              (Spline_lib.one_intersection a b))::lpt
                        with Not_found -> lpt) [] (map (fun x -> x) spls)
     | _ -> assert false
 
 
 
-let main = 
-  let w = GWindow.window 
-      ~title:"Cairo spline demo" 
+let main =
+  let w = GWindow.window
+      ~title:"Cairo spline demo"
       ~allow_grow:true
       ~allow_shrink:true
       () in

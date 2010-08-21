@@ -86,13 +86,13 @@ type t = {
 }
 
 module Print = struct
-  
+
   let file_hdr fmt fh =
     fprintf fmt "File header :\n";
     fprintf fmt " lf=%d; lh=%d; bc=%d; ec=%d;\n" fh.lf fh.lh fh.bc fh.ec;
     fprintf fmt " nw=%d; nh=%d; nd=%d; ni=%d;\n" fh.nw fh.nh fh.nh fh.ni;
     fprintf fmt " nl=%d; nk=%d; ne=%d; np=%d;\n" fh.nl fh.nk fh.ne fh.np
-      
+
   let wd fmt (wd : fix_word) =
     pp_print_float fmt wd
 
@@ -102,7 +102,7 @@ module Print = struct
   let header fmt hdr =
     fprintf fmt " Header : Checksum = %lx; Design size = %a\n"
       hdr.checksum wd hdr.design_size
- 
+
   let info fmt info =
     fprintf fmt " Char : Width = %d, Height = %d, Depth = %d, Italic = %d\n"
       info.width_index info.height_index info.depth_index info.italic_index;
@@ -124,7 +124,7 @@ module Print = struct
 
   let recipes fmt rs =
     Array.iter (fun c -> fprintf fmt "%a" recipe c) rs
- 
+
   let body fmt body =
     fprintf fmt "Body : \n%a\n" header body.header;
     fprintf fmt "%a Widths:\n%a Heights:\n%a Depths:\n%a Italic:\n%a"
@@ -155,7 +155,7 @@ let read_n dummy f n bits =
   in
   let bits = iter_until 0 bits in
     a, bits
-  
+
 let epsilon = 1./.(2.**20.)
 let fix_word bits =
   bitmatch bits with
@@ -184,11 +184,11 @@ let file_hdr bits =
       } ->
 	tfm_assert "number of characters" (bc-1 <= ec && ec <= 255);
 	tfm_assert "extensible character table too big" (ne <= 256);
-	tfm_assert "total size constraint" 
+	tfm_assert "total size constraint"
 	  (lf = 6+lh+(ec-bc+1)+nw+nh+nd+ni+nl+nk+ne+np);
 	{ lf = lf; lh = lh; bc = bc; ec = ec;
-	  nw = nw; nh = nh; nd = nd; ni = ni; 
-	  nl = nl; nk = nk; ne = ne; np = np 
+	  nw = nw; nh = nh; nd = nd; ni = ni;
+	  nl = nl; nk = nk; ne = ne; np = np
 	}, bits
     | { _ : -1 : bitstring } ->
 	tfm_error "ill formed header"
@@ -230,14 +230,14 @@ let char_info_word bits =
       } ->
 	{ width_index = width_idx; height_index = height_idx;
 	  depth_index = depth_idx; italic_index = italic_idx;
-	  tag = tag; info_remainder = remainder 
+	  tag = tag; info_remainder = remainder
 	}, bits
     | { _ : -1 : bitstring } ->
 	tfm_error "ill-formed char info word"
 
 let read_info_words = read_n dummy_info char_info_word
-  
-let kern_dummy = { 
+
+let kern_dummy = {
   skip_byte = 0; next_char = 0; op_byte = 0; kern_remainder = 0
 }
 let lig_kern_cmd bits =
@@ -253,7 +253,7 @@ let lig_kern_cmd bits =
 let read_kern_cmds = read_n kern_dummy lig_kern_cmd
 
 
-let recipe_dummy = { 
+let recipe_dummy = {
   top = 0; mid = 0; bot = 0; rep = 0;
 }
 let exten_recipe bits =
@@ -279,7 +279,7 @@ let body fh bits =
   let param, bits = read_n_fixwds fh.np bits in
     if Bitstring.bitstring_length bits <> 0 then
       printf "Warning : ignored extra data after parameters.\n";
-    { header = hdr; 
+    { header = hdr;
       char_info = infos;
       width = width; height = height; depth = depth; italic = italic;
       lig_kern = lig_kern; kern = kern;

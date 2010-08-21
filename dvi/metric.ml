@@ -13,7 +13,7 @@ let char_height t c = t.body.height.((get_info t c).height_index)
 let char_depth t c = t.body.depth.((get_info t c).depth_index)
 let char_italic t c = t.body.italic.((get_info t c).italic_index)
 
-let char_dims t c = 
+let char_dims t c =
   let i = get_info t c in
   let b = t.body in
   b.width.(i.width_index),
@@ -26,6 +26,6 @@ let space t = t.body.param.(1)
 let space_stretch t = t.body.param.(2)
 let space_shrink t = t.body.param.(3)
 let x_height t = t.body.param.(4)
-let quad t = t.body.param.(5) 
+let quad t = t.body.param.(5)
 let extra_space t = t.body.param.(6)
 (* is the size of one em in the font. *)

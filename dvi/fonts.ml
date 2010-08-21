@@ -35,7 +35,7 @@ let mk_font_def ~checksum ~scale_factor ~design_size ~area ~name =
     name = name
   }
 
-type type1 =       
+type type1 =
     { glyphs_filename : string;
       (* the file, pfb or pfa, which define the glyphs *)
       glyphs_enc : int -> int; (* the conversion of the characters
@@ -229,7 +229,7 @@ let load_font_tfm fd =
 let compute_trans_enc encoding_table charset_table char =
   Hashtbl.find charset_table (encoding_table.(char))
 
-let font_is_virtual s = 
+let font_is_virtual s =
   try
     ignore (find_file (s^".vf"));
     true
@@ -245,14 +245,14 @@ let load_font doc_conv fdef =
     (Int32.to_float fdef.scale_factor) *. doc_conv
   in
   let type1 = lazy (
-    if font_is_virtual tex_name 
-    then invalid_arg 
-      (Format.sprintf 
+    if font_is_virtual tex_name
+    then invalid_arg
+      (Format.sprintf
          "The font %s is virtual I can't currently use it with cairo"
          tex_name);
     let font_map = try HString.find (Lazy.force fonts_map_table) tex_name
-      with Not_found -> 
-        invalid_arg 
+      with Not_found ->
+        invalid_arg
           (Format.sprintf "This tex font : %s has no pfb counterpart@ \
                        it can't be currently used with the cairo backend"
              tex_name) in

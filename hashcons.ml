@@ -17,15 +17,15 @@
 (*
  * hashcons: hash tables for hash consing
  * Copyright (C) 2000 Jean-Christophe FILLIATRE
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
  * License version 2, as published by the Free Software Foundation.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * 
+ *
  * See the GNU Library General Public License version 2 for more details
  * (enclosed in the file LGPL).
  *)
@@ -33,7 +33,7 @@
 (*s Hash tables for hash-consing. (Some code is borrowed from the ocaml
     standard library, which is copyright 1996 INRIA.) *)
 
-type 'a hash_consed = { 
+type 'a hash_consed = {
   hkey : int;
   tag : int;
   node : 'a }
@@ -61,7 +61,7 @@ let clear t =
   for i = 0 to Array.length t.table - 1 do t.table.(i) <- emptybucket done;
   t.totsize <- 0;
   t.limit <- 3
-  
+
 let fold f t init =
   let rec fold_bucket i b accu =
     if i >= Weak.length b then accu else
@@ -107,7 +107,7 @@ and add t d =
   let rec loop i =
     if i >= sz then begin
       let newsz = min (sz + 3) (Sys.max_array_length - 1) in
-      if newsz <= sz then 
+      if newsz <= sz then
 	failwith "Hashcons.Make: hash bucket cannot grow more";
       let newbucket = Weak.create newsz in
       Weak.blit bucket 0 newbucket 0 sz;
@@ -135,7 +135,7 @@ let hashcons t d =
       hnode
     end else begin
       match Weak.get_copy bucket i with
-        | Some v when v.node = d -> 
+        | Some v when v.node = d ->
 	    begin match Weak.get bucket i with
               | Some v -> v
               | None -> loop (i+1)
@@ -144,7 +144,7 @@ let hashcons t d =
     end
   in
   loop 0
-  
+
 let stats t =
   let len = Array.length t.table in
   let lens = Array.map Weak.length t.table in
@@ -202,7 +202,7 @@ module Make(H : HashedType) : (S with type key = H.t) = struct
     done;
     t.totsize <- 0;
     t.limit <- 3
-  
+
   let fold f t init =
     let rec fold_bucket i b accu =
       if i >= Weak.length b then accu else
@@ -248,7 +248,7 @@ module Make(H : HashedType) : (S with type key = H.t) = struct
     let rec loop i =
       if i >= sz then begin
         let newsz = min (sz + 3) (Sys.max_array_length - 1) in
-        if newsz <= sz then 
+        if newsz <= sz then
 	  failwith "Hashcons.Make: hash bucket cannot grow more";
         let newbucket = Weak.create newsz in
         Weak.blit bucket 0 newbucket 0 sz;
@@ -276,7 +276,7 @@ module Make(H : HashedType) : (S with type key = H.t) = struct
 	hnode
       end else begin
         match Weak.get_copy bucket i with
-        | Some v when H.equal v.node d -> 
+        | Some v when H.equal v.node d ->
 	    begin match Weak.get bucket i with
               | Some v -> v
               | None -> loop (i+1)
@@ -285,12 +285,12 @@ module Make(H : HashedType) : (S with type key = H.t) = struct
       end
     in
     loop 0
-  
+
   let stats t =
     let len = Array.length t.table in
     let lens = Array.map Weak.length t.table in
     Array.sort compare lens;
     let totlen = Array.fold_left ( + ) 0 lens in
     (len, count t, totlen, lens.(0), lens.(len/2), lens.(len-1))
-  
+
 end

@@ -14,12 +14,12 @@
 (*                                                                        *)
 (**************************************************************************)
 
-type encoding = 
+type encoding =
   [ `File of string
   | `Adobe_remap
   | `None]
 
-type font_map = 
+type font_map =
     { tex_name : string;
       human_name : string;
       enc_name : string option;

@@ -24,7 +24,7 @@ type t = Types.point
 
 
 (* angle in degrees *)
-let dir f =  
+let dir f =
   let angle = Num.deg2rad f in
   mkPTPair (mkF (cos angle)) (mkF (sin angle))
 
@@ -35,18 +35,18 @@ let right = mkPTPair one zero
 
 let simple_transform t str = mkPTTransformed t str
 
-let xpart p = 
+let xpart p =
   match p.Hashcons.node with
   | PTPair (a,b) -> a
   | _ -> mkNXPart p
 
-let ypart p = 
+let ypart p =
   match p.Hashcons.node with
   | PTPair (a,b) -> b
   | _ -> mkNYPart p
 
 (* insert more sophisticated simplifications *)
-let rec add p1 p2 = 
+let rec add p1 p2 =
   match p1.Hashcons.node,p2.Hashcons.node with
     | PTPair (a1,b1), PTPair (a2,b2) -> mkPTPair (addn a1 a2) (addn b1 b2)
     | PTAdd (p1',p2'), _ -> add p1' (add p2' p2)
@@ -63,7 +63,7 @@ and mult f p =
     | PTRotated (f', p) -> mkPTRotated f' (mult f p)
     | _ -> mkPTMult f p
 
-and sub p1 p2 = 
+and sub p1 p2 =
   match p1.Hashcons.node,p2.Hashcons.node with
     | PTPair (a1,b1), PTPair (a2,b2) -> mkPTPair (subn a1 a2) (subn b1 b2)
     | PTAdd (p1',p2'), _ -> add p1' (sub p2' p2)
@@ -74,11 +74,11 @@ let shift = add
 let scale = mult
 
 let segment f p1 p2 = add (mult (mkF (1.-.f)) p1) (mult (mkF f) p2)
-let rec rotate f p = 
+let rec rotate f p =
   match p.Hashcons.node with
-  | PTPair (a,b) -> 
+  | PTPair (a,b) ->
       let angle = Num.deg2rad f in
-      mkPTPair  
+      mkPTPair
 	((mkF (cos angle) */ a) -/ (mkF (sin angle) */ b))
         ((mkF (sin angle) */ a) +/ (mkF (cos angle) */ b))
   | PTAdd (p1, p2) -> add (rotate f p1) (rotate f p2)
@@ -90,19 +90,19 @@ let rec rotate f p =
 (* rotate p2 around p1 *)
 let rotate_around p1 f p2 = add p1 (rotate f (sub p2 p1))
 
-let xscale f p = 
+let xscale f p =
   match p.Hashcons.node with
   | PTPair (a,b) -> mkPTPair (mkNMult f a) b
   | _ -> simple_transform p (mkTRXscaled f)
 
-let yscale f p = 
+let yscale f p =
   match p.Hashcons.node with
   | PTPair (a,b) -> mkPTPair a (mkNMult f b)
   | _ -> simple_transform p (mkTRYscaled f)
 
 let transform tr p =
-  List.fold_left 
-    (fun acc str -> 
+  List.fold_left
+    (fun acc str ->
        match str.Hashcons.node with
        | TRScaled f -> mult f acc
        | TRShifted p -> add acc p
@@ -112,7 +112,7 @@ let transform tr p =
        | TRRotateAround (p,f) -> rotate_around p f acc
        | _ -> simple_transform acc str
     ) p tr
-    
+
 (* From simplePoint *)
 let pmap f (a,b) = (f a, f b)
 
@@ -129,27 +129,27 @@ let origin = p (0.,0.)
 let ptlist ?scale l = List.map (p ?scale) l
 
 (* construct a point with the right measure *)
-let bpp, inp, cmp, mmp, ptp = 
-    p ~scale:Num.bp, 
-    p ~scale:Num.inch, 
-    p ~scale:Num.cm, 
-    p ~scale:Num.mm, 
+let bpp, inp, cmp, mmp, ptp =
+    p ~scale:Num.bp,
+    p ~scale:Num.inch,
+    p ~scale:Num.cm,
+    p ~scale:Num.mm,
     p ~scale:Num.pt
 
 (* construct a list of points with the right measure *)
 let map_bp, map_in, map_cm, map_mm, map_pt =
-  ptlist ~scale:Num.bp, 
-  ptlist ~scale:Num.inch, 
-  ptlist ~scale:Num.cm, 
-  ptlist ~scale:Num.mm, 
+  ptlist ~scale:Num.bp,
+  ptlist ~scale:Num.inch,
+  ptlist ~scale:Num.cm,
+  ptlist ~scale:Num.mm,
   ptlist ~scale:Num.pt
 
-let draw ?brush ?color ?pen t = 
-  (* We don't use a default to avoid the output of 
-     ... withcolor (0.00red+0.00green+0.00blue) withpen .... 
+let draw ?brush ?color ?pen t =
+  (* We don't use a default to avoid the output of
+     ... withcolor (0.00red+0.00green+0.00blue) withpen ....
      for each command in the output file *)
     mkCommand (mkCDraw (mkPAofMPA (mkMPAKnot (mkKnot mkNoDir t mkNoDir))) (mkBrushOpt brush color pen None))
 
-let normalize p = 
+let normalize p =
   let l = (length p) in
   scale (if_null l zero  (Num.divn Num.one l)) p
