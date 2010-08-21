@@ -16,6 +16,7 @@
 
 open Format
 open Dvi_util
+open Fonts
 
 type color =
   | RGB of float * float * float
@@ -33,36 +34,64 @@ type state = {
   z : int32;
 }
 
-(* an env can't *)
-type 'a env = {
-  dev : 'a;
+(* text *)
+
+type env_info = {ei_conv : float;
+                 ei_pos    : int32 * int32}
+
+type info = {
+  color : color
+}
+type text =
+    { tex_font   : Fonts.t;
+      tex_string : Int32.t list;
+      tex_pos    : float * float;
+      tex_info   : info;
+      tex_env    : env_info}
+
+type text_type1 =
+    { c_glyph : Int32.t;
+      c_font  : Fonts.type1;
+      c_pos   : float * float;
+      c_info  : info}
+
+type command =
+  | Fill_rect of info * float * float * float * float
+  (** [Fill_rect info x y w h] should draw a rectangle at [(x,y)] of
+      width [w] and height [h]. *)
+  | Draw_text of text
+  | Specials of info * string * float * float
+  (** [Specials info s x y] should draw special [s], encoded as a string,
+      at pos. [(x,y)]. [info] can contain additional information
+      such as color. *)
+  | Draw_text_type1 of text_type1
+  (** Can appear only after a decomposition of text *)
+
+type page = command list
+
+type env = {
   mutable ecolor : color;
   color_stack : color Stack.t;
   conv : float;
   mutable font : Int32.t;
   stack : state Stack.t;
-  mutable s : state
+  mutable s : state;
+  use_type1 : bool;
 }
-
-type info = {
-  color : color
-}
-
-let dumb_info = {color = Gray 0.}
 
 let info_of_env env = {color = env.ecolor}
 
-let new_env dev conv = {dev = dev;
-                        ecolor = Gray 0.;
-                        conv = conv;
-                        font = Int32.zero;
-                        stack = Stack.create ();
-                        s = {h=Int32.zero; v=Int32.zero;
-                             w=Int32.zero; x=Int32.zero;
-                             y=Int32.zero; z=Int32.zero;
-                            };
-                        color_stack = Stack.create ();
-                       }
+let new_env conv use_type1 = {ecolor = Gray 0.;
+                    conv = conv;
+                    font = Int32.zero;
+                    stack = Stack.create ();
+                    s = {h=Int32.zero; v=Int32.zero;
+                         w=Int32.zero; x=Int32.zero;
+                         y=Int32.zero; z=Int32.zero;
+                        };
+                    color_stack = Stack.create ();
+                    use_type1 = use_type1;
+                   }
 
 let rec scanf_with s def = function
   | [] -> def s
@@ -71,165 +100,235 @@ let rec scanf_with s def = function
       -> scanf_with s def l
 
 
-module type dev =
-     sig
-       type t
-       type arg
-       type cooked
-       val new_document : arg -> Dvi.t -> t
-       val new_page : t -> unit
-       val fill_rect : t -> info -> float -> float -> float -> float -> unit
-         (* fill_rect t x y w h *)
-       val draw_char : t -> info -> Fonts.t -> Int32.t -> float -> float -> unit
-         (* draw_char t font code x y *)
-       val specials : t -> info -> string -> float -> float -> unit
-         (* specials t s x y *)
-       val end_document : t -> cooked
-     end
+let verbose = ref false
+let set_verbosity b =
+  verbose := b;
+  Fonts.set_verbosity b
+
+let debug = ref false
+let set_debug = (:=) debug
+
+let print_state fmt s =
+  fprintf fmt "{h = %ld; v = %ld; w = %ld; x = %ld; y = %ld; z= %ld}@."
+    s.h s.v s.w s.x s.y s.z
+
+let put_rule env cmds a b =
+  let x = env.conv *. (Int32.to_float env.s.h)
+  and y = env.conv *. (Int32.to_float env.s.v)
+  and w = env.conv *. (Int32.to_float b)
+  and h = env.conv *. (Int32.to_float a) in
+  (Fill_rect (info_of_env env,x,(y -. h),w,h))::cmds
 
 
-module Interp (Dev : dev) =
-struct
-  let verbose = ref false
-  let set_verbosity b =
-    verbose := b;
-    Fonts.set_verbosity b
+let load_fonts font_map conv =
+  Int32Map.fold (fun k fdef ->
+    Int32Map.add k (Fonts.load_font fdef conv)
+  )
+    font_map Int32Map.empty
 
-  let debug = ref false
-  let set_debug = (:=) debug
 
-  let reset dev conv =
-    Dev.new_page dev;
-    new_env dev conv
+let set_env_char (_,font,_) (h,v) c =
+    begin
+      if !debug then printf "Setting character %ld at (%ld,%ld).@." c h v;
+      let fwidth = Fonts.char_width font (Int32.to_int c) in
+      let width = Int32.of_float fwidth in
+      (Int32.add h width,v)
+    end
 
-  let print_state fmt s =
-    fprintf fmt "{h = %ld; v = %ld; w = %ld; x = %ld; y = %ld; z= %ld}@."
-      s.h s.v s.w s.x s.y s.z
 
-  let put_char env font code =
+let rec put_char_type1 (info,font,conv) char (h,v) cmds =
+  match glyphs font with
+    | VirtualFont vf ->
+      if !debug then printf "VirtualFont : %s@." (Fonts.tex_name font);
+      let env = new_env vf.vf_design_size true in
+      env.s <- {env.s with h = h; v = v};
+      let fm = load_fonts vf.vf_font_map vf.vf_design_size in
+      let l = try Int32H.find vf.vf_chars char
+        with Not_found -> failwith ("virtual font not found") in
+      interp_command fm env cmds l
+    | Type1 font1 ->
+      let x = conv *. (Int32.to_float h)
+      and y = conv *. (Int32.to_float v) in
+      if !debug then printf "Type1 : %s,%ld,%f,%f@."
+        (Fonts.tex_name font) char x y;
+      let text_type1 = { c_glyph = char;
+                         c_font = font1;
+                         c_pos = x,y;
+                         c_info = info} in
+      Draw_text_type1 text_type1::cmds
+
+and put_text (info,font,conv) scl ((h,v) as pos) cmds =
+  let x = conv *. (Int32.to_float h)
+  and y = conv *. (Int32.to_float v) in
+  let text = {tex_font = font;
+              tex_string = List.rev scl;
+              tex_pos    = (x,y);
+              tex_info   = info;
+              tex_env    = {ei_conv = conv; ei_pos = pos}} in
+  Draw_text text::cmds
+
+and set_char fm env cmds l =
+  let info = (info_of_env env) in
+  let font = Int32Map.find env.font fm in
+  let conv = env.conv in
+  let ifc = (info,font,conv) in
+  let pos = (env.s.h,env.s.v) in
+  let cmds,(h,v),l = if env.use_type1 then set_char_type1 ifc pos cmds l
+    else set_char_tex ifc [] pos pos cmds l in
+  env.s <- {env.s with h = h; v = v};
+  interp_command fm env cmds l
+
+and set_char_type1 ifc pos cmds l =
+  match l with
+    | Dvi.SetChar c::l ->
+      let cmds = put_char_type1 ifc c pos cmds in
+      let pos = set_env_char ifc pos c in
+      cmds, pos, l
+    | Dvi.PutChar c::l ->
+      if !debug then printf "Putting character %ld.@." c;
+      let cmds = put_char_type1 ifc c pos cmds in
+      cmds, pos, l
+    | _ -> assert false
+
+and set_char_tex ifc scl pos_start pos_end cmds
+    (l : Dvi.command list) =
+  match l with
+    | Dvi.SetChar c::l ->
+      let pos_end = set_env_char ifc pos_end c in
+      set_char_tex ifc (c::scl) pos_start pos_end cmds l
+    | Dvi.PutChar c::l ->
+      if !debug then printf "Putting character %ld.@." c;
+      close_string ifc (c::scl) pos_start pos_end cmds l
+    | l -> close_string ifc scl pos_start pos_end cmds l
+
+and close_string ifc scl pos_start pos_end cmds l =
+    let cmds = put_text ifc scl pos_start cmds in
+    cmds,pos_end,l
+
+and interp_command fm env cmds l =
+  match l with
+    | [] -> cmds
+    | (Dvi.SetChar _ | Dvi.PutChar _)::_ ->
+      set_char fm env cmds l
+    | Dvi.SetRule(a, b)::l ->
+      if !debug then printf "Setting rule (w=%ld, h=%ld).@." a b;
+      let cmds = put_rule env cmds a b in
+      env.s <- {env.s with h = Int32.add env.s.h b};
+      interp_command fm env cmds l
+    | Dvi.PutRule(a, b)::l ->
+      if !debug then printf "Putting rule (w=%ld, h=%ld).@." a b;
+      let cmds = put_rule env cmds a b in
+      interp_command fm env cmds l
+    | Dvi.Push::l ->
+      if !debug then printf "Push current state.@.";
+      Stack.push env.s env.stack;
+      interp_command fm env cmds l
+    | Dvi.Pop::l ->
+      (try
+	 if !debug then printf "Pop current state.@.";
+	 env.s <- Stack.pop env.stack
+       with Stack.Empty -> failwith "Empty stack !");
+      interp_command fm env cmds l
+    | Dvi.Right b::l ->
+      if !debug then printf "Moving right %ld.@." b;
+      env.s<-{env.s with h = Int32.add env.s.h b};
+      interp_command fm env cmds l
+    | Dvi.Wdefault::l ->
+      if !debug then printf "Moving right by the default W.@.";
+      env.s<-{env.s with h = Int32.add env.s.h env.s.w};
+      interp_command fm env cmds l
+    | Dvi.W b::l ->
+      if !debug then printf "Moving right and changing W to %ld.@." b;
+      env.s<-{env.s with h = Int32.add env.s.h b; w = b};
+      interp_command fm env cmds l
+    | Dvi.Xdefault::l ->
+      if !debug then printf "Moving right by the default X.@.";
+      env.s<-{env.s with h = Int32.add env.s.h env.s.x};
+      interp_command fm env cmds l
+    | Dvi.X b::l ->
+      if !debug then printf "Moving right and changing X to %ld.@." b;
+      env.s<-{env.s with h = Int32.add env.s.h b; x = b};
+      interp_command fm env cmds l
+    | Dvi.Down a::l ->
+      if !debug then printf "Moving down %ld.@." a;
+      env.s <- {env.s with v = Int32.add env.s.v a};
+      interp_command fm env cmds l
+    | Dvi.Ydefault::l ->
+      if !debug then printf "Moving down by the default Y.@.";
+      env.s <- {env.s with v = Int32.add env.s.v env.s.y};
+      interp_command fm env cmds l
+    | Dvi.Y a::l ->
+      if !debug then printf "Moving down and changing Y to %ld.@." a;
+      env.s <- {env.s with v = Int32.add env.s.v a; y = a};
+      interp_command fm env cmds l
+    | Dvi.Zdefault::l ->
+      if !debug then printf "Moving down by the default Z.@.";
+      env.s <- {env.s with v = Int32.add env.s.v env.s.z};
+      interp_command fm env cmds l
+    | Dvi.Z a::l ->
+      if !debug then printf "Moving down and changing Z to %ld.@." a;
+      env.s <- {env.s with v = Int32.add env.s.v a; z = a};
+      interp_command fm env cmds l
+    | Dvi.FontNum f::l ->
+      env.font <- f;
+      if !debug then printf "Font is now set to %ld@." f;
+      interp_command fm env cmds l
+    | Dvi.Special xxx::l ->
+      if !debug then printf "Special command : %s@." xxx;
       let x = env.conv *. (Int32.to_float env.s.h)
       and y = env.conv *. (Int32.to_float env.s.v) in
-      Dev.draw_char env.dev (info_of_env env) font code x y
+      let push color =
+        Stack.push env.ecolor env.color_stack;
+        env.ecolor <- color;
+        cmds in
+      let cmds = scanf_with
+        xxx
+        (fun s -> Specials (info_of_env env,s,x,y)::cmds)
+        [(fun s -> Scanf.sscanf s "color push rgb %f %f %f"
+          (fun r g b -> push (RGB (r,g,b))));
+         (fun s -> Scanf.sscanf s "color push cmyk %f %f %f %f"
+           (fun c m y k -> push (CMYK(c,m,y,k))));
+         (fun s -> Scanf.sscanf s "color push gray %f"
+           (fun g -> push (Gray(g))));
+         (fun s -> Scanf.sscanf s "color push hsb %f %f %f"
+           (fun h s b -> push (HSB(h,s,b))));
+         (fun s -> Scanf.sscanf s "color pop%n"
+           (fun _ -> env.ecolor <- Stack.pop env.color_stack);cmds);] in
+      interp_command fm env cmds l
 
-  let put_rule env a b =
-    let x = env.conv *. (Int32.to_float env.s.h)
-    and y = env.conv *. (Int32.to_float env.s.v)
-    and w = env.conv *. (Int32.to_float b)
-    and h = env.conv *. (Int32.to_float a) in
-    Dev.fill_rect env.dev (info_of_env env) x (y -. h) w h
+let interp_page conv fm p =
+  interp_command fm (new_env conv false) [] (Dvi.commands p)
 
-  let interp_command fm env = function
-    | Dvi.SetChar c ->
-        if !debug then printf "Setting character %ld.@." c;
-        let font = Int32Map.find env.font fm in
-        let fwidth = Fonts.char_width font (Int32.to_int c) in
-        let width = Int32.of_float fwidth in
-	if !debug then printf "Character found in font %ld. Width = %ld@."
-	  env.font width;
-        put_char env font c;
-	env.s <- {env.s with h = Int32.add env.s.h width}
-    | Dvi.SetRule(a, b) ->
-        if !debug then printf "Setting rule (w=%ld, h=%ld).@." a b;
-        put_rule env a b;
-        env.s <- {env.s with h = Int32.add env.s.h b}
-    | Dvi.PutChar c ->
-        if !debug then printf "Putting character %ld.@." c;
-        put_char env (Int32Map.find env.font fm) c
-    | Dvi.PutRule(a, b) ->
-        if !debug then printf "Putting rule (w=%ld, h=%ld).@." a b;
-        put_rule env a b
-    | Dvi.Push ->
-        if !debug then printf "Push current state.@.";
-        Stack.push env.s env.stack
-    | Dvi.Pop ->
-        (try
-	   if !debug then printf "Pop current state.@.";
-	   env.s <- Stack.pop env.stack
-         with Stack.Empty -> failwith "Empty stack !")
-    | Dvi.Right b ->
-        if !debug then printf "Moving right %ld.@." b;
-        env.s<-{env.s with h = Int32.add env.s.h b}
-    | Dvi.Wdefault ->
-        if !debug then printf "Moving right by the default W.@.";
-        env.s<-{env.s with h = Int32.add env.s.h env.s.w}
-    | Dvi.W b ->
-        if !debug then printf "Moving right and changing W to %ld.@." b;
-        env.s<-{env.s with h = Int32.add env.s.h b; w = b}
-    | Dvi.Xdefault ->
-        if !debug then printf "Moving right by the default X.@.";
-        env.s<-{env.s with h = Int32.add env.s.h env.s.x}
-    | Dvi.X b ->
-        if !debug then printf "Moving right and changing X to %ld.@." b;
-        env.s<-{env.s with h = Int32.add env.s.h b; x = b}
-    | Dvi.Down a ->
-        if !debug then printf "Moving down %ld.@." a;
-        env.s <- {env.s with v = Int32.add env.s.v a}
-    | Dvi.Ydefault ->
-        if !debug then printf "Moving down by the default Y.@.";
-        env.s <- {env.s with v = Int32.add env.s.v env.s.y}
-    | Dvi.Y a ->
-        if !debug then printf "Moving down and changing Y to %ld.@." a;
-        env.s <- {env.s with v = Int32.add env.s.v a; y = a}
-    | Dvi.Zdefault ->
-        if !debug then printf "Moving down by the default Z.@.";
-        env.s <- {env.s with v = Int32.add env.s.v env.s.z}
-    | Dvi.Z a ->
-        if !debug then printf "Moving down and changing Z to %ld.@." a;
-        env.s <- {env.s with v = Int32.add env.s.v a; z = a}
-    | Dvi.FontNum f ->
-        env.font <- f;
-        if !debug then printf "Font is now set to %ld@." f
-    | Dvi.Special xxx ->
-        if !debug then printf "Special command : %s@." xxx;
-        let x = env.conv *. (Int32.to_float env.s.h)
-        and y = env.conv *. (Int32.to_float env.s.v) in
-        let push color =
-          Stack.push env.ecolor env.color_stack;
-          env.ecolor <- color in
-        scanf_with
-          xxx
-          (fun s -> Dev.specials env.dev (info_of_env env) s x y)
-          [(fun s -> Scanf.sscanf s "color push rgb %f %f %f"
-              (fun r g b -> push (RGB (r,g,b))));
-           (fun s -> Scanf.sscanf s "color push cmyk %f %f %f %f"
-              (fun c m y k -> push (CMYK(c,m,y,k))));
-           (fun s -> Scanf.sscanf s "color push gray %f"
-              (fun g -> push (Gray(g))));
-           (fun s -> Scanf.sscanf s "color push hsb %f %f %f"
-              (fun h s b -> push (HSB(h,s,b))));
-           (fun s -> Scanf.sscanf s "color pop%n"
-              (fun _ -> env.ecolor <- Stack.pop env.color_stack));]
-
-  let interp_page dev conv fm p =
-    List.iter (interp_command fm (reset dev conv))
-      (List.rev (Dvi.commands p))
-
-  let load_fonts font_map conv =
-    Int32Map.fold (fun k fdef ->
-		     Int32Map.add k (Fonts.load_font fdef conv)
-                  )
-      font_map Int32Map.empty
-
-  let load_doc arg doc =
-    let conv = Dvi.get_conv doc in
-    let fonts = load_fonts (Dvi.fontmap doc) conv in
-    let dev = Dev.new_document arg doc in
-    List.iter (fun p ->
-                 if !debug then
-		   printf "#### Starting New Page ####@."
-                 else if !verbose then printf ".";
-		interp_page dev conv fonts p)
-      (Dvi.pages doc);
-    Dev.end_document dev
+let load_doc doc =
+  let conv = Dvi.get_conv doc in
+  let fonts = load_fonts (Dvi.fontmap doc) conv in
+  let pages = List.fold_left (fun acc p ->
+    if !debug then
+      printf "#### Starting New Page ####@."
+    else if !verbose then printf ".";
+    (interp_page conv fonts p)::acc)
+    [] (Dvi.pages doc) in
+  List.rev pages
 
 
-  let load_file arg file =
-    let doc = Dvi.read_file file in
-    if !verbose then
-      printf "Dvi file parsing and interpretation :@.@?";
-    let res = load_doc arg doc in
-    if !verbose then
-      printf " done@.@?";
-    res
+let load_file file =
+  let doc = Dvi.read_file file in
+  if !verbose then
+    printf "Dvi file parsing and interpretation :@.@?";
+  let res = load_doc doc in
+  if !verbose then
+    printf " done@.@?";
+  res
 
-end
+
+let decompose_text text =
+  let font = text.tex_font in
+  let pos = text.tex_env.ei_pos in
+  if !debug then printf "decompose text at (%ld,%ld)@." (fst pos) (snd pos);
+  let info = text.tex_info in
+  let ifc = (info,font,text.tex_env.ei_conv) in
+  let fold (pos,cmds) c =
+    let cmds = put_char_type1 ifc c pos cmds in
+    (set_env_char ifc pos c,cmds) in
+  let _,cmds = List.fold_left fold (pos,[]) text.tex_string in
+  cmds

@@ -201,8 +201,7 @@ let apply_transform_cmds t =
     | Stroke_path (pa,c,pe,d) ->
         Stroke_path (path pa, c, pe, d)
     | Clip (cmds, p) -> Clip (aux cmds, path p)
-    | Tex g -> Tex { Gentex.tex = g.Gentex.tex ;
-                     trans = Matrix.multiply t g.Gentex.trans }
+    | Tex g -> Tex { g with Gentex.trans = Matrix.multiply t g.Gentex.trans }
     | ExternalImage _ -> pic
     | Transform (t', l) -> Transform (Matrix.multiply t' t, l)
   and path p = Spline_lib.transform t p in

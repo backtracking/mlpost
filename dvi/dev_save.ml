@@ -16,192 +16,62 @@
 
 open Tfm
 open Fonts
+open Dviinterp
 
-type command =
-  | Rectangle of Dviinterp.info*float * float * float * float (* x,y,w,h *)
-  | Glyph of Dviinterp.info*Fonts.t * Int32.t * float * float
-  | Specials of Dviinterp.info*string * float *float (* s,x,y *)
+type command = Dviinterp.command
 
-type page = { c : command list;
-              x_min : float;
-              y_min : float;
-              x_max : float;
-              y_max : float;
-              bases : float list
-            }
+type t = command list list
+type page = command list
 
-let stroke = 0.05
+type dimen = { mutable tx_min : float;
+               mutable ty_min : float;
+               mutable tx_max : float;
+               mutable ty_max : float}
 
-
-type t = {mutable pages : page list;
-          doc : Dvi.t}
-
-let pages t = t.pages
-
-let cmd_iter f t =
-  List.iter (fun p -> List.iter f p.c) t.pages
-
-let replay_page_aux trace fill_rect draw_char specials dev page =
-  List.iter (function |Rectangle (info,x,y,w,h) -> fill_rect dev info x y w h
-               |Glyph (info,font,char,x,y) -> draw_char dev info font char x y
-               |Specials (info,xxx,x,y) -> specials dev info xxx x y) page.c;
-  if trace then
-    begin
-      let h = page.y_max -. page.y_min in
-      let w = page.x_max -. page.x_min in
-      let msd x = x -. stroke/.2. in
-      fill_rect dev Dviinterp.dumb_info page.x_min (msd page.y_min) w stroke;
-      fill_rect dev Dviinterp.dumb_info (msd page.x_min) page.y_min stroke h;
-      fill_rect dev Dviinterp.dumb_info page.x_min (msd page.y_max) w stroke;
-      fill_rect dev Dviinterp.dumb_info (msd page.x_max) page.y_min stroke h
-    end
-
-let replay trace new_document new_page fill_rect draw_char specials
-    end_document saved arg =
-  let dev = new_document arg saved.doc in
-  List.iter (fun page -> new_page dev; replay_page_aux trace fill_rect
-               draw_char specials dev page) saved.pages;
-  end_document dev
-
-let separate_pages saved =
-  List.map (fun page -> {pages = [page];doc=saved.doc}) saved.pages
-
-let get_doc s = s.doc
-
-let get_dimen_page s =
-  (s.x_min,s.y_min,s.x_max,s.y_max)
-
-let get_dimen_first_page s = get_dimen_page (List.hd s.pages)
-
-let get_bases_first_page s = (List.hd s.pages).bases
-
-let nb_pages s = List.length s.pages
-
-module Dev_save : Dviinterp.dev with type arg = bool
- with type cooked = t =
-struct
-  type arg = bool
-  type cooked = t
-  type t = { mutable tpages : page list;
-             tdoc : Dvi.t;
-             mutable tfirst_page : bool;
-             mutable tc : command list;
-             mutable tx_min : float;
-             mutable ty_min : float;
-             mutable tx_max : float;
-             mutable ty_max : float;
-             mutable tbases : float list;
-             use_last_vrule : bool}
-
-
-
-  let new_document use_last_vrule doc =
-    {
-      tpages = [];
-      tdoc = doc;
-      tfirst_page = true;
-      tc = [];
-      tx_min = infinity;
-      tx_max = neg_infinity;
-      ty_min = infinity;
-      ty_max = neg_infinity;
-      tbases = [];
-      use_last_vrule = use_last_vrule
-    }
-
-  let new_page s =
-    if s.tfirst_page
-    then s.tfirst_page<-false
-    else
-      begin
-        let page = match s.use_last_vrule, s.tc with
-          | false, _ -> {c = List.rev s.tc;
-                         x_min = s.tx_min;
-                         y_min = s.ty_min;
-                         x_max = s.tx_max;
-                         y_max = s.ty_max;
-                         bases = s.tbases;
-                        }
-
-          (* Dans ce cas on utilise une vrule qui est mis
-             specialement pour connaitre la taille du tex
-             vphantom *)
-          (* Cependant le y donné est très étrange *)
-          | true, (Rectangle (_,x,y,_,h))::l -> {c = List.rev l;
-                                                 x_min = 0.;
-                                                 y_min = -.(y+.h);
-                                                 x_max = x;
-                                                 y_max = -.y;
-                                                 bases = s.tbases;
-                                                }
-          | _ -> failwith "I thought there were always a vrule at the end,\
- please report. thx"
-        in
-        (*Format.eprintf "x_min = %f; x_max = %f; y_min = %f; y_max = %f@."
-          page.x_min page.x_max page.y_min page.y_max;*)
-        s.tpages <- page::s.tpages;
-        s.tc <- [];
-        s.tx_min <- infinity;
-        s.tx_max <- neg_infinity;
-        s.ty_min <- infinity;
-        s.ty_max <- neg_infinity;
-        s.tbases <- []
-      end
-
-  let fill_rect s info x y w h =
-    s.tc <- (Rectangle (info,x,y,w,h))::s.tc;
-    if not s.use_last_vrule then
-      let xmin,xmax = x,x+.w(*min x (x+.w), max x (x+.w)*) in
-      let ymin,ymax = y,y+.h(*min y (y+.h), max y (y+.h)*) in
-      s.tx_min <- (min s.tx_min xmin);
-      s.ty_min <- (min s.ty_min ymin);
-      s.tx_max <- (max s.tx_max xmax);
-      s.ty_max <- (max s.ty_max ymax)
-
-
-
-  let draw_char s info font char x y =
-    s.tc <- (Glyph (info,font,char,x,y))::s.tc;
-    if not (List.mem y s.tbases) then s.tbases <- y::s.tbases;
-    if not s.use_last_vrule then
-      let width,height,depth = Fonts.char_dims font (Int32.to_int char) in
+let get_dimen s = function
+  | Fill_rect (info,x,y,w,h) ->
+    let xmin,xmax = x,x+.w(*min x (x+.w), max x (x+.w)*) in
+    let ymin,ymax = y,y+.h(*min y (y+.h), max y (y+.h)*) in
+    s.tx_min <- (min s.tx_min xmin);
+    s.ty_min <- (min s.ty_min ymin);
+    s.tx_max <- (max s.tx_max xmax);
+    s.ty_max <- (max s.ty_max ymax)
+  | Draw_text text ->
+    let char c =
+      let width,height,depth =
+        Fonts.char_dims text.tex_font (Int32.to_int c) in
+      Format.printf "w=%f h=%f d=%f@." width height depth;
+      let (x,y) = text.tex_pos in
       s.tx_min <- min s.tx_min x;
       s.ty_min <- min s.ty_min (y-.depth);
       s.tx_max <- max s.tx_max (x+.width);
-      s.ty_max <- max s.ty_max (y+.height)
+      s.ty_max <- max s.ty_max (y+.height) in
+    List.iter char text.tex_string
+  | Specials _ -> ()
+  | Draw_text_type1 _ -> assert false
 
-  let specials s info xxx x y =
-    s.tc <- (Specials (info,xxx,x,y))::s.tc
-
-  let end_document s =
-    new_page s;
-    {pages = List.rev s.tpages; doc = s.tdoc}
-end
-
-module Dev_load (Dev : Dviinterp.dev) =
-struct
-  let replay trace = replay trace Dev.new_document Dev.new_page Dev.fill_rect
-    Dev.draw_char Dev.specials Dev.end_document
-
-  let load_doc saved doc arg =
-    if get_doc saved = doc then replay false saved arg
-    else invalid_arg ("The dvi doc is different")
-end
+let get_dimen p =
+  let dimen = { tx_min = infinity;
+                tx_max = neg_infinity;
+                ty_min = infinity;
+                ty_max = neg_infinity} in
+  List.iter (get_dimen dimen) p;
+  (dimen.tx_min,dimen.tx_max,dimen.ty_min,dimen.ty_max)
 
 module Print = struct
   (* debug printing *)
   open Format
   let command fmt c =
     match c with
-    | Rectangle (_,x,y,w,h) -> fprintf fmt "rect(%f,%f,%f,%f)" x y w h
-    | Glyph (_,f,i,_,_) ->
-        fprintf fmt "glyph (%s,%s)" (Fonts.tex_name f) (Int32.to_string i)
+    | Fill_rect (_,x,y,w,h) -> fprintf fmt "rect(%f,%f,%f,%f)" x y w h
+    | Draw_text text -> fprintf fmt "glyph (%s)" (Fonts.tex_name text.tex_font)
     | Specials _ -> assert false
+    | Draw_text_type1 _ -> assert false
 
   let page fmt p =
-    fprintf fmt "[< %a >]" (Misc.print_list Misc.newline command) p.c
+    fprintf fmt "[< %a >]" (Misc.print_list Misc.newline command) p
 
   let dvi fmt d =
     Misc.print_list (fun fmt () ->
-      fprintf fmt "<newpage>@\n@\n") page fmt d.pages
+      fprintf fmt "<newpage>@\n@\n") page fmt d
 end

@@ -19,6 +19,7 @@ open Matrix
 module P = Picture_lib
 module S = Spline_lib
 open Format
+open Dviinterp
 
 let conversion = 0.3937 *. 72.
 let point_of_cm cm = conversion *. cm
@@ -71,7 +72,8 @@ module MPS = struct
   let grestore fmt = fprintf fmt "%tgrestore%t" psstart psend
 
   let setlinewidth fmt f =
-   fprintf fmt "%t0@ %a@ dtransform@ truncate@ idtransform@ setlinewidth@ pop%t"
+   fprintf fmt
+     "%t0@ %a@ dtransform@ truncate@ idtransform@ setlinewidth@ pop%t"
      psstart float f psend
 
   let setlinecap fmt c =
@@ -115,10 +117,11 @@ module MPS = struct
     | Concrete_types.TRANSPARENT _ -> assert false
 
   let char_const fmt c =
-    fprintf fmt "%t(\\%03o)%t" psstart c psend
+    fprintf fmt "\\%03lo" c
 
-  let glyph fmt c font =
-    fprintf fmt "%t%a@ %s@ %a@ fshow%t" psstart char_const c
+  let glyph fmt cl font =
+    fprintf fmt "%t(%a)@ %s@ %a@ fshow%t" psstart
+      (Misc.print_list Misc.nothing char_const) cl
       (Fonts.tex_name font) float (Fonts.scale font conversion) psend
 
   let rectangle fmt p w h =
@@ -155,8 +158,9 @@ let fill_rect fmt trans _ x y w h =
     MPS.rectangle fmt p w h
   )
 
-let draw_char fmt trans _ font c f1 f2 =
+let draw_char fmt trans text =
   (** FIXME take into account info *)
+  let (f1,f2) = text.tex_pos in
   let f1 = point_of_cm f1 and f2 = point_of_cm f2 in
   let p = { x = f1; y = f2 } in
   in_context fmt (fun () ->
@@ -164,23 +168,24 @@ let draw_char fmt trans _ font c f1 f2 =
     pp_print_space fmt ();
     MPS.moveto fmt p;
     pp_print_space fmt ();
-    MPS.glyph fmt (Int32.to_int c) font
+    MPS.glyph fmt text.tex_string text.tex_font
   )
 
 (* FIXME why do we need to negate y coordinates? *)
 let tex_cmd fmt trans c =
   match c with
-  | Dev_save.Rectangle (i,x,y,w,h) ->
+  | Dviinterp.Fill_rect (i,x,y,w,h) ->
       fill_rect fmt trans i x (-. y) w h
-  | Dev_save.Glyph (i,font,c,x,y) -> draw_char fmt trans i font c x (-. y)
-  | Dev_save.Specials _ -> ()
+  | Dviinterp.Draw_text text -> draw_char fmt trans text
+  | Dviinterp.Specials _ -> ()
+  | Dviinterp.Draw_text_type1 _ -> assert false
 
 let draw_tex fmt t =
-  (* FIXME currently the transformation is applied and restored for every letter
-     *)
-  Dev_save.cmd_iter (fun x ->
-		       tex_cmd fmt t.Gentex.trans x;
-		       pp_print_space fmt ()) t.Gentex.tex
+  (* FIXME currently the transformation is applied and restored for every
+     letter *)
+  List.iter (fun x ->
+    tex_cmd fmt t.Gentex.trans x;
+    pp_print_space fmt ()) t.Gentex.tex
 
 let curveto fmt s =
   let _, sb, sc, sd = Spline.explode s in
@@ -275,9 +280,9 @@ let fonts p =
   Picture_lib.iter (fun p ->
     match p with
     | P.Tex g ->
-        Dev_save.cmd_iter (fun c ->
+        List.iter (fun c ->
           match c with
-          | Dev_save.Glyph (_,f,_,_,_) -> x := FS.add f !x
+          | Draw_text text -> x := FS.add text.tex_font !x
           | _ -> ()) g.Gentex.tex
     | _ -> ()) p;
   !x

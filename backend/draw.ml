@@ -17,14 +17,11 @@
 open Point_lib
 module S = Spline_lib
 
-module Cairo_device = Dev_save.Dev_load(Dvicairo.Cairo_device)
-
 let draw_tex cr tex =
   Cairo.save cr;
   Cairo.transform cr tex.Gentex.trans;
-  Cairo_device.replay false tex.Gentex.tex
-  {Dvicairo.pic = cr;new_page = (fun () -> assert false);
-   x_origin = 0.; y_origin = 0.};
+  Dvicairo.draw
+    {Dvicairo.pic = cr; x_origin = 0.; y_origin = 0.} tex.Gentex.tex;
   Cairo.restore cr
   (*;Format.printf "Gentex : %a@." print tex*)
 

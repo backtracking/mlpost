@@ -14,39 +14,36 @@
 (*                                                                        *)
 (**************************************************************************)
 
+open Dvi_util
 
 exception Fonterror of string
 
 let font_error s = raise (Fonterror s)
 
-type font_def = {
-  checksum : int32;
-  scale_factor : int32;
-  design_size : int32;
-  area : string;
-  name : string;
-}
-
-let mk_font_def ~checksum ~scale_factor ~design_size ~area ~name =
-  { checksum = checksum ;
-    scale_factor =  scale_factor ;
-    design_size = design_size ;
-    area = area ;
-    name = name
-  }
-
 type type1 =
-    { glyphs_filename : string;
+    { glyphs_tag : int;
+      glyphs_filename : string;
       (* the file, pfb or pfa, which define the glyphs *)
       glyphs_enc : int -> int; (* the conversion of the characters
                                   between tex and the font *)
       slant : float option;
-      extend : float option}
+      extend : float option;
+      glyphs_ratio_cm : float}
+
+type vf =
+    { vf_design_size : float;
+      vf_font_map : Dvi_util.font_def Dvi_util.Int32Map.t;
+      vf_chars : Dvi.command list Int32H.t}
+
+
+type glyphs =
+  | Type1 of type1
+  | VirtualFont of vf
 
 type t =
     { tex_name : string;
       metric : Tfm.t;
-      type1 : type1 Lazy.t;
+      glyphs : glyphs Lazy.t;
       ratio : float;
       ratio_cm : float
     }
@@ -55,39 +52,13 @@ let debug = ref false
 let info = ref false
 
 let tex_name t = t.tex_name
-let glyphs_filename t = (Lazy.force t.type1).glyphs_filename
-let glyphs_enc t = (Lazy.force t.type1).glyphs_enc
 let ratio_cm t = t.ratio_cm
-let slant t = (Lazy.force t.type1).slant
-let extend t = (Lazy.force t.type1).extend
 let metric t = t.metric
 let design_size t = Tfm.design_size t.metric
+let glyphs t = Lazy.force t.glyphs
 
 let scale t f = t.ratio_cm *. f
 let set_verbosity b = info := b
-
-module Print = struct
-  open Format
-  let print_option pr ff = function
-    |None -> fprintf ff "None"
-    |Some a -> pr ff a
-
-  let font_map ff font =
-    fprintf ff "Tex:%s Human:%s Slant:%a Extend:%a Enc:%a Pfab:%s@."
-      font.Fonts_type.tex_name
-      font.Fonts_type.human_name
-      (print_option pp_print_float) font.Fonts_type.slant
-      (print_option pp_print_float) font.Fonts_type.extend
-      (print_option pp_print_string) font.Fonts_type.enc_name
-      font.Fonts_type.pfab_name
-
-  let font k fmt f =
-    fprintf fmt "\tFont number %ld (%s in directory [%s]) :\n"
-      k f.name f.area;
-    fprintf fmt "\t Checksum = %lx\n" f.checksum;
-    fprintf fmt "\t Scale factor / Design size : %ld / %ld\n"
-      f.scale_factor f.design_size
-end
 
 
 let kwhich = "kpsewhich"
@@ -216,7 +187,9 @@ let load_font_tfm fd =
   if !debug then
     Format.printf "Trying to find metrics at %s...@." filename;
   let tfm = Tfm.read_file filename in
-  if (Int32.compare tfm.Tfm.body.Tfm.header.Tfm.checksum
+  (* FixMe in vf file the checksum of tfm is 0 *)
+  if (Int32.compare fd.checksum Int32.zero <> 0 &&
+        Int32.compare tfm.Tfm.body.Tfm.header.Tfm.checksum
 	fd.checksum <> 0) then
     font_error "Metrics checksum do not match !.@.";
   if !debug then
@@ -231,9 +204,41 @@ let compute_trans_enc encoding_table charset_table char =
 
 let font_is_virtual s =
   try
-    ignore (find_file (s^".vf"));
-    true
-  with Fonterror _ -> false
+    Some (find_file (s^".vf"))
+  with Fonterror _ -> None
+
+let id = let c = ref (-1) in fun () -> incr c; !c
+
+let load_glyphs tex_name ratio_cm =
+  match font_is_virtual tex_name with
+    | Some vf ->
+      let vf = Dvi.read_vf_file vf in
+      let vf_chars = Int32H.create 257 in
+      let add cd = Int32H.add vf_chars cd.Dvi.char_code cd.Dvi.char_commands in
+      List.iter add vf.Dvi.vf_chars_desc;
+      VirtualFont { vf_design_size = vf.Dvi.vf_preamble.Dvi.pre_vf_ds;
+                    vf_font_map = vf.Dvi.vf_font_map;
+                    vf_chars = vf_chars}
+    | None    ->
+      let font_map = try HString.find (Lazy.force fonts_map_table) tex_name
+        with Not_found ->
+          invalid_arg
+            (Format.sprintf "This tex font : %s has no pfb counterpart@ \
+                             and seems not to be virtual@ \
+                             it can't be currently used with the cairo backend"
+               tex_name) in
+      let pfab = find_file font_map.Fonts_type.pfab_name in
+      let pfab_enc,pfab_charset = load_pfb pfab in
+      let enc = match font_map.Fonts_type.enc_name with
+        | None -> pfab_enc
+        | Some x -> load_enc (find_file x) in
+      let glyphs_enc = compute_trans_enc enc pfab_charset in
+      Type1 { glyphs_tag = id ();
+              glyphs_filename = pfab;
+              glyphs_enc = glyphs_enc;
+              slant = font_map.Fonts_type.slant;
+              extend = font_map.Fonts_type.extend;
+              glyphs_ratio_cm = ratio_cm}
 
 let load_font doc_conv fdef =
   let tex_name = fdef.name in
@@ -244,31 +249,10 @@ let load_font doc_conv fdef =
   and ratio_cm =
     (Int32.to_float fdef.scale_factor) *. doc_conv
   in
-  let type1 = lazy (
-    if font_is_virtual tex_name
-    then invalid_arg
-      (Format.sprintf
-         "The font %s is virtual I can't currently use it with cairo"
-         tex_name);
-    let font_map = try HString.find (Lazy.force fonts_map_table) tex_name
-      with Not_found ->
-        invalid_arg
-          (Format.sprintf "This tex font : %s has no pfb counterpart@ \
-                       it can't be currently used with the cairo backend"
-             tex_name) in
-    let pfab = find_file font_map.Fonts_type.pfab_name in
-    let pfab_enc,pfab_charset = load_pfb pfab in
-    let enc = match font_map.Fonts_type.enc_name with
-      | None -> pfab_enc
-      | Some x -> load_enc (find_file x) in
-    let glyphs_enc = compute_trans_enc enc pfab_charset in
-    {glyphs_filename = pfab;
-     glyphs_enc = glyphs_enc;
-     slant = font_map.Fonts_type.slant;
-     extend = font_map.Fonts_type.extend}) in
+  let glyphs = lazy (load_glyphs tex_name ratio_cm) in
   { tex_name = tex_name;
     metric = tfm;
-    type1 = type1;
+    glyphs = glyphs;
     ratio = ratio;
     ratio_cm = ratio_cm
   }
@@ -277,11 +261,11 @@ let load_font =
   let memoize = Hashtbl.create 15 in
   fun (fdef : font_def) (doc_conv : float) ->
     try
-      Hashtbl.find memoize (doc_conv,fdef)
+      Hashtbl.find memoize (doc_conv,fdef.name)
     with
         Not_found ->
           let result = load_font doc_conv fdef in
-          Hashtbl.add memoize (doc_conv,fdef) result;
+          Hashtbl.add memoize (doc_conv,fdef.name) result;
           result
 
 let char_width t c = Metric.char_width t.metric c *. t.ratio

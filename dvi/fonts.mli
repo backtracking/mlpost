@@ -1,15 +1,30 @@
+open Dvi_util
+
 (** Load fonts and extract information *)
 
-type font_def
-(** stores the information needed to load a font file *)
 
-val mk_font_def :
-  checksum : int32 ->
-  scale_factor : int32 ->
-  design_size : int32 ->
-  area: string ->
-  name:string -> font_def
-(** build an object of type [fontdef] *)
+type type1 = private {
+  glyphs_tag : int;
+  (* unique tag *)
+  glyphs_filename : string;
+  (* the file, pfb or pfa, which define the glyphs *)
+  glyphs_enc : int -> int;
+  (* the conversion of the charactersx between tex and the font *)
+  slant : float option;
+  extend : float option;
+  glyphs_ratio_cm : float}
+
+type vf =private {
+  vf_design_size : float;
+  vf_font_map : Dvi_util.font_def Dvi_util.Int32Map.t;
+  (* Font on which the virtual font is defined *)
+  vf_chars : Dvi.command list Int32H.t;
+  (* The dvi command which define each character*)}
+
+
+type glyphs =
+  | Type1 of type1
+  | VirtualFont of vf
 
 type t
 (** the type of a loaded font *)
@@ -25,26 +40,12 @@ val metric : t -> Tfm.t
 val tex_name : t -> string
 (** get the name of the font as used by TeX *)
 
-val glyphs_filename : t -> string
-(** the file, pfb or pfa, which defines the glyphs *)
-
-val glyphs_enc : t -> (int -> int)
-(** the conversion of the characters between tex and the font *)
-
 val ratio_cm : t -> float
 (** The font ratio, in cm *)
 
-val slant : t -> float option
-(** The font slant, if present *)
-
-val extend : t -> float option
-(** The font extent, if present *)
+val glyphs : t -> glyphs
 
 val t1disasm : string option ref
-
-module Print : sig
-  val font : int32 -> Format.formatter -> font_def -> unit
-end
 
 val char_width : t -> int -> float
 val char_height : t -> int -> float

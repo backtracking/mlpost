@@ -71,7 +71,7 @@ type t = {
   pages : page list;
   postamble : postamble;
   postpostamble : postpostamble;
-  font_map : Fonts.font_def Int32Map.t
+  font_map : Dvi_util.font_def Int32Map.t
 }
 
 (* vf *)
@@ -90,7 +90,7 @@ type char_desc =
 
 type vf =
     { vf_preamble   : preamble_vf;
-      vf_font_map   : Fonts.font_def Int32Map.t;
+      vf_font_map   : Dvi_util.font_def Int32Map.t;
       vf_chars_desc : char_desc list}
 (* *)
 
@@ -118,7 +118,7 @@ module Print = struct
 
   let fonts fmt fonts =
     fprintf fmt "* Fonts defined in this file :\n";
-    Int32Map.iter (fun k f -> Fonts.Print.font k fmt f) fonts
+    Int32Map.iter (fun k f -> Print_font.font k fmt f) fonts
 
   let postamble fmt p =
     fprintf fmt "* Postamble :\n";
@@ -237,7 +237,7 @@ let font_def bits =
 	name : (a+l)*8 : string;   (* the full name w/ area *)
 	bits : -1 : bitstring
       } ->
-        Fonts.mk_font_def ~checksum ~scale_factor ~design_size
+        mk_font_def ~checksum ~scale_factor ~design_size
           ~area:(String.sub name 0 a) ~name:(String.sub name a l), bits
     | { _ : -1 : bitstring } ->
 	dvi_error "Ill_formed font definition"
@@ -442,7 +442,8 @@ let rec pages p fonts bits =
 	let counters, previous, bits = page_counters bits in
 	let cmds, fonts, bits = page [] fonts bits in
 	let newp =
-	  {counters = counters; previous = previous; commands = cmds} in
+	  {counters = counters; previous = previous; commands = List.rev cmds}
+        in
         (* Pages in reverse order *)
 	  pages (newp::p) fonts bits
     | { bits : -1 : bitstring } ->
