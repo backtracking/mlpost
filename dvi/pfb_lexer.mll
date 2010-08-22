@@ -74,10 +74,13 @@ and enc_token = parse
   | '%' [^'\n']* '\n' {incr_linenum lexbuf; enc_token lexbuf}
   | '/' [^'[']* '[' '\n' {incr_linenum lexbuf; DUMB}
   | '/' (ident as a) {NAME_ENCODING a}
-  | ' '* '\n' {incr_linenum lexbuf; enc_token lexbuf}
+  | '\n' {incr_linenum lexbuf; enc_token lexbuf}
+  | [' ''\t']* {enc_token lexbuf}
   | ']' _* eof {DUMB}
+  | _ {failwith "enc token not exhaustive"}
+
 {
-let pfb_human_token x = 
+let pfb_human_token x =
   match !state with
     |Header -> header_token x
     |Encoding -> encoding_token x
