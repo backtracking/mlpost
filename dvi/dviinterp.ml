@@ -121,6 +121,7 @@ let put_rule env cmds a b =
 
 
 let load_fonts font_map conv =
+  if !debug then printf "conv : %f@." conv;
   Int32Map.fold (fun k fdef ->
     Int32Map.add k (Fonts.load_font fdef conv)
   )
@@ -139,10 +140,16 @@ let set_env_char (_,font,_) (h,v) c =
 let rec put_char_type1 (info,font,conv) char (h,v) cmds =
   match glyphs font with
     | VirtualFont vf ->
-      if !debug then printf "VirtualFont : %s@." (Fonts.tex_name font);
-      let env = new_env vf.vf_design_size true in
+      (* FixMe how to use vf_design_size?
+         Hack use the one of the first dvi, wrong!!*)
+      if !debug then printf "VirtualFont : %s ds=%f conv=%f@."
+        (Fonts.tex_name font) vf.vf_design_size conv;
+      let conv = (* vf.vf_design_size *)conv in
+      let env = new_env conv true in
       env.s <- {env.s with h = h; v = v};
-      let fm = load_fonts vf.vf_font_map vf.vf_design_size in
+      (* FIXME design size, font_scale,... All is messed up... :( *)
+      let fm = load_fonts vf.vf_font_map
+        (conv  (* for palatino (vf?)*) *. 0.65 (* experimental :( *)) in
       let l = try Int32H.find vf.vf_chars char
         with Not_found -> failwith ("virtual font not found") in
       interp_command fm env cmds l

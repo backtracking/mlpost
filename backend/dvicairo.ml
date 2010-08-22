@@ -83,7 +83,7 @@ let draw_type1 s text_type1 =
   let char = font.Fonts.glyphs_enc (Int32.to_int char)
   and x = point_of_cm x +. s.x_origin
   and y = point_of_cm y +. s.y_origin
-  and ratio = font.Fonts.glyphs_ratio_cm *. conversion in
+  and ratio = point_of_cm font.Fonts.glyphs_ratio_cm in
   if !debug then begin
     try
       printf "Draw the char %i(%c) in (%f,%f) x%f@."
