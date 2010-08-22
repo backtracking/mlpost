@@ -16,7 +16,7 @@
 
 open Format
 open Dviinterp
-
+open Mlpost_ft
 
 
 type multi_page_pic = {pic :Cairo.t;
@@ -32,25 +32,18 @@ let specials = ref false
 let info = ref false
 
 
-let ft = Cairo_ft.init_freetype ()
-
 let fonts_known = Hashtbl.create 30
 
 let find_font font =
   let font_name = font.Fonts.glyphs_tag in
   try Hashtbl.find fonts_known font_name
   with Not_found ->
-    if !debug then printf "Cairo : Loading font %s@."
-      font.Fonts.glyphs_filename;
-    let filename = font.Fonts.glyphs_filename in
-    if !debug then printf "Trying to find font at %s...@." filename;
-    let face = Cairo_ft.new_face ft filename in
-    let f =Cairo_ft.font_face_create_for_ft_face face 0,face in
+    if !debug then printf "Cairo : Loading font@.";
+    let face = font.Fonts.glyphs_ft in
+    let f = Cairo_ft.font_face_create_for_ft_face face 0 in
     Hashtbl.add fonts_known font_name f;f
 
-let clean_up () =
-  Hashtbl.iter (fun _ (_,x) -> Cairo_ft.done_face x) fonts_known;
-  Cairo_ft.done_freetype ft
+let clean_up () = ()
 
 let set_source_color pic = function
   | RGB(r,g,b) ->
@@ -86,18 +79,17 @@ let draw_type1 s text_type1 =
   let font = text_type1.c_font in
   let char = text_type1.c_glyph in
   let x,y = text_type1.c_pos in
-  let f = fst (find_font font) in
+  let f = find_font font in
   let char = font.Fonts.glyphs_enc (Int32.to_int char)
   and x = point_of_cm x +. s.x_origin
   and y = point_of_cm y +. s.y_origin
   and ratio = font.Fonts.glyphs_ratio_cm *. conversion in
   if !debug then begin
-    let name = font.Fonts.glyphs_filename in
     try
-      printf "Draw the char %i(%c) of %s in (%f,%f) x%f@."
-        char (Char.chr char) name x y ratio;
+      printf "Draw the char %i(%c) in (%f,%f) x%f@."
+        char (Char.chr char) x y ratio;
     with _ ->
-      printf "Draw the char %i of %s  in (%f,%f) x%f@." char name x y ratio
+      printf "Draw the char %i in (%f,%f) x%f@." char x y ratio
   end;
   Cairo.save s.pic;
   set_source_color s.pic dinfo.Dviinterp.color;
@@ -106,11 +98,11 @@ let draw_type1 s text_type1 =
     (* slant and extend *)
   (match font.Fonts.slant with
     | Some a when !info ->
-      printf "slant of %f not used for %s@." a font.Fonts.glyphs_filename
+      printf "slant of %f not used@." a
     | Some _ | None -> ());
   (match font.Fonts.extend with
     | Some a when !info ->
-      printf "extend of %f not used for %s@." a font.Fonts.glyphs_filename
+      printf "extend of %f not used@." a
     | Some _ | None -> ());
   Cairo.show_glyphs s.pic
     [|{Cairo.index = char;
@@ -135,3 +127,6 @@ and draw_command s = function
 and draw_commands s = List.iter (draw_command s)
 
 let draw = draw_commands
+
+
+

@@ -22,7 +22,8 @@ let font_error s = raise (Fonterror s)
 
 type type1 =
     { glyphs_tag : int;
-      glyphs_filename : string;
+      (* That must be separated from cairo *)
+      glyphs_ft : Cairo_ft.ft_face;
       (* the file, pfb or pfa, which define the glyphs *)
       glyphs_enc : int -> int; (* the conversion of the characters
                                   between tex and the font *)
@@ -95,22 +96,6 @@ let find_file = memoize find_file_aux 30
 
 module HString = Hashtbl
 
-let open_pfb_decrypted filename =
-  match !t1disasm with
-    | None ->
-        let buf = T1disasm.open_decr filename in
-        (*Buffer.output_buffer stdout buf;*)
-        Lexing.from_string (Buffer.contents buf), fun () -> ()
-    | Some t1disasm ->
-        let temp_fn = Filename.temp_file "pfb_human" "" in
-        let exit_status =
-          Sys.command
-            (Format.sprintf "%s %s > %s" t1disasm filename temp_fn) in
-        if exit_status <> 0 then font_error "pfb_human generation failed"
-        else
-          let file = open_in temp_fn in
-          Lexing.from_channel file,(fun () -> Sys.remove temp_fn)
-
 let deal_with_error ?(pfb=false) lexbuf f =
   try f ()
   with
@@ -127,23 +112,6 @@ let deal_with_error ?(pfb=false) lexbuf f =
       p_start.Lexing.pos_lnum p_start.Lexing.pos_bol p_end.Lexing.pos_bol
       (Lexing.lexeme lexbuf) str ;
       raise a
-
-let load_pfb_aux filename =
-  if !info then
-    Format.printf "Loading font from %s...@?" filename;
-  let lexbuf,do_done = open_pfb_decrypted filename in
-  deal_with_error lexbuf ~pfb:true (fun () ->
-     let encoding_table, charstring =
-      Pfb_parser.pfb_human_main Pfb_lexer.pfb_human_token lexbuf in
-    let charstring_table = Hashtbl.create 700 in
-    let count = ref 0 in
-    List.iter (fun x ->
-      Hashtbl.add charstring_table x !count;incr(count)) charstring;
-    if !info then Format.printf "done@.";
-    do_done ();
-    encoding_table,charstring_table)
-
-let load_pfb = memoize load_pfb_aux 15
 
 let load_fonts_map filename =
   if !info then Format.printf "Load font map from %s...@?" filename;
@@ -199,8 +167,9 @@ let load_font_tfm fd =
     Format.printf "done@.";
   tfm
 
-let compute_trans_enc encoding_table charset_table char =
-  Hashtbl.find charset_table (encoding_table.(char))
+let compute_trans_enc encoding_table font_ft char =
+  let char_name = encoding_table.(char) in
+  Mlpost_ft.ft_get_name_index font_ft char_name
 
 let font_is_virtual s =
   try
@@ -208,6 +177,8 @@ let font_is_virtual s =
   with Fonterror _ -> None
 
 let id = let c = ref (-1) in fun () -> incr c; !c
+
+let ft = lazy (Cairo_ft.init_freetype ())
 
 let load_glyphs tex_name ratio_cm =
   match font_is_virtual tex_name with
@@ -228,13 +199,13 @@ let load_glyphs tex_name ratio_cm =
                              it can't be currently used with the cairo backend"
                tex_name) in
       let pfab = find_file font_map.Fonts_type.pfab_name in
-      let pfab_enc,pfab_charset = load_pfb pfab in
+      let pfab = Cairo_ft.new_face (Lazy.force ft) pfab in
       let enc = match font_map.Fonts_type.enc_name with
-        | None -> pfab_enc
+        | None -> failwith "Hi I'm sorry contact me ;) Francois"
         | Some x -> load_enc (find_file x) in
-      let glyphs_enc = compute_trans_enc enc pfab_charset in
+      let glyphs_enc = compute_trans_enc enc pfab in
       Type1 { glyphs_tag = id ();
-              glyphs_filename = pfab;
+              glyphs_ft = pfab;
               glyphs_enc = glyphs_enc;
               slant = font_map.Fonts_type.slant;
               extend = font_map.Fonts_type.extend;
@@ -275,5 +246,4 @@ let char_depth t c = Metric.char_depth t.metric c *. t.ratio
 let char_dims t c =
   let a,b,c = Metric.char_dims t.metric c and f = t.ratio in
   a *. f, b *. f, c *. f
-
 

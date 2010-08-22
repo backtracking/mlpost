@@ -100,7 +100,7 @@ install-byte-contrib: install-byte-dot install-byte-lablgtk
 install-opt-contrib: install-opt-dot install-opt-lablgtk
 
 
-BCMA = $(addprefix $(BUILD), $(CMA))
+BCMA = $(addprefix $(BUILD), $(CMA) $(DLL))
 BCMXA = $(addprefix $(BUILD), $(CMXA) $(OBJ))
 
 ifeq "@USEOCAMLFIND@" "no"

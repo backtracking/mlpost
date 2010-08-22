@@ -18,6 +18,13 @@
 open Ocamlbuild_plugin
 open Command
 
+(* Configuration section should be done in configure *)
+ let freetype_lib = "-lfreetype"
+ let freetype_lib2 = "-lz"
+ (* let zlib_libdir = "-L/usr/lib64"  (* for x86-64 Linux *) *)
+ let freetype_include = "-I/usr/include/freetype2"
+
+
 let tagcairo = ref false
 let tagconcrete = ref false
 
@@ -158,6 +165,27 @@ let _ = dispatch begin function
   | After_rules ->
       if !tagcairo then
         ocaml_lib ~extern:true ~tag_name:("use_cairo_bigarray") "bigarray";
+
+      (* When one compile C code using the zlib *)
+      flag ["c"; "compile"; "include_freetype"]
+        (S[A"-ccopt"; A freetype_include]);
+
+      flag ["link"; "ocaml"; "library"; "use_freetype"]
+        (S[A"-cclib"; A freetype_lib ; A"-cclib"; A freetype_lib2]);
+
+      (* ml lib *)
+     flag ["link"; "library"; "ocaml"; "byte"; "use_libmlpost_ft"]
+          (S[A"-dllib"; A"-lmlpost_ft";
+             A"-cclib"; A"-lmlpost_ft"]);
+
+     flag ["link"; "library"; "ocaml"; "native"; "use_libmlpost_ft"]
+          (S[A"-cclib"; A"-lmlpost_ft"]);
+
+
+     (* When ocaml link something that use the libmlpost,
+        then one need that file to be up to date. *)
+      dep  ["link"; "ocaml"; "use_libmlpost_ft"] ["backend/libmlpost_ft.a"];
+
 
       List.iter (fun (pkg,dir,file) ->
         ocaml_lib ~extern:true ~tag_name:("pkg_"^pkg) ~dir file;

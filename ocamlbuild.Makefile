@@ -39,20 +39,25 @@ CMA := mlpost.cma mlpost_desc_options.cma mlpost_options.cma
 CMXA := mlpost.cmxa mlpost_desc_options.cmxa mlpost_options.cmxa
 OBJ := mlpost_desc_options$(LIBEXT) mlpost_options$(LIBEXT)
 
+#FixMe Should be done only when cairo/freetype is in the mood
+EXTDLL = .so
+DLL := backend/dllmlpost_ft$(EXTDLL)
+
+
 ifeq "$(OCAMLBEST)" "opt"
 all:
-	$(OCAMLBUILD) $(CMA) $(CMXA) $(TOOL)
+	$(OCAMLBUILD) $(CMA) $(CMXA) $(TOOL) $(DLL)
 
 lib:
-	$(OCAMLBUILD) $(CMA) $(CMXA)
+	$(OCAMLBUILD) $(CMA) $(CMXA) $(DLL)
 
 LIB_EXT=.cma .cmxa .cmi
 else
 all:
-	$(OCAMLBUILD) $(CMA) $(TOOL)
+	$(OCAMLBUILD) $(CMA) $(TOOL) $(DLL)
 
 lib:
-	$(OCAMLBUILD) $(CMA)
+	$(OCAMLBUILD) $(CMA) $(DLL)
 
 LIB_EXT=.cma .cmi
 endif

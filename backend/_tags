@@ -7,3 +7,7 @@
 
 
 <*.cmx> : for-pack(Mlpost)
+
+
+<ml_mlpost_ft.c> : include_freetype
+<mlpost_ft.*>    : pkg_cairo

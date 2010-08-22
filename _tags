@@ -14,3 +14,7 @@
 <handbookgraphs.*> : use_unix, pkg_bitstring, pkg_cairo, use_cairo_bigarray, use_str
 <othergraphs.*> : use_unix, pkg_bitstring, pkg_cairo, use_cairo_bigarray, use_str
 <testsuite>: include
+
+
+<mlpost.*> : use_freetype, use_libmlpost_ft
+<test_freetype.*> : use_freetype, use_libmlpost_ft

@@ -65,7 +65,7 @@ gentex_dev_null.log" com_latex latex) in
     let extract cl =
       (* remove the last rule added above, it gives the bounding box*)
       match cl with
-        | Dviinterp.Fill_rect (_,x,y,_,h)::_ ->
+        | Dviinterp.Fill_rect (_,x,y,_,h)::cl ->
           let bb = (0., -.(y+.h), x, -.y) in
           {tex = cl; trans = Matrix.identity; bb = bb}
         | _ -> assert false in

@@ -6,7 +6,7 @@ open Dvi_util
 type type1 = private {
   glyphs_tag : int;
   (* unique tag *)
-  glyphs_filename : string;
+  glyphs_ft :  Cairo_ft.ft_face;
   (* the file, pfb or pfa, which define the glyphs *)
   glyphs_enc : int -> int;
   (* the conversion of the charactersx between tex and the font *)
