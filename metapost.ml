@@ -96,7 +96,8 @@ let dump_tex ?prelude f =
 	fprintf fmt "\\documentclass[a4paper]{article}";
 	fprintf fmt "\\usepackage{graphicx}"
     | Some s ->
-	fprintf fmt "%s@\n" s
+        fprintf fmt "%s@\n" s;
+        fprintf fmt "\\usepackage{graphicx}"
   end;
   fprintf fmt "\\begin{document}@\n";
   fprintf fmt "\\begin{center}@\n";
