@@ -201,7 +201,7 @@ let load_glyphs tex_name ratio_cm =
       let pfab = find_file font_map.Fonts_type.pfab_name in
       let pfab = Cairo_ft.new_face (Lazy.force ft) pfab in
       let enc = match font_map.Fonts_type.enc_name with
-        | None -> failwith "Hi I'm sorry contact me ;) Francois"
+        | None -> Standardenc.standardencoding
         | Some x -> load_enc (find_file x) in
       let glyphs_enc = compute_trans_enc enc pfab in
       Type1 { glyphs_tag = id ();
