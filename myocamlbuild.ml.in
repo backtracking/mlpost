@@ -184,7 +184,8 @@ let _ = dispatch begin function
 
      (* When ocaml link something that use the libmlpost,
         then one need that file to be up to date. *)
-      dep  ["link"; "ocaml"; "use_libmlpost_ft"] ["backend/libmlpost_ft.a"];
+      (* dep  ["link"; "ocaml"; "use_libmlpost_ft"]
+         ["backend/libmlpost_ft.a"]; *)
 
 
       List.iter (fun (pkg,dir,file) ->

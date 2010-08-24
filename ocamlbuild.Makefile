@@ -41,7 +41,7 @@ OBJ := mlpost_desc_options$(LIBEXT) mlpost_options$(LIBEXT)
 
 #FixMe Should be done only when cairo/freetype is in the mood
 EXTDLL = .so
-DLL := backend/dllmlpost_ft$(EXTDLL)
+DLL := backend/dllmlpost_ft$(EXTDLL) backend/libmlpost_ft.a
 
 
 ifeq "$(OCAMLBEST)" "opt"
