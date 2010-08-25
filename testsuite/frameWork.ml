@@ -43,11 +43,11 @@ module Test = struct
   let mk ?(prepare=id_unit) ?(clean_up=id_unit) ~name run =
     { prepare = prepare ; clean_up = clean_up; run = run; name = name }
 
-  let run_one t =
+  let run_one queue t =
     t.prepare ();
     begin try t.run (); Format.printf ".@?"
     with
-    | Assert.Assert _ -> Format.printf "!@?"
+    | Assert.Assert s -> Format.printf "!@?"; queue := (t,s)::!queue
     | e ->
         Format.printf "?@?";
         Format.eprintf "Error during test %s...@." t.name;
@@ -63,7 +63,14 @@ module Test = struct
 
 
   let run_many l =
-    List.iter run_one l;
-    Format.printf "@."
+    let queue = ref [] in
+    List.iter (run_one queue) l;
+    Format.printf "@.";
+    let l = List.rev !queue in
+    List.iter (fun (t,ass) ->
+      Format.printf "failed test %s:@." t.name;
+      match ass with
+      | None -> ()
+      | Some s -> Format.printf "assertion failed: %s@." s) l
 
 end
