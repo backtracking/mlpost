@@ -46,9 +46,11 @@ end
 
 (* Filename.dir_sep in Ocaml >= 3.11.2 *)
 let dir_sep = match Sys.os_type with
-  | "Cygwin" | "Unix" -> "/"
-  | "Win32" -> "\\"
+  | "Cygwin" | "Unix" -> '/'
+  | "Win32" -> '\\'
   | _ -> assert false
+
+let dir_sep_string = String.make 1 dir_sep
 
 module Dir = struct
   type t =
@@ -56,7 +58,7 @@ module Dir = struct
   (* the type t is a stack of directories, innermost is on top *)
 
   let from_string =
-    let r = Str.regexp_string dir_sep in
+    let r = Str.regexp_string dir_sep_string in
     fun s ->
       { dirs = List.rev (Str.split r s); is_relative = Filename.is_relative s }
 
@@ -64,7 +66,7 @@ module Dir = struct
     assert d2.is_relative;
     { d1 with dirs = d2.dirs @ d1.dirs }
 
-  let print_sep fmt () = Format.pp_print_string fmt dir_sep
+  let print_sep fmt () = Format.pp_print_char fmt dir_sep
   let to_string s =
     let prefix = if s.is_relative then "" else "/" in
       Misc.sprintf "%s%a" prefix
@@ -118,7 +120,7 @@ exception Found of int
 
 let split_ext s =
   let l = String.length s in
-  if s.[l-1] = '.' then s, None
+  if s.[l-1] = '.' || s.[l-1] = dir_sep then s, None
   else
     try
       let i = String.rindex_from s (l-1) '.' in

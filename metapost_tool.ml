@@ -47,8 +47,8 @@ let tempdir ?(clean=true) prefix suffix f =
 
 let append_dir dir suffix =
   let dir =
-    if Filename.check_suffix dir File.dir_sep
-    then Filename.chop_suffix dir File.dir_sep
+    if Filename.check_suffix dir File.dir_sep_string
+    then Filename.chop_suffix dir File.dir_sep_string
     else dir in
   dir^suffix
 
