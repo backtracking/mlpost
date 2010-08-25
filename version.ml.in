@@ -44,5 +44,4 @@ let libraries libdir =
     "mlpost", ([libdir], ["mlpost"]);
     "mlpost_options", ([libdir], [ "mlpost_desc_options";"mlpost_options"]);
     "unix" , ([],["unix"]);
-    "str" , ([],["str"])
   ]

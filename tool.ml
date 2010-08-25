@@ -36,7 +36,7 @@ let not_bitstring = Version.not_bitstring
 
 let used_libs =
   (* put libraries in correct order here *)
-  let acc = ["unix"; "str"] in
+  let acc = ["unix"] in
   let acc = if not_cairo then acc else "cairo"::acc in
   let acc = if not_bitstring then acc else "bitstring"::acc in
   let acc = "mlpost"::acc in
