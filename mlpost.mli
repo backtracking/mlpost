@@ -2456,6 +2456,7 @@ module Metapost : sig
   val depend : string -> unit
 
   val set_required_files : string list -> unit
+  val set_prelude : string -> unit
 
 end
 

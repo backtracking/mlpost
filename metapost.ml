@@ -59,10 +59,17 @@ vardef reset_extra_specials =
 
 let defaultprelude = "\\documentclass{article}\n\\usepackage[T1]{fontenc}\n"
 
+let prelude_ref = ref defaultprelude
+let set_prelude x = prelude_ref := x
+
 (** take a list of figures [l] and write the code to the formatter in argument
  *)
 
-let mp bn ?(prelude=defaultprelude) l =
+let mp bn ?prelude l =
+  let prelude =
+    match prelude with
+    | None -> !prelude_ref
+    | Some s -> s in
   let f = File.set_ext (File.from_string bn) "mp" in
   File.write_to_formatted f (fun fmt ->
     print_prelude prelude fmt ();
