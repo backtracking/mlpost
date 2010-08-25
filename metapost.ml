@@ -81,6 +81,9 @@ let figures = Queue.create ()
 let filename_prefix = ref ""
 let set_filename_prefix = (:=) filename_prefix
 
+let required_files : File.t list ref = ref []
+let set_required_files l = required_files := List.map File.from_string l
+
 let emit s f =
   let fn =
     File.set_ext (File.from_string (!filename_prefix^s)) "mps" in
@@ -170,6 +173,9 @@ let png ?prelude ?verbose bn figl =
 
 let wrap_tempdir f suffix ?prelude ?verbose ?clean bn figl =
   let do_ from_ to_ =
+    (** first copy necessary files, then do your work *)
+    List.iter (fun f -> File.copy (File.place from_ f) (File.place to_ f))
+      !required_files;
     let l = f ?prelude ?verbose bn figl in
     l, l
   in

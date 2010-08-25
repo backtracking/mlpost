@@ -54,6 +54,8 @@ val prepend : t -> string -> t
 val move : t -> t -> unit
 (** move a file to another place *)
 
+val copy : t -> t -> unit
+
 val read_from : t -> (in_channel -> 'a) -> 'a
 
 val compare : t -> t -> int

@@ -39,6 +39,11 @@ let png = ref false
 let svg = ref false
 let filename_prefix = ref ""
 
+let required_files : string list ref = ref []
+let push_required s =
+  required_files := s :: !required_files
+
+
 (* notuple please or change Tool.wrap_options *)
 let spec =
   (["-pdf", Set pdf, " Generate .mps files (default)";
@@ -50,6 +55,7 @@ let spec =
     "-latex", String set_latex_file, "<main.tex> Scan the LaTeX prelude";
     "-eps", Set eps, " Generate encapsulated postscript files";
     "-xpdf", Set xpdf, " wysiwyg mode using xpdf remote server";
+    "-required", String push_required, " Specify files required by latex";
     "-v", Set verbose, " be a bit more verbose";
     "-depend", Set depend,
       " output dependency lines in a format suitable for the make(1) utility";

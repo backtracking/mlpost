@@ -230,8 +230,10 @@ let ocamlbuild args exec_name =
   execute ~outv:true ("_build/"^exec_name);
   (match !compile_name with
     | None -> ()
-    | Some s -> command ("cp _build/" ^ exec_name ^ " " ^ s));
-  if !dont_clean then () else command "ocamlbuild -clean"
+    | Some s -> command ("cp _build/" ^ exec_name ^ " " ^ s))
+    (* I think we should never call ocamlbuild -clean, maybe only remove the
+     * symlink -- Johannes *)
+(*   if !dont_clean then () else command "ocamlbuild -clean" *)
 
 let compile f =
   let bn = Filename.chop_extension f in

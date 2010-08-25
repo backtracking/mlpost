@@ -2455,6 +2455,8 @@ module Metapost : sig
   val dumpable : unit -> unit
   val depend : string -> unit
 
+  val set_required_files : string list -> unit
+
 end
 
 (** Helper functions to generate test TeX files *)

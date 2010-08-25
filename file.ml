@@ -156,6 +156,7 @@ module Map = Map.Make(struct type t' = t type t = t' let compare = compare end)
 
 (** wrappers for low level functions *)
 let move a b = LowLevel.move (to_string a) (to_string b)
+let copy a b = LowLevel.copy (to_string a) (to_string b)
 let read_from t f = LowLevel.read_from (to_string t) f
 let write_to t f = LowLevel.write_to (to_string t) f
 let write_to_formatted t f = LowLevel.write_to_formatted (to_string t) f
