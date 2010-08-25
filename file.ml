@@ -57,20 +57,39 @@ module Dir = struct
     { dirs : string list ; is_relative : bool }
   (* the type t is a stack of directories, innermost is on top *)
 
-  let from_string =
-    let r = Str.regexp_string dir_sep_string in
-    fun s ->
-      { dirs = List.rev (Str.split r s); is_relative = Filename.is_relative s }
-
-  let concat d1 d2 =
-    assert d2.is_relative;
-    { d1 with dirs = d2.dirs @ d1.dirs }
-
   let print_sep fmt () = Format.pp_print_char fmt dir_sep
   let to_string s =
     let prefix = if s.is_relative then "" else "/" in
       Misc.sprintf "%s%a" prefix
         (Misc.print_list print_sep Format.pp_print_string) (List.rev s.dirs)
+
+  let rec eat_dirsep_back i s =
+    if s.[i] = dir_sep then eat_dirsep_back (i-1) s else i
+  let rec eat_dirsep_forw i s =
+    if s.[i] = dir_sep then eat_dirsep_forw (i+1) s else i
+
+  let split_sep s =
+    let l = String.length s in
+    if l = 0 then [] else
+      let rec aux acc i =
+        let i = eat_dirsep_forw i s in
+        try
+          let j = String.index_from s i dir_sep in
+          let dir = String.sub s i (j-i) in
+          let acc = dir::acc in
+          if j = l-1 then acc else aux acc (j+1)
+        with Not_found ->
+          let j = eat_dirsep_back (l-1) s in
+          (String.sub s i (j-i+1)) :: acc in
+      aux [] 0
+
+  let from_string s =
+    let f = { dirs = split_sep s; is_relative = Filename.is_relative s } in
+    f
+
+  let concat d1 d2 =
+    assert d2.is_relative;
+    { d1 with dirs = d2.dirs @ d1.dirs }
 
   let temp = from_string Filename.temp_dir_name
 
