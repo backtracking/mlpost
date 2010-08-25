@@ -96,14 +96,32 @@ let extension t =
   match t.ext with
   | Some s -> s
   | None -> ""
+
 let basename t = t.bn
 
-let split_ext =
-  let r = Str.regexp "\\.[^./]+$" in
-  fun s ->
-    let l = String.length s in
+let file_to_string bn ext =
+  match ext with
+  | None -> bn
+  | Some ext -> Misc.sprintf "%s.%s" bn ext
+
+let to_string t =
+  let dir = Dir.to_string t.dir in
+  let sep =
+    if String.length dir <> 0 && dir.[String.length dir-1] <> '/' then "/"
+    else "" in
+  Misc.sprintf "%s%s%s" (Dir.to_string t.dir) sep (file_to_string t.bn t.ext)
+
+let debug_to_string t =
+  Misc.sprintf "(%s,%s,%s)" (Dir.to_string t.dir) t.bn (extension t)
+
+exception Found of int
+
+let split_ext s =
+  let l = String.length s in
+  if s.[l-1] = '.' then s, None
+  else
     try
-      let i = Str.search_backward r s (String.length s) in
+      let i = String.rindex_from s (l-1) '.' in
       String.sub s 0 i, Some (String.sub s (i+1) (l-i-1))
     with Not_found -> s, None
 
@@ -122,21 +140,6 @@ let concat d t = { t with dir = Dir.concat d t.dir }
 
 let append t s = { t with bn = t.bn ^ s }
 let prepend t s = { t with bn = s ^ t.bn }
-
-let file_to_string bn ext =
-  match ext with
-  | None -> bn
-  | Some ext -> Misc.sprintf "%s.%s" bn ext
-
-let to_string t =
-  let dir = Dir.to_string t.dir in
-  let sep =
-    if String.length dir <> 0 && dir.[String.length dir-1] <> '/' then "/"
-    else "" in
-  Misc.sprintf "%s%s%s" (Dir.to_string t.dir) sep (file_to_string t.bn t.ext)
-
-let debug_to_string t =
-  Misc.sprintf "(%s,%s,%s)" (Dir.to_string t.dir) t.bn (extension t)
 
 
 let set_ext t s =
