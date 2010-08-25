@@ -18,6 +18,7 @@ open Printf
 open Point_lib
 let com_latex = "latex"
 let genfile_name = "gentex"
+(* FIXME different from Metapost.default_prelude? *)
 let default_prelude = "\\documentclass{article}\n"
 
 let debug = false
