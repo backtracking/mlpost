@@ -154,8 +154,12 @@ module Color : sig
     (** [cmyk c m y k] constructs the color that corresponds to the color code
 	CMYK(c,m,y,k)  *)
 
+  (** WARNING : If you use transparency with .mps file in your latex
+      document you need to add : \LoadMetaPostSpecialExtensions in the
+      preamble *)
+
   val rgba : float -> float -> float -> float -> t
-    (** similar to [rgb], but takes the factor of transparency *)
+  (** similar to [rgb], but takes the factor of transparency *)
   val rgb8a : int -> int -> int -> int -> t
     (** similar to [rgb8], but takes the factor of transparency *)
 

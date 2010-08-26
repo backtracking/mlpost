@@ -126,8 +126,9 @@ struct
         Cairo.clip cr;
         draw_aux cr com;
         Cairo.restore cr
-    | ExternalImage (filename,height,width) ->
+    | ExternalImage (filename,height,width,m) ->
         Cairo.save cr;
+        Cairo.transform cr m;
         inversey cr height;
         let img = Cairo_png.image_surface_create_from_file filename in
         let iwidth = float_of_int (Cairo.image_surface_get_width img) in

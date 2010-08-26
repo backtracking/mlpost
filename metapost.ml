@@ -103,12 +103,16 @@ let dump_tex ?prelude f =
   let fmt = formatter_of_out_channel c in
   begin match prelude with
     | None ->
-	fprintf fmt "\\documentclass[a4paper]{article}";
-	fprintf fmt "\\usepackage{graphicx}"
+	fprintf fmt "\\documentclass[a4paper]{article}"
     | Some s ->
-        fprintf fmt "%s@\n" s;
-        fprintf fmt "\\usepackage{graphicx}"
+        fprintf fmt "%s@\n" s
   end;
+      fprintf fmt "\\usepackage{graphicx}";
+      fprintf fmt "%%%%%%%%
+%% For specials in mps
+\\LoadMetaPostSpecialExtensions
+%%%%%%%%
+";
   fprintf fmt "\\begin{document}@\n";
   fprintf fmt "\\begin{center}@\n";
   Queue.iter

@@ -14,12 +14,15 @@
 (*                                                                        *)
 (**************************************************************************)
 
+
+
 open Point_lib
 open Matrix
 module P = Picture_lib
 module S = Spline_lib
 open Format
 open Dviinterp
+open Concrete_types
 
 let conversion = 0.3937 *. 72.
 let point_of_cm cm = conversion *. cm
@@ -32,6 +35,16 @@ let float fmt f =
   if a < 0.0001 then fprintf fmt "0"
   else if a >= 1.e04 then fprintf fmt "%.4f" f
   else fprintf fmt "%.4g" f
+
+type specials_env =
+  { externalimages : (P.commands,int) Hashtbl.t;
+    colors         : (P.color,int) Hashtbl.t;
+    count          : int ref}
+
+let new_specials_env () =
+  {externalimages = Hashtbl.create 7;
+   colors         = Hashtbl.create 17;
+   count          = ref 0}
 
 module MPS = struct
 
@@ -114,7 +127,9 @@ module MPS = struct
   let color fmt c =
     match c with
     | Concrete_types.OPAQUE c -> scolor fmt c
-    | Concrete_types.TRANSPARENT _ -> assert false
+    | Concrete_types.TRANSPARENT _ ->
+      (* harvest take care of that case *)
+      assert false
 
   let char_const fmt c =
     fprintf fmt "\\%03lo" c
@@ -223,6 +238,95 @@ let pen fmt t =
    * value of the matrix and use that as linewidth *)
   MPS.setlinewidth fmt t.xx
 
+let specials_signal = 0.123
+let specials_division = 1000.
+
+let add_color_se clr se =
+  match clr with
+    | None -> clr
+    | Some OPAQUE RGB (r,_,_) when r <> specials_signal -> clr
+    | Some clr ->
+      let nb =
+        try
+          Hashtbl.find se.colors clr
+        with Not_found ->
+          incr se.count;
+          let nb = !(se.count) in
+          Hashtbl.add se.colors clr nb;
+          nb
+      in
+      let nb = (float_of_int nb) /. specials_division in
+      Some (OPAQUE (RGB (specials_signal,0.003,nb)))
+
+let add_image_se p se =
+  if not (Hashtbl.mem se.externalimages p)
+  then begin
+    incr se.count;
+    let nb = !(se.count) in
+    Hashtbl.add se.externalimages p nb
+  end
+
+
+let rec harvest se = function
+  | P.Empty as p -> p
+  | P.OnTop l ->
+    let add acc e =
+      let p = harvest se e in
+      if p = P.Empty then acc else p::acc in
+    let l = List.fold_left add [] l in
+    if l = [] then P.Empty else P.OnTop (List.rev l)
+  | P.Stroke_path(p,c,d,e) -> P.Stroke_path(p,add_color_se c se,d,e)
+  | P.Fill_path (p,c) -> P.Fill_path (p,add_color_se c se)
+  | P.Tex _ as p -> p
+  | P.Transform (m,t) -> harvest se (P.apply_transform_cmds m t)
+  | P.Clip (com,p) ->
+    let com = harvest se com in
+    if com = P.Empty then com else P.Clip (com,p)
+  | P.ExternalImage _ as p ->
+    add_image_se p se;p
+
+
+(*
+For specials in mps
+The specials are described at the bottom of the preamble
+The first line describe the version, the special signal and the special_div
+%%MetaPostSpecials: 2.0 123 1000
+The next describe specials : length data special_number special_type
+%%MetaPostSpecial: 7 1 0.5 1 0 0 1 3
+Color cmyk  : 7 (cmyk_counter)                       c m y k special_number 1
+Color spot  :                                                               2
+Color rgba  : 7 mode_transparency value_transparency r g b   special_number 3
+Color cmyka : 8 mode_transparency value_transparency c m y k special_number 4
+Color spota : 8 mode_transparency value_transparency ? ? ? ? special_number 5
+
+In the text they appear as color : 
+  special_signal (1 cmyk 2 spot 3 rgb) special_number
+ 0.123 0.003 0.001 setrgbcolor
+
+*)
+
+let print_specials_color fmt cl id =
+  Format.pp_print_string fmt "%%MetaPostSpecial: ";
+  match cl with
+    | OPAQUE (RGB (r,g,b)) ->
+      Format.fprintf fmt "7 1 1. %f %f %f %i 3@." r g b id
+    | TRANSPARENT (a,(RGB (r,g,b))) ->
+      Format.fprintf fmt "7 1 %f %f %f %f %i 3@." a r g b id
+    | _ -> assert false
+
+let print_specials fmt cx =
+  let se = new_specials_env () in
+  let cx = harvest se cx in
+  if Hashtbl.length se.colors <> 0 then
+    begin
+      Format.fprintf fmt "%%%%MetaPostSpecials: 2.0 %i %i@."
+        (int_of_float (specials_signal *. specials_division))
+        (int_of_float specials_division);
+      Hashtbl.iter (print_specials_color fmt) se.colors
+    end;
+  cx
+
+
 let rec picture fmt = function
   | P.Empty -> ()
   | P.OnTop l ->
@@ -308,13 +412,14 @@ let draw fmt x =
   fprintf fmt "%%%%BeginProlog@\n";
   fprintf fmt "%%%%EndProlog@\n";
   fprintf fmt "%%%%Page: 1 1@\n";
+  let cx = print_specials fmt (P.content x) in
   MPS.setlinewidth fmt (P.default_line_size /.2.);
   pp_print_space fmt ();
   MPS.setlinecap fmt MPS.RoundCap;
   pp_print_space fmt ();
   MPS.setlinejoin fmt MPS.RoundJoin;
   pp_print_space fmt ();
-  picture fmt (P.content x);
+  picture fmt cx;
   pp_print_space fmt ();
   MPS.showpage fmt;
   fprintf fmt "@\n%%%%EOF@\n"

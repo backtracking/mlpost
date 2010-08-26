@@ -24,7 +24,6 @@ type path = Spline_lib.path
 
 type interactive
 type commands =
-    private
   | Empty
   | Transform of transform * commands
   | OnTop of commands list
@@ -32,7 +31,7 @@ type commands =
   | Stroke_path of path * color option * pen * dash option
   | Fill_path of path * color option
   | Clip of commands  * path
-  | ExternalImage of string * float * float
+  | ExternalImage of string * float * float * transform
 
 type t
 

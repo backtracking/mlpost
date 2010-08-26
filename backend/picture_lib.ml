@@ -105,7 +105,7 @@ type commands =
   | Stroke_path of path * color option * pen * dash option
   | Fill_path of path * color option
   | Clip of commands  * path
-  | ExternalImage of string * float * float
+  | ExternalImage of string * float * float * transform
 
 and t = { fcl : commands;
            fb : BoundingBox.t;
@@ -163,7 +163,7 @@ let external_image filename spec =
               let w = min (h*.(fw/.fh)) w in
               (fh/.fw)*.w,w
     end in
-  {fcl = ExternalImage (filename,height,width);
+  {fcl = ExternalImage (filename,height,width,Matrix.identity);
    fb = S.of_bounding_box (P.zero,{P.x=width;y=height});
    fi = IntEmpty}
 
@@ -202,7 +202,7 @@ let apply_transform_cmds t =
         Stroke_path (path pa, c, pe, d)
     | Clip (cmds, p) -> Clip (aux cmds, path p)
     | Tex g -> Tex { g with Gentex.trans = Matrix.multiply t g.Gentex.trans }
-    | ExternalImage _ -> pic
+    | ExternalImage (f,w,h,m) -> ExternalImage (f,w,h,Matrix.multiply t m)
     | Transform (t', l) -> Transform (Matrix.multiply t' t, l)
   and path p = Spline_lib.transform t p in
   aux

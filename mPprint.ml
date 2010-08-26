@@ -71,6 +71,8 @@ let rec num fmt = function
 
 and float fmt f = num fmt (C.F f)
 
+(* One bug : rgb and transparent can collide : rgb(0.123 0.003 0.001)
+   et rgba(1,1,1,1) since this is encoding lie the first one *)
 and scolor fmt = function
   | RGB (r,g,b) -> fprintf fmt "(%a, %a , %a@,)" float r float g float b
   | CMYK (c,m,y,k) ->

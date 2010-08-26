@@ -77,6 +77,8 @@ val pages : t -> page list
 
 val read_file : string -> t
 
+val get_height_cm : t -> float
+val get_width_cm  : t -> float
 
 (** Vf files *)
 
