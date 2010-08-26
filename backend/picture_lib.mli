@@ -31,8 +31,8 @@ type commands =
   | Stroke_path of path * color option * pen * dash option
   | Fill_path of path * color option
   | Clip of commands  * path
-  | ExternalImage of string * float * float * transform
-
+  | ExternalImage of string * float * transform
+      (* filename, height, transform *)
 type t
 
 type id = int

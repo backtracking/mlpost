@@ -37,7 +37,7 @@ let float fmt f =
   else fprintf fmt "%.4g" f
 
 type specials_env =
-  { externalimages : (P.commands,int) Hashtbl.t;
+  { externalimages : (string * Matrix.t,int) Hashtbl.t;
     colors         : (P.color,int) Hashtbl.t;
     count          : int ref}
 
@@ -66,6 +66,10 @@ module MPS = struct
   let lineto_float fmt x y =
     (* psstart fmt; float fmt x; float fmt y; string fmt "lineto"; psend fmt *)
     fprintf fmt "%t%a@ %a@ lineto%t" psstart float x float y psend
+  let lineto fmt p =
+    (* psstart fmt; float fmt x; float fmt y; string fmt "lineto"; psend fmt *)
+    fprintf fmt "%t%a@ %a@ lineto%t" psstart float p.x float p.y psend
+
   let moveto fmt p = moveto_float fmt p.x p.y
   let curveto fmt p1 p2 p3 =
     fprintf fmt "%t%a@ %a@ %a@ %a@ %a@ %a@ curveto%t"
@@ -203,8 +207,10 @@ let draw_tex fmt t =
     pp_print_space fmt ()) t.Gentex.tex
 
 let curveto fmt s =
-  let _, sb, sc, sd = Spline.explode s in
-  MPS.curveto fmt sb sc sd
+  let sa, sb, sc, sd = Spline.explode s in
+  if sa = sb && sc = sd
+  then MPS.lineto fmt sd
+  else MPS.curveto fmt sb sc sd
 
 let path =
   let rec path fmt = function
@@ -258,13 +264,25 @@ let add_color_se clr se =
       let nb = (float_of_int nb) /. specials_division in
       Some (OPAQUE (RGB (specials_signal,0.003,nb)))
 
-let add_image_se p se =
-  if not (Hashtbl.mem se.externalimages p)
-  then begin
-    incr se.count;
-    let nb = !(se.count) in
-    Hashtbl.add se.externalimages p nb
-  end
+
+
+let add_image_se =
+  let dumb_path = Spline_lib.create_lines
+    [Point_lib.zero;Point_lib.zero;
+     Point_lib.zero;Point_lib.zero] in
+  let dumb_path = Spline_lib.close dumb_path in
+fun p se ->
+  let nb =
+    try
+      Hashtbl.find se.externalimages p
+    with Not_found ->
+        incr se.count;
+      let nb = !(se.count) in
+      Hashtbl.add se.externalimages p nb; nb in
+  (* 0.010? *)
+  let nb = (float_of_int nb) /. specials_division in
+  let c = Some (OPAQUE (RGB (specials_signal,0.019,nb))) in
+  P.Fill_path(dumb_path,c)
 
 
 let rec harvest se = function
@@ -282,8 +300,7 @@ let rec harvest se = function
   | P.Clip (com,p) ->
     let com = harvest se com in
     if com = P.Empty then com else P.Clip (com,p)
-  | P.ExternalImage _ as p ->
-    add_image_se p se;p
+  | P.ExternalImage (f,h,m) -> add_image_se (f,m) se
 
 
 (*
@@ -314,16 +331,22 @@ let print_specials_color fmt cl id =
       Format.fprintf fmt "7 1 %f %f %f %f %i 3@." a r g b id
     | _ -> assert false
 
+let print_specials_extimg fmt (f,m) id =
+  Format.fprintf fmt
+    "%%%%MetaPostSpecial: 9 %f %f %f %f %f %f %s %i 10@."
+    m.xx m.yx m.xy m.yy m.x0 m.y0 f id
+
 let print_specials fmt cx =
   let se = new_specials_env () in
   let cx = harvest se cx in
-  if Hashtbl.length se.colors <> 0 then
-    begin
-      Format.fprintf fmt "%%%%MetaPostSpecials: 2.0 %i %i@."
-        (int_of_float (specials_signal *. specials_division))
-        (int_of_float specials_division);
-      Hashtbl.iter (print_specials_color fmt) se.colors
-    end;
+  if Hashtbl.length se.colors <> 0 || Hashtbl.length se.externalimages <> 0
+  then begin
+    Format.fprintf fmt "%%%%MetaPostSpecials: 2.0 %i %i@."
+      (int_of_float (specials_signal *. specials_division))
+      (int_of_float specials_division);
+    Hashtbl.iter (print_specials_color fmt) se.colors;
+    Hashtbl.iter (print_specials_extimg fmt) se.externalimages
+  end;
   cx
 
 
@@ -349,7 +372,6 @@ let rec picture fmt = function
 	pp_print_space fmt ();
         MPS.fill fmt)
   | P.Tex t -> draw_tex fmt t
-  | P.Transform (m,t) -> picture fmt (P.apply_transform_cmds m t)
   | P.Clip (com,p) ->
       in_context fmt (fun () ->
         path fmt p;
@@ -358,19 +380,9 @@ let rec picture fmt = function
 	pp_print_space fmt ();
         picture fmt com
       )
-  | _ -> assert false
-(*
-  | ExternalImage (filename,height,width) ->
-      Cairo.save cr;
-      inversey cr height;
-      let img = Cairo_png.image_surface_create_from_file filename in
-      let iwidth = float_of_int (Cairo.image_surface_get_width img) in
-      let iheight = float_of_int (Cairo.image_surface_get_height img) in
-      Cairo.scale cr (width/.iwidth) (height/.iheight);
-      Cairo.set_source_surface cr img 0. 0.;
-      Cairo.paint cr;
-      Cairo.restore cr
-*)
+  | P.Transform _
+  | P.ExternalImage _ -> assert false
+
 
 (* FIXME do better than comparing font names *)
 module FontCmp = struct

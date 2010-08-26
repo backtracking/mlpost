@@ -105,7 +105,7 @@ type commands =
   | Stroke_path of path * color option * pen * dash option
   | Fill_path of path * color option
   | Clip of commands  * path
-  | ExternalImage of string * float * float * transform
+  | ExternalImage of string * float * transform
 
 and t = { fcl : commands;
            fb : BoundingBox.t;
@@ -148,22 +148,22 @@ let externalimage_dimension filename : float * float =
     invalid_arg (Format.sprintf "Unknown external image %s" filename)
 
 let external_image filename spec =
+  let fh,fw = externalimage_dimension filename in
   let height,width =
     begin
       match spec with
         | `Exact (h,w) -> (h,w)
-        | ((`None as spec)| (`Height _ as spec)| (`Width _ as spec)
-          |(`Inside _ as spec)) ->
-            let fh,fw = externalimage_dimension filename in
-            match spec with
-              | `None -> fh,fw
-              | `Height h -> h,(fw/.fh)*.h
-              | `Width w -> (fh/.fw)*.w,w
-          | `Inside (h,w) ->
-              let w = min (h*.(fw/.fh)) w in
-              (fh/.fw)*.w,w
+        | `None -> (fh,fw)
+        | `Height h -> h,(fw/.fh)*.h
+        | `Width w -> (fh/.fw)*.w,w
+        | `Inside (h,w) ->
+          let w = min (h*.(fw/.fh)) w in
+          (fh/.fw)*.w,w
     end in
-  {fcl = ExternalImage (filename,height,width,Matrix.identity);
+  (* TODO : width/.fw pour cairo width pour mps *)
+  let m = Matrix.multiply (Matrix.xscaled width)
+    (Matrix.yscaled height) in
+  {fcl = ExternalImage (filename,height,m);
    fb = S.of_bounding_box (P.zero,{P.x=width;y=height});
    fi = IntEmpty}
 
@@ -202,7 +202,7 @@ let apply_transform_cmds t =
         Stroke_path (path pa, c, pe, d)
     | Clip (cmds, p) -> Clip (aux cmds, path p)
     | Tex g -> Tex { g with Gentex.trans = Matrix.multiply t g.Gentex.trans }
-    | ExternalImage (f,w,h,m) -> ExternalImage (f,w,h,Matrix.multiply t m)
+    | ExternalImage (f,h,m) -> ExternalImage (f,h,Matrix.multiply t m)
     | Transform (t', l) -> Transform (Matrix.multiply t' t, l)
   and path p = Spline_lib.transform t p in
   aux

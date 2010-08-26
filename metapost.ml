@@ -28,25 +28,6 @@ let print fmt i c =
 let print_prelude s fmt () =
   fprintf fmt "input mp-tool ; %% some initializations and auxiliary macros
 input mp-spec ; %% macros that support special features
-
-%%redefinition
-def doexternalfigure (expr filename) text transformation =
-  begingroup ; save p, t ; picture p ; transform t ;
-  p := nullpicture ; t := identity transformation ;
-  flush_special(10, 9,
-    dddecimal (xxpart t, yxpart t, xypart t) & \" \" &
-    dddecimal (yypart t,  xpart t,  ypart t) & \" \" & filename) ;
-  addto p contour unitsquare transformed t ;
-  setbounds p to unitsquare transformed t ;
-  _color_counter_ := _color_counter_ + 1 ;
-  draw p withcolor (_special_signal_/_special_div_,\
-_color_counter_/_special_div_,_special_counter_/_special_div_) ;
-  endgroup ;
-enddef ;
-
-vardef reset_extra_specials =
-  enddef ;
-
 @\n";
  fprintf fmt "prologues := 0;@\n";
  fprintf fmt "mpprocset := 0;@\n";
