@@ -123,7 +123,7 @@ let _ = dispatch begin function
 
        (** For img *)
       rule "produce image in img from img_doc.ml"
-        ~prods: (List.map (fun x -> "img/"^x^".1") img_doc_prod)
+        ~prods: (List.map (fun x -> "img/"^x^".mps") img_doc_prod)
         ~dep: "customdoc/img_doc.byte"
         begin fun env _ ->
            Cmd(Sh "mkdir -p img/ && cd img/ && ../customdoc/img_doc.byte \
@@ -131,9 +131,9 @@ let _ = dispatch begin function
         end;
 
        (** conversion of images *)
-      rule ".1 -> .dvi"
+      rule ".mps -> .dvi"
         ~prod: "%.dvi"
-        ~deps: ["%.1";"customdoc/all.template"]
+        ~deps: ["%.mps";"customdoc/all.template"]
         begin fun env _ ->
           let base = env "%" in
           let dirname = Pathname.dirname base in
@@ -163,6 +163,7 @@ let _ = dispatch begin function
         (fun env _ -> Cmd(S[A "convert"; A(env "%.ps"); A(env "%.png")]));
 
   | After_rules ->
+    ocaml_lib "mlpost_ft";
       if !tagcairo then
         ocaml_lib ~extern:true ~tag_name:("use_cairo_bigarray") "bigarray";
 
@@ -175,7 +176,15 @@ let _ = dispatch begin function
 
       (* ml lib *)
      flag ["link"; "library"; "ocaml"; "byte"; "use_libmlpost_ft"]
-          (S[A"-dllib"; A"-lmlpost_ft";
+          (S[A"-dllpath";A "backend";
+             A"-dllib"; A"-lmlpost_ft";
+             A"-cclib"; A"-Lbackend";
+             A"-cclib"; A"-lmlpost_ft"]);
+
+     flag ["link"; "ocaml"; "byte"; "use_libmlpost_ft"]
+          (S[A"-dllpath";A "backend";
+             A"-dllib"; A"-lmlpost_ft";
+             A"-cclib"; A"-Lbackend";
              A"-cclib"; A"-lmlpost_ft"]);
 
      flag ["link"; "library"; "ocaml"; "native"; "use_libmlpost_ft"]
