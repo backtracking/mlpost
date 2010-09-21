@@ -89,6 +89,7 @@ let gmean x y =
   | _, _ -> mkNGMean x y
 
 let fold_max f = List.fold_left (fun w p -> maxn w (f p))
+let fold_min f = List.fold_left (fun w p -> minn w (f p))
 
 let if_null n n1 n2 =
   match n.node with

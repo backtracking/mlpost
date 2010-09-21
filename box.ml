@@ -481,24 +481,20 @@ let set_width pos w b =
       n +/ ((xpart b.ctr -/ n) */ (w // b.width)) in
   { b with width = w; ctr = Point.pt (nc, ypart b.ctr) }
 
-let set_gen2 mycorner chgp pos1 y1 pos2 y2 b =
-  let pos1 = mycorner pos1 b in
-  let pos2 = mycorner pos2 b in
-  let conv x =
-    let a = (y1 -/ y2) // (pos1 -/ pos2) in
-    let b = ((y2 */ pos1) -/ (y1 */ pos2)) // (pos1 -/ pos2) in
-    a */ x +/ b in
-  let h = conv b.height in
-  let ctr = chgp conv b.ctr in
-  { b with height = h; ctr = ctr }
+let set_gen2 mycorner chdim pos1 y1 pos2 y2 box =
+  let pos1 = mycorner pos1 box in
+  let pos2 = mycorner pos2 box in
+  let a = (y1 -/ y2) // (pos1 -/ pos2) in
+  let b = ((y2 */ pos1) -/ (y1 */ pos2)) // (pos1 -/ pos2) in
+  let w,h = chdim (fun x -> a */ x) (box.width,box.height) in
+  let ctr = chdim (fun x -> a */ x +/ b) (xpart box.ctr,ypart box.ctr) in
+  { box with width = w; height = h; ctr = Point.pt ctr }
 
 let set_height2 pos1 y1 pos2 y2 b = set_gen2 cornerv
-  (fun conv p -> Point.pt (xpart p, conv (ypart p)))
-  pos1 y1 pos2 y2 b
+  (fun conv (x,y) -> (x, conv y)) pos1 y1 pos2 y2 b
 
 let set_width2 pos1 y1 pos2 y2 b = set_gen2 cornerh
-  (fun conv p -> Point.pt (conv (xpart p),ypart p))
-  pos1 y1 pos2 y2 b
+  (fun conv (x,y) -> (conv x,y)) pos1 y1 pos2 y2 b
 
 let valign ?(pos=`Center) x l =
   List.map (fun b -> shift (Point.pt (x -/ xcoord pos b, zero)) b) l
@@ -672,6 +668,20 @@ let grid ?hpadding ?vpadding ?pos ?stroke ?pen ?dash m =
 let gridi ?hpadding ?vpadding ?pos ?stroke ?pen ?dash w h f =
   let m = Array.init h (fun j -> Array.init w (fun i -> f i j)) in
   grid ?hpadding ?vpadding ?pos ?stroke ?pen ?dash m
+
+let henlarge l =
+  let toh f x = xpart (f x) in
+  let min = Num.fold_min (toh west) (bp infinity) l in
+  let max = Num.fold_max (toh east) (bp neg_infinity) l in
+  List.map (set_width2 `West min `East max) l
+
+
+let venlarge l =
+  let tow f x = ypart (f x) in
+  let min = Num.fold_min (tow south) (bp infinity) l in
+  let max = Num.fold_max (tow north) (bp neg_infinity) l in
+  List.map (set_height2 `North max `South min) l
+
 
 module P = Path
 

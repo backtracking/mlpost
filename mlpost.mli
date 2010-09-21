@@ -726,7 +726,7 @@ and Dash : sig
   (** This module permits to define dash patterns, that are used to draw lines
    in different styles *)
 
-  type t
+  type t = Brush.Dash.t
     (** The abstract type of dash patterns *)
 
   val evenly : t
@@ -788,7 +788,7 @@ and Brush : sig
     (** This module permits to define dash patterns, that are used to
         draw lines in different styles *)
 
-    type t (**/**) = Dash.t (**/**)
+    type t
       (** The abstract type of dash patterns *)
 
     val evenly : t
@@ -818,8 +818,10 @@ and Brush : sig
   val t :
     ?color:Color.t -> ?pen:Pen.t ->
     ?dash:Dash.t -> ?scale:Num.t ->
-    ?brush:t -> (* use the value of brush for the default value *)
+    ?brush:t ->
     unit -> t
+  (** [t ~color ~pen ~dash ~scale ~brush] create a brush with color [color] if 
+      TODO *)
 
   val pen : t -> Pen.t option
   val dash : t -> Dash.t option
@@ -1560,12 +1562,20 @@ module Box : sig
   val same_width : ?pos:hposition -> t list -> t list
   val same_size : ?pos:position -> t list -> t list
 
-  val set_post_draw : (t -> Command.t) -> t -> t
-  val clear_post_draw : t -> t
-  val set_pre_draw : (t -> Command.t) -> t -> t
-  val clear_pre_draw : t -> t
+  val henlarge : t list -> t list
+  (** [henlarge l] set the west boundaries of the box in [l] to the
+      westest boundaries of the box in [l]. same for the east
+      boundaries *)
 
-  (** {2 Misc.} *)
+  val venlarge : t list -> t list
+    (** same as {henlarge} for vertical boundaries *)
+
+    val set_post_draw : (t -> Command.t) -> t -> t
+    val clear_post_draw : t -> t
+    val set_pre_draw : (t -> Command.t) -> t -> t
+    val clear_pre_draw : t -> t
+
+(** {2 Misc.} *)
 
   val shadow : t -> t
 
@@ -1599,7 +1609,8 @@ module Box : sig
   val yscale : Num.t -> t -> t
   val xscale : Num.t -> t -> t
 
-  (** {2 Boxlike : An argument for functor of object that are similar to box} *)
+  (** {2 Boxlike : An argument for functor of object that are similar to box}
+ *)
 
   val set_pos : Point.t -> t -> t
     (** same as center *)
