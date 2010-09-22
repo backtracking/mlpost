@@ -111,16 +111,9 @@ handbook.pdf : handbookgraphs.ml
 handbook: handbook.pdf
 	$(PDFVIEWER) test/testmanual.pdf
 
-# handbook.byte: handbookgraphs.ml
-# 	$(OCAMLBUILD) handbookgraphs.byte
-# 	$(BUILD)/handbookgraphs.byte
-# 	make -C test manual
-# 	make -C test/manual mpost
-# 	$(PSVIEWER) test/testmanual.ps
-
-other.pdf: othergraphs.ml
-	$(OCAMLBUILD) othergraphs.native
-	$(BUILD)/othergraphs.native
+other.pdf : othergraphs.ml
+	$(OCAMLBUILD) generate.cmx
+	$(LOCALMLPOST) -no-magic -ccopt "generate.cmx" othergraphs.ml
 	make -C test other
 	make -C test/othergraphs mpost
 
