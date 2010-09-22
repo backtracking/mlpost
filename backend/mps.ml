@@ -200,8 +200,6 @@ let tex_cmd fmt trans c =
   | Dviinterp.Draw_text_type1 _ -> assert false
 
 let draw_tex fmt t =
-  (* FIXME currently the transformation is applied and restored for every
-     letter *)
   List.iter (fun x ->
     tex_cmd fmt t.Gentex.trans x;
     pp_print_space fmt ()) t.Gentex.tex
