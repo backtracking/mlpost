@@ -20,9 +20,10 @@ open Point_lib
 open Matrix
 module P = Picture_lib
 module S = Spline_lib
-open Format
 open Dviinterp
 open Concrete_types
+
+let fprintf = Printf.fprintf
 
 let conversion = 0.3937 *. 72.
 let point_of_cm cm = conversion *. cm
@@ -34,7 +35,22 @@ let float fmt f =
   let a = abs_float f in
   if a < 0.0001 then fprintf fmt "0"
   else if a >= 1.e04 then fprintf fmt "%.4f" f
-  else fprintf fmt "%.4g" f
+  else Printf.fprintf fmt "%.4g" f
+
+let rec list sep p fmt l =
+  match l with
+  | [] -> ()
+  | [x] -> p fmt x
+  | x::xs -> p fmt x; sep fmt; list sep p fmt xs
+
+let option sep p fmt o =
+  match o with
+  | None -> ()
+  | Some x -> p fmt x ; sep fmt
+
+let nothing _ = ()
+let space fmt = fprintf fmt " "
+
 
 type specials_env =
   { externalimages : (string * Matrix.t,int) Hashtbl.t;
@@ -58,40 +74,30 @@ module MPS = struct
     | RoundJoin
     | BevelJoin
 
-  let psstart fmt = fprintf fmt "@[<hov 0>"
-  let psend fmt = fprintf fmt "@]"
-  let string = pp_print_string
-  let moveto_float fmt x y =
-    fprintf fmt "%t%a@ %a@ moveto%t" psstart float x float y psend
-  let lineto_float fmt x y =
-    (* psstart fmt; float fmt x; float fmt y; string fmt "lineto"; psend fmt *)
-    fprintf fmt "%t%a@ %a@ lineto%t" psstart float x float y psend
-  let lineto fmt p =
-    (* psstart fmt; float fmt x; float fmt y; string fmt "lineto"; psend fmt *)
-    fprintf fmt "%t%a@ %a@ lineto%t" psstart float p.x float p.y psend
-
+  let moveto_float fmt x y = fprintf fmt "%a %a moveto" float x float y
+  let lineto_float fmt x y = fprintf fmt "%a %a lineto" float x float y
+  let rlineto_float fmt x y = fprintf fmt "%a %a rlineto" float x float y
+  let lineto fmt p = lineto_float fmt p.x p.y
   let moveto fmt p = moveto_float fmt p.x p.y
+  let rlineto fmt p = rlineto_float fmt p.x p.y
+  let lineto_floatp fmt (x,y) = lineto_float fmt x y
+
   let curveto fmt p1 p2 p3 =
-    fprintf fmt "%t%a@ %a@ %a@ %a@ %a@ %a@ curveto%t"
-      psstart float p1.x float p1.y float p2.x float p2.y float p3.x float p3.y
-      psend
+    fprintf fmt "%a %a %a %a %a %a curveto"
+      float p1.x float p1.y float p2.x float p2.y float p3.x float p3.y
 
-  let rlineto fmt p =
-    fprintf fmt "%t%a@ %a@ rlineto%t" psstart float p.x float p.y psend
-  let close_path fmt = fprintf fmt "%tclose_path%t" psstart psend
-  let newpath fmt = fprintf fmt "%tnewpath%t" psstart psend
-  let stroke fmt = fprintf fmt "%tstroke%t" psstart psend
-  let fill fmt = fprintf fmt "%tfill%t" psstart psend
-  let showpage fmt = fprintf fmt "%tshowpage%t" psstart psend
-  let clip fmt = fprintf fmt "%tclip%t" psstart psend
+  let close_path fmt = fprintf fmt "close_path"
+  let newpath fmt = fprintf fmt "newpath"
+  let stroke fmt = fprintf fmt "stroke"
+  let fill fmt = fprintf fmt "fill"
+  let showpage fmt = fprintf fmt "showpage"
+  let clip fmt = fprintf fmt "clip"
 
-  let gsave fmt = fprintf fmt "%tgsave%t" psstart psend
-  let grestore fmt = fprintf fmt "%tgrestore%t" psstart psend
+  let gsave fmt = fprintf fmt "gsave"
+  let grestore fmt = fprintf fmt "grestore"
 
   let setlinewidth fmt f =
-   fprintf fmt
-     "%t0@ %a@ dtransform@ truncate@ idtransform@ setlinewidth@ pop%t"
-     psstart float f psend
+   fprintf fmt "0 %a dtransform truncate idtransform setlinewidth pop" float f
 
   let setlinecap fmt c =
     let i =
@@ -99,7 +105,7 @@ module MPS = struct
       | ButtCap -> 0
       | RoundCap -> 1
       | SquareCap -> 2 in
-    fprintf fmt "%t%d setlinecap%t" psstart i psend
+    fprintf fmt "%d setlinecap" i
 
   let setlinejoin fmt j =
     let i =
@@ -107,26 +113,22 @@ module MPS = struct
       | MiterJoin -> 0
       | RoundJoin -> 1
       | BevelJoin -> 2 in
-    fprintf fmt "%t%d setlinejoin%t" psstart i psend
+    fprintf fmt "%d setlinejoin" i
 
   let matrix fmt t =
-    fprintf fmt "%t[%a@ %a@ %a@ %a@ %a@ %a]%t" psstart
-      float t.xx float t.yx float t.xy float t.yy float t.x0 float t.y0 psend
+    fprintf fmt "[%a %a %a %a %a %a]"
+      float t.xx float t.yx float t.xy float t.yy float t.x0 float t.y0
 
   let transform fmt t =
-    if t = Matrix.identity then () else
-    fprintf fmt "%t%a concat%t" psstart matrix t psend
+    if t = Matrix.identity then () else fprintf fmt "%a concat" matrix t
 
   let scolor fmt c =
     match c with
     | Concrete_types.RGB (r,g,b) ->
-        fprintf fmt "%t%a@ %a@ %a@ setrgbcolor%t"
-          psstart float r float g float b psend
+        fprintf fmt "%a %a %a setrgbcolor" float r float g float b
     | Concrete_types.CMYK (c,m,y,k) ->
-        fprintf fmt "%t%a@ %a@ %a@ %a@ setcmykcolor%t"
-          psstart float c float m float y float k psend
-    | Concrete_types.Gray c ->
-        fprintf fmt "%t%a@ setgray%t" psstart float c psend
+        fprintf fmt "%a %a %a %a setcmykcolor" float c float m float y float k
+    | Concrete_types.Gray c -> fprintf fmt "%a setgray" float c
 
   let color fmt c =
     match c with
@@ -135,46 +137,38 @@ module MPS = struct
       (* harvest take care of that case *)
       assert false
 
-  let char_const fmt c =
-    fprintf fmt "\\%03lo" c
+  let char_const fmt c = fprintf fmt "\\%03lo" c
 
   let glyph fmt cl font =
-    fprintf fmt "%t(%a)@ %s@ %a@ fshow%t" psstart
-      (Misc.print_list Misc.nothing char_const) cl
-      (Fonts.tex_name font) float (Fonts.scale font conversion) psend
+    fprintf fmt "(%a) %s %a fshow" (list nothing char_const) cl
+      (Fonts.tex_name font) float (Fonts.scale font conversion)
+
+  let glyphp fmt (cl, font) = glyph fmt cl font
 
   let rectangle fmt p w h =
-    newpath fmt;
-    pp_print_space fmt ();
-    moveto fmt p;
-    pp_print_space fmt ();
-    lineto_float fmt (p.x+.w) p.y;
-    pp_print_space fmt ();
-    lineto_float fmt (p.x+.w) (p.y+.h);
-    pp_print_space fmt ();
-    lineto_float fmt p.x (p.y+.h);
-    pp_print_space fmt ();
-    close_path fmt;
-    pp_print_space fmt ();
-    fill fmt
+    fprintf fmt "%t %a %a %a %a %t %t"
+      newpath
+      moveto p
+      lineto_floatp (p.x+.w, p.y)
+      lineto_floatp (p.x+.w, p.y+.h)
+      lineto_floatp (p.x, p.y+.h)
+      close_path
+      fill
+
+  let rectanglep fmt (p,w,h) = rectangle fmt p w h
 end
 
-let in_context fmt f =
-  MPS.gsave fmt;
-  pp_print_space fmt ();
-  f ();
-  pp_print_space fmt ();
-  MPS.grestore fmt
+let in_context fmt f = fprintf fmt "%t %t %t" MPS.gsave f MPS.grestore
 
 let fill_rect fmt trans _ x y w h =
   (** FIXME take into account info *)
   let x = point_of_cm x and y = point_of_cm y
   and w = point_of_cm w and h = point_of_cm h in
   let p = { x = x ; y = y } in
-  in_context fmt (fun () ->
-    MPS.transform fmt trans;
-    pp_print_space fmt ();
-    MPS.rectangle fmt p w h
+  in_context fmt (fun _ ->
+    fprintf fmt "%a %a"
+      MPS.transform trans
+      MPS.rectanglep (p,w,h)
   )
 
 let draw_char fmt trans text =
@@ -182,12 +176,11 @@ let draw_char fmt trans text =
   let (f1,f2) = text.tex_pos in
   let f1 = point_of_cm f1 and f2 = point_of_cm f2 in
   let p = { x = f1; y = f2 } in
-  in_context fmt (fun () ->
-    MPS.transform fmt trans;
-    pp_print_space fmt ();
-    MPS.moveto fmt p;
-    pp_print_space fmt ();
-    MPS.glyph fmt text.tex_string text.tex_font
+  in_context fmt (fun _ ->
+    fprintf fmt "%a %a %a"
+      MPS.transform trans
+      MPS.moveto p
+      MPS.glyphp (text.tex_string, text.tex_font)
   )
 
 (* FIXME why do we need to negate y coordinates? *)
@@ -200,9 +193,7 @@ let tex_cmd fmt trans c =
   | Dviinterp.Draw_text_type1 _ -> assert false
 
 let draw_tex fmt t =
-  List.iter (fun x ->
-    tex_cmd fmt t.Gentex.trans x;
-    pp_print_space fmt ()) t.Gentex.tex
+  list space (fun fmt x -> tex_cmd fmt t.Gentex.trans x) fmt t.Gentex.tex
 
 let curveto fmt s =
   let sa, sb, sc, sd = Spline.explode s in
@@ -216,25 +207,20 @@ let path =
         begin match p.S.pl with
         | [] -> assert false
         | (x::_) as l ->
-          MPS.moveto fmt (Spline.left_point x);
-	  pp_print_space fmt ();
-          Misc.print_list Misc.space curveto fmt l
+            fprintf fmt "%a %a"
+              MPS.moveto (Spline.left_point x)
+              (list space curveto) l
         end ;
-        if p.S.cycle then begin pp_print_space fmt (); MPS.close_path fmt end
+        if p.S.cycle then begin fprintf fmt " %t" MPS.close_path end
     | S.Point p ->
-        MPS.moveto fmt p;
-	pp_print_space fmt ();
-        MPS.rlineto fmt p in
+        fprintf fmt "%a %a"
+          MPS.moveto p
+          MPS.rlineto p in
   fun fmt p ->
-    MPS.newpath fmt;
-    pp_print_space fmt ();
-    path fmt p
+    fprintf fmt "%t %a"
+      MPS.newpath
+      path p
 
-
-let option p fmt o =
-  match o with
-  | None -> ()
-  | Some c -> p fmt c
 
 let pen fmt t =
   (* FIXME do something better *)
@@ -323,9 +309,9 @@ In the text they appear as color :
 let print_specials_color =
   let pr_color fmt c =
     match c with
-    | RGB (r,b,g) -> Format.fprintf fmt "%f %f %f" r g b
-    | Gray g -> Format.fprintf fmt "%f %f %f" g g g
-    | CMYK (c,m,y,k) -> Format.fprintf fmt "%f %f %f %f" c m y k in
+    | RGB (r,b,g) -> fprintf fmt "%f %f %f" r g b
+    | Gray g -> fprintf fmt "%f %f %f" g g g
+    | CMYK (c,m,y,k) -> fprintf fmt "%f %f %f %f" c m y k in
   fun fmt cl id ->
     let trans, c =
       match cl with
@@ -335,12 +321,11 @@ let print_specials_color =
       match c with
       | RGB _ | Gray _ -> 7, 3
       | CMYK _ -> 8, 4 in
-    Format.pp_print_string fmt "%%MetaPostSpecial: ";
-    Format.fprintf fmt "%i 1 %f %a %i %i@." mode trans pr_color c id special_type
-
+    fprintf fmt "%%MetaPostSpecial: ";
+    fprintf fmt "%i 1 %f %a %i %i@." mode trans pr_color c id special_type
 
 let print_specials_extimg fmt (f,m) id =
-  Format.fprintf fmt
+  fprintf fmt
     "%%%%MetaPostSpecial: 9 %f %f %f %f %f %f %s %i 10@."
     m.xx m.yx m.xy m.yy m.x0 m.y0 f id
 
@@ -349,7 +334,7 @@ let print_specials fmt cx =
   let cx = harvest se cx in
   if Hashtbl.length se.colors <> 0 || Hashtbl.length se.externalimages <> 0
   then begin
-    Format.fprintf fmt "%%%%MetaPostSpecials: 2.0 %i %i@."
+    fprintf fmt "%%%%MetaPostSpecials: 2.0 %i %i@."
       (int_of_float (specials_signal *. specials_division))
       (int_of_float specials_division);
     Hashtbl.iter (print_specials_color fmt) se.colors;
@@ -358,38 +343,35 @@ let print_specials fmt cx =
   cx
 
 
-let rec picture fmt = function
+let rec picture fmt p =
+  match p with
   | P.Empty -> ()
-  | P.OnTop l ->
-      Misc.print_list Misc.space picture fmt l
+  | P.OnTop l -> list space picture fmt l
   | P.Stroke_path(pa,clr,pe,_) ->
       (* FIXME dash pattern *)
-      in_context fmt (fun () ->
-        option MPS.color fmt clr;
-	pp_print_space fmt ();
-        pen fmt pe;
-	pp_print_space fmt ();
-        path fmt pa;
-	pp_print_space fmt ();
-        MPS.stroke fmt)
-  | P.Fill_path (p,c)->
-      in_context fmt (fun () ->
-        option MPS.color fmt c;
-	pp_print_space fmt ();
-        path fmt p;
-	pp_print_space fmt ();
-        MPS.fill fmt)
+      in_context fmt (fun _ ->
+        fprintf fmt "%a%a %a %t"
+          (option space MPS.color) clr
+          pen pe
+          path pa
+          MPS.stroke)
+  | P.Fill_path (p,clr)->
+      in_context fmt (fun _ ->
+        fprintf fmt "%a %a %t"
+          (option space MPS.color) clr
+          path p
+          MPS.fill)
   | P.Tex t -> draw_tex fmt t
   | P.Clip (com,p) ->
-      in_context fmt (fun () ->
-        path fmt p;
-	pp_print_space fmt ();
-        MPS.clip fmt;
-	pp_print_space fmt ();
-        picture fmt com
+      in_context fmt (fun _ ->
+        fprintf fmt "%a %t %a"
+          path p
+          MPS.clip
+          picture com
       )
   | P.Transform _
   | P.ExternalImage _ -> assert false
+
 
 
 (* FIXME do better than comparing font names *)
@@ -415,12 +397,12 @@ let draw fmt x =
   let {x = minx; y = miny},{x = maxx; y = maxy} = Picture_lib.bounding_box x in
   let minxt, minyt, maxxt, maxyt =
     floor minx, floor miny, ceil maxx, ceil maxy in
-  fprintf fmt "%%!PS@\n";
-  fprintf fmt "%%%%BoundingBox: %f %f %f %f@\n" minxt minyt maxxt maxyt;
-  fprintf fmt "%%%%HiResBoundingBox: %f %f %f %f@\n" minx miny maxx maxy;
-  fprintf fmt "%%%%Creator: Mlpost %s@\n" Version.version;
-  fprintf fmt "%%%%CreationDate: %s@\n" (Misc.date_string ());
-  fprintf fmt "%%%%Pages: 1@\n";
+  fprintf fmt "%%!PS\n";
+  fprintf fmt "%%%%BoundingBox: %f %f %f %f\n" minxt minyt maxxt maxyt;
+  fprintf fmt "%%%%HiResBoundingBox: %f %f %f %f\n" minx miny maxx maxy;
+  fprintf fmt "%%%%Creator: Mlpost %s\n" Version.version;
+  fprintf fmt "%%%%CreationDate: %s\n" (Misc.date_string ());
+  fprintf fmt "%%%%Pages: 1\n";
   let usedfonts = fonts x in
   FS.iter (fun f ->
     let n = Fonts.tex_name f in
@@ -428,32 +410,29 @@ let draw fmt x =
     let d = Fonts.design_size f in
     let r = point_of_cm (Fonts.ratio_cm f) in
   (* FIXME what is the 30:f8 for? *)
-    fprintf fmt "%%*Font: %s %f %f 30:f8@\n" n d r) usedfonts;
-  fprintf fmt "%%%%BeginProlog@\n";
-  fprintf fmt "%%%%EndProlog@\n";
-  fprintf fmt "%%%%Page: 1 1@\n";
+    fprintf fmt "%%*Font: %s %f %f 30:f8\n" n d r) usedfonts;
+  fprintf fmt "%%%%BeginProlog\n";
+  fprintf fmt "%%%%EndProlog\n";
+  fprintf fmt "%%%%Page: 1 1\n";
   let cx = print_specials fmt (P.content x) in
-  MPS.setlinewidth fmt (P.default_line_size /.2.);
-  pp_print_space fmt ();
-  MPS.setlinecap fmt MPS.RoundCap;
-  pp_print_space fmt ();
-  MPS.setlinejoin fmt MPS.RoundJoin;
-  pp_print_space fmt ();
-  picture fmt cx;
-  pp_print_space fmt ();
-  MPS.showpage fmt;
-  fprintf fmt "@\n%%%%EOF@\n"
+  fprintf fmt "%a %a %a %a %t"
+    MPS.setlinewidth (P.default_line_size /.2.)
+    MPS.setlinecap MPS.RoundCap
+    MPS.setlinejoin MPS.RoundJoin
+    picture cx
+    MPS.showpage;
+  fprintf fmt "\n%%%%EOF\n"
 
 let generate_one fn fig =
-  File.write_to_formatted fn (fun fmt ->
+  File.write_to fn (fun fmt ->
     let fig = LookForTeX.commandpic fig in
-(*     Format.printf "picturelib code: @\n %a@." P.Print.pic fig; *)
+(*     Format.printf "picturelib code: \n %a@." P.Print.pic fig; *)
     draw fmt fig);
   fn
 
 let mps figl =
   List.map (fun (fn,fig) ->
-(*     Format.printf "metapost code:@\n %a@."Print.commandpic fig; *)
+(*     Format.printf "metapost code:\n %a@."Print.commandpic fig; *)
     generate_one fn fig) figl
 
 let dump () = ignore (mps (Metapost.emited ()))

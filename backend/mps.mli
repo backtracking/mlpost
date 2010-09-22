@@ -14,7 +14,7 @@
 (*                                                                        *)
 (**************************************************************************)
 
-val draw : Format.formatter -> Picture_lib.t -> unit
+val draw : out_channel -> Picture_lib.t -> unit
 
 val dump: unit -> unit
 val generate : (string * Command.t) list -> unit
