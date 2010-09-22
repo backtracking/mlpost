@@ -14,6 +14,20 @@
 (*                                                                        *)
 (**************************************************************************)
 
+(** copied from File to remove dependency *)
+
+let write_to filename f =
+  let chan = open_out filename in
+  let r = f chan in
+  close_out chan; r
+
+let write_to_formatted filename f =
+  write_to filename
+    (fun chan ->
+      let fmt = Format.formatter_of_out_channel chan in
+      let r = f fmt in
+      Format.fprintf fmt "@?"; r)
+
 open Format
 
   let minipage fmt coef i tmpl sep suf =
@@ -28,7 +42,7 @@ open Format
 let generate_tex ?(pdf=false) tf tmpl1 tmpl2 l =
   let suf = if pdf then ".mps" else "" in
   let sep = if pdf then "-" else "." in
-    File.LowLevel.write_to_formatted tf
+    write_to_formatted tf
       (fun fmt ->
           fprintf fmt "\\documentclass[a4paper]{article}@.";
           fprintf fmt "\\usepackage[]{graphicx}@.";
@@ -43,7 +57,7 @@ let generate_tex ?(pdf=false) tf tmpl1 tmpl2 l =
           fprintf fmt "@]@\n\\end{document}@.")
 
 let generate_tex_cairo tf tmpl1 tmpl2 tmpl3 l =
-    File.LowLevel.write_to_formatted tf
+    write_to_formatted tf
       (fun fmt ->
           fprintf fmt "\\documentclass[a4paper]{article}@.";
           fprintf fmt "\\usepackage[]{graphicx}@.";

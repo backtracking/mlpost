@@ -2476,6 +2476,7 @@ module Metapost : sig
 end
 
 (** Helper functions to generate test TeX files *)
+(*
 module Generate : sig
   val generate_tex : ?pdf:bool -> string -> string -> string
     -> (int * 'a) list -> unit
@@ -2484,6 +2485,7 @@ module Generate : sig
     -> (int * 'a) list -> unit
 
 end
+*)
 
 (** Compute concrete values of numerics, points and paths;
    not always available *)

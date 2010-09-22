@@ -6,6 +6,7 @@ current
 
 * (internal) Misc.call_cmd now does print output of the called program
   directly, instead of returning it as a string
+* module Generate has been removed
 
 version 0.8.1, April 26th 2010
 ------------------------------

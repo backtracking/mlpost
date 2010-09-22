@@ -103,7 +103,8 @@ tests.byte: tests.ml
 LOCALMLPOST:=$(BUILD)tool.native -libdir $(BUILD) -v -ps -native -ccopt "-I $(BUILD)/backend"
 
 handbook.pdf : handbookgraphs.ml
-	$(LOCALMLPOST) -no-magic handbookgraphs.ml
+	$(OCAMLBUILD) generate.cmx
+	$(LOCALMLPOST) -no-magic -ccopt "generate.cmx" handbookgraphs.ml
 	make -C test manual
 	make -C test/manual mpost
 
