@@ -316,20 +316,26 @@ Color rgba  : 7 mode_transparency value_transparency r g b   special_number 3
 Color cmyka : 8 mode_transparency value_transparency c m y k special_number 4
 Color spota : 8 mode_transparency value_transparency ? ? ? ? special_number 5
 
-In the text they appear as color : 
+In the text they appear as color :
   special_signal (1 cmyk 2 spot 3 rgb) special_number
  0.123 0.003 0.001 setrgbcolor
 
 *)
 
-let print_specials_color fmt cl id =
-  Format.pp_print_string fmt "%%MetaPostSpecial: ";
-  match cl with
-    | OPAQUE (RGB (r,g,b)) ->
-      Format.fprintf fmt "7 1 1. %f %f %f %i 3@." r g b id
-    | TRANSPARENT (a,(RGB (r,g,b))) ->
-      Format.fprintf fmt "7 1 %f %f %f %f %i 3@." a r g b id
-    | _ -> assert false
+let print_specials_color =
+  let pr_color fmt c =
+    match c with
+    | RGB (r,b,g) -> Format.fprintf fmt "%f %f %f" r g b
+    | Gray g -> Format.fprintf fmt "%f %f %f" g g g
+    | _ -> (* TODO *) assert false
+  in
+  fun fmt cl id ->
+    Format.pp_print_string fmt "%%MetaPostSpecial: ";
+    match cl with
+    | OPAQUE c ->
+        Format.fprintf fmt "7 1 1. %a %i 3@." pr_color c id
+    | TRANSPARENT (a,c) ->
+        Format.fprintf fmt "7 1 %f %a %i 3@." a pr_color c id
 
 let print_specials_extimg fmt (f,m) id =
   Format.fprintf fmt
