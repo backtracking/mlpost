@@ -327,15 +327,19 @@ let print_specials_color =
     match c with
     | RGB (r,b,g) -> Format.fprintf fmt "%f %f %f" r g b
     | Gray g -> Format.fprintf fmt "%f %f %f" g g g
-    | _ -> (* TODO *) assert false
-  in
+    | CMYK (c,m,y,k) -> Format.fprintf fmt "%f %f %f %f" c m y k in
   fun fmt cl id ->
+    let trans, c =
+      match cl with
+      | OPAQUE c -> 1., c
+      | TRANSPARENT (a,c) -> a, c in
+    let mode, special_type =
+      match c with
+      | RGB _ | Gray _ -> 7, 3
+      | CMYK _ -> 8, 4 in
     Format.pp_print_string fmt "%%MetaPostSpecial: ";
-    match cl with
-    | OPAQUE c ->
-        Format.fprintf fmt "7 1 1. %a %i 3@." pr_color c id
-    | TRANSPARENT (a,c) ->
-        Format.fprintf fmt "7 1 %f %a %i 3@." a pr_color c id
+    Format.fprintf fmt "%i 1 %f %a %i %i@." mode trans pr_color c id special_type
+
 
 let print_specials_extimg fmt (f,m) id =
   Format.fprintf fmt
