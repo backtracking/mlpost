@@ -2392,8 +2392,6 @@ module Legend : sig
 
 end
 
-(** {2 Metapost generation} *)
-
 (* Misc does not appear in the documentation *)
 (**/**)
 module Misc : sig
@@ -2414,6 +2412,8 @@ module Misc : sig
 
 end
 (**/**)
+
+(** {2 Metapost generation} *)
 
 (** Functions to generate Metapost files *)
 module Metapost : sig

@@ -14,6 +14,9 @@
 (*                                                                        *)
 (**************************************************************************)
 
+type job = File.t * Types.commandpic
+type jobs = job list
+
 open Format
 
 let print fmt i c =

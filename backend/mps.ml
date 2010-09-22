@@ -97,6 +97,7 @@ module MPS = struct
   let grestore fmt = fprintf fmt "grestore"
 
   let setlinewidth fmt f =
+    (** strange treatment of linewidth of Metapost *)
    fprintf fmt "0 %a dtransform truncate idtransform setlinewidth pop" float f
 
   let setlinecap fmt c =
