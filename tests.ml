@@ -268,7 +268,7 @@ let d7 =
      Command.dotlabel ~pos:`East (Picture.tex "lrcorner") (Picture.lrcorner pic);
     ]
 
-let half pic = Picture.transform [Transform.scaled (bp 0.5)] pic
+let half = Picture.scale (bp 0.5)
 
 let rec right_split n pic =
   if n <= 0 then pic
@@ -278,18 +278,18 @@ let rec right_split n pic =
 
 let d11 =
   let p1 = Picture.transform [Transform.rotated 90.] (Picture.tex "recursion") in
-    right_split 4 p1
+    right_split 3 p1
 
 let rec sierpinski p n =
   if n = 0 then p else
-    let sp = sierpinski p (n-1) in
-    let p = half sp in
+    let p = sierpinski p (n-1) in
+(*     let p = half sp in *)
     let p1 = Picture.beside p p in
       Picture.below p p1
 
 let d12 =
   let p1 = Picture.tex "A" in
-    sierpinski p1 7
+    sierpinski p1 5
 
 
 (** plots *)
@@ -563,6 +563,7 @@ let grid_with_padding_2 =
   seq [Box.draw b; Box.draw (shift (Point.pt (bp 5., bp 5.)) b)]
 
 let figs = [
+(*
   grid_with_padding;
   adv_fig;
   grid_with_padding_2;
@@ -578,17 +579,18 @@ let figs = [
   block2;
   vblock1;
   yannick Box.Rect; yannick Box.Patatoid; yannick Box.Patatoid2; d1;
-  d2sq; d2hsq; d2s; d2c; cheno011; d3; d4;
-  d7; d11;
-  (*  proval;*)
-(*
+  d2sq; d2hsq; d2s; d2c;
+  cheno011; d3; d4;
+  d7;
+  proval;
+*)
+   d11;
    d12 ;
+  d14; d13; d5;
+  florence; Box.draw shapes1; Box.draw shapes2;
   farey 17;
   (* other *)
-  florence; Box.draw shapes1; Box.draw shapes2;
-  d14; d13; d5;
-(*   d6 *)
-*)
+  d6
 ]
 
 let figs =
@@ -604,26 +606,5 @@ let theprelude = "\\documentclass[a4paper]{article}
 "
 *)
 
-
 let () =
   List.iter (fun (i,r) -> Metapost.emit (string_of_int i) r) figs
-
-(*
-let () =
-  Metapost.generate_mp ~prelude:theprelude "test/tests.mp" figs;
-  Misc.write_to_formatted_file "test/tests.tex"
-    (fun fmt ->
-      fprintf fmt "\\documentclass[a4paper]{article}@.";
-      fprintf fmt "\\usepackage[T1]{fontenc}@.";
-      fprintf fmt "\\usepackage{times}@.";
-      fprintf fmt "\\usepackage{fullpage}@.";
-      fprintf fmt "\\usepackage[]{graphicx}@.";
-      fprintf fmt "@[<hov 2>\\begin{document}@.";
-      List.iter
-        (fun (i,_) ->
-          fprintf fmt "@\n %i\\quad" i;
-	  fprintf fmt "\\includegraphics[width=\\textwidth,height=\\textheight,keepaspectratio]{tests.%d}" i;
-          fprintf fmt "@\n \\vspace{3cm}@\n"
-        ) figs;
-      fprintf fmt "@]@\n\\end{document}@.")
-*)

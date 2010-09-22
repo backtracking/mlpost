@@ -76,11 +76,10 @@ tool.byte:
 tool.opt:
 	$(OCAMLBUILD) tool.native
 
+LOCALMLPOST:=$(BUILD)tool.native -libdir $(BUILD) -v -ps -native -ccopt "-I $(BUILD)/backend"
+
 tests: tests.ml
-	$(OCAMLBUILD) tests.native
-	$(BUILD)/tests.native
-	make -C test tests
-	$(PSVIEWER) test/tests.ps
+	$(LOCALMLPOST) -xpdf tests.ml
 
 testbox: testbox.ml
 	$(OCAMLBUILD) testbox.native
@@ -100,7 +99,6 @@ tests.byte: tests.ml
 	$(BUILD)/tests.byte
 	make -C test tests
 	$(PSVIEWER) test/tests.ps
-LOCALMLPOST:=$(BUILD)tool.native -libdir $(BUILD) -v -ps -native -ccopt "-I $(BUILD)/backend"
 
 handbook.pdf : handbookgraphs.ml
 	$(OCAMLBUILD) generate.cmx
