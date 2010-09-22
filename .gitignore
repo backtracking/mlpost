@@ -13,6 +13,7 @@ ocamlbuild.Makefile
 simple.Makefile
 version.ml
 doc
+examples/*.mps
 test/*.mps
 test/*.mp
 test/*.ps
@@ -34,3 +35,5 @@ test/manual/*.log
 www/*.html
 www/version.prehtml
 *.native
+\#*\#
+.#*

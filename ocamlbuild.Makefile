@@ -100,22 +100,22 @@ tests.byte: tests.ml
 	$(BUILD)/tests.byte
 	make -C test tests
 	$(PSVIEWER) test/tests.ps
+LOCALMLPOST:=$(BUILD)tool.native -libdir $(BUILD) -v -ps -native -ccopt "-I $(BUILD)/backend"
 
 handbook.pdf : handbookgraphs.ml
-	$(OCAMLBUILD) handbookgraphs.native
-	$(BUILD)/handbookgraphs.native
+	$(LOCALMLPOST) -no-magic handbookgraphs.ml
 	make -C test manual
 	make -C test/manual mpost
 
 handbook: handbook.pdf
 	$(PDFVIEWER) test/testmanual.pdf
 
-handbook.byte: handbookgraphs.ml
-	$(OCAMLBUILD) handbookgraphs.byte
-	$(BUILD)/handbookgraphs.byte
-	make -C test manual
-	make -C test/manual mpost
-	$(PSVIEWER) test/testmanual.ps
+# handbook.byte: handbookgraphs.ml
+# 	$(OCAMLBUILD) handbookgraphs.byte
+# 	$(BUILD)/handbookgraphs.byte
+# 	make -C test manual
+# 	make -C test/manual mpost
+# 	$(PSVIEWER) test/testmanual.ps
 
 other.pdf: othergraphs.ml
 	$(OCAMLBUILD) othergraphs.native
@@ -134,7 +134,7 @@ other.byte: othergraphs.ml
 	$(PSVIEWER) test/othergraphs.ps
 
 .PHONY: check-examples examples
-SUBDIRMLPOST:=../$(BUILD)tool.native -libdir ../$(BUILD) -v -ps -native
+SUBDIRMLPOST:=../$(BUILD)tool.native -libdir ../$(BUILD) -v -ps -native -ccopt "-I ../$(BUILD)/backend"
 MAKEEXAMPLES=$(MAKE) -C examples MLPOST='$(SUBDIRMLPOST)'
 
 check-examples: mlpost.cma tool.opt
