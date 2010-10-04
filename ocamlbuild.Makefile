@@ -35,7 +35,8 @@ OCAMLBUILD := $(OCAMLBUILDBIN) $(OBOPTS) -no-links $(DTYPES) $(TAGS) $(OCAMLBUIL
 
 BUILD := _build/
 
-CMA := mlpost.cma mlpost_desc_options.cma mlpost_options.cma
+CMI := mlpost_options.cmi
+CMA := mlpost.cma mlpost_desc_options.cma mlpost_options.cma $(CMI)
 CMXA := mlpost.cmxa mlpost_desc_options.cmxa mlpost_options.cmxa
 OBJ := mlpost_desc_options$(LIBEXT) mlpost_options$(LIBEXT)
 
