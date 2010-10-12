@@ -69,6 +69,7 @@ val exists : t -> bool
 val rm : t -> unit
 
 val open_out : t -> out_channel
+val open_in : t -> in_channel
 
 val clear_dir : t -> t
 
