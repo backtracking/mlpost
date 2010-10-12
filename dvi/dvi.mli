@@ -56,6 +56,8 @@ type page = {
   commands : command list
 }
 
+type fontmap = Dvi_util.font_def Dvi_util.Int32Map.t
+
 (** A document is a list of pages, plus a preamble, postamble,
    postpostamble and font map *)
 type t = {
@@ -63,13 +65,13 @@ type t = {
   pages : page list;
   postamble : postamble;
   postpostamble : postpostamble;
-  font_map : Dvi_util.font_def Dvi_util.Int32Map.t
+  font_map : fontmap
 }
 
 (** a few accessor functions *)
 val get_conv : t -> float
 
-val fontmap : t -> Dvi_util.font_def Dvi_util.Int32Map.t
+val fontmap : t -> fontmap
 
 val commands : page -> command list
 
@@ -98,7 +100,7 @@ type char_desc =
 
 type vf =
     { vf_preamble   : preamble_vf;
-      vf_font_map   : Dvi_util.font_def Dvi_util.Int32Map.t;
+      vf_font_map   : fontmap;
       vf_chars_desc : char_desc list}
 
 val print_vf : Format.formatter -> vf -> unit
@@ -115,6 +117,10 @@ module Incremental : sig
 
   val next_pages : t -> page list
   (** read all available pages *)
+
+  val get_conv : t -> float
+
+  val font_map : t -> fontmap
 
 end
 

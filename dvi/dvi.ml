@@ -66,12 +66,13 @@ type page = {
   commands : command list
 }
 
+type fontmap = Dvi_util.font_def Int32Map.t
 type t = {
   preamble : preamble;
   pages : page list;
   postamble : postamble;
   postpostamble : postpostamble;
-  font_map : Dvi_util.font_def Int32Map.t
+  font_map : fontmap
 }
 
 (* vf *)
@@ -90,7 +91,7 @@ type char_desc =
 
 type vf =
     { vf_preamble   : preamble_vf;
-      vf_font_map   : Dvi_util.font_def Int32Map.t;
+      vf_font_map   : fontmap;
       vf_chars_desc : char_desc list}
 (* *)
 
@@ -616,12 +617,13 @@ let read_vf_file file =
    vf_font_map    = fonts;
    vf_chars_desc    = chars_desc}
 
-let get_conv doc =
+let get_conv_from_preamble p =
     let formule_magique_cm mag num den =
       ((Int32.to_float mag) *.
           ((Int32.to_float num) /. (Int32.to_float den))) /. (10.**8.) in
-    formule_magique_cm doc.preamble.pre_mag
-      doc.preamble.pre_num doc.preamble.pre_den
+    formule_magique_cm p.pre_mag p.pre_num p.pre_den
+
+let get_conv doc = get_conv_from_preamble doc.preamble
 
 let get_height_cm doc =
   (get_conv doc) *. (Int32.to_float doc.postamble.post_height)
@@ -634,7 +636,7 @@ let commands p = p.commands
 
 module Incremental = struct
   type t =
-    { mutable fonts : Dvi_util.font_def Int32Map.t ;
+    { mutable fonts : fontmap;
       preamble : preamble;
       chan : in_channel;
       mutable bits : string * int * int;
@@ -653,4 +655,8 @@ module Incremental = struct
       read_pages t.fonts (Bitstring.concat [t.bits;bits]) in
     t.bits <- bits; t.fonts <- fonts;
     pgs
+
+  let get_conv i = get_conv_from_preamble i.preamble
+
+  let font_map i = i.fonts
 end
