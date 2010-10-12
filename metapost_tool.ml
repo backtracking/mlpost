@@ -21,19 +21,19 @@ let read_prelude_from_tex_file file =
 let rnd_state = Random.State.make_self_init ()
 
 (** create a temporary directory *)
-let rec create_dir prefix suffix =
+let rec create_temp_dir prefix suffix =
   try
     let i = Random.State.int rnd_state 10000 in
     let dir = File.Dir.from_string (Printf.sprintf "%s%i%s" prefix i suffix) in
     let dirname = File.Dir.concat File.Dir.temp dir in
     File.Dir.mk dirname 0o700; dirname
-  with Unix.Unix_error (Unix.EEXIST, _, _) -> create_dir prefix suffix
+  with Unix.Unix_error (Unix.EEXIST, _, _) -> create_temp_dir prefix suffix
 
 (** create a temporary directory and call function [f] within.
  *  [f] has to return a result [res] and a list of files [files] that are
  *  copied from the [tmpdir] to the [workdir] *)
 let tempdir ?(clean=true) prefix suffix f =
-  let tmpdir = create_dir prefix suffix in
+  let tmpdir = create_temp_dir prefix suffix in
   let workdir = File.Dir.cwd () in
   File.Dir.ch tmpdir;
   let res, files = f workdir tmpdir in
