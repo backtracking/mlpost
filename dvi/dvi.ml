@@ -106,16 +106,6 @@ module Print = struct
     fprintf fmt "\tmagnification = %ld\n" p.pre_mag;
     fprintf fmt "\tcomment : %s\n" p.pre_text
 
-  let page fmt
-      {counters = c; previous = prev; commands = cmds} =
-    fprintf fmt "* Page number :";
-    Array.iter (fun c -> fprintf fmt "%ld;" c) c; fprintf fmt "\n";
-    fprintf fmt "\tPrevious page can be found at %ld\n" prev;
-    fprintf fmt "\t<list of commands skipped ...>"
-
-  let pages fmt =
-    List.iter (fun p -> fprintf fmt "%a\n" page p)
-
   let fonts fmt fonts =
     fprintf fmt "* Fonts defined in this file :\n";
     Int32Map.iter (fun k f -> Print_font.font k fmt f) fonts
@@ -135,14 +125,6 @@ module Print = struct
     fprintf fmt "* Postpostamble :\n";
     fprintf fmt "\tPostamble can be found at %ld.\n" p.postamble_pointer;
     fprintf fmt "\tDVI version : %d\n" p.post_post_version
-
-  let doc name fmt doc =
-    fprintf fmt "***********************\n";
-    fprintf fmt "Reading DVI file : %s\n" name;
-    fprintf fmt "%a%a%a%a%a"
-      preamble doc.preamble pages doc.pages
-      fonts doc.font_map postamble doc.postamble
-      postpostamble doc.postpostamble
 
 
   let commands fmt = function
@@ -197,6 +179,30 @@ module Print = struct
       fonts vf.vf_font_map
       print_chars_desc vf.vf_chars_desc
 
+  let page verbose fmt
+      {counters = c; previous = prev; commands = cmds} =
+    fprintf fmt "* Page number :";
+    Array.iter (fun c -> fprintf fmt "%ld;" c) c; fprintf fmt "\n";
+    fprintf fmt "\tPrevious page can be found at %ld\n" prev;
+    if verbose then Misc.print_list Misc.newline commands fmt cmds
+    else fprintf fmt "\t<list of commands skipped ...>"
+
+  let pages verbose fmt =
+    List.iter (fun p -> fprintf fmt "%a\n" (page verbose) p)
+
+  let page_verb = page true
+  let pages_verb = pages true
+
+  let page = page false
+  let pages = pages false
+
+  let doc name fmt doc =
+    fprintf fmt "***********************\n";
+    fprintf fmt "Reading DVI file : %s\n" name;
+    fprintf fmt "%a%a%a%a%a"
+      preamble doc.preamble pages doc.pages
+      fonts doc.font_map postamble doc.postamble
+      postpostamble doc.postpostamble
 
 end
 
@@ -419,6 +425,8 @@ let rec page commands fonts bits =
 	let cmd, bits = command bits in
 	  page (cmd::commands) fonts bits
 
+let page = page []
+
 let rec pages p fonts bits =
   bitmatch bits with
       (* nop opcode *)
@@ -440,7 +448,7 @@ let rec pages p fonts bits =
       (* begin page opcode *)
     | { 139 : 8; bits : -1 : bitstring } ->
 	let counters, previous, bits = page_counters bits in
-	let cmds, fonts, bits = page [] fonts bits in
+	let cmds, fonts, bits = page fonts bits in
 	let newp =
 	  {counters = counters; previous = previous; commands = List.rev cmds}
         in
@@ -449,6 +457,8 @@ let rec pages p fonts bits =
     | { bits : -1 : bitstring } ->
 	p, fonts, bits
 	(* dvi_error "Expected : nop, font_definition, or new page" *)
+
+let read_pages = pages []
 
 let postamble bits =
   let rec skip_font_defs bits =
@@ -515,7 +525,7 @@ let postpostamble bits =
 let read_file file =
   let bits = Bitstring.bitstring_of_file file in
   let preamble, bits = preamble bits in
-  let pages, fonts, bits = pages [] Int32Map.empty bits in
+  let pages, fonts, bits = read_pages Int32Map.empty bits in
   let postamble, bits = postamble bits in
   let postpostamble = postpostamble bits in
     { preamble = preamble;
@@ -621,3 +631,26 @@ let get_width_cm doc =
 
 let pages d = d.pages
 let commands p = p.commands
+
+module Incremental = struct
+  type t =
+    { mutable fonts : Dvi_util.font_def Int32Map.t ;
+      preamble : preamble;
+      chan : in_channel;
+      mutable bits : string * int * int;
+  }
+
+  let from_in_channel c =
+    let bits = Bitstring.bitstring_of_chan c in
+    let preamble, bits = preamble bits in
+    let fonts = Int32Map.empty in
+    let pgs, fonts, bits = read_pages fonts bits in
+    pgs, { chan = c; preamble = preamble ; fonts = fonts ; bits = bits }
+
+  let next_pages t =
+    let bits = Bitstring.bitstring_of_chan t.chan in
+    let pgs, fonts, bits =
+      read_pages t.fonts (Bitstring.concat [t.bits;bits]) in
+    t.bits <- bits; t.fonts <- fonts;
+    pgs
+end

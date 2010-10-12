@@ -104,3 +104,24 @@ type vf =
 val print_vf : Format.formatter -> vf -> unit
 val read_vf_file : string -> vf
 
+module Incremental : sig
+  (** Useful to read a DVI file page per page *)
+
+  type t
+  (** The type that stores information regarding the DVI file *)
+
+  val from_in_channel : in_channel -> page list * t
+  (** Read the preamble and read all available pages *)
+
+  val next_pages : t -> page list
+  (** read all available pages *)
+
+end
+
+module Print : sig
+  val page : Format.formatter -> page -> unit
+  val pages : Format.formatter -> page list -> unit
+
+  val page_verb : Format.formatter -> page -> unit
+  val pages_verb : Format.formatter -> page list -> unit
+end
