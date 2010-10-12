@@ -319,7 +319,7 @@ let load_doc doc =
 
 
 let load_file file =
-  let doc = Dvi.read_file file in
+  let doc = Dvi.read_file (File.to_string file) in
   if !verbose then
     printf "Dvi file parsing and interpretation :@.@?";
   let res = load_doc doc in

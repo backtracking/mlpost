@@ -186,3 +186,4 @@ let write_to t f = LowLevel.write_to (to_string t) f
 let write_to_formatted t f = LowLevel.write_to_formatted (to_string t) f
 let exists t = LowLevel.exists (to_string t)
 let rm t = LowLevel.rm (to_string t)
+let open_out t = open_out (to_string t)

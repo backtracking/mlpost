@@ -17,7 +17,7 @@
 open Printf
 open Point_lib
 let com_latex = "latex"
-let genfile_name = "gentex"
+let genfile = File.from_string "gentex.tex"
 (* FIXME different from Metapost.default_prelude? *)
 let default_prelude = "\\documentclass{article}\n"
 
@@ -53,15 +53,15 @@ let create prelude = function
 "\\mpxshipout
 %s\\stopmpxshipout")) texs in
   let todo _ pwd =
-    let latex = genfile_name^".tex" in
-    let file = open_out latex in
+    let file = File.open_out genfile in
     Printf.fprintf file "%t" format;
     close_out file;
     let exit_status = Sys.command (sprintf "%s -halt-on-error %s > \
-gentex_dev_null.log" com_latex latex) in
+gentex_dev_null.log" com_latex (File.to_string genfile)) in
     if exit_status <> 0 then failwith (sprintf "Error with : %s : \
-%s %s log in gentex.log" (File.Dir.to_string pwd) com_latex latex);
-    let dvi = genfile_name^".dvi" in
+%s %s log in gentex.log" (File.Dir.to_string pwd) com_latex
+  (File.to_string genfile));
+    let dvi = File.set_ext genfile "dvi"  in
     let saved = Dviinterp.load_file dvi in
     let extract cl =
       (* remove the last rule added above, it gives the bounding box*)
@@ -71,7 +71,7 @@ gentex_dev_null.log" com_latex latex) in
           {tex = cl; trans = Matrix.identity; bb = bb}
         | _ -> assert false in
     List.map extract saved, [] in
-  tempdir genfile_name "" todo
+  tempdir "gentex" "" todo
 
 let point_of_cm cm = (0.3937 *. 72.) *. cm
 

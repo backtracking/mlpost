@@ -68,6 +68,8 @@ val dir : t -> Dir.t
 val exists : t -> bool
 val rm : t -> unit
 
+val open_out : t -> out_channel
+
 val clear_dir : t -> t
 
 val set_ext : t -> string -> t
