@@ -24,7 +24,7 @@ let default_prelude = "\\documentclass{article}\n"
 
 let latex_cmd =
 (*   Printf.sprintf "latex -jobname=%s -ipc -halt-on-error" jobname *)
-  Printf.sprintf "cat"
+  Printf.sprintf "tee toto"
 
 let debug = false
 
@@ -99,13 +99,9 @@ let create prelude texs =
   match texs with
   | [] -> []
   | first::rest ->
-(*       let tempdir = Metapost_tool.create_temp_dir jobname "" in *)
-(*       let workdir = File.Dir.cwd () in *)
-(*       File.Dir.ch tempdir; *)
       let p = mk_proc latex_cmd in
       Printf.printf "%s\n%!" (Sys.getcwd ());
       Printf.printf "launched latex proc\n%!";
-(*       File.Dir.ch workdir; *)
       push_prelude p prelude;
       Printf.printf "pushed prelude\n%!";
       shipout_and_flush p first;
