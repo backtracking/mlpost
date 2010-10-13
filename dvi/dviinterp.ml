@@ -339,3 +339,11 @@ let decompose_text text =
     (set_env_char ifc pos c,cmds) in
   let _,cmds = List.fold_left fold (pos,[]) text.tex_string in
   cmds
+
+module Incremental = struct
+
+  let load_page i p =
+    let conv = Dvi.Incremental.get_conv i in
+    let fonts = load_fonts (Dvi.Incremental.font_map i) conv in
+    interp_page conv fonts p
+end

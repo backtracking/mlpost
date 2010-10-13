@@ -56,3 +56,8 @@ val load_file : File.t -> page list
 
 
 val decompose_text : text -> command list
+
+module Incremental : sig
+
+  val load_page : Dvi.Incremental.t -> Dvi.page -> page
+end
