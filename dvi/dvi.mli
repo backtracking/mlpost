@@ -112,8 +112,9 @@ module Incremental : sig
   type t
   (** The type that stores information regarding the DVI file *)
 
-  val from_in_channel : in_channel -> page list * t
-  (** Read the preamble and read all available pages *)
+(*   val mk_t : in_channel -> t *)
+
+  val mk_t : in_channel -> t * page list
 
   val next_pages : t -> page list
   (** read all available pages *)

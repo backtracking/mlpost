@@ -23,39 +23,10 @@ let filename = File.from_string jobname
 let default_prelude = "\\documentclass{article}\n"
 
 let latex_cmd =
-(*   Printf.sprintf "latex -jobname=%s -ipc -halt-on-error" jobname *)
-  Printf.sprintf "tee toto"
+  Printf.sprintf "latex -jobname=%s -ipc -halt-on-error" jobname
+(*   Printf.sprintf "cat" *)
 
 let debug = false
-
-type proc =
-  { in_descr : Unix.file_descr ;
-    out_descr : Unix.file_descr ;
-    err_descr : Unix.file_descr;
-    mutable open_ : Unix.file_descr list;
-    cout : out_channel;
-  }
-
-let mk_proc s =
-  let outc,inc,errc =
-    Unix.open_process_full s (Unix.environment ()) in
-  let out_descr = Unix.descr_of_in_channel outc and
-      err_descr = Unix.descr_of_in_channel errc and
-      in_descr = Unix.descr_of_out_channel inc in
-  { in_descr = in_descr ; out_descr = out_descr ; err_descr = err_descr ;
-    open_ = [out_descr ; err_descr ]; cout = inc }
-
-let rec read_all =
-  let buf = String.create 1024 in
-  fun p ->
-    let can_read, _, _ = Unix.select [p.out_descr ; p.err_descr ] [] [] 0.0 in
-    List.iter (fun fh ->
-      let ret = Unix.read fh buf 0 1024 in
-      if ret = 0 then
-        p.open_ <- List.filter (fun fh' -> fh <> fh') p.open_;
-        if fh = p.err_descr then ignore (Unix.write Unix.stderr buf 0 ret)
-      else ignore (Unix.write Unix.stdout buf 0 ret)) can_read;
-    if can_read <> [] then read_all p
 
 type t = {tex   : Dviinterp.page;
           trans : Matrix.t;
@@ -63,8 +34,84 @@ type t = {tex   : Dviinterp.page;
 
 let set_verbosity b = ()
 
+type proc =
+  { in_descr : Unix.file_descr ;
+    out_descr : Unix.file_descr ;
+    err_descr : Unix.file_descr;
+    out_chan : in_channel;
+    inc : out_channel;
+(*
+    dvi_channel : in_channel;
+    dvi_descr : Unix.file_descr;
+*)
+  }
+
+let truncate_or_touch f =
+  File.open_in_gen [Open_trunc; Open_creat; Open_rdonly] 0o600 f
+
+let ends_with en s =
+  let l = String.length s in
+  let k = String.length en in
+  if k <= l then
+    try
+      for i = 0 to k - 1 do
+        if s.[l - i - 1] <> en.[k - i - 1] then raise Exit
+      done;
+      true
+    with Exit -> false
+  else false
+
+let rec read_up_to_one =
+  let end_ = "[1]" in
+  let rec aux inc =
+    if ends_with end_ (input_line inc) then () else aux inc in
+  aux
+
+let read_up_to_one p = read_up_to_one p.out_chan
+
+(*
+let read_pages =
+  let buf = String.create 1024 in
+  let rec aux p =
+    let can_read,_,_ =
+      Unix.select [p.out_descr ; p.err_descr ; p.dvi_descr ] [] [] (-1.) in
+    if List.mem p.out_descr can_read then begin
+      let ret = Unix.read p.out_descr buf 0 1024 in
+      if ret <> 0 then ignore (Unix.write Unix.stdout buf 0 ret);
+      aux p
+    end else if List.mem p.err_descr can_read then begin
+      let ret = Unix.read p.err_descr buf 0 1024 in
+      if ret <> 0 then ignore (Unix.write Unix.stderr buf 0 ret);
+      aux p;
+    end else if List.mem p.dvi_descr can_read then
+      let pgs = Dvi.Incremental.next_pages p.dvi_data in
+      if pgs = [] then aux p else pgs
+      else aux p in
+  aux
+*)
+
+let mk_proc_latex () =
+  let outc,inc,errc =
+    Unix.open_process_full latex_cmd (Unix.environment ()) in
+  Printf.printf "created process: %s\n%!" latex_cmd;
+  let out_descr = Unix.descr_of_in_channel outc and
+      err_descr = Unix.descr_of_in_channel errc and
+      in_descr = Unix.descr_of_out_channel inc in
+(*   let dvi = Dvi.Incremental.mk_t dvi_chan in *)
+  { in_descr = in_descr ; out_descr = out_descr ;
+    err_descr = err_descr ; inc = inc ;
+(*
+    dvi_channel = dvi_chan;
+    dvi_descr = dvi_descr;
+*)
+    out_chan = outc }
+
+let write_and_wait p s =
+(*   Printf.kfprintf (fun _ -> read_all p) p.cout s *)
+  Printf.fprintf p.inc s
+
 let push_prelude p prel =
-  Printf.fprintf p.cout
+  write_and_wait p
   "%s
 \\begin{document}
 \\gdef\\mpxshipout{\\shipout\\hbox\\bgroup%%
@@ -76,16 +123,13 @@ let push_prelude p prel =
     \\ifnum\\dimen0>0 \\vrule width1sp height\\dimen1 depth\\dimen2
     \\else \\vrule width1sp height1sp depth0sp\\relax
     \\fi\\egroup
-  \\ht0=0pt \\dp0=0pt \\box0 \\egroup}\n%!" prel;
-  read_all p
+  \\ht0=0pt \\dp0=0pt \\box0 \\egroup}\n%!" prel
 
 let shipout_and_flush p s =
-  Printf.fprintf p.cout "\\mpxshipout %s\\stopmpxshipout\n%!" s;
-  read_all p
+  write_and_wait p "\\mpxshipout %s\\stopmpxshipout\n%!" s
 
 let end_doc p =
-  Printf.fprintf p.cout "\\end{document}\n%!";
-  read_all p
+  write_and_wait p "\\end{document}\n%!"
 
 let extract cl =
   (* remove the last rule added above, it gives the bounding box*)
@@ -99,22 +143,30 @@ let create prelude texs =
   match texs with
   | [] -> []
   | first::rest ->
-      let p = mk_proc latex_cmd in
+      let p = mk_proc_latex () in
+      let prelude =
+        if prelude = "" then default_prelude else prelude in
+      Printf.printf "prelude: %s\n%!" prelude;
       Printf.printf "%s\n%!" (Sys.getcwd ());
       Printf.printf "launched latex proc\n%!";
       push_prelude p prelude;
       Printf.printf "pushed prelude\n%!";
       shipout_and_flush p first;
       Printf.printf "pushed first page\n%!";
-      let dvi_file = File.set_ext filename "dvi" in
-      let in_chan = File.open_in dvi_file in
-      let d,t = Dvi.Incremental.from_in_channel in_chan in
+      read_up_to_one p;
+      let dvi_chan = File.open_in (File.set_ext filename "dvi") in
+      let t, pgs = Dvi.Incremental.mk_t dvi_chan in
       let texed = List.fold_left (fun acc tex ->
         shipout_and_flush p tex;
-        Dvi.Incremental.next_pages t @ acc) d rest in
+        read_up_to_one p;
+        Printf.printf "shipped out: %s \n%!" tex;
+        let l = Dvi.Incremental.next_pages t in
+        let k = List.length l in
+        Printf.printf "\n%!found: %d\n%!" k;
+         l @ acc) pgs rest in
       end_doc p;
       let f = Dviinterp.Incremental.load_page t in
-      List.map (fun x -> extract (f x)) texed
+      List.rev_map (fun x -> extract (f x)) texed
 
 
 
