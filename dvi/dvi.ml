@@ -655,43 +655,6 @@ module Incremental = struct
     t.fonts <- fonts; t.bits <- bits;
     pgs
 
-(*
-  let mk_t c =
-    { fonts = Int32Map.empty ; chan = c ; bits = Bitstring.empty_bitstring ;
-      preamble = None }
-
-let rec really_read_one_page t =
-    let pgs, fonts, bits = read_pages t.fonts t.bits in
-    t.bits <- bits; t.fonts <- fonts;
-    pgs
-
-  let rec really_read_preamble t bits =
-    try
-      let preamble, bits = preamble bits in
-      t.preamble <- Some preamble;
-      t.bits <- bits
-    with DviError _ ->
-      Unix.sleep 1;
-      really_read_preamble t bits
-
-  let read_one_page t =
-    let bits = Bitstring.concat [t.bits ; Bitstring.bitstring_of_chan t.chan] in
-    match t.preamble with
-    | None ->
-        really_read_preamble t bits;
-        really_read_one_page t
-    | Some _ ->
-        really_read_one_page t
-
-  let next_pages = read_one_page
-
-  let get_conv i =
-    match i.preamble with
-    | None -> assert false
-    | Some p -> 
-
-*)
-
   let get_conv i = get_conv_from_preamble i.preamble
   let font_map i = i.fonts
 end
