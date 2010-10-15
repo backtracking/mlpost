@@ -17,22 +17,22 @@
 open Types
 open Hashcons
 
-type t = num
+type t = float
 
 
-let zero = mkF 0.
-let one = mkF 1.
-let minus_one = mkF (-.1.)
-let two = mkF 2.
+let zero = 0.
+let one = 1.
+let minus_one = (-.1.)
+let two = 2.
 
-let of_float = mkF
-let num_of_int i = mkF (float_of_int i)
+let of_float = Misc.id
+let num_of_int = float
 
-let bp f = mkF f
-let pt f = mkF (0.99626 *. f)
-let cm f = mkF (28.34645 *. f)
-let mm f = mkF (2.83464 *. f)
-let inch f = mkF (72. *. f)
+let bp f = f
+let pt f = 0.99626 *. f
+let cm f = 28.34645 *. f
+let mm f = 2.83464 *. f
+let inch f = 72. *. f
 
 let pi = 3.1415926535897932384626433832795029
 let pi_div_180 = pi /. 180.0
@@ -42,68 +42,23 @@ let is_zero f = abs_float f < 0.0001
 
 type scale = float -> t
 
-let addn x y =
-  match x.node, y.node with
-  | F f1, F f2 -> mkF (f1 +. f2)
-  | _, F f when is_zero f -> x
-  | F f, _ when is_zero f -> y
-  | _, _ -> mkNAdd x y
+let addn = (+.)
+let subn = (-.)
+let multn = ( *.)
+let multf = multn
+let divn =  (/.)
+let divf x f = divn x f
 
-let subn x y =
-  match x.node, y.node with
-  | F f1, F f2 -> mkF (f1 -. f2)
-  | _, F f  when is_zero f -> x
-  | _, _ -> mkNSub x y
+let maxn = max
 
-let multn x y =
-  match x.node, y.node with
-  | F f1, F f2 -> mkF (f1 *. f2)
-  | (F f, _ | _ , F f) when is_zero f -> zero
-  | _, _ -> mkNMult x y
+let minn = min
 
-let multf f x = multn (mkF f) x
-
-let divn x y =
-  match x.node, y.node with
-  | F f1, F f2 -> mkF (f1 /. f2)
-  | F f, _ when is_zero f -> zero
-  | _, _ -> mkNDiv x y
-
-let divf x f = divn x (mkF f)
-
-let maxn x y =
-  match x.node, y.node with
-    | F f1, F f2 -> mkF (max f1 f2)
-    | _, _ -> mkNMax x y
-
-let minn x y =
-  match x.node, y.node with
-    | F f1, F f2 -> mkF (min f1 f2)
-    | _, _ -> mkNMin x y
-
-let gmean x y =
-  match x.node, y.node with
-  | F f1, F f2 -> mkF ( sqrt (f1 *. f1 +. f2 *. f2 ))
-  | _, F f when is_zero f -> x
-  | F f, _ when is_zero f -> y
-  | _, _ -> mkNGMean x y
+let gmean f1 f2 = sqrt (f1 *. f1 +. f2 *. f2 )
 
 let fold_max f = List.fold_left (fun w p -> maxn w (f p))
 let fold_min f = List.fold_left (fun w p -> minn w (f p))
 
-let if_null n n1 n2 =
-  match n.node with
-    | F f  when is_zero f -> n1
-    | F f  -> n2
-    | _ -> mkNIfnullthenelse n n1 n2
-
-(*
-let bpn n = n
-let ptn n = multn (F 0.99626) n
-let cmn n = multn (F 28.34645) n
-let mmn n = multn (F 2.83464) n
-let inchn n = multn (F 72.) n
-*)
+let if_null n n1 n2 = if is_zero n then n1 else n2
 
 module Scale = struct
   let bp x y = bp (x *. y)
@@ -122,24 +77,24 @@ module Infix = struct
   let (/./)  = divf
 end
 
-open Infix
+let neg x = 0. -. x
 
-let neg x = zero -/ x
-
-let abs x = maxn x (neg x)
+let abs = abs_float
 
 (* TeX units *)
-(* we have to do this by hand because we cannot use the Picture module here *)
 let xlength p =
-  mkNXPart (mkPTSub (mkPTPicCorner p `Northeast) (mkPTPicCorner p `Northwest))
+  let xmin,_,xmax, _ = Gentex.get_dimen_pt (Gentex.create p) in
+  xmax -. xmin
+
 let ylength p =
-  mkNYPart (mkPTSub (mkPTPicCorner p `Northeast) (mkPTPicCorner p `Southeast))
+  let _,ymin,_, ymax = Gentex.get_dimen_pt (Gentex.create p) in
+  ymax -. ymin
 
 let pic s = mkPicture (mkPITex s)
 
-let em_factor = xlength (pic "m")
-let ex_factor = ylength (pic "x")
+let em_factor () = xlength "m"
+let ex_factor () = ylength "x"
 
-let em f = f *./ em_factor
-let ex f = f *./ ex_factor
+let em f = f *. em_factor ()
+let ex f = f *. ex_factor ()
 

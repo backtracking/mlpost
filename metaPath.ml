@@ -54,15 +54,17 @@ struct
   let cut_before p1 p2 = mkPACutBefore p1 p2
   let build_cycle l = mkPABuildCycle l
 
-  let subpath (f1: float) (f2: float) p = mkPASub (mkF f1) (mkF f2) p
-  let point (f: float) p = mkPTPointOf (mkF f) p
-  let direction (f: float) p = mkPTDirectionOf (mkF f) p
+  let subpath (f1: float) (f2: float) p = mkPASub f1 f2 p
+  let point (f: float) p = mkPTPointOf f p
+  let direction (f: float) p = mkPTDirectionOf f p
 
   let pointn (n: num) p = mkPTPointOf n p
   let directionn (n: num) p = mkPTDirectionOf n p
   let subpathn (n1: num) (n2: num) p = mkPASub n1 n2 p
 
-  let length p = mkNLength p
+  let length p =
+    let p = Compute.path p in
+    Spline_lib.metapost_length p
 
   let defaultjoint = jCurve
   let defaultdir = noDir

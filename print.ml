@@ -35,21 +35,7 @@ let position fmt p =
   | `Southwest -> fprintf fmt ".llft"
   | `Southeast -> fprintf fmt ".lrt"
 
-let rec num fmt n =
-  match n.Hashcons.node with
-  | F f -> fprintf fmt "%f" f
-  | NXPart p -> fprintf fmt "xpart(%a)" point p
-  | NYPart p -> fprintf fmt "ypart(%a)" point p
-  | NAdd(n1,n2) -> fprintf fmt "(%a + %a)" num n1 num n2
-  | NSub(n1,n2) -> fprintf fmt "(%a - %a)" num n1 num n2
-  | NMult(n1,n2) -> fprintf fmt "(%a * %a)" num n1 num n2
-  | NDiv(n1,n2) -> fprintf fmt "(%a / %a)" num n1 num n2
-  | NMax(n1,n2) -> fprintf fmt "max(%a,%a)" num n1 num n2
-  | NMin(n1,n2) -> fprintf fmt "min(%a,%a)" num n1 num n2
-  | NLength p -> fprintf fmt "length %a" path p
-  | NGMean (n1,n2) -> fprintf fmt "mean(%a,%a)" num n1 num n2
-  | NIfnullthenelse (n,n1,n2) ->
-      fprintf fmt "(if %a = 0 then %a else %a)" num n num n1 num n2
+let rec num fmt f = pp_print_float fmt f
 
 and point fmt p =
   match p.Hashcons.node with

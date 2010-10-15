@@ -82,10 +82,10 @@ let ctransform_of_transform = Compute.transform
 
 let baselines s = Picture_lib.baseline (Compute.picture (Types.mkPITex s))
 
-let num_of_float f = Types.mkF f
+let num_of_float =Misc.id
 let point_of_cpoint p =
-  let x = Types.mkF p.CPoint.x in
-  let y = Types.mkF p.CPoint.y in
+  let x = p.CPoint.x in
+  let y = p.CPoint.y in
   Types.mkPTPair x y
 
 let path_of_cpath p =
@@ -101,12 +101,12 @@ let path_of_cpath p =
   else Types.mkPAofMPA path
 
 let transform_of_ctransform p = [Types.mkTRMatrix
-   {Types.x0 = Types.mkF p.Ctypes.x0;
-    Types.y0 = Types.mkF p.Ctypes.y0;
-    Types.xx = Types.mkF p.Ctypes.xx;
-    Types.xy = Types.mkF p.Ctypes.xy;
-    Types.yx = Types.mkF p.Ctypes.yx;
-    Types.yy = Types.mkF p.Ctypes.yy}]
+   {Matrix.x0 = p.Ctypes.x0;
+    Matrix.y0 = p.Ctypes.y0;
+    Matrix.xx = p.Ctypes.xx;
+    Matrix.xy = p.Ctypes.xy;
+    Matrix.yx = p.Ctypes.yx;
+    Matrix.yy = p.Ctypes.yy}]
 
 ELSE
 let supported = false

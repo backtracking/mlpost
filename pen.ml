@@ -23,7 +23,7 @@ let transform tr p =
   List.fold_left mkPenTransformed p tr
 
 let default =
-  mkPenTransformed mkPenCircle (scaled (mkF 0.5))
+  mkPenTransformed mkPenCircle (scaled 0.5)
 let circle = mkPenCircle
 let square = mkPenSquare
 let from_path p = mkPenFromPath p

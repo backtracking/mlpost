@@ -86,7 +86,6 @@ let anchor_of_position pos =
   | `Southeast -> `Northwest
   | `Center -> `Center
 
-let num_memoize = Hashtbl.create 50
 let point_memoize = Hashtbl.create 50
 let metapath_memoize = Hashtbl.create 50
 let path_memoize = Hashtbl.create 50
@@ -94,7 +93,6 @@ let picture_memoize = Hashtbl.create 50
 let command_memoize = Hashtbl.create 50
 
 let clear () =
-  Hashtbl.clear num_memoize;
   Hashtbl.clear point_memoize;
   Hashtbl.clear metapath_memoize;
   Hashtbl.clear path_memoize;
@@ -108,53 +106,7 @@ let float_to_metapost f =
       else if abs_float f < 0.0001 then 0.
       else f
 
-let rec num' = function
-  | F f -> (*float_to_metapost*) f
-  | NXPart p ->
-      let p = point p in
-      p.P.x
-  | NYPart p ->
-      let p = point p in
-      p.P.y
-  | NAdd(n1,n2) ->
-      let n1 = num n1 in
-      let n2 = num n2 in
-        n1 +. n2
-  | NSub(n1,n2) ->
-      let n1 = num n1 in
-      let n2 = num n2 in
-        n1 -. n2
-  | NMult (n1,n2) ->
-      let n1 = num n1 in
-      let n2 = num n2 in
-        n1*.n2
-  | NDiv (n1,n2) ->
-      let n1 = num n1 in
-      let n2 = num n2 in
-	if n2 = 0. then
-	  failwith "Concrete : division by zero"
-	else
-          n1/.n2
-  | NMax (n1,n2) ->
-      let n1 = num n1 in
-      let n2 = num n2 in
-       max n1 n2
-  | NMin (n1,n2) ->
-      let n1 = num n1 in
-      let n2 = num n2 in
-        min n1 n2
-  | NGMean (n1,n2) ->
-      let n1 = num n1 in
-      let n2 = num n2 in
-        sqrt (n1*.n1+.n2*.n2)
-  | NLength p ->
-      let p = path p in
-      Spline_lib.metapost_length p
-  | NIfnullthenelse (n,n1,n2) ->
-      let n = num n in
-      if n = 0. then num n1 else num n2
-
-and num n = memoize num' "num" num_memoize n
+let rec num n = n
 and point' = function
   | PTPair (f1,f2) ->
       let f1 = num f1 in
@@ -309,12 +261,12 @@ and transform t =
   | TRZscaled p -> Matrix.zscaled (point p)
   | TRReflect (p1,p2) -> Matrix.reflect (point p1) (point p2)
   | TRRotateAround (p,f) -> Matrix.rotate_around (point p) (deg2rad f)
-  | TRMatrix p -> {Ctypes.x0 = num p.Types.x0;
-                   Ctypes.y0 = num p.Types.y0;
-                   Ctypes.xx = num p.Types.xx;
-                   Ctypes.xy = num p.Types.xy;
-                   Ctypes.yx = num p.Types.yx;
-                   Ctypes.yy = num p.Types.yy}
+  | TRMatrix p -> {Ctypes.x0 = num p.Matrix.x0;
+                   Ctypes.y0 = num p.Matrix.y0;
+                   Ctypes.xx = num p.Matrix.xx;
+                   Ctypes.xy = num p.Matrix.xy;
+                   Ctypes.yx = num p.Matrix.yx;
+                   Ctypes.yy = num p.Matrix.yy}
 
 and commandpic p =
   match p.Hashcons.node with

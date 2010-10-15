@@ -27,7 +27,6 @@ let (++) c1 c2 =
     | _, C.CSeq [] -> c1
     | _, _ -> C.CSeq [c1 ; c2]
 
-let num_names = D.NM.create 257
 let point_names = D.PtM.create 257
 let path_names = D.PthM.create 257
 let picture_names = D.PicM.create 257
@@ -38,67 +37,7 @@ let option_compile f = function
       let obj, c = f obj in
         Some obj, c
 
-let rec num' = function
-  | F f -> C.F f, nop
-  | NXPart p ->
-      let p,c = point p in
-      C.NXPart p, c
-  | NYPart p ->
-      let p,c = point p in
-      C.NYPart p, c
-  | NAdd(n1,n2) ->
-      let n1,c1 = num n1 in
-      let n2,c2 = num n2 in
-        C.NAdd (n1,n2), c1 ++ c2
-  | NSub(n1,n2) ->
-      let n1,c1 = num n1 in
-      let n2,c2 = num n2 in
-        C.NSub (n1,n2), c1 ++ c2
-  | NMult (n1,n2) ->
-      let n1,c1 = num n1 in
-      let n2,c2 = num n2 in
-        C.NMult (n1,n2), c1 ++ c2
-  | NDiv (n1,n2) ->
-      let n1,c1 = num n1 in
-      let n2,c2 = num n2 in
-        C.NDiv (n1,n2), c1 ++ c2
-  | NMax (n1,n2) ->
-      let n1,c1 = num n1 in
-      let n2,c2 = num n2 in
-        C.NMax (n1,n2), c1 ++ c2
-  | NMin (n1,n2) ->
-      let n1,c1 = num n1 in
-      let n2,c2 = num n2 in
-        C.NMin (n1,n2), c1 ++ c2
-  | NGMean (n1,n2) ->
-      let n1,c1 = num n1 in
-      let n2,c2 = num n2 in
-        C.NGMean (n1,n2), c1 ++ c2
-  | NLength p ->
-      let p,c = path p in
-      C.NLength p, c
-  | NIfnullthenelse (n,n1,n2) ->
-      let n,c = num n in
-      let n1,c1 = num n1 in
-      let n2,c2 = num n2 in
-      C.NIfnullthenelse (n,n1,n2), c ++ c1 ++ c2
-
-and num n =
-  match n.node with
-  | F f -> C.F f, nop
-  | _ ->
-      let cnt = try !(D.NM.find D.num_map n) with Not_found -> assert false in
-      if cnt >= 2 then num_save n
-      else num' n.node
-and num_save n =
-  try
-    let x = D.NM.find num_names n in
-    C.NName x, nop
-  with Not_found ->
-    let n', code = num' n.node in
-    let x = Name.num () in
-    let () = D.NM.add num_names n x in
-    C.NName x, code ++ C.CDeclNum (x,n')
+let rec num n = n, nop
 
 and point' = function
   | PTPair (f1,f2) ->
@@ -333,12 +272,12 @@ and transform t =
       let p, code = point p in
         C.TRRotateAround (p,f), code
   | TRMatrix p ->
-      let nx0,nc0 = num p.x0 in
-      let ny0,nc1 = num p.y0 in
-      let nxx,nc2 = num p.xx in
-      let nxy,nc3 = num p.xy in
-      let nyx,nc4 = num p.yx in
-      let nyy,nc5 = num p.yy in
+      let nx0,nc0 = num p.Matrix.x0 in
+      let ny0,nc1 = num p.Matrix.y0 in
+      let nxx,nc2 = num p.Matrix.xx in
+      let nxy,nc3 = num p.Matrix.xy in
+      let nyx,nc4 = num p.Matrix.yx in
+      let nyy,nc5 = num p.Matrix.yy in
       let tname = Name.transform () in
       C.TRName tname,
       nc0 ++ nc1 ++ nc2 ++ nc3 ++ nc4 ++ nc5 ++
@@ -433,8 +372,6 @@ and command c =
 
 
 let reset () =
-  D.NM.clear D.num_map;
-  D.NM.clear num_names;
   D.PtM.clear point_names;
   D.PtM.clear D.point_map;
   D.PthM.clear D.path_map;

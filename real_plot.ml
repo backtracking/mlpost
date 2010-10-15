@@ -186,7 +186,7 @@ let draw ?(logarithmic=false) ?curve_brush
     if not Concrete.supported then
       List.map (fun y -> (y,scaley y)) ypitchl
     else
-      let ex2 = 2. *. Concrete.float_of_num Num.ex_factor in
+      let ex2 = 2. *. Num.ex_factor () in
       let _, ypitchl = List.fold_left
         (fun (last,acc) y ->
            let yn = scaley y in

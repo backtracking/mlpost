@@ -23,7 +23,7 @@ let off = mkOff
 
 let evenly = mkDEvenly
 let withdots = mkDWithdots
-let scaled f = mkDScaled (mkF f)
+let scaled f = mkDScaled f
 let shifted = mkDShifted
 let pattern = mkDPattern
 

@@ -30,14 +30,8 @@ let zscaled a = mkTRZscaled a
 let reflect p1 p2 = mkTRReflect p1 p2
 let rotate_around p f = mkTRRotateAround p f
 
-type matrix = Types.matrix =  {
-           xx : Num.t;
-           yx : Num.t;
-           xy : Num.t;
-           yy : Num.t;
-           x0 : Num.t;
-           y0 : Num.t;
-         }
+type matrix = Matrix.t
+
 let explicit t = mkTRMatrix t
 
 (* applied the transformations in the order of the list *)

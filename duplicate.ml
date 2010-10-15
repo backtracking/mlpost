@@ -21,13 +21,6 @@ open Hashcons
 (* A duplicate analysis - find out the number of times a node is used *)
 
 
-module Num =
-struct
-  type t = num_node hash_consed
-  let equal = (==)
-  let hash x = x.hkey
-end
-
 module Point =
 struct
   type t = point_node hash_consed
@@ -56,20 +49,14 @@ struct
   let hash x = x.hkey
 end
 
-module NM = Hashtbl.Make (Num)
 module PtM = Hashtbl.Make (Point)
 module MPthM = Hashtbl.Make (MetaPath)
 module PthM = Hashtbl.Make (Path)
 module PicM = Hashtbl.Make (Picture)
 
-let num_map = NM.create 257
 let point_map = PtM.create 257
 let path_map = PthM.create 257
 let picture_map = PicM.create 257
-
-let test_and_incr_num n =
-  try incr (NM.find num_map n) ; true
-  with Not_found -> NM.add num_map n (ref 1) ; false
 
 let test_and_incr_point n =
   try incr (PtM.find point_map n); true
@@ -87,28 +74,12 @@ let option_count f = function
   | None -> ()
   | Some x -> f x
 
-let rec num' = function
-  | F _ -> ()
-  | NXPart p | NYPart p -> point p
-  | NAdd(n1,n2)
-  | NSub(n1,n2)
-  | NMult (n1,n2)
-  | NDiv (n1,n2)
-  | NMax (n1,n2)
-  | NMin (n1,n2)
-  | NGMean (n1,n2) -> num n1; num n2
-  | NLength p -> path p
-  | NIfnullthenelse (n,n1,n2) -> num n; num n1; num n2
-
-and num n =
-  if test_and_incr_num n then () else num' n.node
-
-and point' = function
-  | PTPair (f1,f2) -> num f1; num f2
-  | PTPointOf (f,p) | PTDirectionOf (f,p) -> path p ; num f
+let rec point' = function
+  | PTPair (f1,f2) -> ()
+  | PTPointOf (f,p) | PTDirectionOf (f,p) -> path p
   | PTAdd (p1,p2)
   | PTSub (p1,p2) -> point p1; point p2
-  | PTMult (f,p) -> num f; point p
+  | PTMult (f,p) -> point p
   | PTRotated (f,p) -> point p
   | PTPicCorner (pic, corner) -> commandpic pic
   | PTTransformed (p,tr) ->
@@ -145,7 +116,7 @@ and path' = function
   | PACutAfter (p1,p2)
   | PACutBefore (p1,p2) -> path p1; path p2
   | PABuildCycle pl -> List.iter path pl
-  | PASub (f1, f2, p) -> num f1; num f2; path p
+  | PASub (f1, f2, p) ->  path p
   | PABBox p -> commandpic p
   | PAUnitSquare | PAQuarterCircle | PAHalfCircle | PAFullCircle -> ()
 and path p =
@@ -161,12 +132,11 @@ and picture p =
 
 and transform t =
   match t.node with
-  | TRRotated f -> ()
-  | TRScaled f | TRSlanted f | TRXscaled f | TRYscaled f  -> num f
+  | TRRotated f | TRScaled f | TRSlanted f | TRXscaled f | TRYscaled f -> ()
+  | TRMatrix p -> ()
   | TRShifted p | TRZscaled p -> point p
   | TRReflect (p1,p2) -> point p1; point p2
   | TRRotateAround (p,f) -> point p
-  | TRMatrix p -> num p.x0; num p.y0; num p.xx; num p.xy; num p.yx; num p.yy
 and command c =
   match c.node with
   | CDraw (p, b) ->
@@ -191,9 +161,7 @@ and dash d =
   | DShifted (p,d) -> point p; dash d
   | DPattern l -> List.iter dash_pattern l
 
-and dash_pattern o =
-  match o.Hashcons.node with
-  | On f | Off f -> num f
+and dash_pattern _ = ()
 
 and commandpic p =
   match p.node with

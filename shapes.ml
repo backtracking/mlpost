@@ -22,8 +22,8 @@ open Num.Infix
 open Types
 
 let pi = Num.pi
-let kappa = mkF (4. *. (sqrt 2. -. 1.) /. 3.)
-let mkappa = mkF (1. -. (4. *. (sqrt 2. -. 1.) /. 3.))
+let kappa = 4. *. (sqrt 2. -. 1.) /. 3.
+let mkappa = 1. -. (4. *. (sqrt 2. -. 1.) /. 3.)
 
 type t = Path.t
 
@@ -63,7 +63,7 @@ let round_rect width height rx ry =
 (** Ellipses and Arcs *)
 
 let ellipse rx ry =
-  let m theta = pt (rx */ (mkF (cos theta)), ry */ (mkF (sin theta))) in
+  let m theta = pt (rx */ (cos theta), ry */ (sin theta)) in
   let knots = knotlist
     [(noDir, m 0., mkVec up); (noDir, m (pi /. 2.), mkVec left);
      (noDir, m pi, mkVec down); (noDir, m (-. pi /. 2.), mkVec right)] in

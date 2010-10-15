@@ -26,7 +26,7 @@ type t = Types.point
 (* angle in degrees *)
 let dir f =
   let angle = Num.deg2rad f in
-  mkPTPair (mkF (cos angle)) (mkF (sin angle))
+  mkPTPair (cos angle) (sin angle)
 
 let up = mkPTPair zero one
 let down = mkPTPair zero minus_one
@@ -38,12 +38,14 @@ let simple_transform t str = mkPTTransformed t str
 let xpart p =
   match p.Hashcons.node with
   | PTPair (a,b) -> a
-  | _ -> mkNXPart p
+  | _ ->
+      let p = Compute.point p in
+      p.Point_lib.x
 
 let ypart p =
   match p.Hashcons.node with
   | PTPair (a,b) -> b
-  | _ -> mkNYPart p
+  | _ -> let p = Compute.point p in p.Point_lib.y
 
 (* insert more sophisticated simplifications *)
 let rec add p1 p2 =
@@ -73,14 +75,14 @@ and sub p1 p2 =
 let shift = add
 let scale = mult
 
-let segment f p1 p2 = add (mult (mkF (1.-.f)) p1) (mult (mkF f) p2)
+let segment f p1 p2 = add (mult (1.-.f) p1) (mult f p2)
 let rec rotate f p =
   match p.Hashcons.node with
   | PTPair (a,b) ->
       let angle = Num.deg2rad f in
       mkPTPair
-	((mkF (cos angle) */ a) -/ (mkF (sin angle) */ b))
-        ((mkF (sin angle) */ a) +/ (mkF (cos angle) */ b))
+	((cos angle */ a) -/ (sin angle */ b))
+        ((sin angle */ a) +/ (cos angle */ b))
   | PTAdd (p1, p2) -> add (rotate f p1) (rotate f p2)
   | PTSub (p1, p2) -> sub (rotate f p1) (rotate f p2)
   | PTRotated (f', p) -> mkPTRotated (f+.f') p
@@ -92,12 +94,12 @@ let rotate_around p1 f p2 = add p1 (rotate f (sub p2 p1))
 
 let xscale f p =
   match p.Hashcons.node with
-  | PTPair (a,b) -> mkPTPair (mkNMult f a) b
+  | PTPair (a,b) -> mkPTPair (f *. a) b
   | _ -> simple_transform p (mkTRXscaled f)
 
 let yscale f p =
   match p.Hashcons.node with
-  | PTPair (a,b) -> mkPTPair a (mkNMult f b)
+  | PTPair (a,b) -> mkPTPair a (f *. b)
   | _ -> simple_transform p (mkTRYscaled f)
 
 let transform tr p =

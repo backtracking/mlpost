@@ -49,21 +49,7 @@ type position_red = [ | hposition_red | vposition_red | corner_red ]
 
 open Hashcons
 
-type num_node =
-  | F of float
-  | NXPart of point
-  | NYPart of point
-  | NAdd of num * num
-  | NSub of num * num
-  | NMult of num * num
-  | NDiv of num * num
-  | NMax of num * num
-  | NMin of num * num
-  | NGMean of num * num
-  | NLength of path
-  | NIfnullthenelse of num * num * num
-
-and num = num_node hash_consed
+type num = float
 
 and point_node =
   | PTPair of num * num
@@ -130,9 +116,7 @@ and path_node =
 
 and path = path_node hash_consed
 
-and matrix =
-    { xx : num; yx : num;
-      xy : num; yy : num; x0 : num; y0 : num; }
+and matrix = Matrix.t
 
 and transform_node =
   | TRRotated of float
@@ -201,11 +185,11 @@ and brush_node = {pen : pen option;
 
 and brush = brush_node hash_consed
 
-let hash_float = Hashtbl.hash
+let hash_float : float -> int = Hashtbl.hash
 
-let hash_piccorner = Hashtbl.hash
+let hash_piccorner : corner -> int = Hashtbl.hash
 
-let hash_string = Hashtbl.hash
+let hash_string : string -> int = Hashtbl.hash
 
 let combine n acc = acc * 65599 + n
 
@@ -216,35 +200,22 @@ let combine3 n acc1 acc2 acc3 = combine n (combine acc1 (combine acc2 acc3))
 let combine4 n acc1 acc2 acc3 acc4 = combine n (combine3 acc1 acc2 acc3 acc4)
 
 
-let num = function
-  | F f -> combine 1 (hash_float f)
-  | NXPart p -> combine 2 p.hkey
-  | NYPart p -> combine 3 p.hkey
-  | NAdd(n,m) -> combine2 4 n.hkey m.hkey
-  | NSub(n,m) -> combine2 5 n.hkey m.hkey
-  | NMult(n,m) -> combine2 6 n.hkey m.hkey
-  | NDiv(n,m) -> combine2 7 n.hkey m.hkey
-  | NMax(n,m) -> combine2 8 n.hkey m.hkey
-  | NMin(n,m) -> combine2 9 n.hkey m.hkey
-  | NGMean(n,m) -> combine2 10 n.hkey m.hkey
-  | NLength p -> combine 11 p.hkey
-  | NIfnullthenelse (n,n1,n2) -> combine3 12 n.hkey n1.hkey n2.hkey
-
+let num = hash_float
 
 let point = function
-  | PTPair(n,m) -> combine2 12 n.hkey m.hkey
+  | PTPair(n,m) -> combine2 12 (num n) (num m)
   | PTPicCorner(p,pc) -> combine2 13 p.hkey (hash_piccorner pc)
   | PTPointOf(f,p) -> combine2 14 (hash_float f) p.hkey
   | PTDirectionOf(f,p) -> combine2 15 (hash_float f) p.hkey
   | PTAdd(p,q) -> combine2 16 p.hkey q.hkey
   | PTSub(p,q) -> combine2 17 p.hkey q.hkey
-  | PTMult(n,q) -> combine2 18 n.hkey q.hkey
+  | PTMult(n,q) -> combine2 18 (num n) q.hkey
   | PTRotated(f,p) -> combine2 19 (hash_float f) p.hkey
   | PTTransformed(p,tr) -> combine2 20 p.hkey tr.hkey
 
 let on_off = function
-  | On n -> combine 65 n.hkey
-  | Off n -> combine 66 n.hkey
+  | On n -> combine 65 (num n)
+  | Off n -> combine 66 (num n)
 
 let direction = function
   | Vec p -> combine 61 p.hkey
@@ -287,17 +258,17 @@ let path = function
 
 let transform = function
   | TRRotated f -> combine 52 (hash_float f)
-  | TRScaled n -> combine 53 n.hkey
+  | TRScaled n -> combine 53 (num n)
   | TRShifted p -> combine 57 p.hkey
-  | TRSlanted n -> combine 54 n.hkey
-  | TRXscaled n -> combine 55 n.hkey
-  | TRYscaled n -> combine 56 n.hkey
+  | TRSlanted n -> combine 54 (num n)
+  | TRXscaled n -> combine 55 (num n)
+  | TRYscaled n -> combine 56 (num n)
   | TRZscaled p -> combine 58 p.hkey
   | TRReflect(p,q) -> combine2 59 p.hkey q.hkey
   | TRRotateAround(p,q) -> combine2 60 p.hkey (hash_float q)
   | TRMatrix m ->
-      List.fold_left (fun acc n -> combine2 63 acc n.hkey) 61
-        [m.x0;m.y0;m.xx;m.xy;m.yx;m.yy]
+      List.fold_left (fun acc n -> combine2 63 acc (num n)) 61
+        [m.Matrix.x0;m.Matrix.y0;m.Matrix.xx;m.Matrix.xy;m.Matrix.yx;m.Matrix.yy]
 
 let picture = function
   | PITex s -> combine 38 (hash_string s)
@@ -312,7 +283,7 @@ let commandpic = function
 let dash = function
   | DEvenly -> 72
   | DWithdots -> 73
-  | DScaled(f,d) -> combine2 74 (hash_float f) d.hkey
+  | DScaled(f,d) -> combine2 74 (num f) d.hkey
   | DShifted(p,d) -> combine2 75 p.hkey d.hkey
   | DPattern l ->
       List.fold_left (fun acc o -> combine2 76 acc o.hkey) 77 l
@@ -355,6 +326,8 @@ let brush b =
 let eq_float (f1:float) (f2:float) =
   Pervasives.compare f1 f2 == 0
 
+let eq_num = eq_float
+
 (* we enforce to use physical equality only on hash-consed data
    of the same type *)
 let eq_hashcons (x:'a hash_consed) (y:'a hash_consed) =
@@ -389,7 +362,7 @@ let eq_dash_node d1 d2 =
   | DEvenly, DEvenly
   | DWithdots, DWithdots -> true
   | DScaled(f1,d1), DScaled(f2,d2) ->
-      eq_hashcons f1 f2 && eq_hashcons d1 d2
+      eq_num f1 f2 && eq_hashcons d1 d2
   | DShifted(p1,d1), DShifted(p2,d2) ->
       eq_hashcons p1 p2 && eq_hashcons d1 d2
   | DPattern l1, DPattern l2 ->
@@ -404,43 +377,27 @@ let eq_brush_node b1 b2 =
 let eq_on_off o1 o2 =
   match o1,o2 with
     | Off n1, Off n2
-    | On n1, On n2 -> eq_hashcons n1 n2
+    | On n1, On n2 -> eq_num n1 n2
     | _ -> false
 
 let eq_position (p1:position) (p2:position) =
   p1 == p2 (* correct because this type contains only constants *)
 
-let eq_num_node n1 n2 =
-  match n1,n2 with
-    | F f1, F f2 -> eq_float f1 f2
-    | NXPart p1, NXPart p2
-    | NYPart p1, NYPart p2 -> eq_hashcons p1 p2
-    | NAdd(n11,n12),NAdd(n21,n22)
-    | NSub(n11,n12),NSub(n21,n22)
-    | NMult(n11,n12),NMult(n21,n22)
-    | NDiv(n11,n12),NDiv(n21,n22)
-    | NMax(n11,n12),NMax(n21,n22)
-    | NMin(n11,n12),NMin(n21,n22)
-    | NGMean(n11,n12),NGMean(n21,n22)
-	-> eq_hashcons n11 n21 && eq_hashcons n12 n22
-    | NLength p1, NLength p2 -> eq_hashcons p1 p2
-    | _ -> false
-
 let eq_point_node p1 p2 =
   match p1,p2 with
     | PTPair(n11,n12),PTPair(n21,n22) ->
-	eq_hashcons n11 n21 && eq_hashcons n12 n22
+        eq_num n11 n21 && eq_num n12 n22
     | PTPicCorner(pic1,corn1), PTPicCorner(pic2,corn2) ->
 	eq_hashcons pic1 pic2 &&
         eq_position (corn1 :> position) (corn2 :> position)
     | PTPointOf(n1,p1), PTPointOf(n2,p2)
     | PTDirectionOf(n1,p1), PTDirectionOf(n2,p2)
-	-> eq_hashcons n1 n2 && eq_hashcons p1 p2
+	-> eq_num n1 n2 && eq_hashcons p1 p2
     | PTAdd(p11,p12),PTAdd(p21,p22)
     | PTSub(p11,p12),PTSub(p21,p22)
 	-> eq_hashcons p11 p21 && eq_hashcons p12 p22
     | PTMult(n1,p1),PTMult(n2,p2) ->
-	eq_hashcons n1 n2 && eq_hashcons p1 p2
+	eq_num n1 n2 && eq_hashcons p1 p2
     | PTRotated(f1,p1),PTRotated(f2,p2) ->
 	eq_float f1 f2 && eq_hashcons p1 p2
     | PTTransformed(p1,tr1), PTTransformed(p2,tr2) ->
@@ -476,7 +433,7 @@ let eq_path_node p1 p2 =
     | PABuildCycle(l1),PABuildCycle(l2) ->
 	eq_hashcons_list l1 l2
     | PASub(f11,f12,p1), PASub(f21,f22,p2) ->
-	eq_hashcons f11 f21 && eq_hashcons f12 f22 && eq_hashcons p1 p2
+	eq_num f11 f21 && eq_num f12 f22 && eq_hashcons p1 p2
     | PABBox(p1), PABBox(p2) ->
 	eq_hashcons p1 p2
     | _ -> false
@@ -499,7 +456,7 @@ let eq_transform_node t1 t2 =
   | TRScaled n1, TRScaled n2
   | TRSlanted n1, TRSlanted n2
   | TRXscaled n1, TRXscaled n2
-  | TRYscaled n1, TRYscaled n2 -> eq_hashcons n1 n2
+  | TRYscaled n1, TRYscaled n2 -> eq_num n1 n2
   | TRShifted p1, TRShifted p2
   | TRZscaled p1, TRZscaled p2 -> eq_hashcons p1 p2
   | TRReflect(p11,p12), TRReflect(p21,p22) ->
@@ -507,12 +464,12 @@ let eq_transform_node t1 t2 =
   | TRRotateAround(p1,f1), TRRotateAround(p2,f2) ->
       eq_hashcons p1 p2 && eq_float f1 f2
   | TRMatrix m1, TRMatrix m2 ->
-      eq_hashcons m1.x0 m2.x0
-      &&  eq_hashcons m1.y0 m2.y0
-      &&  eq_hashcons m1.xx m2.xx
-      &&  eq_hashcons m1.xy m2.xy
-      &&  eq_hashcons m1.yx m2.yx
-      &&  eq_hashcons m1.yy m2.yy
+      eq_num m1.Matrix.x0 m2.Matrix.x0
+      &&  eq_num m1.Matrix.y0 m2.Matrix.y0
+      &&  eq_num m1.Matrix.xx m2.Matrix.xx
+      &&  eq_num m1.Matrix.xy m2.Matrix.xy
+      &&  eq_num m1.Matrix.yx m2.Matrix.yx
+      &&  eq_num m1.Matrix.yy m2.Matrix.yy
   | _ -> false
 
 let eq_knot_node k1 k2 =
@@ -561,27 +518,6 @@ let eq_commandpic_node p1 p2 =
 (* num *)
 
 let unsigned f x = (f x) land 0x3FFFFFFF
-
-module HashNum =
-  Hashcons.Make(struct type t = num_node
-		       let equal = eq_num_node
-		       let hash = unsigned num end)
-
-let hashnum_table = HashNum.create 257;;
-let hashnum = HashNum.hashcons hashnum_table
-
-let mkF f = hashnum (F f)
-let mkNAdd n1 n2 = hashnum (NAdd(n1,n2))
-let mkNSub n1 n2 = hashnum (NSub(n1,n2))
-let mkNMult n1 n2 = hashnum (NMult(n1,n2))
-let mkNDiv n1 n2 = hashnum (NDiv(n1,n2))
-let mkNMax n1 n2 = hashnum (NMax(n1,n2))
-let mkNMin n1 n2 = hashnum (NMin(n1,n2))
-let mkNGMean n1 n2 = hashnum (NGMean(n1,n2))
-let mkNXPart p = hashnum (NXPart p)
-let mkNYPart p = hashnum (NYPart p)
-let mkNLength p = hashnum (NLength p)
-let mkNIfnullthenelse p n1 n2 = hashnum (NIfnullthenelse (p,n1,n2))
 
 (* point *)
 

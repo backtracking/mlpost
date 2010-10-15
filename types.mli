@@ -48,21 +48,7 @@ type position_red = [ | hposition_red | vposition_red | corner_red ]
 
 open Hashcons
 
-type num_node = private
-  | F of float
-  | NXPart of point
-  | NYPart of point
-  | NAdd of num * num
-  | NSub of num * num
-  | NMult of num * num
-  | NDiv of num * num
-  | NMax of num * num
-  | NMin of num * num
-  | NGMean of num * num
-  | NLength of path
-  | NIfnullthenelse of num * num * num
-
-and num = num_node hash_consed
+type num = float
 
 and point_node = private
   | PTPair of num * num
@@ -129,9 +115,7 @@ and path_node = private
 
 and path = path_node hash_consed
 
-and matrix =
-    { xx : num; yx : num;
-      xy : num; yy : num; x0 : num; y0 : num; }
+and matrix = Matrix.t
 
 and transform_node = private
   | TRRotated of float
@@ -203,19 +187,6 @@ and brush = brush_node hash_consed
 (* smart constructors *)
 
 (* num *)
-
-val mkF: float -> num
-val mkNAdd : num -> num -> num
-val mkNSub : num -> num -> num
-val mkNMult : num -> num -> num
-val mkNDiv : num -> num -> num
-val mkNMax : num -> num -> num
-val mkNMin : num -> num -> num
-val mkNGMean : num -> num -> num
-val mkNXPart : point -> num
-val mkNYPart : point -> num
-val mkNLength : path -> num
-val mkNIfnullthenelse : num -> num -> num -> num
 
 (* point *)
 val mkPTPair : num -> num -> point

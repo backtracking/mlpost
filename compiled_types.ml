@@ -14,20 +14,7 @@
 (*                                                                        *)
 (**************************************************************************)
 
-type num =
-  | F of float
-  | NXPart of point
-  | NYPart of point
-  | NAdd of num * num
-  | NSub of num * num
-  | NMult of num * num
-  | NDiv of num * num
-  | NMax of num * num
-  | NMin of num * num
-  | NGMean of num * num
-  | NName of name
-  | NLength of path
-  | NIfnullthenelse of num * num * num
+type num = float
 
 and point =
   | PTPair of num * num

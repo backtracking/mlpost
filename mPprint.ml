@@ -48,28 +48,13 @@ let position fmt p =
   | `Southwest -> fprintf fmt ".llft"
   | `Southeast -> fprintf fmt ".lrt"
 
-let rec num fmt = function
-  | C.F f ->
-      if f = infinity then fprintf fmt "infinity"
-      else if f > 4095. then fprintf fmt "%g" 4095.
-      else if abs_float f < 0.0001 then fprintf fmt "0"
-      else fprintf fmt "%g" f
-  | C.NXPart p -> fprintf fmt "xpart %a" point p
-  | C.NYPart p -> fprintf fmt "ypart %a" point p
-  | C.NAdd (f1, f2) -> fprintf fmt "(%a +@ %a@,)" num f1 num f2
-  | C.NSub (f1, f2) -> fprintf fmt "(%a -@ %a@,)" num f1 num f2
-  | C.NMult (f1, f2) -> fprintf fmt "(%a *@ %a@,)" num f1 num f2
-  | C.NDiv (f1, f2) -> fprintf fmt "(%a /@ %a@,)" num f1 num f2
-  | C.NMax (f1, f2) -> fprintf fmt "max(@ %a,@ %a@,)" num f1 num f2
-  | C.NMin (f1, f2) -> fprintf fmt "min(@ %a,@ %a@,)" num f1 num f2
-  | C.NGMean (f1, f2) -> fprintf fmt "(%a@ ++@ %a@,)" num f1 num f2
-  | C.NName n -> pp_print_string fmt n
-  | C.NLength p -> fprintf fmt "length (%a@,)" path p
-  | C.NIfnullthenelse (n,n1,n2) ->
-      fprintf fmt "(if (%a = 0): %a else: %a fi)"
-        num n num n1 num n2
+let rec num fmt f =
+  if f = infinity then fprintf fmt "infinity"
+  else if f > 4095. then fprintf fmt "%g" 4095.
+  else if abs_float f < 0.0001 then fprintf fmt "0"
+  else fprintf fmt "%g" f
 
-and float fmt f = num fmt (C.F f)
+and float fmt = num fmt
 
 (* One bug : rgb and transparent can collide : rgb(0.123 0.003 0.001)
    et rgba(1,1,1,1) since this is encoding lie the first one *)
@@ -232,10 +217,10 @@ yypart %s = %a;@\n@." n
               fprintf fmt "externalfigure \"%s\" xyscaled (%a,%a);@\n"
                 filename num w num h in
               match spec with
-                | `None -> printext (C.F fh) (C.F fw)
-                | `Height h -> printext h (C.NMult (C.F (fw/.fh),h))
-                | `Width w -> printext (C.NMult (C.F (fh/.fw),w)) w
+                | `None -> printext fh fw
+                | `Height h -> printext h ((fw/.fh) *. h)
+                | `Width w -> printext ((fh/.fw) *. w) w
                 | `Inside (h,w) ->
-                    let w = C.NMin (C.NMult (h,C.F (fw/.fh)),w) in
-                    printext (C.NMult (C.F (fh/.fw),w)) w
+                    let w = min (h *. (fw/.fh)) w in
+                    printext ((fh/.fw) *. w) w
 
