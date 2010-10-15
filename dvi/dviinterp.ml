@@ -100,14 +100,6 @@ let rec scanf_with s def = function
       -> scanf_with s def l
 
 
-let verbose = ref false
-let set_verbosity b =
-  verbose := b;
-  Fonts.set_verbosity b
-
-let debug = ref false
-let set_debug = (:=) debug
-
 let print_state fmt s =
   fprintf fmt "{h = %ld; v = %ld; w = %ld; x = %ld; y = %ld; z= %ld}@."
     s.h s.v s.w s.x s.y s.z
@@ -121,7 +113,7 @@ let put_rule env cmds a b =
 
 
 let load_fonts font_map conv =
-  if !debug then printf "conv : %f@." conv;
+  if Defaults.get_debug () then printf "conv : %f@." conv;
   Int32Map.fold (fun k fdef ->
     Int32Map.add k (Fonts.load_font fdef conv)
   )
@@ -130,7 +122,8 @@ let load_fonts font_map conv =
 
 let set_env_char (_,font,_) (h,v) c =
     begin
-      if !debug then printf "Setting character %ld at (%ld,%ld).@." c h v;
+      if Defaults.get_debug () then
+        printf "Setting character %ld at (%ld,%ld).@." c h v;
       let fwidth = Fonts.char_width font (Int32.to_int c) in
       let width = Int32.of_float fwidth in
       (Int32.add h width,v)
@@ -142,7 +135,7 @@ let rec put_char_type1 (info,font,conv) char (h,v) cmds =
     | VirtualFont vf ->
       (* FixMe how to use vf_design_size?
          Hack use the one of the first dvi, wrong!!*)
-      if !debug then printf "VirtualFont : %s ds=%f conv=%f@."
+      if Defaults.get_debug () then printf "VirtualFont : %s ds=%f conv=%f@."
         (Fonts.tex_name font) vf.vf_design_size conv;
       let conv = (* vf.vf_design_size *)conv in
       let env = new_env conv true in
@@ -156,7 +149,7 @@ let rec put_char_type1 (info,font,conv) char (h,v) cmds =
     | Type1 font1 ->
       let x = conv *. (Int32.to_float h)
       and y = conv *. (Int32.to_float v) in
-      if !debug then printf "Type1 : %s,%ld,%f,%f@."
+      if Defaults.get_debug () then printf "Type1 : %s,%ld,%f,%f@."
         (Fonts.tex_name font) char x y;
       let text_type1 = { c_glyph = char;
                          c_font = font1;
@@ -192,7 +185,7 @@ and set_char_type1 ifc pos cmds l =
       let pos = set_env_char ifc pos c in
       cmds, pos, l
     | Dvi.PutChar c::l ->
-      if !debug then printf "Putting character %ld.@." c;
+      if Defaults.get_debug () then printf "Putting character %ld.@." c;
       let cmds = put_char_type1 ifc c pos cmds in
       cmds, pos, l
     | _ -> assert false
@@ -204,7 +197,7 @@ and set_char_tex ifc scl pos_start pos_end cmds
       let pos_end = set_env_char ifc pos_end c in
       set_char_tex ifc (c::scl) pos_start pos_end cmds l
     | Dvi.PutChar c::l ->
-      if !debug then printf "Putting character %ld.@." c;
+      if Defaults.get_debug () then printf "Putting character %ld.@." c;
       close_string ifc (c::scl) pos_start pos_end cmds l
     | l -> close_string ifc scl pos_start pos_end cmds l
 
@@ -218,70 +211,70 @@ and interp_command fm env cmds l =
     | (Dvi.SetChar _ | Dvi.PutChar _)::_ ->
       set_char fm env cmds l
     | Dvi.SetRule(a, b)::l ->
-      if !debug then printf "Setting rule (w=%ld, h=%ld).@." a b;
+      if Defaults.get_debug () then printf "Setting rule (w=%ld, h=%ld).@." a b;
       let cmds = put_rule env cmds a b in
       env.s <- {env.s with h = Int32.add env.s.h b};
       interp_command fm env cmds l
     | Dvi.PutRule(a, b)::l ->
-      if !debug then printf "Putting rule (w=%ld, h=%ld).@." a b;
+      if Defaults.get_debug () then printf "Putting rule (w=%ld, h=%ld).@." a b;
       let cmds = put_rule env cmds a b in
       interp_command fm env cmds l
     | Dvi.Push::l ->
-      if !debug then printf "Push current state.@.";
+      if Defaults.get_debug () then printf "Push current state.@.";
       Stack.push env.s env.stack;
       interp_command fm env cmds l
     | Dvi.Pop::l ->
       (try
-	 if !debug then printf "Pop current state.@.";
+	 if Defaults.get_debug () then printf "Pop current state.@.";
 	 env.s <- Stack.pop env.stack
        with Stack.Empty -> failwith "Empty stack !");
       interp_command fm env cmds l
     | Dvi.Right b::l ->
-      if !debug then printf "Moving right %ld.@." b;
+      if Defaults.get_debug () then printf "Moving right %ld.@." b;
       env.s<-{env.s with h = Int32.add env.s.h b};
       interp_command fm env cmds l
     | Dvi.Wdefault::l ->
-      if !debug then printf "Moving right by the default W.@.";
+      if Defaults.get_debug () then printf "Moving right by the default W.@.";
       env.s<-{env.s with h = Int32.add env.s.h env.s.w};
       interp_command fm env cmds l
     | Dvi.W b::l ->
-      if !debug then printf "Moving right and changing W to %ld.@." b;
+      if Defaults.get_debug () then printf "Moving right and changing W to %ld.@." b;
       env.s<-{env.s with h = Int32.add env.s.h b; w = b};
       interp_command fm env cmds l
     | Dvi.Xdefault::l ->
-      if !debug then printf "Moving right by the default X.@.";
+      if Defaults.get_debug () then printf "Moving right by the default X.@.";
       env.s<-{env.s with h = Int32.add env.s.h env.s.x};
       interp_command fm env cmds l
     | Dvi.X b::l ->
-      if !debug then printf "Moving right and changing X to %ld.@." b;
+      if Defaults.get_debug () then printf "Moving right and changing X to %ld.@." b;
       env.s<-{env.s with h = Int32.add env.s.h b; x = b};
       interp_command fm env cmds l
     | Dvi.Down a::l ->
-      if !debug then printf "Moving down %ld.@." a;
+      if Defaults.get_debug () then printf "Moving down %ld.@." a;
       env.s <- {env.s with v = Int32.add env.s.v a};
       interp_command fm env cmds l
     | Dvi.Ydefault::l ->
-      if !debug then printf "Moving down by the default Y.@.";
+      if Defaults.get_debug () then printf "Moving down by the default Y.@.";
       env.s <- {env.s with v = Int32.add env.s.v env.s.y};
       interp_command fm env cmds l
     | Dvi.Y a::l ->
-      if !debug then printf "Moving down and changing Y to %ld.@." a;
+      if Defaults.get_debug () then printf "Moving down and changing Y to %ld.@." a;
       env.s <- {env.s with v = Int32.add env.s.v a; y = a};
       interp_command fm env cmds l
     | Dvi.Zdefault::l ->
-      if !debug then printf "Moving down by the default Z.@.";
+      if Defaults.get_debug () then printf "Moving down by the default Z.@.";
       env.s <- {env.s with v = Int32.add env.s.v env.s.z};
       interp_command fm env cmds l
     | Dvi.Z a::l ->
-      if !debug then printf "Moving down and changing Z to %ld.@." a;
+      if Defaults.get_debug () then printf "Moving down and changing Z to %ld.@." a;
       env.s <- {env.s with v = Int32.add env.s.v a; z = a};
       interp_command fm env cmds l
     | Dvi.FontNum f::l ->
       env.font <- f;
-      if !debug then printf "Font is now set to %ld@." f;
+      if Defaults.get_debug () then printf "Font is now set to %ld@." f;
       interp_command fm env cmds l
     | Dvi.Special xxx::l ->
-      if !debug then printf "Special command : %s@." xxx;
+      if Defaults.get_debug () then printf "Special command : %s@." xxx;
       let x = env.conv *. (Int32.to_float env.s.h)
       and y = env.conv *. (Int32.to_float env.s.v) in
       let push color =
@@ -310,9 +303,9 @@ let load_doc doc =
   let conv = Dvi.get_conv doc in
   let fonts = load_fonts (Dvi.fontmap doc) conv in
   let pages = List.fold_left (fun acc p ->
-    if !debug then
+    if Defaults.get_debug () then
       printf "#### Starting New Page ####@."
-    else if !verbose then printf ".";
+    else if Defaults.get_verbosity () then printf ".";
     (interp_page conv fonts p)::acc)
     [] (Dvi.pages doc) in
   List.rev pages
@@ -320,10 +313,10 @@ let load_doc doc =
 
 let load_file file =
   let doc = Dvi.read_file (File.to_string file) in
-  if !verbose then
+  if Defaults.get_verbosity () then
     printf "Dvi file parsing and interpretation :@.@?";
   let res = load_doc doc in
-  if !verbose then
+  if Defaults.get_verbosity () then
     printf " done@.@?";
   res
 
@@ -331,7 +324,8 @@ let load_file file =
 let decompose_text text =
   let font = text.tex_font in
   let pos = text.tex_env.ei_pos in
-  if !debug then printf "decompose text at (%ld,%ld)@." (fst pos) (snd pos);
+  if Defaults.get_debug () then
+    printf "decompose text at (%ld,%ld)@." (fst pos) (snd pos);
   let info = text.tex_info in
   let ifc = (info,font,text.tex_env.ei_conv) in
   let fold (pos,cmds) c =

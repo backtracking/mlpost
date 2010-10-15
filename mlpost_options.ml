@@ -42,15 +42,17 @@ let () =
 
   let prelude = match !latex_file with
     | None -> None
-    | Some f -> Some (Metapost_tool.read_prelude_from_tex_file f) in
+    | Some f ->
+        let s = Metapost_tool.read_prelude_from_tex_file f in
+        Defaults.set_prelude s;
+        Some s in
 
   let verbose = !verbose in
 
-  Metapost.set_filename_prefix !filename_prefix;
-  Metapost.set_required_files !required_files;
-  Command.set_verbosity verbose;
-  Concrete.set_t1disasm !t1disasm;
-  Concrete.set_prelude2 prelude;
+  Defaults.set_filename_prefix !filename_prefix;
+  Defaults.set_required_files !required_files;
+  Defaults.set_verbosity verbose;
+  Defaults.set_t1disasm !t1disasm;
 
   let bn = Filename.concat (Sys.getcwd ())
     (Filename.basename (Sys.argv.(0))) in

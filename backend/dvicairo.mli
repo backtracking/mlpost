@@ -1,5 +1,3 @@
-val specials : bool ref
-
 type multi_page_pic = {pic :Cairo.t;
                        x_origin : float;
                        y_origin : float

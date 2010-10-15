@@ -21,7 +21,7 @@ type t = {tex   : Dev_save.page;
           trans : Matrix.t;
           bb    : (float * float * float * float)}
 
-val create : string -> string list -> t list
+val create : ?prelude:string -> string list -> t list
 val get_dimen_pt : t -> float * float * float * float
 val get_dimen_cm : t -> float * float * float * float
 val bounding_box : t -> Point_lib.t * Point_lib.t

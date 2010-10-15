@@ -68,5 +68,3 @@ let externalimage filename spec =
 let iterl f l = seq (List.map f l)
 
 let nop = seq []
-
-let set_verbosity = Types.set_verbosity

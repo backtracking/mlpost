@@ -436,7 +436,7 @@ let mps figl =
 (*     Format.printf "metapost code:\n %a@."Print.commandpic fig; *)
     generate_one fn fig) figl
 
-let dump () = ignore (mps (Metapost.emited ()))
+let dump () = ignore (mps (Defaults.emited ()))
 
 let generate figs =
   let figl = List.map (fun (s,f) ->

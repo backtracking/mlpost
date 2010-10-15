@@ -14,9 +14,6 @@
 (*                                                                        *)
 (**************************************************************************)
 
-val add_set_verbosity : (bool -> unit) -> unit
-val set_verbosity : bool -> unit
-
 type color = Concrete_types.color
 
 type name = string

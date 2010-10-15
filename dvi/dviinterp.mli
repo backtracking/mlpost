@@ -45,8 +45,6 @@ type command =
 
 type page = command list
 
-val set_verbosity : bool -> unit
-
 val load_file : File.t -> page list
   (** [load_file arg fn] loads the dvi document in file [fn], passes
       [arg] and the loaded document to {!Dev.new_document} and calls the

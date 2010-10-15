@@ -49,9 +49,6 @@ type t =
       ratio_cm : float
     }
 
-let debug = ref false
-let info = ref false
-
 let tex_name t = t.tex_name
 let ratio_cm t = t.ratio_cm
 let metric t = t.metric
@@ -59,11 +56,8 @@ let design_size t = Tfm.design_size t.metric
 let glyphs t = Lazy.force t.glyphs
 
 let scale t f = t.ratio_cm *. f
-let set_verbosity b = info := b
-
 
 let kwhich = "kpsewhich"
-let t1disasm = ref None (*"t1disasm"*)
 let which_fonts_table = "pdftex.map"
 
 let memoize f nb =
@@ -114,18 +108,19 @@ let deal_with_error ?(pfb=false) lexbuf f =
       raise a
 
 let load_fonts_map filename =
-  if !info then Format.printf "Load font map from %s...@?" filename;
+  if Defaults.get_verbosity () then
+    Format.printf "Load font map from %s...@?" filename;
   let file = open_in filename in
   let lexbuf = Lexing.from_channel file in
   deal_with_error lexbuf (fun () ->
     let result = Map_parser.pdftex_main Map_lexer.pdftex_token lexbuf in
     let table = HString.create 1500 in
     List.iter (fun x -> HString.add table x.Fonts_type.tex_name x) result;
-    if !info then Format.printf "done@.";
+    if Defaults.get_verbosity () then Format.printf "done@.";
     table)
 
 let load_enc_aux filename =
-  if !info then
+  if Defaults.get_verbosity () then
     Format.printf "Loading enc from %s...@?" filename;
   let file = open_in filename in
   let lexbuf = Lexing.from_channel file in
@@ -134,7 +129,7 @@ let load_enc_aux filename =
     let enc_table = Array.create 256 "" in
     let count = ref 0 in
     List.iter (fun x -> enc_table.(!count)<-x;incr(count)) result;
-    if !info then Format.printf "done@.";
+    if Defaults.get_verbosity () then Format.printf "done@.";
     enc_table)
 
 let load_enc = memoize load_enc_aux 15
@@ -144,7 +139,7 @@ let fonts_map_table = lazy (load_fonts_map (find_file which_fonts_table))
 let fonts_table = (HString.create 1500 : (string,t) Hashtbl.t)
 
 let load_font_tfm fd =
-  if !info then
+  if Defaults.get_verbosity () then
     Format.printf "Loading font %s at [%ld/%ld]...@?"
       fd.name fd.scale_factor fd.design_size;
   let filename =
@@ -152,7 +147,7 @@ let load_font_tfm fd =
       Filename.concat fd.area fd.name
     else
       find_file (fd.name^".tfm") in
-  if !debug then
+  if Defaults.get_debug () then
     Format.printf "Trying to find metrics at %s...@." filename;
   let tfm = Tfm.read_file filename in
   (* FixMe in vf file the checksum of tfm is 0 *)
@@ -160,10 +155,10 @@ let load_font_tfm fd =
         Int32.compare tfm.Tfm.body.Tfm.header.Tfm.checksum
 	fd.checksum <> 0) then
     font_error "Metrics checksum do not match !.@.";
-  if !debug then
+  if Defaults.get_debug () then
     Format.printf "Metrics successfully loaded for font %s from %s.@."
       fd.name filename;
-  if !info then
+  if Defaults.get_verbosity () then
     Format.printf "done@.";
   tfm
 

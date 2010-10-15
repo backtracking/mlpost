@@ -17,19 +17,6 @@
 IFDEF CONCRETE THEN
 let supported = true
 
-let set_verbosity b = Compute.set_verbosity b
-
-let set_prelude filename =
-  Compute.set_prelude (Metapost_tool.read_prelude_from_tex_file filename)
-
-let set_t1disasm opt = Fonts.t1disasm := opt
-
-let set_prelude2 prelude =
-  match prelude with
-    | None -> Compute.set_prelude ""
-    | Some p -> Compute.set_prelude p
-
-
 type cnum = float
 
 module CPoint = Point_lib
@@ -126,12 +113,6 @@ ELSE
 let supported = false
 
 let not_supported s = failwith ("Concrete."^s^" : not supported")
-
-(* these are only configuration; we silently do nothing here *)
-let set_verbosity _ = ()
-let set_prelude _ = ()
-let set_t1disasm _ = ()
-let set_prelude2 _ = ()
 
 module CPoint =
 struct

@@ -16,17 +16,16 @@
 
 open Point_lib
 open Format
-let info = ref false
 
 let create create_surface out_file (draw:Cairo.t -> unit) height width =
-  if !info then printf "height = %f, width = %f@." height width;
+  if Defaults.get_debug () then printf "height = %f, width = %f@." height width;
   let oc = open_out out_file in
   let s = create_surface oc ~width_in_points:width ~height_in_points:height in
   let cr = Cairo.create s in
   draw cr;
-  if !info then printf "Clean up surface_finish ...@.";
+  if Defaults.get_debug () then printf "Clean up surface_finish ...@.";
   Cairo.surface_finish s;
-  if !info then printf "Clean up close file ...@.";
+  if Defaults.get_debug () then printf "Clean up close file ...@.";
   close_out oc
 
 let rec iter_after f after = function
@@ -104,7 +103,3 @@ let emit_cairo cairo (width,height) fig =
 let emit_pdfs fname figs = emit_gen
   (create Cairo_pdf.surface_create_for_channel fname)
   (fun cr _ -> Cairo.show_page cr) figs
-
-
-let set_verbosity b =
-  Dvicairo.specials := b

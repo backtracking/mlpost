@@ -33,8 +33,6 @@ module S = Spline_lib
 module Pi = Picture_lib
 module MP = Metapath_lib
 
-let debug = true
-
 let memoize f fname memoize =
   fun arg ->
     try Hashtbl.find memoize arg.tag
@@ -42,7 +40,7 @@ let memoize f fname memoize =
       let result =
         try f arg.node
         with exn ->
-          if debug then
+          if Defaults.get_debug () then
             Format.printf "Compute.%s raises : %s@.@?"
               fname (Printexc.to_string exn);
           raise exn
@@ -102,12 +100,6 @@ let clear () =
   Hashtbl.clear path_memoize;
   Hashtbl.clear picture_memoize;
   Hashtbl.clear command_memoize
-
-let prelude = ref ""
-let set_prelude = (:=) prelude
-
-let set_verbosity b =
-  Gentex.set_verbosity b
 
 let float_to_metapost f =
       (* Compatibility with metapost *)
@@ -296,7 +288,7 @@ and picture' = function
       Picture_lib.transform tr pic
   | PITex s ->
       (* With lookfortex we never pass this point *)
-      let tex = List.hd (Gentex.create !prelude [s]) in
+      let tex = List.hd (Gentex.create [s]) in
       Picture_lib.tex tex
   | PIClip (pic,pth) ->
       let pic = commandpic pic in

@@ -20,9 +20,6 @@ let supported = true
 module M = Mps
 open Icairost
 
-let set_verbosity = set_verbosity
-let () = Types.add_set_verbosity set_verbosity
-
 let emit_pdf = emit_pdf
 let emit_ps = emit_ps
 let emit_png = emit_png
@@ -48,11 +45,11 @@ let dump_pdf () =
         Format.printf "An@ internal@ error@ occured@ during@ the\
           @ generation@ of@ %s :@ %s@."
           pdfname_s (Printexc.to_string error)
-  ) Metapost.figures
+  ) Defaults.figures
 
 let dump_pdfs fname =
   let figs =
-    List.rev (Queue.fold (fun l (_,x) ->  x::l) [] Metapost.figures) in
+    List.rev (Queue.fold (fun l (_,x) ->  x::l) [] Defaults.figures) in
   emit_pdfs (fname^".pdf") figs
 
 let generate_pdfs pdffile figs = List.iter
@@ -62,7 +59,7 @@ let generate_pdfs pdffile figs = List.iter
 let dump_ext ext f () =
   Queue.iter (fun (fname,fig) ->
     let s = File.to_string (File.set_ext fname ext) in
-    f s fig) Metapost.figures
+    f s fig) Defaults.figures
 
 let dump_ps = dump_ext "ps" emit_ps
 let dump_png = dump_ext "png" emit_png
@@ -71,8 +68,6 @@ let dump_svg = dump_ext "svg" emit_svg
 ELSE
 
 let supported = false
-
-let set_verbosity _ = failwith "Cairost.set_verbosity : not supported"
 
 let float_of_num n = failwith "Cairost.float_of_num : not supported"
 
@@ -87,9 +82,6 @@ let dump_pdfs _ = failwith "Cairost.dump_pdfs : not supported"
 let dump_ps _ = failwith "Cairost.dump_ps : not supported"
 let dump_png _ = failwith "Cairost.dump_png : not supported"
 let dump_svg _ = failwith "Cairost.dump_svg : not supported"
-
-let set_prelude _ = failwith "Cairost.set_prelude : not supported"
-let set_t1disasm _ = failwith "Cairost.set_t1disasm : not supported"
 
 let generate_pdfs _ _ = failwith "Cairost.generate_pdfs : not supported"
 

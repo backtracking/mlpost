@@ -1024,10 +1024,6 @@ end
 (** Basic drawing commands *)
 and Command : sig
 
-  (** Set the verbosity of all mlpost *)
-  val set_verbosity : bool -> unit
-
-
   (** General Commands to build figures *)
 
   type t
@@ -2418,12 +2414,6 @@ end
 (** Functions to generate Metapost files *)
 module Metapost : sig
 
-  val set_filename_prefix : string -> unit
-    (** Add to the filename given to the emit function this prefix.
-        This function is here just for convenience *)
-
-  val emit : string -> Command.t -> unit
-
   val generate :
     ?prelude:string ->
     ?verbose:bool ->
@@ -2448,10 +2438,6 @@ module Metapost : sig
   val dump_png :
     ?prelude:string -> ?verbose:bool -> ?clean:bool -> string -> unit
 
-  val read_prelude_from_tex_file : string -> string
-    (** read the prelude from a tex file, until the end of file or the text
-       "\begin\{document\}" if it is outside a comment *)
-
   val dump_tex : ?prelude:string -> string -> unit
     (** [dump_tex ?prelude f] builds a LaTeX file [f.tex] for all the figures,
 	using LaTeX prelude [prelude] if given. *)
@@ -2469,9 +2455,6 @@ module Metapost : sig
 
   val dumpable : unit -> unit
   val depend : string -> unit
-
-  val set_required_files : string list -> unit
-  val set_prelude : string -> unit
 
 end
 
@@ -2620,20 +2603,6 @@ module Concrete : sig
   val path_of_cpath : CPath.t -> Path.t
 
   val transform_of_ctransform : CTransform.t -> Transform.t
-
-    (** {2 Some options (the mlpost tool takes care of them)} *)
-  val set_verbosity : bool -> unit
-
-  val set_prelude : string -> unit
-    (** set_prelude filename uses the prelude of the file filename
-        for compilation of the tex snippets *)
-
-  val set_prelude2 : string option -> unit
-    (** set_prelude2 prelude uses this prelude
-        for compilation of the tex snippets *)
-
-  val set_t1disasm : string option -> unit
-    (** Deprecated in a next release *)
 
 end
 

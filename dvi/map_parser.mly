@@ -42,7 +42,7 @@ let compose tex human =
 let add_some l = function
   | None -> l
   | Some a -> a::l
-  
+
 
 %}
 %token <float> FLOAT

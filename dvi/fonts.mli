@@ -29,8 +29,6 @@ type glyphs =
 type t
 (** the type of a loaded font *)
 
-val set_verbosity : bool -> unit
-
 val load_font : font_def -> float -> t
 (** [load_font def f] loads font [def] scaled by [f] *)
 
@@ -44,8 +42,6 @@ val ratio_cm : t -> float
 (** The font ratio, in cm *)
 
 val glyphs : t -> glyphs
-
-val t1disasm : string option ref
 
 val char_width : t -> int -> float
 val char_height : t -> int -> float

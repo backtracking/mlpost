@@ -146,7 +146,7 @@ and commandpic acc p =
 
 let compile_tex l =
   let tags,texs = List.split l in
-  let texs = Gentex.create !Compute.prelude texs in
+  let texs = Gentex.create texs in
   List.iter2 (fun tag tex -> Hashtbl.add
                 Compute.picture_memoize tag.tag (Picture_lib.tex tex))
     tags texs

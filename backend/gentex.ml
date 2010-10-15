@@ -20,13 +20,10 @@ let com_latex = "latex"
 let jobname = "gentex"
 let filename = File.from_string jobname
 (* FIXME different from Metapost.default_prelude? *)
-let default_prelude = "\\documentclass{article}\n"
 
 let latex_cmd =
   Printf.sprintf "latex -jobname=%s -ipc -halt-on-error" jobname
 (*   Printf.sprintf "cat" *)
-
-let debug = false
 
 type t = {tex   : Dviinterp.page;
           trans : Matrix.t;
@@ -97,13 +94,15 @@ let extract cl =
       {tex = cl; trans = Matrix.identity; bb = bb}
     | _ -> assert false
 
-let create prelude texs =
+let create ?prelude texs =
   match texs with
   | [] -> []
   | first::rest ->
       let p = mk_proc_latex () in
       let prelude =
-        if prelude = "" then default_prelude else prelude in
+        match prelude with
+        | None -> Defaults.get_prelude ()
+        | Some p -> p in
       push_prelude p prelude;
       shipout_and_flush p first;
       read_up_to_one p;
@@ -134,7 +133,7 @@ let get_bases_pt x = assert false
 
 let bounding_box x =
   let (xmin,ymin,xmax,ymax) = get_dimen_pt x in
-  if debug then
+  if Defaults.get_debug () then
     Format.printf "gentex bb : %f %f %f %f@." xmin ymin xmax ymax;
   {x=xmin;y=ymin},{x=xmax;y=ymax}
 

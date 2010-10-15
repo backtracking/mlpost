@@ -14,9 +14,6 @@
 (*                                                                        *)
 (**************************************************************************)
 
-type job = File.t * Types.commandpic
-type jobs = job list
-
 open Format
 
 let print fmt i c =
@@ -41,18 +38,13 @@ input mp-spec ; %% macros that support special features
  fprintf fmt "etex@\n"
    (* fprintf fmt "input boxes;@\n" *)
 
-let defaultprelude = "\\documentclass{article}\n\\usepackage[T1]{fontenc}\n"
-
-let prelude_ref = ref defaultprelude
-let set_prelude x = prelude_ref := x
-
 (** take a list of figures [l] and write the code to the formatter in argument
  *)
 
 let mp bn ?prelude l =
   let prelude =
     match prelude with
-    | None -> !prelude_ref
+    | None -> Defaults.get_prelude ()
     | Some s -> s in
   let f = File.set_ext (File.from_string bn) "mp" in
   File.write_to_formatted f (fun fmt ->
@@ -65,22 +57,6 @@ let mp bn ?prelude l =
     f,m)
 
 (* batch processing *)
-
-let figuren = ref 0
-let figures = Queue.create ()
-
-let filename_prefix = ref ""
-let set_filename_prefix = (:=) filename_prefix
-
-let required_files : File.t list ref = ref []
-let set_required_files l = required_files := List.map File.from_string l
-
-let emit s f =
-  let fn =
-    File.set_ext (File.from_string (!filename_prefix^s)) "mps" in
-  Queue.add (fn, f) figures
-
-let read_prelude_from_tex_file = Metapost_tool.read_prelude_from_tex_file
 
 let dump_tex ?prelude f =
   let c = open_out (f ^ ".tex") in
@@ -105,7 +81,7 @@ let dump_tex ?prelude f =
        (File.to_string s);
        fprintf fmt "\\includegraphics{%s}\\\\@\n" (File.to_string s);
        fprintf fmt "\\hrulefill\\\\@\n@\n\\medskip@\n";)
-    figures;
+    Defaults.figures;
   fprintf fmt "\\end{center}@\n";
   fprintf fmt "\\end{document}@.";
   close_out c
@@ -160,8 +136,6 @@ let pdf ?prelude ?verbose bn figl =
   let l = mps ?prelude ?verbose bn figl in
   List.map (fun f -> call_mptopdf ?verbose f) l
 
-let emited () = Queue.fold (fun l t -> t :: l) [] figures
-
 let png ?prelude ?verbose bn figl =
   let pdfl = pdf ?prelude ?verbose bn figl in
   List.map (fun f -> call_convert ?verbose f (File.set_ext f "png")) pdfl
@@ -170,7 +144,7 @@ let wrap_tempdir f suffix ?prelude ?verbose ?clean bn figl =
   let do_ from_ to_ =
     (** first copy necessary files, then do your work *)
     List.iter (fun f -> File.copy (File.place from_ f) (File.place to_ f))
-      !required_files;
+      (Defaults.get_required_files ());
     let l = f ?prelude ?verbose bn figl in
     l, l
   in
@@ -183,7 +157,7 @@ let temp_png = wrap_tempdir png "png"
 
 let wrap_dump f ?prelude ?verbose ?clean bn =
   let bn = Filename.basename bn in
-  ignore (f ?prelude ?verbose ?clean bn (emited ()))
+  ignore (f ?prelude ?verbose ?clean bn (Defaults.emited ()))
 
 let dump_mp = wrap_dump temp_mp
 let dump_mps = wrap_dump temp_mps
@@ -212,17 +186,18 @@ let slideshow l k =
 
 let emit_slideshow s l =
   let l = slideshow l 0 in
-  List.iter (fun (i,fig) -> emit (s^(string_of_int i)) fig) l
+  List.iter (fun (i,fig) -> Defaults.emit (s^(string_of_int i)) fig) l
 
 
 let dumpable () =
   Queue.iter (fun (s,_) ->
     let s = File.set_ext s "" in
-    Printf.printf "%s\n" (File.to_string s)) figures
+    Printf.printf "%s\n" (File.to_string s)) Defaults.figures
 
 let depend myname =
   Queue.iter (fun (s,_) ->
-    Printf.printf "%s" (File.to_string (File.set_ext s "fmlpost"))) figures;
+    Printf.printf "%s" (File.to_string (File.set_ext s "fmlpost")))
+    Defaults.figures;
   Printf.printf " : %s.cmlpost\n" myname
 
 

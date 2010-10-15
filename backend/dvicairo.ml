@@ -27,18 +27,13 @@ type multi_page_pic = {pic :Cairo.t;
 let conversion = 0.3937 *. 72.
 let point_of_cm cm = conversion *. cm
 
-let debug = ref false
-let specials = ref false
-let info = ref false
-
-
 let fonts_known = Hashtbl.create 30
 
 let find_font font =
   let font_name = font.Fonts.glyphs_tag in
   try Hashtbl.find fonts_known font_name
   with Not_found ->
-    if !debug then printf "Cairo : Loading font@.";
+    if Defaults.get_debug () then printf "Cairo : Loading font@.";
     let face = font.Fonts.glyphs_ft in
     let f = Cairo_ft.font_face_create_for_ft_face face 0 in
     Hashtbl.add fonts_known font_name f;f
@@ -47,11 +42,11 @@ let clean_up () = ()
 
 let set_source_color pic = function
   | RGB(r,g,b) ->
-    if !debug then
+    if Defaults.get_debug () then
       printf "Use color RGB (%f,%f,%f)@." r g b;
     Cairo.set_source_rgb pic r g b
   | Gray(g) ->
-    if !debug then
+    if Defaults.get_debug () then
       printf "Use color Gray (%f)@." g;
     Cairo.set_source_rgb pic g g g
   | CMYK _ -> failwith "dvicairo : I don't know how to convert CMYK\
@@ -66,7 +61,7 @@ let fill_rect s dinfo x1 y1 w h =
   and y1 = point_of_cm y1 +. s.y_origin
   and w = point_of_cm w
   and h = point_of_cm h in
-  if !debug then
+  if Defaults.get_debug () then
     printf "Draw a rectangle in (%f,%f) with w=%f h=%f@." x1 y1 w h;
   Cairo.save s.pic;
   set_source_color s.pic dinfo.Dviinterp.color;
@@ -84,7 +79,7 @@ let draw_type1 s text_type1 =
   and x = point_of_cm x +. s.x_origin
   and y = point_of_cm y +. s.y_origin
   and ratio = point_of_cm font.Fonts.glyphs_ratio_cm in
-  if !debug then begin
+  if Defaults.get_debug () then begin
     try
       printf "Draw the char %i(%c) in (%f,%f) x%f@."
         char (Char.chr char) x y ratio;
@@ -97,11 +92,11 @@ let draw_type1 s text_type1 =
   Cairo.set_font_size s.pic ratio;
     (* slant and extend *)
   (match font.Fonts.slant with
-    | Some a when !info ->
+    | Some a when Defaults.get_verbosity () ->
       printf "slant of %f not used@." a
     | Some _ | None -> ());
   (match font.Fonts.extend with
-    | Some a when !info ->
+    | Some a when Defaults.get_debug () ->
       printf "extend of %f not used@." a
     | Some _ | None -> ());
   Cairo.show_glyphs s.pic
@@ -112,7 +107,7 @@ let draw_type1 s text_type1 =
   Cairo.restore s.pic
 
 let _specials s info xxx x y =
-  if !debug || !specials then
+  if Defaults.get_debug () then
     printf "specials : \"%s\" at (%f,%f)@." xxx x y
 
 let rec draw_string s text =
