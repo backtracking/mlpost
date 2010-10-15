@@ -288,7 +288,7 @@ and picture' = function
       Picture_lib.transform tr pic
   | PITex s ->
       (* With lookfortex we never pass this point *)
-      let tex = List.hd (Gentex.create [s]) in
+      let tex = Gentex.create s in
       Picture_lib.tex tex
   | PIClip (pic,pth) ->
       let pic = commandpic pic in
@@ -391,3 +391,15 @@ and pen p =
         Matrix.multiply (transform tr) (pen p)
 
 and command c = memoize command' "command" command_memoize c
+
+let commandl_error ferror arg = List.map (ferror command) arg
+let commandpicl_error ferror arg = List.map (ferror commandpic) arg
+let numl_error ferror arg = List.map (ferror num) arg
+let pointl_error ferror  arg = List.map (ferror point) arg
+let pathl_error ferror  arg = List.map (ferror path) arg
+let metapathl_error ferror  arg = List.map (ferror metapath) arg
+let picturel_error ferror arg = List.map (ferror picture) arg
+
+let transform arg =
+  List.fold_left (fun acc t -> Matrix.multiply acc (transform t))
+    Matrix.identity arg

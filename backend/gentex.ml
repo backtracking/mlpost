@@ -33,6 +33,8 @@ let set_verbosity b = ()
 
 type proc = { outc : in_channel; inc : out_channel; errc : in_channel }
 
+type comm = { latex : proc ; dvi : Dvi.Incremental.t }
+
 let truncate_or_touch f =
   File.open_in_gen [Open_trunc; Open_creat; Open_rdonly] 0o600 f
 
@@ -66,6 +68,8 @@ let write_to_proc p s =
   Printf.fprintf p.inc s
 
 let push_prelude p prel =
+  (* the shipout macro from metapost, that adds a vrule at the end of the tex
+   * to obtain easily the size of the dvi *)
   write_to_proc p
   "%s
 \\begin{document}
@@ -87,35 +91,32 @@ let end_doc p =
   write_to_proc p "\\end{document}\n%!"
 
 let extract cl =
-  (* remove the last rule added above, it gives the bounding box*)
+  (* the vrule added by the metapost shipout macro is exploited and removed *)
   match cl with
     | Dviinterp.Fill_rect (_,x,y,_,h)::cl ->
       let bb = (0., -.(y+.h), x, -.y) in
       {tex = cl; trans = Matrix.identity; bb = bb}
     | _ -> assert false
 
-let create ?prelude texs =
-  match texs with
-  | [] -> []
-  | first::rest ->
+let comm = ref None
+
+let create tex =
+  (* FIXME at some point we have to close the latex process *)
+  match !comm with
+  | None ->
       let p = mk_proc_latex () in
-      let prelude =
-        match prelude with
-        | None -> Defaults.get_prelude ()
-        | Some p -> p in
-      push_prelude p prelude;
-      shipout_and_flush p first;
+      push_prelude p (Defaults.get_prelude ());
+      shipout_and_flush p tex;
       read_up_to_one p;
       let dvi_chan = File.open_in (File.set_ext filename "dvi") in
       let t, pgs = Dvi.Incremental.mk_t dvi_chan in
-      let texed = List.fold_left (fun acc tex ->
-        shipout_and_flush p tex;
-        read_up_to_one p;
-        let l = Dvi.Incremental.next_pages t in
-         l @ acc) pgs rest in
-      end_doc p;
-      let f = Dviinterp.Incremental.load_page t in
-      List.rev_map (fun x -> extract (f x)) texed
+      comm := Some { latex = p ; dvi = t };
+      extract (Dviinterp.Incremental.load_page t (List.hd pgs))
+  | Some p ->
+      shipout_and_flush p.latex tex;
+      read_up_to_one p.latex;
+      let pgs = Dvi.Incremental.next_pages p.dvi in
+      extract (Dviinterp.Incremental.load_page p.dvi (List.hd pgs))
 
 let point_of_cm cm = (0.3937 *. 72.) *. cm
 

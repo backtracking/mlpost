@@ -75,13 +75,12 @@ module CPath =
 
 module CTransform = Matrix
 
-let float_of_num = LookForTeX.num
-let compute_nums = LookForTeX.compute_nums
-let cpoint_of_point = LookForTeX.point
-let cpath_of_path = LookForTeX.path
-let ctransform_of_transform = LookForTeX.transform
+let float_of_num = Compute.num
+let cpoint_of_point = Compute.point
+let cpath_of_path = Compute.path
+let ctransform_of_transform = Compute.transform
 
-let baselines s = Picture_lib.baseline (LookForTeX.picture (Types.mkPITex s))
+let baselines s = Picture_lib.baseline (Compute.picture (Types.mkPITex s))
 
 let num_of_float f = Types.mkF f
 let point_of_cpoint p =

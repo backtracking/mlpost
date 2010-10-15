@@ -426,7 +426,7 @@ let draw fmt x =
 
 let generate_one fn fig =
   File.write_to fn (fun fmt ->
-    let fig = LookForTeX.commandpic fig in
+    let fig = Compute.commandpic fig in
 (*     Format.printf "picturelib code: \n %a@." P.Print.pic fig; *)
     draw fmt fig);
   fn

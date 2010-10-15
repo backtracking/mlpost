@@ -52,7 +52,7 @@ let max_if_inf = {x= 1.;y= 1.}
 let emit_gen ?msg_error create next_page figs =
   (*Format.printf "Fig : %a@." Print.commandpic (List.hd figs);*)
   let figs =
-    LookForTeX.commandpicl_error (error_replace_by_tex msg_error) figs in
+    Compute.commandpicl_error (error_replace_by_tex msg_error) figs in
   let (min,max) = Point_lib.list_min_max Picture_lib.bounding_box figs in
   let min = norm_infinity min_if_inf min in
   let max = norm_infinity max_if_inf max in
@@ -97,7 +97,7 @@ let emit_png fname fig = emit_gen
 
 let emit_cairo cairo (width,height) fig =
   (*Compute.clear (); LookForTeX.clear ();*)
-  let fig = LookForTeX.commandpic fig in
+  let fig = Compute.commandpic fig in
   Draw.Picture.draw cairo width height fig
 
 let emit_pdfs fname figs = emit_gen
