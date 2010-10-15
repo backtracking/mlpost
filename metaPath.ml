@@ -55,12 +55,10 @@ struct
   let build_cycle l = mkPABuildCycle l
 
   let subpath (f1: float) (f2: float) p = mkPASub f1 f2 p
-  let point (f: float) p = mkPTPointOf f p
-  let direction (f: float) p = mkPTDirectionOf f p
+(*   let point (f: float) p = mkPTPointOf f p *)
+(*   let direction (f: float) p = mkPTDirectionOf f p *)
 
-  let pointn (n: num) p = mkPTPointOf n p
-  let directionn (n: num) p = mkPTDirectionOf n p
-  let subpathn (n1: num) (n2: num) p = mkPASub n1 n2 p
+  let subpathn = subpath
 
   let length p =
     let p = Compute.path p in

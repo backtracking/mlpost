@@ -15,6 +15,7 @@
 (**************************************************************************)
 
 open Types
+open Point_lib
 
 type t = commandpic
 
@@ -23,10 +24,25 @@ let make l = l
 let empty = mkSeq []
 let bbox pic = mkPABBox pic
 
-let ulcorner pic = mkPTPicCorner pic `Northwest
-let llcorner pic = mkPTPicCorner pic `Southwest
-let urcorner pic = mkPTPicCorner pic `Northeast
-let lrcorner pic = mkPTPicCorner pic `Southeast
+let ulcorner pic =
+  let pic = Compute.commandpic pic in
+  let ll, ur = Picture_lib.bounding_box pic in
+  { x = ll.x ; y = ur.y }
+
+let llcorner pic =
+  let pic = Compute.commandpic pic in
+  let ll, _ = Picture_lib.bounding_box pic in
+  ll
+
+let urcorner pic =
+  let pic = Compute.commandpic pic in
+  let _, ur = Picture_lib.bounding_box pic in
+  ur
+
+let lrcorner pic =
+  let pic = Compute.commandpic pic in
+  let ll, ur = Picture_lib.bounding_box pic in
+  { Point_lib.x = ur.x ; y = ll.y }
 
 let north_west = ulcorner
 let south_west = llcorner

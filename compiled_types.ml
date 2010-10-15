@@ -15,18 +15,7 @@
 (**************************************************************************)
 
 type num = float
-
-and point =
-  | PTPair of num * num
-  | PTPicCorner of picture * Types.corner
-  | PTPointOf of num * path
-  | PTDirectionOf of num * path
-  | PTAdd of point * point
-  | PTSub of point * point
-  | PTMult of num * point
-  | PTRotated of float * point
-  | PTTransformed of point * transform
-  | PTName of name
+and point = Point_lib.t
 
 and direction =
   | Vec of point

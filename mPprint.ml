@@ -69,18 +69,8 @@ and color fmt = function
   | TRANSPARENT (f,c) -> fprintf fmt "transparent (1,%a,%a@,)" float f scolor c
       (* 1 is the "normal" mode *)
 
-and point fmt = function
-  | C.PTPair (m,n) -> fprintf fmt "(%a,@ %a@,)" num m num n
-  | C.PTPicCorner (pic, d) -> fprintf fmt "(%a@ %a@,)" piccorner d picture pic
-  | C.PTAdd (p1, p2) -> fprintf fmt "(%a +@ %a@,)" point p1 point p2
-  | C.PTSub (p1, p2) -> fprintf fmt "(%a -@ %a@,)" point p1 point p2
-  | C.PTMult (f, p) -> fprintf fmt "(%a *@ %a@,)" num f point p
-  | C.PTRotated (f, p) ->  fprintf fmt "(%a rotated@ %a@,)" point p float f
-  | C.PTPointOf (f, p) -> fprintf fmt "(point %a@ of (%a))" num f path p
-  | C.PTDirectionOf (f, p) ->
-      fprintf fmt "(direction %a@ of (%a))" num f path p
-  | C.PTTransformed (p,tr) -> fprintf fmt "((%a)@ %a@,)" point p transform tr
-  | C.PTName pn -> pp_print_string fmt pn
+and point fmt { Point_lib.x = x ; y = y } =
+  fprintf fmt "(%a,@ %a@,)" num x num y
 
 and transform fmt = function
   | C.TRScaled a -> fprintf fmt "scaled %a@," num a

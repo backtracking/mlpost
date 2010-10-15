@@ -24,16 +24,14 @@ let normalize = Point.normalize
 let neg = Point.scale (Num.bp (-1.))
 
 let direction_on_path f p =
-  Path.directionn (Num.multf f (Path.length p)) p
+  Path.direction (f *. Path.length p) p
 
 let point_on_path f p =
-  Path.pointn (Num.multf f (Path.length p)) p
+  Path.point (f *. Path.length p) p
 
 let subpath_01 f t p =
   let l = Path.length p in
-  let f = Num.multf f l in
-  let t = Num.multf t l in
-  Path.subpathn f t p
+  Path.subpath (f *. l) (t *. l) p
 
 (* Atoms *)
 

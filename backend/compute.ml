@@ -86,14 +86,12 @@ let anchor_of_position pos =
   | `Southeast -> `Northwest
   | `Center -> `Center
 
-let point_memoize = Hashtbl.create 50
 let metapath_memoize = Hashtbl.create 50
 let path_memoize = Hashtbl.create 50
 let picture_memoize = Hashtbl.create 50
 let command_memoize = Hashtbl.create 50
 
 let clear () =
-  Hashtbl.clear point_memoize;
   Hashtbl.clear metapath_memoize;
   Hashtbl.clear path_memoize;
   Hashtbl.clear picture_memoize;
@@ -107,6 +105,8 @@ let float_to_metapost f =
       else f
 
 let rec num n = n
+and point p = p
+(*
 and point' = function
   | PTPair (f1,f2) ->
       let f1 = num f1 in
@@ -143,6 +143,7 @@ and point' = function
       let tr = transform tr in
       P.transform tr p
 and point p = memoize point' "point" point_memoize p
+*)
 and knot k =
   match k.Hashcons.node with
     | { knot_in = d1 ; knot_p = p ; knot_out = d2 } ->
@@ -239,7 +240,6 @@ and picture' = function
       let pic = commandpic p in
       Picture_lib.transform tr pic
   | PITex s ->
-      (* With lookfortex we never pass this point *)
       let tex = Gentex.create s in
       Picture_lib.tex tex
   | PIClip (pic,pth) ->

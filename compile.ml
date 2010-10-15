@@ -27,7 +27,6 @@ let (++) c1 c2 =
     | _, C.CSeq [] -> c1
     | _, _ -> C.CSeq [c1 ; c2]
 
-let point_names = D.PtM.create 257
 let path_names = D.PthM.create 257
 let picture_names = D.PicM.create 257
 
@@ -38,58 +37,7 @@ let option_compile f = function
         Some obj, c
 
 let rec num n = n, nop
-
-and point' = function
-  | PTPair (f1,f2) ->
-      let f1, c1 = num f1 in
-      let f2,c2 = num f2 in
-      C.PTPair (f1,f2), c1 ++ c2
-  | PTPointOf (f,p) ->
-      let f, c = num f in
-      let p, code = path p in
-      C.PTPointOf (f, p), c ++ code
-  | PTDirectionOf (f,p) ->
-      let f, c = num f in
-      let p, code = path p in
-      C.PTDirectionOf (f, p), c ++ code
-  | PTAdd (p1,p2) ->
-      let p1,c1 = point p1 in
-      let p2,c2 = point p2 in
-        C.PTAdd (p1,p2),  c1 ++ c2
-  | PTSub (p1,p2) ->
-      let p1,c1 = point p1 in
-      let p2,c2 = point p2 in
-        C.PTSub (p1,p2),  c1 ++ c2
-  | PTMult (f,p) ->
-      let f, c1 = num f in
-      let p1,c2 = point p in
-        C.PTMult (f,p1), c1 ++ c2
-  | PTRotated (f,p) ->
-      let p1,c1 = point p in
-        C.PTRotated (f,p1), c1
-  | PTPicCorner (pic, corner) ->
-      let pic, code = commandpic_pic pic in
-        C.PTPicCorner (pic, corner) , code
-  | PTTransformed (p,tr) ->
-      let p, c1 = point p in
-      let tr, c2 = transform tr in
-        C.PTTransformed (p,tr),  c1 ++ c2
-and point p =
-  match p.node with
-  | PTPair _ -> point' p.node
-  | _ ->
-    let cnt = try !(D.PtM.find D.point_map p) with Not_found -> assert false in
-    if cnt >= 2 then point_save p
-    else point' p.node
-and point_save p =
-  try
-    let x = D.PtM.find point_names p in
-    C.PTName x, nop
-  with Not_found ->
-    let p', code = point' p.node in
-    let x = Name.point () in
-    let () = D.PtM.add point_names p x in
-    C.PTName x, code ++ C.CDeclPoint (x,p')
+and point p = p, nop
 
 and knot k =
   match k.Hashcons.node with
@@ -372,8 +320,6 @@ and command c =
 
 
 let reset () =
-  D.PtM.clear point_names;
-  D.PtM.clear D.point_map;
   D.PthM.clear D.path_map;
   D.PthM.clear path_names;
   D.PicM.clear D.picture_map;

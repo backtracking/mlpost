@@ -36,16 +36,8 @@ let position fmt p =
   | `Southeast -> fprintf fmt ".lrt"
 
 let rec num fmt f = pp_print_float fmt f
+and point fmt { Point_lib.x = x ; y = y } = fprintf fmt "(%a,%a)" num x num y
 
-and point fmt p =
-  match p.Hashcons.node with
-  | PTPair (n1,n2) -> fprintf fmt "(%a,%a)" num n1 num n2
-  | PTPicCorner (p,pc) ->
-      fprintf fmt "%a(%a)" position (pc :> position) commandpic p
-  | PTAdd (p1,p2) -> fprintf fmt "(%a + %a)" point p1 point p2
-  | PTSub (p1,p2) -> fprintf fmt "(%a - %a)" point p1 point p2
-  | PTMult (n,p) -> fprintf fmt "(%a * %a)" num n point p
-  | _ -> fprintf fmt "somepoint..."
 and picture fmt p =
   match p.Hashcons.node with
   | PITex s -> fprintf fmt "tex(%s)" s

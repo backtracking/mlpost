@@ -49,19 +49,7 @@ type position_red = [ | hposition_red | vposition_red | corner_red ]
 open Hashcons
 
 type num = float
-
-and point_node = private
-  | PTPair of num * num
-  | PTPicCorner of commandpic * corner
-  | PTPointOf of num * path
-  | PTDirectionOf of num * path
-  | PTAdd of point * point
-  | PTSub of point * point
-  | PTMult of num * point
-  | PTRotated of float * point
-  | PTTransformed of point * transform
-
-and point = point_node hash_consed
+type point = Point_lib.t
 
 and on_off_node = private
   | On of num
@@ -185,19 +173,6 @@ and brush_node = {pen : pen option;
 
 and brush = brush_node hash_consed
 (* smart constructors *)
-
-(* num *)
-
-(* point *)
-val mkPTPair : num -> num -> point
-val mkPTAdd : point -> point -> point
-val mkPTSub : point -> point -> point
-val mkPTMult : num -> point -> point
-val mkPTRotated : float -> point -> point
-val mkPTTransformed : point -> transform -> point
-val mkPTPointOf : num -> path -> point
-val mkPTDirectionOf : num -> path -> point
-val mkPTPicCorner : commandpic -> corner -> point
 
 (* transform *)
 

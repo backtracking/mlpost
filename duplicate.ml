@@ -21,13 +21,6 @@ open Hashcons
 (* A duplicate analysis - find out the number of times a node is used *)
 
 
-module Point =
-struct
-  type t = point_node hash_consed
-  let equal = (==)
-  let hash x = x.hkey
-end
-
 module MetaPath =
 struct
   type t = metapath_node hash_consed
@@ -49,18 +42,12 @@ struct
   let hash x = x.hkey
 end
 
-module PtM = Hashtbl.Make (Point)
 module MPthM = Hashtbl.Make (MetaPath)
 module PthM = Hashtbl.Make (Path)
 module PicM = Hashtbl.Make (Picture)
 
-let point_map = PtM.create 257
 let path_map = PthM.create 257
 let picture_map = PicM.create 257
-
-let test_and_incr_point n =
-  try incr (PtM.find point_map n); true
-  with Not_found -> PtM.add point_map n (ref 1); false
 
 let test_and_incr_path n =
   try incr (PthM.find path_map n); true
@@ -74,45 +61,17 @@ let option_count f = function
   | None -> ()
   | Some x -> f x
 
-let rec point' = function
-  | PTPair (f1,f2) -> ()
-  | PTPointOf (f,p) | PTDirectionOf (f,p) -> path p
-  | PTAdd (p1,p2)
-  | PTSub (p1,p2) -> point p1; point p2
-  | PTMult (f,p) -> point p
-  | PTRotated (f,p) -> point p
-  | PTPicCorner (pic, corner) -> commandpic pic
-  | PTTransformed (p,tr) ->
-      point p ; transform tr
-and point p =
-  if test_and_incr_point p then () else point' p.node
-
-and direction d =
-  match d.node with
-  | Vec p -> point p
-  | Curl _ | NoDir -> ()
-
-and joint j =
-  match j.node with
-  | JLine | JCurve | JCurveNoInflex | JTension _ -> ()
-  | JControls (p1,p2) -> point p1; point p2
-
-and knot k =
-  match k.Hashcons.node with
-  | { knot_in = d1 ; knot_p = p ; knot_out = d2 } ->
-      direction d1; point p; direction d2
-
-and metapath p =
+let rec metapath p =
   match p.Hashcons.node with
-  | MPAConcat (k,j,p) -> knot k; joint j; metapath p
-  | MPAAppend (p1,j,p2) -> metapath p1; joint j; metapath p2
-  | MPAKnot k -> knot k
+  | MPAConcat (k,j,p) -> metapath p
+  | MPAAppend (p1,j,p2) -> metapath p1; metapath p2
+  | MPAKnot k -> ()
   | MPAofPA p -> path p
 
 and path' = function
   | PAofMPA p -> metapath p
-  | MPACycle (d,j,p) -> direction d; joint j; metapath p
-  | PATransformed (p,tr) -> path p; transform tr
+  | MPACycle (_,_,p) -> metapath p
+  | PATransformed (p,_) -> path p
   | PACutAfter (p1,p2)
   | PACutBefore (p1,p2) -> path p1; path p2
   | PABuildCycle pl -> List.iter path pl
@@ -124,26 +83,19 @@ and path p =
   if test_and_incr_path p then () else path' p.node
 
 and picture' = function
-    | PITransformed (p,tr) -> transform tr; commandpic p
+    | PITransformed (p,_) -> commandpic p
     | PITex s -> ()
     | PIClip (pic,pth) -> commandpic pic; path pth
 and picture p =
   if test_and_incr_pic p then () else picture' p.node
 
-and transform t =
-  match t.node with
-  | TRRotated f | TRScaled f | TRSlanted f | TRXscaled f | TRYscaled f -> ()
-  | TRMatrix p -> ()
-  | TRShifted p | TRZscaled p -> point p
-  | TRReflect (p1,p2) -> point p1; point p2
-  | TRRotateAround (p,f) -> point p
 and command c =
   match c.node with
   | CDraw (p, b) ->
       path p; brush b
   | CFill (p, c) -> path p
-  | CDotLabel (pic, pos, pt) -> commandpic pic; point pt
-  | CLabel (pic, pos ,pt) -> commandpic pic; point pt
+  | CDotLabel (pic, _, _) -> commandpic pic
+  | CLabel (pic, _ ,_) -> commandpic pic
   | CExternalImage _ -> ()
 and brush b =
   let b = b.Hashcons.node in
@@ -152,13 +104,13 @@ and pen p =
   match p.Hashcons.node with
   | PenCircle | PenSquare -> ()
   | PenFromPath p -> path p
-  | PenTransformed (p, tr) -> pen p; transform tr
+  | PenTransformed (p, _) -> pen p
 
 and dash d =
   match d.Hashcons.node with
   | DEvenly | DWithdots -> ()
   | DScaled (f, d) -> dash d
-  | DShifted (p,d) -> point p; dash d
+  | DShifted (_, d) -> dash d
   | DPattern l -> List.iter dash_pattern l
 
 and dash_pattern _ = ()

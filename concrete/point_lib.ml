@@ -40,7 +40,7 @@ let rotated f = transform (init_rotate f)
 let swapmx {x=x;y=y} = {x=y;y= -.x}
 let swapmy {x=x;y=y} = {x= -.y;y=x}
 
-module Infix = 
+module Infix =
 struct
   let (+/)  = add
   let (-/)  = sub
@@ -59,30 +59,30 @@ let norm p = sqrt (norm2 p)
 let dist2 a b = norm2 (a -/ b)
 let dist a b = sqrt (dist2 a b)
 
-let list_min_max f = 
+let list_min_max f =
   List.fold_left (fun ({x=x_min;y=y_min},{x=x_max;y=y_max}) s ->
                     let ({x=sx_min;y=sy_min},{x=sx_max;y=sy_max}) = f s in
                     {x=min x_min sx_min;y=min y_min sy_min},
                      {x=max x_max sx_max;y=max y_max sy_max})
     ({x=infinity;y=infinity},{x=neg_infinity;y=neg_infinity})
 
-let list_min_max_float f p = 
+let list_min_max_float f p =
   List.fold_left (fun (x_min,y_min,x_max,y_max) s ->
                     let (sx_min,sy_min,sx_max,sy_max) = f s in
                     (min x_min sx_min,min y_min sy_min,
                      max x_max sx_max,max y_max sy_max))
     (infinity,infinity,neg_infinity,neg_infinity) p
 
-let sign f = 
-  if f = 0. then 0. 
+let sign f =
+  if f = 0. then 0.
   else if f < 0. then -1. else 1.
 
 let sign { x=x; y = y} = { x = sign x; y = sign y}
 
-let norm_infinity default f = 
+let norm_infinity default f =
   if f = infinity || f = neg_infinity then default
   else f
 
-let norm_infinity {x=xdef;y=ydef} {x=x;y=y} = 
+let norm_infinity {x=xdef;y=ydef} {x=x;y=y} =
   {x= norm_infinity xdef x;y= norm_infinity ydef y}
-  
+

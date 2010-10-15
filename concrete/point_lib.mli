@@ -14,7 +14,7 @@
 (*                                                                        *)
 (**************************************************************************)
 
-type t = Ctypes.point = 
+type t = Ctypes.point =
   { x : float; y : float }
 
 val zero : t
@@ -39,8 +39,8 @@ val dist : t -> t -> float
 val dist2 : t -> t -> float
 
 val list_min_max : ('a -> t * t) -> 'a list -> t * t
-val list_min_max_float : 
-  ('a -> float * float * float * float) -> 'a list -> 
+val list_min_max_float :
+  ('a -> float * float * float * float) -> 'a list ->
     float * float * float * float
 
 val opp : t -> t
@@ -56,3 +56,5 @@ val print : Format.formatter -> t -> unit
   end
 
 val norm_infinity : t -> t -> t
+
+val segment : float -> t -> t -> t

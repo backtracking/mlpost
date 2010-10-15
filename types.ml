@@ -50,19 +50,7 @@ type position_red = [ | hposition_red | vposition_red | corner_red ]
 open Hashcons
 
 type num = float
-
-and point_node =
-  | PTPair of num * num
-  | PTPicCorner of commandpic * corner
-  | PTPointOf of num * path
-  | PTDirectionOf of num * path
-  | PTAdd of point * point
-  | PTSub of point * point
-  | PTMult of num * point
-  | PTRotated of float * point
-  | PTTransformed of point * transform
-
-and point = point_node hash_consed
+type point = Point_lib.t
 
 and on_off_node =
   | On of num
@@ -202,23 +190,14 @@ let combine4 n acc1 acc2 acc3 acc4 = combine n (combine3 acc1 acc2 acc3 acc4)
 
 let num = hash_float
 
-let point = function
-  | PTPair(n,m) -> combine2 12 (num n) (num m)
-  | PTPicCorner(p,pc) -> combine2 13 p.hkey (hash_piccorner pc)
-  | PTPointOf(f,p) -> combine2 14 (hash_float f) p.hkey
-  | PTDirectionOf(f,p) -> combine2 15 (hash_float f) p.hkey
-  | PTAdd(p,q) -> combine2 16 p.hkey q.hkey
-  | PTSub(p,q) -> combine2 17 p.hkey q.hkey
-  | PTMult(n,q) -> combine2 18 (num n) q.hkey
-  | PTRotated(f,p) -> combine2 19 (hash_float f) p.hkey
-  | PTTransformed(p,tr) -> combine2 20 p.hkey tr.hkey
+let point { Point_lib.x = x ; y = y } = combine2 12 (num x) (num y)
 
 let on_off = function
   | On n -> combine 65 (num n)
   | Off n -> combine 66 (num n)
 
 let direction = function
-  | Vec p -> combine 61 p.hkey
+  | Vec p -> combine 61 (point p)
   | Curl f -> combine 62 (hash_float f)
   | NoDir -> 63
 
@@ -227,10 +206,10 @@ let joint = function
   | JCurve -> 68
   | JCurveNoInflex -> 69
   | JTension(f1,f2) -> combine2 70 (hash_float f1) (hash_float f2)
-  | JControls(p1,p2) -> combine2 71 p1.hkey p2.hkey
+  | JControls(p1,p2) -> combine2 71 (point p1) (point p2)
 
 let knot k =
-  combine3 64 k.knot_in.hkey k.knot_p.hkey k.knot_out.hkey
+  combine3 64 k.knot_in.hkey (point k.knot_p) k.knot_out.hkey
 
 let metapath = function
   | MPAConcat(k,j,p) ->
@@ -259,13 +238,13 @@ let path = function
 let transform = function
   | TRRotated f -> combine 52 (hash_float f)
   | TRScaled n -> combine 53 (num n)
-  | TRShifted p -> combine 57 p.hkey
+  | TRShifted p -> combine 57 (point p)
   | TRSlanted n -> combine 54 (num n)
   | TRXscaled n -> combine 55 (num n)
   | TRYscaled n -> combine 56 (num n)
-  | TRZscaled p -> combine 58 p.hkey
-  | TRReflect(p,q) -> combine2 59 p.hkey q.hkey
-  | TRRotateAround(p,q) -> combine2 60 p.hkey (hash_float q)
+  | TRZscaled p -> combine 58 (point p)
+  | TRReflect(p,q) -> combine2 59 (point p) (point q)
+  | TRRotateAround(p,q) -> combine2 60 (point p) (hash_float q)
   | TRMatrix m ->
       List.fold_left (fun acc n -> combine2 63 acc (num n)) 61
         [m.Matrix.x0;m.Matrix.y0;m.Matrix.xx;m.Matrix.xy;m.Matrix.yx;m.Matrix.yy]
@@ -284,7 +263,7 @@ let dash = function
   | DEvenly -> 72
   | DWithdots -> 73
   | DScaled(f,d) -> combine2 74 (num f) d.hkey
-  | DShifted(p,d) -> combine2 75 p.hkey d.hkey
+  | DShifted(p,d) -> combine2 75 (point p) d.hkey
   | DPattern l ->
       List.fold_left (fun acc o -> combine2 76 acc o.hkey) 77 l
 
@@ -310,9 +289,9 @@ let command = function
   | CDraw(pa,b) ->
       combine2 43 pa.hkey b.hkey
   | CFill(p,c) -> combine2 46 p.hkey (hash_color c)
-  | CLabel(pic,pos,poi) -> combine3 47 pic.hkey (hash_position pos) poi.hkey
+  | CLabel(pic,pos,poi) -> combine3 47 pic.hkey (hash_position pos) (point poi)
   | CDotLabel(pic,pos,poi) ->
-      combine3 48 pic.hkey (hash_position pos) poi.hkey
+      combine3 48 pic.hkey (hash_position pos) (point poi)
   | CExternalImage (filename,spec) -> combine2 52 (hash_string filename)
       (hash_spec_image spec)
 
@@ -327,6 +306,8 @@ let eq_float (f1:float) (f2:float) =
   Pervasives.compare f1 f2 == 0
 
 let eq_num = eq_float
+let eq_point p1 p2 =
+  eq_num p1.Point_lib.x p2.Point_lib.x && eq_num p1.Point_lib.y p2.Point_lib.y
 
 (* we enforce to use physical equality only on hash-consed data
    of the same type *)
@@ -364,7 +345,7 @@ let eq_dash_node d1 d2 =
   | DScaled(f1,d1), DScaled(f2,d2) ->
       eq_num f1 f2 && eq_hashcons d1 d2
   | DShifted(p1,d1), DShifted(p2,d2) ->
-      eq_hashcons p1 p2 && eq_hashcons d1 d2
+      eq_point p1 p2 && eq_hashcons d1 d2
   | DPattern l1, DPattern l2 ->
       eq_hashcons_list l1 l2
   | _ -> false
@@ -382,28 +363,6 @@ let eq_on_off o1 o2 =
 
 let eq_position (p1:position) (p2:position) =
   p1 == p2 (* correct because this type contains only constants *)
-
-let eq_point_node p1 p2 =
-  match p1,p2 with
-    | PTPair(n11,n12),PTPair(n21,n22) ->
-        eq_num n11 n21 && eq_num n12 n22
-    | PTPicCorner(pic1,corn1), PTPicCorner(pic2,corn2) ->
-	eq_hashcons pic1 pic2 &&
-        eq_position (corn1 :> position) (corn2 :> position)
-    | PTPointOf(n1,p1), PTPointOf(n2,p2)
-    | PTDirectionOf(n1,p1), PTDirectionOf(n2,p2)
-	-> eq_num n1 n2 && eq_hashcons p1 p2
-    | PTAdd(p11,p12),PTAdd(p21,p22)
-    | PTSub(p11,p12),PTSub(p21,p22)
-	-> eq_hashcons p11 p21 && eq_hashcons p12 p22
-    | PTMult(n1,p1),PTMult(n2,p2) ->
-	eq_num n1 n2 && eq_hashcons p1 p2
-    | PTRotated(f1,p1),PTRotated(f2,p2) ->
-	eq_float f1 f2 && eq_hashcons p1 p2
-    | PTTransformed(p1,tr1), PTTransformed(p2,tr2) ->
-	eq_hashcons p1 p2 && eq_hashcons tr1 tr2
-    | _ -> false
-
 
 let eq_metapath_node p1 p2 =
   match p1,p2 with
@@ -458,11 +417,11 @@ let eq_transform_node t1 t2 =
   | TRXscaled n1, TRXscaled n2
   | TRYscaled n1, TRYscaled n2 -> eq_num n1 n2
   | TRShifted p1, TRShifted p2
-  | TRZscaled p1, TRZscaled p2 -> eq_hashcons p1 p2
+  | TRZscaled p1, TRZscaled p2 -> eq_point p1 p2
   | TRReflect(p11,p12), TRReflect(p21,p22) ->
-      eq_hashcons p11 p21 && eq_hashcons p12 p22
+      eq_point p11 p21 && eq_point p12 p22
   | TRRotateAround(p1,f1), TRRotateAround(p2,f2) ->
-      eq_hashcons p1 p2 && eq_float f1 f2
+      eq_point p1 p2 && eq_float f1 f2
   | TRMatrix m1, TRMatrix m2 ->
       eq_num m1.Matrix.x0 m2.Matrix.x0
       &&  eq_num m1.Matrix.y0 m2.Matrix.y0
@@ -474,7 +433,7 @@ let eq_transform_node t1 t2 =
 
 let eq_knot_node k1 k2 =
   eq_hashcons k1.knot_in k2.knot_in &&
-  eq_hashcons k1.knot_p k2.knot_p &&
+  eq_point k1.knot_p k2.knot_p &&
   eq_hashcons k1.knot_out k2.knot_out
 
 let eq_joint_node j1 j2 =
@@ -485,12 +444,12 @@ let eq_joint_node j1 j2 =
   | JTension(f11,f12), JTension(f21,f22) ->
       eq_float f11 f21 && eq_float f12 f22
   | JControls(p11,p12), JControls(p21,p22) ->
-      eq_hashcons p11 p21 && eq_hashcons p12 p22
+      eq_point p11 p21 && eq_point p12 p22
   | _ -> false
 
 let eq_direction_node d1 d2 =
   match d1,d2 with
-    | Vec p1, Vec p2 -> eq_hashcons p1 p2
+    | Vec p1, Vec p2 -> eq_point p1 p2
     | Curl f1, Curl f2 -> eq_float f1 f2
     | NoDir, NoDir -> true
     | _ -> false
@@ -503,7 +462,7 @@ let eq_command_node c1 c2 =
       eq_hashcons p1 p2 && eq_opt eq_color c1 c2
   | CLabel(pic1,pos1,poi1), CLabel(pic2,pos2,poi2)
   | CDotLabel(pic1,pos1,poi1), CDotLabel(pic2,pos2,poi2) ->
-      eq_hashcons pic1 pic2 && eq_position pos1 pos2 && eq_hashcons poi1 poi2
+      eq_hashcons pic1 pic2 && eq_position pos1 pos2 && eq_point poi1 poi2
   | _ -> false
 
 let eq_commandpic_node p1 p2 =
@@ -518,27 +477,6 @@ let eq_commandpic_node p1 p2 =
 (* num *)
 
 let unsigned f x = (f x) land 0x3FFFFFFF
-
-(* point *)
-
-
-module HashPoint =
-  Hashcons.Make(struct type t = point_node
-		       let equal = eq_point_node
-		       let hash = unsigned point end)
-
-let hashpoint_table = HashPoint.create 257;;
-let hashpoint = HashPoint.hashcons hashpoint_table
-
-let mkPTPair f1 f2 = hashpoint (PTPair(f1,f2))
-let mkPTAdd p1 p2 = hashpoint (PTAdd(p1,p2))
-let mkPTSub p1 p2 = hashpoint (PTSub(p1,p2))
-let mkPTMult x y = hashpoint (PTMult(x,y))
-let mkPTRotated x y = hashpoint (PTRotated(x,y))
-let mkPTTransformed x y = hashpoint (PTTransformed(x,y))
-let mkPTPointOf f p = hashpoint (PTPointOf(f,p))
-let mkPTDirectionOf f p = hashpoint (PTDirectionOf(f,p))
-let mkPTPicCorner x y = hashpoint (PTPicCorner(x,y))
 
 (* transform *)
 

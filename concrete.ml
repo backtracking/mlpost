@@ -82,11 +82,8 @@ let ctransform_of_transform = Compute.transform
 
 let baselines s = Picture_lib.baseline (Compute.picture (Types.mkPITex s))
 
-let num_of_float =Misc.id
-let point_of_cpoint p =
-  let x = p.CPoint.x in
-  let y = p.CPoint.y in
-  Types.mkPTPair x y
+let num_of_float = Misc.id
+let point_of_cpoint = Misc.id
 
 let path_of_cpath p =
   let knot x = Types.mkKnot Types.mkNoDir (point_of_cpoint x) Types.mkNoDir in
