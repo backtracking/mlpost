@@ -45,11 +45,7 @@ and picture fmt p =
       fprintf fmt "%a transformed %a" commandpic p transform tr
   | PIClip _ -> ()
 
-and transform fmt t =
-  match t.Hashcons.node with
-    | TRShifted p -> fprintf fmt "shifted %a" point p
-    | TRYscaled f ->  fprintf fmt "yscaled %a" num f
-    | _ -> fprintf fmt "something"
+and transform fmt t = Misc.print_list Misc.comma Matrix.print fmt t
 
 and knot fmt k =
   match k.Hashcons.node with

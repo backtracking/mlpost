@@ -16,23 +16,19 @@
 
 open Types
 
-type t' = transform
+type t' = matrix
 
 type t = t' list
 
-let scaled a = mkTRScaled a
-let rotated a = mkTRRotated a
-let shifted a = mkTRShifted a
-let slanted a = mkTRSlanted a
-let xscaled a = mkTRXscaled a
-let yscaled a = mkTRYscaled a
-let zscaled a = mkTRZscaled a
-let reflect p1 p2 = mkTRReflect p1 p2
-let rotate_around p f = mkTRRotateAround p f
-
-type matrix = Matrix.t
-
-let explicit t = mkTRMatrix t
+let scaled = Matrix.scale
+let rotated f = Matrix.rotation (Num.deg2rad f)
+let shifted = Matrix.translation
+let slanted = Matrix.slanted
+let xscaled = Matrix.xscaled
+let yscaled = Matrix.yscaled
+let zscaled = Matrix.zscaled
+let reflect = Matrix.reflect
+let rotate_around p f = Matrix.rotate_around p (Num.deg2rad f)
 
 (* applied the transformations in the order of the list *)
 let id = []

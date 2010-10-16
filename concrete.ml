@@ -97,13 +97,7 @@ let path_of_cpath p =
   then Types.mkMPACycle Types.mkNoDir Types.mkJLine path
   else Types.mkPAofMPA path
 
-let transform_of_ctransform p = [Types.mkTRMatrix
-   {Matrix.x0 = p.Ctypes.x0;
-    Matrix.y0 = p.Ctypes.y0;
-    Matrix.xx = p.Ctypes.xx;
-    Matrix.xy = p.Ctypes.xy;
-    Matrix.yx = p.Ctypes.yx;
-    Matrix.yy = p.Ctypes.yy}]
+let transform_of_ctransform x = [x]
 
 ELSE
 let supported = false

@@ -72,19 +72,8 @@ and color fmt = function
 and point fmt { Point_lib.x = x ; y = y } =
   fprintf fmt "(%a,@ %a@,)" num x num y
 
-and transform fmt = function
-  | C.TRScaled a -> fprintf fmt "scaled %a@," num a
-  | C.TRShifted a -> fprintf fmt "shifted %a@," point a
-  | C.TRRotated a -> fprintf fmt "rotated %a@," float a
-  | C.TRSlanted a -> fprintf fmt "slanted %a@," num a
-  | C.TRXscaled a -> fprintf fmt "xscaled %a@," num a
-  | C.TRYscaled a -> fprintf fmt "yscaled %a@," num a
-  | C.TRZscaled a -> fprintf fmt "zscaled %a@," point a
-  | C.TRReflect (p1,p2) ->
-      fprintf fmt "reflectedabout (%a,@ %a)@," point p1 point p2
-  | C.TRRotateAround (p,f) ->
-      fprintf fmt "rotatedaround(%a,@ %a)@," point p float f
-  | C.TRName tn -> fprintf fmt "transformed %s" tn
+and transform fmt t = Matrix.print fmt t
+
 and picture fmt = function
   | C.PITex s -> fprintf fmt "btex %s etex" s
   | C.PITransformed (p, tr) -> fprintf fmt "((%a) %a@,)" picture p transform tr

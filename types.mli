@@ -104,20 +104,7 @@ and path_node = private
 and path = path_node hash_consed
 
 and matrix = Matrix.t
-
-and transform_node = private
-  | TRRotated of float
-  | TRScaled of num
-  | TRShifted of point
-  | TRSlanted of num
-  | TRXscaled of num
-  | TRYscaled of num
-  | TRZscaled of point
-  | TRReflect of point * point
-  | TRRotateAround of point * float
-  | TRMatrix of matrix
-
-and transform = transform_node hash_consed
+and transform = Matrix.t list
 
 and dash_node = private
   | DEvenly
@@ -173,20 +160,6 @@ and brush_node = {pen : pen option;
 
 and brush = brush_node hash_consed
 (* smart constructors *)
-
-(* transform *)
-
-val mkTRScaled :  num -> transform
-val mkTRXscaled :  num -> transform
-val mkTRYscaled :  num -> transform
-val mkTRZscaled :  point -> transform
-val mkTRRotated : float -> transform
-val mkTRShifted : point -> transform
-val mkTRSlanted : num -> transform
-val mkTRReflect : point -> point -> transform
-val mkTRRotateAround : point -> float -> transform
-val mkTRMatrix : matrix -> transform
-
 
 (* knot *)
 val mkKnot : direction -> point -> direction -> knot

@@ -58,11 +58,9 @@ let corner_bbox ?(dx=Num.zero) ?(dy=Num.zero) pic =
      Point.sub (Point.add (lrcorner pic) pdx) pdy;
      Point.add (Point.add (urcorner pic) pdx) pdy]
 
-let transform trl p =
-  List.fold_left
-    (fun acc tr -> mkPicture (mkPITransformed acc tr)) p trl
-
 let ctr pic = Point.segment 0.5 (llcorner pic) (urcorner pic)
+
+let transform tr p = mkPicture (mkPITransformed p tr)
 
 let scale f p = transform [Transform.scaled f] p
 let rotate f p = transform [Transform.rotated f] p

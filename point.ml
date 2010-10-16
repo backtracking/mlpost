@@ -19,7 +19,7 @@ open Point_lib
 
 type corner = Types.corner
 
-type t = Types.point
+type t = Ctypes.point
 
 
 (* angle in degrees *)
@@ -52,7 +52,7 @@ let rotate_around p1 f p2 = add p1 (rotate f (sub p2 p1))
 let xscale f p = { p with x = f *. p.x }
 let yscale f p = { p with y = f *. p.y }
 
-let transform tr p =
+let transform (tr : Transform.t) (p : t) : t =
   let t = Compute.transform tr in
   Point_lib.transform t p
 

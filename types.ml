@@ -105,20 +105,7 @@ and path_node =
 and path = path_node hash_consed
 
 and matrix = Matrix.t
-
-and transform_node =
-  | TRRotated of float
-  | TRScaled of num
-  | TRShifted of point
-  | TRSlanted of num
-  | TRXscaled of num
-  | TRYscaled of num
-  | TRZscaled of point
-  | TRReflect of point * point
-  | TRRotateAround of point * float
-  | TRMatrix of matrix
-
-and transform = transform_node hash_consed
+and transform = Matrix.t list
 
 and dash_node =
   | DEvenly
@@ -192,6 +179,17 @@ let num = hash_float
 
 let point { Point_lib.x = x ; y = y } = combine2 12 (num x) (num y)
 
+let transform' { Matrix.xx = xx; yx = yx; xy = xy; yy = yy; x0 = x0; y0 = y0} =
+  combine4 52 (hash_float xx) (hash_float yx) (hash_float xy)
+    (combine3 53 (hash_float yy) (hash_float x0) (hash_float y0))
+
+let rec hash_list h l =
+  match l with
+  | [] -> 54
+  | x::xs -> combine2 55 (h x) (hash_list h xs)
+
+let transform = hash_list transform'
+
 let on_off = function
   | On n -> combine 65 (num n)
   | Off n -> combine 66 (num n)
@@ -226,7 +224,7 @@ let path = function
   | PAHalfCircle -> 25
   | PAQuarterCircle -> 26
   | PAUnitSquare -> 27
-  | PATransformed(p,tr) -> combine2 28 p.hkey tr.hkey
+  | PATransformed(p,tr) -> combine2 28 p.hkey (transform tr)
   | PACutAfter(p,q) -> combine2 32 p.hkey q.hkey
   | PACutBefore(p,q) -> combine2 33 p.hkey q.hkey
   | PABuildCycle l ->
@@ -235,23 +233,9 @@ let path = function
       combine3 36 (hash_float f1) (hash_float f2) p.hkey
   | PABBox p -> combine 37 p.hkey
 
-let transform = function
-  | TRRotated f -> combine 52 (hash_float f)
-  | TRScaled n -> combine 53 (num n)
-  | TRShifted p -> combine 57 (point p)
-  | TRSlanted n -> combine 54 (num n)
-  | TRXscaled n -> combine 55 (num n)
-  | TRYscaled n -> combine 56 (num n)
-  | TRZscaled p -> combine 58 (point p)
-  | TRReflect(p,q) -> combine2 59 (point p) (point q)
-  | TRRotateAround(p,q) -> combine2 60 (point p) (hash_float q)
-  | TRMatrix m ->
-      List.fold_left (fun acc n -> combine2 63 acc (num n)) 61
-        [m.Matrix.x0;m.Matrix.y0;m.Matrix.xx;m.Matrix.xy;m.Matrix.yx;m.Matrix.yy]
-
 let picture = function
   | PITex s -> combine 38 (hash_string s)
-  | PITransformed(p,tr) -> combine2 40 p.hkey tr.hkey
+  | PITransformed(p,tr) -> combine2 40 p.hkey (transform tr)
   | PIClip(p,q) -> combine2 42 p.hkey q.hkey
 
 let commandpic = function
@@ -271,7 +255,7 @@ let pen = function
   | PenCircle -> 78
   | PenSquare -> 79
   | PenFromPath p -> combine 80 p.hkey
-  | PenTransformed(p,tr) -> combine2 81 p.hkey tr.hkey
+  | PenTransformed(p,tr) -> combine2 81 p.hkey (transform tr)
 
 let hash_opt f = function
   | None -> 83
@@ -306,8 +290,8 @@ let eq_float (f1:float) (f2:float) =
   Pervasives.compare f1 f2 == 0
 
 let eq_num = eq_float
-let eq_point p1 p2 =
-  eq_num p1.Point_lib.x p2.Point_lib.x && eq_num p1.Point_lib.y p2.Point_lib.y
+let eq_point (a : point) (b : point) = Pervasives.compare a b == 0
+let eq_matrix (a : matrix) (b : matrix) = Pervasives.compare a b == 0
 
 (* we enforce to use physical equality only on hash-consed data
    of the same type *)
@@ -319,6 +303,14 @@ let rec eq_hashcons_list (x:'a hash_consed list) (y:'a hash_consed list) =
     | [], [] -> true
     | h1::t1,h2::t2 -> h1 == h2 && eq_hashcons_list t1 t2
     | _ -> false
+
+let rec eq_list eq x y =
+  match x, y with
+  | [], [] -> true
+  | x::xs, y::ys -> eq x y && eq_list eq xs ys
+  | _, _ -> false
+
+let eq_transform = eq_list eq_matrix
 
 let eq_opt f o1 o2 =
   match o1,o2 with
@@ -335,7 +327,7 @@ let eq_pen_node p1 p2 =
     | PenFromPath p1, PenFromPath p2 ->
 	eq_hashcons p1 p2
     | PenTransformed(p1,tr1), PenTransformed(p2,tr2) ->
-	eq_hashcons p1 p2 && eq_hashcons tr1 tr2
+	eq_hashcons p1 p2 && eq_transform tr1 tr2
     | _ -> false
 
 let eq_dash_node d1 d2 =
@@ -385,7 +377,7 @@ let eq_path_node p1 p2 =
     | PAUnitSquare, PAUnitSquare
 	-> true
     | PATransformed(p1,tr1),PATransformed(p2,tr2) ->
-	eq_hashcons p1 p2 && eq_hashcons tr1 tr2
+	eq_hashcons p1 p2 && eq_transform tr1 tr2
     | PACutAfter(p11,p12),PACutAfter(p21,p22)
     | PACutBefore(p11,p12),PACutBefore(p21,p22)
 	-> eq_hashcons p11 p21 && eq_hashcons p12 p22
@@ -404,32 +396,10 @@ let eq_picture_node p1 p2 =
         (* it actually happens that the same text appears twice *)
         s1<>"" && s1=s2
     | PITransformed(p1,tr1), PITransformed(p2,tr2) ->
-	eq_hashcons p1 p2 && eq_hashcons tr1 tr2
+	eq_hashcons p1 p2 && eq_transform tr1 tr2
     | PIClip(pi1,pa1), PIClip(pi2,pa2) ->
 	eq_hashcons pi1 pi2 && eq_hashcons pa1 pa2
     | _ -> false
-
-let eq_transform_node t1 t2 =
-  match t1,t2 with
-  | TRRotated f1, TRRotated f2 -> eq_float f1 f2
-  | TRScaled n1, TRScaled n2
-  | TRSlanted n1, TRSlanted n2
-  | TRXscaled n1, TRXscaled n2
-  | TRYscaled n1, TRYscaled n2 -> eq_num n1 n2
-  | TRShifted p1, TRShifted p2
-  | TRZscaled p1, TRZscaled p2 -> eq_point p1 p2
-  | TRReflect(p11,p12), TRReflect(p21,p22) ->
-      eq_point p11 p21 && eq_point p12 p22
-  | TRRotateAround(p1,f1), TRRotateAround(p2,f2) ->
-      eq_point p1 p2 && eq_float f1 f2
-  | TRMatrix m1, TRMatrix m2 ->
-      eq_num m1.Matrix.x0 m2.Matrix.x0
-      &&  eq_num m1.Matrix.y0 m2.Matrix.y0
-      &&  eq_num m1.Matrix.xx m2.Matrix.xx
-      &&  eq_num m1.Matrix.xy m2.Matrix.xy
-      &&  eq_num m1.Matrix.yx m2.Matrix.yx
-      &&  eq_num m1.Matrix.yy m2.Matrix.yy
-  | _ -> false
 
 let eq_knot_node k1 k2 =
   eq_hashcons k1.knot_in k2.knot_in &&
@@ -477,28 +447,6 @@ let eq_commandpic_node p1 p2 =
 (* num *)
 
 let unsigned f x = (f x) land 0x3FFFFFFF
-
-(* transform *)
-
-
-module HashTransform =
-  Hashcons.Make(struct type t = transform_node
-		       let equal = eq_transform_node
-		       let hash = unsigned transform end)
-
-let hashtransform_table = HashTransform.create 257;;
-let hashtransform = HashTransform.hashcons hashtransform_table
-
-let mkTRScaled n = hashtransform (TRScaled n)
-let mkTRXscaled n = hashtransform (TRXscaled n)
-let mkTRYscaled n = hashtransform (TRYscaled n)
-let mkTRZscaled pt = hashtransform (TRZscaled pt)
-let mkTRRotated f = hashtransform (TRRotated f)
-let mkTRShifted pt = hashtransform (TRShifted pt)
-let mkTRSlanted n = hashtransform (TRSlanted n)
-let mkTRReflect pt1 pt2 = hashtransform (TRReflect(pt1,pt2))
-let mkTRRotateAround pt f = hashtransform (TRRotateAround(pt,f))
-let mkTRMatrix m = hashtransform (TRMatrix m)
 
 (* knot *)
 

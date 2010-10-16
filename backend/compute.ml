@@ -249,24 +249,7 @@ and picture' = function
 
 and picture p = memoize picture' "picture" picture_memoize p
 and transform t =
-  match t.Hashcons.node with
-  | TRRotated f -> Matrix.rotation (deg2rad f)
-  | TRScaled f -> Matrix.scale (num f)
-  | TRSlanted f -> Matrix.slanted (num f)
-  | TRXscaled f -> Matrix.xscaled (num f)
-  | TRYscaled f -> Matrix.yscaled (num f)
-  | TRShifted p ->
-      let p = point p in
-      Matrix.translation p
-  | TRZscaled p -> Matrix.zscaled (point p)
-  | TRReflect (p1,p2) -> Matrix.reflect (point p1) (point p2)
-  | TRRotateAround (p,f) -> Matrix.rotate_around (point p) (deg2rad f)
-  | TRMatrix p -> {Ctypes.x0 = num p.Matrix.x0;
-                   Ctypes.y0 = num p.Matrix.y0;
-                   Ctypes.xx = num p.Matrix.xx;
-                   Ctypes.xy = num p.Matrix.xy;
-                   Ctypes.yx = num p.Matrix.yx;
-                   Ctypes.yy = num p.Matrix.yy}
+  List.fold_left Matrix.multiply Matrix.identity t
 
 and commandpic p =
   match p.Hashcons.node with
@@ -352,6 +335,3 @@ let pathl_error ferror  arg = List.map (ferror path) arg
 let metapathl_error ferror  arg = List.map (ferror metapath) arg
 let picturel_error ferror arg = List.map (ferror picture) arg
 
-let transform arg =
-  List.fold_left (fun acc t -> Matrix.multiply acc (transform t))
-    Matrix.identity arg

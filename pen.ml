@@ -19,17 +19,17 @@ open Transform
 
 type t = Types.pen
 
-let transform tr p =
-  List.fold_left mkPenTransformed p tr
+let transform tr p = mkPenTransformed p tr
 
 let default =
-  mkPenTransformed mkPenCircle (scaled 0.5)
+  mkPenTransformed mkPenCircle [scaled 0.5]
 let circle = mkPenCircle
 let square = mkPenSquare
 let from_path p = mkPenFromPath p
 
-let scale f p = transform [Transform.scaled f] p
-let rotate f p = transform [Transform.rotated f] p
-let shift pt path = transform [Transform.shifted pt] path
-let yscale n p = transform [Transform.yscaled n] p
-let xscale n p = transform [Transform.xscaled n] p
+let scale f p = mkPenTransformed p [Transform.scaled f]
+let rotate f p = mkPenTransformed p [Transform.rotated f]
+let shift pt path = mkPenTransformed path [Transform.shifted pt]
+let yscale n p = mkPenTransformed p [Transform.yscaled n]
+let xscale n p = mkPenTransformed p [Transform.xscaled n]
+

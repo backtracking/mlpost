@@ -19,6 +19,8 @@ open Types
 
 include MetaPath.BaseDefs
 
+let transform tr p = mkPATransformed p tr
+
 let start x = of_metapath (start x)
 let append ?style x y  =
   of_metapath (append ?style (of_path x) (of_path y))
@@ -61,11 +63,11 @@ let jointpathp lp lj  = jointpathk (List.map (knotp) lp) lj
 let jointpathn lp lj  = jointpathk (List.map knotn lp) lj
 let jointpath ?(scale) lp lj  = jointpathk (List.map (knot ?scale) lp) lj
 
-let scale f p = transform [Transform.scaled f] p
-let rotate f p = transform [Transform.rotated f] p
-let shift pt p = transform [Transform.shifted pt] p
-let yscale n p = transform [Transform.yscaled n] p
-let xscale n p = transform [Transform.xscaled n] p
+let scale f p = mkPATransformed p [Transform.scaled f]
+let rotate f p = mkPATransformed p [Transform.rotated f]
+let shift pt p = mkPATransformed p [Transform.shifted pt]
+let yscale n p = mkPATransformed p [Transform.yscaled n]
+let xscale n p = mkPATransformed p [Transform.xscaled n]
 
 let point (f: float) p =
   let p = Compute.path p in

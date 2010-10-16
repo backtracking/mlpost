@@ -49,7 +49,6 @@ struct
   let halfcircle = mkPAHalfCircle
   let quartercircle = mkPAQuarterCircle
   let unitsquare = mkPAUnitSquare
-  let transform tr p = List.fold_left mkPATransformed p tr
   let cut_after p1 p2 = mkPACutAfter p1 p2
   let cut_before p1 p2 = mkPACutBefore p1 p2
   let build_cycle l = mkPABuildCycle l

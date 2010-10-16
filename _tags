@@ -13,6 +13,8 @@
 <handbookgraphs.*> : use_unix, pkg_bitstring, pkg_cairo, use_cairo_bigarray
 <othergraphs.*> : use_unix, pkg_bitstring, pkg_cairo, use_cairo_bigarray
 <testsuite>: include
+<concrete_transform.ml> : syntax_macro, pkg_cairo
+<concrete_point.ml> : syntax_macro, pkg_cairo
 
 
 <mlpost.*> : use_freetype, use_libmlpost_ft

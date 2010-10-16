@@ -16,18 +16,33 @@
 
 module Signature : sig
   type point
-  type num
 
   module type Boxlike =
   sig
     type t
-    val width : t -> num
-    val height : t -> num
+    val width : t -> float
+    val height : t -> float
     val set_pos : point -> t -> t
   end
 
 end
 
+module Ctypes : sig
+
+  IFDEF CAIRO THEN
+    type matrix = Cairo.matrix =
+      { xx : float; yx : float; xy : float; yy : float; x0 : float; y0 : float; }
+
+    type point = Cairo.point =
+        {x : float;
+         y : float}
+  ELSE
+    type matrix =
+      { xx : float; yx : float; xy : float; yy : float; x0 : float; y0 : float; }
+
+    type point = {x : float; y : float}
+  END
+end
 
 (** {2 Interfaces to basic Metapost datatypes} *)
 
@@ -41,7 +56,7 @@ module Num : sig
     [float].
   *)
 
-  type t = Signature.num
+  type t = float
       (** The Mlpost numeric type is an abstract datatype *)
 
   (** {2 Conversion functions} *)
@@ -902,14 +917,6 @@ and Transform : sig
         given points *)
   val rotate_around : Point.t -> float -> t'
     (** Rotate an object by an angle given in degrees, around a given point *)
-
-(*
-  type matrix  =
-      { xx : Num.t; yx : Num.t;
-        xy : Num.t; yy : Num.t; x0 : Num.t; y0 : Num.t}
-
-  val explicit : matrix -> t'
-*)
 
   type t = t' list
     (** A transformation is a list of single transformations *)
@@ -2480,11 +2487,7 @@ module Concrete : sig
   (** The module of concrete points *)
   module CPoint : sig
 
-    IFDEF CAIRO THEN
-      type t = Cairo.point = { x : float; y : float }
-    ELSE
-      type t = { x : float; y : float }
-    END
+    type t = Ctypes.point
 
     val add : t -> t -> t
     val sub : t -> t -> t
@@ -2571,15 +2574,7 @@ module Concrete : sig
 
   module CTransform :
   sig
-    IFDEF CAIRO THEN
-    type t = Cairo.matrix =
-        { xx : float; yx : float
-        ; xy : float; yy : float; x0 : float; y0 : float; }
-    ELSE
-    type t =
-        { xx : float; yx : float;
-          xy : float; yy : float; x0 : float; y0 : float; }
-    END
+    type t = Ctypes.matrix
   end
 
   (** {2 Compute the concrete value} *)

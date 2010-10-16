@@ -54,17 +54,7 @@ and matrix =
     { xx : num; yx : num;
       xy : num; yy : num; x0 : num; y0 : num; }
 
-and transform =
-  | TRRotated of float
-  | TRScaled of num
-  | TRShifted of point
-  | TRSlanted of num
-  | TRXscaled of num
-  | TRYscaled of num
-  | TRZscaled of point
-  | TRReflect of point * point
-  | TRRotateAround of point * float
-  | TRName of name
+and transform = Matrix.t
 
 and picture =
   | PITex of string

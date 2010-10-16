@@ -192,49 +192,7 @@ and commandpic_cmd pc =
   | Seq l -> C.CSeq (List.map commandpic_cmd l)
 
 and transform t =
-  match t.Hashcons.node with
-  | TRRotated f -> C.TRRotated f, nop
-  | TRScaled f ->
-      let f,c = num f in
-      C.TRScaled f, c
-  | TRSlanted f ->
-      let f,c = num f in
-      C.TRSlanted f, c
-  | TRXscaled f ->
-      let f,c = num f in
-      C.TRXscaled f, c
-  | TRYscaled f ->
-      let f,c = num f in
-      C.TRYscaled f, c
-  | TRShifted p ->
-      let p, code = point p in
-        C.TRShifted p, code
-  | TRZscaled p ->
-      let p, code = point p in
-        C.TRZscaled p, code
-  | TRReflect (p1,p2) ->
-      let p1, c1 = point p1 in
-      let p2, c2 = point p2 in
-        C.TRReflect (p1,p2), c1 ++ c2
-  | TRRotateAround (p,f) ->
-      let p, code = point p in
-        C.TRRotateAround (p,f), code
-  | TRMatrix p ->
-      let nx0,nc0 = num p.Matrix.x0 in
-      let ny0,nc1 = num p.Matrix.y0 in
-      let nxx,nc2 = num p.Matrix.xx in
-      let nxy,nc3 = num p.Matrix.xy in
-      let nyx,nc4 = num p.Matrix.yx in
-      let nyy,nc5 = num p.Matrix.yy in
-      let tname = Name.transform () in
-      C.TRName tname,
-      nc0 ++ nc1 ++ nc2 ++ nc3 ++ nc4 ++ nc5 ++
-        C.CDefTrans (tname,{ C.x0 = nx0;
-                             y0 = ny0;
-                             xx = nxx;
-                             xy = nxy;
-                             yx = nyx;
-                             yy = nyy})
+  List.fold_left Matrix.multiply Matrix.identity t, nop
 
 and pen p =
     match p.Hashcons.node with
