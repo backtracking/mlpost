@@ -195,10 +195,20 @@ let load_glyphs tex_name ratio_cm =
                tex_name) in
       let pfab = find_file font_map.Fonts_type.pfab_name in
       let pfab = Cairo_ft.new_face (Lazy.force ft) pfab in
-      let enc = match font_map.Fonts_type.enc_name with
-        | None -> Standardenc.standardencoding
-        | Some x -> load_enc (find_file x) in
-      let glyphs_enc = compute_trans_enc enc pfab in
+      let glyphs_enc =
+        match font_map.Fonts_type.enc_name with
+          | None ->
+            (* 0 seems to be an empty one,
+               1 the one in the pfb, but I'm not sure*)
+            let charmap_index = 1 in
+            Mlpost_ft.ft_set_charmap pfab charmap_index;
+            Mlpost_ft.ft_get_char_index pfab
+          | Some x -> let enc = load_enc (find_file x) in
+                      compute_trans_enc enc pfab in
+      (* let glyphs_enc i = *)
+      (*   let r = glyphs_enc i in *)
+      (*   Printf.printf "char : %i -> %i\n%!" i r; *)
+      (*   r in *)
       Type1 { glyphs_tag = id ();
               glyphs_ft = pfab;
               glyphs_enc = glyphs_enc;
