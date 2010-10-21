@@ -285,7 +285,8 @@ let cast_path_to_point p = function
   | Path {pl=[];} -> Point p
   | x -> x
 (*
-(((t0*tt)^3)*(d + (3*(b - c)) - a)) + (3*((((t0*tt)^2)*(c + a - (2*b))) + (t0*tt*(b - a)))) + a
+(((t0*tt)^3)*(d + (3*(b - c)) - a)) + (3*((((t0*tt)^2)*
+  (c + a - (2*b))) + (t0*tt*(b - a)))) + a
 *)
 
 let split_aux s t l =
@@ -319,7 +320,8 @@ let cut_before a b =
   try
     let t = (fst (one_intersection b a)) in
     let res = snd (split b t) in
-(*    Format.printf "t : %f@.point %a@.b : %a@.res : %a@." t P.print (abscissa_to_point b t) print b print res;*)
+(*    Format.printf "t : %f@.point %a@.b : %a@.res : %a@."
+      t P.print (abscissa_to_point b t) print b print res;*)
     res
   with Not_found -> b
 
