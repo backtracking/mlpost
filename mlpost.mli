@@ -31,18 +31,19 @@ module Ctypes : sig
 
   IFDEF CAIRO THEN
     type matrix = Cairo.matrix =
-      { xx : float; yx : float; xy : float; yy : float; x0 : float; y0 : float; }
+      { xx : float; yx : float; xy : float; yy : float; x0 : float; y0 : float;}
 
     type point = Cairo.point =
         {x : float;
          y : float}
   ELSE
     type matrix =
-      { xx : float; yx : float; xy : float; yy : float; x0 : float; y0 : float; }
+      { xx : float; yx : float; xy : float; yy : float; x0 : float; y0 : float;}
 
     type point = {x : float; y : float}
   END
 end
+
 
 (** {2 Interfaces to basic Metapost datatypes} *)
 
@@ -174,7 +175,10 @@ module Color : sig
       preamble *)
 
   val rgba : float -> float -> float -> float -> t
-  (** similar to [rgb], but takes the factor of transparency *)
+    (** similar to [rgb], but takes the factor of transparency *)
+
+  val rgba : float -> float -> float -> float -> t
+    (** similar to [rgb], but takes the factor of transparency *)
   val rgb8a : int -> int -> int -> int -> t
     (** similar to [rgb8], but takes the factor of transparency *)
 
@@ -835,7 +839,7 @@ and Brush : sig
     ?dash:Dash.t -> ?scale:Num.t ->
     ?brush:t ->
     unit -> t
-  (** [t ~color ~pen ~dash ~scale ~brush] create a brush with color [color] if 
+  (** [t ~color ~pen ~dash ~scale ~brush] create a brush with color [color] if
       TODO *)
 
   val pen : t -> Pen.t option
@@ -917,6 +921,10 @@ and Transform : sig
         given points *)
   val rotate_around : Point.t -> float -> t'
     (** Rotate an object by an angle given in degrees, around a given point *)
+
+  type matrix  = Ctypes.matrix
+
+  val explicit : matrix -> t'
 
   type t = t' list
     (** A transformation is a list of single transformations *)
@@ -1206,8 +1214,8 @@ module Box : sig
 
   type 'a box_creator =
     ?dx:Num.t -> ?dy:Num.t -> ?name:string ->
-    ?brush:Brush.t -> ?stroke:Color.t option -> ?pen:Pen.t ->
-    ?dash:Dash.t -> ?fill:Color.t -> 'a -> t
+    ?brush:Brush.t -> ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t ->
+    ?fill:Color.t -> 'a -> t
     (** All functions used to create boxes take the following optional
 	parameters : [dx] (resp. [dy]) is the horizontal
 	(resp. vertical) padding between the box border and its
@@ -1573,14 +1581,14 @@ module Box : sig
       boundaries *)
 
   val venlarge : t list -> t list
-    (** same as {henlarge} for vertical boundaries *)
+   (** same as {henlarge} for vertical boundaries *)
 
-    val set_post_draw : (t -> Command.t) -> t -> t
-    val clear_post_draw : t -> t
-    val set_pre_draw : (t -> Command.t) -> t -> t
-    val clear_pre_draw : t -> t
+  val set_post_draw : (t -> Command.t) -> t -> t
+  val clear_post_draw : t -> t
+  val set_pre_draw : (t -> Command.t) -> t -> t
+  val clear_pre_draw : t -> t
 
-(** {2 Misc.} *)
+  (** {2 Misc.} *)
 
   val shadow : t -> t
 
@@ -1614,8 +1622,7 @@ module Box : sig
   val yscale : Num.t -> t -> t
   val xscale : Num.t -> t -> t
 
-  (** {2 Boxlike : An argument for functor of object that are similar to box}
- *)
+  (** {2 Boxlike : An argument for functor of object that are similar to box} *)
 
   val set_pos : Point.t -> t -> t
     (** same as center *)
@@ -2397,6 +2404,8 @@ module Legend : sig
 
 end
 
+(** {2 Metapost generation} *)
+
 (* Misc does not appear in the documentation *)
 (**/**)
 module Misc : sig
@@ -2418,19 +2427,37 @@ module Misc : sig
 end
 (**/**)
 
-(** {2 Metapost generation} *)
-
 (** Functions to generate Metapost files *)
 module Metapost : sig
 
-  val generate :
+(**/**) (** This code is deprecated. *)
+  val set_filename_prefix : string -> unit
+    (** Add to the filename given to the emit function this prefix.
+        This function is here just for convenience *)
+
+  (* I believe these functions were only used internally. Commented. *)
+  (*
+  val generate_mp :
+    string ->
     ?prelude:string ->
+    ?eps:bool ->
+    (int * Command.t) list -> unit
+
+  val generate :
+    string ->
+    ?prelude:string ->
+    ?pdf:bool ->
+    ?eps:bool ->
     ?verbose:bool ->
     ?clean:bool ->
-    string -> (string * Command.t) list -> unit
+    (int * Command.t) list -> unit
+    *)
 
+  val emit : string -> Command.t -> unit
   val dump :
     ?prelude:string ->
+    ?pdf:bool ->
+    ?eps:bool ->
     ?verbose:bool ->
     ?clean:bool ->
     string -> unit
@@ -2440,12 +2467,13 @@ module Metapost : sig
 	set, and [.1] otherwise. *)
 
   val dump_mp :
-    ?prelude:string ->
-    ?verbose:bool ->
-    ?clean:bool -> string -> unit
-
+    ?prelude:string -> ?verbose:bool -> ?clean:bool -> string -> unit
   val dump_png :
     ?prelude:string -> ?verbose:bool -> ?clean:bool -> string -> unit
+
+  val read_prelude_from_tex_file : string -> string
+    (** read the prelude from a tex file, until the end of file or the text
+       "\begin\{document\}" if it is outside a comment *)
 
   val dump_tex : ?prelude:string -> string -> unit
     (** [dump_tex ?prelude f] builds a LaTeX file [f.tex] for all the figures,
@@ -2465,19 +2493,8 @@ module Metapost : sig
   val dumpable : unit -> unit
   val depend : string -> unit
 
+(**/**)
 end
-
-(** Helper functions to generate test TeX files *)
-(*
-module Generate : sig
-  val generate_tex : ?pdf:bool -> string -> string -> string
-    -> (int * 'a) list -> unit
-
-  val generate_tex_cairo : string -> string -> string -> string
-    -> (int * 'a) list -> unit
-
-end
-*)
 
 (** Compute concrete values of numerics, points and paths;
    not always available *)
@@ -2579,7 +2596,6 @@ module Concrete : sig
 
   (** {2 Compute the concrete value} *)
   val float_of_num : Num.t -> float
-    (** The value of a num in bp *)
 
   val cpoint_of_point : Point.t -> CPoint.t
 
@@ -2599,6 +2615,21 @@ module Concrete : sig
   val path_of_cpath : CPath.t -> Path.t
 
   val transform_of_ctransform : CTransform.t -> Transform.t
+
+  (** / **) (* These functions are deprecated. *)
+    (** {2 Some options (the mlpost tool takes care of them)} *)
+  val set_verbosity : bool -> unit
+
+  val set_prelude : string -> unit
+    (** set_prelude filename uses the prelude of the file filename
+        for compilation of the tex snippets *)
+
+  val set_prelude2 : string option -> unit
+    (** set_prelude2 prelude uses this prelude
+        for compilation of the tex snippets *)
+
+  val set_t1disasm : string option -> unit
+    (** Deprecated in a next release *)
 
 end
 
@@ -2636,14 +2667,14 @@ module Cairost : sig
 
 end
 
-module Version : sig
-  val version : string
-  val date : string
-end
-
 (**/**)
 module Metapost_tool : sig
   val read_prelude_from_tex_file : string -> string
+end
+
+module Version : sig
+  val version : string
+  val date : string
 end
 
 module Mps : sig

@@ -39,7 +39,6 @@ val temp_png :
 
 (** Same as above, but use a temporary directory and take jobs from the job
    queue *)
-val dump : ?prelude:string -> ?verbose:bool -> ?clean:bool -> string -> unit
 val dump_mp : ?prelude:string -> ?verbose:bool -> ?clean:bool -> string -> unit
 val dump_mps : ?prelude:string -> ?verbose:bool -> ?clean:bool -> string -> unit
 val dump_png : ?prelude:string -> ?verbose:bool -> ?clean:bool -> string -> unit
@@ -52,3 +51,19 @@ val emit_slideshow : string -> Types.commandpic list -> unit
 
 val dumpable : unit -> unit
 val depend : string -> unit
+
+
+(* compatibility *)
+val read_prelude_from_tex_file : string -> string
+
+val emit : string -> Types.commandpic -> unit
+
+val dump :
+  ?prelude:string ->
+  ?pdf:bool ->
+  ?eps:bool ->
+  ?verbose:bool ->
+  ?clean:bool ->
+  string -> unit
+
+val set_filename_prefix : string -> unit

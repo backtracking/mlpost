@@ -19,6 +19,14 @@ let supported = true
 
 type cnum = float
 
+let set_verbosity = Defaults.set_verbosity
+let set_prelude = Defaults.set_prelude_from_file
+let set_prelude2 s =
+  let s = match s with None -> "" | Some s -> s in
+  Defaults.set_prelude s
+
+let set_t1disasm = Defaults.set_t1disasm
+
 module CPoint = Point_lib
 
 module CPath =

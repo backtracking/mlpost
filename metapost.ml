@@ -163,7 +163,6 @@ let dump_mp = wrap_dump temp_mp
 let dump_mps = wrap_dump temp_mps
 let dump_pdf = wrap_dump temp_pdf
 let dump_png = wrap_dump temp_png
-let dump = dump_mps
 
 let generate ?prelude ?verbose ?clean bn figl =
   let figl = List.map (fun (s,f) ->
@@ -201,4 +200,12 @@ let depend myname =
   Printf.printf " : %s.cmlpost\n" myname
 
 
+(* compatibility *)
+let read_prelude_from_tex_file = Metapost_tool.read_prelude_from_tex_file
+let emit = Defaults.emit
 
+let dump ?prelude ?(pdf = false) ?(eps = false) ?verbose ?clean s =
+  if pdf then dump_pdf ?prelude ?verbose ?clean s
+  else dump_mps ?prelude ?verbose ?clean s
+
+let set_filename_prefix = Defaults.set_filename_prefix

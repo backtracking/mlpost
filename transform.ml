@@ -17,6 +17,7 @@
 open Types
 
 type t' = matrix
+type matrix = t'
 
 type t = t' list
 
@@ -29,6 +30,8 @@ let yscaled = Matrix.yscaled
 let zscaled = Matrix.zscaled
 let reflect = Matrix.reflect
 let rotate_around p f = Matrix.rotate_around p (Num.deg2rad f)
+
+let explicit t = t
 
 (* applied the transformations in the order of the list *)
 let id = []
