@@ -189,3 +189,7 @@ let rm t = LowLevel.rm (to_string t)
 let open_out t = open_out (to_string t)
 let open_in t = open_in (to_string t)
 let open_in_gen f i t = open_in_gen f i (to_string t)
+
+let mk ?(dir = Dir.empty) bn ext =
+  let ext = if ext = "" then None else Some ext in
+  { dir = dir ; bn = bn ; ext = ext }

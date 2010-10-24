@@ -78,8 +78,9 @@ let dump_tex ?prelude f =
   Queue.iter
     (fun (s,_) ->
        fprintf fmt "\\hrulefill\\verb!%s!\\hrulefill\\\\[1em]@\n"
-       (File.to_string s);
-       fprintf fmt "\\includegraphics{%s}\\\\@\n" (File.to_string s);
+       s;
+       fprintf fmt "\\includegraphics{%s}\\\\@\n"
+         (File.to_string (File.set_ext (File.from_string s) "mps"));
        fprintf fmt "\\hrulefill\\\\@\n@\n\\medskip@\n";)
     Defaults.figures;
   fprintf fmt "\\end{center}@\n";
@@ -108,12 +109,14 @@ let print_latex_error () =
 
 let mps ?prelude ?(verbose=false) bn figl =
   if figl <> [] then
-    let targets = List.map fst figl in
+    let targets =
+      List.map (fun (bn,_) -> File.set_ext (File.from_string bn) "mps") figl in
     let f, m = mp bn ?prelude figl in
     let s = call_mpost ~verbose f in
     if s <> 0 then print_latex_error ();
     Misc.IntMap.iter (fun k to_ ->
       let from = File.set_ext f (string_of_int k) in
+      let to_ = File.mk to_ "mps" in
       File.move from to_) m;
     targets
     else []
@@ -165,9 +168,6 @@ let dump_pdf = wrap_dump temp_pdf
 let dump_png = wrap_dump temp_png
 
 let generate ?prelude ?verbose ?clean bn figl =
-  let figl = List.map (fun (s,f) ->
-    let s = File.from_string s in
-    File.set_ext s "mps", f) figl in
   ignore (temp_mps ?prelude ?verbose ?clean bn figl)
 
 let slideshow l k =
@@ -189,13 +189,11 @@ let emit_slideshow s l =
 
 
 let dumpable () =
-  Queue.iter (fun (s,_) ->
-    let s = File.set_ext s "" in
-    Printf.printf "%s\n" (File.to_string s)) Defaults.figures
+  Queue.iter (fun (s,_) -> Printf.printf "%s\n" s) Defaults.figures
 
 let depend myname =
   Queue.iter (fun (s,_) ->
-    Printf.printf "%s" (File.to_string (File.set_ext s "fmlpost")))
+    Printf.printf "%s" (File.to_string (File.mk s "fmlpost")))
     Defaults.figures;
   Printf.printf " : %s.cmlpost\n" myname
 

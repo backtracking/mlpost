@@ -37,6 +37,9 @@ end
 type t
 (** a file name, including directory information *)
 
+val mk : ?dir:Dir.t -> string -> string -> t
+(** give a directory, a base name and an extension, and obtain a file name *)
+
 val from_string : string -> t
 
 val to_string : t -> string

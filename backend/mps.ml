@@ -433,13 +433,10 @@ let generate_one fn fig =
 
 let mps figl =
   List.map (fun (fn,fig) ->
+    let fn = File.mk fn "mps" in
 (*     Format.printf "metapost code:\n %a@."Print.commandpic fig; *)
     generate_one fn fig) figl
 
 let dump () = ignore (mps (Defaults.emited ()))
 
-let generate figs =
-  let figl = List.map (fun (s,f) ->
-    let s = File.from_string s in
-    File.set_ext s "mps", f) figs in
-  ignore (mps figl)
+let generate figs = ignore (mps figs)

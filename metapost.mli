@@ -15,7 +15,7 @@ val generate :
 (** Generate files of corresponding type, using the argument of type [jobs],
    and return information about the created files *)
 val mp :
-  string -> ?prelude:string -> Defaults.jobs -> File.t * File.t Misc.IntMap.t
+  string -> ?prelude:string -> Defaults.jobs -> File.t * string Misc.IntMap.t
 val mps :
   ?prelude:string -> ?verbose:bool -> string -> Defaults.jobs -> File.t list
 val pdf :
@@ -26,7 +26,7 @@ val png :
 (** Same as above, but use a temporary directory *)
 val temp_mp :
   ?prelude:string -> ?verbose:bool -> ?clean:bool -> string -> Defaults.jobs ->
-    File.t * File.t Misc.IntMap.t
+    File.t * string Misc.IntMap.t
 val temp_mps :
   ?prelude:string -> ?verbose:bool -> ?clean:bool -> string ->
     Defaults.jobs -> File.t list

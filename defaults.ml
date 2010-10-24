@@ -27,15 +27,14 @@ let append_required_file f =
 let get_verbosity, set_verbosity = mk_ref_default default_verbosity
 let get_debug, set_debug = mk_ref_default default_debug
 
-type job = File.t * Types.commandpic
+type job = string * Types.commandpic
 type jobs = job list
 
 let figures = Queue.create ()
 
 let emit s f =
-  let fn =
-    File.set_ext (File.from_string (get_filename_prefix ()^s)) "mps" in
-  Queue.add (fn, f) figures
+  let s = get_filename_prefix () ^ s in
+  Queue.add (s, f) figures
 
 let emited () = Queue.fold (fun l t -> t :: l) [] figures
 

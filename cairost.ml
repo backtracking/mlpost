@@ -33,7 +33,7 @@ let emit_cairo = emit_cairo
 
 let dump_pdf () =
   Queue.iter (fun (fname,fig) ->
-    let pdfname = File.set_ext fname "pdf" in
+    let pdfname = File.mk fname "pdf" in
     let pdfname_s = File.to_string pdfname in
     try emit_pdf pdfname_s fig
     with
@@ -58,7 +58,7 @@ let generate_pdfs pdffile figs = List.iter
 
 let dump_ext ext f () =
   Queue.iter (fun (fname,fig) ->
-    let s = File.to_string (File.set_ext fname ext) in
+    let s = File.to_string (File.mk fname ext) in
     f s fig) Defaults.figures
 
 let dump_ps = dump_ext "ps" emit_ps

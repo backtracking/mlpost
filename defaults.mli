@@ -18,7 +18,7 @@ val get_verbosity : unit -> bool
 val set_debug : bool -> unit
 val get_debug : unit -> bool
 
-type job = File.t * Types.commandpic
+type job = string * Types.commandpic
 type jobs = job list
 
 val figures : job Queue.t
