@@ -51,7 +51,7 @@ let ends_with en s =
   else false
 
 
-let rec read_up_to_one =
+let read_up_to_one =
   let end_ = "[1]" in
   let rec aux inc =
     if ends_with end_ (input_line inc) then () else aux inc in
