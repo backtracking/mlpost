@@ -2448,16 +2448,11 @@ module Metapost : sig
     ?prelude:string ->
     ?eps:bool ->
     (int * Command.t) list -> unit
+    *)
 
   val generate :
-    string ->
-    ?prelude:string ->
-    ?pdf:bool ->
-    ?eps:bool ->
-    ?verbose:bool ->
-    ?clean:bool ->
-    (int * Command.t) list -> unit
-    *)
+    ?prelude:string -> ?verbose:bool -> ?clean:bool ->
+    string -> (string * Command.t) list -> unit
 
   val emit : string -> Command.t -> unit
   val dump :
@@ -2725,3 +2720,11 @@ module Mps : sig
   val generate : (string * Command.t) list -> unit
 end
 (**/**)
+
+module Defaults : sig
+  val set_prelude : string -> unit
+  val set_filename_prefix : string -> unit
+  val set_required_files : string list -> unit
+  val set_verbosity : bool -> unit
+  val set_t1disasm : string option -> unit
+end
