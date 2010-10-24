@@ -19,6 +19,7 @@ open Misc
 open Concrete_types
 open Types
 module C = Compiled_types
+module M = Matrix
 
 let externalimage_dimension filename : float * float =
   let inch = Unix.open_process_in ("identify -format \"%h\\n%w\" "^filename) in
@@ -72,7 +73,7 @@ and color fmt = function
 and point fmt { Point_lib.x = x ; y = y } =
   fprintf fmt "(%a,@ %a@,)" num x num y
 
-and transform fmt t = Matrix.print fmt t
+and transform fmt t = fprintf fmt "transformed %s" t
 
 and picture fmt = function
   | C.PITex s -> fprintf fmt "btex %s etex" s
@@ -181,8 +182,8 @@ xxpart %s = %a;@\n\
 xypart %s = %a;@\n\
 yxpart %s = %a;@\n\
 yypart %s = %a;@\n@." n
-        n num t.C.x0 n
-        num t.C.y0 n num t.C.xx n num t.C.xy n num t.C.yx n num t.C.yy
+        n num t.M.x0 n
+        num t.M.y0 n num t.M.xx n num t.M.xy n num t.M.yx n num t.M.yy
   | C.CClip (pic,pth) -> fprintf fmt "clip %s to %a;@\n" pic path pth
   | C.CExternalImage (filename, spec) ->
       match spec with

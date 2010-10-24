@@ -50,11 +50,9 @@ and path =
   | PABBox of picture
   | PAName of name
 
-and matrix =
-    { xx : num; yx : num;
-      xy : num; yy : num; x0 : num; y0 : num; }
+and matrix = Types.matrix
 
-and transform = Matrix.t
+and transform = name
 
 and picture =
   | PITex of string

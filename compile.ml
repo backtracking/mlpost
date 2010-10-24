@@ -192,7 +192,9 @@ and commandpic_cmd pc =
   | Seq l -> C.CSeq (List.map commandpic_cmd l)
 
 and transform t =
-  List.fold_left Matrix.multiply Matrix.identity t, nop
+  let t = List.fold_left Matrix.multiply Matrix.identity t in
+  let pn = Name.transform () in
+  pn, C.CDefTrans (pn, t)
 
 and pen p =
     match p.Hashcons.node with
