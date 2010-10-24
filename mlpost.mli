@@ -27,6 +27,12 @@ module Signature : sig
 
 end
 
+module File : sig
+  type t
+  val from_string : string -> t
+  val to_string : t -> string
+end
+
 module Ctypes : sig
 
   IFDEF CAIRO THEN
@@ -2466,9 +2472,46 @@ module Metapost : sig
 	names specified to [emit]. The file suffix is [.mps] if [pdf] is
 	set, and [.1] otherwise. *)
 
+  type job = string * Command.t
+  type jobs = job list
+  (** Generate files of corresponding type, using the argument of type [jobs],
+     and return information about the created files *)
+(* (* FIXME export this function, too *)
+  val mp :
+    string -> ?prelude:string -> jobs -> File.t * string Misc.IntMap.t
+*)
+  val mps :
+    ?prelude:string -> ?verbose:bool -> string -> jobs -> File.t list
+  val pdf :
+    ?prelude:string -> ?verbose:bool -> string -> jobs -> File.t list
+  val png :
+    ?prelude:string -> ?verbose:bool -> string -> jobs -> File.t list
+
+  (** Same as above, but use a temporary directory *)
+(* (* FIXME export this function, too *)
+  val temp_mp :
+    ?prelude:string -> ?verbose:bool -> ?clean:bool -> string -> jobs ->
+      File.t * string Misc.IntMap.t
+*)
+  val temp_mps :
+    ?prelude:string -> ?verbose:bool -> ?clean:bool -> string ->
+      jobs -> File.t list
+  val temp_pdf :
+    ?prelude:string -> ?verbose:bool -> ?clean:bool -> string ->
+      jobs -> File.t list
+  val temp_png :
+    ?prelude:string -> ?verbose:bool -> ?clean:bool -> string ->
+      jobs -> File.t list
+
+  (** Same as above, but use a temporary directory and take jobs from the job
+     queue *)
   val dump_mp :
     ?prelude:string -> ?verbose:bool -> ?clean:bool -> string -> unit
+  val dump_mps :
+    ?prelude:string -> ?verbose:bool -> ?clean:bool -> string -> unit
   val dump_png :
+    ?prelude:string -> ?verbose:bool -> ?clean:bool -> string -> unit
+  val dump_pdf :
     ?prelude:string -> ?verbose:bool -> ?clean:bool -> string -> unit
 
   val read_prelude_from_tex_file : string -> string

@@ -207,3 +207,6 @@ let dump ?prelude ?(pdf = false) ?(eps = false) ?verbose ?clean s =
   else dump_mps ?prelude ?verbose ?clean s
 
 let set_filename_prefix = Defaults.set_filename_prefix
+
+type job = Defaults.job
+type jobs = Defaults.jobs
