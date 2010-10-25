@@ -249,6 +249,8 @@ let specials_division = 1000.
 let add_color_se clr se =
   match clr with
     | None -> clr
+    | Some OPAQUE Gray _ -> clr
+    | Some OPAQUE CMYK _ -> clr
     | Some OPAQUE RGB (r,_,_) when r <> specials_signal -> clr
     | Some clr ->
       let nb =
