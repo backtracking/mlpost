@@ -123,13 +123,19 @@ module MPS = struct
   let transform fmt t =
     if t = Matrix.identity then () else fprintf fmt "%a concat" matrix t
 
+  let scolor_rgb fmt r g b =
+    fprintf fmt "%a %a %a setrgbcolor" float r float g float b
+
+  let scolor_cmyk fmt c m y k =
+    fprintf fmt "%a %a %a %a setcmykcolor" float c float m float y float k
+
+  let scolor_gray fmt c = fprintf fmt "%a setgray" float c
+
   let scolor fmt c =
     match c with
-    | Concrete_types.RGB (r,g,b) ->
-        fprintf fmt "%a %a %a setrgbcolor" float r float g float b
-    | Concrete_types.CMYK (c,m,y,k) ->
-        fprintf fmt "%a %a %a %a setcmykcolor" float c float m float y float k
-    | Concrete_types.Gray c -> fprintf fmt "%a setgray" float c
+    | Concrete_types.RGB (r,g,b) -> scolor_rgb fmt r g b
+    | Concrete_types.CMYK (c,m,y,k) -> scolor_cmyk fmt c m y k
+    | Concrete_types.Gray c -> scolor_gray fmt c
 
   let color fmt c =
     match c with
@@ -137,6 +143,13 @@ module MPS = struct
     | Concrete_types.TRANSPARENT _ ->
       (* harvest take care of that case *)
       assert false
+
+  let dvi_color fmt c =
+    match c with
+    | Dviinterp.RGB (r,g,b) -> scolor_rgb fmt r g b
+    | Dviinterp.CMYK (c,m,y,k) -> scolor_cmyk fmt c m y k
+    | Dviinterp.HSB _ -> assert false
+    | Dviinterp.Gray g -> scolor_gray fmt g
 
   let char_const fmt c = fprintf fmt "\\%03lo" c
 
@@ -161,14 +174,14 @@ end
 
 let in_context fmt f = fprintf fmt "%t %t %t" MPS.gsave f MPS.grestore
 
-let fill_rect fmt trans _ x y w h =
-  (** FIXME take into account info *)
+let fill_rect fmt trans i x y w h =
   let x = point_of_cm x and y = point_of_cm y
   and w = point_of_cm w and h = point_of_cm h in
   let p = { x = x ; y = y } in
   in_context fmt (fun _ ->
-    fprintf fmt "%a %a"
+    fprintf fmt "%a %a %a"
       MPS.transform trans
+      MPS.dvi_color i.Dviinterp.color
       MPS.rectanglep (p,w,h)
   )
 
