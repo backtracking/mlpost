@@ -174,9 +174,10 @@ let fill_rect fmt trans _ x y w h =
 
 let draw_char fmt trans text =
   (** FIXME take into account info *)
+  (* FIXME why do we need to negate y coordinates? *)
   let (f1,f2) = text.tex_pos in
   let f1 = point_of_cm f1 and f2 = point_of_cm f2 in
-  let p = { x = f1; y = f2 } in
+  let p = { x = f1; y = -. f2 } in
   in_context fmt (fun _ ->
     fprintf fmt "%a %a %a"
       MPS.transform trans
