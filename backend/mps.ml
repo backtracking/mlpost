@@ -186,14 +186,14 @@ let fill_rect fmt trans i x y w h =
   )
 
 let draw_char fmt trans text =
-  (** FIXME take into account info *)
   (* FIXME why do we need to negate y coordinates? *)
   let (f1,f2) = text.tex_pos in
   let f1 = point_of_cm f1 and f2 = point_of_cm f2 in
   let p = { x = f1; y = -. f2 } in
   in_context fmt (fun _ ->
-    fprintf fmt "%a %a %a"
+    fprintf fmt "%a %a %a %a"
       MPS.transform trans
+      MPS.dvi_color text.Dviinterp.tex_info.Dviinterp.color
       MPS.moveto p
       MPS.glyphp (text.tex_string, text.tex_font)
   )
@@ -514,7 +514,6 @@ hex-bitstring
  *)
 let fontdecl fmt f map =
   let n = Fonts.tex_name f in
-  (* FIXME this is not exactly as metapost does *)
   let d = Fonts.design_size f in
   let r = point_of_cm (Fonts.ratio_cm f) in
   let magic_string = BitMap.chars map in
