@@ -215,9 +215,7 @@ and path' = function
 (*       Spline_lib.buildcycle npl *)
   | PASub (f1, f2, p) ->
       let p = path p in
-      let f1 = Spline_lib.abscissa_of_metapost p (num f1) in
-      let f2 = Spline_lib.abscissa_of_metapost p (num f2) in
-      Spline_lib.subpath p f1 f2
+      Spline_lib.subpath p (num f1) (num f2)
   | PABBox p ->
       let p = commandpic p in
       let pmin,pmax = Picture_lib.bounding_box p in

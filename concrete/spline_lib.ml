@@ -142,10 +142,6 @@ let abscissa_to_point p0 t =
     | Point p when t = 0. -> p
     | Point _ -> Error.absc_point "abscissa_to_point"
 
-let metapost_of_abscissa _ t = t
-
-let abscissa_of_metapost _ t = t
-
 let direction_of_abscissa p0 t =
   match p0 with
     | Point _ -> Error.dir_point "direction_of_abscissa"
@@ -364,7 +360,3 @@ let of_bounding_box ({x=x_min;y=y_min},{x=x_max;y=y_max}) =
   let ul = {x=x_min;y=y_max} in
   let ur = {x=x_max;y=y_max} in
   close (create_lines [ul;ur;dr;dl;ul])
-
-
-let length l = float (length l)
-let metapost_length = length

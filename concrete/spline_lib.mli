@@ -49,9 +49,8 @@ val close : path -> path
 
 val min_abscissa : path -> abscissa
 val max_abscissa : path -> abscissa
-val length : path -> float
-val metapost_length : path -> float
-(** It's not the real length of the path *)
+val length : path -> int
+(** number of vertex *)
 
 val add_end : path -> point -> point -> path
   (** add_end p a b return the path p with one more spline at the end.*)
@@ -122,7 +121,3 @@ val of_bounding_box : point * point -> path
 
 val print : Format.formatter -> path -> unit
 val print_splines : Format.formatter -> Spline.t list -> unit
-
-val abscissa_of_metapost : path -> float -> abscissa
-val metapost_of_abscissa : path -> abscissa -> float
-

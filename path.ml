@@ -71,12 +71,10 @@ let xscale n p = mkPATransformed p [Transform.xscaled n]
 
 let point (f: float) p =
   let p = Compute.path p in
-  let f = Spline_lib.abscissa_of_metapost p f in
   Spline_lib.abscissa_to_point p f
 
 let direction (f: float) p =
   let p = Compute.path p in
-  let f = Spline_lib.abscissa_of_metapost p f in
   Spline_lib.direction_of_abscissa p f
 
 let pointn = point

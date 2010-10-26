@@ -61,7 +61,7 @@ struct
 
   let length p =
     let p = Compute.path p in
-    Spline_lib.metapost_length p
+    float (Spline_lib.length p)
 
   let defaultjoint = jCurve
   let defaultdir = noDir

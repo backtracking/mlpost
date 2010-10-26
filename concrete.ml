@@ -35,19 +35,13 @@ module CPath =
     type t = S.path
     type abscissa = float
 
-    let length = S.metapost_length
+    let length p = float (S.length p)
     let is_closed = S.is_closed
     let is_a_point x = S.is_a_point x
 
-    let c_metapost_of_abscissa p1 p2 (t1,t2) =
-      S.metapost_of_abscissa p1 t1,
-      S.metapost_of_abscissa p2 t2
+    let intersection p1 p2 = S.intersection p1 p2
 
-    let intersection p1 p2 =
-      List.map (c_metapost_of_abscissa p1 p2) (S.intersection p1 p2)
-
-    let one_intersection p1 p2 =
-      c_metapost_of_abscissa p1 p2 (S.one_intersection p1 p2)
+    let one_intersection p1 p2 = S.one_intersection p1 p2
 
     let reverse = S.reverse
 
@@ -57,25 +51,18 @@ module CPath =
     let cut_before = S.cut_before
     let cut_after = S.cut_after
 
-    let split p t =  S.split p (S.abscissa_of_metapost p t)
+    let split = S.split
 
-    let subpath p t1 t2 =
-      S.subpath p (S.abscissa_of_metapost p t1) (S.abscissa_of_metapost p t2)
+    let subpath = S.subpath
 
-    let direction_of_abscissa p t1 =
-      S.direction_of_abscissa p (S.abscissa_of_metapost p t1)
-    let point_of_abscissa p t1 =
-      S.abscissa_to_point p (S.abscissa_of_metapost p t1)
+    let direction_of_abscissa = S.direction_of_abscissa
+    let point_of_abscissa = S.abscissa_to_point
 
     let bounding_box = S.bounding_box
 
-    let dist_min_point path point =
-      let d, a = S.dist_min_point path point in
-      d, S.metapost_of_abscissa path (a)
+    let dist_min_point = S.dist_min_point
 
-    let dist_min_path path1 path2 =
-      let d, (a1, a2) = S.dist_min_path path1 path2 in
-      d, c_metapost_of_abscissa path1 path2 (a1,a2)
+    let dist_min_path = S.dist_min_path
 
     let print = S.print
 
