@@ -52,9 +52,13 @@ let ends_with en s =
 
 
 let read_up_to_one =
+  (* FIXME deal with EOF exception: in this case, the user latex was probably
+   * broken and latex stopped with an error *)
   let end_ = "[1]" in
   let rec aux inc =
-    if ends_with end_ (input_line inc) then () else aux inc in
+    let s = input_line inc in
+    print_endline s;
+    if ends_with end_ s then () else aux inc in
   aux
 
 let read_up_to_one p = read_up_to_one p.outc
