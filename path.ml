@@ -97,7 +97,8 @@ type orientation =
 let divise_dir l =
   let rec fct left_down right_up listn =function
     |[] -> left_down,right_up,listn
-    |((Leftn _|Rightn _|Downn _|Upn _) as x) ::res -> fct left_down right_up (x::listn) res
+    |((Leftn _|Rightn _|Downn _|Upn _) as x) ::res ->
+      fct left_down right_up (x::listn) res
     |((Left|Down) as x) ::res -> fct (x::left_down) right_up listn res
     |((Right|Up) as x) ::res -> fct left_down (x::right_up) listn res
   in
@@ -115,7 +116,8 @@ let dist_horizontal dirlist abs distance =
 			    |Leftn n -> (-/) a n
 			    |Rightn n -> (+/) a n
 			    |_ -> failwith "impossible") distance listn in
-  let dist,b = if diff = 0 then (bp 10.),false else (gmean ((/./) d (float diff)) zero),true in
+  let dist,b = if diff = 0 then (bp 10.),false
+    else (gmean ((/./) d (float diff)) zero),true in
 
   let rec fct acc abs = function
     |[] -> List.rev acc
@@ -143,7 +145,8 @@ let dist_vertical dirlist ordo distance =
 			    |Upn n -> (+/) a n
 			    |_ -> failwith "impossible") distance listn in
 
-  let dist,b = if diff = 0 then (bp 10.),false else (gmean ((/./) d (float diff)) zero),true in
+  let dist,b = if diff = 0 then (bp 10.),false
+    else (gmean ((/./) d (float diff)) zero),true in
   let rec fct acc ordo = function
     |[] -> List.rev acc
     |Down::res ->
@@ -164,7 +167,8 @@ let smart_path ?style dirlist p1 p2 =
   let width = (-/) (xpart p2) (xpart p1) in
   let height = (-/) (ypart p2) (ypart p1) in
   let dirhorizontal, dirvertical = List.partition
-    (fun x -> match x with |(Left|Right|Leftn _|Rightn _) -> true |_->false) dirlist in
+    (fun x -> match x with |(Left|Right|Leftn _|Rightn _) -> true
+      |_->false) dirlist in
   let lesdisth = dist_horizontal dirhorizontal (xpart p1) width in
   let lesdistv = dist_vertical dirvertical (ypart p1) height in
 
