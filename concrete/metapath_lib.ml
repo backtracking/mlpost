@@ -516,14 +516,14 @@ let print_option f fmt = function
    make_choices knots;
    if debug then
      Format.printf "@[after : @[%a@]@]@." print_kpath knots;
-   let rec aux smin = function
+   let rec aux = function
    | {right = Endpoint} -> []
    | {right = Explicit sb;coord = sa;
       link={left = Explicit sc;coord = sd} as s} ->
-        Spline.create ~min:smin ~max:(smin +. 1.) sa sb sc sd ::
-          (if s==knots then [] else (aux (smin+.1.) s))
+        Spline.create sa sb sc sd ::
+          (if s==knots then [] else (aux s))
    | _ -> assert false in
-   aux 0. knots
+   aux knots
 
 let kto_path ?cycle = function
  | Start p -> S.Point p

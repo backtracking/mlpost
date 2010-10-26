@@ -9,8 +9,6 @@ type t =
     sb : point;
     sc : point;
     sd : point;
-    smin : abscissa;
-    smax : abscissa;
   }
 
 let inter_depth = ref 15
@@ -19,35 +17,23 @@ let debug = false
 let pt_f fmt p = Format.fprintf fmt "{@[ %.20g,@ %.20g @]}" p.x p.y
 
 let print fmt pt =
-  Format.fprintf fmt "@[%f|%f { %a,@ %a,@ %a,@ %a }@]@."
-    pt.smin pt.smax pt_f pt.sa pt_f pt.sb pt_f pt.sc pt_f pt.sd
+  Format.fprintf fmt "@[{ %a,@ %a,@ %a,@ %a }@]@."
+    pt_f pt.sa pt_f pt.sb pt_f pt.sc pt_f pt.sd
 
-let s_of_01 s t = t *. (s.smax -. s.smin) +. s.smin
-let _01_of_s s t = (t -. s.smin) /. (s.smax -. s.smin)
-
-let create ?(min=0.) ?(max=1.) a b c d =
+let create a b c d =
   {
     sa = a; sb = b;
     sc = c; sd = d;
-    smin = min; smax = max;
   }
 
 
 let create_with_offset offs a b c d =
-  create ~min:offs ~max:(offs +. 1.) a b c d
-
-let min t = t.smin
-let max t = t.smax
+  create a b c d
 
 let explode s = s.sa, s.sb, s.sc, s.sd
 
-let set_min_max fmin fmax b =
-  { b with smin = fmin b.smin ;
-           smax = fmax b.smax
-  }
-
-let reverse conv {sa=sa;sb=sb;sc=sc;sd=sd;smin=smin;smax=smax} =
-  {sa=sd;sb=sc;sc=sb;sd=sa; smin=conv smax; smax=conv smin}
+let reverse conv {sa=sa;sb=sb;sc=sc;sd=sd} =
+  {sa=sd;sb=sc;sc=sb;sd=sa}
 
 let right_control_point t = t.sc
 let right_point t = t.sd
@@ -66,7 +52,9 @@ let point_of s t =
   { x=cubic s.sa.x s.sb.x s.sc.x s.sd.x t;
     y=cubic s.sa.y s.sb.y s.sc.y s.sd.y t;}
 
-let point_of_s s t = point_of s (_01_of_s s t)
+let point_of_s s t =
+  assert ( 0. <= t && t <= 1.);
+  point_of s t
 
 let direction s t =
   (* An expression as polynomial:
@@ -184,17 +172,16 @@ let intersect_fold f acc a b =
   let nmax = int_of_float (2.**(float_of_int (!inter_depth+1))) in
   aux acc a b 0 0 nmax !inter_depth
 
-exception Found of float*float
+exception Found of int*int
 
 let one_intersection a b =
   let nmax = 2.**(float_of_int (!inter_depth+1)) in
-  let f_from_i s x = s_of_01 s ((float_of_int x)*.(1./.nmax)) in
+  let f_from_i x = (float_of_int x)*.(1./.nmax) in
   try
-    intersect_fold (fun (x,y) () -> raise (Found (f_from_i a x,f_from_i b y)))
-      () a b
-    ; raise Not_found
+    intersect_fold (fun (x,y) () -> raise (Found (x,y))) () a b;
+    raise Not_found
   with
-  Found (t1,t2) -> t1,t2
+  Found (t1,t2) -> f_from_i t1, f_from_i t2
 
 module UF = Unionfind
 
@@ -230,8 +217,8 @@ let intersection a b =
           List.iter (fun (f1,f2) -> Format.fprintf fmt "%i,%i" f1 f2)
         ) l;
     let l = rem_noise (2 * !inter_depth) (16 * !inter_depth) l in
-    let f_from_i s x = s_of_01 s (x *. (1./.nmax)) in
-    let res = List.rev_map (fun (x,y) -> (f_from_i a x,f_from_i b y)) l in
+    let f_from_i x = x *. (1./.nmax) in
+    let res = List.rev_map (fun (x,y) -> (f_from_i x,f_from_i y)) l in
     if debug then
       Format.printf "@[%a@]@." (fun fmt -> List.iter (pt_f fmt))
         (List.map (fun (t1,t2) ->
@@ -244,10 +231,11 @@ type split =
   | InBetween of t * t
 
 let split s t =
-  if t = s.smax then Max
-  else if t = s.smin then Min
+  assert (0. <= t && t <= 1.);
+  if t = 1. then Max
+  else if t = 0. then Min
   else
-    let t0 = _01_of_s s t in
+    let t0 = (*_01_of_s s*) t in
     let _1t0 = 1.-.t0 in
     let b1 = t0 */ s.sb +/ _1t0 */ s.sa in
     let c1 =
@@ -259,8 +247,8 @@ let split s t =
     let c2 = _1t0 */ s.sc +/ t0 */ s.sd in
     let b2 =
       (_1t0*._1t0) */ s.sb +/ (2.*._1t0*.t0) */ s.sc +/ (t0*.t0) */ s.sd in
-    InBetween ({s with sb = b1;sd = d1;sc = c1;smax = t0},
-               {s with sa = a2;sb = b2;sc = c2;smin = t})
+    InBetween ({s with sb = b1;sd = d1;sc = c1},
+               {s with sa = a2;sb = b2;sc = c2})
 
 let norm2 a b = a*.a +. b*.b
 
@@ -285,7 +273,7 @@ let dist_min_point ({x=px;y=py} as p) s =
         let t1 = float_of_int (t1 + dt/2) /. nmax in
         let pt1 = point_of s t1 in
         let dist = P.dist2 pt1 p in
-        if dist < min then (dist, s_of_01 s t1) else pmin
+        if dist < min then (dist, t1) else pmin
     | n ->
         let dt = dt/2 in
         let (af,al) = bisect a in
@@ -301,7 +289,7 @@ let dist_min_point ({x=px;y=py} as p) s =
           let pmin = doit pmin dist_al al (t1+dt) in
           doit pmin dist_af af t1
   in
-  let pmin = P.dist2 (left_point s) p, min s in
+  let pmin = P.dist2 (left_point s) p, 0. in
   aux s pmin 0 (int_of_float nmax) !inter_depth
 
 let dist_min_spline s1 s2 =
@@ -313,7 +301,7 @@ let dist_min_spline s1 s2 =
       let ap = point_of s1 t1 in
       let bp = point_of s2 t2 in
       let dist = norm2 (ap.x -. bp.x) (ap.y -. bp.y) in
-      if dist < min then (dist,(s_of_01 s1 t1,s_of_01 s2 t2)) else pmin
+      if dist < min then (dist,(t1,t2)) else pmin
     | n -> let n = n-1 in
       let dt = dt/2 in
       let (af,al) = bisect a in
@@ -327,21 +315,18 @@ let dist_min_spline s1 s2 =
                         dist, doit dist am bm t1 t2) l in
       let l = List.fast_sort (fun (da,_) (db,_) -> compare da db) l in
       List.fold_left (fun pmin (_,doit) -> doit pmin) pmin l in
-  let pmin = P.dist2 (left_point s1) (left_point s2), (min s1, min s2) in
+  let pmin = P.dist2 (left_point s1) (left_point s2), (0., 0.) in
   aux s1 s2 pmin 0 0 (int_of_float nmax) !inter_depth
 
 let translate t a =
-  { a with
-       sa= a.sa +/ t;
-       sb=a.sb +/ t;
-       sc=a.sc +/ t;
-       sd=a.sd +/ t
-  }
+  { sa = a.sa +/ t;
+    sb = a.sb +/ t;
+    sc = a.sc +/ t;
+    sd = a.sd +/ t}
 
 let transform t a =
-  { a with
-    sa=P.transform t a.sa;
-    sb=P.transform t a.sb;
-    sc=P.transform t a.sc;
-    sd=P.transform t a.sd
+  { sa = P.transform t a.sa;
+    sb = P.transform t a.sb;
+    sc = P.transform t a.sc;
+    sd = P.transform t a.sd
   }

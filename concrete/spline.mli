@@ -11,30 +11,19 @@ val debug : bool
 
 val print : Format.formatter -> t -> unit
 
-val create :
-  ?min:float -> ?max:float -> point -> point -> point -> point -> t
+val create : point -> point -> point -> point -> t
 (** [create a b c d] creates a spline with points a and d and
     control points b and c. By default, the abscissa of the spline
     starts at [0.] and ends at [1.].
 
-    @param min give minimal abscissa
-    @param max give maximal abscissa
 *)
 
 val create_with_offset : float -> point -> point -> point -> point -> t
 (** create a spline with abscissa between [ [f,f+1] ] *)
 
-val min : t -> abscissa
-(** minimal abscissa *)
-val max : t -> abscissa
-(** maximal abscissa *)
-
 val explode : t -> point * point * point * point
 (** return the four points of the spline; left point, left control
     point, second point, second control point*)
-
-val set_min_max : (float -> float) -> (float -> float) -> t -> t
-(** set the minimal and maximal abscissa using two functions. *)
 
 val left_point : t -> point
 val left_control_point : t -> point
@@ -44,15 +33,6 @@ val right_control_point : t -> point
 
 val reverse : (float -> float) -> t -> t
 (** reverse a spline, using a conversion function for max and min *)
-
-val _01_of_s : t -> abscissa -> abscissa
-(** take an abscissa on spline [s], and compute its position as if
-    minimal and maximal abscissa of the spline were 0. and 1. *)
-
-val s_of_01 : t -> abscissa -> abscissa
-(** inverse of _01_of_s: take an abscissa between 0. and 1. and return the
-   corresponding abscissa of the spline, taking into account its minimal and
-   maximal abscissa *)
 
 val point_of : t -> abscissa -> point
 (** compute the location of the given abscissa on a spline *)

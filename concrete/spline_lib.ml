@@ -88,24 +88,21 @@ let create_lines = function
       Path { pl = aux l; cycle = false }
 
 let min_abscissa = function
-  | Path p -> Spline.min (List.hd p.pl)
+  | Path p -> 0.
   | Point _ -> 0.
 
-let max_abscissa = function
-  | Path p ->
-      let rec aux = function
-        | [] -> assert false
-        | [a] -> Spline.max a
-        | a::l -> aux l in
-      aux p.pl
-  | Point _ -> 0.
+let length = function
+  | Point _ -> 0
+  | Path p -> List.length p.pl
+
+let max_abscissa p = float (length p)
 
 let with_last f p acc =
   let rec aux = function
     | [] -> assert false
     | [e] ->
         let sd = Spline.right_point e and sc = Spline.right_control_point e in
-        e :: (f sc sd (Spline.max e)) :: acc
+        e :: (f sc sd) :: acc
     | a::l -> a::(aux l)
   in
   {p with pl = aux p.pl}
@@ -114,74 +111,46 @@ let add_end p c d =
   match p with
   | Point p -> create p c c d
   | Path p ->
-      Path (with_last (fun mb a smax ->
-        Spline.create_with_offset smax a (2. */ a -/ mb) c d) p [])
+      Path (with_last (fun mb a -> Spline.create a (2. */ a -/ mb) c d) p [])
 
 let add_end_line p d =
   match p with
   | Point p -> create_line p d
   | Path p ->
-      Path (with_last (fun mb a smax ->
-        Spline.create_with_offset smax a a d d) p [])
+      Path (with_last (fun mb a -> Spline.create a a d d) p [])
 
 let add_end_spline p sb sc d =
   match p with
   | Point p -> create p sb sc d
   | Path p ->
-      Path (with_last (fun _ a smax ->
-        Spline.create_with_offset smax a sb sc d) p [])
+      Path (with_last (fun _ a -> Spline.create a sb sc d) p [])
+
+let abscissa_to f pl t =
+  let tn,tf = truncate t, t -. floor t in
+  let rec aux tn l =
+    match tn,l with
+      |_,[] -> Error.max_absc "abscissa_to"
+      |0,a::l -> f a tf
+      |_,_::l -> aux (pred tn) l
+  in
+  if 0. > t then Error.min_absc "abscissa_to"
+  else aux tn pl
 
 let abscissa_to_point p0 t =
   match p0 with
-    | Path p ->
-        let rec aux = function
-          |[] -> Error.max_absc "abscissa_to_point"
-          | a::l when Spline.max a >= t -> Spline.point_of_s a t
-          | _::l -> aux l
-        in
-        if min_abscissa p0 > t then Error.min_absc "abscissa_to_point"
-        else aux p.pl
+    | Path p -> abscissa_to Spline.point_of_s p.pl t
     | Point p when t = 0. -> p
     | Point _ -> Error.absc_point "abscissa_to_point"
 
-let metapost_of_abscissa p0 t =
-  match p0 with
-    | Path p ->
-        let rec aux s = function
-          |[] -> Error.max_absc "metapost_of_abscissa"
-          | a::l when Spline.max a >= t -> s +.(Spline._01_of_s a t)
-          | _::l -> aux (s+.1.) l
-        in
-        if min_abscissa p0 > t then Error.min_absc "metapost_of_abscissa"
-        else aux 0. p.pl
-    | Point p when t = 0. -> 0.
-    | Point _ -> Error.absc_point "metapost_of_abscissa"
+let metapost_of_abscissa _ t = t
 
-let abscissa_of_metapost p0 t =
-  match p0 with
-    | Path p ->
-        let rec aux t = function
-          |[] -> Error.max_absc "abscissa_of_metapost"
-          | a::l when 1. >= t -> Spline.s_of_01 a t
-          | _::l -> aux (t-.1.) l
-        in
-        if 0. > t then Error.min_absc ~value:t "abscissa_of_metapost"
-        else aux t p.pl
-    | Point p when t = 0. -> 0.
-    | Point _ -> Error.absc_point "abscissa_of_metapost"
+let abscissa_of_metapost _ t = t
 
 let direction_of_abscissa p0 t =
   match p0 with
     | Point _ -> Error.dir_point "direction_of_abscissa"
-    | Path p ->
-        let rec aux = function
-          |[] -> Error.max_absc "direction_of_abscissa"
-          | a::_ when Spline.max a >= t ->
-              Spline.direction a (Spline._01_of_s a t)
-          | _::l -> aux l
-        in
-        if min_abscissa p0 > t then Error.min_absc "direction_of_abscissa"
-        else aux p.pl
+    | Path p -> abscissa_to Spline.direction p.pl t
+
 
 let unprecise_bounding_box = function
   | Path s ->
@@ -240,29 +209,28 @@ let append_conv ap bp =
 
 let ext_list = function
   | [] -> assert false
-  | a::l -> a,l
+  | (a::_) as l -> a,l
 
 let append ap0 sb sc bp0 =
   match bp0 with
   | Path bp ->
-      let conv x = append_conv ap0 bp0 x +. 1. in
-        let l = List.map (fun b -> Spline.set_min_max conv conv b) bp.pl in
-        let fbpconv,bpconv = ext_list l in
-        begin match ap0 with
-        | Path ap ->
-            let spl =
-              with_last (fun _ sa smin ->
-                Spline.create_with_offset smin sa sb sc
-                  (Spline.left_point fbpconv)) ap bpconv
-           in Path {spl with cycle = false}
-        | Point p1 ->
-            Path {bp with pl =
-              (Spline.create p1 sb sc (Spline.left_point fbpconv)) ::bp.pl }
-        end
+    (* let conv x = append_conv ap0 bp0 x +. 1. in *)
+    (* let l = List.map (fun b -> Spline.set_min_max conv conv b) bp.pl in *)
+    let fbpconv,bpconv = ext_list bp.pl in
+    begin match ap0 with
+      | Path ap ->
+        let spl =
+          with_last (fun _ sa -> Spline.create sa sb sc
+              (Spline.left_point fbpconv)) ap bpconv
+        in Path {spl with cycle = false}
+      | Point p1 ->
+        Path {bp with pl =
+            (Spline.create p1 sb sc (Spline.left_point fbpconv)) ::bp.pl }
+    end
   | Point p2 ->
       match ap0 with
       | Point p1 -> create p1 sb sc p2
-      | Path p -> add_end ap0 sc p2
+      | Path p -> add_end_spline ap0 sb sc p2
 
 let reverse x =
     match x with
@@ -302,21 +270,26 @@ let split_aux s t l =
 let split p0 t =
   match p0 with
     | Path p ->
-        let rec aux = function
-          |[] -> Error.max_absc "split"
-          | a::l when Spline.max a > t -> split_aux a t l
-          | a::l -> let (p1,p2) = aux l in (a::p1,p2) in
-        if min_abscissa p0 > t then Error.min_absc "split"
-        else
-          let (p1,p2) = aux p.pl in
-          cast_path_to_point (Spline.left_point (List.hd p.pl))
-            (Path {pl=p1;cycle = false}),p2
+      let tn,tf = truncate t, t -. floor t in
+      let rec aux tn l =
+        match tn,l with
+          |_,[] -> Error.max_absc "split"
+          |0,a::l ->  split_aux a tf l
+          |_,a::l -> let (p1,p2) = aux (pred tn) l in (a::p1,p2)
+      in
+      if 0. > t then Error.min_absc "split"
+      else let (p1,p2) = aux tn p.pl in
+           cast_path_to_point (Spline.left_point (List.hd p.pl))
+             (Path {pl=p1;cycle = false}),p2
     | Point _ when t = 0. -> p0,p0
     | Point _ -> Error.absc_point "split"
 
-let subpath p t1 t2 = fst (split (snd (split p t1)) t2)
+let subpath p t1 t2 =
+  (* TODO implement it in a more efficient way *)
+  fst (split (snd (split p t1)) t2)
 
 let cut_before a b =
+  (* TODO implement it in a more efficient way *)
   try
     let t = (fst (one_intersection b a)) in
     let res = snd (split b t) in
@@ -326,6 +299,7 @@ let cut_before a b =
   with Not_found -> b
 
 let cut_after a b =
+  (* TODO implement it in a more efficient way *)
   try
     let b = reverse b in
     reverse (snd (split b (fst (one_intersection b a))))
@@ -391,7 +365,6 @@ let of_bounding_box ({x=x_min;y=y_min},{x=x_max;y=y_max}) =
   let ur = {x=x_max;y=y_max} in
   close (create_lines [ul;ur;dr;dl;ul])
 
-let length p = max_abscissa p -. min_abscissa p
-let metapost_length = function
-  | Point _ -> 0.
-  | Path p -> float_of_int (List.length p.pl)
+
+let length l = float (length l)
+let metapost_length = length
