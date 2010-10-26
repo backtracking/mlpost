@@ -391,24 +391,134 @@ let rec picture fmt p =
 
 
 
+module BitMap = struct
+  (* FIXME replace me by something more efficient *)
+
+  (* encode our bitmap as a string (array of chars) *)
+  type t = string
+  (* a char '0' corresponds to '0', a char '1' corresponds to '1' *)
+
+  let mk n = String.make n '0'
+
+  let set t n = t.[n] <- '1'
+  let get t n = t.[n]
+  let min t =
+    try String.index t '1' with Not_found -> assert false
+
+  let safe_sub_four s i =
+    (* if the string does not have 4 remaining chars, pad with zeros *)
+    let my_len = 4 in
+    let l = String.length s in
+    if i + my_len <= l then String.sub s i my_len
+    else
+      let buf = String.make my_len '0' in
+      for j = i to l - 1 do
+        buf.[j-i] <- s.[j]
+      done;
+      buf
+
+  let one_char t i =
+    match safe_sub_four t i with
+    | "0000" -> '0'
+    | "0001" -> '1'
+    | "0010" -> '2'
+    | "0011" -> '3'
+    | "0100" -> '4'
+    | "0101" -> '5'
+    | "0110" -> '6'
+    | "0111" -> '7'
+    | "1000" -> '8'
+    | "1001" -> '9'
+    | "1010" -> 'a'
+    | "1011" -> 'b'
+    | "1100" -> 'c'
+    | "1101" -> 'd'
+    | "1110" -> 'e'
+    | "1111" -> 'f'
+    | _ -> assert false
+
+  let chars t =
+    let b = Buffer.create 5 in
+    let rec aux k =
+      let c = one_char t k in
+      if c = '0' then Buffer.contents b
+      else begin
+        Buffer.add_char b c;
+        aux (k+4)
+      end in
+    let m = min t in
+    Printf.sprintf "%x:%s" m (aux m)
+
+end
+
 (* FIXME do better than comparing font names *)
 module FontCmp = struct
   type t = Fonts.t
   let compare a b = String.compare (Fonts.tex_name a) (Fonts.tex_name b)
 end
-module FS = Set.Make(FontCmp)
+(* module FS = Set.Make(FontCmp) *)
+module FM = Map.Make(FontCmp)
+
+let max_char f =
+  (Fonts.metric f).Tfm.file_hdr.Tfm.ec
 
 let fonts p =
-  let x = ref FS.empty in
+  let x = ref FM.empty in
   Picture_lib.iter (fun p ->
     match p with
     | P.Tex g ->
         List.iter (fun c ->
           match c with
-          | Draw_text text -> x := FS.add text.tex_font !x
+          | Draw_text text ->
+              let f = text.tex_font in
+              let map =
+                try FM.find f  !x
+                with Not_found ->
+                  let map = BitMap.mk (max_char f) in
+                  x := FM.add f map !x;
+                  map in
+              List.iter (fun x ->
+                BitMap.set map (Int32.to_int x)) text.tex_string
           | _ -> ()) g.Gentex.tex
     | _ -> ()) p;
   !x
+
+
+(* Following the dvips manual, for example on
+ http://www.radicaleye.com/dvipsman/dvips.html#SEC34,
+ the Font line looks as follows:
+ %*Font: tfmname scaledbp designbp hex-start:hex-bitstring
+ Here is the meaning of each of these elements:
+
+tfmname
+    The TeX TFM filename, e.g., `cmr10'. You can give the same tfmname on more
+    than one `%*Font' line; this is useful when the number of characters from
+    the font used needs a longer hex-bitstring (see item below) than
+    conveniently fits on one line.
+scaledbp
+    The size at which you are using the font, in PostScript points (TeX big
+    points). 72bp = 72.27pt = 1in.
+designbp
+    The designsize of the font, again in PostScript points. This should match
+    the value in the TFM file tfmname. Thus, for `cmr10', it should be
+    `9.96265'.
+hex-start
+    The character code of the first character used from the font, specified as
+    two ASCII hexadecimal characters, e.g., `4b' or `4B' for `K'.
+hex-bitstring
+    An arbitrary number of ASCII hexadecimal digits specifying which characters
+    following (and including) hex-start are used. This is treated as a bitmap.
+    For example, if your figure used the single letter `K', you would use
+    `4b:8' for hex-start and hex-bitstring. If it used `KLMNP', you would use
+    `4b:f4'.
+ *)
+let fontdecl fmt f map =
+  let n = Fonts.tex_name f in
+  (* FIXME this is not exactly as metapost does *)
+  let d = Fonts.design_size f in
+  let r = point_of_cm (Fonts.ratio_cm f) in
+  let magic_string = BitMap.chars map in
+  fprintf fmt "%%*Font: %s %f %f %s\n" n d r magic_string
 
 let draw fmt x =
   let {x = minx; y = miny},{x = maxx; y = maxy} = Picture_lib.bounding_box x in
@@ -420,14 +530,7 @@ let draw fmt x =
   fprintf fmt "%%%%Creator: Mlpost %s\n" Version.version;
   fprintf fmt "%%%%CreationDate: %s\n" (Misc.date_string ());
   fprintf fmt "%%%%Pages: 1\n";
-  let usedfonts = fonts x in
-  FS.iter (fun f ->
-    let n = Fonts.tex_name f in
-    (* FIXME this is not exactly as metapost does *)
-    let d = Fonts.design_size f in
-    let r = point_of_cm (Fonts.ratio_cm f) in
-  (* FIXME what is the 30:f8 for? *)
-    fprintf fmt "%%*Font: %s %f %f 30:f8\n" n d r) usedfonts;
+  FM.iter (fontdecl fmt) (fonts x);
   fprintf fmt "%%%%BeginProlog\n";
   fprintf fmt "%%%%EndProlog\n";
   fprintf fmt "%%%%Page: 1 1\n";
