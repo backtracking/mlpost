@@ -246,6 +246,12 @@ let pen fmt t =
 let specials_signal = 0.123
 let specials_division = 1000.
 
+
+(** map real color to encoded color :
+    - identity for four first case
+    - encoding for transparency
+    - encoding specials rgb opaque color
+*)
 let add_color_se clr se =
   match clr with
     | None -> clr
