@@ -606,7 +606,7 @@ let vblock ?padding ?(pos=`Center) ?name ?stroke ?pen ?dash
            ?min_height ?same_height pl =
   group ?name
     (List.map (modify_box ?stroke ?pen ?dash)
-      (vbox_list ~pos ?min_height ?same_height
+      (vbox_list ?padding ~pos ?min_height ?same_height
         (List.map (set_width (extracth pos) (max_width pl)) pl)))
 
 
