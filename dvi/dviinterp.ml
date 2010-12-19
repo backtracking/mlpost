@@ -341,3 +341,21 @@ module Incremental = struct
     let fonts = load_fonts (Dvi.Incremental.font_map i) conv in
     interp_page conv fonts p
 end
+
+module Print = struct
+  (* debug printing *)
+  open Format
+  let command fmt c =
+    match c with
+    | Fill_rect (_,x,y,w,h) -> fprintf fmt "rect(%f,%f,%f,%f)" x y w h
+    | Draw_text text -> fprintf fmt "glyph (%s)" (Fonts.tex_name text.tex_font)
+    | Specials _ -> assert false
+    | Draw_text_type1 _ -> assert false
+
+  let page fmt p =
+    fprintf fmt "[< %a >]" (Misc.print_list Misc.newline command) p
+
+  let dvi fmt d =
+    Misc.print_list (fun fmt () ->
+      fprintf fmt "<newpage>@\n@\n") page fmt d
+end

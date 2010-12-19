@@ -17,7 +17,7 @@
 val set_verbosity : bool -> unit
 
 
-type t = {tex   : Dev_save.page;
+type t = {tex   : Dviinterp.page ;
           trans : Matrix.t;
           bb    : (float * float * float * float)}
 

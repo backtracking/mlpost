@@ -59,3 +59,10 @@ module Incremental : sig
 
   val load_page : Dvi.Incremental.t -> Dvi.page -> page
 end
+
+module Print : sig
+  (* debug printing *)
+  val command : Format.formatter -> command -> unit
+  val page : Format.formatter -> page -> unit
+  val dvi : Format.formatter -> page list -> unit
+end

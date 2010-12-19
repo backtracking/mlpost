@@ -147,5 +147,5 @@ let print fmt tex =
   Format.fprintf fmt "[%a,%a]" print min print max
 
 let deb_print fmt tex =
-  Format.printf "{ tex: %a ; matrix: %a }" Dev_save.Print.page tex.tex
+  Format.printf "{ tex: %a ; matrix: %a }" Dviinterp.Print.page tex.tex
     Matrix.print tex.trans
