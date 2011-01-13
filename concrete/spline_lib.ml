@@ -130,6 +130,7 @@ let abscissa_to f pl t =
   let rec aux tn l =
     match tn,l with
       |_,[] -> Error.max_absc "abscissa_to"
+      |1,[a] when tf = 0. -> f a 1.
       |0,a::l -> f a tf
       |_,_::l -> aux (pred tn) l
   in
