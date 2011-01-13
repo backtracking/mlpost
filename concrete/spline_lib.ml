@@ -20,8 +20,9 @@ exception Not_implemented of string
 let not_implemented s = raise (Not_implemented s)
 
 module Error = struct
-  let max_absc f =
-    invalid_arg (f^": the abscissa given is greater than max_abscissa")
+  let max_absc t f =
+    invalid_arg (f^": the abscissa given is greater than max_abscissa : "^
+                   (string_of_float t))
   let min_absc ?value f =
     let value = match value with | None -> ""
       | Some f -> ": "^(string_of_float f) in
@@ -129,7 +130,7 @@ let abscissa_to f pl t =
   let tn,tf = truncate t, t -. floor t in
   let rec aux tn l =
     match tn,l with
-      |_,[] -> Error.max_absc "abscissa_to"
+      |_,[] -> Error.max_absc t "abscissa_to"
       |1,[a] when tf = 0. -> f a 1.
       |0,a::l -> f a tf
       |_,_::l -> aux (pred tn) l
@@ -270,7 +271,8 @@ let split p0 t =
       let tn,tf = truncate t, t -. floor t in
       let rec aux tn l =
         match tn,l with
-          |_,[] -> Error.max_absc "split"
+          |_,[] -> Error.max_absc t "split"
+          |1,[a] when tf = 0. -> split_aux a 1. l
           |0,a::l ->  split_aux a tf l
           |_,a::l -> let (p1,p2) = aux (pred tn) l in (a::p1,p2)
       in
@@ -282,8 +284,12 @@ let split p0 t =
     | Point _ -> Error.absc_point "split"
 
 let subpath p t1 t2 =
+  assert (t1 <= t2);
+  let t2 =
+    if ceil t1 = ceil t2 then (t2 -. t1)/.((ceil t1) -. t1)
+    else t2 -. (floor t1) in
   (* TODO implement it in a more efficient way *)
-  fst (split (snd (split p t1)) t2)
+   fst (split (snd (split p t1)) t2)
 
 let cut_before a b =
   (* TODO implement it in a more efficient way *)
