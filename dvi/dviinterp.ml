@@ -227,7 +227,7 @@ and interp_command fm env cmds l =
       (try
 	 if Defaults.get_debug () then printf "Pop current state.@.";
 	 env.s <- Stack.pop env.stack
-       with Stack.Empty -> failwith "Empty stack !");
+       with Stack.Empty -> failwith "Empty color stack !");
       interp_command fm env cmds l
     | Dvi.Right b::l ->
       if Defaults.get_debug () then printf "Moving right %ld.@." b;
@@ -293,7 +293,10 @@ and interp_command fm env cmds l =
          (fun s -> Scanf.sscanf s "color push hsb %f %f %f"
            (fun h s b -> push (HSB(h,s,b))));
          (fun s -> Scanf.sscanf s "color pop%n"
-           (fun _ -> env.ecolor <- Stack.pop env.color_stack);cmds);] in
+           (fun _ -> env.ecolor <-
+	     (* todo : color stack seems to traverse pages and so pop before push in one page *)
+             try Stack.pop env.color_stack
+            with Stack.Empty -> failwith "Empty color stack !");cmds);] in
       interp_command fm env cmds l
 
 let interp_page conv fm p =
