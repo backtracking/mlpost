@@ -190,18 +190,18 @@ let draw ?(kind = triangle_full) ?tex ?(pos = 0.5) ?anchor path =
 
 (* Instances *)
 
-let point_to_point ?kind ?tex ?pos ?anchor ?outd ?ind a b =
+let point_to_point ?kind ?tex ?pos ?anchor ?style ?outd ?ind a b =
   let r, l = outd, ind in
-  draw ?kind ?tex ?pos ?anchor (Path.pathk [Path.knotp ?r a; Path.knotp ?l b])
+  draw ?kind ?tex ?pos ?anchor (Path.pathk ?style [Path.knotp ?r a; Path.knotp ?l b])
 
-let box_to_box ?kind ?tex ?pos ?anchor ?outd ?ind a b =
-  draw ?kind ?tex ?pos ?anchor (Box.cpath ?outd ?ind a b)
+let box_to_box ?kind ?tex ?pos ?anchor ?style ?outd ?ind ?sep a b =
+  draw ?kind ?tex ?pos ?anchor (Box.cpath ?style ?outd ?ind ?sep a b)
 
-let box_to_point ?kind ?tex ?pos ?anchor ?outd ?ind a b =
-  draw ?kind ?tex ?pos ?anchor (Box.cpath_left ?outd ?ind a b)
+let box_to_point ?kind ?tex ?pos ?anchor ?style ?outd ?ind ?sep a b =
+  draw ?kind ?tex ?pos ?anchor (Box.cpath_left ?style ?outd ?ind ?sep a b)
 
-let point_to_box ?kind ?tex ?pos ?anchor ?outd ?ind a b =
-  draw ?kind ?tex ?pos ?anchor (Box.cpath_right ?outd ?ind a b)
+let point_to_box ?kind ?tex ?pos ?anchor ?style ?outd ?ind ?sep a b =
+  draw ?kind ?tex ?pos ?anchor (Box.cpath_right ?style ?outd ?ind ?sep a b)
 
 (*******************************************************************************)
 (*                                 To be sorted                                *)

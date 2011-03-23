@@ -694,15 +694,15 @@ let cpath ?style ?outd ?ind ?sep a b =
   let p = P.pathk ?style [P.knotp ?r (ctr a); P.knotp ?l (ctr b)] in
   strip ?sep (P.cut_after (bpath b) (P.cut_before (bpath a) p))
 
-let cpath_left ?style ?outd ?ind a b =
+let cpath_left ?style ?outd ?ind ?sep a b =
   let r,l = outd, ind in
   let p = P.pathk ?style [P.knotp ?r (ctr a); P.knotp ?l b] in
-  P.cut_before (bpath a) p
+  strip ?sep (P.cut_before (bpath a) p)
 
-let cpath_right ?style ?outd ?ind a b =
+let cpath_right ?style ?outd ?ind ?sep a b =
   let r,l = outd, ind in
   let p = P.pathk ?style [P.knotp ?r a; P.knotp ?l (ctr b)] in
-  P.cut_after (bpath b) p
+  strip ?sep (P.cut_after (bpath b) p)
 
 (* (* Deleted because of circular dependency with the Arrow module.
 It did not seem to be used anyway. *)
