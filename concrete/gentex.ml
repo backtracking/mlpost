@@ -21,8 +21,9 @@ let jobname = "gentex"
 let filename = File.from_string jobname
 (* FIXME different from Metapost.default_prelude? *)
 
-let latex_cmd =
-  Printf.sprintf "latex -jobname=%s -ipc -halt-on-error" jobname
+let latex_cmd tmpdir =
+  Printf.sprintf "latex -jobname=%s -ipc -halt-on-error -output-dir '%s'"
+    jobname (File.Dir.to_string tmpdir)
 (*   Printf.sprintf "cat" *)
 
 type t = {tex   : Dviinterp.page;
@@ -33,7 +34,7 @@ let set_verbosity b = ()
 
 type proc = { outc : in_channel; inc : out_channel; errc : in_channel }
 
-type comm = { latex : proc ; dvi : Dvi.Incremental.t }
+type comm = { latex : proc ; dvi : Dvi.Incremental.t; tmpdir : File.Dir.t }
 
 let truncate_or_touch f =
   File.open_in_gen [Open_trunc; Open_creat; Open_rdonly] 0o600 f
@@ -63,9 +64,9 @@ let read_up_to_one =
 
 let read_up_to_one p = read_up_to_one p.outc
 
-let mk_proc_latex () =
+let mk_proc_latex tmpdir =
   let outc,inc,errc =
-    Unix.open_process_full latex_cmd (Unix.environment ()) in
+    Unix.open_process_full (latex_cmd tmpdir) (Unix.environment ()) in
   { outc = outc; inc = inc ; errc = errc }
 
 let write_to_proc p s =
@@ -104,17 +105,25 @@ let extract cl =
 
 let comm = ref None
 
+(* TODO : do that only when clean is requested *)
+let () = at_exit (fun () ->
+  match !comm with
+    | None -> ()
+    | Some p -> File.Dir.rm p.tmpdir)
+
 let create tex =
   (* FIXME at some point we have to close the latex process *)
   match !comm with
   | None ->
-      let p = mk_proc_latex () in
+      let tmpdir = Metapost_tool.create_temp_dir "mlpost" "" in
+      let p = mk_proc_latex tmpdir in
       push_prelude p (Defaults.get_prelude ());
       shipout_and_flush p tex;
       read_up_to_one p;
-      let dvi_chan = File.open_in (File.set_ext filename "dvi") in
+      let filename = File.place tmpdir (File.set_ext filename "dvi") in
+      let dvi_chan = File.open_in filename in
       let t, pgs = Dvi.Incremental.mk_t dvi_chan in
-      comm := Some { latex = p ; dvi = t };
+      comm := Some { latex = p ; dvi = t ; tmpdir = tmpdir};
       extract (Dviinterp.Incremental.load_page t (List.hd pgs))
   | Some p ->
       shipout_and_flush p.latex tex;
