@@ -151,6 +151,11 @@ module MPS = struct
     | Dviinterp.HSB _ -> assert false
     | Dviinterp.Gray g -> scolor_gray fmt g
 
+  let dash fmt (offset,pattern) =
+    fprintf fmt "[%a ] %a setdash"
+      (list space float) pattern
+      float offset
+
   let char_const fmt c = fprintf fmt "\\%03lo" c
 
   let glyph fmt cl font =
@@ -370,11 +375,11 @@ let rec picture fmt p =
   match p with
   | P.Empty -> ()
   | P.OnTop l -> list space picture fmt l
-  | P.Stroke_path(pa,clr,pe,_) ->
-      (* FIXME dash pattern *)
+  | P.Stroke_path(pa,clr,pe,da) ->
       in_context fmt (fun _ ->
-        fprintf fmt "%a%a %a %t"
+        fprintf fmt "%a%a%a %a %t"
           (option space MPS.color) clr
+          (option space MPS.dash) da
           pen pe
           path pa
           MPS.stroke)
