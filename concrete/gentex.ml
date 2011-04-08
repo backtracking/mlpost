@@ -53,14 +53,27 @@ let ends_with en s =
 
 
 let read_up_to_one =
-  (* FIXME deal with EOF exception: in this case, the user latex was probably
-   * broken and latex stopped with an error *)
+  (* FIXME deal with EOF exception:
+     Actually that print on stdout and that throw the error.
+     Perhaps can we throw an exception with all in it.
+     But it is not very fun for user (only part of the string in an exception
+     is printed)
+ *)
   let end_ = "[1]" in
-  let rec aux inc =
-    let s = input_line inc in
-    print_endline s;
-    if ends_with end_ s then () else aux inc in
-  aux
+  let rec aux buf inc =
+    let s =
+        try
+          input_line inc
+        with End_of_file ->
+          Buffer.output_buffer stdout buf;
+          invalid_arg ("One tex snipet contains an error")
+      in
+      Buffer.add_string buf s;
+      Buffer.add_char buf '\n';
+    if ends_with end_ s then () else aux buf inc in
+  fun inc ->
+    let buf = Buffer.create 10 in
+    aux buf inc
 
 let read_up_to_one p = read_up_to_one p.outc
 
@@ -105,11 +118,18 @@ let extract cl =
 
 let comm = ref None
 
-(* TODO : do that only when clean is requested *)
+(* TODO : do that only when clean is requested.
+   note if an error occured comm become None
+ *)
 let () = at_exit (fun () ->
   match !comm with
     | None -> ()
     | Some p -> File.Dir.rm p.tmpdir)
+
+let read_up_to_one p =
+  try
+    read_up_to_one p
+  with e -> comm := None;raise e
 
 let create tex =
   (* FIXME at some point we have to close the latex process *)
