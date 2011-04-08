@@ -391,6 +391,11 @@ let get' n b =
 let get n b = get' (Name.Userdef n) b
 let sub b1 b2 = get' b1.name b2
 
+let relative b g =
+  let b' = sub b g in
+  let v = Point.sub (ctr b) (ctr b') in
+  shift v g
+
 let get_fill b = b.fill
 let set_fill c b = { b with fill = Some c }
 

@@ -1517,6 +1517,17 @@ module Box : sig
         direction will change according to the width / height ratio of
         [a]. *)
 
+
+  val relative : t -> t -> t
+  (** After using one of the previous function which give you a group
+      [g] of box from multiple box (one of them must be [b]), you can
+      use [relative b g] to translate [g] so that [b] inside [g] is
+      at the same place than before.
+      Indeed it's just {!sub} and a translation.
+
+      {!relative} is really useful when someone make a slideshow from a
+      succession of figures. *)
+
   (** {2 Sub-boxes accessors} *)
 
   val nth : int -> t -> t
