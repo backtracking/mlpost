@@ -171,10 +171,11 @@ let spec = Arg.align
     " Output the libraries which are needed by the library Mlpost";
     "-compile-name", String (fun s -> compile_name := Some s),
     "<compile-name> Keep the compiled version of the .ml file";
-    "-dont-execute", Set dont_execute, " Don't execute the mlfile";
-    "-no-magic", Unit remove_mlpost_options, " Do not parse mlpost options,
-    do not call Metapost.dump";
-    "-contrib", String add_contrib, " Compile with the specified contrib"
+    "-dont-execute", Set dont_execute, " Don't execute the compiled file";
+    "-no-magic", Unit remove_mlpost_options,
+    " Do not parse mlpost options, do not call Metapost.dump";
+    "-contrib", String add_contrib,
+    "<contrib_name> Compile with the specified contrib"
   ]@(if not_cairo
      then ["-cairo" , Unit nocairo,
            " Mlpost has not been compiled with the cairo backend";
