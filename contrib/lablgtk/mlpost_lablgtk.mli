@@ -1,4 +1,5 @@
-(** Use Mlpost figures inside gtk interface *) 
+(** Use Mlpost figures inside gtk interface. *)
+
 open Mlpost
 type auto_aspect = width:Num.t -> height:Num.t -> 
   Mlpost.Picture.t -> Mlpost.Transform.t
@@ -10,7 +11,7 @@ val aa_fit_width  : auto_aspect
 val aa_fit_height : auto_aspect
 
 
-(** widget gtk to display one mlpost picture *)
+(** GTK widget which displays an mlpost picture. *)
 class mlpost_pic : 
   ?width:int -> ?height:int -> ?packing:(GObj.widget -> unit) -> 
   ?show:bool -> unit ->
