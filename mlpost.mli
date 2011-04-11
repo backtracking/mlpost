@@ -2651,6 +2651,7 @@ module Concrete : sig
   end
 
   (** {2 Compute the concrete value} *)
+
   val float_of_num : Num.t -> float
 
   val cpoint_of_point : Point.t -> CPoint.t
@@ -2660,33 +2661,36 @@ module Concrete : sig
   val ctransform_of_transform : Transform.t -> CTransform.t
 
   (** {2 Compute the baselines of a tex} *)
+
   val baselines : string -> float list
 
   (** {2 Simple functions for the opposite operations} *)
 
   val num_of_float : float -> Num.t
-    (** exactly Num.bp *)
+    (** Same as [Num.bp]. *)
 
   val point_of_cpoint : CPoint.t -> Point.t
   val path_of_cpath : CPath.t -> Path.t
 
   val transform_of_ctransform : CTransform.t -> Transform.t
 
-  (** / **) (* These functions are deprecated. *)
-    (** {2 Some options (the mlpost tool takes care of them)} *)
+  (** {2 Some options (the mlpost tool takes care of them)} *)
+
+  (** These functions are deprecated. *)
+
   val set_verbosity : bool -> unit
+    (** (deprecated) *)
 
   val set_prelude : string -> unit
-    (** set_prelude filename uses the prelude of the file filename
+    (** (deprecated) [set_prelude filename] uses the prelude of the file filename
         for compilation of the tex snippets *)
 
   val set_prelude2 : string option -> unit
-    (** set_prelude2 prelude uses this prelude
+    (** (deprecated) [set_prelude2 prelude] uses this prelude
         for compilation of the tex snippets *)
 
   val set_t1disasm : string option -> unit
-    (** Deprecated in a next release *)
-
+    (** (deprecated) *)
 end
 
 (** Use the Cairo backend to draw your figures; not always available *)
