@@ -76,7 +76,11 @@ let find_file_aux file =
   let exit_status =
     Sys.command
       (Format.sprintf "%s %s > %s" kwhich file temp_fn) in
-  if exit_status <> 0 then font_error "kwhich failed"
+  if exit_status <> 0 then
+    begin
+      Sys.remove temp_fn;
+      font_error "kwhich failed"
+    end
   else
     let cin = open_in temp_fn in
     let n =
