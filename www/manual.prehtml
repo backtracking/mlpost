@@ -53,7 +53,7 @@ right away.</#en>
 <#en>Each figure has type </#en>   
 <#fr>Chaque figure a le type</#fr>
 <#de>Jede Abbildung hat den Typ</#de>
-<a href="doc/Mlpost.Command.html#TYPEfigure"><tt>Command.figure</tt></a>.
+<a href="doc/Mlpost.Command.html#TYPEt"><tt>Command.t</tt></a>.
 
 <li> 
 <#en>Add some code to emit Metapost code, as follows</#en>
