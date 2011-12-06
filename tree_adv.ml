@@ -32,6 +32,9 @@ let rec fold f acc (Node (x,l)) =
   let acc = List.fold_left (fold f) acc l in
   f acc x
 
+let rec fold_child f acc (Node (x,l)) =
+  List.fold_left (fun acc (Node(y,_) as n) -> fold_child f (f acc x y) n) acc l
+
 let filter_option f t =
   let rec aux (Node (x,l)) =
     match f x with

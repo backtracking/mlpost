@@ -2074,6 +2074,11 @@ module Tree_adv : sig
   val fold : ('a -> 'b -> 'a) -> 'a -> 'b t -> 'a
     (** Traverse the tree in a bottom-up, left-to-right order *)
 
+  val fold_child : ('a -> 'b -> 'b -> 'a) -> 'a -> 'b t -> 'a
+    (** Traverse the pairs of parent-child in the tree in a bottom-up,
+        left-to-right order *)
+
+
   val filter : ('a -> bool) -> 'a t -> 'a t
     (** filter f t
         If for a node n of t f n is false then it doesn't appear in the result
