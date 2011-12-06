@@ -1687,41 +1687,42 @@ module Arrow : sig
         @param pos label position on the path
         @param anchor label anchor *)
 
-  val point_to_point: ?kind: kind -> ?tex: string -> ?pos: float ->
-    ?anchor: Command.position ->
-    ?style:Path.joint -> ?outd: Path.direction -> ?ind: Path.direction -> 
-    Point.t -> Point.t -> Command.t
-    (** Use [point_to_point a b] to draw an arrow from [a] to [b].
-        @param kind the kind of arrow (default is {!triangle_full})
-        @param tex add a LaTeX label
-        @param pos label position on the path
-        @param anchor label anchor
-        @param outd the outgoing direction, at the beginning of the arrow
-        @param ind the ingoing direction, at the end of the arrow *)
+  type ('a,'b) arrow_from_to =
+      ?kind: kind ->
+      ?tex: string ->
+      ?pos: float ->
+      ?anchor: Command.position ->
+      ?style:Path.joint ->
+      ?outd: Path.direction ->
+      ?ind: Path.direction ->
+      ?sep:Num.t ->
+      'a -> 'b -> Command.t
+  (**
+     {ul {- [kind] the kind of arrow (default is {!triangle_full})}
+     {- [tex] add a LaTeX label}
+     {- [pos] label position on the path}
+     {- [anchor] label anchor}
+     {- [outd] the outgoing direction, at the beginning of the arrow}
+     {- [ind] the ingoing direction, at the end of the arrow}
+     {- [sep] add a little separation of the given distance}
+     }
+    *)
 
-  val box_to_box: ?kind: kind -> ?tex: string -> ?pos: float ->
-    ?anchor: Command.position ->
-    ?style:Path.joint -> ?outd: Path.direction -> ?ind: Path.direction -> 
-    ?sep:Num.t ->
-    Box.t -> Box.t -> Command.t
+
+  val point_to_point: (Point.t,Point.t) arrow_from_to
+    (** Use [point_to_point a b] to draw an arrow from [a] to [b]. *)
+
+  val box_to_box: (Box.t,Box.t) arrow_from_to
     (** Use [box_to_box] to draw an arrow from [a] to [b], stopping at the
         box boundaries. The arguments are the same as those of
         [point_to_point]. *)
 
-  val point_to_box: ?kind: kind -> ?tex: string -> ?pos: float ->
-    ?anchor: Command.position ->
-    ?style:Path.joint -> ?outd: Path.direction -> ?ind: Path.direction -> 
-    ?sep:Num.t ->
-    Point.t -> Box.t -> Command.t
+  val point_to_box: (Point.t,Box.t) arrow_from_to
     (** Use [point_to_box] to draw an arrow from [a] to [b], stopping at the
         box boundaries. The arguments are the same as those of
         [point_to_point]. *)
 
-  val box_to_point: ?kind: kind -> ?tex: string -> ?pos: float ->
-    ?anchor: Command.position ->
-    ?style:Path.joint -> ?outd: Path.direction -> ?ind: Path.direction -> 
-    ?sep:Num.t ->
-    Box.t -> Point.t -> Command.t
+  val box_to_point: (Box.t,Point.t) arrow_from_to
     (** Use [box_to_point] to draw an arrow from [a] to [b], stopping at the
         box boundaries. The arguments are the same as those of
         [point_to_point]. *)

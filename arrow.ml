@@ -189,10 +189,20 @@ let draw ?(kind = triangle_full) ?tex ?(pos = 0.5) ?anchor path =
   Command.seq (lines @ belts @ labels)
 
 (* Instances *)
+type ('a,'b) arrow_from_to =
+    ?kind: kind -> ?tex: string -> ?pos: float ->
+    ?anchor: Command.position ->
+    ?style:Path.joint -> ?outd: Path.direction -> ?ind: Path.direction ->
+    ?sep:Num.t ->
+    'a -> 'b -> Command.t
 
-let point_to_point ?kind ?tex ?pos ?anchor ?style ?outd ?ind a b =
+let point_to_point ?kind ?tex ?pos ?anchor ?style ?outd ?ind ?sep a b =
   let r, l = outd, ind in
-  draw ?kind ?tex ?pos ?anchor (Path.pathk ?style [Path.knotp ?r a; Path.knotp ?l b])
+  let path = (Path.pathk ?style [Path.knotp ?r a; Path.knotp ?l b]) in
+  let path = match sep with
+    | None -> path
+    | Some n -> Path.strip n path in
+  draw ?kind ?tex ?pos ?anchor path
 
 let box_to_box ?kind ?tex ?pos ?anchor ?style ?outd ?ind ?sep a b =
   draw ?kind ?tex ?pos ?anchor (Box.cpath ?style ?outd ?ind ?sep a b)
