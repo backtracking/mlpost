@@ -177,15 +177,14 @@ let _ = dispatch begin function
       (* ml lib *)
      flag ["link"; "library"; "ocaml"; "byte"; "use_libmlpost_ft"]
           (S[A"-dllpath";A "backend";
-             A"-dllib"; A"-lmlpost_ft";
+             A"-dllib"; A"dllmlpost_ft";
              A"-cclib"; A"-Lbackend";
-             A"-cclib"; A"-lmlpost_ft"]);
+             A"-I"; A"backend"]);
 
      flag ["link"; "ocaml"; "byte"; "use_libmlpost_ft"]
-          (S[A"-dllpath";A "backend";
-             A"-dllib"; A"-lmlpost_ft";
-             A"-cclib"; A"-Lbackend";
-             A"-cclib"; A"-lmlpost_ft"]);
+          (S[A"-dllpath";A "../backend";
+             A"-dllib"; A"dllmlpost_ft";
+             A"-cclib"; A"-Lbackend"; A "-I"; A"backend"]);
 
      flag ["link"; "library"; "ocaml"; "native"; "use_libmlpost_ft"]
           (S[A"-cclib"; A"-lmlpost_ft"]);
