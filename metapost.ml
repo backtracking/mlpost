@@ -26,8 +26,8 @@ let print fmt i c =
     i MPprint.command c
 
 let print_prelude s fmt () =
-  fprintf fmt "input mp-tool.mpii ; %% some initializations and auxiliary macros
-input mp-spec.mpii ; %% macros that support special features
+  fprintf fmt "input metafun.mp ; %% some initializations and auxiliary macros
+%% macros that support special features
 @\n";
  fprintf fmt "prologues := 0;@\n";
  fprintf fmt "mpprocset := 0;@\n";
