@@ -6,8 +6,8 @@
 <script type=\"text/javascript\">
 <!--
     function toggle_visibility(id) {$(id).toggle(); }
-    function toggle_css_ident(event,class) 
-      {$$(class).invoke('toggle');
+    function toggle_css_ident(event,toggled_class) 
+      {$$(toggled_class).invoke('toggle');
        var elt = event.findElement();
        if(elt.textContent.startsWith('\\nhide')){
          elt.textContent = elt.textContent.sub('hide','show');
@@ -68,7 +68,8 @@ rule scan = parse
 <img title=\"with cairo : -cairo -pdf\" src=\"pdf_cairo_%s.png\" /></div>" i;
         Printf.printf 
 "<div class=\"table svg_cairo\" style=\"display:none;\">\
-<object title=\"with cairo : -cairo -svg\" data=\"svg_cairo_%s.svg\" />\
+<embed title=\"with cairo : -cairo -svg\" src=\"svg_cairo_%s.svg\" \
+                                         type=\"image/svg+xml\"/>\
 </div>" i;
         Printf.printf "<div style=\"clear:both;\">";
         Printf.printf "<a href=\"javascript:toggle_visibility('%s')\">" i;
