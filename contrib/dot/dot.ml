@@ -127,9 +127,6 @@ struct
   let node_name id = Xdot_lexer.node_name id
   
   let place ?(orient:[`TB|`LR|`BT|`RL]=`TB) nodes edges =
-    let cadd,compute = Concrete.compute_nums () in
-    List.iter (fun n -> cadd (B.width n.fig);cadd (B.height n.fig)) nodes;
-    compute ();
     let nodes2 = List.map 
       (fun n -> node_name n.id,
          Concrete.float_of_num (B.width n.fig),
