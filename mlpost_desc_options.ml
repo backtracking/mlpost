@@ -26,6 +26,7 @@ let set_latex_file f =
   end;
   latex_file := Some f
 let xpdf = ref false
+let interactive = ref false
 let eps = ref false
 let verbose = ref false
 let cairo = ref false
@@ -55,6 +56,7 @@ let spec =
     "-latex", String set_latex_file, "<main.tex> Scan the LaTeX prelude";
     "-eps", Set eps, " Generate encapsulated postscript files";
     "-xpdf", Set xpdf, " wysiwyg mode using xpdf remote server";
+    "-i", Set interactive, " wysiwyg mode using file _mlpost.pdf";
     "-required", String push_required, " Specify files required by latex";
     "-v", Set verbose, " be a bit more verbose";
     "-depend", Set depend,

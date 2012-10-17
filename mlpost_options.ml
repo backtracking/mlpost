@@ -59,7 +59,7 @@ let () =
 
   let do_at_exit () =
     if !cairo then begin
-      if not !xpdf then
+      if not (!xpdf || !interactive) then
         if !png then Cairost.dump_png ()
         else if !svg then Cairost.dump_svg ()
         else if !pdf then Cairost.dump_pdf ()
@@ -67,15 +67,15 @@ let () =
       else Cairost.dump_pdfs "_mlpost"
     end
     else begin
-      if !mp && not !xpdf then
+      if !mp && not (!xpdf || !interactive) then
         Metapost.dump_mp ?prelude bn
-      else if !png && not !xpdf then
+      else if !png && not (!xpdf || !interactive) then
         Metapost.dump_png ?prelude ~verbose ~clean:(not !dont_clean) bn
       else
         if !mps then Mps.dump () else
           Metapost.dump
           ?prelude ~verbose ~clean:(not !dont_clean) bn;
-      if !xpdf then begin
+      if !xpdf || !interactive then begin
         Metapost.dump_tex ?prelude "_mlpost";
         begin try Sys.remove "_mlpost.aux" with _ -> () end;
         ignore (call_cmd ~verbose "pdflatex _mlpost.tex");
@@ -83,13 +83,13 @@ let () =
     end;
 
     if !xpdf then begin
-      (*     ignore (Misc.call_cmd ~verbose "setsid xpdf -remote mlpost
-             _mlpost.pdf &") *)
       if call_cmd ~verbose "fuser _mlpost.pdf" = 0 then
         ignore (call_cmd ~verbose "xpdf -remote mlpost -reload")
       else
         ignore (call_cmd ~verbose "setsid xpdf -remote mlpost _mlpost.pdf &")
-    end in
+    end;
+
+  in
 
   (* When an exit is fired inside do_at_exit
      the function seems to be run again *)
