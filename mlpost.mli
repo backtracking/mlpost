@@ -1601,6 +1601,7 @@ module Box : sig
    (** same as {!henlarge} for vertical boundaries *)
 
   val set_post_draw : (t -> Command.t) -> t -> t
+  val add_post_draw : (t -> Command.t) -> t -> t
   val clear_post_draw : t -> t
   val set_pre_draw : (t -> Command.t) -> t -> t
   val clear_pre_draw : t -> t
