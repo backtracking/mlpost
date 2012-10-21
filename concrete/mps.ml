@@ -349,12 +349,12 @@ let print_specials_color =
       match c with
       | RGB _ | Gray _ -> 7, 3
       | CMYK _ -> 8, 4 in
-    fprintf fmt "%%MetaPostSpecial: ";
-    fprintf fmt "%i 1 %f %a %i %i@." mode trans pr_color c id special_type
+    fprintf fmt "%%%%MetaPostSpecial: ";
+    fprintf fmt "%i 1 %f %a %i %i\n" mode trans pr_color c id special_type
 
 let print_specials_extimg fmt (f,m) id =
   fprintf fmt
-    "%%%%MetaPostSpecial: 9 %f %f %f %f %f %f %s %i 10@."
+    "%%%%MetaPostSpecial: 9 %f %f %f %f %f %f %s %i 10\n"
     m.xx m.yx m.xy m.yy m.x0 m.y0 f id
 
 let print_specials fmt cx =
@@ -362,7 +362,7 @@ let print_specials fmt cx =
   let cx = harvest se cx in
   if Hashtbl.length se.colors <> 0 || Hashtbl.length se.externalimages <> 0
   then begin
-    fprintf fmt "%%%%MetaPostSpecials: 2.0 %i %i@."
+    fprintf fmt "%%%%MetaPostSpecials: 2.0 %i %i\n"
       (int_of_float (specials_signal *. specials_division))
       (int_of_float specials_division);
     Hashtbl.iter (print_specials_color fmt) se.colors;
