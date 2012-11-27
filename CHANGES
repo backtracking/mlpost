@@ -4,6 +4,7 @@ o - changes in behaviour, new features, bugfixes
 current
 -------
 
+o new module [Triangle] to draw tree-like, triangular shapes
 * (internal) Misc.call_cmd now does print output of the called program
   directly, instead of returning it as a string
 * module Generate has been removed

@@ -1621,7 +1621,7 @@ module Box : sig
   val cpath_left :
     ?style:Path.joint ->
     ?outd:Path.direction ->
-    ?ind:Path.direction -> 
+    ?ind:Path.direction ->
     ?sep:Num.t ->
     t -> Point.t -> Path.t
     (** the path that connects a box and a point and stops at the box
@@ -1630,7 +1630,7 @@ module Box : sig
   val cpath_right :
     ?style:Path.joint ->
     ?outd:Path.direction ->
-    ?ind:Path.direction -> 
+    ?ind:Path.direction ->
     ?sep:Num.t ->
     Point.t -> t -> Path.t
     (** the path that connects a box and a point and stops at the box
@@ -1648,6 +1648,89 @@ module Box : sig
 
   val set_pos : Point.t -> t -> t
     (** same as center *)
+end
+
+(** Tree-like, triangular shapes,
+    with a root on top and an horizontal bottom line. *)
+module Triangle : sig
+
+  type t = Box.t
+  (** A triangular shape is a box.
+      In the following, we simply call it a "triangle". *)
+
+  val create:
+    ?brush:Brush.t ->
+    ?stroke:Color.t option ->
+    ?pen:Pen.t ->
+    ?dash:Dash.t ->
+    ?fill:Color.t ->
+    ?left:float -> ?right:float -> ?width:Num.t ->
+    depth:Num.t -> unit -> Box.t
+    (** [create depth] creates a triangular shape of depth [depth].
+        The width is equal to [depth], unless specified using [width].
+        [left] and [right] control the horizontal position of the root;
+        they default to [0.5] i.e. the root is centered. Negative values for
+        [left] and [right] are allowed. *)
+
+  val pic:
+    ?brush:Brush.t ->
+    ?stroke:Color.t option ->
+    ?pen:Pen.t ->
+    ?dash:Dash.t ->
+    ?fill:Color.t ->
+    ?dx:float -> ?dy:float -> Picture.t -> t
+    (** builds a triangle surrounding a picture *)
+  val tex:
+    ?brush:Brush.t ->
+    ?stroke:Color.t option ->
+    ?pen:Pen.t ->
+    ?dash:Dash.t ->
+    ?fill:Color.t -> ?dx:float -> ?dy:float -> string -> t
+    (** builds a triangle surrounding a LaTeX label *)
+
+  val root: t -> Point.t
+  val bottom_left: t -> Point.t
+  val bottom_right: t -> Point.t
+    (** Special points in a triangle. *)
+
+  val draw: ?debug:bool -> t -> Command.t
+
+  val root_label: ?pos:Command.position -> Picture.t -> t -> t
+  val tex_root_label: ?pos:Command.position -> string -> t -> t
+    (** Attach a label to the root. *)
+
+  val x_depth: ?x:float -> ?depth:float -> t -> Point.t
+    (** a point inside a triangle is denoted using two coordinates
+        [x] and [depth]. Coordinate [x] controls horizontal placement,
+        with 0.0 for left and 1.0 for right (negative values are allowed).
+        Coordinate [depth] controls vertical placement, with 0.0 for root
+        and 1.0 for bottom line (negative values are allowed).
+        [x] defaults to [0.5] (centered) and [depth] defaults to [1.0]
+        (bottom). *)
+
+  val label:
+    ?x:float -> ?depth:float -> ?pos:Command.position ->
+    Picture.t -> t -> t
+  val tex_label:
+    ?x:float -> ?depth:float -> ?pos:Command.position ->
+    string -> t -> t
+    (** Attach a label to the point (x, depth).
+        Coordinate [depth] defaults to 0.7, so that label is likely to fit
+        nicely in the triangle (otherwise, you may consider using functions
+        [pic] and [tex] above). *)
+
+  val anchor: ?x:float -> ?depth:float -> t -> t -> t
+    (** [anchor t2 t1] moves triangle [t1] at position (x, depth) in
+        triangle [t2] *)
+
+  val pose: ?x:float -> ?depth:float -> t -> t -> t
+    (** [pose t2 t1] moves triangle [t1] so that its south point is
+        at position (x, depth) in triangle [t2] *)
+  val pose_left: ?x:float -> ?depth:float -> t -> t -> t
+  val pose_right: ?x:float -> ?depth:float -> t -> t -> t
+    (** similarly, using [bottom_left] and [bottom_right] instead of
+        south point *)
+
 end
 
 (** Draw arrows and build new forms of arrows. *)

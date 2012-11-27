@@ -134,6 +134,7 @@ check-examples: mlpost.cma tool.opt
 	$(MAKEEXAMPLES) boxes.dummy
 	$(MAKEEXAMPLES) paths.dummy
 	$(MAKEEXAMPLES) tree.dummy
+	$(MAKEEXAMPLES) terms.dummy
 	$(MAKEEXAMPLES) label.dummy
 	make -C multi-examples
 
