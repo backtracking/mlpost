@@ -24,17 +24,18 @@ open Command
 let dotlabels ?(pos=`Center) ls lp =
   seq (List.map2 (fun s p -> dotlabel ~pos:pos (Picture.tex s) p) ls lp)
 
-let draw_simple_arrow ?color ?pen ?dashed ?style ?outd ?ind a b =
+let draw_simple_arrow ?color ?pen ?dashed ?style ?outd ?ind ?sep a b =
   Arrow.simple ?color ?pen ?dashed
-    (Arrow.simple_point_point ?style ?outd ?ind a b)
+    (Box.strip ?sep (Arrow.simple_point_point ?style ?outd ?ind a b))
 
-let draw_label_arrow ?color ?pen ?dashed ?style ?outd ?ind ?pos lab a b =
-  let p = Arrow.simple_point_point ?style ?outd ?ind a b in
+let draw_label_arrow ?color ?pen ?dashed ?style ?outd ?ind ?pos ?sep lab a b =
+  let p = Arrow.simple_point_point ?style ?outd ?ind ?sep a b in
   Arrow.simple ?color ?pen ?dashed p ++
   label ?pos lab (Path.point 0.5 p)
 
-let draw_labelbox_arrow ?color ?pen ?dashed ?style ?outd ?ind ?pos lab a b =
-  draw_label_arrow ?color ?pen ?dashed ?style ?outd ?ind ?pos
+let draw_labelbox_arrow ?color ?pen ?dashed ?style ?outd ?ind ?pos ?sep
+  lab a b =
+  draw_label_arrow ?color ?pen ?dashed ?style ?outd ?ind ?pos ?sep
     (Picture.make (Box.draw lab)) a b
 
 let subboxes within a b =

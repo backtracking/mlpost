@@ -218,9 +218,9 @@ let point_to_box ?kind ?tex ?pos ?anchor ?style ?outd ?ind ?sep a b =
 (*******************************************************************************)
 
 
-let simple_point_point ?style ?outd ?ind a b =
+let simple_point_point ?style ?outd ?ind ?sep a b =
   let r,l = outd, ind in
-  pathk ?style [knotp ?r a; knotp ?l b]
+  Box.strip ?sep (pathk ?style [knotp ?r a; knotp ?l b])
 
 
 (*let normalize p =
