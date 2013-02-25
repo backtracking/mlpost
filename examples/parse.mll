@@ -26,6 +26,10 @@ hide mpost</a>
    >
 show cairo png</a>
 <a href=\"javascript:void(0)\" 
+   onclick=\"toggle_css_ident(event,'.mps')\"
+   >
+show mps</a>
+<a href=\"javascript:void(0)\" 
    onclick=\"toggle_css_ident(event,'.ps_cairo')\"
    >
 show cairo ps</a>
@@ -57,6 +61,9 @@ rule scan = parse
         Printf.printf 
 "<div class=\"table mpost\" title=\"with mpost : -ps\">\
 <img src=\"%s.png\" /></div>" i;
+        Printf.printf 
+"<div class=\"table mps\" title=\"with mpost : -mps\">\
+<img src=\"mps_%s.png\" /></div>" i;
         Printf.printf 
 "<div class=\"table png_cairo\" style=\"display:none;\">\
 <img title=\"with cairo : -cairo -png\" src=\"png_cairo_%s.png\" /></div>" i;

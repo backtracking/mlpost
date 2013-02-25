@@ -39,6 +39,9 @@ MLPOST:=mlpost -v -ps
 ALL := $(BOXESPNG) $(PATHSPNG) $(MISCPNG) $(TREEPNG) $(LABELPNG) $(AUTOMPNG)\
 	$(HISTPNG)  $(RADARPNG) $(REALPLOTPNG) $(COLORPNG) $(INCLUDEPNG)
 
+#Direct mps output
+ALL_MPS :=  $(addprefix mps_,$(ALL))
+
 ALL_CAIRO := $(addprefix cairo_,$(ALL))
 
 ALL_CAIRO_PNG := $(addprefix png_,$(ALL_CAIRO))
@@ -48,9 +51,11 @@ ALL_CAIRO_PDF := $(addprefix pdf_,$(ALL_CAIRO))
 ALL_CAIRO_PS := $(addprefix ps_,$(ALL_CAIRO))
 ALL_CAIRO_SVG := $(addprefix svg_,$(ALL_CAIRO:.png=.svg))
 
-all : all_metapost all_cairo
+all : all_metapost all_cairo all_mps
 
 all_metapost: $(ALL)
+all_mps: $(ALL_MPS)
+
 all_cairo: all_cairo_png all_cairo_ps all_cairo_pdf all_cairo_svg
 
 all_cairo_png:  $(ALL_CAIRO_PNG)
@@ -58,6 +63,8 @@ all_cairo_pdf:  $(ALL_CAIRO_PDF)
 all_cairo_ps:  $(ALL_CAIRO_PS)
 all_cairo_svg:  $(ALL_CAIRO_SVG)
 
+.PHONY: all all_metapost all_mps all_cairo all_cairo_png all_cairo_pdf \
+	all_cairo_ps all_cairo_svg
 
 contrib:$(DOTPNG)\
 	$(addprefix png_cairo_,$(DOTPNG))\
@@ -75,6 +82,10 @@ contrib:$(DOTPNG)\
 #With Metapost :
 $(foreach i,$(shell seq 1 $(MAX)), %$(i).1) : %.native
 	./$^ -ps
+
+#With direct mps output :
+$(foreach i,$(shell seq 1 $(MAX)), mps_%$(i).mps) : %.native
+	./$^ -mps -prefix "mps_"
 
 #With cairo pdf
 $(foreach i,$(shell seq 1 $(MAX)), pdf_cairo_%$(i).pdf) : %.native
@@ -110,12 +121,19 @@ html: $(HTMLFILES)
 %.png: %.pdf
 	convert $^  $@
 
+%.pdf.tex: all.pdf.template
+	sed -e 's/all/$*/' all.pdf.template > $@
+
 %.tex: all.template
 	sed -e 's/all/$*/' all.template > $@
 
 %.ps: %.1 %.tex
 	latex $*
 	dvips -E $*.dvi -o
+
+%.pdf: %.mps %.pdf.tex
+	pdflatex $*.pdf.tex
+	mv $*.pdf.pdf $*.pdf
 
 # %.pdf: %.mps all.template2
 # 	sed -e 's/all/$*/' all.template2 > $*.tex
@@ -124,7 +142,7 @@ html: $(HTMLFILES)
 # %.mps: %.1
 # 	cp $*.1 $*.mps
 
-ALLTEX:=$(ALL:.png=.tex)
+ALLTEX:=$(ALL:.png=.tex) $(ALL_MPS:.png=.pdf.tex)
 
 clean:
 	rm -f *.aux *.dvi *.ps *.1 *.log $(PNGFILES) *.mp *.mpx *.mps *.pdf

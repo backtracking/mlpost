@@ -377,7 +377,7 @@ let rec picture fmt p =
   | P.OnTop l -> list space picture fmt l
   | P.Stroke_path(pa,clr,pe,da) ->
       in_context fmt (fun _ ->
-        fprintf fmt "%a%a%a %a %t"
+        fprintf fmt "%a%a%a %a %t\n"
           (option space MPS.color) clr
           (option space MPS.dash) da
           pen pe
@@ -385,7 +385,7 @@ let rec picture fmt p =
           MPS.stroke)
   | P.Fill_path (p,clr)->
       in_context fmt (fun _ ->
-        fprintf fmt "%a %a %t"
+        fprintf fmt "%a %a %t\n"
           (option space MPS.color) clr
           path p
           MPS.fill)
