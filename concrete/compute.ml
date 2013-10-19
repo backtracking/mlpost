@@ -194,8 +194,8 @@ and path' = function
       MP.to_path mp
   | MPACycle (d,j,p) ->
       let d = direction d in
-      let dl,p,_ = metapath p in
-      let j = joint dl j d in
+      let _,p,dr = metapath p in
+      let j = joint dr j d in
       MP.cycle j p
   | PATransformed (p,tr) ->
       let p = path p in
