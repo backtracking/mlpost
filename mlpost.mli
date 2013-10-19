@@ -391,7 +391,7 @@ and MetaPath : sig
   type knot = Path.knot
 
   (** Build a knot from a point; the optional arguments are the
-      incoming directions *)
+      incoming directions.Warning they are going in the same direction. *)
   val knotp :
     ?l:direction -> ?r:direction -> Point.t -> knot
 
@@ -522,7 +522,7 @@ and Path : sig
   type knot
 
   (** Build a knot from a point; the optional arguments are the
-      incoming directions *)
+      incoming directions. Warning they are going in the same direction. *)
   val knotp :
     ?l:direction -> ?r:direction -> Point.t -> knot
 
@@ -1305,6 +1305,8 @@ module Box : sig
 
   (** Get the bounding path of a box *)
   val bpath : t -> Path.t
+  (** Set the bounding path of a box *)
+  val set_bpath : Path.t -> t -> t
 
   (** {2 Special points on a box} *)
 
@@ -2770,8 +2772,8 @@ module Concrete : sig
     (** (deprecated) *)
 
   val set_prelude : string -> unit
-    (** (deprecated) [set_prelude filename] uses the prelude of the file filename
-        for compilation of the tex snippets *)
+    (** (deprecated) [set_prelude filename] uses the prelude of the file
+        filename for compilation of the tex snippets *)
 
   val set_prelude2 : string option -> unit
     (** (deprecated) [set_prelude2 prelude] uses this prelude

@@ -76,6 +76,7 @@ let height b = b.height
 let ctr b = b.ctr
 
 let bpath b = b.contour
+let set_bpath p b = {b with contour = p}
 
 let halfheight b = Point.pt (zero, b.height /./ 2.)
 let halfwidth b = Point.pt (b.width /./ 2., zero)
