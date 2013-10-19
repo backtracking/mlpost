@@ -538,7 +538,8 @@ let draw fmt x =
   fprintf fmt "%%%%BoundingBox: %f %f %f %f\n" minxt minyt maxxt maxyt;
   fprintf fmt "%%%%HiResBoundingBox: %f %f %f %f\n" minx miny maxx maxy;
   fprintf fmt "%%%%Creator: Mlpost %s\n" Version.version;
-  fprintf fmt "%%%%CreationDate: %s\n" (Misc.date_string ());
+  (** metapost add a creation date but it breaks determinism *)
+  (* fprintf fmt "%%%%CreationDate: %s\n" (Misc.date_string ()); *)
   fprintf fmt "%%%%Pages: 1\n";
   FM.iter (fontdecl fmt) (fonts x);
   fprintf fmt "%%%%BeginProlog\n";
