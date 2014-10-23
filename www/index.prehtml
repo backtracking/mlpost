@@ -62,33 +62,27 @@ befinden sich in einem Hauptmodul Mlpost.  </#de>
 <h3>Download</h3>
 <p>
 <#fr>
-La version courante est <#version> et peut être téléchargée
-<a href="download/">ici</a>.
+La version courante est <#version>.
 </#fr>
 <#en>
-Current version is <#version> and can be downloaded from <a
-href="download/">here</a>.
-Here are the <a href="download/CHANGES">CHANGES</a>.
+Current version is <#version>.
 </#en>
 <#de>
-Die aktuelle Version ist <#version> and kann im <a
-href="download/">Download-Bereich</a> heruntergeladen werden.
-Es gibt auch ein <a href="download/CHANGES">Changelog</a>.
-</#de>
-</p>
-<p>
-<#fr>
-Un paquet debian est également disponible:
-</#fr>
-<#en>
-A Debian package is also available:
-</#en>
-<#de>
-Ein Debian-Paket ist ebenfalls verfügbar:
+Die aktuelle Version ist <#version>.
 </#de>
 
-<p><pre><code>sudo apt-get install mlpost</code></pre></p>
+<ul>
+<li>
+  Sources: <a href="download/mlpost-<#version>.tar.gz">mlpost-<#version>.tar.gz</a>
+<li>
+  Opam
+  <a href="http://opam.ocaml.org/packages/mlpost/mlpost.<#version>/">package</a>
+<li>
+  Debian <a href="https://packages.debian.org/stable/tex/mlpost">package</a>
+</ul>
+<a href="download/CHANGES">CHANGES</a>
 </p>
+<p>
 
 <h3><#fr>Erreurs et Contributions</#fr><#en>Bugs and
 Contributions</#en><#de>Bugs und Änderungsvorschläge</#de></h3>
