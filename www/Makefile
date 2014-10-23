@@ -9,6 +9,9 @@ ALL:= $(GENERATED) slides-jfla.pdf mlpost-jfla.pdf
 install: all
 	cp -f --parents $(ALL) $(WWW)
 
+export: all
+	scp $(ALL) filliatr@pl-ssh2.lri.fr:/users/www-perso/projets/mlpost/
+
 all: $(ALL)
 
 $(GENERATED): macros.prehtml version.prehtml

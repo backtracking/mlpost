@@ -4,7 +4,7 @@
 </#def>
 
 <#def metapost><a
-href="http://plan9.bell-labs.com/who/hobby/MetaPost.html">Metapost</a></#def>
+href="http://en.wikipedia.org/wiki/MetaPost">Metapost</a></#def>
 
 <#def ocaml><a href="http://caml.inria.fr/">Objective Caml</a></#def>
 
