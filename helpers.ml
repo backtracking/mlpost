@@ -69,6 +69,16 @@ let box_labelbox_arrow ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep ?pos
   box_label_arrow ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep ?pos
     (Picture.make (Box.draw lab)) a b
 
+let pointer_start_pen = Pen.scale (Num.bp 4.) Pen.circle
+
+let box_pointer_arrow ?within ?color ?pen ?dashed ?style ?outd ?ind a b =
+  let a, b = subboxes within a b in
+  let r,l = outd, ind in
+  let p = Path.pathk ?style [Path.knotp ?r (ctr a); Path.knotp ?l (ctr b)] in
+  let p = Path.cut_after (bpath b) p in
+  Command.draw ~pen:pointer_start_pen (pathp [Path.point 0. p]) ++
+  Arrow.simple ?color ?pen ?dashed p
+
 (***
 
 let hboxjoin ?color ?pen ?dashed ?dx ?dy ?pos ?spacing pl =

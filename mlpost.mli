@@ -1986,6 +1986,10 @@ module Helpers : sig
     ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
     ?sep:Num.t -> ?pos:Command.position ->
     Box.t -> Box.t -> Box.t -> Command.t
+  val box_pointer_arrow :
+    ?within:Box.t -> ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
+    ?style:Path.joint -> ?outd:Path.direction -> ?ind:Path.direction ->
+    Box.t -> Box.t -> Command.t
 (***
   val hboxjoin :
     ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
