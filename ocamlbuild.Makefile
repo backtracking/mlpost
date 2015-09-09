@@ -155,7 +155,7 @@ dot-contrib : lib
 	cd contrib/dot && $(OCAMLBUILDBIN) -tag dtypes -cflags -I,$(shell pwd)/_build $(addprefix mlpost_dot,$(LIB_EXT)) && cd ../..
 	ln -sf contrib/dot/_build _build_dot
 
-ifeq "$(LABLGTK2)$(CAIROLABLGTK2)$(USEOCAMLFIND)" "yesyesyes"
+ifeq "$(LABLGTK2)$(CAIROLABLGTK2)" "yesyes"
 lablgtk-contrib : lib
 	@echo "make: Entering directory \`$(shell pwd)/contrib/lablgtk'"
 	cd contrib/lablgtk && $(OCAMLBUILDBIN) -tag dtypes -cflags -I,$(shell pwd)/_build \

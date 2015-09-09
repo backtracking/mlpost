@@ -1,5 +1,6 @@
 Dependencies:
 * You need OCaml 4.0 or higher to compile Mlpost.
+* You need Ocamlfind
 * You need the libraries bitstring, lablgtk2 and cairo for cairo support.
   Check the output of ./configure to see if cairo has been selected.
 * To use Mlpost, you need metapost and metafun (packages texlive-metapost and
