@@ -57,8 +57,8 @@ else
 fi
 
 case $OCAMLVERSION in
-  3.10.0*)
-    AC_MSG_ERROR(ocamlbuild is too buggy in this version. Aborting.)
+  1.*|2.*|3.*)
+    AC_MSG_ERROR(Mlpost doesn't support OCaml version smaller than 4.0. Aborting.)
     ;;
 esac
 
