@@ -57,8 +57,8 @@ else
 fi
 
 case $OCAMLVERSION in
-  3.10.0*)
-    AC_MSG_ERROR(ocamlbuild is too buggy in this version. Aborting.)
+  1.*|2.*|3.*)
+    AC_MSG_ERROR(Mlpost doesn't support OCaml version smaller than 4.0. Aborting.)
     ;;
 esac
 
@@ -217,22 +217,19 @@ fi
 # libraries
 AC_CHECK_PROG(USEOCAMLFIND,ocamlfind,yes,no)
 
-if test "$USEOCAMLFIND" = yes; then
-   OCAMLFINDLIB=$(ocamlfind printconf stdlib)
-   OCAMLFIND=$(which ocamlfind)
-   if test "$OCAMLFINDLIB" != "$OCAMLLIB"; then
-   USEOCAMLFIND=no;
-   echo "but your ocamlfind is not compatible with your ocamlc:"
+if test "$USEOCAMLFIND" = no; then
+   	AC_MSG_ERROR(Cannot find ocamlfind.)
+fi
+
+OCAMLFINDLIB=$(ocamlfind printconf stdlib)
+OCAMLFIND=$(which ocamlfind)
+if test "$OCAMLFINDLIB" != "$OCAMLLIB"; then
    echo "ocamlfind : $OCAMLFINDLIB, ocamlc : $OCAMLLIB"
-   fi
+   AC_MSG_ERROR(Your ocamlfind is not compatible with your ocamlc.)
 fi
 
 if test "$LIBDIR" = ""; then
-   if test "$USEOCAMLFIND" = yes; then
-        LIBDIR=$(ocamlfind printconf destdir)/mlpost
-   else
-        LIBDIR=$OCAMLLIB/mlpost
-   fi
+   LIBDIR=$(ocamlfind printconf destdir)/mlpost
 fi
 echo "Mlpost library will be installed in: $LIBDIR"
 
@@ -243,23 +240,11 @@ AC_ARG_ENABLE(cairo,
 CAIRO=no
 if test "$enable_cairo" = yes; then
   # checking for mlcairo
-  if test "$USEOCAMLFIND" = yes; then
-     CAIROLIB=$(ocamlfind query cairo)
-  fi
+  CAIROLIB=$(ocamlfind query cairo)
 
   if test -n "$CAIROLIB";then
      echo "ocamlfind found cairo in $CAIROLIB"
      CAIRO=yes
-  else
-      AC_CHECK_FILE($OCAMLLIB/cairo/cairo.cma,CAIRO=yes,CAIRO=no)
-      if test "$CAIRO" = yes; then
-         CAIROLIB=$OCAMLLIB/cairo/
-      elif test -n "$OCAMLLIBLOCAL"; then
-         AC_CHECK_FILE($OCAMLLIBLOCAL/cairo/cairo.cma,CAIRO=yes,CAIRO=no)
-         if test "$CAIRO" = yes; then
-         CAIROLIB=$OCAMLLIBLOCAL/cairo/
-         fi
-      fi
   fi
 fi
 
@@ -269,23 +254,10 @@ AC_ARG_ENABLE(concrete,
 
 BITSTRING=no
 if test "$enable_concrete" = yes; then
-  if test "$USEOCAMLFIND" = yes; then
-     BITSTRINGLIB=$(ocamlfind query bitstring)
-  fi
-
+  BITSTRINGLIB=$(ocamlfind query bitstring)
   if test -n "$BITSTRINGLIB";then
      echo "ocamlfind found bitstring in $BITSTRINGLIB"
      BITSTRING=yes
-  else
-      AC_CHECK_FILE($OCAMLLIB/bitstring/bitstring.cma,BITSTRING=yes,BITSTRING=no)
-      if test "$BITSTRING" = yes; then
-         BITSTRINGLIB=$OCAMLLIB/bitstring/
-      elif test -n "$OCAMLLIBLOCAL"; then
-         AC_CHECK_FILE($OCAMLLIBLOCAL/bitstring/bitstring.cma,BITSTRING=yes,BITSTRING=no)
-         if test "$BITSTRING" = yes; then
-         BITSTRINGLIB=$OCAMLLIBLOCAL/bitstring/
-         fi
-      fi
   fi
 fi
 
@@ -320,22 +292,9 @@ AC_ARG_ENABLE(lablgtk,
 LABLGTK2=no
 if test "$enable_lablgtk" = yes; then
    # checking for lablgtk2
-   if test "$USEOCAMLFIND" == yes; then
       LABLGTK2LIB=$(ocamlfind query lablgtk2)
-   fi
-
    if test -n "$LABLGTK2LIB";then
       echo "ocamlfind found lablgtk2 in $LABLGTK2LIB"
-   else
-    AC_CHECK_FILE($OCAMLLIB/lablgtk2/lablgtk.cma,LABLGTK2=yes,LABLGTK2=no)
-    if test "$LABLGTK2" = yes; then
-       LABLGTK2LIB=$OCAMLLIB/lablgtk2/
-    elif test -n "$OCAMLLIBLOCAL"; then
-       AC_CHECK_FILE($OCAMLLIBLOCAL/lablgtk2/lablgtk2.cma,LABLGTK2=yes,LABLGTK2=no)
-       if test "$LABLGTK2" = yes; then
-       LABLGTK2LIB=$OCAMLLIBLOCAL/lablgtk2/
-       fi
-    fi
    fi
 fi
 
@@ -350,24 +309,10 @@ else
 fi
 
 # checking for cairo.lablgtk2
-if test "$USEOCAMLFIND" == yes; then
-   CAIROLABLGTK2LIB=$(ocamlfind query cairo.lablgtk2)
-fi
+CAIROLABLGTK2LIB=$(ocamlfind query cairo.lablgtk2)
 
 if test -n "$CAIROLABLGTK2LIB";then
    echo "ocamlfind found cairo.lablgtk2 in $CAIROLABLGTK2LIB"
-else
-    AC_CHECK_FILE($OCAMLLIB/cairo/cairo_lablgtk.cma,
-        CAIROLABLGTK2=yes,CAIROLABLGTK2=no)
-    if test "$CAIROLABLGTK2" = yes; then
-        CAIROLABLGTK2LIB=$OCAMLLIB/lablgtk2/
-    elif test -n "$OCAMLLIBLOCAL"; then
-       AC_CHECK_FILE($OCAMLLIBLOCAL/cairo/cairo_lablgtk.cma,
-        CAIROLABLGTK2=yes,CAIROLABLGTK2=no)
-       if test "$CAIROLABLGTK2" = yes; then
-        CAIROLABLGTK2LIB=$OCAMLLIBLOCAL/cairo/
-       fi
-    fi
 fi
 
 if test -n "$LABLGTK2LIB" ; then
@@ -393,7 +338,6 @@ AC_SUBST(OCAMLVERSION)
 AC_SUBST(OCAMLWEB)
 AC_SUBST(OCAMLFIND)
 AC_SUBST(OCAMLBUILD)
-AC_SUBST(USEOCAMLFIND)
 AC_SUBST(LABLGTK2)
 AC_SUBST(INCLUDEGTK2)
 AC_SUBST(LABLGTK2LIB)
