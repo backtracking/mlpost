@@ -101,38 +101,39 @@ install-opt-contrib: install-opt-dot install-opt-lablgtk
 
 BCMA = $(addprefix $(BUILD), $(CMA) $(DLL))
 BCMXA = $(addprefix $(BUILD), $(CMXA) $(OBJ))
+BCMT = $(addprefix $(BUILD), mlpost.cmti mlpost.cmt)
 
 DESTDIR=-destdir $(LIBDIR:/mlpost=)
 
 install-byte:
 	$(OCAMLFIND) remove $(DESTDIR) mlpost
-	$(OCAMLFIND) install $(DESTDIR) mlpost $(BUILD)mlpost.cmi META $(BCMA)
+	$(OCAMLFIND) install $(DESTDIR) mlpost $(BUILD)mlpost.cmi META $(BCMA) $(BCMT)
 
 install-opt:
 	$(OCAMLFIND) remove $(DESTDIR) mlpost
-	$(OCAMLFIND) install $(DESTDIR) mlpost $(BUILD)mlpost$(LIBEXT) $(BUILD)mlpost.cmi META $(BCMXA) $(BCMA)
+	$(OCAMLFIND) install $(DESTDIR) mlpost $(BUILD)mlpost$(LIBEXT) $(BUILD)mlpost.cmi META $(BCMXA) $(BCMA) $(BCMT)
 
 
 install-byte-dot:
 	$(OCAMLFIND) remove $(DESTDIR) mlpost_dot
 	$(OCAMLFIND) install $(DESTDIR) mlpost_dot contrib/dot/META \
-	   $(addprefix contrib/dot/_build/mlpost_dot,.cmi .cma)
+	   $(addprefix contrib/dot/_build/mlpost_dot,.cmi .cma .cmt .cmti)
 
 install-opt-dot:
 	$(OCAMLFIND) remove $(DESTDIR) mlpost_dot
 	$(OCAMLFIND) install $(DESTDIR) mlpost_dot contrib/dot/META \
-           $(addprefix contrib/dot/_build/mlpost_dot,.cmi .cma .cmxa $(LIBEXT))
+           $(addprefix contrib/dot/_build/mlpost_dot,.cmi .cma .cmxa $(LIBEXT) .cmt .cmti)
 
 ifeq "$(LABLGTK2)$(CAIROLABLGTK2)" "yesyes"
 install-byte-lablgtk:
 	$(OCAMLFIND) remove $(DESTDIR) mlpost_lablgtk
 	$(OCAMLFIND) install $(DESTDIR) mlpost_lablgtk contrib/lablgtk/META \
-	   $(addprefix contrib/lablgtk/_build/mlpost_lablgtk,.cmi .cma)
+	   $(addprefix contrib/lablgtk/_build/mlpost_lablgtk,.cmi .cma .cmt .cmti)
 
 install-opt-lablgtk:
 	$(OCAMLFIND) remove $(DESTDIR) mlpost_lablgtk
 	$(OCAMLFIND) install $(DESTDIR) mlpost_lablgtk contrib/lablgtk/META \
-           $(addprefix contrib/lablgtk/_build/mlpost_lablgtk,.cmi .cma .cmxa $(LIBEXT))
+           $(addprefix contrib/lablgtk/_build/mlpost_lablgtk,.cmi .cma .cmxa $(LIBEXT) .cmt .cmti)
 else
 install-byte-lablgtk:
 
