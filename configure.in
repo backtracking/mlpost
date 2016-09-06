@@ -175,11 +175,7 @@ else
           AC_MSG_RESULT(ok)
         fi ;;
       *)
-        if test "$TMPVER" != "$OCAMLVERSION" ; then
-          AC_MSG_ERROR(ocamlbuild version differs from ocamlc. Aborting.)
-        else
-          AC_MSG_RESULT(ok)
-        fi ;;
+        AC_MSG_RESULT(ok) ;;
     esac
 fi
 # Then check that we are dealing with ocamlbuild at the right place
