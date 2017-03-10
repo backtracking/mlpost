@@ -103,9 +103,10 @@ let print_latex_error () =
     Printf.printf
       "LaTeX has found an error in your file. Here is its output:\n";
     ignore (call_latex ~outv:true "mpxerr.tex")
-  end else
-    Printf.printf "There was an error during execution of metapost. Aborting. \
-      Execute with option -v to see the error.\n"
+  end (* else
+    Printf.printf
+      "There were (ignored) errors during the execution of metapost. \
+      Execute with option -v to see the errors.\n" *)
 
 let mps ?prelude ?(verbose=false) bn figl =
   if figl <> [] then

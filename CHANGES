@@ -1,9 +1,11 @@
 o - changes in behaviour, new features, bugfixes
 * - incompatible changes in the interface
 
-current
--------
-
+version 0.8.2, March 10, 2017
+-----------------------------
+o mlpost does not complain anymore about Metapost errors
+o ocamlopt is called with warning 58 disabled
+o fixed installation with OCaml 4.04
 o new module [Triangle] to draw tree-like, triangular shapes
 * (internal) Misc.call_cmd now does print output of the called program
   directly, instead of returning it as a string
@@ -11,7 +13,6 @@ o new module [Triangle] to draw tree-like, triangular shapes
 
 version 0.8.1, April 26th 2010
 ------------------------------
-
 o configure: store absolute paths of programs
 o configure: fixed META file
 o doc: documentation for contribs

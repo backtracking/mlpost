@@ -31,7 +31,7 @@
 #   EXE           ".exe" if OCAMLWIN32=yes, "" otherwise
 
 # The name of the package and its version
-AC_INIT(mlpost,current,[],[],[])
+AC_INIT(mlpost,0.8.2,[],[],[])
 
 # The compilation date
 TODAY=`date`
@@ -165,28 +165,7 @@ AC_PATH_PROG(OCAMLBUILD, ocamlbuild, no)
 if test "$OCAMLBUILD" = no; then
     AC_MSG_ERROR(Cannot find ocamlbuild.)
 else
-    AC_MSG_CHECKING(ocamlbuild version)
-    TMPVER=`$OCAMLBUILD -version | sed -n -e 's|.*ocamlbuild *\(.*\)$|\1|p' `
-    case $OCAMLVERSION in
-      3.10.1|3.10.2*)
-        if test "$TMPVER" != "0.1"; then
-          AC_MSG_ERROR(ocamlbuild version differs from ocamlc. Aborting.)
-        else
-          AC_MSG_RESULT(ok)
-        fi ;;
-      *)
-        AC_MSG_RESULT(ok) ;;
-    esac
-fi
-# Then check that we are dealing with ocamlbuild at the right place
-AC_MSG_CHECKING(ocamlbuild place)
-OCAMLBUILDLIB=$(ocamlbuild -where)
-if test "$OCAMLBUILDLIB" != "${OCAMLLIB}/ocamlbuild"; then
-  echo "ocamlbuild present but your ocamlbuild is not compatible with your ocamlc:"
-  echo "ocamlbuild : $OCAMLBUILDLIB, ocamlc : $OCAMLLIB"
-  AC_MSG_ERROR(ocamlbuild not at the right place)
-else
-   AC_MSG_RESULT(ok)
+    AC_MSG_RESULT(ok)
 fi
 
 AC_PATH_PROG(OCAMLWEB,ocamlweb,true)
@@ -294,11 +273,8 @@ if test "$enable_lablgtk" = yes; then
    fi
 fi
 
-##AC_CHECK_FILE($OCAMLLIB/lablgtk2/lablgtk.cma,LABLGTK2=yes,LABLGTK2=no)
-## AC_CHECK_PROG(LABLGTK2,lablgtk2,yes,no) not always available (Win32)
 if test -n "$LABLGTK2LIB" ; then
    LABLGTK2=yes
-dnl    INCLUDEGTK2="-I $LABLGTK2LIB"
    INCLUDEGTK2="-I +lablgtk2"
 else
    LABLGTK2=no

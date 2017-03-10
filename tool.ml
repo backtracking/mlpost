@@ -214,7 +214,7 @@ let try_remove s = try Sys.remove s with _ -> ()
 
 let ocaml_generic compiler args =
   let s = get_exec_name !compile_name in
-  let cmd = compiler ^ " -o " ^ s ^ " " ^ String.concat " " args in
+  let cmd = compiler ^ " -w -58 -o " ^ s ^ " " ^ String.concat " " args in
   command ~outv:true cmd;
   execute ~outv:true s;
   match !compile_name with
