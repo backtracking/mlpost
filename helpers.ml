@@ -49,6 +49,14 @@ let box_line ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep a b =
   let a, b = subboxes within a b in
   draw ?color ?pen ?dashed (Box.cpath ?style ?outd ?ind ?sep a b)
 
+let box_point_line ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep a b =
+  let a = match within with None -> a | Some x -> Box.sub a x in
+  draw ?color ?pen ?dashed (Box.cpath_left ?style ?outd ?ind ?sep a b)
+
+let point_box_line ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep a b =
+  let b = match within with None -> b | Some x -> Box.sub b x in
+  draw ?color ?pen ?dashed (Box.cpath_right ?style ?outd ?ind ?sep a b)
+
 let box_label_line ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep ?pos
   lab a b =
   let a, b = subboxes within a b in

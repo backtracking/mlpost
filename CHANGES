@@ -1,6 +1,8 @@
 o - changes in behaviour, new features, bugfixes
 * - incompatible changes in the interface
 
+o added Helpers.box_point_line and Helpers.point_box_line
+
 version 0.8.2, March 10, 2017
 -----------------------------
 o mlpost does not complain anymore about Metapost errors
