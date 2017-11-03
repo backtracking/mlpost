@@ -163,14 +163,17 @@ let clip_line_with_belt (line, line_path) (belt, _, clipping_path) =
 let draw_line (line, line_path) =
   Command.draw ~brush:line.brush line_path
 
-let classic = add_head (add_line empty)
+let mk_classic ?color () = add_head (add_line ?color empty)
+let mk_implies ?color () =
+  add_head
+    (add_line ?color ~dist:(Num.cm 0.035)
+       (add_line ?color ~dist:(Num.cm (-0.035))
+          empty))
+
+let classic = mk_classic ()
 let triangle = add_head ~head: head_triangle (add_line empty)
 let triangle_full = add_head ~head: head_triangle_full (add_line empty)
-let implies =
-  add_head
-    (add_line ~dist: (Num.cm 0.035)
-       (add_line ~dist: (Num.cm (-0.035))
-          empty))
+let implies = mk_implies ()
 let iff = add_foot implies
 
 let draw ?(kind = triangle_full) ?tex ?(pos = 0.5) ?anchor path =

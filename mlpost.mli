@@ -1832,6 +1832,9 @@ module Arrow : sig
     (** An arrow made of two parallel lines, a classic head and a classic
         foot. *)
 
+  val mk_classic: ?color:Color.t -> unit -> kind
+  val mk_implies: ?color:Color.t -> unit -> kind
+
   (** {2 Heads} *)
 
   type head_description
