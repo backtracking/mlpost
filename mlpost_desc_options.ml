@@ -36,6 +36,7 @@ let dumpable = ref false
 let dont_clean = ref false
 let mp = ref false
 let mps = ref false
+let pgf = ref false
 let png = ref false
 let svg = ref false
 let filename_prefix = ref ""
@@ -52,6 +53,7 @@ let spec =
     "-png", Set png, " Generate .png files";
     "-ps", Clear pdf, " Generate .1 files";
     "-mps", Set mps, " Use the experimental Mps output";
+    "-pgf", Set pgf, " Use the experimental Pgf output";
     "-svg", Set svg, " Generate .svg files (only with cairo)";
     "-latex", String set_latex_file, "<main.tex> Scan the LaTeX prelude";
     "-eps", Set eps, " Generate encapsulated postscript files";

@@ -2848,6 +2848,11 @@ module Mps : sig
   val dump: unit -> unit
   val generate : (string * Command.t) list -> unit
 end
+
+module Pgf : sig
+  val dump: unit -> unit
+  val generate : (string * Command.t) list -> unit
+end
 (**/**)
 
 module Defaults : sig

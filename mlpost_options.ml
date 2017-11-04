@@ -72,7 +72,9 @@ let () =
       else if !png && not (!xpdf || !interactive) then
         Metapost.dump_png ?prelude ~verbose ~clean:(not !dont_clean) bn
       else
-        if !mps then Mps.dump () else
+      if !mps then Mps.dump ()
+      else if !pgf then Pgf.dump ()
+      else
           Metapost.dump
           ?prelude ~verbose ~clean:(not !dont_clean) bn;
       if !xpdf || !interactive then begin
