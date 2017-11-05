@@ -19,3 +19,6 @@
 
 <mlpost.*> : use_freetype, use_libmlpost_ft
 <test_freetype.*> : use_freetype, use_libmlpost_ft, pkg_cairo, I(backend)
+
+<*>: safe_string
+<**/*>: safe_string

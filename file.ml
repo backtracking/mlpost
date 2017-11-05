@@ -8,7 +8,7 @@ module LowLevel = struct
   let copy src dest =
     let cin = open_in src
     and cout = open_out dest
-    and buff = String.make 1024 ' '
+    and buff = Bytes.make 1024 ' '
     and n = ref 0
     in
     while n := input cin buff 0 1024; !n <> 0 do

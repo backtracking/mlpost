@@ -406,30 +406,30 @@ module BitMap = struct
   (* FIXME replace me by something more efficient *)
 
   (* encode our bitmap as a string (array of chars) *)
-  type t = string
+  type t = Bytes.t
   (* a char '0' corresponds to '0', a char '1' corresponds to '1' *)
 
-  let mk n = String.make n '0'
+  let mk n = Bytes.make n '0'
 
-  let set t n = t.[n] <- '1'
+  let set t n = Bytes.set t n '1'
   let get t n = t.[n]
   let min t =
-    try String.index t '1' with Not_found -> assert false
+    try Bytes.index t '1' with Not_found -> assert false
 
   let safe_sub_four s i =
     (* if the string does not have 4 remaining chars, pad with zeros *)
     let my_len = 4 in
-    let l = String.length s in
-    if i + my_len <= l then String.sub s i my_len
+    let l = Bytes.length s in
+    if i + my_len <= l then Bytes.sub s i my_len
     else
-      let buf = String.make my_len '0' in
+      let buf = Bytes.make my_len '0' in
       for j = i to l - 1 do
-        buf.[j-i] <- s.[j]
+        Bytes.set buf (j-i) (Bytes.get s j)
       done;
       buf
 
   let one_char t i =
-    match safe_sub_four t i with
+    match Bytes.to_string (safe_sub_four t i) with
     | "0000" -> '0'
     | "0001" -> '1'
     | "0010" -> '2'
