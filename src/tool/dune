@@ -1,0 +1,5 @@
+(executable
+  (name tool)
+  (public_name mlpost)
+  (libraries mlpost mlpost_desc_options mlpost_version)
+)

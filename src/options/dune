@@ -1,0 +1,25 @@
+(library
+   (name mlpost_desc_options)
+   (public_name mlpost.desc_options)
+   (modules mlpost_desc_options)
+)
+
+(library
+   (name mlpost_options)
+   (public_name mlpost.options)
+   (modules mlpost_options)
+   (libraries mlpost mlpost_desc_options)
+)
+
+
+(library
+   (name mlpost_version)
+   (public_name mlpost.version)
+   (modules mlpost_version)
+)
+
+
+(rule
+  (targets mlpost_version.ml)
+  (deps version.ml.in)
+  (action (copy version.ml.in mlpost_version.ml)))

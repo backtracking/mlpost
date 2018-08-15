@@ -38,3 +38,5 @@ www/version.prehtml
 \#*\#
 .#*
 _mlpost.*
+.merlin
+/mlpost.install

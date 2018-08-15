@@ -1,5 +1,0 @@
-<dvi.ml> or <tfm.ml> : syntax_bitstring
-<dvi.ml> or <tfm.ml>  : pkg_bitstring, pkg_bitstring.syntax
-<*.cmx> : for-pack(Mlpost)
-
-<fonts.*> : pkg_cairo
