@@ -7,9 +7,6 @@ autom4te.cache/
 config.log
 config.status
 configure
-mlpost.mli
-myocamlbuild.ml
-ocamlbuild.Makefile
 simple.Makefile
 version.ml
 doc
