@@ -4,14 +4,12 @@
 open StdLabels
 open Mlpost
 
-open Format
-
 
 module P = Picture
 
 type auto_aspect = width:Num.t -> height:Num.t -> P.t -> Mlpost.Transform.t
 
-let aa_nothing ~width ~height _ = []
+let aa_nothing ~width:_ ~height:_ _ = []
 let aa_center ~width ~height pic =
   let p = Point.pt (Num.divf width 2.,Num.divf height 2.) in
   [Transform.shifted (Point.sub p (P.ctr pic))]
@@ -83,7 +81,7 @@ class mlpost_pic ?width ?height ?packing ?show () =
       (* *)
       let pic = if show_corner then
         let f x = Point.draw ~color:Color.red (Picture.corner x pic) in
-        Command.seq (pic:: (List.map f [`Center;`Northeast;`Southeast;
+        Command.seq (pic:: (List.map ~f [`Center;`Northeast;`Southeast;
                                         `Northwest;`Southwest]))
                      else pic in
       let t = auto_aspect ~width:(Num.pt w) ~height:(Num.pt h) pic in
@@ -146,7 +144,7 @@ struct
 
 
   let refresh w =
-    List.iter (fun (pic,(mlpic,_)) ->
+    List.iter ~f:(fun (pic,(mlpic,_)) ->
                  begin try
                    mlpic#set_pic (pic ())
                  with e -> 
@@ -172,7 +170,7 @@ struct
 			           ?group
 			           ~label:s
 			           ~packing:menu#append () in
-			         ignore(menuitem#connect#toggled c); 
+			         ignore(menuitem#connect#toggled ~callback:c); 
 			         Some (menuitem#group)
 		              ) ~init:None l)
       
@@ -185,12 +183,12 @@ struct
     let text = GText.view ~packing:w.main_vbox#pack ~show:true () in
     text#buffer#set_text first;
     ignore (text#buffer#connect#changed 
-	      (fun () -> set (text#buffer#get_text ());refresh w))
+	      ~callback:(fun () -> set (text#buffer#get_text ());refresh w))
 
 
   let main w =
     ignore(w.window#show ());
-    List.iter (fun (_,(_,window)) -> ignore(window#show ())) w.picda;
+    List.iter ~f:(fun (_,(_,window)) -> ignore(window#show ())) w.picda;
     GMain.main ()
 
 end

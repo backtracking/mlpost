@@ -1,0 +1,6 @@
+(library
+    (name mlpost_lablgtk2)
+    (public_name mlpost-lablgtk2)
+    (synopsis "Library for Mlpost to easily display mlpost figures into an x-window")
+    (libraries mlpost cairo.lablgtk2 lablgtk2)
+)

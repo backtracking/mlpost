@@ -40,3 +40,4 @@ www/version.prehtml
 _mlpost.*
 .merlin
 /mlpost.install
+/mlpost-lablgtk2.install

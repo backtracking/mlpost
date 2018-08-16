@@ -148,7 +148,7 @@ let update_points _ ((sp1,d1,sp2,d2),p) =
 	  `X2 (x +. 3.) ; `Y2 (y +. 3.) ];
   ()
 
-let refresh canvas pic () = 
+let refresh _canvas pic () = 
   eprintf "@.------------------------------refresh------------------------------@.";
   write_edit (); 
   make_png ();
@@ -194,7 +194,7 @@ let highlight_point item ev =
   end ;
   false
 
-let move_point x y s item ev =
+let move_point _x _y s item ev =
   begin match ev with
   | `MOTION_NOTIFY ev ->
       let state = GdkEvent.Motion.state ev in
@@ -211,8 +211,7 @@ let move_point x y s item ev =
 	    item#set [ `X1 (x -. 3.) ; `Y1 (y -. 3.) ;
 		       `X2 (x +. 3.) ; `Y2 (y +. 3.) ]
 	end
-  | `BUTTON_RELEASE ev -> 
-      eprintf "toto@.";
+  | `BUTTON_RELEASE _ -> ()
   | _ -> ()
   end ; false
 
@@ -225,8 +224,8 @@ let draw_point root s n1 n2 d1 d2 =
   let point = GnoCanvas.ellipse ~x1:(x-.3.) ~x2:(x+.3.) ~y1:(y-.3.) ~y2:(y+.3.) 
     ~props:[ `FILL_COLOR "black" ; `OUTLINE_COLOR "black" ; `WIDTH_PIXELS 0 ] root in
   let sigs = point#connect in
- ignore( sigs#event (highlight_point point) );
-  sigs#event (move_point x y s point);
+  ignore (sigs#event ~callback:(highlight_point point));
+  ignore (sigs#event ~callback:(move_point x y s point));
   points := point::!points;
   ()
   
@@ -258,15 +257,15 @@ let init_spin_bounds = function
   |Mm -> (-500.),500.,1.
   |Inch -> (-3.),3.,0.05
 
-let left_part_lign pic vbox vbox2 vbox3 s n d s' = 
-  GMisc.label ~text:(s^s') ~packing:vbox#add ();
-  GMisc.label ~text:(string_of_dim d) ~packing:vbox3#add ();      
+let left_part_lign _pic vbox vbox2 vbox3 s n d s' = 
+  ignore (GMisc.label ~text:(s^s') ~packing:vbox#add ());
+  ignore (GMisc.label ~text:(string_of_dim d) ~packing:vbox3#add ());
   let sb = GEdit.spin_button ~packing:vbox2#add ~digits:2 ~numeric:true ~wrap:true () in
   let lower,upper,step_incr = init_spin_bounds d 
   in
     sb#adjustment#set_bounds ~lower ~upper ~step_incr ();
     sb#set_value n;
-    sb#adjustment#connect#value_changed ~callback:(point_of_spin s sb);
+    ignore (sb#adjustment#connect#value_changed ~callback:(point_of_spin s sb));
     spins := sb::!spins;
     ()
 
@@ -296,9 +295,8 @@ let main () =
   
   (* Menu bar *)
   let menubar = GMenu.menu_bar ~packing:vb#pack () in
-    
-  window#connect#destroy ~callback:write_edit ;
-  window#connect#destroy ~callback:Main.quit ;
+  ignore (window#connect#destroy ~callback:write_edit) ;
+  ignore (window#connect#destroy ~callback:Main.quit) ;
 
   let hbox = GPack.hbox ~spacing:10 ~packing:vb#add () in
   let scrolled_window = GBin.scrolled_window  ~width:350
@@ -315,7 +313,7 @@ let main () =
     ~border_width: 10 ~hpolicy: `AUTOMATIC ~packing:hbox#add () in
   let canvas = GnoCanvas.canvas ~width:(int_of_float (!pic_w)) 
     ~height:(int_of_float (!pic_h)) ~packing:scrolled_canvas#add_with_viewport () in
-    canvas#set_scroll_region 0. 0. !pic_w !pic_h ;
+    canvas#set_scroll_region ~x1:0. ~y1:0. ~x2:!pic_w ~y2:!pic_h ;
   
   let root = canvas#root in  
   
@@ -328,17 +326,17 @@ let main () =
   
   (* File menu *)
   let factory = new GMenu.factory file_menu ~accel_group in
-  factory#add_item "Refresh" ~key:_r ~callback: (refresh canvas pic);
+  ignore (factory#add_item "Refresh" ~key:_r ~callback: (refresh canvas pic));
   let factory = new GMenu.factory file_menu ~accel_group in
-  factory#add_item "Quit" ~key:_Q ~callback: Main.quit;
+  ignore (factory#add_item "Quit" ~key:_Q ~callback: Main.quit);
   
   (* Zoom *)
   let factory = new GMenu.factory zoom_menu ~accel_group in
-  factory#add_item "50%" ~callback:(fun()->zoom canvas 0.5);
-  factory#add_item "75%" ~callback:(fun()->zoom canvas 0.75);
-  factory#add_item "100%" ~callback:(fun()->zoom canvas 1.);
-  factory#add_item "125%" ~callback:(fun()->zoom canvas 1.25);
-  factory#add_item "150%" ~callback:(fun()->zoom canvas 1.5);
+  ignore (factory#add_item "50%" ~callback:(fun()->zoom canvas 0.5));
+  ignore (factory#add_item "75%" ~callback:(fun()->zoom canvas 0.75));
+  ignore (factory#add_item "100%" ~callback:(fun()->zoom canvas 1.));
+  ignore (factory#add_item "125%" ~callback:(fun()->zoom canvas 1.25));
+  ignore (factory#add_item "150%" ~callback:(fun()->zoom canvas 1.5));
 
   window#add_accel_group accel_group;  
   
