@@ -1,24 +1,11 @@
 open Xdot_ast
 open Mlpost
 
-let parse_file f =
-  let f  = open_in f in
-  let f = Lexing.from_channel f in
-  let d = Xdot_lexer.main f in
-  d
-
 module Pi = Picture
 
 let ip (x,y) = (*Format.printf "%i,%i@." x y;*) Point.bpp (x,y)
 
-let interp_node (id,pos) = 
-  let t = Pi.tex ("mlpost_node"^string_of_int id) in
-  let t = Pi.shift (ip pos) t in
-  t
-
 (* http://lists.cairographics.org/archives/cairo/2009-April/016916.html *)
-open Num
-open Command
 module P = Point
 
 (*

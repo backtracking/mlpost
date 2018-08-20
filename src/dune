@@ -1,0 +1,13 @@
+(library
+  (name mlpost)
+  (public_name mlpost)
+  (synopsis "OCaml interface to Mlpost, Cairo, Pgf")
+  (libraries unix bitstring cairo mlpost_version)
+  (preprocess (pps bitstring.ppx))
+  (c_names ml_mlpost_ft)
+  (c_library_flags -lfreetype -lz)
+  (c_flags -I/usr/include/freetype2)
+)
+
+(ocamllex scan_prelude pfb_lexer map_lexer)
+(ocamlyacc pfb_parser map_parser)

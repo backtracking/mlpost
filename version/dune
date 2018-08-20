@@ -1,0 +1,9 @@
+(library
+   (name mlpost_version)
+   (public_name mlpost.version)
+)
+
+(rule
+  (targets mlpost_version.ml)
+  (deps version.ml.in)
+  (action (copy version.ml.in mlpost_version.ml)))

@@ -20,17 +20,20 @@ object
   val obj : Gtk.widget Gtk.obj
   method pic : Mlpost.Picture.t
     (** The displayed picture *)
+
   method set_pic : Mlpost.Picture.t -> unit
     (** Sets the picture to display. This function doesn't refresh
        the widget. *)
 
   method background : GDraw.color
     (** The actual background color *)
+
   method set_background : GDraw.color -> unit
     (** Sets the background color *)
 
   method size : int * int
     (** The size of the drawing area (width,height) *)
+
   method set_auto_aspect : auto_aspect -> unit
     (** define the transformation used to have a good aspect of the
         picture (centered, ...) *)
@@ -50,7 +53,8 @@ sig
 
   val new_interface : 
     ?width:int -> ?height:int -> ?title:string -> unit -> interface
-    (** create a new interface with an empty control window *)
+  (** create a new interface with an empty control window *)
+
   (** {2 Interfaces} *)
 
   val create_text : 
