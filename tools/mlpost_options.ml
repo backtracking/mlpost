@@ -58,7 +58,9 @@ let () =
     (Filename.basename (Sys.argv.(0))) in
 
   let do_at_exit () =
-    if !cairo then begin
+    if !dumpable then
+      Metapost.dumpable ()
+    else if !cairo then begin
       if not (!xpdf || !interactive) then
         if !png then Cairost.dump_png ()
         else if !svg then Cairost.dump_svg ()

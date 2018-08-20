@@ -1,5 +1,4 @@
 META
-Makefile
 _build/
 _build_dot
 _build_lablgtk
@@ -38,3 +37,4 @@ _mlpost.*
 .merlin
 /mlpost.install
 /mlpost-lablgtk2.install
+/mlpost-lablgtk.install

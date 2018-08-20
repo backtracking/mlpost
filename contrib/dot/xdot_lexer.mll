@@ -62,6 +62,7 @@ rule token = parse
   | "mlpost_node" (int as i) {NODE (int_of_string i)} 
   | ident as id  
       { try Hashtbl.find keywords id with Not_found -> IDENT id }
+  | float as f { FLOAT (float_of_string f) }
   | "\""
       { STRING (string lexbuf) }
   | "'"
@@ -173,8 +174,7 @@ let xdot_type digraph =
                    with Not_found -> () end) digraph;
   let bounding_box = match !bounding_box with
     | None -> 
-        Format.eprintf "Dot doesn't give any bounding box!! 
-Please report to mlpost authors@.";
+        Format.eprintf "Dot doesn't give any bounding box!! Please report to mlpost authors@.";
         exit 1
     | Some bb -> bb in
   { bounding_box = bounding_box;

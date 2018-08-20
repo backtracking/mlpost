@@ -1,9 +1,6 @@
 open Mlpost
 open Command
-open Picture
-open Path
 open Num
-open Num.Infix
 open Helpers
 
 (** Copy from misc.ml!!! *)
@@ -55,17 +52,17 @@ let fold_bit f =
 (* the bits in [n] indicate the selected characters of [s] *)
 let subword s n =
   let len = fold_bit (fun l _ -> l+1) 0 n in
-  let w = String.create len in
+  let w = Bytes.create len in
   let j = ref 0 in
-  for i = 0 to String.length s - 1 do
-    if n land (1 lsl i) != 0 then begin w.[!j] <- s.[i]; incr j end
+  for i = 0 to Bytes.length s - 1 do
+    if n land (1 lsl i) != 0 then begin Bytes.set w !j s.[i]; incr j end
   done;
-  w
+  Bytes.unsafe_to_string w
 
 (* builds the lattice of [s]'s subwords *)
 let subwords s =
   let n = String.length s in
-  let levels = Array.create (n+1) [] in
+  let levels = Array.make (n+1) [] in
   let memo = Hashtbl.create 97 in
   let rec make_node lvl x =
     try 

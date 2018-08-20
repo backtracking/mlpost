@@ -33,7 +33,10 @@ let float fmt f =
     uses %g in the cases where this would use e notation; we do not need that
     much precision anyway*)
   let a = abs_float f in
-  if a < 0.0001 then fprintf fmt "0"
+  if classify_float f = FP_nan then
+    (* should be an error there is a bug somewhere to track *)
+    fprintf fmt "0"
+  else if a < 0.0001 then fprintf fmt "0"
   else if a >= 1.e04 then fprintf fmt "%.4f" f
   else Printf.fprintf fmt "%.4g" f
 

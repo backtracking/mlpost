@@ -4,6 +4,8 @@
 )
 
 (rule
-  (targets mlpost_version.ml)
-  (deps version.ml.in)
-  (action (copy version.ml.in mlpost_version.ml)))
+  (targets conf.ml)
+  (action (write-file conf.ml "let ocamlfind_path = \"%{bin:ocamlfind}\"\n\
+                               let version = \"%{version:mlpost}\""
+                               ))
+)

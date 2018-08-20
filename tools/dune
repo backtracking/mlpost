@@ -9,6 +9,7 @@
    (public_name mlpost.options)
    (modules mlpost_options)
    (libraries mlpost mlpost_desc_options)
+   (flags "-linkall")
 )
 
 (executable
@@ -22,7 +23,7 @@
 (executable
   (name gmlpost)
   (public_name gmlpost)
-  (package mlpost-lablgtk2)
+  (package mlpost-lablgtk)
   (modules Gmlpost Glexer)
   (libraries threads lablgtk2 lablgtk2.gnomecanvas)
 )

@@ -46,7 +46,7 @@ let add_some l = function
 
 %}
 %token <float> FLOAT
-%token <string> ID IDENC IDPFAB IDTTF
+%token <string> ID IDENC IDPFAB IDUnknown
 %token EOL EOF
 %token REMAP SLANT EXTEND
 %token DQUOTE LESS
@@ -80,8 +80,8 @@ pdftex_options:
   | {}
   | DQUOTE pdftex_options_aux DQUOTE pdftex_options {$2}
   | IDENC pdftex_options                {enc:=Some $1}
-  | IDPFAB pdftex_options              {pfab:=Some $1}
-  | IDTTF pdftex_options              {pfab:=None}
+  | IDPFAB pdftex_options               {pfab:=Some $1}
+  | IDUnknown pdftex_options            {pfab:=None}
 
 pdftex_options_aux:
   |                    {}

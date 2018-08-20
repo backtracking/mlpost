@@ -68,5 +68,7 @@ val dump :
 
 val set_filename_prefix : string -> unit
 
+val figures_names : unit -> string list
+
 type job = Defaults.job
 type jobs = Defaults.jobs

@@ -2646,6 +2646,7 @@ module Metapost : sig
 
   val dumpable : unit -> unit
   val depend : string -> unit
+  val figures_names : unit -> string list
 
 (**/**)
 end
@@ -2828,7 +2829,7 @@ end
 
 module Version : sig
   val version : string
-  val date : string
+  (* val date : string *)
 end
 
 module Mps : sig

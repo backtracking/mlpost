@@ -1,10 +1,10 @@
-\documentclass{article}
+\documentclass[tikz]{standalone}
 \usepackage{graphicx}
-\pagestyle{empty}
-\usepackage[paperwidth=1000pt, paperheight=2000pt]{geometry}
+\LoadMetaPostSpecialExtensions
 \begin{document}
-\includegraphics{all.mps}
+\includegraphics{\filetoconvert}
 \end{document}
+
 
 %%% Local Variables: 
 %%% mode: latex

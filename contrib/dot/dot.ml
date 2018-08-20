@@ -73,10 +73,10 @@ let call_dot orient nodes edges =
     | `LR -> "LR"
     | `BT -> "BT"
     | `RL -> "RL" in
-  let ((pin,pout) as p) = Unix.open_process  
+  let ((pin,pout) as p) = Unix.open_process
     "dot -Txdot" in
-    (*"tee example_in.log | dot -Txdot |tee example_out.log" in*)
-    (*"cat example_out.log" in*)
+    (* "tee example_in.log | dot -Txdot |tee example_out.log" in *)
+    (* "cat example_out.log" in *)
   let pout2 = formatter_of_out_channel pout in
   print_dot pout2 rankdir nodes edges;
   pp_print_flush pout2 ();

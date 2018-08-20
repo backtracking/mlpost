@@ -63,6 +63,7 @@ properties:
 property:
  | IDENT EQUAL STRING {($1,$3)}
  | IDENT EQUAL IDENT {($1,$3)}
+ | IDENT EQUAL FLOAT {($1,string_of_float $3)}
 
 
 pos: 

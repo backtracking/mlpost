@@ -3,6 +3,7 @@ open Concrete
 open Command
 open Picture
 open CPoint
+open Ctypes
 
 let s = "Bonjour les amis $42_{la reponse}$"
 

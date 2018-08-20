@@ -32,9 +32,15 @@ let float fmt f =
     uses %g in the cases where this would use e notation; we do not need that
     much precision anyway*)
   let a = abs_float f in
-  if a < 0.0001 then fprintf fmt "0"
+  if classify_float f = FP_nan then
+    (* should be an error there is a bug somewhere to track *)
+    fprintf fmt "0"
+  else if a < 0.0001 then fprintf fmt "0"
   else if a >= 1.e04 then fprintf fmt "%.4f" f
   else fprintf fmt "%.4g" f
+
+let bp fmt f =
+  Format.fprintf fmt "%a bp" float f
 
 let rec list sep p fmt l =
   match l with
@@ -49,7 +55,6 @@ let option sep p fmt o =
 
 let nothing _ = ()
 let space fmt = fprintf fmt "@ "
-let comma fmt = fprintf fmt ",@,"
 let braces p fmt x = fprintf fmt "{%a}" p x
 
 module PGF = struct
@@ -70,7 +75,7 @@ module PGF = struct
   let _ = MiterJoin
   let _ = BevelJoin
 
-  let point fmt p = fprintf fmt "\\pgfqpoint{%a bp}{%a bp}" float p.x float p.y
+  let point fmt p = fprintf fmt "\\pgfqpoint{%a}{%a}" bp p.x bp p.y
   let moveto fmt p = fprintf fmt "\\pgfpathmoveto{%a}" point p
   let lineto fmt p = fprintf fmt "\\pgfpathlineto{%a}" point p
 
@@ -90,7 +95,7 @@ module PGF = struct
 
   let setlinewidth fmt f =
     (** strange treatment of linewidth of Metapost *)
-   fprintf fmt "\\pgfsetlinewidth{%a}" float f
+   fprintf fmt "\\pgfsetlinewidth{%a}" bp f
 
   let setlinecap fmt c =
     let i =
@@ -145,8 +150,8 @@ module PGF = struct
 
   let dash fmt (offset,pattern) =
     fprintf fmt "\\pgfsetdash{%a}{%a}"
-      (list comma (braces float)) pattern
-      float offset
+      (list nothing (braces bp)) pattern
+      bp offset
 
   let char_const fmt c = fprintf fmt "\\char'%03lo" c
 
@@ -276,10 +281,11 @@ let rec picture fmt p =
 
 let draw fmt x =
   let fmt = Format.formatter_of_out_channel fmt in
-  (* let {x = minx; y = miny},{x = maxx; y = maxy} = Picture_lib.bounding_box x in *)
-  (* let minxt, minyt, maxxt, maxyt = *)
-  (*   floor minx, floor miny, ceil maxx, ceil maxy in *)
+  let p1,p2 = Picture_lib.bounding_box x in
   fprintf fmt "%%%%Creator: Mlpost %s@." Mlpost_version.version;
+  fprintf fmt "\\begin{tikzpicture}@.";
+  fprintf fmt "\\useasboundingbox (%a, %a) rectangle (%a, %a);@."
+    bp p1.x bp p1.y bp p2.x bp p2.y;
   in_context fmt (fun _ ->
       fprintf fmt "%a@ %a@ %a@ %a"
         PGF.setlinewidth (P.default_line_size /.2.)
@@ -287,7 +293,7 @@ let draw fmt x =
         PGF.setlinejoin PGF.RoundJoin
         picture (P.content x)
     );
-  fprintf fmt "@."
+  fprintf fmt "@.\\end{tikzpicture}@."
 
 let generate_one fn fig =
   File.write_to fn (fun fmt ->

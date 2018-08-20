@@ -17,12 +17,13 @@
 open Format
 open Arg
 
-let use_ocamlbuild = ref false
 let ccopt = ref " "
 let execopt = ref " "
 let verbose = Mlpost_desc_options.verbose
+let ocamlfind_path = ref Mlpost_version.ocamlfind_path
 let native = ref false
-let libraries = ref (Mlpost_version.libraries Mlpost_version.libdir)
+(* let libraries = ref (Mlpost_version.libraries Mlpost_version.libdir) *)
+let contribs = ["dot","mlpost.dot";"graphics","mlpost.graphcis";"lablgtk","mlpost-lablgtk2"]
 let compile_name = ref None
 let dont_execute = ref false
 let dont_clean = ref false
@@ -31,8 +32,8 @@ let add_nothing = ref false
 let files =
   Queue.create ()
 
-let not_cairo = Mlpost_version.not_cairo
-let not_bitstring = Mlpost_version.not_bitstring
+let not_cairo = false
+let not_bitstring = false
 
 let used_libs =
   (* put libraries in correct order here *)
@@ -44,10 +45,10 @@ let used_libs =
   let acc = "mlpost_options"::acc in
   ref acc
 
-let add_contrib x =
-  if List.mem_assoc x !libraries then
-    used_libs := x::!used_libs
-  else begin Format.eprintf "contrib %s unknown" x; exit 1 end
+let add_contrib _x = ()
+  (* if List.mem_assoc x !libraries then
+   *   used_libs := x::!used_libs
+   * else begin Format.eprintf "contrib %s unknown" x; exit 1 end *)
 
 let remove_mlpost_options () =
   used_libs := List.filter (fun s -> s <> "mlpost_options") !used_libs
@@ -67,38 +68,24 @@ let version () =
   (* The first line of the output should be the version number, and only the
    * version number! *)
   Format.printf "%s@." Mlpost_version.version;
-  Format.printf "mlpost %s compiled at %s@." Mlpost_version.version Mlpost_version.date;
-  Format.printf "searching for mlpost.cm(a|xa) in %s@." Mlpost_version.libdir;
-  if not not_cairo || not not_bitstring  then
-    Format.printf "additional directories are %s@." Mlpost_version.include_string;
+  (* Format.printf "mlpost %s compiled at %s@." Mlpost_version.version Mlpost_version.date;
+   * Format.printf "searching for mlpost.cm(a|xa) in %s@." Mlpost_version.libdir;
+   * if not not_cairo || not not_bitstring  then
+   *   Format.printf "additional directories are %s@." Mlpost_version.include_string; *)
   exit 0
 
 let add_ccopt x = ccopt := !ccopt ^ x ^ " "
 let add_execopt x = execopt := !execopt ^ x ^ " "
 
-let add_libdir libdir =
-  libraries := Mlpost_version.libraries libdir
+let add_libdir _libdir = ()
+  (* libraries := Mlpost_version.libraries libdir *)
 
-let give_lib () =
-  List.fold_left
-  (fun (acc1,acc2) x ->
-    let includes_,libs = List.assoc x !libraries in
-    List.rev_append includes_ acc1, List.rev_append libs acc2)
-  ([],[]) !used_libs
-
-let get_include_compile s =
-  (* TODO revoir *)
-  let aux = function
-(*
-    | "cmxa" -> List.map (fun (x,y) -> Filename.concat x (y^".cmxa"))
-        (give_lib ())
-    | "cma" -> List.map (fun (x,y) -> Filename.concat x (y^".cma"))
-        (give_lib ())
-*)
-    | "dir" -> fst (give_lib ())
-    | "file" -> snd (give_lib ())
-    | _ -> assert false in
-  print_string (String.concat "\n" (aux s))
+(* let give_lib () =
+ *   List.fold_left
+ *   (fun (acc1,acc2) x ->
+ *     let includes_,libs = List.assoc x !libraries in
+ *     List.rev_append includes_ acc1, List.rev_append libs acc2)
+ *   ([],[]) !used_libs *)
 
 let nocairo () =
   print_string "Mlpost has not been compiled with cairo\n";
@@ -117,21 +104,21 @@ let execopt cmd =
     (fun fmt -> Queue.iter (fprintf fmt "\"%s\" ")) options_for_compiled_prog
     !execopt
 
-let build_args ?ext () =
-  (* ext = None => ocamlbuild *)
-  let lib_ext lib acc =
-    match ext with
-    | None -> "-lib"::lib::acc
-    | Some ext -> (lib^ext)::acc in
-  let include_ acc libdir =
-    match ext with
-    | None -> (sprintf "-cflags -I,%s -lflags -I,%s " libdir libdir)::acc
-    | Some _ -> "-I"::libdir::acc in
-  List.fold_left (fun acc c ->
-    let llibdir,llib = List.assoc c !libraries in
-    let acc = List.fold_right lib_ext llib acc in
-    let acc = List.fold_left include_ acc llibdir in
-    acc) [] !used_libs
+(* let build_args ?ext () =
+ *   (\* ext = None => ocamlbuild *\)
+ *   let lib_ext lib acc =
+ *     match ext with
+ *     | None -> "-lib"::lib::acc
+ *     | Some ext -> (lib^ext)::acc in
+ *   let include_ acc libdir =
+ *     match ext with
+ *     | None -> (sprintf "-cflags -I,%s -lflags -I,%s " libdir libdir)::acc
+ *     | Some _ -> "-I"::libdir::acc in
+ *   List.fold_left (fun acc c ->
+ *     let llibdir,llib = List.assoc c !libraries in
+ *     let acc = List.fold_right lib_ext llib acc in
+ *     let acc = List.fold_left include_ acc llibdir in
+ *     acc) [] !used_libs *)
 
  (* The option have the same behavior but
     add itself to option_for_compiled_prog in addition *)
@@ -156,17 +143,13 @@ let wrap_option (opt,desc,help) =
 
 
 let spec = Arg.align
-  (["-ocamlbuild", Set use_ocamlbuild, " Use ocamlbuild to compile";
-    "-native", Set native, " Compile to native code";
+  (["-native", Set native, " Compile to native code";
     "-ccopt", String add_ccopt,
     "\"<options>\" Pass <options> to the Ocaml compiler";
     "-execopt", String add_execopt,
     "\"<options>\" Pass <options> to the compiled program";
     "-version", Unit version, " Print Mlpost version and exit";
     "-libdir", String add_libdir, " change assumed libdir of mlpost";
-    "-get-include-compile",
-    Symbol (["cmxa";"cma";"dir";"file"],get_include_compile),
-    " Output the libraries which are needed by the library Mlpost";
     "-compile-name", String (fun s -> compile_name := Some s),
     "<compile-name> Keep the compiled version of the .ml file";
     "-dont-execute", Set dont_execute, " Don't execute the compiled file";
@@ -251,39 +234,18 @@ let try_remove s = try Sys.remove s with _ -> ()
 
 let ocaml_generic compiler args =
   let s = get_exec_name !compile_name in
-  let cmd = compiler ^ " -w -58 -o " ^ s ^ " " ^ String.concat " " args in
+  let cmd = !ocamlfind_path ^ " " ^ compiler ^ " -w -58 -o " ^ s ^ " " ^ String.concat " " args in
   command ~outv:true cmd;
   execute ~outv:true s;
   match !compile_name with
     | None -> if !dont_clean then () else Sys.remove s
     | Some _ -> ()
 
-let ocaml = ocaml_generic Mlpost_version.ocamlc
-let ocamlopt = ocaml_generic Mlpost_version.ocamlopt
-
-let ocamlbuild args exec_name =
-  let args =
-    if !verbose then "-classic-display" :: args else " -quiet"::args in
-  command ~outv:true ("ocamlbuild " ^ String.concat " " args ^ exec_name);
-  execute ~outv:true ("_build/"^exec_name);
-  (match !compile_name with
-    | None -> ()
-    | Some s -> command ("cp _build/" ^ exec_name ^ " " ^ s))
-    (* I think we should never call ocamlbuild -clean, maybe only remove the
-     * symlink -- Johannes *)
-(*   if !dont_clean then () else command "ocamlbuild -clean" *)
-
 let compile f =
   let bn = Filename.chop_extension f in
-  if !use_ocamlbuild then
-    let ext = if !native then ".native" else ".byte" in
-    let exec_name = bn ^ ext in
-    try ocamlbuild (build_args () @ ["-no-links";!ccopt]) exec_name
-    with Command_failed out -> exit out
-  else
-    let ext = if !native then ".cmxa" else ".cma" in
-    let args = build_args ~ext () @ [!ccopt; f] in
-    if !native then ocamlopt args else ocaml args;
+    let compiler = if !native then "ocamlopt" else "ocamlc" in
+    let args = ["-package";"mlpost.options";"-package";"mlpost";"-linkpkg";"-g";"-linkall";f] in
+    ocaml_generic compiler args;
     if not !dont_clean then List.iter (fun suf -> try_remove (bn^suf))
       [".cmi";".cmo";".cmx";".o"]
 

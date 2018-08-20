@@ -192,6 +192,10 @@ let emit_slideshow s l =
 let dumpable () =
   Queue.iter (fun (s,_) -> Printf.printf "%s\n" s) Defaults.figures
 
+let figures_names () =
+  List.rev (Queue.fold (fun acc (s,_) -> s::acc) [] Defaults.figures)
+
+
 let depend myname =
   Queue.iter (fun (s,_) ->
     Printf.printf "%s" (File.to_string (File.mk s "fmlpost")))
