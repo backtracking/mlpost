@@ -28,3 +28,9 @@
   (modules parse)
   (libraries caml2html)
 )
+
+; test of the executable
+(alias
+   (name runtest)
+   (action (ignore-stderr (run %{bin:mlpost} -pgf %{dep:boxes.ml})))
+)
