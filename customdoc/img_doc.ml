@@ -126,4 +126,3 @@ let _ = Metapost.emit "halign" Align.halign
 let _ = Metapost.emit "hplace" Align.hplace
 let _ = Metapost.emit "hbox" Align.hbox
 
-let () = Mlpost.Metapost.dump "img_doc"

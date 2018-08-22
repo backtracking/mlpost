@@ -22,6 +22,9 @@ all:
 test:
 	dune runtest
 
+doc:
+	dune build @doc
+
 # When adding new figures or examples
 promote:
 	dune build @promote --auto-promote || true  #For dune.inc

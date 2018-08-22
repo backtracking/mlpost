@@ -105,9 +105,9 @@ let wrap_corner_box give_box f =
 
 module Overlays =
 struct
-    type interval = | Bet of int * int (** [|a,b|] *)
-                    | Bef of int       (** ]|-oo,a|] *)
-                    | Aft of int       (** [|a,+oo|[ *)
+    type interval = | Bet of int * int (** \[|a,b|\] *)
+                    | Bef of int       (** \]|-oo,a|\] *)
+                    | Aft of int       (** \[|a,+oo|\[ *)
                     | Nev              (** emptyset *)
                     | Alw              (** N *)
 

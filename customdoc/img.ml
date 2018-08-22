@@ -1,28 +1,26 @@
-class my_gen =
-  object(self)
-    inherit Odoc_html.html
+open Migrate_parsetree
+open OCaml_403.Ast
+open Parsetree
 
-    (** Return HTML code for the given text of a bar tag. *)
-    method html_of_img t = 
-      match t with 
-      | [] -> ""
-      | (x::r) ->
-          begin
-          match x with
-          | Odoc_info.Raw s -> Format.sprintf "<img alt=\"%s\" src=\"img/%s\"/>" s s
-          | _ -> ""
-          end
-          
-    initializer
-      tag_functions <- ("img", self#html_of_img) :: tag_functions
-  end
+let img_regexp = Str.regexp "^ *@img \\([a-z.]*\\)"
 
-let my_generator = new my_gen
-let _ = 
-  Odoc_args.set_doc_generator 
-         (Some my_generator :> Odoc_args.doc_generator option) ;
-  (* we need to deactivate the -html option of ocamldoc, otherwise our generator
-   * is overwritten by the standard html generator. Ocamlbuild gives the -html
-   * option to ocamldoc, so this is really required *)
-  Odoc_args.add_option ("-html", Arg.Unit (fun () -> ()), "")
+let img_subst (s:string) =
+  Str.global_replace img_regexp "{%html:<img alt=\"\\1\" src=\"img/\\1\"/>%}" s
 
+let rewriter _config _cookies =
+  let super = Ast_mapper.default_mapper in
+  let attribute _self ((t,p) as a:attribute) =
+    if t.txt = "ocaml.text" || t.txt = "ocaml.doc" then
+      (t,(match p with
+           | PStr [{ pstr_desc = Pstr_eval({pexp_desc=Pexp_constant (Pconst_string(doc,None)); _} as pexp,[]); _} as pstr] ->
+             PStr [{ pstr with pstr_desc = Pstr_eval(
+                 {pexp with pexp_desc = Pexp_constant (Pconst_string(img_subst doc,None))},[])}]
+           | _ -> failwith "not implemented kind of comment"))
+    else a
+  in
+  { super with attribute }
+
+let () =
+  Driver.register ~name:"ppx1"
+    (module OCaml_403)
+    rewriter
