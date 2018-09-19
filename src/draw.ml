@@ -31,7 +31,7 @@ struct
 
   let curve_to cr s =
     let _, sb, sc, sd = Spline.explode s in
-    Cairo.curve_to cr ~x1:sb.x ~y1:sb.y ~x2:sc.x ~y2:sc.y ~x3:sd.x ~y3:sd.y
+    Cairo.curve_to cr sb.x sb.y sc.x sc.y sd.x sd.y
 
   let draw_path cr = function
     | S.Path p ->
@@ -39,10 +39,10 @@ struct
         | [] -> assert false
         | (x::_) as l ->
             let sa = Spline.left_point x in
-            Cairo.move_to cr ~x:sa.x ~y:sa.y;
+            Cairo.move_to cr sa.x sa.y;
             List.iter (curve_to cr) l
         end ;
-        if p.S.cycle then Cairo.close_path cr
+        if p.S.cycle then Cairo.Path.close cr
     | S.Point _ ->
         failwith "Metapost fail in that case what should I do???"
 
@@ -74,10 +74,10 @@ struct
   let not_implemented s = raise (Not_implemented s)
 
   let rec color cr = function
-    | OPAQUE (RGB (red,green,blue)) -> Cairo.set_source_rgb cr ~red ~green ~blue
+    | OPAQUE (RGB (r,g,b)) -> Cairo.set_source_rgb cr r g b
     | OPAQUE (CMYK _) -> not_implemented "cmyk"
     | OPAQUE (Gray g) -> color cr (OPAQUE (RGB (g,g,g)))
-    | TRANSPARENT (alpha,RGB (red,green,blue)) -> Cairo.set_source_rgba cr ~red ~green ~blue ~alpha
+    | TRANSPARENT (a,RGB (r,g,b)) -> Cairo.set_source_rgba cr r g b a
     | TRANSPARENT (_,CMYK _) -> not_implemented "cmyk"
     | TRANSPARENT (a,(Gray g)) -> color cr (TRANSPARENT (a,RGB (g,g,g)))
 
@@ -87,11 +87,11 @@ struct
 
   let dash cr = function
     | None | Some (_,[]) -> ();
-    | Some (f,l) -> Cairo.set_dash cr (Array.of_list l) f
+    | Some (ofs,l) -> Cairo.set_dash cr (Array.of_list l) ~ofs
 
   let inversey cr height =
-    Cairo.translate cr ~tx:0. ~ty:height;
-    Cairo.scale cr ~sx:1. ~sy:(-.1.)
+    Cairo.translate cr 0. height;
+    Cairo.scale cr 1. (-.1.)
 
   open Picture_lib
 
@@ -106,7 +106,7 @@ struct
     | OnTop l -> List.iter (draw_aux cr) l
     | Tex t ->
         Cairo.save cr;
-        Cairo.scale cr ~sx:1. ~sy:(-.1.);
+        Cairo.scale cr 1. (-.1.);
         draw_tex cr t;
         Cairo.restore cr
     | Stroke_path(path,c,pen,d) ->
@@ -130,8 +130,8 @@ struct
         Cairo.save cr;
         Cairo.transform cr m;
         inversey cr height;
-        let img = Cairo_png.image_surface_create_from_file filename in
-        Cairo.set_source_surface cr img 0. 0.;
+        let img = Cairo.PNG.create filename in
+        Cairo.set_source_surface cr img ~x:0. ~y:0.;
         Cairo.paint cr;
         Cairo.restore cr
 
@@ -140,8 +140,8 @@ struct
     inversey cr height;
     Cairo.set_line_width cr default_line_size;
     (* Only elliptical pens use the stroke command *)
-    Cairo.set_line_cap cr Cairo.LINE_CAP_ROUND;
-    Cairo.set_line_join cr Cairo.LINE_JOIN_ROUND;
+    Cairo.set_line_cap cr Cairo.ROUND;
+    Cairo.set_line_join cr Cairo.JOIN_ROUND;
     draw_aux cr (content p);
     Cairo.restore cr
 

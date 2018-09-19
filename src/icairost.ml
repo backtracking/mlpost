@@ -17,16 +17,13 @@
 open Point_lib
 open Format
 
-let create create_surface out_file (draw:Cairo.t -> unit) height width =
-  if Defaults.get_debug () then printf "height = %f, width = %f@." height width;
-  let oc = open_out out_file in
-  let s = create_surface oc ~width_in_points:width ~height_in_points:height in
+let create create_surface out_file (draw:Cairo.context -> unit) h w =
+  if Defaults.get_debug () then printf "height = %f, width = %f@." h w;
+  let s = create_surface out_file ~w ~h in
   let cr = Cairo.create s in
   draw cr;
   if Defaults.get_debug () then printf "Clean up surface_finish ...@.";
-  Cairo.surface_finish s;
-  if Defaults.get_debug () then printf "Clean up close file ...@.";
-  close_out oc
+  Cairo.Surface.finish s
 
 let rec iter_after f after = function
   | [] -> ()
@@ -78,22 +75,22 @@ let dumb_next_page _ _ = assert false
 
 let emit_pdf ?msg_error fname fig =
   emit_gen ?msg_error
-    (create Cairo_pdf.surface_create_for_channel fname) dumb_next_page [fig]
+    (create Cairo.PDF.create fname) dumb_next_page [fig]
 let emit_ps fname fig =
-  emit_gen (create Cairo_ps.surface_create_for_channel fname)
+  emit_gen (create Cairo.PS.create fname)
     dumb_next_page [fig]
 let emit_svg fname fig =
-  emit_gen (create Cairo_svg.surface_create_for_channel fname)
+  emit_gen (create Cairo.SVG.create fname)
     dumb_next_page [fig]
 let emit_png fname fig = emit_gen
   (fun draw height width ->
      let width = int_of_float (ceil width) in
      let height = int_of_float (ceil height) in
-     let surf = Cairo.image_surface_create
-       Cairo.FORMAT_ARGB32 ~width ~height in
+     let surf = Cairo.Image.create
+       Cairo.Image.ARGB32 ~w:width ~h:height in
      let cr = (Cairo.create surf) in
      draw cr;
-     Cairo_png.surface_write_to_file surf fname) dumb_next_page [fig]
+     Cairo.PNG.write surf fname) dumb_next_page [fig]
 
 let emit_cairo cairo (width,height) fig =
   (*Compute.clear (); LookForTeX.clear ();*)
@@ -101,5 +98,5 @@ let emit_cairo cairo (width,height) fig =
   Draw.Picture.draw cairo width height fig
 
 let emit_pdfs fname figs = emit_gen
-  (create Cairo_pdf.surface_create_for_channel fname)
+  (create Cairo.PDF.create fname)
   (fun cr _ -> Cairo.show_page cr) figs

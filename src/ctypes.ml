@@ -1,6 +1,7 @@
 type matrix = Cairo.matrix =
-    { xx : float; yx : float; xy : float; yy : float; x0 : float; y0 : float; }
+  { mutable xx: float; mutable yx: float;
+    mutable xy: float; mutable yy: float;
+    mutable x0: float; mutable y0: float; }
 
-type point = Cairo.point =
-      {x : float;
-       y : float}
+type point =
+  {x : float; y : float}

@@ -35,12 +35,13 @@ end
 
 module Ctypes : sig
 
-    type matrix = Cairo.matrix =
-      { xx : float; yx : float; xy : float; yy : float; x0 : float; y0 : float;}
+  type matrix = Cairo.matrix =
+     { mutable xx: float; mutable yx: float;
+       mutable xy: float; mutable yy: float;
+       mutable x0: float; mutable y0: float; }
 
-    type point = Cairo.point =
-        {x : float;
-         y : float}
+    type point =
+      {x : float; y : float}
 
 end
 
@@ -2816,7 +2817,7 @@ module Cairost : sig
   val generate_pdfs : string ->
     (int * Command.t) list -> unit
 
-  type cairo_t = Cairo.t
+  type cairo_t = Cairo.context
 
   val emit_cairo : cairo_t -> float * float -> Command.t -> unit
 

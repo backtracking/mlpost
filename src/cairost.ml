@@ -25,7 +25,7 @@ let emit_png = emit_png
 let emit_svg = emit_svg
 let emit_pdfs = emit_pdfs
 
-type cairo_t = Cairo.t
+type cairo_t = Cairo.context
 
 let emit_cairo = emit_cairo
 (*let emit_cairo = fun x -> ()*)
@@ -39,7 +39,7 @@ let dump_pdf () =
     | Cairo.Error status ->
         Format.printf "An@ internal@ error@ occured@ during@ the\
           generation@ of@ %s@ with@ Cairo :@ %s@."
-          pdfname_s (Cairo.string_of_status status)
+          pdfname_s (Cairo.status_to_string status)
     | error ->
         Format.printf "An@ internal@ error@ occured@ during@ the\
           @ generation@ of@ %s :@ %s@."

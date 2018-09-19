@@ -86,10 +86,10 @@ class mlpost_pic ?width ?height ?packing ?show () =
                      else pic in
       let t = auto_aspect ~width:(Num.pt w) ~height:(Num.pt h) pic in
       let pic = Picture.transform t pic in
-      let cr = Cairo_lablgtk.create pm#pixmap in       
+      let cr = Cairo_gtk.create pm#pixmap in
       Cairost.emit_cairo cr (w,h) pic;
       need_update<-false
-     
+
     (* Repaint the widget. *)
     method private expose ev =
       if need_update then self#repaint ();

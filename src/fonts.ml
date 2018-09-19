@@ -23,7 +23,7 @@ let font_error s = raise (Fonterror s)
 type type1 =
     { glyphs_tag : int;
       (* That must be separated from cairo *)
-      glyphs_ft : Cairo_ft.ft_face;
+      glyphs_ft : Mlpost_ft.t;
       (* the file, pfb or pfa, which define the glyphs *)
       glyphs_enc : int -> int; (* the conversion of the characters
                                   between tex and the font *)
@@ -175,7 +175,7 @@ let font_is_virtual s =
 
 let id = let c = ref (-1) in fun () -> incr c; !c
 
-let ft = lazy (Cairo_ft.init_freetype ())
+(* let ft = lazy (Cairo_ft.init_freetype ()) *)
 
 let load_glyphs tex_name ratio_cm =
   match font_is_virtual tex_name with
@@ -196,7 +196,7 @@ let load_glyphs tex_name ratio_cm =
                              it can't be currently used with the cairo backend"
                tex_name) in
       let pfab = find_file font_map.Fonts_type.pfab_name in
-      let pfab = Cairo_ft.new_face (Lazy.force ft) pfab in
+      let pfab = Cairo.Ft.face (*Lazy.force ft*) pfab in
       let glyphs_enc =
         match font_map.Fonts_type.enc_name with
           | None ->

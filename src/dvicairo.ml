@@ -18,7 +18,7 @@ open Format
 open Dviinterp
 
 
-type multi_page_pic = {pic :Cairo.t;
+type multi_page_pic = {pic : Cairo.context;
                        x_origin : float;
                        y_origin : float
                       }
@@ -34,18 +34,18 @@ let find_font font =
   with Not_found ->
     if Defaults.get_debug () then printf "Cairo : Loading font@.";
     let face = font.Fonts.glyphs_ft in
-    let f = Cairo_ft.font_face_create_for_ft_face face 0 in
+    let f = Cairo.Ft.create_for_ft_face face in
     Hashtbl.add fonts_known font_name f;f
 
 let set_source_color pic = function
   | RGB(red,green,blue) ->
     if Defaults.get_debug () then
       printf "Use color RGB (%f,%f,%f)@." red green blue;
-    Cairo.set_source_rgb pic ~red ~green  ~blue
+    Cairo.set_source_rgb pic red green  blue
   | Gray(g) ->
     if Defaults.get_debug () then
       printf "Use color Gray (%f)@." g;
-    Cairo.set_source_rgb pic ~red:g ~green:g ~blue:g
+    Cairo.set_source_rgb pic g g g
   | CMYK _ -> failwith "dvicairo : I don't know how to convert CMYK\
  to RGB and cairo doesn't support it"
   | HSB _ -> failwith "dvicairo : I'm lazy I haven't written this conversion"
@@ -62,7 +62,7 @@ let fill_rect s dinfo x1 y1 w h =
     printf "Draw a rectangle in (%f,%f) with w=%f h=%f@." x1 y1 w h;
   Cairo.save s.pic;
   set_source_color s.pic dinfo.Dviinterp.color;
-  Cairo.rectangle s.pic ~x:x1 ~y:y1 ~width:w ~height:h;
+  Cairo.rectangle s.pic x1 y1 ~w ~h;
   Cairo.fill s.pic;
   Cairo.restore s.pic
 
@@ -85,7 +85,7 @@ let draw_type1 s text_type1 =
   end;
   Cairo.save s.pic;
   set_source_color s.pic dinfo.Dviinterp.color;
-  Cairo.set_font_face s.pic f ;
+  Cairo.Font_face.set s.pic f ;
   Cairo.set_font_size s.pic ratio;
     (* slant and extend *)
   (match font.Fonts.slant with
@@ -96,10 +96,10 @@ let draw_type1 s text_type1 =
     | Some a when Defaults.get_debug () ->
       printf "extend of %f not used@." a
     | Some _ | None -> ());
-  Cairo.show_glyphs s.pic
-    [|{Cairo.index = char;
-       Cairo.glyph_x = x;
-       Cairo.glyph_y = y}|];
+  Cairo.Glyph.show s.pic
+    [|{Cairo.Glyph.index = char;
+       Cairo.Glyph.x = x;
+       Cairo.Glyph.y = y}|];
   Cairo.stroke s.pic;
   Cairo.restore s.pic
 
@@ -119,6 +119,3 @@ and draw_command s = function
 and draw_commands s = List.iter (draw_command s)
 
 let draw = draw_commands
-
-
-
