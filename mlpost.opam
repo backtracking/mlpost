@@ -23,7 +23,7 @@ build-test: [
 depends: [
   "ocamlfind" #during execution also
   "bitstring" { >= "3.0.0" }
-  "cairo" { >= "1.2.0" }
+  "cairo2"
   "dune" {build}
 ]
 available: [ ocaml-version >= "4.04.0" ]
