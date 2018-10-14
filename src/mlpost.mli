@@ -1236,7 +1236,8 @@ module Box : sig
     ?style:style -> ?name:string -> ?brush:Brush.t ->
     ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t -> ?fill:Color.t -> t
     -> t
-    (** the empty box with the same position and dimension as the box *)
+    (** the empty box with the same position and dimension as the box.
+        The special points are kept *)
 
   val pic : ?style:style -> Picture.t box_creator
     (** [pic p] creates a new box containing the picture [p] *)

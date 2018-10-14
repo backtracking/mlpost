@@ -306,7 +306,7 @@ let empty ?(width=Num.zero) ?(height=Num.zero) ?style ?name ?brush
 
 let empty_from_box ?style ?name ?brush ?(stroke=None) ?pen ?dash ?fill box =
   mkbox ?style ?name ?brush ~stroke ?pen ?dash ?fill
-    (width box) (height box) (ctr box) Emp
+    (width box) (height box) (ctr box) (Grp ([||], merge_maps [box] ))
 
 
 (* groups the given boxes in a new box *)
