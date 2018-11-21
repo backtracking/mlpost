@@ -3,13 +3,15 @@ open Point_lib.Infix
 module P = Point_lib
 type point = Ctypes.point
 type abscissa = float
-type t =
+type 'a t' =
   {
-    sa : point;
-    sb : point;
-    sc : point;
-    sd : point;
+    sa : 'a;
+    sb : 'a;
+    sc : 'a;
+    sd : 'a;
   }
+
+type t = point t'
 
 let inter_depth = ref 15
 let debug = false
@@ -68,21 +70,31 @@ let direction s t =
   (t**2.) */ s.sd +/ (((2. *. t) -. (3. *. (t**2.)))) */ s.sc +/
   ((1. -. (4. *. t)+.(3. *. (t**2.)))) */ s.sb +/ (-.((1. -. t)**2.)) */ s.sa
 
+(*
+                         sqrt((a - b) d + c  + (- b - a) c + b ) + c - 2 b + a
+                   t = - -----------------------------------------------------]
+                                           d - 3 c + 3 b - a
+*)
+
+(*
 let extremum a b c d =
-  let eqa = d -. a +. (3.*.(b -. c)) in
+  (* denominator *)
+  let eqa = (d -. a) +. (3.*.(b -. c)) in
+  (* *)
   let eqb = 2.*.(c +. a -. (2.*.b)) in
-  let eqc = b -. a in
+  let eqc = (b -. a) in
   (*Format.printf "eqa : %f; eqb : %f; eqc : %f@." eqa eqb eqc;*)
-  let test s l = if s>=0. && s<=1. then s::l else l in
+  let test s l = if 0.<=s && s<=1. then s::l else l in
   if eqa = 0. then if eqb = 0. then []
   else test (-. eqc /. eqb) []
   else
   (*let sol delta = (delta -. (2.*.b) +. a +. c)/.
     (a -. d +. (3.*.(c -. b))) in*)
   (*let delta = ((b*.b) -. (c*.(b +. a -. c)) +. (d*.(a -. b))) in*)
-  let sol delta = (delta +. eqb) /. (-.2.*.eqa) in
-  let delta = (eqb*.eqb) -. (4.*.eqa*.eqc) in
-  (*Format.printf "delta2 : %f; delta : %f@." delta2 delta;*)
+  let sol delta = (delta -. c +. 2. *. b -. a) /. eqa in
+  let delta = (a -. b) *. d +. c *. c -. ( b +. a) *. c +. b *. b in
+  let delta2 = (eqb*.eqb) -. (4.*.eqa*.eqc) in
+  Format.printf "delta : %f delta2 : %f@." delta delta2;
   match compare delta 0. with
     | x when x<0 -> []
     | 0 -> test (sol 0.) []
@@ -90,11 +102,59 @@ let extremum a b c d =
         let delta = delta**0.5 in
         test (sol delta) (test (sol (-.delta)) [])
 
+(* let extremum a b c d =
+ *   (\* denominator *\)
+ *   let eqa = (d -. a) +. (3.*.(b -. c)) in
+ *   (\* *\)
+ *   let eqb = 2.*.(c +. a -. (2.*.b)) in
+ *   let eqc = (b -. a) in
+ *   (\*Format.printf "eqa : %f; eqb : %f; eqc : %f@." eqa eqb eqc;*\)
+ *   let test s l = if 0.<=s && s<=1. then s::l else l in
+ *   if eqa = 0. then if eqb = 0. then []
+ *   else test (-. eqc /. eqb) []
+ *   else
+ *   (\*let sol delta = (delta -. (2.*.b) +. a +. c)/.
+ *     (a -. d +. (3.*.(c -. b))) in*\)
+ *   (\*let delta = ((b*.b) -. (c*.(b +. a -. c)) +. (d*.(a -. b))) in*\)
+ *   let sol delta = (delta +. eqb) /. (-.2.*.eqa) in
+ *   let delta = (eqb*.eqb) -. (4.*.eqa*.eqc) in
+ *   (\*Format.printf "delta2 : %f; delta : %f@." delta2 delta;*\)
+ *   match compare delta 0. with
+ *     | x when x<0 -> []
+ *     | 0 -> test (sol 0.) []
+ *     | _ ->
+ *         let delta = delta**0.5 in
+ *         test (sol delta) (test (sol (-.delta)) []) *)
+
+
 let remarkable a b c d =
   let res = 0.::1.::(extremum a b c d) in
-  (*Format.printf "remarquable : %a@."
-    (fun fmt -> List.iter (Format.printf "%f;")) res;*)
+  Format.printf "remarquable : %a@."
+    (fun fmt -> List.iter (Format.fprintf fmt "%f;")) res;
     res
+
+let precise_bounding_box s =
+  (*Format.printf "precise : %a@." print_spline s;*)
+  let x_remarq = List.map (apply_x cubic s) (apply_x remarkable s) in
+  let y_remarq = List.map (apply_y cubic s) (apply_y remarkable s) in
+  let x_max = List.fold_left Pervasives.max neg_infinity x_remarq in
+  let y_max = List.fold_left Pervasives.max neg_infinity y_remarq in
+  let x_min = List.fold_left Pervasives.min infinity x_remarq in
+  let y_min = List.fold_left Pervasives.min infinity y_remarq in
+  List.iter
+    (fun f ->
+       let x = apply_x cubic s f in
+       let y = apply_y cubic s f in
+       if not (x_min <= x && x <= x_max && y_min <= y && y <= y_max)
+       then begin
+         Format.eprintf "Error at %f(%f,%f): %a@." f x y print s;
+         List.iter (Format.eprintf "   x:%f@.") x_remarq;
+         List.iter (Format.eprintf "   y:%f@.") y_remarq;
+       end
+    )
+    (0.1::0.2::0.3::0.4::0.5::0.6::0.7::0.8::0.9::[]);
+  x_min,y_min,x_max,y_max
+                    *)
 
 let apply_x f s = f s.sa.x s.sb.x s.sc.x s.sd.x
 let apply_y f s = f s.sa.y s.sb.y s.sc.y s.sd.y
@@ -108,17 +168,13 @@ let bounding_box s =
   let y_min = apply_y (f4 Pervasives.min) s in
   x_min,y_min,x_max,y_max
 
-let precise_bounding_box s =
-  (*Format.printf "precise : %a@." print_spline s;*)
-  let x_remarq = List.map (apply_x cubic s) (apply_x remarkable s) in
-  let y_remarq = List.map (apply_y cubic s) (apply_y remarkable s) in
-  let x_max = List.fold_left Pervasives.max neg_infinity x_remarq in
-  let y_max = List.fold_left Pervasives.max neg_infinity y_remarq in
-  let x_min = List.fold_left Pervasives.min infinity x_remarq in
-  let y_min = List.fold_left Pervasives.min infinity y_remarq in
-  x_min,y_min,x_max,y_max
+let middle a b =
+  {
+    x = a.x *. 0.5 +. b.x *. 0.5;
+    y = a.y *. 0.5 +. b.y *. 0.5;
+  }
 
-let bisect a =
+let bisect middle a =
   let b = a in
   (*D\leftarrow (C+D)/2*)
   let b = {b with sd = middle b.sd b.sc} in
@@ -137,6 +193,37 @@ let bisect a =
   let c = {c with sb = middle c.sb c.sc} in
   let c = {c with sa = middle c.sa c.sb} in
   b,c
+
+let bisect_p a = bisect (fun a b -> a *. 0.5 +. b *. 0.5) a
+let bisect a = bisect middle a
+
+let rec precise_bounding_box_aux ~min ~max ~cmp cmin s =
+  let cmin' = min s.sb s.sc in
+  if cmp cmin cmin' <= 0
+  then cmin
+  else
+    let cmin' = min (min s.sa s.sd) cmin' in
+    let cmax' = apply4 (f4 max) s in
+    if cmp cmin' cmax' = 0 then cmin
+    else
+      let sa,sb = bisect_p s in
+      let cmin = min sa.sd cmin in
+      precise_bounding_box_aux ~min ~max ~cmp
+        (precise_bounding_box_aux ~min ~max ~cmp cmin sa) sb
+
+let precise_bounding_box s =
+  let f ~min ~max ~cmp ~map s =
+    let s = { sa = map s.sa; sb = map s.sb; sc = map s.sc; sd = map s.sd } in
+    let cmin = min s.sa s.sd in
+    precise_bounding_box_aux ~min ~max ~cmp:cmp cmin s
+  in
+  (
+    f ~min ~max ~cmp:(fun a b -> compare a b) s ~map:(fun p -> p.x),
+    f ~min ~max ~cmp:(fun a b -> compare a b) s ~map:(fun p -> p.y),
+    f ~min:max ~max:min ~cmp:(fun a b -> -(compare a b)) s ~map:(fun p -> p.x),
+    f ~min:max ~max:min ~cmp:(fun a b -> -(compare a b)) s ~map:(fun p -> p.y)
+  )
+
 
 let test_in amin amax bmin bmax =
   (amin <= bmax && bmin <= amax)
