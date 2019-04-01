@@ -639,7 +639,7 @@ module Incremental = struct
     { mutable fonts : fontmap;
       mutable preamble : preamble;
       chan : in_channel;
-      mutable bits : string * int * int;
+      mutable bits : bytes * int * int;
   }
 
   let mk_t c =
