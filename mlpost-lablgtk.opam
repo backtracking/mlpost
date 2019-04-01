@@ -18,9 +18,10 @@ build: [
 
 depends: [
   "bitstring" { >= "3.0.0" }
-  "cairo" { >= "1.2.0" }
+  "cairo2"
   "dune" {build}
   "mlpost"
   "lablgtk"
+  "conf-gnomecanvas"
 ]
 available: [ ocaml-version >= "4.04.0" ]

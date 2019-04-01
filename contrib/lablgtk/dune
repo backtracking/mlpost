@@ -3,4 +3,5 @@
     (public_name mlpost-lablgtk)
     (synopsis "Library for Mlpost to easily display mlpost figures into an x-window")
     (libraries mlpost cairo2-gtk lablgtk2)
+    (optional)
 )
