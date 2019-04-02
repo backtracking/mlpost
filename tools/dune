@@ -26,6 +26,7 @@
   (package mlpost-lablgtk)
   (modules Gmlpost Glexer)
   (libraries threads lablgtk2 lablgtk2.gnomecanvas)
+  (optional)
 )
 
 (ocamllex glexer)
