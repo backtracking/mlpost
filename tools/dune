@@ -20,12 +20,12 @@
   (libraries mlpost mlpost_desc_options mlpost_version)
 )
 
-(executable
-  (name gmlpost)
-  (public_name gmlpost)
-  (package mlpost-lablgtk)
-  (modules Gmlpost Glexer)
-  (libraries threads lablgtk2 lablgtk2.gnomecanvas)
-)
+; (executable
+;   (name gmlpost)
+;   (public_name gmlpost)
+;   (package mlpost-lablgtk)
+;   (modules Gmlpost Glexer)
+;   (libraries threads lablgtk2 lablgtk2.gnomecanvas)
+; )
 
-(ocamllex glexer)
+; (ocamllex glexer)
