@@ -1,6 +1,12 @@
 o - changes in behaviour, new features, bugfixes
 * - incompatible changes in the interface
 
+
+o fixes floating-point error in extremum computation
+o special points are kept in empty from box
+o migrate to cairo2 and dune
+o added experimental export to pgf
+o added Arrows.mk_classic
 o added Helpers.box_point_line and Helpers.point_box_line
 
 version 0.8.2, March 10, 2017

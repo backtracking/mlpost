@@ -40,5 +40,4 @@ clean:
 
 ## Install should be replaced when `dune install` is improved (e.g. DESTDIR support)
 install:
-	opam-installer mlpost.install
-	opam-installer mlpost-lablgtk.install
+	dune install
