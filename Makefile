@@ -41,3 +41,7 @@ clean:
 ## Install should be replaced when `dune install` is improved (e.g. DESTDIR support)
 install:
 	dune install
+
+release:
+	@echo "Only the committed code is added in the archive, VERSION is \"$(VERSION)\""
+	git archive --format=tar.gz --prefix mlpost-$(VERSION)/ -o mlpost-$(VERSION).tar.gz HEAD
