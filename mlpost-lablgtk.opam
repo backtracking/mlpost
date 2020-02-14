@@ -1,4 +1,4 @@
-opam-version: "1.2"
+opam-version: "2.0"
 version: "0.9"
 maintainer: "filliatr@lri.fr"
 authors: [
@@ -11,12 +11,14 @@ authors: [
 homepage: "http://mlpost.lri.fr/index.fr.html"
 dev-repo: "git://github.com/backtracking/mlpost"
 bug-reports: "https://github.com/backtracking/mlpost/issues"
+synopsis: "Library for adding mlpost graphics in lablgtk"
 license: "LGPL-2.1"
 build: [
   [ "dune" "build" "--for-release-of-packages" "mlpost-lablgtk" ]
 ]
 
 depends: [
+  "ocaml" { >= "4.07.0" }
   "bitstring" { >= "3.0.0" }
   "cairo2"
   "dune" {build}
@@ -24,4 +26,3 @@ depends: [
   "lablgtk"
   "conf-gnomecanvas"
 ]
-available: [ ocaml-version >= "4.04.0" ]

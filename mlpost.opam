@@ -1,4 +1,4 @@
-opam-version: "1.2"
+opam-version: "2.0"
 version: "0.9"
 maintainer: "filliatr@lri.fr"
 authors: [
@@ -11,19 +11,17 @@ authors: [
 homepage: "http://mlpost.lri.fr/index.fr.html"
 dev-repo: "git://github.com/backtracking/mlpost"
 bug-reports: "https://github.com/backtracking/mlpost/issues"
+synopsis : "Library for building graphics and figures similarly to Metapost"
 license: "LGPL-2.1"
 build: [
   [ "dune" "build" "--for-release-of-packages" "mlpost" "-j" jobs ]
-]
-
-build-test: [
-  [ "dune" "runtest" "--for-release-of-packages" "mlpost" "-j" jobs]
+  [ "dune" "runtest" "--for-release-of-packages" "mlpost" "-j" jobs] { with-test }
 ]
 
 depends: [
+  "ocaml" { >= "4.07.0" }
   "ocamlfind" #during execution also
   "bitstring" { >= "3.0.0" }
   "cairo2"
   "dune" {build}
 ]
-available: [ ocaml-version >= "4.04.0" ]
