@@ -38,7 +38,7 @@ struct
   type t =
     | Internal of int
     | Userdef of string
-  let compare = Pervasives.compare
+  let compare = Stdlib.compare
 
   let print fmt = function
     | Internal i -> Format.pp_print_int fmt i

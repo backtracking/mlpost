@@ -285,11 +285,11 @@ let brush b =
 
 (* equality of floats with correct handling of nan *)
 let eq_float (f1:float) (f2:float) =
-  Pervasives.compare f1 f2 == 0
+  Stdlib.compare f1 f2 == 0
 
 let eq_num = eq_float
-let eq_point (a : point) (b : point) = Pervasives.compare a b == 0
-let eq_matrix (a : matrix) (b : matrix) = Pervasives.compare a b == 0
+let eq_point (a : point) (b : point) = Stdlib.compare a b == 0
+let eq_matrix (a : matrix) (b : matrix) = Stdlib.compare a b == 0
 
 (* we enforce to use physical equality only on hash-consed data
    of the same type *)
@@ -316,7 +316,7 @@ let eq_opt f o1 o2 =
     | Some x1, Some x2 -> f x1 x2
     | _ -> false
 
-let eq_color c1 c2 = Pervasives.compare c1 c2 = 0
+let eq_color c1 c2 = Stdlib.compare c1 c2 = 0
 
 let eq_pen_node p1 p2 =
   match p1, p2 with

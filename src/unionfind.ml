@@ -22,8 +22,8 @@
 
 module M = struct
   type t = int * int
-  let equal = Pervasives.(=)
-  (* let compare = Pervasives.compare *)
+  let equal = Stdlib.(=)
+  (* let compare = Stdlib.compare *)
   let hash = Hashtbl.hash
 end
 

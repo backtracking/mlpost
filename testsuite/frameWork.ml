@@ -52,13 +52,13 @@ module Test = struct
         Format.printf "?@?";
         Format.eprintf "Error during test %s...@." t.name;
         Format.eprintf "%s@." (Printexc.to_string e);
-        Printexc.print_backtrace Pervasives.stderr
+        Printexc.print_backtrace Stdlib.stderr
     end;
     try t.clean_up ()
     with e ->
       Format.eprintf "Error during cleanup of test %s...@." t.name;
       Format.eprintf "%s@." (Printexc.to_string e);
-      Printexc.print_backtrace Pervasives.stderr;
+      Printexc.print_backtrace Stdlib.stderr;
       exit 1
 
 

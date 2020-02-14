@@ -137,10 +137,10 @@ let precise_bounding_box s =
   (*Format.printf "precise : %a@." print_spline s;*)
   let x_remarq = List.map (apply_x cubic s) (apply_x remarkable s) in
   let y_remarq = List.map (apply_y cubic s) (apply_y remarkable s) in
-  let x_max = List.fold_left Pervasives.max neg_infinity x_remarq in
-  let y_max = List.fold_left Pervasives.max neg_infinity y_remarq in
-  let x_min = List.fold_left Pervasives.min infinity x_remarq in
-  let y_min = List.fold_left Pervasives.min infinity y_remarq in
+  let x_max = List.fold_left Stdlib.max neg_infinity x_remarq in
+  let y_max = List.fold_left Stdlib.max neg_infinity y_remarq in
+  let x_min = List.fold_left Stdlib.min infinity x_remarq in
+  let y_min = List.fold_left Stdlib.min infinity y_remarq in
   List.iter
     (fun f ->
        let x = apply_x cubic s f in
@@ -162,10 +162,10 @@ let apply4 f s = f s.sa s.sb s.sc s.sd
 let f4 f a b c d = f (f a b) (f c d)
 
 let bounding_box s =
-  let x_max = apply_x (f4 Pervasives.max) s in
-  let y_max = apply_y (f4 Pervasives.max) s in
-  let x_min = apply_x (f4 Pervasives.min) s in
-  let y_min = apply_y (f4 Pervasives.min) s in
+  let x_max = apply_x (f4 Stdlib.max) s in
+  let y_max = apply_y (f4 Stdlib.max) s in
+  let x_min = apply_x (f4 Stdlib.min) s in
+  let y_min = apply_y (f4 Stdlib.min) s in
   x_min,y_min,x_max,y_max
 
 let middle a b =

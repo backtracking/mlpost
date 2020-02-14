@@ -103,7 +103,7 @@ module Dir = struct
 
   let rm d = LowLevel.rmdir (to_string d)
 
-  let compare = Pervasives.compare
+  let compare = Stdlib.compare
     (* this one is actually difficult ... for now we just compare the elements
        *)
 
@@ -168,9 +168,9 @@ let set_ext t s =
 let clear_dir t = { t with dir = Dir.empty }
 
 let compare a b =
-  let c = Pervasives.compare a.bn b.bn in
+  let c = Stdlib.compare a.bn b.bn in
   if c <> 0 then c
-  else let c = Pervasives.compare a.ext b.ext in
+  else let c = Stdlib.compare a.ext b.ext in
   if c<> 0 then c
   else Dir.compare a.dir b.dir
 
