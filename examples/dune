@@ -21,16 +21,17 @@
 
 (alias (name runtest) (deps (alias promote)))
 
-(ocamllex parse)
+; (ocamllex parse)
 
-(executable
-  (name parse)
-  (modules parse)
-  (libraries caml2html)
-)
+; (executable
+;   (name parse)
+;   (modules parse)
+;   (libraries caml2html)
+; )
 
 ; test of the executable
 (alias
-   (name runtest)
-   (action (ignore-stderr (run %{bin:mlpost} -pgf %{dep:boxes.ml})))
+ (name runtest)
+ (deps (package mlpost))
+ (action (ignore-stderr (run %{bin:mlpost} -pgf %{dep:boxes.ml})))
 )

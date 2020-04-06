@@ -11,7 +11,7 @@
 (** mode leaf: generate the leaf rules *)
 
 let examples =
-  ["boxes","";"paths","";"misc","";"tree","";"label","";"automata","";
+  ["boxes","";"paths","";(* "misc","" ;*)"tree","";"label","";"automata","";
    "hist","";"radar","";"real_plot","";"dot_dot","mlpost.dot";"color",""]
 
 let mode_general () =
@@ -52,8 +52,8 @@ let mode_leaf () =
   (* pdf -> png *)
   let pdf_to_png prefix =
     iter_figures (fun figure ->
-        Format.printf "(rule (targets %s%s.png) (deps %s%s.pdf) (action (run convert %%{deps} %%{targets})))@\n"
-          prefix figure prefix figure
+        Format.printf "(rule (targets %s%s.png) (deps %s%s.pdf) (action (run pdftoppm %%{deps} %s%s -png -singlefile)))@\n"
+          prefix figure prefix figure prefix figure
       )
   in
   pdf_to_png "pdf_cairo_";
@@ -77,11 +77,12 @@ let mode_leaf () =
   in
   pgf_to_pdf "pgf_";
   (* create html *)
-  Format.printf "(rule (targets %s.ml.html) (deps %s.ml ./parse.exe) (action (run ./parse.exe %s.ml)))"
-    file file file;
+  (* Format.printf "(rule (targets %s.ml.html) (deps %s.ml ./parse.exe) (action (run ./parse.exe %s.ml)))"
+   *   file file file; *)
   (* build for runtest all the files needed *)
-  Format.printf "(alias (name %s) (deps prototype.js style.css %s.ml.html%t))@\n@."
-    file file
+  (* Format.printf "(alias (name %s) (deps prototype.js style.css %s.ml.html%t))@\n@." *)
+  Format.printf "(alias (name %s) (deps %t))@\n@."
+    file
     (fun fmt -> List.iter (fun (prefix,_,suffix,_) -> print_figures ~prefix ~suffix fmt) kinds);
   Format.printf "(alias (name runtest) (deps (alias %s)))@\n@\n" file;
   ()
