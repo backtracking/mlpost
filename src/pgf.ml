@@ -139,7 +139,7 @@ module PGF = struct
     match c with
     | Concrete_types.OPAQUE c -> scolor fmt c
     | Concrete_types.TRANSPARENT (f,c) ->
-      fprintf fmt "\\blendcolors{!%a}%a" float f scolor c
+      fprintf fmt "\\pgfsetfillopacity{%a}\\pgfsetstrokeopacity{%a}%a" float f float f scolor c
 
   let dvi_color fmt c =
     match c with
