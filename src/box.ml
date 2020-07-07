@@ -305,7 +305,7 @@ let empty ?(width=Num.zero) ?(height=Num.zero) ?style ?name ?brush
     width height Point.origin Emp
 
 let empty_from_box ?style ?name ?brush ?(stroke=None) ?pen ?dash ?fill box =
-  mkbox ?style ?name ?brush ~stroke ?pen ?dash ?fill
+  mkbox ?style ?name ?brush ~stroke ?pen ?dash ?fill ~dx:zero ~dy:zero
     (width box) (height box) (ctr box) (Grp ([||], merge_maps [box] ))
 
 
