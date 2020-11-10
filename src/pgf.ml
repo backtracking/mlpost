@@ -94,8 +94,8 @@ module PGF = struct
   let grestore fmt = fprintf fmt "\\end{pgfscope}"
 
   let setlinewidth fmt f =
-    (** strange treatment of linewidth of Metapost *)
-   fprintf fmt "\\pgfsetlinewidth{%a}" bp f
+    (* handle strange treatment of linewidth of Metapost *)
+    fprintf fmt "\\pgfsetlinewidth{%a}" bp f
 
   let setlinecap fmt c =
     let i =

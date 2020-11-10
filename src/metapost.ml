@@ -123,9 +123,10 @@ let mps ?prelude ?(verbose=false) bn figl =
     else []
 
 let call_mptopdf ?inv ?outv ?verbose f =
-  (** assume that f is ps file or sth like that *)
-  ignore (Misc.call_cmd ?inv ?outv ?verbose
-    (sprintf "mptopdf %s" (File.to_string f)));
+  (* assume that f is ps file or sth like that *)
+  ignore
+    (Misc.call_cmd ?inv ?outv ?verbose
+       (sprintf "mptopdf %s" (File.to_string f)));
   let out = File.set_ext f "pdf" in
   File.move (File.append out ("-"^File.extension f)) out;
   out
@@ -146,8 +147,9 @@ let png ?prelude ?verbose bn figl =
 
 let wrap_tempdir f suffix ?prelude ?verbose ?clean bn figl =
   let do_ from_ to_ =
-    (** first copy necessary files, then do your work *)
-    List.iter (fun f -> File.copy (File.place from_ f) (File.place to_ f))
+    (* first copy necessary files, then do your work *)
+    List.iter
+      (fun f -> File.copy (File.place from_ f) (File.place to_ f))
       (Defaults.get_required_files ());
     let l = f ?prelude ?verbose bn figl in
     l, l

@@ -1459,13 +1459,21 @@ module Box : sig
         @param same_width if [true], all boxes are of same width,
                and at least of [min_width]; default is false*)
 
-  val vblock : ?padding:Num.t -> ?pos:Command.position -> ?name:string ->
-               ?stroke:Color.t option -> ?pen:Pen.t -> ?dash:Dash.t ->
-               ?min_height:Num.t -> ?same_height:bool -> t list -> t
-    (** similar to [hblock], with vertical alignment. @param
-        min_height minimum height of all boxes; default is zero @param
-        same_height if [true], all boxes are of same height, and at
-        least of [min_height]; default is false*)
+  val vblock :
+    ?padding:Num.t ->
+    ?pos:Command.position ->
+    ?name:string ->
+    ?stroke:Color.t option ->
+    ?pen:Pen.t ->
+    ?dash:Dash.t ->
+    ?min_height:Num.t ->
+    ?same_height:bool ->
+    t list ->
+    t
+  (** similar to [hblock], with vertical alignment.
+      @param min_height minimum height of all boxes; default is zero
+      @param same_height if [true], all boxes are of same height, and at
+      least of [min_height]; default is false*)
 
   val grid :
     ?hpadding:Num.t -> ?vpadding:Num.t -> ?pos:Command.position ->

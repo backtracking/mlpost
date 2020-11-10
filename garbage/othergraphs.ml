@@ -102,10 +102,12 @@ let d111 =
 let deuxpi = 2.*.3.14159
 
 let d130 =
-  let sq = path ~style:jLine ~scale:N.cm ~cycle:jLine
-    [(0.,0.);(2.,0.);(2.,2.);(0.,2.)] in
-    (** on peut pas utiliser la resolution de MetaPost donc on
-	construit la transform à la main.. :-/ *)
+  let sq =
+    path ~style:jLine ~scale:N.cm ~cycle:jLine
+      [ (0., 0.); (2., 0.); (2., 2.); (0., 2.) ]
+  in
+  (* on peut pas utiliser la resolution de MetaPost donc on
+     construit la transform à la main.. :-/ *)
   let ratio = sqrt (3.28 /. 4.) in
   let angle = atan (0.2 /. 1.8) *. 360. /. deuxpi in
   let v = pt (Num.cm 0.2, Num.cm 0.) in
