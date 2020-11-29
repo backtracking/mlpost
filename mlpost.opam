@@ -23,5 +23,5 @@ depends: [
   "ocamlfind" #during execution also
   "bitstring" { >= "3.0.0" }
   "cairo2"
-  "dune" {build}
+  "dune"
 ]
