@@ -33,7 +33,7 @@ promote:
 
 headers:
 	headache -c headache_config.txt -h header.txt \
-	version/*.in README.txt tools/*.ml tools/*.ml[iyl] src/*.ml src/*.ml[iyl]
+	version/*.ml* README.txt tools/*.ml tools/*.ml[iyl] src/*.ml src/*.ml[iyl]
 
 clean:
 	dune clean

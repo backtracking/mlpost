@@ -1,13 +1,6 @@
-META
 _build/
 _build_dot
 _build_lablgtk
-autom4te.cache/
-config.log
-config.status
-configure
-simple.Makefile
-version.ml
 doc
 examples/*.mps
 test/*.mps
@@ -30,7 +23,6 @@ test/manual/*.mps
 test/manual/*.log
 www/*.html
 www/version.prehtml
-*.native
 \#*\#
 .#*
 _mlpost.*
