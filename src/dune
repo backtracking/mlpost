@@ -4,7 +4,7 @@
  (synopsis "OCaml interface to Mlpost, Cairo, Pgf")
  (libraries unix bitstring cairo2 mlpost_version)
  (preprocess
-  (pps bitstring.ppx img))
+  (pps ppx_bitstring img))
  (c_names ml_mlpost_ft)
  (c_library_flags
   (:include c_library_flags.sexp))
