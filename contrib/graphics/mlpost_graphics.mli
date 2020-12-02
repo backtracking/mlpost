@@ -110,7 +110,7 @@ module type Graphics =
     used when [set_line_width 1] is specified.
     Raise [Invalid_argument] if the argument is negative. *)
 
-(** {6 Text drawing} *)
+  (** {5 Text drawing} *)
 
     (* val draw_char : char -> unit *)
 (** See {!Graphics.draw_string}.*)
@@ -136,8 +136,7 @@ module type Graphics =
 (** Return the dimensions of the given text, if it were drawn with
     the current font and size. *)
 
-
-(** {6 Filling} *)
+  (** {5 Filling} *)
 
     (* val fill_rect : int -> int -> int -> int -> unit *)
 (** [fill_rect x y w h] fills the rectangle with lower left corner

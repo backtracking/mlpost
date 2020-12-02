@@ -57,15 +57,15 @@ let read_up_to_one =
   let end_ = "[1]" in
   let rec aux buf inc =
     let s =
-        try
-          input_line inc
-        with End_of_file ->
-          Buffer.output_buffer stdout buf;
-          invalid_arg ("One tex snipet contains an error")
-      in
-      Buffer.add_string buf s;
-      Buffer.add_char buf '\n';
-    if ends_with end_ s then () else aux buf inc in
+      try input_line inc
+      with End_of_file ->
+        Buffer.output_buffer stdout buf;
+        invalid_arg "One tex snippet contains an error"
+    in
+    Buffer.add_string buf s;
+    Buffer.add_char buf '\n';
+    if ends_with end_ s then () else aux buf inc
+  in
   fun inc ->
     let buf = Buffer.create 10 in
     aux buf inc

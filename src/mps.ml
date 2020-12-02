@@ -106,8 +106,8 @@ module MPS = struct
   let grestore fmt = fprintf fmt "grestore"
 
   let setlinewidth fmt f =
-    (** strange treatment of linewidth of Metapost *)
-   fprintf fmt "0 %a dtransform truncate idtransform setlinewidth pop" float f
+    (* handle strange treatment of linewidth of Metapost *)
+    fprintf fmt "0 %a dtransform truncate idtransform setlinewidth pop" float f
 
   let setlinecap fmt c =
     let i =
@@ -547,7 +547,7 @@ let draw fmt x =
   fprintf fmt "%%%%BoundingBox: %f %f %f %f\n" minxt minyt maxxt maxyt;
   fprintf fmt "%%%%HiResBoundingBox: %f %f %f %f\n" minx miny maxx maxy;
   fprintf fmt "%%%%Creator: Mlpost %s\n" Mlpost_version.version;
-  (** metapost add a creation date but it breaks determinism *)
+  (* metapost adds a creation date but this breaks determinism *)
   (* fprintf fmt "%%%%CreationDate: %s\n" (Misc.date_string ()); *)
   fprintf fmt "%%%%Pages: 1\n";
   FM.iter (fontdecl fmt) (fonts x);
