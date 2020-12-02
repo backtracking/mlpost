@@ -16,17 +16,25 @@
 
 val set_verbosity : bool -> unit
 
+type t = {
+  tex : Dviinterp.page;
+  trans : Matrix.t;
+  bb : float * float * float * float;
+}
 
-type t = {tex   : Dviinterp.page ;
-          trans : Matrix.t;
-          bb    : (float * float * float * float)}
+val create : string -> t
 
-val create :  string -> t
 val get_dimen_pt : t -> float * float * float * float
+
 val get_dimen_cm : t -> float * float * float * float
+
 val bounding_box : t -> Point_lib.t * Point_lib.t
+
 val get_bases_pt : t -> float list
+
 val get_bases_cm : t -> float list
+
 val print : Format.formatter -> t -> unit
+
 val deb_print : Format.formatter -> t -> unit
 (** donne la dimension en centimètre *)

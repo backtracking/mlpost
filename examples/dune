@@ -1,25 +1,30 @@
 ; In order to add a new example look at gen_dune.ml
 
-(rule (with-stdout-to dune.inc.gen (run ./gen_dune.exe general )))
+(rule
+ (with-stdout-to
+  dune.inc.gen
+  (run ./gen_dune.exe general)))
 
 (executable
-    (name lattice_lablgtk)
-    (modules lattice_lablgtk)
-    (libraries threads mlpost-lablgtk)
-)
+ (name lattice_lablgtk)
+ (modules lattice_lablgtk)
+ (libraries threads mlpost-lablgtk))
 
 (include dune.inc)
 
 (executable
-  (name gen_dune)
-  (modules gen_dune)
-)
+ (name gen_dune)
+ (modules gen_dune))
 
- (alias
-  (name   promote)
-  (action (diff dune.inc dune.inc.gen)))
+(alias
+ (name promote)
+ (action
+  (diff dune.inc dune.inc.gen)))
 
-(alias (name runtest) (deps (alias promote)))
+(alias
+ (name runtest)
+ (deps
+  (alias promote)))
 
 ; (ocamllex parse)
 
@@ -30,8 +35,11 @@
 ; )
 
 ; test of the executable
+
 (alias
  (name runtest)
- (deps (package mlpost))
- (action (ignore-stderr (run %{bin:mlpost} -pgf %{dep:boxes.ml})))
-)
+ (deps
+  (package mlpost))
+ (action
+  (ignore-stderr
+   (run %{bin:mlpost} -pgf %{dep:boxes.ml}))))

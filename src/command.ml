@@ -18,25 +18,25 @@ open Types
 module T = Transform
 
 type hposition = Types.hposition
+
 type vposition = Types.vposition
+
 type position = Types.position
 
 type t = commandpic
 
-let label ?(pos=`Center) pic point =
-  mkCommand (mkCLabel pic pos point)
+let label ?(pos = `Center) pic point = mkCommand (mkCLabel pic pos point)
+
 (* replace later *)
-let dotlabel ?(pos=`Center) pic point =
-  mkCommand (mkCDotLabel pic pos point)
+let dotlabel ?(pos = `Center) pic point = mkCommand (mkCDotLabel pic pos point)
 
 let draw ?brush ?color ?pen ?dashed t =
   (* We don't use a default to avoid the output of
      ... withcolor (0.00red+0.00green+0.00blue) withpen ....
      for each command in the output file *)
-    mkCommand (mkCDraw t (mkBrushOpt brush color pen dashed))
+  mkCommand (mkCDraw t (mkBrushOpt brush color pen dashed))
 
-let fill ?color t =
-  mkCommand (mkCFill t color)
+let fill ?color t = mkCommand (mkCFill t color)
 
 let seq l = mkSeq l
 
@@ -46,20 +46,22 @@ let iter from until f =
 
 let draw_pic p = p
 
-let append c1 c2 = seq [c1; c2]
-let (++) = append
+let append c1 c2 = seq [ c1; c2 ]
+
+let ( ++ ) = append
 
 let externalimage filename spec =
-  if not (Filename.check_suffix filename "png")
-  then invalid_arg
-    (Format.sprintf "externalimage support only png image : %s" filename);
-  if not (Sys.file_exists filename)
-  then invalid_arg
-    (Format.sprintf "externalimage file doesn't exist : %s" filename);
+  if not (Filename.check_suffix filename "png") then
+    invalid_arg
+      (Format.sprintf "externalimage support only png image : %s" filename);
+  if not (Sys.file_exists filename) then
+    invalid_arg
+      (Format.sprintf "externalimage file doesn't exist : %s" filename);
   let filename =
-    if Filename.is_relative filename
-    then Filename.concat (Sys.getcwd ()) filename
-    else filename in
+    if Filename.is_relative filename then
+      Filename.concat (Sys.getcwd ()) filename
+    else filename
+  in
   mkCommand (mkCExternalImage filename spec)
 
 (* syntactic sugar *)

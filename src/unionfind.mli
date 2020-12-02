@@ -24,12 +24,16 @@
  * of their class, so they are of type float * float *)
 
 type elt = float * float
+
 type inputelt = int * int
+
 type t
-  
+
 val init : inputelt list -> t
+
 val find : inputelt -> t -> elt
+
 val union : inputelt -> inputelt -> t -> unit
+
 (* merge two classes and compute new average *)
 val fold_classes : (elt -> 'a -> 'a) -> 'a -> t -> 'a
-

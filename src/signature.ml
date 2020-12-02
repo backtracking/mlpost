@@ -16,10 +16,12 @@
 
 type point = Types.point
 
-module type Boxlike =
-sig
+module type Boxlike = sig
   type t
+
   val width : t -> float
+
   val height : t -> float
+
   val set_pos : point -> t -> t
 end

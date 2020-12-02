@@ -17,13 +17,19 @@
 open Types
 
 type t = Types.dash
+
 type on_off = Types.on_off
+
 let on = mkOn
+
 let off = mkOff
 
 let evenly = mkDEvenly
-let withdots = mkDWithdots
-let scaled f = mkDScaled f
-let shifted = mkDShifted
-let pattern = mkDPattern
 
+let withdots = mkDWithdots
+
+let scaled f = mkDScaled f
+
+let shifted = mkDShifted
+
+let pattern = mkDPattern

@@ -1,4 +1,5 @@
 type point = Ctypes.point
+
 type abscissa = float
 
 type t
@@ -27,8 +28,11 @@ val explode : t -> point * point * point * point
     point, second point, second control point*)
 
 val left_point : t -> point
+
 val left_control_point : t -> point
+
 val right_point : t -> point
+
 val right_control_point : t -> point
 (** the four points of a spline *)
 
@@ -66,7 +70,7 @@ type split =
   | Min
   | Max
   | InBetween of t * t
-  (** the type which caracterizes a split of a spline -
+      (** the type which caracterizes a split of a spline -
      Min - we have splitted at the left end
      Max - we have splitted at the right end
      InBetween (s1,s2) - we have splitted somewhere in between, and the

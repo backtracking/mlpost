@@ -2,29 +2,27 @@ open Dvi_util
 
 (** Load fonts and extract information *)
 
-
 type type1 = private {
   glyphs_tag : int;
   (* unique tag *)
-  glyphs_ft :  Mlpost_ft.t;
+  glyphs_ft : Mlpost_ft.t;
   (* the file, pfb or pfa, which define the glyphs *)
   glyphs_enc : int -> int;
   (* the conversion of the charactersx between tex and the font *)
   slant : float option;
   extend : float option;
-  glyphs_ratio_cm : float}
+  glyphs_ratio_cm : float;
+}
 
-type vf =private {
+type vf = private {
   vf_design_size : float;
   vf_font_map : Dvi_util.font_def Dvi_util.Int32Map.t;
   (* Font on which the virtual font is defined *)
   vf_chars : Dvi.command list Int32H.t;
-  (* The dvi command which define each character*)}
+      (* The dvi command which define each character*)
+}
 
-
-type glyphs =
-  | Type1 of type1
-  | VirtualFont of vf
+type glyphs = Type1 of type1 | VirtualFont of vf
 
 type t
 (** the type of a loaded font *)
@@ -44,7 +42,9 @@ val ratio_cm : t -> float
 val glyphs : t -> glyphs
 
 val char_width : t -> int -> float
+
 val char_height : t -> int -> float
+
 val char_depth : t -> int -> float
 (** get information about the [i]th char of the font *)
 

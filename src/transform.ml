@@ -17,18 +17,27 @@
 open Types
 
 type t' = matrix
+
 type matrix = t'
 
 type t = t' list
 
 let scaled = Matrix.scale
+
 let rotated f = Matrix.rotation (Num.deg2rad f)
+
 let shifted = Matrix.translation
+
 let slanted = Matrix.slanted
+
 let xscaled = Matrix.xscaled
+
 let yscaled = Matrix.yscaled
+
 let zscaled = Matrix.zscaled
+
 let reflect = Matrix.reflect
+
 let rotate_around p f = Matrix.rotate_around p (Num.deg2rad f)
 
 let explicit t = t

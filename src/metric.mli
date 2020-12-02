@@ -11,6 +11,8 @@ val char_height : t -> int -> float
 
 val char_depth : t -> int -> float
 (** same as [char_width], but for character depth *)
+
+(** same as [char_width], but for character depth *)
 val char_italic : t -> int -> float
 (** same as [char_width], but for italic correction of the character *)
 
@@ -38,6 +40,8 @@ val x_height : t -> float
    lowered. *)
 
 val quad : t -> float
+(** is the size of one em in the font. *)
+
 (** is the size of one em in the font. *)
 val extra_space : t -> float
 (** is the amount added to [space] at the ends of sentences. *)

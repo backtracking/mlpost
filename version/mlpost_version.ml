@@ -15,4 +15,5 @@
 (**************************************************************************)
 
 include Conf
-let packages = ["mlpost.options";"mlpost"]
+
+let packages = [ "mlpost.options"; "mlpost" ]

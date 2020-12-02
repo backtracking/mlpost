@@ -21,15 +21,20 @@ type t = Types.pen
 
 let transform tr p = mkPenTransformed p tr
 
-let default =
-  mkPenTransformed mkPenCircle [scaled 0.5]
+let default = mkPenTransformed mkPenCircle [ scaled 0.5 ]
+
 let circle = mkPenCircle
+
 let square = mkPenSquare
+
 let from_path p = mkPenFromPath p
 
-let scale f p = mkPenTransformed p [Transform.scaled f]
-let rotate f p = mkPenTransformed p [Transform.rotated f]
-let shift pt path = mkPenTransformed path [Transform.shifted pt]
-let yscale n p = mkPenTransformed p [Transform.yscaled n]
-let xscale n p = mkPenTransformed p [Transform.xscaled n]
+let scale f p = mkPenTransformed p [ Transform.scaled f ]
 
+let rotate f p = mkPenTransformed p [ Transform.rotated f ]
+
+let shift pt path = mkPenTransformed path [ Transform.shifted pt ]
+
+let yscale n p = mkPenTransformed p [ Transform.yscaled n ]
+
+let xscale n p = mkPenTransformed p [ Transform.xscaled n ]

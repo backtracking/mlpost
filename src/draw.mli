@@ -16,19 +16,26 @@
 
 val draw_tex : Cairo.context -> Gentex.t -> unit
 
-module MetaPath :
-  sig
-    type pen = Matrix.t
-    val stroke : Cairo.context -> pen -> Spline_lib.path -> unit
-    val fill : Cairo.context -> Spline_lib.path -> unit
-    val draw_path : Cairo.context -> Spline_lib.path -> unit
-  end
+module MetaPath : sig
+  type pen = Matrix.t
 
-module Picture :
-sig
-  val draw : Cairo.context -> float -> float -> Picture_lib.t -> unit
-  val where : Cairo.context -> Picture_lib.t -> float * float -> Picture_lib.id list
-  val move :
-    Cairo.context -> Picture_lib.t -> Picture_lib.id -> float * float -> float * float
+  val stroke : Cairo.context -> pen -> Spline_lib.path -> unit
+
+  val fill : Cairo.context -> Spline_lib.path -> unit
+
+  val draw_path : Cairo.context -> Spline_lib.path -> unit
 end
 
+module Picture : sig
+  val draw : Cairo.context -> float -> float -> Picture_lib.t -> unit
+
+  val where :
+    Cairo.context -> Picture_lib.t -> float * float -> Picture_lib.id list
+
+  val move :
+    Cairo.context ->
+    Picture_lib.t ->
+    Picture_lib.id ->
+    float * float ->
+    float * float
+end

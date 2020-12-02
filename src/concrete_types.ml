@@ -3,6 +3,4 @@ type scolor =
   | CMYK of float * float * float * float
   | Gray of float
 
-type color =
-  |OPAQUE of scolor
-  |TRANSPARENT of float * scolor
+type color = OPAQUE of scolor | TRANSPARENT of float * scolor

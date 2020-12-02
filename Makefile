@@ -45,3 +45,6 @@ install:
 release:
 	@echo "Only the committed code is added in the archive, VERSION is \"$(VERSION)\""
 	git archive --format=tar.gz --prefix mlpost-$(VERSION)/ -o mlpost-$(VERSION).tar.gz HEAD
+
+fmt:
+	dune build @fmt --auto-promote
