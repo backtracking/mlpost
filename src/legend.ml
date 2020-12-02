@@ -17,28 +17,22 @@
 open Box
 
 let rec mklegend ensstroke colstroke fill vb1 = function
-    |[] -> set_fill fill (set_stroke ensstroke (
-	box (tabularl ~hpadding:(Num.bp 10.) ~vpadding:(Num.bp 10.)
-	       (List.rev vb1))))
-    |(col,text)::res ->
-       let c = set_fill col (set_stroke colstroke (
-        empty ~width:(Num.bp 20.) ~height:(Num.bp 10.) ()))
-       in
-	 mklegend ensstroke colstroke fill ([c;tex text]::vb1) res
-
+  | [] ->
+      set_fill fill
+        (set_stroke ensstroke
+           (box
+              (tabularl ~hpadding:(Num.bp 10.) ~vpadding:(Num.bp 10.)
+                 (List.rev vb1))))
+  | (col, text) :: res ->
+      let c =
+        set_fill col
+          (set_stroke colstroke
+             (empty ~width:(Num.bp 20.) ~height:(Num.bp 10.) ()))
+      in
+      mklegend ensstroke colstroke fill ([ c; tex text ] :: vb1) res
 
 let legend ?ensstroke ?colstroke ?fill l =
-  let ensstroke = match ensstroke with
-    |None-> Color.white
-    |Some i -> i
-  in
-  let colstroke = match colstroke with
-    |None-> Color.white
-    |Some i -> i
-  in
-  let fill = match fill with
-    |None-> Color.white
-    |Some i -> i
-  in
-    Picture.make (Box.draw (mklegend ensstroke colstroke fill [] l))
-
+  let ensstroke = match ensstroke with None -> Color.white | Some i -> i in
+  let colstroke = match colstroke with None -> Color.white | Some i -> i in
+  let fill = match fill with None -> Color.white | Some i -> i in
+  Picture.make (Box.draw (mklegend ensstroke colstroke fill [] l))

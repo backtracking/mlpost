@@ -18,7 +18,9 @@ type t = string
 
 let create prefix =
   let r = ref 0 in
-  fun () -> incr r; prefix ^ string_of_int !r
+  fun () ->
+    incr r;
+    prefix ^ string_of_int !r
 
 let node = create "node"
 
@@ -28,20 +30,30 @@ let rec alpha i =
 
 let path =
   let r = ref 0 in
-  fun () -> incr r; "path" ^ alpha !r
+  fun () ->
+    incr r;
+    "path" ^ alpha !r
 
 let picture =
   let r = ref 0 in
-  fun () -> incr r; "pic" ^ alpha !r
+  fun () ->
+    incr r;
+    "pic" ^ alpha !r
 
 let point =
   let r = ref 0 in
-  fun () -> incr r; "pot" ^ alpha !r
+  fun () ->
+    incr r;
+    "pot" ^ alpha !r
 
 let num =
   let r = ref 0 in
-  fun () -> incr r; "num" ^ alpha !r
+  fun () ->
+    incr r;
+    "num" ^ alpha !r
 
 let transform =
   let r = ref 0 in
-  fun () -> incr r; "trans" ^ alpha !r
+  fun () ->
+    incr r;
+    "trans" ^ alpha !r

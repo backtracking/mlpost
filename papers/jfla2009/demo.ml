@@ -3,18 +3,19 @@ open Num
 open Box
 
 let fig =
-  let b = 
+  let b =
     hbox ~padding:(bp 20.) ~pos:`Bot
-      [circle (tex "A");
-       vbox [round_rect (tex "B"); tex "\\LaTeX"]]
+      [ circle (tex "A"); vbox [ round_rect (tex "B"); tex "\\LaTeX" ] ]
   in
   let b = round_rect ~stroke:(Some Color.red) b in
-  draw (vbox [b;b;b])
+  draw (vbox [ b; b; b ])
 
 let () = Metapost.emit "fig" fig
 
-let triple x = [x;x;x]
+let triple x = [ x; x; x ]
+
 let nine x = triple (triple x)
+
 let u = bp 10.
 
 let sudoku =

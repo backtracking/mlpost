@@ -15,12 +15,10 @@
 (**************************************************************************)
 
 type num = float
+
 and point = Point_lib.t
 
-and direction =
-  | Vec of point
-  | Curl of float
-  | NoDir
+and direction = Vec of point | Curl of float | NoDir
 
 and joint =
   | JLine
@@ -94,10 +92,12 @@ and spec_image =
   | `Width of num (* keep the proportion of the image *)
   | `Height of num
   | `Inside of num * num (* must be inside a box of this height and width *)
-  | `Exact of num * num]
+  | `Exact of num * num ]
 
 and color = Types.color
+
 and position = Types.position
+
 and name = Types.name
-and on_off =
-  | On of num | Off of num
+
+and on_off = On of num | Off of num

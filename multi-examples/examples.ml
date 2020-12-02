@@ -12,4 +12,4 @@ let emit, dump =
     let base_name = Filename.chop_extension Sys.argv.(0) in
     fun () -> Metapost.dump base_name
   in
-  emit, dump
+  (emit, dump)

@@ -15,5 +15,7 @@
 (**************************************************************************)
 
 val version : string
+
 val ocamlfind_path : string
+
 val packages : string list

@@ -1,20 +1,21 @@
-(** Place figures, boxes or boxlikes with graphviz *)
 open Mlpost
+(** Place figures, boxes or boxlikes with graphviz *)
 
-module Dot :
-sig
-  module Make (B : Signature.Boxlike) :
-  sig
-    type node      
+module Dot : sig
+  module Make (B : Signature.Boxlike) : sig
+    type node
+
     type edge = node * node
 
     val mknode : B.t -> node
-      (** creates an abstract node from a boxlike *)
+    (** creates an abstract node from a boxlike *)
 
-    val place : 
-      ?orient:[`TB|`LR|`BT|`RL] -> 
-      node list -> edge list -> B.t list * Path.t list
-      (** [place ~orient nodes edges] returns a concrete
+    val place :
+      ?orient:[ `TB | `LR | `BT | `RL ] ->
+      node list ->
+      edge list ->
+      B.t list * Path.t list
+    (** [place ~orient nodes edges] returns a concrete
           representation of the abstract directed graph composed by
           [nodes] linked by [edges]. The concrete representation is
           composed by the list of all the boxlikes of [nodes] placed

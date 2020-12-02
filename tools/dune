@@ -1,24 +1,21 @@
 (library
-   (name mlpost_desc_options)
-   (public_name mlpost.desc_options)
-   (modules mlpost_desc_options)
-)
+ (name mlpost_desc_options)
+ (public_name mlpost.desc_options)
+ (modules mlpost_desc_options))
 
 (library
-   (name mlpost_options)
-   (public_name mlpost.options)
-   (modules mlpost_options)
-   (libraries mlpost mlpost_desc_options)
-   (flags "-linkall")
-)
+ (name mlpost_options)
+ (public_name mlpost.options)
+ (modules mlpost_options)
+ (libraries mlpost mlpost_desc_options)
+ (flags "-linkall"))
 
 (executable
-  (name tool)
-  (modules Tool)
-  (public_name mlpost)
-  (package mlpost)
-  (libraries mlpost mlpost_desc_options mlpost_version)
-)
+ (name tool)
+ (modules Tool)
+ (public_name mlpost)
+ (package mlpost)
+ (libraries mlpost mlpost_desc_options mlpost_version))
 
 ; (executable
 ;   (name gmlpost)
