@@ -96,13 +96,12 @@ let box_loop ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep
   Arrow.simple ?color ?pen ?dashed p
 
 let box_label_loop ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep
-      ?pos ?dist ?angle lab b =
-  let b, _, x = loop_aux ?within ?pos ?dist b in
+      ?(pos=`South) ?dist ?angle lab b =
+  let b, _, x = loop_aux ?within ~pos ?dist b in
   box_loop ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep
-    ?pos ?dist ?angle b ++
-  let pos = match pos with
-    | None | Some (`Custom _) -> None
-    | Some (#Command.position as p) -> Some p in
+    ~pos ?dist ?angle b ++
+  let pos =
+    match pos with `Custom _ -> None | #Command.position as p -> Some p in
   label ?pos lab x
 
 let pointer_start_pen = Pen.scale (Num.bp 4.) Pen.circle
