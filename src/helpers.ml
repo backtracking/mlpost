@@ -74,11 +74,15 @@ let box_labelbox_arrow ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep ?pos
     (Picture.make (Box.draw lab))
     a b
 
-let box_loop ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep
-      ?(pos=`South) ?(dist=2.) ?(angle=90.) b =
+let loop_aux ?within ?(pos=`South) ?(dist=2.) b =
   let b = match within with None -> b | Some x -> Box.sub b x in
   let c = Box.ctr b in
   let x = Point.segment dist c (Box.corner pos b) in
+  b, c, x
+
+let box_loop ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep
+      ?pos ?dist ?(angle=90.) b =
+  let b, c, x = loop_aux ?within ?pos ?dist b in
   let outd, ind =
     let rad =
       atan2 (Point.ypart x -. Point.ypart c) (Point.xpart x -. Point.xpart c) in
@@ -92,14 +96,13 @@ let box_loop ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep
   Arrow.simple ?color ?pen ?dashed p
 
 let box_label_loop ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep
-      ?(pos=`South) ?(dist=2.) ?angle lab b =
-  let b = match within with None -> b | Some x -> Box.sub b x in
-  let c = Box.ctr b in
-  let x = Point.segment dist c (Box.corner pos b) in
+      ?pos ?dist ?angle lab b =
+  let b, _, x = loop_aux ?within ?pos ?dist b in
   box_loop ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep
-    ~pos ~dist ?angle b ++
-  let pos =
-    match pos with `Custom _ -> None | #Command.position as p -> Some p in
+    ?pos ?dist ?angle b ++
+  let pos = match pos with
+    | None | Some (`Custom _) -> None
+    | Some (#Command.position as p) -> Some p in
   label ?pos lab x
 
 let pointer_start_pen = Pen.scale (Num.bp 4.) Pen.circle
