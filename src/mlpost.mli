@@ -2499,12 +2499,42 @@ module Helpers : sig
     Box.t ->
     Command.t
 
-  (***
-      val hboxjoin :
-        ?color:Color.t -> ?pen:Pen.t -> ?dashed:Dash.t ->
-        ?dx:Num.t -> ?dy:Num.t -> ?pos:Command.position -> ?spacing:Num.t ->
-         Picture.t list -> Command.t
-    ***)
+  val box_loop :
+    ?within:Box.t ->
+    ?color:Color.t ->
+    ?pen:Pen.t ->
+    ?dashed:Dash.t ->
+    ?style:Path.joint ->
+    ?outd:Path.direction ->
+    ?ind:Path.direction ->
+    ?sep:Num.t ->
+    ?pos:Box.position ->
+    ?dist:float ->
+    ?angle:float ->
+    Box.t ->
+    Command.t
+  (** Position [pos] defaults to [`South].
+      [angle] is the opening angle of the loop, in degrees; it defaults to 90.
+      [dist] is the relative distance between the box center and the
+      furthest point of the loop (when compared to the distance between the
+      center and the corner [pos]); it defaults to 2. *)
+
+  val box_label_loop :
+    ?within:Box.t ->
+    ?color:Color.t ->
+    ?pen:Pen.t ->
+    ?dashed:Dash.t ->
+    ?style:Path.joint ->
+    ?outd:Path.direction ->
+    ?ind:Path.direction ->
+    ?sep:Num.t ->
+    ?pos:Box.position ->
+    ?dist:float ->
+    ?angle:float ->
+    Picture.t ->
+    Box.t ->
+    Command.t
+
 end
 
 (** Create and draw trees *)

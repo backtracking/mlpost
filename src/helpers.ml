@@ -74,6 +74,34 @@ let box_labelbox_arrow ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep ?pos
     (Picture.make (Box.draw lab))
     a b
 
+let box_loop ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep
+      ?(pos=`South) ?(dist=2.) ?(angle=90.) b =
+  let b = match within with None -> b | Some x -> Box.sub b x in
+  let c = Box.ctr b in
+  let x = Point.segment dist c (Box.corner pos b) in
+  let outd, ind =
+    let rad =
+      atan2 (Point.ypart x -. Point.ypart c) (Point.xpart x -. Point.xpart c) in
+    let theta = 180. *. rad /. Compute.pi in
+    let a = angle /. 2. in
+    (match outd with None -> vec (Point.dir (theta -. a)) | Some d -> d),
+    (match ind  with None -> vec (Point.dir (theta +. 180. +. a)) | Some d -> d)
+  in
+  let p = Path.pathk ?style [ knotp ~r:outd c; knotp x; knotp ~l:ind c ] in
+  let p = strip ?sep (P.cut_after (bpath b) (P.cut_before (bpath b) p)) in
+  Arrow.simple ?color ?pen ?dashed p
+
+let box_label_loop ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep
+      ?(pos=`South) ?(dist=2.) ?angle lab b =
+  let b = match within with None -> b | Some x -> Box.sub b x in
+  let c = Box.ctr b in
+  let x = Point.segment dist c (Box.corner pos b) in
+  box_loop ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep
+    ~pos ~dist ?angle b ++
+  let pos =
+    match pos with `Custom _ -> None | #Command.position as p -> Some p in
+  label ?pos lab x
+
 let pointer_start_pen = Pen.scale (Num.bp 4.) Pen.circle
 
 let box_pointer_arrow ?within ?color ?pen ?dashed ?style ?outd ?ind a b =
@@ -81,8 +109,8 @@ let box_pointer_arrow ?within ?color ?pen ?dashed ?style ?outd ?ind a b =
   let r, l = (outd, ind) in
   let p = Path.pathk ?style [ Path.knotp ?r (ctr a); Path.knotp ?l (ctr b) ] in
   let p = Path.cut_after (bpath b) p in
-  Command.draw ~pen:pointer_start_pen (pathp [ Path.point 0. p ])
-  ++ Arrow.simple ?color ?pen ?dashed p
+  Command.draw ~pen:pointer_start_pen (pathp [ Path.point 0. p ]) ++
+  Arrow.simple ?color ?pen ?dashed p
 
 (***
 
