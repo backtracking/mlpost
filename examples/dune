@@ -8,7 +8,9 @@
 (executable
  (name lattice_lablgtk)
  (modules lattice_lablgtk)
- (libraries threads mlpost-lablgtk))
+ (libraries threads mlpost-lablgtk)
+ (optional)
+)
 
 (include dune.inc)
 
@@ -16,8 +18,8 @@
  (name gen_dune)
  (modules gen_dune))
 
-(alias
- (name promote)
+(rule
+ (alias promote)
  (action
   (diff dune.inc dune.inc.gen)))
 
@@ -36,8 +38,8 @@
 
 ; test of the executable
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (deps
   (package mlpost))
  (action

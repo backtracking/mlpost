@@ -45,7 +45,7 @@ let mode_general () =
          @\n"
         file file file;
       Format.printf
-        "(alias (name promote) (action (diff dune.%s.inc dune.%s.inc.gen)))@\n"
+        "(rule (alias promote) (action (diff dune.%s.inc dune.%s.inc.gen)))@\n"
         file file)
     examples
 

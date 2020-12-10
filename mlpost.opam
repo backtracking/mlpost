@@ -22,6 +22,7 @@ depends: [
   "ocaml" { >= "4.07.0" }
   "ocamlfind" #during execution also
   "bitstring" { >= "3.0.0" }
-  "cairo2"
-  "dune"
+  "ppx_bitstring"
+  "cairo2" { >= "0.6.2" }
+  "dune" { >= "2.7.0" }
 ]
