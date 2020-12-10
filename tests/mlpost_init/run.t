@@ -36,3 +36,37 @@
   $ cmp mlpost_figures/foo.bak.pgf mlpost_figures/foo.pgf
   mlpost_figures/foo.bak.pgf mlpost_figures/foo.pgf differ: char 62, line 3
   [1]
+
+
+#  $ rm -rf mlpost_figures
+#
+#  $ cat >>main.tex <<EOF
+#  > \documentclass{article}
+#  > \newcommand{\grand}[1]{\huge{#1}}
+#  > \begin{document}
+#  > EOF
+#
+#  $ mlpost-init foo --latex main.tex
+#
+#  $ cat >>mlpost_figures/common_for_figures.ml <<EOF
+#  > 
+#  > let tex s = tex (Printf.sprintf "\\\\grand{%s}" s)
+#  > EOF
+#
+#  $ dune build --root=mlpost_figures @pgf
+#  Entering directory 'mlpost_figures'
+#
+#  $ cp mlpost_figures/foo.pgf mlpost_figures/foo.bak.pgf
+#
+#  $ cat >>main.tex <<EOF
+#  > \documentclass{article}
+#  > \newcommand{\grand}[1]{\tiny{#1}}
+#  > \begin{document}
+#  > EOF
+#
+#  $ dune build --root=mlpost_figures @pgf
+#  Entering directory 'mlpost_figures'
+#
+#  $ cmp -u mlpost_figures/foo.bak.pgf mlpost_figures/foo.pgf
+#  mlpost_figures/foo.bak.pgf mlpost_figures/foo.pgf differ: char 62, line 3
+#  [1]
