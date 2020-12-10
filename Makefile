@@ -29,7 +29,7 @@ doc:
 promote:
 	dune build @promote --auto-promote || true  #For dune.inc
 	dune build @promote --auto-promote || true  #For *.dune.inc
-	dune runtest
+	dune runtest --auto-promote
 
 headers:
 	headache -c headache_config.txt -h header.txt \
