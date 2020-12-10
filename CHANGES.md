@@ -1,4 +1,5 @@
 
+  - add mlpost-init which initialize a directory for compiling mlpost figures using dune
   - a small script `view-mps` to visualize .mps files
 
 # 0.9 (January 19, 2021)
