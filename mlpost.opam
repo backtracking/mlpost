@@ -25,4 +25,6 @@ depends: [
   "ppx_bitstring"
   "cairo2" { >= "0.6.2" }
   "dune" { >= "2.7.0" }
+  "cmdliner"
+  "fmt"
 ]
