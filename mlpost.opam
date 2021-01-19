@@ -9,8 +9,8 @@ authors: [
   "Stephane Lescuyer"
 ]
 homepage: "https://github.com/backtracking/mlpost"
-dev-repo: "git://github.com/backtracking/mlpost"
 bug-reports: "https://github.com/backtracking/mlpost/issues"
+doc: "https://backtracking.github.io/mlpost"
 synopsis : "OCaml library on top of Metapost"
 description: "Library for building graphics and figures similarly to Metapost"
 license: "LGPL-2.1"

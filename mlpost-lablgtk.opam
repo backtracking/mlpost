@@ -9,8 +9,8 @@ authors: [
   "Stephane Lescuyer"
 ]
 homepage: "https://github.com/backtracking/mlpost"
-dev-repo: "git://github.com/backtracking/mlpost"
 bug-reports: "https://github.com/backtracking/mlpost/issues"
+doc: "https://backtracking.github.io/mlpost"
 synopsis: "Library for adding mlpost graphics in lablgtk"
 description: "Library for adding mlpost graphics in lablgtk"
 license: "LGPL-2.1"
