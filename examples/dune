@@ -8,9 +8,7 @@
 (executable
  (name lattice_lablgtk)
  (modules lattice_lablgtk)
- (libraries threads mlpost-lablgtk)
- (optional)
-)
+ (libraries threads mlpost-lablgtk))
 
 (include dune.inc)
 
