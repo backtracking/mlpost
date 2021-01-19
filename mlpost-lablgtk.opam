@@ -8,10 +8,11 @@ authors: [
   "Johannes Kanig"
   "Stephane Lescuyer"
 ]
-homepage: "http://mlpost.lri.fr/index.fr.html"
+homepage: "https://github.com/backtracking/mlpost"
 dev-repo: "git://github.com/backtracking/mlpost"
 bug-reports: "https://github.com/backtracking/mlpost/issues"
 synopsis: "Library for adding mlpost graphics in lablgtk"
+description: "Library for adding mlpost graphics in lablgtk"
 license: "LGPL-2.1"
 build: [
   ["dune" "subst"] {pinned}
