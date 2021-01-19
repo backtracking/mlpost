@@ -8,7 +8,7 @@
  (public_name mlpost.options)
  (modules mlpost_options)
  (libraries mlpost mlpost_desc_options)
- (flags "-linkall"))
+ (flags -linkall :standard))
 
 (executable
  (name tool)

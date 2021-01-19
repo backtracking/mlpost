@@ -20,9 +20,9 @@ build: [
 depends: [
   "ocaml" { >= "4.07.0" }
   "bitstring" { >= "3.0.0" }
-  "cairo2"
   "dune"
   "mlpost"
+  "cairo2-gtk"
   "lablgtk"
   "conf-gnomecanvas"
 ]

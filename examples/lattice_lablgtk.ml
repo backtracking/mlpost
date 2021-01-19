@@ -61,12 +61,13 @@ let fold_bit f =
 
 (* the bits in [n] indicate the selected characters of [s] *)
 let subword s n =
+  let s = Bytes.of_string s in
   let len = fold_bit (fun l _ -> l + 1) 0 n in
   let w = Bytes.create len in
   let j = ref 0 in
   for i = 0 to Bytes.length s - 1 do
     if n land (1 lsl i) != 0 then (
-      Bytes.set w !j s.[i];
+      Bytes.set w !j (Bytes.get s i);
       incr j )
   done;
   Bytes.unsafe_to_string w
