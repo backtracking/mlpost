@@ -16,7 +16,7 @@ synopsis: "Library for adding mlpost graphics in lablgtk"
 description: "Library for adding mlpost graphics in lablgtk"
 license: "LGPL-2.1"
 build: [
-  ["dune" "subst"] {pinned}
+  ["dune" "subst"] {dev}
   [
     "dune"
     "build"
@@ -33,7 +33,7 @@ depends: [
   "ocaml" { >= "4.07.0" }
   "bitstring" { >= "3.0.0" }
   "dune"
-  "mlpost"
+  "mlpost" { = version }
   "cairo2-gtk"
   "lablgtk"
   "conf-gnomecanvas"
