@@ -17,7 +17,7 @@ let print_fig_template name fmt =
   Fmt.pf fmt "open Mlpost@\n";
   Fmt.pf fmt "open Box@\n";
   Fmt.pf fmt "open! Common_for_figures@\n";
-  Fmt.pf fmt "let fig = draw (tex %S)@\n" name;
+  Fmt.pf fmt "let fig = draw (tex (Mlpost.Picture.escape_all %S))@\n" name;
   Fmt.pf fmt "let () = Metapost.emit %S fig@\n" name
 
 let modes = ["mps";"pgf";"png"]
@@ -29,7 +29,8 @@ let additional_options mode =
 
 let print_dune figures latex required fmt =
   let dep fmt s = Fmt.pf fmt "%%{dep:%s}" (Filename.concat ".." s) in
-  Fmt.pf fmt "(executables (names %a) (libraries mlpost mlpost.options))@\n@\n" Fmt.(list string) figures;
+  Fmt.pf fmt "(executables (names %a) (libraries mlpost mlpost.options))@\n@\n"
+    Fmt.(list ~sep:sp string) figures;
   List.iter (fun fig ->
       List.iter (fun mode ->
       Fmt.pf fmt "(rule (targets %S) (alias %s) (action (run %S -%s %a %a %a)) (mode promote-until-clean))"
@@ -39,7 +40,7 @@ let print_dune figures latex required fmt =
         mode
         Fmt.(option (any "-latex " ++ dep)) latex
         Fmt.(list ~sep:sp (any "-required " ++ dep)) required
-        Fmt.(list string) (additional_options mode)
+        Fmt.(list ~sep:sp string) (additional_options mode)
         ) modes) figures;
   ()
 
