@@ -2,7 +2,7 @@
  (name img)
  (modules img)
  (kind ppx_rewriter)
- (libraries ocaml-migrate-parsetree str))
+ (libraries ppxlib str))
 
 (executable
  (name img_doc)
