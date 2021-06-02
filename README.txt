@@ -54,6 +54,9 @@ mlpost supports the following options:
 	same, but the suffix is used by pdflatex to identify
 	PostScript produced by Metapost)
 
+        The bash script view-mps, enclosed in mlpost repo, can be used
+        to view .mps files.
+
 -latex main.tex
         indicates the main LaTeX file, from which the prelude is
         extracted to be passed to Metapost (this way you can use

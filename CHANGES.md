@@ -1,4 +1,6 @@
 
+  - a small script `view-mps` to visualize .mps files
+
 # 0.9 (January 19, 2021)
   - fixes floating-point error in extremum computation
   - special points are kept in empty from box

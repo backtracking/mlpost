@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# This is a quick script to view .mps files
+
+# Running "view-mps file.mps..." creates a file out.pdf (using rubber -d)
+# and then open it with evince.
+# This can be customized by editing the last two lines.
+
+echo "\\documentclass{article}
+\\usepackage{graphicx}
+\\begin{document}
+\\begin{center}
+" > out
+
+for f in $*; do
+echo "
+\\verb+"$f"+ \\\\
+\\hrulefill \\\\
+\\includegraphics{"$f"} \\\\
+\\hrulefill \\\\
+\\vspace{2cm}
+" >> out
+done
+
+echo "
+\\end{center}
+\\end{document}" >> out
+
+rubber -d out
+evince out.pdf
