@@ -4,7 +4,7 @@ This is MLPost, an OCaml interface to MetaPost.
 Quick links:
 * [API documentation](http://backtracking.github.io/mlpost/)
 * [Examples](http://mlpost.lri.fr/examples/)
-* [FAQ](../blob/master/FAQ)
+* [FAQ](../master/FAQ)
 
 # Usage
 
