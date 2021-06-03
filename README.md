@@ -1,23 +1,12 @@
-**************************************************************************
-*                                                                        *
-*  Copyright (C) Johannes Kanig, Stephane Lescuyer                       *
-*  Jean-Christophe Filliatre, Romain Bardou and Francois Bobot           *
-*                                                                        *
-*  This software is free software; you can redistribute it and/or        *
-*  modify it under the terms of the GNU Library General Public           *
-*  License version 2.1, with the special exception on linking            *
-*  described in file LICENSE.                                            *
-*                                                                        *
-*  This software is distributed in the hope that it will be useful,      *
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                  *
-*                                                                        *
-**************************************************************************
 
-This is MLPost !
+This is MLPost, an OCaml interface to MetaPost.
 
-Usage:
-------
+Quick links:
+* [API documentation](http://backtracking.github.io/mlpost/)
+* [Examples](http://mlpost.lri.fr/examples/)
+* [FAQ](../blob/master/FAQ)
+
+# Usage
 
 * Open the Mlpost pack:
 
@@ -43,8 +32,7 @@ Usage:
   It will create PostScript figures in files file_a.1, file_b.1, etc.
 
 
-Options:
---------
+# Options
 
 mlpost supports the following options:
 
@@ -84,8 +72,7 @@ mlpost supports the following options:
         pass options to the compiled program
 
 
-Cairo output:
--------------
+# Cairo output
 
 The following functions are not supported in combination with the Concrete /
 Cairo modules:
