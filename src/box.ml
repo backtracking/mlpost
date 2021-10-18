@@ -339,9 +339,24 @@ let empty ?(width=Num.zero) ?(height=Num.zero) ?style ?name ?brush
   mkbox ?style ?name ~dx:zero ~dy:zero ?brush ~stroke ?pen ?dash ?fill
     width height Point.origin Emp
 
-let empty_from_box ?style ?name ?brush ?(stroke=None) ?pen ?dash ?fill box =
-  mkbox ?style ?name ?brush ~stroke ?pen ?dash ?fill ~dx:zero ~dy:zero
-    (width box) (height box) (ctr box) (Grp ([||], merge_maps [box] ))
+let empty_from_box ?name box =
+  let name =
+    match name with None -> fresh_name () | Some s -> Name.Userdef s
+  in
+  {
+    desc = Emp;
+    name;
+    stroke = None;
+    pen = None;
+    fill = None;
+    dash = None;
+    width = (width box);
+    height = (height box);
+    ctr = box.ctr;
+    contour = box.contour;
+    post_draw = no_drawing;
+    pre_draw = no_drawing;
+  }
 
 (* groups the given boxes in a new box *)
 let group ?style ?(dx = Num.zero) ?(dy = Num.zero) ?name ?brush ?(stroke = None)
