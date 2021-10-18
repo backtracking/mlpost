@@ -69,3 +69,8 @@ let externalimage filename spec =
 let iterl f l = seq (List.map f l)
 
 let nop = seq []
+
+let is_nop (c:t) =
+  match c.Hashcons.node with
+  | Seq [] -> true
+  | _ -> false

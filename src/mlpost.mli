@@ -1275,6 +1275,9 @@ and Command : sig
   val nop : t
   (** A command that has no effect *)
 
+  val is_nop : t -> bool
+  (** Test if a command that has no effect *)
+
   val append : t -> t -> t
   (** Append two commands to form a compound command *)
 
@@ -1449,6 +1452,9 @@ module Box : sig
     t
   (** the empty box with the same position, dimension and contour (not shown) as
       the box. The special points are kept *)
+
+  val is_empty: t -> bool
+  (** Tests if the box is empty or a group of empty box *)
 
   val pic : ?style:style -> Picture.t box_creator
   (** [pic p] creates a new box containing the picture [p] *)

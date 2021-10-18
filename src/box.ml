@@ -358,6 +358,10 @@ let empty_from_box ?name box =
     pre_draw = no_drawing;
   }
 
+let rec is_empty box = match box.desc with
+  | Emp -> true | Pic _ -> false
+  | Grp (a,_) -> Array.for_all is_empty a
+
 (* groups the given boxes in a new box *)
 let group ?style ?(dx = Num.zero) ?(dy = Num.zero) ?name ?brush ?(stroke = None)
     ?pen ?dash ?fill bl =
