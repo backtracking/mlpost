@@ -222,6 +222,8 @@ let shift t w h = transform (Matrix.xy_translation w h) t
 
 let bounding_box t = S.bounding_box t.fb
 
+let set_bounding_box t b = { t with fb = S.of_bounding_box b }
+
 let baseline p = match p.fcl with Tex tex -> Gentex.get_bases_pt tex | _ -> []
 
 let apply_transform_cmds t =

@@ -269,6 +269,11 @@ and commandpic p =
           List.fold_left
             (fun acc c -> Picture_lib.on_top acc (commandpic c))
             (commandpic x) r )
+  | BBox (c,p) ->
+    let c = commandpic c in
+    let p = path p in
+    let fb = S.bounding_box p in
+    Picture_lib.set_bounding_box c fb
 
 and dash d =
   match d.Hashcons.node with

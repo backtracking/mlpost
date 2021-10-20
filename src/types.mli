@@ -146,6 +146,7 @@ and commandpic_node = private
   | Picture of picture
   | Command of command
   | Seq of commandpic list
+  | BBox of commandpic * path
 
 and commandpic = commandpic_node hash_consed
 
@@ -258,6 +259,8 @@ val mkPicture : picture -> commandpic
 val mkCommand : command -> commandpic
 
 val mkSeq : commandpic list -> commandpic
+
+val mkBBox : commandpic -> path -> commandpic
 
 (* dash *)
 

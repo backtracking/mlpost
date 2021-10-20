@@ -138,3 +138,4 @@ and commandpic p =
   | Picture p -> picture p
   | Command c -> command c
   | Seq l -> List.iter commandpic l
+  | BBox (c,p) -> commandpic c; path p

@@ -84,6 +84,8 @@ val iter : (commands -> unit) -> t -> unit
 
 val bounding_box : t -> Point_lib.t * Point_lib.t
 
+val set_bounding_box : t -> Point_lib.t * Point_lib.t -> t
+
 (* lower left and upper right point *)
 
 (* Return the empty list if the picture is not directly a Tex *)

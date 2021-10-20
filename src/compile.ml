@@ -180,6 +180,7 @@ and commandpic_pic pc =
   | Seq l ->
       let pn = Name.picture () in
       (C.PIName pn, C.CDefPic (pn, C.CSeq (List.map commandpic_cmd l)))
+  | BBox _ -> invalid_arg "bbox unimplemented for metapost"
 
 and commandpic_pic_save pc =
   match pc.Hashcons.node with
@@ -193,6 +194,7 @@ and commandpic_cmd pc =
       C.CSeq [ code; C.CDrawPic p ]
   | Command c -> command c
   | Seq l -> C.CSeq (List.map commandpic_cmd l)
+  | BBox _ -> invalid_arg "bbox unimplemented for metapost"
 
 and transform t =
   let t = List.fold_left Matrix.multiply Matrix.identity t in

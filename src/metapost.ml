@@ -187,16 +187,16 @@ let generate ?prelude ?verbose ?clean bn figl =
   ignore (temp_mps ?prelude ?verbose ?clean bn figl)
 
 let slideshow l k =
-  let l = List.map Picture.make l in
   let l' =
     Command.seq
       (List.map (fun p -> Command.draw ~color:Color.white (Picture.bbox p)) l)
   in
+  let bb = Picture.bbox l' in
   let x = ref (k - 1) in
   List.map
     (fun p ->
       incr x;
-      (!x, Command.seq [ l'; Command.draw_pic p ]))
+      (!x, Command.set_bounding_box p bb))
     l
 
 let emit_slideshow s l =

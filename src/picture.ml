@@ -21,6 +21,8 @@ type t = commandpic
 
 let tex s = mkPicture (mkPITex s)
 
+let set_bbox s = mkPicture (mkPITex s)
+
 let make l = l
 
 let empty = mkSeq []

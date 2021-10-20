@@ -1278,6 +1278,9 @@ and Command : sig
   val is_nop : t -> bool
   (** Test if a command that has no effect *)
 
+  val set_bounding_box : t -> Path.t -> t
+  (** Change the bounding box to the one of the given path *)
+
   val append : t -> t -> t
   (** Append two commands to form a compound command *)
 
