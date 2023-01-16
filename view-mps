@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/bin/sh
+
+set -eu
 
 # This is a quick script to view .mps files
 
@@ -6,25 +8,25 @@
 # and then open it with evince.
 # This can be customized by editing the last two lines.
 
-echo "\\documentclass{article}
-\\usepackage{graphicx}
+printf '\\documentclass{article}
+\usepackage{graphicx}
 \\begin{document}
 \\begin{center}
-" > out
+' > out
 
-for f in $*; do
-echo "
-\\verb+"$f"+ \\\\
+for f in "$@"; do
+printf '
+\\verb+%s+ \\\\
 \\hrulefill \\\\
-\\includegraphics{"$f"} \\\\
+\\includegraphics{%s} \\\\
 \\hrulefill \\\\
 \\vspace{2cm}
-" >> out
+' "$f" "$f" >> out
 done
 
-echo "
+printf '
 \\end{center}
-\\end{document}" >> out
+\\end{document}' >> out
 
 rubber -d out
-evince out.pdf
+xdg-open out.pdf

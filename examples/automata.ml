@@ -9,11 +9,11 @@ open Box
 
 (*parse <<togglescript>> *)
 (* Nodes are boxes (type Box.t), created using functions such as "state" and
-   "final" below. These boxes are given names using the labeled argument 
+   "final" below. These boxes are given names using the labeled argument
    ~name, for further reference in transition drawing. Nodes placement is
    left to the user, and is typically performed using alignment functions
-   such as Box.hbox, Box.vbox or Box.tabularl (see examples below). 
- 
+   such as Box.hbox, Box.vbox or Box.tabularl (see examples below).
+
    Given a set of placed nodes, that is a box containing nodes as sub-boxes,
    function "transition" draws a transition from one node to another, given
    their names. A label and its position are also given. Optional arguments
@@ -104,7 +104,7 @@ let state name s = rect ~name  ~stroke:None (rect (tex ("$" ^ s ^ "$")))
 let automata3 =
   let states = tabularl ~hpadding:(cm 1.) ~vpadding:(cm 1.)
     [[state "11" "S\\rightarrow E\\bullet";
-      state "0" "S\\rightarrow\\bullet E"; 
+      state "0" "S\\rightarrow\\bullet E";
       state "5" "E\\rightarrow\\texttt{int}\\bullet";
       ];
      [state "1" "E\\rightarrow\\bullet E\\texttt{+}E";
