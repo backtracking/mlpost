@@ -481,7 +481,7 @@ and MetaPath : sig
 
   val knotn : ?l:direction -> ?r:direction -> Num.t * Num.t -> knot
   (** Build a knot from a Num.t pair; the optional arguments are as in
-      {!knot} *)
+      {!val-knot} *)
 
   val path :
     ?style:joint -> ?scale:(float -> Num.t) -> (float * float) list -> t
@@ -615,7 +615,7 @@ and Path : sig
 
   val knotn : ?l:direction -> ?r:direction -> Num.t * Num.t -> knot
   (** Build a knot from a Num.t pair; the optional arguments are as in
-      {!knot} *)
+      {!val-knot} *)
 
   val path :
     ?style:joint ->

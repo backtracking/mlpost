@@ -1,5 +1,4 @@
 (library
- (name mlpost)
  (public_name mlpost)
  (synopsis "OCaml interface to Mlpost, Cairo, Pgf")
  (libraries unix bitstring cairo2 mlpost_version)
@@ -20,4 +19,4 @@
 (rule
  (targets c_flags.sexp c_library_flags.sexp)
  (action
-  (run ./config/discover.exe)))
+  (run config/discover.exe)))
