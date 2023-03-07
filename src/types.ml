@@ -151,6 +151,7 @@ and commandpic_node =
   | Picture of picture
   | Command of command
   | Seq of commandpic list
+  | BBox of commandpic * path
 
 and commandpic = commandpic_node hash_consed
 
@@ -228,6 +229,7 @@ let commandpic = function
   | Picture pic -> combine 91 pic.hkey
   | Command c -> combine 92 c.hkey
   | Seq l -> List.fold_left (fun acc t -> combine2 93 acc t.hkey) 94 l
+  | BBox (c,p) -> combine2 94 c.hkey p.hkey
 
 let dash = function
   | DEvenly -> 72
@@ -610,6 +612,8 @@ let mkPicture p = hashcommandpic (Picture p)
 let mkCommand p = hashcommandpic (Command p)
 
 let mkSeq l = hashcommandpic (Seq l)
+
+let mkBBox paths pic = hashcommandpic (BBox (paths,pic))
 
 (* dash *)
 

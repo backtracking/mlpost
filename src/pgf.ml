@@ -161,15 +161,35 @@ module PGF = struct
 
   let char_const fmt c = fprintf fmt "\\char'%03lo" c
 
-  let glyph fmt p cl font =
+  type db = (string*float,string) Hashtbl.t
+
+  let rec name_of_int acc i =
+    let c = Char.chr (Char.code 'A' + (i mod 26)) in
+    let acc = ((String.make 1 c ) ^ acc) in
+    let i = i / 26 in
+    if i = 0 then acc else name_of_int acc (i-1)
+
+  let key_of_font font = ((Fonts.tex_name font),(Fonts.scale font conversion))
+
+  let add_tex_name (db:db) font =
+    let k = key_of_font font in
+    if not (Hashtbl.mem db k) then
+      Hashtbl.add db k (name_of_int "" (Hashtbl.length db))
+
+  let declare_fonts fmt db =
+    Hashtbl.iter (fun (name,size) id -> fprintf fmt
+                     "\\font\\mlpostfont%s=%s at %apt@ "
+                     id
+                     name float size) db
+
+  let glyph fmt db p cl font =
+    let id = Hashtbl.find db (key_of_font font) in
     fprintf fmt
-      "\\pgftext[base,left,at={%a}]{{\\font\\mlpostfont=%s at %apt \
-       {\\mlpostfont %a}}}"
-      point p (Fonts.tex_name font) float
-      (Fonts.scale font conversion)
+      "\\pgftext[base,left,at={%a}]{{\\mlpostfont%s %a}}"
+      point p id
       (list nothing char_const) cl
 
-  let glyphp p fmt (cl, font) = glyph fmt p cl font
+  let glyphp db p fmt (cl, font) = glyph fmt db p cl font
 
   let rectangle fmt p w h =
     fprintf fmt "\\pgfpathrectangle{%a}{%a} %t" point p point { x = w; y = h }
@@ -191,26 +211,26 @@ let fill_rect fmt trans i x y w h =
       fprintf fmt "%a@ %a@ %a" PGF.transform trans PGF.dvi_color
         i.Dviinterp.color PGF.rectanglep (p, w, h))
 
-let draw_char fmt trans text =
+let draw_char fmt db trans text =
   (* FIXME why do we need to negate y coordinates? *)
   let f1, f2 = text.tex_pos in
   let f1 = point_of_cm f1 and f2 = point_of_cm f2 in
   let p = { x = f1; y = -. f2 } in
   in_context fmt (fun _ ->
       fprintf fmt "%a@ %a@ %a" PGF.transform trans PGF.dvi_color
-        text.Dviinterp.tex_info.Dviinterp.color (PGF.glyphp p)
+        text.Dviinterp.tex_info.Dviinterp.color (PGF.glyphp db p)
         (text.tex_string, text.tex_font))
 
 (* FIXME why do we need to negate y coordinates? *)
-let tex_cmd fmt trans c =
+let tex_cmd fmt db trans c =
   match c with
   | Dviinterp.Fill_rect (i, x, y, w, h) -> fill_rect fmt trans i x (-.y) w h
-  | Dviinterp.Draw_text text -> draw_char fmt trans text
+  | Dviinterp.Draw_text text -> draw_char fmt db trans text
   | Dviinterp.Specials _ -> ()
   | Dviinterp.Draw_text_type1 _ -> assert false
 
-let draw_tex fmt t =
-  list space (fun fmt x -> tex_cmd fmt t.Gentex.trans x) fmt t.Gentex.tex
+let draw_tex fmt db t =
+  list space (fun fmt x -> tex_cmd fmt db t.Gentex.trans x) fmt t.Gentex.tex
 
 let curveto fmt s =
   let sa, sb, sc, sd = Spline.explode s in
@@ -235,10 +255,10 @@ let pen fmt t =
    * value of the matrix and use that as linewidth *)
   PGF.setlinewidth fmt t.xx
 
-let rec picture fmt p =
+let rec picture db fmt p =
   match p with
   | P.Empty -> ()
-  | P.OnTop l -> list space picture fmt l
+  | P.OnTop l -> list space (picture db) fmt l
   | P.Stroke_path (pa, clr, pe, da) ->
       in_context fmt (fun _ ->
           fprintf fmt "%a%a%a@ %a@ %t\n" (option space PGF.color) clr
@@ -246,28 +266,48 @@ let rec picture fmt p =
   | P.Fill_path (p, clr) ->
       in_context fmt (fun _ ->
           fprintf fmt "%a%a@ %t\n" (option space PGF.color) clr path p PGF.fill)
-  | P.Tex t -> draw_tex fmt t
+  | P.Tex t -> draw_tex fmt db t
   | P.Clip (com, p) ->
       in_context fmt (fun _ ->
-          fprintf fmt "%a@ %t@ %a" path p PGF.clip picture com)
+          fprintf fmt "%a@ %t@ %a" path p PGF.clip (picture db) com)
   | P.Transform (t, p) ->
-      in_context fmt (fun _ -> fprintf fmt "%a@ %a" PGF.transform t picture p)
+      in_context fmt (fun _ -> fprintf fmt "%a@ %a" PGF.transform t (picture db) p)
   | P.ExternalImage (f, _, t) ->
       in_context fmt (fun _ ->
           fprintf fmt "%a@ \\pgftext{\\includegraphics{%s}}" PGF.transform t f)
 
+let rec compute_fonts db p =
+  match p with
+  | P.Empty -> ()
+  | P.OnTop l -> List.iter (compute_fonts db) l
+  | P.Stroke_path _ -> ()
+  | P.Fill_path _ -> ()
+  | P.Tex t ->
+    List.iter (function
+  | Dviinterp.Fill_rect _ -> ()
+  | Dviinterp.Draw_text text -> PGF.add_tex_name db text.tex_font
+  | Dviinterp.Specials _ -> ()
+  | Dviinterp.Draw_text_type1 _ -> assert false
+      ) t.Gentex.tex
+  | P.Clip (com, _) -> compute_fonts db com
+  | P.Transform (_, p) -> compute_fonts db p
+  | P.ExternalImage _ -> ()
+
 let draw fmt x =
   let fmt = Format.formatter_of_out_channel fmt in
+  let db = (Hashtbl.create 10)  in
+  compute_fonts db (P.content x);
   let p1, p2 = Picture_lib.bounding_box x in
   fprintf fmt "%%%%Creator: Mlpost %s@." Mlpost_version.version;
   fprintf fmt "\\begin{tikzpicture}@.";
   fprintf fmt "\\useasboundingbox (%a, %a) rectangle (%a, %a);@." bp p1.x bp
     p1.y bp p2.x bp p2.y;
   in_context fmt (fun _ ->
-      fprintf fmt "%a@ %a@ %a@ %a" PGF.setlinewidth
+      fprintf fmt "%a@ %a@ %a@ %a@ %a" PGF.setlinewidth
         (P.default_line_size /. 2.)
-        PGF.setlinecap PGF.RoundCap PGF.setlinejoin PGF.RoundJoin picture
-        (P.content x));
+        PGF.setlinecap PGF.RoundCap PGF.setlinejoin PGF.RoundJoin
+        PGF.declare_fonts db
+        (picture db) (P.content x));
   fprintf fmt "@.\\end{tikzpicture}@."
 
 let generate_one fn fig =
@@ -277,7 +317,7 @@ let generate_one fn fig =
       draw fmt fig);
   fn
 
-let mps figl =
+let pgf figl =
   List.map
     (fun (fn, fig) ->
       let fn = File.mk fn "pgf" in
@@ -285,6 +325,6 @@ let mps figl =
       generate_one fn fig)
     figl
 
-let dump () = ignore (mps (Defaults.emited ()))
+let dump () = ignore (pgf (Defaults.emited ()))
 
-let generate figs = ignore (mps figs)
+let generate figs = ignore (pgf figs)

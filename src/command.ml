@@ -50,6 +50,8 @@ let append c1 c2 = seq [ c1; c2 ]
 
 let ( ++ ) = append
 
+let set_bounding_box c p = mkBBox c p
+
 let externalimage filename spec =
   if not (Filename.check_suffix filename "png") then
     invalid_arg
@@ -69,3 +71,8 @@ let externalimage filename spec =
 let iterl f l = seq (List.map f l)
 
 let nop = seq []
+
+let is_nop (c:t) =
+  match c.Hashcons.node with
+  | Seq [] -> true
+  | _ -> false

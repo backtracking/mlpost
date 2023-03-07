@@ -121,6 +121,7 @@ and commandpic fmt c =
   | Picture p -> picture fmt p
   | Command c -> command fmt c
   | Seq l -> Misc.print_list Misc.space commandpic fmt l
+  | BBox (c,p) -> commandpic fmt c; path fmt p
 
 and pen fmt x =
   match x.Hashcons.node with
