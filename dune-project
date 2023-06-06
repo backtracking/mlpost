@@ -43,7 +43,9 @@
    (>= 0.6.2))
   (ppxlib
    (>= 0.20.0))
-  (odoc :with-doc))
+  (odoc :with-doc)
+  (cmdliner (>= 1.1.0))
+ )
  (depopts graphics))
 
 (package
@@ -62,3 +64,5 @@
   lablgtk
   conf-gnomecanvas
   (odoc :with-doc)))
+
+(cram enable)

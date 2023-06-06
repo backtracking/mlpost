@@ -17,6 +17,15 @@
  (package mlpost)
  (libraries mlpost mlpost_desc_options mlpost_version))
 
+
+(executable
+ (name mlpost_init)
+ (modules Mlpost_init)
+ (public_name mlpost-init)
+ (package mlpost)
+ (libraries cmdliner fmt unix)
+)
+
 ; (executable
 ;   (name gmlpost)
 ;   (public_name gmlpost)
