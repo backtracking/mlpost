@@ -31,3 +31,8 @@ _mlpost.*
 /mlpost.install
 /mlpost-lablgtk2.install
 /mlpost-lablgtk.install
+out
+out.aux
+out.log
+out.pdf
+out.rubbercache
