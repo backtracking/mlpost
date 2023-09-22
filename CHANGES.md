@@ -1,4 +1,5 @@
 
+  - do not load 'metafun.mpii' anymore
   - a small script `view-mps` to visualize .mps files
 
 # 0.9 (January 19, 2021)
