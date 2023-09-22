@@ -26,8 +26,7 @@ let print fmt i c =
 
 let print_prelude s fmt () =
   fprintf fmt
-    "input metafun.mp ; %% some initializations and auxiliary macros\n\
-     %% macros that support special features\n\
+     "%% macros that support special features\n\
      @\n";
   fprintf fmt "prologues := 0;@\n";
   fprintf fmt "mpprocset := 0;@\n";
