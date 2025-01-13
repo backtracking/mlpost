@@ -7,7 +7,7 @@
 
 (name mlpost)
 
-(license LGPL-2.1)
+(license LGPL-2.1-only)
 
 (authors
  "Romain Bardou"
