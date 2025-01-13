@@ -12,10 +12,10 @@
 
 (executable
  (name tool)
- (modules Tool)
+ (modules tool)
  (public_name mlpost)
  (package mlpost)
- (libraries mlpost mlpost_desc_options mlpost_version))
+ (libraries mlpost mlpost_desc_options mlpost_version unix))
 
 ; (executable
 ;   (name gmlpost)
