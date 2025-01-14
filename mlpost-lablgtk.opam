@@ -12,7 +12,7 @@ authors: [
   "Claude Marché"
   "Florence Plateau"
 ]
-license: "LGPL-2.1"
+license: "LGPL-2.1-only"
 tags: [
   "ocaml" "latex" "figure" "mlpost" "metapost" "graphics" "lablgtk" "gtk"
 ]
