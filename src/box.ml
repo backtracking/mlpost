@@ -493,6 +493,10 @@ let add_post_draw f b =
   let d = b.post_draw in
   { b with post_draw = (fun t -> Command.append (d t) (f t)) }
 
+let add_pre_draw f b =
+  let d = b.pre_draw in
+  { b with pre_draw = (fun t -> Command.append (d t) (f t)) }
+
 let clear_post_draw b = { b with post_draw = no_drawing }
 
 let clear_pre_draw b = { b with pre_draw = no_drawing }

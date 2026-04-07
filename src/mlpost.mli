@@ -1952,6 +1952,8 @@ module Box : sig
 
   val set_pre_draw : (t -> Command.t) -> t -> t
 
+  val add_pre_draw : (t -> Command.t) -> t -> t
+
   val clear_pre_draw : t -> t
 
   (** {2 Misc.} *)
