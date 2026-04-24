@@ -41,6 +41,7 @@ module Real_plot = Real_plot
 module Hist = Hist
 module Radar = Radar
 module Legend = Legend
+module Arrays = Arrays
 module Misc = Misc
 module Metapost = Metapost
 module Concrete = Concrete

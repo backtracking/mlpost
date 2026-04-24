@@ -3143,6 +3143,63 @@ module Legend : sig
     Picture.t
 end
 
+(** Draw arrays
+
+    This module provides a few functions to draw pcitures such as
+{v
+               |lo        |hi
+        +------+----------+------+
+      a |      |          |      |
+        +------+----------+------+
+v}
+
+    The picture above can be drawn as follows:
+{v
+  Arrays.create ~left:(Picture.tex "a") 14
+    |> tick  4. |> index  4. (Picture.tex "lo")
+    |> tick 10. |> index 10. (Picture.tex "hi")
+v}
+
+    The result is a box (to be drawn with [Box.draw]).
+
+    The array has an integer size (here 14), but indices are floats so
+    that decorative elements can be placed in between array cells if
+    needed. Indices can be negative or beyond the size of the array.
+
+*)
+module Arrays : sig
+
+  type t = Box.t
+
+  val create: ?u:float -> ?pen:Pen.t -> ?left:Picture.t -> int -> t
+  (** [create n] returns a new array of size [n] *)
+
+  val index: ?pos:Command.position -> float -> Picture.t -> t -> t
+  (** [index i pic] places the picture [pic] above the array cell
+      at index [i] *)
+
+  val cell: ?pos:Command.position -> float -> Picture.t -> t -> t
+  (** [cell i pic] places the picture [pic] inside the array cell
+      at index [i] *)
+
+  val below: ?pos:Command.position -> float -> Picture.t -> t -> t
+  (** [below i pic] places the picture [pic] below the array cell
+      at index [i] *)
+
+  val tick: ?pen:Pen.t -> float -> t -> t
+  (** [tick i] places a vertical bar at the left of index [i] that
+      goes above the top of the array *)
+
+  val sep: ?pen:Pen.t -> float -> t -> t
+  (** [sep i] places a vertical separator at the left of index [i] *)
+
+  val fill: ?sep:bool -> ?pen:Pen.t -> ?color:Color.t ->
+            float -> float -> t -> t
+  (** [fill i j] fills all the cells from index [i] included to
+      index [j] excluded *)
+
+end
+
 (** {2 Metapost generation} *)
 
 (* Misc does not appear in the documentation *)

@@ -1,4 +1,5 @@
 
+  - new module [Arrays] to draw arrays
   - added Box.add_pre_draw
   - do not load 'metafun.mpii' anymore
   - a small script `view-mps` to visualize .mps files
