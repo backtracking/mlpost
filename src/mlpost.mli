@@ -3145,7 +3145,7 @@ end
 
 (** Draw arrays
 
-    This module provides a few functions to draw pcitures such as
+    This module provides a few functions to draw pictures such as
 {v
                |lo        |hi
         +------+----------+------+
@@ -3191,7 +3191,7 @@ module Arrays : sig
       goes above the top of the array *)
 
   val sep: ?pen:Pen.t -> float -> t -> t
-  (** [sep i] places a vertical separator at the left of index [i] *)
+  (** [sep i] places a vertical separator at the left of cell [i] *)
 
   val fill: ?sep:bool -> ?pen:Pen.t -> ?color:Color.t ->
             float -> float -> t -> t

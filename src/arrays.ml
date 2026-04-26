@@ -22,9 +22,6 @@ open Box
 
 type t = Box.t
 
-let u = 12.
-let height = u
-
 let add o f b = match o with
   | None -> b
   | Some o -> add_post_draw (f o) b
@@ -32,13 +29,17 @@ let add o f b = match o with
 let add_left pic b =
   Command.label ~pos:`Left pic (west b)
 
-let create ?(u=u) ?pen ?left len =
+let create ?(u=12.) ?pen ?left len =
   let width = float len *. u in
+  let height = u in
   let b = rect ?pen (empty ~width ~height ()) in
   add left add_left b
 
+let height b = Box.height (Box.nth 0 b)
+
 let xat b i =
   let w = xpart (east b) -. xpart (west b) in
+  let u = height b in
   let len = floor (w /. u) in
   let f = w /. len in
   i *. f
@@ -70,6 +71,7 @@ let sep ?pen i = add_post_draw @@ fun b ->
 
 let tick ?pen i = add_post_draw @@ fun b ->
   let p1 = botat b i in
+  let u = height b in
   let p2 = Point.shift p1 (Point.pt (zero, 2. *. u)) in
   Path.draw ?pen (pathp [p1; p2])
 
