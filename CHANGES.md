@@ -1,4 +1,5 @@
 
+  - Helpers: new functions `box_point_arrow` and `point_box_arrow`
   - new module `Arrays` to draw arrays
   - added `Box.add_pre_draw`
   - do not load 'metafun.mpii' anymore

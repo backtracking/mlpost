@@ -74,6 +74,20 @@ let box_labelbox_arrow ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep ?pos
     (Picture.make (Box.draw lab))
     a b
 
+let box_point_arrow ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep b p =
+  let b = match within with None -> b | Some x -> Box.sub b x in
+  let c = ctr b in
+  let p = Path.pathk ?style [ knotp ?r:outd c; knotp ?l:ind p ] in
+  let p = strip ?sep (P.cut_before (bpath b) p) in
+  Arrow.simple ?color ?pen ?dashed p
+
+let point_box_arrow ?within ?color ?pen ?dashed ?style ?outd ?ind ?sep p b =
+  let b = match within with None -> b | Some x -> Box.sub b x in
+  let c = ctr b in
+  let p = Path.pathk ?style [ knotp ?r:outd p; knotp ?l:ind c; ] in
+  let p = strip ?sep (P.cut_after (bpath b) p) in
+  Arrow.simple ?color ?pen ?dashed p
+
 let loop_aux ?within ?(pos=`South) ?(dist=2.) b =
   let b = match within with None -> b | Some x -> Box.sub b x in
   let c = Box.ctr b in

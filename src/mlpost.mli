@@ -2447,6 +2447,32 @@ module Helpers : sig
     Box.t ->
     Command.t
 
+  val box_point_arrow :
+    ?within:Box.t ->
+    ?color:Color.t ->
+    ?pen:Pen.t ->
+    ?dashed:Dash.t ->
+    ?style:Path.joint ->
+    ?outd:Path.direction ->
+    ?ind:Path.direction ->
+    ?sep:Num.t ->
+    Box.t ->
+    Point.t ->
+    Command.t
+
+  val point_box_arrow :
+    ?within:Box.t ->
+    ?color:Color.t ->
+    ?pen:Pen.t ->
+    ?dashed:Dash.t ->
+    ?style:Path.joint ->
+    ?outd:Path.direction ->
+    ?ind:Path.direction ->
+    ?sep:Num.t ->
+    Point.t ->
+    Box.t ->
+    Command.t
+
   val box_label_arrow :
     ?within:Box.t ->
     ?color:Color.t ->
